@@ -149,24 +149,24 @@ eBPF 字节码并不适合所有编译语言的目标。如果语言涉及运行
 第五章包括了对 BCC 的可移植性方法的讨论，即在运行时编译 eBPF 代码，以确保它与目标机器的内核数据结构兼容。在 BCC 中，你将内核端的 eBPF 程序代码定义为一个字符串（或者 BCC 读入字符串的文件内容）。这个字符串被传递给 Clang 进行编译，但在此之前，BCC 对字符串进行了一些预处理。这使得它可以为程序员提供便利的快捷方式，其中一些你在本书中已经看到了。例如，这里是*chapter2/hello_map.py*中示例代码的一些相关行。
 
 ```cpp
-#!/usr/bin/python3 ![1](assets/1.png)
+#!/usr/bin/python3 // ①
 from bcc import BPF
 
-program = """                                     ![2](assets/2.png)
-BPF_RINGBUF_OUTPUT(output, 1); ![3](assets/3.png) 
+program = """                                     // ②
+BPF_RINGBUF_OUTPUT(output, 1); // ③ 
 ...
 int hello(void *ctx) {
  ...
- output.ringbuf_output(&data, sizeof(data), 0); ![4](assets/4.png)
+ output.ringbuf_output(&data, sizeof(data), 0); // ④
 
  return 0;
 }
 """
 
-b = BPF(text=program)                             ![5](assets/5.png)
+b = BPF(text=program)                             // ⑤
 ...
 
-b["output"].open_ring_buffer(print_event)         ![6](assets/6.png)
+b["output"].open_ring_buffer(print_event)         // ⑥
 ...
 ```
 
@@ -190,7 +190,7 @@ b["output"].open_ring_buffer(print_event)         ![6](assets/6.png)
 
 这是程序字符串被重写为 BPF C 代码的地方，Clang 可以编译。这行还将结果程序加载到内核中。
 
-![6](img/6.png)
+// ⑥
 
 代码中没有其他地方定义名为`output`的环形缓冲区，但它可以从这里的 Python 用户空间代码中访问。BCC 在预处理调用 3 中承担了双重职责，因为它为用户空间和内核部分都定义了环形缓冲区。
 
@@ -289,19 +289,19 @@ typebpfObjectsstruct{ `bpfPrograms` ``bpfMaps` ``}```cppYou can then use these o
 
 ```cpp
 
-[![1](assets/1.png)](#code_id_10_7)
+[// ①](#code_id_10_7)
 
 Load all the BPF objects that were embedded in bytecode form, into the `bpfObjects` I just showed you defined by the auto-generated code.
 
-[![2](assets/2.png)](#code_id_10_8)
+[// ②](#code_id_10_8)
 
 Attach the program to the `sys_execve` kprobe.
 
-[![3](assets/3.png)](#code_id_10_9)
+[// ③](#code_id_10_9)
 
 Set up a ticker so that the code can poll the map once per second.
 
-[![4](assets/4.png)](#code_id_10_10)
+[// ④](#code_id_10_10)
 
 Read an item out of the map.
 
@@ -323,19 +323,19 @@ Here’s an extract from the example from *libbpfgo*’s *README*, which gives a
 
 ```
 
-[![1](assets/1.png)](#code_id_10_11)
+[// ①](#code_id_10_11)
 
 Read eBPF bytecode from an object file.
 
-[![2](assets/2.png)](#code_id_10_12)
+[// ②](#code_id_10_12)
 
 Load that bytecode into the kernel.
 
-[![3](assets/3.png)](#code_id_10_13)
+[// ③](#code_id_10_13)
 
 Manipulate an entry in an eBPF map.
 
-[![4](assets/4.png)](#code_id_10_14)
+[// ④](#code_id_10_14)
 
 Go programmers will appreciate receiving data from a ring or perf buffer on a channel, which is a language feature designed to handle asynchronous events.
 
@@ -465,15 +465,15 @@ Aya 还为用户空间加载 eBPF 程序到内核并将其附加到事件的活�
 
 ```
 
-[![1](assets/1.png)](#code_id_10_15)
+[// ①](#code_id_10_15)
 
 This line is what defines the section name, equivalent to `SEC("xdp/myapp")` in C.
 
-[![2](assets/2.png)](#code_id_10_16)
+[// ②](#code_id_10_16)
 
 The eBPF program called `myapp` calls the function `try_myapp` to process a network packet received at XDP.
 
-[![3](assets/3.png)](#code_id_10_17)
+[// ③](#code_id_10_17)
 
 The `try_myapp` function logs the fact that a packet was received and always returns the `XDP_PASS` value that tells the kernel to carry on processing the packet as usual.
 
@@ -519,19 +519,19 @@ Aya 的维护者 Dave Tucker 和 Alessandro Decina 在[“eBPF 和 Cilium 办公
 
 ```
 
-[![1](assets/1.png)](#code_id_10_19)
+[// ①](#code_id_10_19)
 
 Read the eBPF bytecode from the ELF object file produced by the compiler.
 
-[![2](assets/2.png)](#code_id_10_20)
+[// ②](#code_id_10_20)
 
 Find the program called `myapp` in that bytecode.
 
-[![3](assets/3.png)](#code_id_10_21)
+[// ③](#code_id_10_21)
 
 Load it into the kernel.
 
-[![4](assets/4.png)](#code_id_10_22)
+[// ④](#code_id_10_22)
 
 Attach it to the XDP event on a specified network interface.
 

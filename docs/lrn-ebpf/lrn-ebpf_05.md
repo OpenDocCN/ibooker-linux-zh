@@ -448,19 +448,19 @@ The section definition declares where the eBPF program should be attached, and t
 
 ```cpp
 
-[![1](assets/1.png)](#code_id_5_1)
+[// ①](#code_id_5_1)
 
 I’ve taken advantage of a [`BPF_KPROBE_SYSCALL`](https://oreil.ly/pgI1B) macro defined in *libbpf* that makes it easy to access the arguments to a syscall by name. For `execve()`, the first argument is the pathname for the program that’s going to be executed. The eBPF program name is `hello`.
 
-[![2](assets/2.png)](#code_id_5_2)
+[// ②](#code_id_5_2)
 
 Since the macro has made it so easy to access that pathname argument to `execve()`, I’m including it in the data sent to the perf buffer output. Notice that copying memory requires the use of a BPF helper function.
 
-[![3](assets/3.png)](#code_id_5_3)
+[// ③](#code_id_5_3)
 
 Here, `bpf_map_lookup_elem()` is the BPF helper function for looking up values in a map, given a key. BCC’s equivalent of this would be `p = my_config.lookup(&data.uid)`. BCC rewrites this to use the underlying `bpf_map_lookup_elem()` function before it passes the C code to the compiler. When you’re using *libbpf*, there is no rewriting of the code before compilation,^([7](ch05.xhtml#ch05fn7)) so you have to write directly to the helper functions.
 
-[![4](assets/4.png)](#code_id_5_4)
+[// ④](#code_id_5_4)
 
 Here’s another similar example where I have written directly to the helper function `bpf_perf_event_output()`, where BCC gave me the convenient equivalent `output.perf_submit(ctx, &data, sizeof(data))`.
 
@@ -669,7 +669,7 @@ bpftool gen skeleton hello-buffer-config.bpf.o > hello-buffer-config.skel.h
 
 ```
 ... [other #includes]
-#include "hello-buffer-config.h"                                       ![1](assets/1.png)
+#include "hello-buffer-config.h"                                       // ①
 #include "hello-buffer-config.skel.h"
 
 ... [some callback functions]
@@ -680,21 +680,21 @@ int main()
    struct perf_buffer *pb = NULL;
    int err;
 
-   libbpf_set_print(libbpf_print_fn);                                 ![2](assets/2.png)
+   libbpf_set_print(libbpf_print_fn);                                 // ②
 
-   skel = hello_buffer_config_bpf__open_and_load();                   ![3](assets/3.png)
+   skel = hello_buffer_config_bpf__open_and_load();                   // ③
 ...
-   err = hello_buffer_config_bpf__attach(skel);                       ![4](assets/4.png)
+   err = hello_buffer_config_bpf__attach(skel);                       // ④
 ...
    pb = perf_buffer__new(bpf_map__fd(skel->maps.output), 8, handle_event,
                                                          lost_event, NULL, NULL);                                              
-                                                                      ![5](assets/5.png)
+                                                                      // ⑤
 ...
-   while (true) {                                                     ![6](assets/6.png)
+   while (true) {                                                     // ⑥
        err = perf_buffer__poll(pb, 100);
 ...}
 
-   perf_buffer__free(pb);                                             ![7](assets/7.png)
+   perf_buffer__free(pb);                                             // ⑦
    hello_buffer_config_bpf__destroy(skel);
    return -err;
 }
@@ -720,11 +720,11 @@ int main()
 
 这个函数创建了一个用于处理 perf 缓冲区输出的结构。
 
-![6](img/6.png)
+// ⑥
 
 这里 perf 缓冲区被持续轮询。
 
-![7](img/7.png)
+// ⑦
 
 这是清理代码。
 

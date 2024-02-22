@@ -149,35 +149,35 @@ if(bpf_ntohs(eth->h_proto)==ETH_P_IP)④{// 返回此数据包的协议}}
 
 // 17 = UDP
 
-structiphdr*iph=data+sizeof(structethhdr);⑤if(data+sizeof(structethhdr)+sizeof(structiphdr)<=data_end)![6](img/6.png)protocol=iph->protocol;![7](img/7.png)}returnprotocol;}
+structiphdr*iph=data+sizeof(structethhdr);⑤if(data+sizeof(structethhdr)+sizeof(structiphdr)<=data_end)// ⑥protocol=iph->protocol;// ⑦}returnprotocol;}
 
 ```cpp
 
-[![1](assets/1.png)](#code_id_8_1)
+[// ①](#code_id_8_1)
 
 The local variables `data` and `data_end` point to the start and end of the network packet.
 
-[![2](assets/2.png)](#code_id_8_2)
+[// ②](#code_id_8_2)
 
 The network packet should start with an Ethernet header.
 
-[![3](assets/3.png)](#code_id_8_3)
+[// ③](#code_id_8_3)
 
 But you can’t simply assume this network packet is big enough to hold that Ethernet header! The verifier requires that you check this explicitly.
 
-[![4](assets/4.png)](#code_id_8_4)
+[// ④](#code_id_8_4)
 
 The Ethernet header contains a 2-byte field that tells us the Layer 3 protocol.
 
-[![5](assets/5.png)](#code_id_8_5)
+[// ⑤](#code_id_8_5)
 
 If the protocol type indicates that it’s an IP packet, the IP header immediately follows the Ethernet header.
 
-[![6](assets/6.png)](#code_id_8_6)
+[// ⑥](#code_id_8_6)
 
 You can’t just assume there’s enough room for that IP header in the network packet. Again the verifier requires that you check explicitly.
 
-[![7](assets/7.png)](#code_id_8_7)
+[// ⑦](#code_id_8_7)
 
 The IP header contains the protocol byte the function will return to its caller.
 
@@ -237,15 +237,15 @@ Here’s the XDP program from the example load balancer code:
 
 目标 IP 和 MAC 地址将被更新以匹配所选择的后端…
 
-![6](img/6.png)
+// ⑥
 
 …或者如果这是来自后端的响应（如果不是来自客户端的话，这里是假设），目标 IP 和 MAC 地址将被更新以匹配客户端。
 
-![7](img/7.png)
+// ⑦
 
 无论这个数据包去哪里，源地址都需要更新，以便看起来像是由负载均衡器发起的。
 
-![8](img/8.png)
+// ⑧
 
 IP 头部包括对其内容计算的校验和，由于源和目标 IP 地址都已经被更新，校验和也需要被重新计算并替换在这个数据包中。
 
@@ -257,35 +257,35 @@ IP 头部包括对其内容计算的校验和，由于源和目标 IP 地址都�
 
 ```
 
-[![1](assets/1.png)](#code_id_8_8)
+[// ①](#code_id_8_8)
 
 The first part of this function is practically the same as in the previous example: it locates the Ethernet header and then the IP header in the packet.
 
-[![2](assets/2.png)](#code_id_8_9)
+[// ②](#code_id_8_9)
 
 This time it will process only TCP packets, passing anything else it receives on up the stack as if nothing had happened.
 
-[![3](assets/3.png)](#code_id_8_10)
+[// ③](#code_id_8_10)
 
 Here the source IP address is checked. If this packet didn’t come from the client, I will assume it is a response going to the client.
 
-[![4](assets/4.png)](#code_id_8_11)
+[// ④](#code_id_8_11)
 
 This code generates a pseudorandom choice between backends A and B.
 
-[![5](assets/5.png)](#code_id_8_12)
+[// ⑤](#code_id_8_12)
 
 The destination IP and MAC addresses are updated to match whichever backend was chosen…
 
-[![6](assets/6.png)](#code_id_8_13)
+[// ⑥](#code_id_8_13)
 
 …or if this is a response from a backend (which is the assumption here if it didn’t come from a client), the destination IP and MAC addresses are updated to match the client.
 
-[![7](assets/7.png)](#code_id_8_14)
+[// ⑦](#code_id_8_14)
 
 Wherever this packet is going, the source addresses need to be updated so that it looks as though the packet originated from the load balancer.
 
-[![8](assets/8.png)](#code_id_8_15)
+[// ⑧](#code_id_8_15)
 
 The IP header includes a checksum calculated over its contents, and since the source and destination IP addresses have both been updated, the checksum also needs to be recalculated and replaced in this packet.
 
@@ -416,45 +416,45 @@ int tc_pingpong(struct __sk_buff *skb) {
   void *data = (void *)(long)skb->data;
   void *data_end = (void *)(long)skb->data_end;
 
-  if (!is_icmp_ping_request(data, data_end)) {      ![1](assets/1.png)
+  if (!is_icmp_ping_request(data, data_end)) {      // ①
     return TC_ACT_OK;
   }
 
   struct iphdr *iph = data + sizeof(struct ethhdr);
   struct icmphdr *icmp = data + sizeof(struct ethhdr) + sizeof(struct iphdr);
 
-  swap_mac_addresses(skb);                          ![2](assets/2.png)
+  swap_mac_addresses(skb);                          // ②
   swap_ip_addresses(skb);
 
   // Change the type of the ICMP packet to 0 (ICMP Echo Reply) 
   // (was 8 for ICMP Echo request)
-  update_icmp_type(skb, 8, 0);                      ![3](assets/3.png)
+  update_icmp_type(skb, 8, 0);                      // ③
 
   // Redirecting a clone of the modified skb back to the interface 
   // it arrived on
-  bpf_clone_redirect(skb, skb->ifindex, 0);         ![4](assets/4.png)
+  bpf_clone_redirect(skb, skb->ifindex, 0);         // ④
 
-  return TC_ACT_SHOT;                               ![5](assets/5.png)
+  return TC_ACT_SHOT;                               // ⑤
 }
 ```
 
-[![1](assets/1.png)](#code_id_8_16)
+[// ①](#code_id_8_16)
 
 The `is_icmp_ping_request()` function parses the packet and checks not only that it’s an ICMP message, but also that it’s an echo (ping) request.
 
-[![2](assets/2.png)](#code_id_8_17)
+[// ②](#code_id_8_17)
 
 Since this function is going to send a response to the sender, the source and destination addresses need to be swapped. (You can read the example code if you want to see the nitty-gritty details of this, which also includes updating the IP header checksum.)
 
-[![3](assets/3.png)](#code_id_8_18)
+[// ③](#code_id_8_18)
 
 This is converted to an echo response by changing the type field in the ICMP header.
 
-[![4](assets/4.png)](#code_id_8_19)
+[// ④](#code_id_8_19)
 
 This helper function sends a clone of the packet back through the interface (`skb->ifindex`) on which it was received.
 
-[![5](assets/5.png)](#code_id_8_20)
+[// ⑤](#code_id_8_20)
 
 Since the helper function cloned the packet before sending out the response, the original packet should be dropped.
 
@@ -498,18 +498,18 @@ So this example follows a common pattern for kprobes and uprobes, illustrated in
   uint64_t current_pid_tgid = bpf_get_current_pid_tgid(); 
   ...
 
-  const char* buf = (const char*)PT_REGS_PARM2(ctx);         ![1](assets/1.png)
+  const char* buf = (const char*)PT_REGS_PARM2(ctx);         // ①
 
-  active_ssl_read_args_map.update(&current_pid_tgid, &buf);  ![2](assets/2.png)
+  active_ssl_read_args_map.update(&current_pid_tgid, &buf);  // ②
   return 0;
 }
 ```
 
-[![1](assets/1.png)](#code_id_8_21)
+[// ①](#code_id_8_21)
 
 As described in the comment for this function, the buffer pointer is the second parameter passed into the `SSL_read()` function to which this probe will be attached. The `PT_REGS_PARM2` macro gets this parameter from the context.
 
-[![2](assets/2.png)](#code_id_8_22)
+[// ②](#code_id_8_22)
 
 The buffer pointer is stored in a hash map, for which the key is the current process and thread ID, obtained at the start of the function using the helper `bpf_get_current_pid_tgif()`.
 
@@ -520,25 +520,25 @@ int probe_ret_SSL_read(struct pt_regs* ctx) {
   uint64_t current_pid_tgid = bpf_get_current_pid_tgid();
 
   ...
-  const char** buf = active_ssl_read_args_map.lookup(&current_pid_tgid);   ![1](assets/1.png)
+  const char** buf = active_ssl_read_args_map.lookup(&current_pid_tgid);   // ①
   if (buf != NULL) {
-    process_SSL_data(ctx, current_pid_tgid, kSSLRead, *buf);               ![2](assets/2.png)
+    process_SSL_data(ctx, current_pid_tgid, kSSLRead, *buf);               // ②
   }
 
-  active_ssl_read_args_map.delete(&current_pid_tgid);                      ![3](assets/3.png)
+  active_ssl_read_args_map.delete(&current_pid_tgid);                      // ③
   return 0;
 }
 ```
 
-[![1](assets/1.png)](#code_id_8_23)
+[// ①](#code_id_8_23)
 
 Having looked up the current process and thread ID, use this as the key to retrieve the buffer pointer from the hash map.
 
-[![2](assets/2.png)](#code_id_8_24)
+[// ②](#code_id_8_24)
 
 If this isn’t a null pointer, call `process_SSL_data()`, which is the function you saw earlier that sends the data from that buffer to user space using the perf buffer.
 
-[![3](assets/3.png)](#code_id_8_25)
+[// ③](#code_id_8_25)
 
 Clean up the entry in the hash map, since every entry call should be paired with an exit.
 

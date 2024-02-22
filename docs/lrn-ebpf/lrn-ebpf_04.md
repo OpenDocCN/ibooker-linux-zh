@@ -31,22 +31,22 @@ int bpf(int cmd, union bpf_attr *attr, unsigned int size);
 以下是 eBPF 源代码：
 
 ```cpp
-struct user_msg_t {                                          ![1](assets/1.png)
+struct user_msg_t {                                          // ①
   char message[12];
 };
 
-BPF_HASH(config, u32, struct user_msg_t);                    ![2](assets/2.png)
+BPF_HASH(config, u32, struct user_msg_t);                    // ②
 
-BPF_PERF_OUTPUT(output);                                     ![3](assets/3.png)
+BPF_PERF_OUTPUT(output);                                     // ③
 
-struct data_t {                                              ![4](assets/4.png)
+struct data_t {                                              // ④
   int pid;
   int uid;
   char command[16];
   char message[12];
 };
 
-int hello(void *ctx) {                                       ![5](assets/5.png)
+int hello(void *ctx) {                                       // ⑤
   struct data_t data = {};
   struct user_msg_t *p;
   char message[12] = "Hello World";
@@ -56,7 +56,7 @@ int hello(void *ctx) {                                       ![5](assets/5.png)
 
   bpf_get_current_comm(&data.command, sizeof(data.command));
 
-  p = config.lookup(&data.uid);                              ![6](assets/6.png)
+  p = config.lookup(&data.uid);                              // ⑥
   if (p != 0) {
      bpf_probe_read_kernel(&data.message, sizeof(data.message), p->message);      
   } else {
@@ -88,7 +88,7 @@ BCC 宏`BPF_HASH`用于定义一个名为`config`的哈希表映射。它将保�
 
 大部分其他的 eBPF 程序与您之前看到的`hello()`版本没有变化。
 
-![6](img/6.png)
+// ⑥
 
 唯一的区别是，使用了一个辅助函数来获取用户 ID 后，代码会查找`config`哈希映射中具有该用户 ID 的条目。如果有匹配的条目，该值包含一个消息，该消息将用于替代默认的“Hello World”。
 
@@ -508,11 +508,11 @@ $ strace -e bpf bpftool map dump name config
 输出以重复的类似调用序列开始，因为 `bpftool` 遍历所有映射，查找其中名称为 `config` 的映射：
 
 ```cpp
-bpf(BPF_MAP_GET_NEXT_ID, {start_id=0,...}, 12) = 0             ![1](assets/1.png)
-bpf(BPF_MAP_GET_FD_BY_ID, {map_id=48...}, 12) = 3              ![2](assets/2.png)
-bpf(BPF_OBJ_GET_INFO_BY_FD, {info={bpf_fd=3, ...}}, 16) = 0    ![3](assets/3.png)
+bpf(BPF_MAP_GET_NEXT_ID, {start_id=0,...}, 12) = 0             // ①
+bpf(BPF_MAP_GET_FD_BY_ID, {map_id=48...}, 12) = 3              // ②
+bpf(BPF_OBJ_GET_INFO_BY_FD, {info={bpf_fd=3, ...}}, 16) = 0    // ③
 
-bpf(BPF_MAP_GET_NEXT_ID, {start_id=48, ...}, 12) = 0           ![4](assets/4.png)
+bpf(BPF_MAP_GET_NEXT_ID, {start_id=48, ...}, 12) = 0           // ④
 bpf(BPF_MAP_GET_FD_BY_ID, {map_id=116, ...}, 12) = 3
 bpf(BPF_OBJ_GET_INFO_BY_FD, {info={bpf_fd=3...}}, 16) = 0
 ```
@@ -547,16 +547,16 @@ directory)
 此时，`bpftool`具有对要从中读取的映射的文件描述符引用。让我们看一下读取该信息的系统调用序列：
 
 ```cpp
-bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=NULL,                    ![1](assets/1.png)
+bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=NULL,                    // ①
 next_key=0xaaaaf7a63960}, 24) = 0
-bpf(BPF_MAP_LOOKUP_ELEM, {map_fd=3, key=0xaaaaf7a63960,           ![2](assets/2.png)
+bpf(BPF_MAP_LOOKUP_ELEM, {map_fd=3, key=0xaaaaf7a63960,           // ②
 value=0xaaaaf7a63980, flags=BPF_ANY}, 32) = 0
-[{                                                                ![3](assets/3.png)
+[{                                                                // ③
         "key": 0,
         "value": {
             "message": "Hey root!"
         }
-bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=0xaaaaf7a63960,          ![4](assets/4.png)
+bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=0xaaaaf7a63960,          // ④
 next_key=0xaaaaf7a63960}, 24) = 0
 bpf(BPF_MAP_LOOKUP_ELEM, {map_fd=3, key=0xaaaaf7a63960, 
 value=0xaaaaf7a63980, flags=BPF_ANY}, 32) = 0
@@ -565,9 +565,9 @@ value=0xaaaaf7a63980, flags=BPF_ANY}, 32) = 0
         "value": {
             "message": "Hi user 501!"
         }
-bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=0xaaaaf7a63960,          ![5](assets/5.png)
+bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=0xaaaaf7a63960,          // ⑤
 next_key=0xaaaaf7a63960}, 24) = -1 ENOENT (No such file or directory)
-    }                                                             ![6](assets/6.png)
+    }                                                             // ⑥
 ]
 +++ exited with 0 +++
 ```
@@ -592,7 +592,7 @@ next_key=0xaaaaf7a63960}, 24) = -1 ENOENT (No such file or directory)
 
 对`BPF_MAP_GET_NEXT_KEY`的下一次调用返回`ENOENT`，表示映射中没有更多的条目。
 
-![6](img/6.png)
+// ⑥
 
 在这里，`bpftool`完成了写入屏幕的输出并退出。
 

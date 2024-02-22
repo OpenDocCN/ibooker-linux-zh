@@ -36,10 +36,10 @@ eBPF 虚拟机使用 10 个通用寄存器，编号从 0 到 9。此外，寄存
 
 ```cpp
 struct `bpf_insn` {
-    `__u8` `code`;          /* opcode */                      ![1](assets/1.png) 
-    `__u8` `dst_reg`:4;     /* dest register */               ![2](assets/2.png)
+    `__u8` `code`;          /* opcode */                      // ① 
+    `__u8` `dst_reg`:4;     /* dest register */               // ②
     `__u8` `src_reg`:4;     /* source register */
-    `__s16` `off`;       /* signed offset */                  ![3](assets/3.png)
+    `__s16` `off`;       /* signed offset */                  // ③
     `__s32` `imm`;       /* signed immediate constant */
 };
 ```
@@ -93,19 +93,19 @@ struct `bpf_insn` {
 示例程序在*chapter3/hello.bpf.c*中。将 eBPF 程序放入以*bpf.c*结尾的文件名中是一个相当常见的约定，以区分它们与可能存在于同一源代码目录中的用户空间 C 代码。这是整个程序：
 
 ```cpp
-#include <linux/bpf.h>                           ![1](assets/1.png)
+#include <linux/bpf.h>                           // ①
 #include <bpf/bpf_helpers.h>
 
-int counter = 0;                                 ![2](assets/2.png)
+int counter = 0;                                 // ②
 
-SEC("xdp")                                       ![3](assets/3.png)
-int hello(void *ctx) {                           ![4](assets/4.png)
+SEC("xdp")                                       // ③
+int hello(void *ctx) {                           // ④
     bpf_printk("Hello World %d", counter);
     counter++;
     return XDP_PASS;
 }
 
-char LICENSE[] SEC("license") = "Dual BSD/GPL";  ![5](assets/5.png)
+char LICENSE[] SEC("license") = "Dual BSD/GPL";  // ⑤
 ```
 
 ①
@@ -171,22 +171,22 @@ $ llvm-objdump -S hello.bpf.o
 即使您不熟悉反汇编，此命令的输出也不难理解：
 
 ```cpp
-hello.bpf.o:    file format elf64-bpf               ![1](assets/1.png)
+hello.bpf.o:    file format elf64-bpf               // ①
 
-Disassembly of section xdp:                         ![2](assets/2.png)
+Disassembly of section xdp:                         // ②
 
-0000000000000000 <hello>:                           ![3](assets/3.png)
-;  bpf_printk("Hello World %d", counter");          ![4](assets/4.png) 
+0000000000000000 <hello>:                           // ③
+;  bpf_printk("Hello World %d", counter");          // ④ 
     0:   18 06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 r6 = 0 ll
     2:   61 63 00 00 00 00 00 00 r3 = *(u32 *)(r6 + 0)
     3:   18 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 r1 = 0 ll
     5:   b7 02 00 00 0f 00 00 00 r2 = 15
     6:   85 00 00 00 06 00 00 00 call 6
-;  counter++;                                       ![5](assets/5.png)
+;  counter++;                                       // ⑤
     7:   61 61 00 00 00 00 00 00 r1 = *(u32 *)(r6 + 0)
     8:   07 01 00 00 01 00 00 00 r1 += 1
     9:   63 16 00 00 00 00 00 00 *(u32 *)(r6 + 0) = r1
-;  return XDP_PASS;                                 ![6](assets/6.png)
+;  return XDP_PASS;                                 // ⑥
    10:   b7 00 00 00 02 00 00 00 r0 = 2
    11:   95 00 00 00 00 00 00 00 exit
 ```
@@ -211,7 +211,7 @@ Disassembly of section xdp:                         ![2](assets/2.png)
 
 三行 eBPF 字节码指令增加了`counter`变量。
 
-![6](img/6.png)
+// ⑥
 
 另外两行字节码是从源代码`return XDP_PASS;`生成的。
 
@@ -675,11 +675,11 @@ The interesting part of this exercise is inspecting the eBPF bytecode to see the
 
 ```cpp
 
-[![1](assets/1.png)](#code_id_3_15)
+[// ①](#code_id_3_15)
 
 Here you can see the `hello()` eBPF program making a call to `get_opcode()`. The eBPF instruction at offset `0` is `0x85`, which from the instruction set documentation corresponds to “Function call.” Instead of executing the next instruction, which would be at offset 1, execution will jump seven instructions ahead (`pc+7`), which means the instruction at offset `8`.
 
-[![2](assets/2.png)](#code_id_3_16)
+[// ②](#code_id_3_16)
 
 Here’s the bytecode for `get_opcode()`, and as you might hope, the first instruction is at offset `8`.
 

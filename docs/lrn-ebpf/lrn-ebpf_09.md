@@ -69,14 +69,14 @@
 以下是加载 eBPF 程序到内核并将其附加到 tracepoint 的 OCI 运行时挂钩的[代码行](https://oreil.ly/DOShA)（为简洁起见，有几行被省略）：
 
 ```cpp
-src := strings.Replace(source, "$PARENT_PID", strconv.Itoa(pid), -1)           ![1](assets/1.png)
+src := strings.Replace(source, "$PARENT_PID", strconv.Itoa(pid), -1)           // ①
 m := bcc.NewModule(src, []string{})
 defer m.Close()
 
 ...
-enterTrace, err := m.LoadTracepoint("enter_trace")                             ![2](assets/2.png)
+enterTrace, err := m.LoadTracepoint("enter_trace")                             // ②
 ...
-if err := m.AttachTracepoint("raw_syscalls:sys_enter", enterTrace); err != nil ![3](assets/3.png)
+if err := m.AttachTracepoint("raw_syscalls:sys_enter", enterTrace); err != nil // ③
     {                                                                       
     return fmt.Errorf("error attaching to tracepoint: %v", err)
 }

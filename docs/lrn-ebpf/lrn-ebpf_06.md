@@ -65,18 +65,18 @@ peak_states 4 mark_read 3
 
 ```cpp
 0: (bf) r6 = r1
-; data.counter = c;                                              ![1](assets/1.png)
+; data.counter = c;                                              // ①
 1: (18) r1 = 0xffff800008178000
 3: (61) r2 = *(u32 *)(r1 +0)
  R1_w=map_value(id=0,off=0,ks=4,vs=16,imm=0) R6_w=ctx(id=0,off=0,imm=0) 
- R10=fp0                                                         ![2](assets/2.png)
+ R10=fp0                                                         // ②
 ; c++; 
 4: (bf) r3 = r2
 5: (07) r3 += 1
 6: (63) *(u32 *)(r1 +0) = r3
  R1_w=map_value(id=0,off=0,ks=4,vs=16,imm=0) R2_w=inv(id=1,umax_value=4294967295,
  var_off=(0x0; 0xffffffff)) R3_w=inv(id=0,umin_value=1,umax_value=4294967296,
- var_off=(0x0; 0x1ffffffff)) R6_w=ctx(id=0,off=0,imm=0) R10=fp0  ![3](assets/3.png)
+ var_off=(0x0; 0x1ffffffff)) R6_w=ctx(id=0,off=0,imm=0) R10=fp0  // ③
 ```
 
 ①
@@ -280,15 +280,15 @@ R6=ctx(id=0,off=0,imm=0) ...
 
 ```cpp
 
-[![1](assets/1.png)](#code_id_6_6)
+[// ①](#code_id_6_6)
 
 Working backward from the error, the last register state information shows that Register 2 could have a maximum value of `12`.
 
-[![2](assets/2.png)](#code_id_6_5)
+[// ②](#code_id_6_5)
 
 At instruction 31, Register 2 is set to an address in memory and then is incremented by the value of Register 1\. The output shows that this corresponds to the line of code accessing `message[c]`, so it stands to reason that Register 2 is set to point to the message array and then to be incremented by the value of `c`, which is held in the Register 1 register.
 
-[![3](assets/3.png)](#code_id_6_4)
+[// ③](#code_id_6_4)
 
 Working further back to find the value of Register 1, the log shows that it has a maximum value of `12` (which is hex 0x0c). However, `message` is defined as a 12-byte character array, so only indexes 0 through 11 are within its bounds. From this, you can see that the error springs from the source code testing for `c <= sizeof(message)`.
 
@@ -316,17 +316,17 @@ char a = p->message[0]; `bpf_printk``(``"%c"``,` `a``);`
 ; p = bpf_map_lookup_elem(&my_config, &uid); 
 25: (18) r1 = 0xffff263ec2fe5000
 27: (85) call bpf_map_lookup_elem#1
-28: (bf) r7 = r0                                ![1](assets/1.png)
+28: (bf) r7 = r0                                // ①
 ; char a = p->message[0];
-29: (71) r3 = *(u8 *)(r7 +0)                    ![2](assets/2.png)
+29: (71) r3 = *(u8 *)(r7 +0)                    // ②
 R7 invalid mem access 'map_value_or_null'
 ```
 
-[![1](assets/1.png)](#code_id_6_7)
+[// ①](#code_id_6_7)
 
 The return value from a helper function call gets stored in Register 0\. Here, that value is being stored in Register 7\. This means Register 7 now holds the value of the local variable `p`.
 
-[![2](assets/2.png)](#code_id_6_8)
+[// ②](#code_id_6_8)
 
 This instruction attempts to dereference the pointer value `p`. The verifier has been keeping track of the state of Register 7 and knows that it may hold a pointer to a map value, or it might be null.
 

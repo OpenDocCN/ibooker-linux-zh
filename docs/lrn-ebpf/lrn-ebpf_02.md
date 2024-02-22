@@ -147,20 +147,20 @@ b'     bash-5412    [001] .... 90432.904952: 0: bpf_trace_printk: Hello World'
 首先，让我们看看 eBPF 程序本身的 C 代码：
 
 ```cpp
-BPF_HASH(counter_table);                                     ![1](assets/1.png)
+BPF_HASH(counter_table);                                     // ①
 
 int hello(void *ctx) {
   u64 uid;                                                  
   u64 counter = 0;
   u64 *p;
 
-  uid = bpf_get_current_uid_gid() & 0xFFFFFFFF;              ![2](assets/2.png)
-  p = counter_table.lookup(&uid);                            ![3](assets/3.png)
-  if (p != 0) {                                              ![4](assets/4.png)
+  uid = bpf_get_current_uid_gid() & 0xFFFFFFFF;              // ②
+  p = counter_table.lookup(&uid);                            // ③
+  if (p != 0) {                                              // ④
      counter = *p;
   }
-  counter++;                                                 ![5](assets/5.png)
-  counter_table.update(&uid, &counter);                      ![6](assets/6.png)
+  counter++;                                                 // ⑤
+  counter_table.update(&uid, &counter);                      // ⑥
   return 0;
 }
 ```
@@ -185,7 +185,7 @@ int hello(void *ctx) {
 
 无论当前的计数器值是多少，它都会增加一。
 
-![6](img/6.png)
+// ⑥
 
 使用新的计数器值更新哈希表中的值。
 
@@ -214,10 +214,10 @@ b.attach_kprobe(event=syscall, fn_name="hello")
 这次在 Python 端需要更多的工作来从哈希表中读取信息：
 
 ```cpp
-while True:                                       ![1](assets/1.png)
+while True:                                       // ①
   sleep(2)                                         
   s = ""
-  for k,v in b["counter_table"].items():          ![2](assets/2.png)
+  for k,v in b["counter_table"].items():          // ②
     s += f"ID {k.value}: {v.value}\t"
   print(s)
 ```
@@ -266,9 +266,9 @@ ID 501: 5       ID 0: 2             sudo ls
 这是将加载到内核中的 eBPF 程序：
 
 ```cpp
-BPF_PERF_OUTPUT(output);                                                ![1](assets/1.png)
+BPF_PERF_OUTPUT(output);                                                // ①
 
-struct data_t {                                                         ![2](assets/2.png)
+struct data_t {                                                         // ②
    int pid;
    int uid;
    char command[16];
@@ -276,16 +276,16 @@ struct data_t {                                                         ![2](ass
 };
 
 int hello(void *ctx) {
-   struct data_t data = {};                                             ![3](assets/3.png)
+   struct data_t data = {};                                             // ③
    char message[12] = "Hello World";
 
-   data.pid = bpf_get_current_pid_tgid() >> 32;                         ![4](assets/4.png)
-   data.uid = bpf_get_current_uid_gid() & 0xFFFFFFFF;                   ![5](assets/5.png)
+   data.pid = bpf_get_current_pid_tgid() >> 32;                         // ④
+   data.uid = bpf_get_current_uid_gid() & 0xFFFFFFFF;                   // ⑤
 
-   bpf_get_current_comm(&data.command, sizeof(data.command));           ![6](assets/6.png) 
-   bpf_probe_read_kernel(&data.message, sizeof(data.message), message); ![7](assets/7.png)
+   bpf_get_current_comm(&data.command, sizeof(data.command));           // ⑥ 
+   bpf_probe_read_kernel(&data.message, sizeof(data.message), message); // ⑦
 
-   output.perf_submit(ctx, &data, sizeof(data));                        ![8](assets/8.png)
+   output.perf_submit(ctx, &data, sizeof(data));                        // ⑧
 
    return 0;
 }
@@ -311,32 +311,32 @@ BCC 为创建一个将消息从内核传递到用户空间的映射定义了宏`
 
 `bpf_get_current_uid_gid()`是你在前面示例中看到的用于获取用户 ID 的辅助函数。
 
-![6](img/6.png)
+// ⑥
 
 类似地，`bpf_get_current_comm()`是一个辅助函数，用于获取执行`execve`系统调用的进程中正在运行的可执行文件（或“命令”）的名称。这是一个字符串，不像进程和用户 ID 那样是一个数值，而在 C 中，您不能简单地使用`=`分配一个字符串。您必须将字符串应该写入的字段的地址`&data.command`作为辅助函数的参数传递。
 
-![7](img/7.png)
+// ⑦
 
 对于这个示例，消息每次都是“Hello World”。`bpf_probe_read_kernel()`将其复制到数据结构的正确位置。
 
-![8](img/8.png)
+// ⑧
 
 此时，数据结构已填充有进程 ID、命令名称和消息。调用`output.perf_submit()`将该数据放入映射中。
 
 就像第一个“Hello World”示例中一样，这个 C 程序在 Python 代码中被分配给一个名为`program`的字符串。接下来是 Python 代码的其余部分：
 
 ```cpp
-b = BPF(text=program)                                ![1](assets/1.png)
+b = BPF(text=program)                                // ①
 syscall = b.get_syscall_fnname("execve")
 b.attach_kprobe(event=syscall, fn_name="hello")
 
-def print_event(cpu, data, size):                    ![2](assets/2.png)
+def print_event(cpu, data, size):                    // ②
    data = b["output"].event(data)
    print(f"{data.pid} {data.uid} {data.command.decode()} " + \
          f"{data.message.decode()}")
 
-b["output"].open_perf_buffer(print_event)            ![3](assets/3.png)
-while True:                                          ![4](assets/4.png)
+b["output"].open_perf_buffer(print_event)            // ③
+while True:                                          // ④
    b.perf_buffer_poll()
 ```
 
@@ -442,21 +442,21 @@ bpf_tail_call(ctx, prog_array_map, index)
 `这是 eBPF 程序及其尾调用的源代码：
 
 ```cpp
-BPF_PROG_ARRAY(syscall, 300);                                   ![1](assets/1.png)
+BPF_PROG_ARRAY(syscall, 300);                                   // ①
 
-int hello(struct bpf_raw_tracepoint_args *ctx) {                ![2](assets/2.png)
-   int opcode = ctx->args[1];                                   ![3](assets/3.png)
-   syscall.call(ctx, opcode);                                   ![4](assets/4.png)
-   bpf_trace_printk("Another syscall: %d", opcode);             ![5](assets/5.png)
+int hello(struct bpf_raw_tracepoint_args *ctx) {                // ②
+   int opcode = ctx->args[1];                                   // ③
+   syscall.call(ctx, opcode);                                   // ④
+   bpf_trace_printk("Another syscall: %d", opcode);             // ⑤
    return 0;
 }
 
-int hello_execve(void *ctx) {                                   ![6](assets/6.png)
+int hello_execve(void *ctx) {                                   // ⑥
    bpf_trace_printk("Executing a program");
    return 0;
 }
 
-int hello_timer(struct bpf_raw_tracepoint_args *ctx) {          ![7](assets/7.png)
+int hello_timer(struct bpf_raw_tracepoint_args *ctx) {          // ⑦
    if (ctx->args[1] == 222) {
        bpf_trace_printk("Creating a timer");
    } else if (ctx->args[1] == 226) {
@@ -467,7 +467,7 @@ int hello_timer(struct bpf_raw_tracepoint_args *ctx) {          ![7](assets/7.pn
    return 0;
 }
 
-int ignore_opcode(void *ctx) {                                  ![8](assets/8.png)
+int ignore_opcode(void *ctx) {                                  // ⑧
    return 0;
 }
 ```
@@ -492,15 +492,15 @@ BCC 提供了一个`BPF_PROG_ARRAY`宏，用于轻松定义`BPF_MAP_TYPE_PROG_AR
 
 如果尾调用成功，这行跟踪操作码值的代码将永远不会被触发。我使用这个来为映射中没有程序条目的操作码提供默认的跟踪行。
 
-![6](img/6.png)
+// ⑥
 
 `hello_exec()`是一个将加载到系统调用程序数组映射中的程序，当操作码指示为`execve()`系统调用时将作为尾调用执行。它只会生成一行跟踪，告诉用户正在执行一个新程序。
 
-![7](img/7.png)
+// ⑦
 
 `hello_timer()`是另一个将加载到系统调用程序数组中的程序。在这种情况下，它将被多个程序数组中的条目引用。
 
-![8](img/8.png)
+// ⑧
 
 `ignore_opcode()`是一个尾调用程序，什么也不做。我将用它来处理那些我不希望生成任何跟踪的系统调用。
 
@@ -508,13 +508,13 @@ BCC 提供了一个`BPF_PROG_ARRAY`宏，用于轻松定义`BPF_MAP_TYPE_PROG_AR
 
 ```cpp
 b = BPF(text=program)                                              
-b.attach_raw_tracepoint(tp="sys_enter", fn_name="hello")           ![1](assets/1.png)
+b.attach_raw_tracepoint(tp="sys_enter", fn_name="hello")           // ①
 
-ignore_fn = b.load_func("ignore_opcode", BPF.RAW_TRACEPOINT)       ![2](assets/2.png)
+ignore_fn = b.load_func("ignore_opcode", BPF.RAW_TRACEPOINT)       // ②
 exec_fn = b.load_func("hello_exec", BPF.RAW_TRACEPOINT)
 timer_fn = b.load_func("hello_timer", BPF.RAW_TRACEPOINT)
 
-prog_array = b.get_table("syscall")                                ![3](assets/3.png)
+prog_array = b.get_table("syscall")                                // ③
 prog_array[ct.c_int(59)] = ct.c_int(exec_fn.fd)
 prog_array[ct.c_int(222)] = ct.c_int(timer_fn.fd)
 prog_array[ct.c_int(223)] = ct.c_int(timer_fn.fd)
@@ -522,13 +522,13 @@ prog_array[ct.c_int(224)] = ct.c_int(timer_fn.fd)
 prog_array[ct.c_int(225)] = ct.c_int(timer_fn.fd)
 prog_array[ct.c_int(226)] = ct.c_int(timer_fn.fd)
 
-# Ignore some syscalls that come up a lot ![4](assets/4.png)
+# Ignore some syscalls that come up a lot // ④
 prog_array[ct.c_int(21)] = ct.c_int(ignore_fn.fd)
 prog_array[ct.c_int(22)] = ct.c_int(ignore_fn.fd)
 prog_array[ct.c_int(25)] = ct.c_int(ignore_fn.fd)
 ...
 
-b.trace_print()                                                    ![5](assets/5.png)
+b.trace_print()                                                    // ⑤
 ```
 
 ①
