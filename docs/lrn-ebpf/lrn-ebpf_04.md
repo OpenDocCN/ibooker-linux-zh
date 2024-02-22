@@ -9,7 +9,7 @@
 在我向您展示`bpf()`系统调用的示例之前，让我们考虑一下[`bpf()`的 manpage](https://oreil.ly/NJdIM)所说的，即`bpf()`用于“对扩展 BPF 映射或程序执行命令”。它还告诉我们，`bpf()`的签名如下：
 
 ```cpp
-intbpf(intcmd,unionbpf_attr*attr,unsignedintsize);
+int bpf(int cmd, union bpf_attr *attr, unsigned int size);
 ```
 
 `bpf()`的第一个参数`cmd`指定要执行的命令。`bpf()`系统调用不仅仅执行一项任务——有许多不同的命令可用于操作 eBPF 程序和映射。图 4-1 概述了用户空间代码可能用于加载 eBPF 程序、创建映射、将程序附加到事件以及访问映射中键-值对的一些常见命令。
@@ -31,7 +31,41 @@ intbpf(intcmd,unionbpf_attr*attr,unsignedintsize);
 以下是 eBPF 源代码：
 
 ```cpp
-structuser_msg_t{①charmessage[12];};BPF_HASH(config,u32,structuser_msg_t);②BPF_PERF_OUTPUT(output);③structdata_t{④intpid;intuid;charcommand[16];charmessage[12];};inthello(void*ctx){⑤structdata_tdata={};structuser_msg_t*p;charmessage[12]="Hello World";data.pid=bpf_get_current_pid_tgid()>>32;data.uid=bpf_get_current_uid_gid()&0xFFFFFFFF;bpf_get_current_comm(&data.command,sizeof(data.command));p=config.lookup(&data.uid);![6](img/6.png)if(p!=0){bpf_probe_read_kernel(&data.message,sizeof(data.message),p->message);}else{bpf_probe_read_kernel(&data.message,sizeof(data.message),message);}output.perf_submit(ctx,&data,sizeof(data));return0;}
+struct user_msg_t {                                          ![1](assets/1.png)
+  char message[12];
+};
+
+BPF_HASH(config, u32, struct user_msg_t);                    ![2](assets/2.png)
+
+BPF_PERF_OUTPUT(output);                                     ![3](assets/3.png)
+
+struct data_t {                                              ![4](assets/4.png)
+  int pid;
+  int uid;
+  char command[16];
+  char message[12];
+};
+
+int hello(void *ctx) {                                       ![5](assets/5.png)
+  struct data_t data = {};
+  struct user_msg_t *p;
+  char message[12] = "Hello World";
+
+  data.pid = bpf_get_current_pid_tgid() >> 32;
+  data.uid = bpf_get_current_uid_gid() & 0xFFFFFFFF;
+
+  bpf_get_current_comm(&data.command, sizeof(data.command));
+
+  p = config.lookup(&data.uid);                              ![6](assets/6.png)
+  if (p != 0) {
+     bpf_probe_read_kernel(&data.message, sizeof(data.message), p->message);      
+  } else {
+     bpf_probe_read_kernel(&data.message, sizeof(data.message), message);
+  }
+
+  output.perf_submit(ctx, &data, sizeof(data));
+  return 0;
+}
 ```
 
 ①
@@ -474,11 +508,11 @@ $ strace -e bpf bpftool map dump name config
 输出以重复的类似调用序列开始，因为 `bpftool` 遍历所有映射，查找其中名称为 `config` 的映射：
 
 ```cpp
-bpf(BPF_MAP_GET_NEXT_ID, {start_id=0,...}, 12) = 0             ①
-bpf(BPF_MAP_GET_FD_BY_ID, {map_id=48...}, 12) = 3              ②
-bpf(BPF_OBJ_GET_INFO_BY_FD, {info={bpf_fd=3, ...}}, 16) = 0    ③
+bpf(BPF_MAP_GET_NEXT_ID, {start_id=0,...}, 12) = 0             ![1](assets/1.png)
+bpf(BPF_MAP_GET_FD_BY_ID, {map_id=48...}, 12) = 3              ![2](assets/2.png)
+bpf(BPF_OBJ_GET_INFO_BY_FD, {info={bpf_fd=3, ...}}, 16) = 0    ![3](assets/3.png)
 
-bpf(BPF_MAP_GET_NEXT_ID, {start_id=48, ...}, 12) = 0           ④
+bpf(BPF_MAP_GET_NEXT_ID, {start_id=48, ...}, 12) = 0           ![4](assets/4.png)
 bpf(BPF_MAP_GET_FD_BY_ID, {map_id=116, ...}, 12) = 3
 bpf(BPF_OBJ_GET_INFO_BY_FD, {info={bpf_fd=3...}}, 16) = 0
 ```
@@ -513,16 +547,16 @@ directory)
 此时，`bpftool`具有对要从中读取的映射的文件描述符引用。让我们看一下读取该信息的系统调用序列：
 
 ```cpp
-bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=NULL,                    ①
+bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=NULL,                    ![1](assets/1.png)
 next_key=0xaaaaf7a63960}, 24) = 0
-bpf(BPF_MAP_LOOKUP_ELEM, {map_fd=3, key=0xaaaaf7a63960,           ②
+bpf(BPF_MAP_LOOKUP_ELEM, {map_fd=3, key=0xaaaaf7a63960,           ![2](assets/2.png)
 value=0xaaaaf7a63980, flags=BPF_ANY}, 32) = 0
-[{                                                                ③
+[{                                                                ![3](assets/3.png)
         "key": 0,
         "value": {
             "message": "Hey root!"
         }
-bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=0xaaaaf7a63960,          ④
+bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=0xaaaaf7a63960,          ![4](assets/4.png)
 next_key=0xaaaaf7a63960}, 24) = 0
 bpf(BPF_MAP_LOOKUP_ELEM, {map_fd=3, key=0xaaaaf7a63960, 
 value=0xaaaaf7a63980, flags=BPF_ANY}, 32) = 0
@@ -531,9 +565,9 @@ value=0xaaaaf7a63980, flags=BPF_ANY}, 32) = 0
         "value": {
             "message": "Hi user 501!"
         }
-bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=0xaaaaf7a63960,          ⑤
+bpf(BPF_MAP_GET_NEXT_KEY, {map_fd=3, key=0xaaaaf7a63960,          ![5](assets/5.png)
 next_key=0xaaaaf7a63960}, 24) = -1 ENOENT (No such file or directory)
-    }                                                             ![6](img/6.png)
+    }                                                             ![6](assets/6.png)
 ]
 +++ exited with 0 +++
 ```

@@ -153,7 +153,7 @@ bpftool prog show name hello
 知道 BTF 信息的 ID 后，可以使用命令`bpftool btf dump id <id>`来检查其内容。当我使用之前获得的 ID 149 运行时，我得到了 69 行输出，每行都是一个类型定义。我只描述前几行，这应该能让你很好地理解如何解释其余部分。这些前几行的 BTF 信息与在源代码中定义的`config`哈希映射相关：
 
 ```cpp
-structuser_msg_t{ `char``message``[``12``];` ``};` ``BPF_HASH``(``config``,``u32``,``struct``user_msg_t``);```
+struct user_msg_t { `char` `message``[``12``];` ``};` ``BPF_HASH``(``config``,` `u32``,` `struct` `user_msg_t``);```
 
 ```cpp
 
@@ -220,8 +220,8 @@ BTF 输出中的接下来几种类型如下：
 在 C 中，结构字段会自动对齐到边界，因此不能简单地假设一个字段总是直接跟在前一个字段的内存中。例如，考虑这样一个结构：
 
 ```cpp
-structsomething{ `char``letter``;`
-`u64``number``;` ``}``
+struct something { `char` `letter``;` 
+    `u64` `number``;` ``}``
 ```
 
 ```cppThere would be 7 bytes of unused memory after the field called `letter` before the `number` field so that the 64-bit number can be aligned to a memory location divisible by 8.
@@ -233,7 +233,19 @@ It’s possible in some circumstances to turn on compiler packing to avoid this 
 您在第四章中看到，映射是使用`bpf(BPF_MAP_CREATE)`系统调用创建的。这需要一个`bpf_attr`结构作为参数，[在内核中定义](https://oreil.ly/PLrYG)如下（一些细节被省略）：
 
 ```cpp
-struct{/* anonymous struct used by BPF_MAP_CREATE command */`__u32``map_type`;/* one of enum bpf_map_type */`__u32``key_size`;/* size of key in bytes */`__u32``value_size`;/* size of value in bytes */`__u32``max_entries`;/* max number of entries in a map */...char`map_name`[`BPF_OBJ_NAME_LEN`];...`__u32``btf_fd`;/* fd pointing to a BTF type data */`__u32``btf_key_type_id`;/* BTF type_id of the key */`__u32``btf_value_type_id`;/* BTF type_id of the value */...};
+struct { /* anonymous struct used by BPF_MAP_CREATE command */
+    `__u32`   `map_type`;             /* one of enum bpf_map_type */
+    `__u32`   `key_size`;             /* size of key in bytes */
+    `__u32`   `value_size`;           /* size of value in bytes */
+    `__u32`   `max_entries`;          /* max number of entries in a map */
+    ...
+    char    `map_name`[`BPF_OBJ_NAME_LEN`];
+    ...
+    `__u32`   `btf_fd`;               /* fd pointing to a BTF type data */
+    `__u32`   `btf_key_type_id`;      /* BTF type_id of the key */
+    `__u32`   `btf_value_type_id`;    /* BTF type_id of the value */
+    ...
+};
 ```
 
 在引入 BTF 之前，`btf_*`字段不存在于`bpf_attr`结构中，内核对键或值的结构一无所知。`key_size`和`value_size`字段定义了它们所需的内存量，但它们只是被视为一些字节。通过另外传递定义键和值类型的 BTF 信息，内核可以内省它们，而像`bpftool`这样的实用程序可以检索类型信息以进行漂亮的打印，如前面讨论的那样。但是，有趣的是要注意为键和值分别传递了单独的 BTF `type _id`。您刚刚看到的`____btf_map_config`结构并未被内核用于映射定义；它只是由用户空间的 BCC 使用。
@@ -261,7 +273,7 @@ struct{/* anonymous struct used by BPF_MAP_CREATE command */`__u32``map_type`;/*
 类型 23 的返回值是一个 4 字节整数，`encoding=SIGNED`表示它是一个有符号整数；也就是说，它可以具有正值或负值。这对应于*hello-buffer-config.py*源代码中的函数定义，如下所示：
 
 ```cpp
-inthello(void*ctx)
+int hello(void *ctx)
 ```
 
 到目前为止，我展示的示例 BTF 信息来自于列出 BTF 数据块的内容。让我们看看如何仅获取与特定映射或程序相关的 BTF 信息。## 检查映射和程序的 BTF 数据
@@ -366,7 +378,7 @@ BTFHub 存储库还包括有关[BTF 内部](https://oreil.ly/CfyQh)的进一步�
 通常会有一个特定于应用程序的头文件，定义了用户空间和 eBPF 应用程序的共同使用的任何结构。在我的示例中，*hello-buffer-config.h*头文件定义了`data_t`结构，我用它来从 eBPF 程序传递事件数据到用户空间。它几乎与您在此代码的 BCC 版本中看到的结构相同，看起来是这样的：
 
 ```cpp
-structdata_t{ `int``pid``;` ``int``uid``;` ``char``command``[``16``];` ``char``message``[``12``];` ``char``path``[``16``];` ``};``````cpp
+struct data_t { `int` `pid``;` ``int` `uid``;` ``char` `command``[``16``];` ``char` `message``[``12``];` ``char` `path``[``16``];` ``};``````cpp
 ```
 
 ```cppThe only difference from the version you saw before is that I have added a field called `path`.
@@ -383,13 +395,15 @@ struct{ `__uint``(``type``,``BPF_MAP_TYPE_PERF_EVENT_ARRAY``);` ``__uint``(``key
  ```cppThis requires more lines of code than I needed in the equivalent BCC example! With BCC, the map called `config` was created with the following macro:
 
 ```
-BPF_HASH(config,u64,structuser_msg_t);
+BPF_HASH(config, u64, struct user_msg_t);
 ```cpp
 
  `This macro isn’t available when you’re not using BCC, so in C you have to write it out longhand. You’ll see that I have used `__uint` and `__type`. These are defined in [*bpf/bpf_helpers_def.h*](https://oreil.ly/2FgjB) along with `__array`, like this:
 
 ```
-#define `__uint`(name, val) int (*name)[val]#define `__type`(name, val) `typeof`(val) *name#define `__array`(name, val) `typeof`(val) *name[]
+#define `__uint`(name, val) int (*name)[val]
+#define `__type`(name, val) `typeof`(val) *name
+#define `__array`(name, val) `typeof`(val) *name[]
 ```cpp
 
 These macros generally seem to be used by convention in *libbpf*-based programs, and I think they make the map definitions a little easier to read.
@@ -406,7 +420,7 @@ SEC（“kprobe”）
 
 ```cpp
 
- `This results in a section called `kprobe` in the compiled ELF object, so *libbpf* knows to load this as a `BPF_PROG_TYPE_KPROBE`. We’ll discuss different program types further in [Chapter 7](ch07.html#ebpf_program_and_attachment_types).
+ `This results in a section called `kprobe` in the compiled ELF object, so *libbpf* knows to load this as a `BPF_PROG_TYPE_KPROBE`. We’ll discuss different program types further in [Chapter 7](ch07.xhtml#ebpf_program_and_attachment_types).
 
 Depending on the program type, you can also use the section name to specify what event the program will be attached to. The *libbpf* library will use this information to set up the attachment automatically, rather than leaving you to do it explicitly in your user space code. So, for example, to auto-attach to the kprobe for the `execve` syscall on an ARM-based machine, you could specify the section like this:
 
@@ -428,35 +442,31 @@ SEC("ksyscall/execve")
 
 The valid section names and formats are listed in the [*libbpf* documentation](https://oreil.ly/FhHrm). In the past, the requirements for section names were much looser, so you may come across eBPF programs written before *libbpf 1.0* with section names that don’t match the valid set. Don’t let them confuse you!
 
-The section definition declares where the eBPF program should be attached, and then the program itself follows. As before, the eBPF program itself is written as a C function. In the example code it’s called `hello()`, and it’s extremely similar to the `hello()` function you saw in [Chapter 4](ch04.html#the_bpfleft_parenthesisright_parenthesi). Let’s consider the differences between that previous version and the version here:
+The section definition declares where the eBPF program should be attached, and then the program itself follows. As before, the eBPF program itself is written as a C function. In the example code it’s called `hello()`, and it’s extremely similar to the `hello()` function you saw in [Chapter 4](ch04.xhtml#the_bpfleft_parenthesisright_parenthesi). Let’s consider the differences between that previous version and the version here:
 
 ```
 
-```  ```cpp## 对象文件中的 BTF 信息
-
 ```cpp
 
-①
+[![1](assets/1.png)](#code_id_5_1)
 
 I’ve taken advantage of a [`BPF_KPROBE_SYSCALL`](https://oreil.ly/pgI1B) macro defined in *libbpf* that makes it easy to access the arguments to a syscall by name. For `execve()`, the first argument is the pathname for the program that’s going to be executed. The eBPF program name is `hello`.
 
-②
+[![2](assets/2.png)](#code_id_5_2)
 
 Since the macro has made it so easy to access that pathname argument to `execve()`, I’m including it in the data sent to the perf buffer output. Notice that copying memory requires the use of a BPF helper function.
 
-③
+[![3](assets/3.png)](#code_id_5_3)
 
-Here, `bpf_map_lookup_elem()` is the BPF helper function for looking up values in a map, given a key. BCC’s equivalent of this would be `p = my_config.lookup(&data.uid)`. BCC rewrites this to use the underlying `bpf_map_lookup_elem()` function before it passes the C code to the compiler. When you’re using *libbpf*, there is no rewriting of the code before compilation,⁷ so you have to write directly to the helper functions.
+Here, `bpf_map_lookup_elem()` is the BPF helper function for looking up values in a map, given a key. BCC’s equivalent of this would be `p = my_config.lookup(&data.uid)`. BCC rewrites this to use the underlying `bpf_map_lookup_elem()` function before it passes the C code to the compiler. When you’re using *libbpf*, there is no rewriting of the code before compilation,^([7](ch05.xhtml#ch05fn7)) so you have to write directly to the helper functions.
 
-④
+[![4](assets/4.png)](#code_id_5_4)
 
 Here’s another similar example where I have written directly to the helper function `bpf_perf_event_output()`, where BCC gave me the convenient equivalent `output.perf_submit(ctx, &data, sizeof(data))`.
 
 The only other difference is that in the BCC version, I defined the message string as a local variable within the `hello()` function. BCC doesn’t (at least at the time of this writing) support global variables. In this version I have defined it as a global variable, like this:
 
-```
-
-正如您稍后在本章中将看到的，CO-RE 重定位条目告诉*libbpf*在将 eBPF 程序加载到内核时重新编写地址，以考虑任何 BTF 差异。如果`src`在其包含结构中的偏移在目标内核上不同，重新编写的指令将考虑到这一点。
+```cpp## 对象文件中的 BTF 信息
 
 ```cpp
 
@@ -464,7 +474,7 @@ The only other difference is that in the BCC version, I defined the message stri
 
 ```
 
-在你看到的`bpf_core_read()`中，直接调用`bpf_probe_read_kernel()`，唯一的区别是它用`__builtin_preserve_access_index()`包装了`src`字段。这告诉 Clang 在访问内存中的这个地址时发出 CO-RE 重定位条目以及 eBPF 指令。
+正如您稍后在本章中将看到的，CO-RE 重定位条目告诉*libbpf*在将 eBPF 程序加载到内核时重新编写地址，以考虑任何 BTF 差异。如果`src`在其包含结构中的偏移在目标内核上不同，重新编写的指令将考虑到这一点。
 
 ```cpp
 
@@ -474,12 +484,17 @@ If you’re paying very close attention you might notice that the `ctx` variable
 
 ```
 
+在你看到的`bpf_core_read()`中，直接调用`bpf_probe_read_kernel()`，唯一的区别是它用`__builtin_preserve_access_index()`包装了`src`字段。这告诉 Clang 在访问内存中的这个地址时发出 CO-RE 重定位条目以及 eBPF 指令。
+
+```cpp
+
+ `The `ctx` variable does exist, hidden within the `BPF_KPROBE_SYSCALL` macro definition inside [*bpf/bpf_tracing.h*](https://oreil.ly/pgI1B), in *libbpf*, where you’ll also find some commentary about this. It can be slightly confusing to use a variable that’s not visibly defined, but it’s very helpful that it can be accessed.```
+
 `然后您可以使用`bpf_probe_read_kernel()`辅助函数从点`d`读取。
 
 Andrii 的[指南](https://oreil.ly/tU0Gb)中有一个很好的描述。
 
-```cpp
-structb_t*b; `struct``c_t``*``c``;` ``bpf_core_read``(``&``b``,``8``,``&``a``->``b``);` ``bpf_core_read``(``&``c``,``8``,``&``b``->``c``);` ``bpf_core_read``(``&``d``,``8``,``&``c``->``d``);````
+```cpp  ````
 
 charmessage[12]="Hello World";
 
@@ -490,8 +505,9 @@ charmessage[12]="Hello World";
 ```
 
 ```cpp
+struct b_t *b; `struct` `c_t` `*``c``;` ``bpf_core_read``(``&``b``,` `8``,` `&``a``->``b``);` ``bpf_core_read``(``&``c``,` `8``,` `&``b``->``c``);` ``bpf_core_read``(``&``d``,` `8``,` `&``c``->``d``);``````cpp
 
- `The `ctx` variable does exist, hidden within the `BPF_KPROBE_SYSCALL` macro definition inside [*bpf/bpf_tracing.h*](https://oreil.ly/pgI1B), in *libbpf*, where you’ll also find some commentary about this. It can be slightly confusing to use a variable that’s not visibly defined, but it’s very helpful that it can be accessed.``````cpp  ```## CO-RE 内存访问
+ ```## CO-RE 内存访问
 
 ###### *libbpf*库提供了围绕`bpf_probe_read_*()`辅助函数的 CO-RE 包装，以利用 BTF 信息并使内存访问调用在不同的内核版本中可移植。以下是其中一个这些包装的示例，定义在[*bpf_core_read.h*头文件](https://oreil.ly/XWWyc)中。
 
@@ -501,9 +517,21 @@ SEC("ksyscall/execve")intBPF_KPROBE_SYSCALL(hello,constchar*pathname)①{structd
 
 `您现在已经看到了*hello-buffer-config.bpf.c*示例中的所有代码。现在让我们将其编译成一个对象文件。
 
-```cpp```````cpp```  ```# Compiling eBPF Programs for CO-RE
+```cpp
+d = BPF_CORE_READ(a, b, c, d);
+``````cpp`  `````cpp`
 
-In [Chapter 3](ch03.html#anatomy_of_an_ebpf_program) you saw an extract from a Makefile that compiles C to eBPF bytecode. Let’s dig into the options used and see why they are necessary for CO-RE/*libbpf* programs.
+```cpp
+char LICENSE[] SEC("license") = "Dual BSD/GPL";
+```但使用起来更紧凑：
+
+```cpp```
+
+用于跟踪的 eBPF 程序通过`bpf_probe_read_*()`家族的 BPF 辅助函数对内存的访问受到限制。⁸（还有一个`bpf_probe_write_user()`辅助函数，但它只是[“用于实验”](https://oreil.ly/ibcy1)）。问题在于，正如您将在下一章中看到的，eBPF 验证器通常不会让您像在 C 中那样简单地通过指针读取内存（例如，`x = p->y`）。⁹
+
+````cpp```  ```# Compiling eBPF Programs for CO-RE
+
+In [Chapter 3](ch03.xhtml#anatomy_of_an_ebpf_program) you saw an extract from a Makefile that compiles C to eBPF bytecode. Let’s dig into the options used and see why they are necessary for CO-RE/*libbpf* programs.
 
 ## Debug Information
 
@@ -533,31 +561,17 @@ The following is an example Makefile instruction for compiling CO-RE objects (ta
 
 ```cpp
 hello-buffer-config.bpf.o: %.o: %.c
-   clang \ -target bpf \ `-D __TARGET_ARCH_`$(``ARCH``)` \ `-I/usr/include/`$(``shell` `uname` -`m``)`-linux-gnu \ `-Wall \ `-O2 -g \ `-c `$<` -o `$@` `llvm-strip -g `$@``````cpp`
-
-```cpp
-
- ```但使用起来更紧凑：
-
-```cpp
-d=BPF_CORE_READ(a,b,c,d);
-```
-
-用于跟踪的 eBPF 程序通过`bpf_probe_read_*()`家族的 BPF 辅助函数对内存的访问受到限制。⁸（还有一个`bpf_probe_write_user()`辅助函数，但它只是[“用于实验”](https://oreil.ly/ibcy1)）。问题在于，正如您将在下一章中看到的，eBPF 验证器通常不会让您像在 C 中那样简单地通过指针读取内存（例如，`x = p->y`）。⁹
-
-```cpp`  ```## 许可证定义
+   clang \ -target bpf \ `-D __TARGET_ARCH_`$(``ARCH``)` \ `-I/usr/include/`$(``shell` `uname` -`m``)`-linux-gnu \ `-Wall \ `-O2 -g \ `-c `$<` -o `$@` `llvm-strip -g `$@````## 许可证定义
 
 SEC("kprobe/__arm64_sys_execve")
 
-```cpp
-charLICENSE[]SEC("license")="Dual BSD/GPL";
 ```
+
+ ```
 
 正如您从第三章中已经知道的，eBPF 程序必须声明其许可证。示例代码是这样做的：
 
-```
-
- ```cpp 如果您使用示例代码，应该能够通过在*chapter5*目录中运行`make`来构建 eBPF 对象文件*hello-buffer-config.bpf.o*（以及我将很快描述的伴随的用户空间可执行文件）。让我们检查该对象文件，看看它是否包含 BTF 信息。
+```  ```cpp 如果您使用示例代码，应该能够通过在*chapter5*目录中运行`make`来构建 eBPF 对象文件*hello-buffer-config.bpf.o*（以及我将很快描述的伴随的用户空间可执行文件）。让我们检查该对象文件，看看它是否包含 BTF 信息。
 
 [BTF 的内核文档](https://oreil.ly/5QrBy)描述了 BTF 数据如何在 ELF 对象文件中以两个部分进行编码：*.BTF*，其中包含数据和字符串信息，以及*.BTF.ext*，其中包含函数和行信息。您可以使用`readelf`来查看这些部分是否已添加到对象文件中，就像这样：
 
@@ -584,7 +598,12 @@ bpftool btf dump file hello-buffer-config.bpf.o
 您可以从[*linux/bpf.h*](https://elixir.bootlin.com/linux/v5.19.17/source/include/uapi/linux/bpf.h#L6711)头文件中`struct bpf_core_relo`的定义中了解有关重定位工作原理的更多信息：
 
 ```
-struct`bpf_core_relo`{`__u32``insn_off`;`__u32``type_id`;`__u32``access_str_off`;enum`bpf_core_relo_kind``kind`;};
+struct `bpf_core_relo` {
+    `__u32` `insn_off`;
+    `__u32` `type_id`;
+    `__u32` `access_str_off`;
+    enum `bpf_core_relo_kind` `kind`;
+};
 ```cpp
 
 eBPF 程序的 CO-RE 重定位数据由每个需要重定位的指令的这些结构之一组成。假设该指令正在将寄存器设置为结构中字段的值。该指令的`bpf_core_relo`结构（由`insn_off`字段标识）对该结构的 BTF 类型（`type_id`字段）进行编码，并且还指示相对于该结构的字段如何被访问（`access_str_off`）。
@@ -649,7 +668,36 @@ bpftool gen skeleton hello-buffer-config.bpf.o > hello-buffer-config.skel.h
 这是管理本示例中 eBPF 程序和映射生命周期的用户空间代码的概要，使用了生成的骨架代码。为了清晰起见，我省略了一些细节和错误处理，但你可以在*chapter5/hello-buffer-config.c*中找到完整的源代码。
 
 ```
-...[other#includes]#include"hello-buffer-config.h"①#include"hello-buffer-config.skel.h"...[somecallbackfunctions]intmain(){structhello_buffer_config_bpf*skel;structperf_buffer*pb=NULL;interr;libbpf_set_print(libbpf_print_fn);②skel=hello_buffer_config_bpf__open_and_load();③...err=hello_buffer_config_bpf__attach(skel);④...pb=perf_buffer__new(bpf_map__fd(skel->maps.output),8,handle_event,lost_event,NULL,NULL);⑤...while(true){![6](img/6.png)err=perf_buffer__poll(pb,100);...}perf_buffer__free(pb);![7](img/7.png)hello_buffer_config_bpf__destroy(skel);return-err;}
+... [other #includes]
+#include "hello-buffer-config.h"                                       ![1](assets/1.png)
+#include "hello-buffer-config.skel.h"
+
+... [some callback functions]
+
+int main()
+{
+   struct hello_buffer_config_bpf *skel;
+   struct perf_buffer *pb = NULL;
+   int err;
+
+   libbpf_set_print(libbpf_print_fn);                                 ![2](assets/2.png)
+
+   skel = hello_buffer_config_bpf__open_and_load();                   ![3](assets/3.png)
+...
+   err = hello_buffer_config_bpf__attach(skel);                       ![4](assets/4.png)
+...
+   pb = perf_buffer__new(bpf_map__fd(skel->maps.output), 8, handle_event,
+                                                         lost_event, NULL, NULL);                                              
+                                                                      ![5](assets/5.png)
+...
+   while (true) {                                                     ![6](assets/6.png)
+       err = perf_buffer__poll(pb, 100);
+...}
+
+   perf_buffer__free(pb);                                             ![7](assets/7.png)
+   hello_buffer_config_bpf__destroy(skel);
+   return -err;
+}
 ```cpp
 
 ①
@@ -687,7 +735,7 @@ bpftool gen skeleton hello-buffer-config.bpf.o > hello-buffer-config.skel.h
 第一个调用自动生成的函数是这个：
 
 ```
-skel=hello_buffer_config_bpf__open_and_load();
+skel = hello_buffer_config_bpf__open_and_load();
 ```cpp
 
 `正如其名称所示，这个函数涵盖了两个阶段：打开和加载。 “打开”阶段涉及读取 ELF 数据并将其部分转换为代表 eBPF 程序和映射的结构。 “加载”阶段将这些映射和程序加载到内核中，并在必要时执行任何 CO-RE 修复。
@@ -695,9 +743,9 @@ skel=hello_buffer_config_bpf__open_and_load();
 这两个阶段可以很容易地分开处理，因为骨架代码提供了单独的`name__open()`和`name__load()`函数。这样你就有选择在加载之前操作 eBPF 信息的选项。这通常用于在加载之前配置程序。例如，我可以将计数器全局变量`c`初始化为某个值，就像这样：
 
 ```
-skel=hello_buffer_config_bpf__open(); `if``(``!``skel``)``{` ``// Error ...`
-`}`
-`skel``->``data``->``c``=``10``;` ``err``=``hello_buffer_config_bpf__load``(``skel``);```cpp
+skel = hello_buffer_config_bpf__open(); `if` `(``!``skel``)` `{` ``// Error ...`
+`}`   
+`skel``->``data``->``c` `=` `10``;` ``err` `=` `hello_buffer_config_bpf__load``(``skel``);```cpp
 
 ```
 
@@ -712,7 +760,7 @@ By default, *libbpf* will also create any maps that are defined in the ELF bytes
 So how do you access an existing map? Maps can be pinned, and if you know the pinned path, you can get a file descriptor to an existing map with `bpf_obj_get()`. Here’s a very simple example (available in the GitHub repository as *chapter5/find-map.c*):
 
 ```
-structbpf_map_infoinfo={}; `unsigned``int``len``=``sizeof``(``info``);` ``int``findme``=``bpf_obj_get``(``"/sys/fs/bpf/findme"``);` ``if``(``findme``<=``0``)``{` ``printf``(``"No FD``\n``"``);` ``}``else``{` ``bpf_obj_get_info_by_fd``(``findme``,``&``info``,``&``len``);` ``printf``(``"Name: %s``\n``"``,``info``.``name``);` ``}```cpp````
+struct bpf_map_info info = {}; `unsigned` `int` `len` `=` `sizeof``(``info``);` ``int` `findme` `=` `bpf_obj_get``(``"/sys/fs/bpf/findme"``);` ``if` `(``findme` `<=` `0``)` `{` ``printf``(``"No FD``\n``"``);` ``}` `else` `{` ``bpf_obj_get_info_by_fd``(``findme``,` `&``info``,` `&``len``);` ``printf``(``"Name: %s``\n``"``,` `info``.``name``);` ``}```cpp````
 
 ```cpp
 
@@ -734,7 +782,7 @@ Name: findme
 示例中的下一个骨架函数将程序附着到`execve`系统调用函数：
 
 ```cpp
-err=hello_buffer_config_bpf__attach(skel);
+err = hello_buffer_config_bpf__attach(skel);
 ```
 
 `libbpf`库会自动从`SEC()`定义中获取程序的附着点。如果你没有完全定义附着点，那么有一系列`libbpf`函数，比如`bpf_program__attach_kprobe`，`bpf_program__attach_xdp`等，用于附着不同类型的程序。### 管理事件缓冲区
@@ -742,7 +790,7 @@ err=hello_buffer_config_bpf__attach(skel);
 设置性能缓冲区使用的是`libbpf`中定义的函数，而不是在骨架中定义的函数。
 
 ```cpp
-pb=perf_buffer__new(bpf_map__fd(skel->maps.output),8,handle_event, `lost_event``,``NULL``,``NULL``);`
+pb = perf_buffer__new(bpf_map__fd(skel->maps.output), 8, handle_event, `lost_event``,` `NULL``,` `NULL``);`
 ```
 
 你可以看到`perf_buffer__new()`函数将“输出”映射的文件描述符作为第一个参数。`handle_event`参数是一个回调函数，当新数据到达性能缓冲区时会被调用，`lost_event`在性能缓冲区没有足够的空间让内核写入数据条目时会被调用。在我的示例中，这些函数只是将消息写入屏幕。
@@ -750,7 +798,7 @@ pb=perf_buffer__new(bpf_map__fd(skel->maps.output),8,handle_event, `lost_event``
 最后，程序必须重复轮询性能缓冲区：
 
 ```cpp
-while(true){ `err``=``perf_buffer__poll``(``pb``,``100``);` ``...` ``}```
+while (true) { `err` `=` `perf_buffer__poll``(``pb``,` `100``);` ``...` ``}```
 
 ```cpp
 
@@ -795,24 +843,24 @@ Here are a few things you can do to further explore BTF, CO-RE, and *libbpf*:
 
 4.  Try building a BPF program against a different *vmlinux* header file from BTFHub, and look in the debug output from `bpftool` for relocations that change offsets.
 
-5.  Modify the *hello-buffer-config.c* program so that you can configure different messages for different user IDs using the map (similar to the *hello-buffer-config.py* example in [Chapter 4](ch04.html#the_bpfleft_parenthesisright_parenthesi)).
+5.  Modify the *hello-buffer-config.c* program so that you can configure different messages for different user IDs using the map (similar to the *hello-buffer-config.py* example in [Chapter 4](ch04.xhtml#the_bpfleft_parenthesisright_parenthesi)).
 
 6.  Try changing the section name in the `SEC();`, perhaps to your own name. When you come to load the program into the kernel you should see an error because *libbpf* doesn’t recognize the section name. This illustrates how *libbpf* uses the section name to work out what kind of BPF program this is. You could try writing your own attachment code to explicitly attach to an event of your choice rather than relying on *libbpf*’s auto-attachment.
 
-¹ Strictly speaking, the data structure definitions come from kernel header files, and you could choose to compile based on a set of these header files that is different from what was used to build the kernel running on that machine. To work correctly (without the CO-RE mechanisms described in this chapter), the kernel headers have to be compatible with the kernel on the target machine where the eBPF program will run.
+^([1](ch05.xhtml#ch05fn1-marker)) Strictly speaking, the data structure definitions come from kernel header files, and you could choose to compile based on a set of these header files that is different from what was used to build the kernel running on that machine. To work correctly (without the CO-RE mechanisms described in this chapter), the kernel headers have to be compatible with the kernel on the target machine where the eBPF program will run.
 
-² Part of this section is adapted from “What Is eBPF?” by Liz Rice. Copyright © 2022 O’Reilly Media. Used with permission.
+^([2](ch05.xhtml#ch05fn2-marker)) Part of this section is adapted from “What Is eBPF?” by Liz Rice. Copyright © 2022 O’Reilly Media. Used with permission.
 
-³ A small and unscientific survey suggests that most people pronounce this the same as the word *core* rather than in two syllables.
+^([3](ch05.xhtml#ch05fn3-marker)) A small and unscientific survey suggests that most people pronounce this the same as the word *core* rather than in two syllables.
 
-⁴ See the kernel documentation at [*https://docs.kernel.org/bpf/btf.html#type-encoding*](https://docs.kernel.org/bpf/btf.html#type-encoding).
+^([4](ch05.xhtml#ch05fn4-marker)) See the kernel documentation at [*https://docs.kernel.org/bpf/btf.xhtml#type-encoding*](https://docs.kernel.org/bpf/btf.xhtml#type-encoding).
 
-⁵ The kernel needs to have been built with the `CONFIG_DEBUG_INFO_BTF` option enabled.
+^([5](ch05.xhtml#ch05fn5-marker)) The kernel needs to have been built with the `CONFIG_DEBUG_INFO_BTF` option enabled.
 
-⁶ Which is the oldest Linux kernel version that can support BTF? See [*https://oreil.ly/HML9m*](https://oreil.ly/HML9m).
+^([6](ch05.xhtml#ch05fn6-marker)) Which is the oldest Linux kernel version that can support BTF? See [*https://oreil.ly/HML9m*](https://oreil.ly/HML9m).
 
-⁷ Well, normal C preprocessing applies so that you can do things like `#define`. But there’s no *special* rewriting like there is when you use BCC.
+^([7](ch05.xhtml#ch05fn7-marker)) Well, normal C preprocessing applies so that you can do things like `#define`. But there’s no *special* rewriting like there is when you use BCC.
 
-⁸ eBPF programs handling network packets don’t get to use this helper function and can only access the network packet memory.
+^([8](ch05.xhtml#ch05fn8-marker)) eBPF programs handling network packets don’t get to use this helper function and can only access the network packet memory.
 
-⁹ It is permitted in certain BTF-enabled program types such as `tp_btf`, `fentry`, and `fexit`.``````cpp```
+^([9](ch05.xhtml#ch05fn9-marker)) It is permitted in certain BTF-enabled program types such as `tp_btf`, `fentry`, and `fexit`.``````cpp```

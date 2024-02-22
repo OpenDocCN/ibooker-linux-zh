@@ -69,7 +69,17 @@
 以下是加载 eBPF 程序到内核并将其附加到 tracepoint 的 OCI 运行时挂钩的[代码行](https://oreil.ly/DOShA)（为简洁起见，有几行被省略）：
 
 ```cpp
-src:=strings.Replace(source,"$PARENT_PID",strconv.Itoa(pid),-1)①m:=bcc.NewModule(src,[]string{})deferm.Close()...enterTrace,err:=m.LoadTracepoint("enter_trace")②...iferr:=m.AttachTracepoint("raw_syscalls:sys_enter",enterTrace);err!=nil③{returnfmt.Errorf("error attaching to tracepoint: %v",err)}
+src := strings.Replace(source, "$PARENT_PID", strconv.Itoa(pid), -1)           ![1](assets/1.png)
+m := bcc.NewModule(src, []string{})
+defer m.Close()
+
+...
+enterTrace, err := m.LoadTracepoint("enter_trace")                             ![2](assets/2.png)
+...
+if err := m.AttachTracepoint("raw_syscalls:sys_enter", enterTrace); err != nil ![3](assets/3.png)
+    {                                                                       
+    return fmt.Errorf("error attaching to tracepoint: %v", err)
+}
 ```
 
 ①
@@ -93,7 +103,7 @@ src:=strings.Replace(source,"$PARENT_PID",strconv.Itoa(pid),-1)①m:=bcc.NewModu
 内核模块驱动程序和基于 eBPF 的驱动程序都连接到系统调用。如果您检查 GitHub 上的[Falco eBPF 程序](https://oreil.ly/Q_cBD)，您会看到类似以下内容的行，它们将探针连接到原始系统调用入口和退出点（以及一些其他事件，例如页面错误）：
 
 ```cpp
-BPF_PROBE("raw_syscalls/",sys_enter,sys_enter_args) `BPF_PROBE``(``"raw_syscalls/"``,``sys_exit``,``sys_exit_args``)`
+BPF_PROBE("raw_syscalls/", sys_enter, sys_enter_args) `BPF_PROBE``(``"raw_syscalls/"``,` `sys_exit``,` `sys_exit_args``)`
 ```
 
 “由于 eBPF 程序可以动态加载并且可以检测由预先存在的进程触发的事件，因此像 Falco 这样的工具可以将策略应用于已经运行的应用工作负载。用户可以修改正在应用的规则集，而无需修改应用程序或其配置。这与 seccomp 配置文件形成对比，后者必须在启动应用程序时应用于应用程序进程。”
@@ -127,7 +137,7 @@ LSM 接口提供了一组钩子，每个钩子都在内核即将对内核数据�
 以下是一个附加到 LSM 钩子的 eBPF 程序的简单示例。此示例在处理`chmod`命令（“chmod”代表“更改模式”，主要用于更改文件的访问权限）时被调用：
 
 ```cpp
-SEC("lsm/path_chmod") `int``BPF_PROG``(``path_chmod``,``const``struct``path``*``path``,``umode_t``mode``)` ``{` ``bpf_printk``(``"Change mode of file name %s``\n``"``,``path``->``dentry``->``d_iname``);` ``return``0``;` ``}`````
+SEC("lsm/path_chmod") `int` `BPF_PROG``(``path_chmod``,` `const` `struct` `path` `*``path``,` `umode_t` `mode``)` ``{` ``bpf_printk``(``"Change mode of file name %s``\n``"``,` `path``->``dentry``->``d_iname``);` ``return` `0``;` ``}`````
 
 ```cpp
 

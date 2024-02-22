@@ -149,7 +149,25 @@ eBPF 字节码并不适合所有编译语言的目标。如果语言涉及运行
 第五章包括了对 BCC 的可移植性方法的讨论，即在运行时编译 eBPF 代码，以确保它与目标机器的内核数据结构兼容。在 BCC 中，你将内核端的 eBPF 程序代码定义为一个字符串（或者 BCC 读入字符串的文件内容）。这个字符串被传递给 Clang 进行编译，但在此之前，BCC 对字符串进行了一些预处理。这使得它可以为程序员提供便利的快捷方式，其中一些你在本书中已经看到了。例如，这里是*chapter2/hello_map.py*中示例代码的一些相关行。
 
 ```cpp
-#!/usr/bin/python3 ①frombccimportBPFprogram="""②BPF_RINGBUF_OUTPUT(output, 1); ③...int hello(void *ctx) { ... output.ringbuf_output(&data, sizeof(data), 0); ④ return 0;}"""b=BPF(text=program)⑤...b["output"].open_ring_buffer(print_event)![6](img/6.png)...
+#!/usr/bin/python3 ![1](assets/1.png)
+from bcc import BPF
+
+program = """                                     ![2](assets/2.png)
+BPF_RINGBUF_OUTPUT(output, 1); ![3](assets/3.png) 
+...
+int hello(void *ctx) {
+ ...
+ output.ringbuf_output(&data, sizeof(data), 0); ![4](assets/4.png)
+
+ return 0;
+}
+"""
+
+b = BPF(text=program)                             ![5](assets/5.png)
+...
+
+b["output"].open_ring_buffer(print_event)         ![6](assets/6.png)
+...
 ```
 
 ①
@@ -250,56 +268,80 @@ Go 语言已经被广泛应用于基础设施和云原生工具，因此在其�
 您可以将自动生成的 Go 代码中定义的对象与生成它的 C 代码相关联。以下是该 kprobe 示例的 C 代码中定义的对象：
 
 ```cpp
-structbpf_map_defSEC("maps")kprobe_map={ `...` ``};` ``SEC``(``"kprobe/sys_execve"``)` ``int``kprobe_execve``()``{` ``...` ``}``````cpp
+struct bpf_map_def SEC("maps") kprobe_map = { `...` ``};` ``SEC``(``"kprobe/sys_execve"``)` ``int` `kprobe_execve``()` `{` ``...` ``}``````cpp
 ```
 
 ```cppThe auto-generated Go code includes structures representing all the maps and programs (in this case, there is only one of each):
 
 ```
 
-typebpfMapsstruct{ `KprobeMap``*``ebpf``.``Map```cppebpf:"kprobe_map"`` ``}` ``type``bpfPrograms``struct``{` ``KprobeExecve``*``ebpf``.``Program```ebpf:"kprobe_execve"`` ``}```cpp``
-```
-
-```cppThe names “KprobeMap” and “KprobeExecve” are derived from the map and program names used in the C code. These objects are grouped into a `bpfObjects` structure representing everything that’s being loaded into the kernel:
+typebpfMapsstruct{ `KprobeMap``*``ebpf``.``Map```cpp``
+```ebpf:"kprobe_execve"`` ``}```cppThe names “KprobeMap” and “KprobeExecve” are derived from the map and program names used in the C code. These objects are grouped into a `bpfObjects` structure representing everything that’s being loaded into the kernel:
 
 ```
 
-typebpfObjectsstruct{ `bpfPrograms` ``bpfMaps` ``}```cpp
+```cpp
 ```
 
-```cppYou can then use these object definitions and related auto-generated functions in your user space Go code. To give you an idea of what this might involve, here’s an extract based on the main function from the same [kprobe example](https://oreil.ly/YXAjH) (omitting error handling for brevity):
+typebpfObjectsstruct{ `bpfPrograms` ``bpfMaps` ``}```cppYou can then use these object definitions and related auto-generated functions in your user space Go code. To give you an idea of what this might involve, here’s an extract based on the main function from the same [kprobe example](https://oreil.ly/YXAjH) (omitting error handling for brevity):
 
 ```
-
-objs:=bpfObjects{}loadBpfObjects(&objs,nil)①deferobjs.Close()kp,_:=link.Kprobe("sys_execve",objs.KprobeExecve,nil)②deferkp.Close()ticker:=time.NewTicker(1*time.Second)③deferticker.Stop()forrangeticker.C{varvalueuint64objs.KprobeMap.Lookup(mapKey,&value)④log.Printf("%s called %d times\n",fn,value)}
 
 ```cpp
 
-①
+[![1](assets/1.png)](#code_id_10_7)
 
 Load all the BPF objects that were embedded in bytecode form, into the `bpfObjects` I just showed you defined by the auto-generated code.
 
-②
+[![2](assets/2.png)](#code_id_10_8)
 
 Attach the program to the `sys_execve` kprobe.
 
-③
+[![3](assets/3.png)](#code_id_10_9)
 
 Set up a ticker so that the code can poll the map once per second.
 
-④
+[![4](assets/4.png)](#code_id_10_10)
 
 Read an item out of the map.
 
-There are several other examples in the *cilium/ebpf* directory that you can use for reference and inspiration.``````cpp```  ``## Libbpfgo
+There are several other examples in the *cilium/ebpf* directory that you can use for reference and inspiration.```
+
+objs:=bpfObjects{}loadBpfObjects(&objs,nil)①deferobjs.Close()kp,_:=link.Kprobe("sys_execve",objs.KprobeExecve,nil)②deferkp.Close()ticker:=time.NewTicker(1*time.Second)③deferticker.Stop()forrangeticker.C{varvalueuint64objs.KprobeMap.Lookup(mapKey,&value)④log.Printf("%s called %d times\n",fn,value)}
+
+```cpp``````## Libbpfgo
+
+The [*libbpfgo* project](https://oreil.ly/gvbXr) by Aqua Security implements a Go wrapper around *libbpf*’s C code, providing utilities for loading and attaching programs and using Go-native features like channels for receiving events. Because it’s built on *libbpf*, it supports CO-RE.
+
+Here’s an extract from the example from *libbpfgo*’s *README*, which gives a good high-level view of what to expect from this library:
+
+```  ``## Libbpfgo
 
 由 Aqua Security 实施的[*libbpfgo*项目](https://oreil.ly/gvbXr)在*libbpf*的 C 代码周围实现了一个 Go 包装器，提供了加载和附加程序的实用程序，并使用 Go 本地功能（如用于接收事件的通道）。因为它是建立在*libbpf*之上的，所以它支持 CO-RE。
 
 以下是*libbpfgo*的*README*中的示例摘录，它很好地概述了从该库中可以期望得到的高层视图：
 
 ```
-bpfModule:=bpf.NewModuleFromFile(bpfObjectPath)①bpfModule.BPFLoadObject()②mymap,_:=bpfModule.GetMap("mymap")③mymap.Update(key,value)rb,_:=bpfModule.InitRingBuffer("events",eventsChannel,buffSize)rb.Start()e:=<-eventsChannel④
-```cpp
+
+[![1](assets/1.png)](#code_id_10_11)
+
+Read eBPF bytecode from an object file.
+
+[![2](assets/2.png)](#code_id_10_12)
+
+Load that bytecode into the kernel.
+
+[![3](assets/3.png)](#code_id_10_13)
+
+Manipulate an entry in an eBPF map.
+
+[![4](assets/4.png)](#code_id_10_14)
+
+Go programmers will appreciate receiving data from a ring or perf buffer on a channel, which is a language feature designed to handle asynchronous events.
+
+This library was created for Aqua’s [Tracee](https://oreil.ly/A03zd) security project, and it’s also being used by other projects such as [Parca](https://oreil.ly/s8JP9) from Polar Signals, which provides eBPF-based CPU profiling. The only concern about this project’s approach is the CGo boundary between the *libbpf* C code and Go, which can cause performance and other issues.^([5](ch10.xhtml#ch10fn5))
+
+While Go has been the established language for lots of infrastructure coding for around a decade, there has more recently been a growing body of developers who prefer to use Rust.```cpp
 
 ①
 
@@ -361,8 +403,48 @@ Aya 项目非常强调开发者体验，并且让新手很容易上手。考虑�
 
 为了让您对 Rust 中的 eBPF 代码是什么样子有一个简要的了解，这里是 Aya 基本 XDP 示例的一部分，允许所有流量通过：
 
-```
-#[xdp(name="myapp")]①pubfnmyapp(ctx:XdpContext)->u32{matchunsafe{try_myapp(ctx)}{②Ok(ret)=>ret,Err(_)=>xdp_action::XDP_ABORTED,}}unsafefntry_myapp(ctx:XdpContext)->Result<u32,u32>{③info!(&ctx,"received a packet");Ok(xdp_action::XDP_PASS)}
+```# Rust
+
+Rust is increasingly being used for building infrastructure tools. It allows for the low-level access of C, but with the added benefit of memory safety. Indeed, Linus Torvalds [confirmed in 2022](https://oreil.ly/7fINA) that the Linux kernel itself will start to incorporate Rust code, and the recent [6.1 release has some initial Rust support](https://oreil.ly/HrXy2).
+
+As I discussed earlier in this chapter, Rust can be compiled to eBPF bytecode, meaning that (with the right library support) it’s possible to write both the user space and kernel code for eBPF utilities in Rust.
+
+There are a few options for Rust eBPF development: *libbpf-rs*, *Redbpf*, and Aya.
+
+## Libbpf-rs
+
+[*Libbpf-rs*](https://oreil.ly/qBagk) is part of the *libbpf* project, and provides a Rust wrapper around the *libbpf* C code so that you can write the user space parts of eBPF code in Rust. As you can see from the project’s [examples](https://oreil.ly/6wpf8), the eBPF programs themselves are written in C.
+
+###### Note
+
+There are further examples in Rust in the [*libbpf-bootstrap*](https://oreil.ly/ter6c) project, designed to help you get off the ground if you want to try building your own code using this crate.
+
+This crate is helpful for incorporating eBPF programs into a Rust-based project, but it doesn’t fulfill the desire that many people have to write the kernel-side code in Rust as well. Let’s look at some other projects that enable that.
+
+## Redbpf
+
+[*Redbpf*](https://oreil.ly/AtJod) is a set of Rust crates that interface with *libbpf*, developed as part of [foniod](https://oreil.ly/dwGNK), an eBPF-based security monitoring agent.
+
+*Redbpf* predates Rust’s ability to compile to eBPF bytecode, so it uses a [multistep compilation process](https://oreil.ly/DuHxE) that involves compiling from Rust to LLVM bitcode and then using the LLVM toolchain to generate eBPF bytecode in ELF format. *Redbpf* supports a range of program types including tracepoints, kprobes and uprobes, XDP, TC, and some socket events.
+
+As the Rust compiler rustc gained the ability to generate eBPF bytecode directly, this was leveraged by a project called Aya. At the time of this writing, Aya is considered “emerging” according to the [community site at ebpf.io](https://oreil.ly/WynV6), while *Redbpf* is listed as a major project, but my personal perspective is that momentum seems to be moving toward Aya.
+
+## Aya
+
+[Aya](https://aya-rs.dev/book) is built in Rust directly to the syscall level, so it doesn’t depend on *libbpf* (or indeed on BCC or the LLVM toolchain). But it does support the BTF format, the same relocations that *libbpf* does (as described in [Chapter 5](ch05.xhtml#co_recomma_btfcomma_and_libbpf)), so it’s providing the same CO-RE abilities to compile once and run on other kernels. At the time of this writing, it supports a wider range of eBPF program types than *Redbpf*, including tracing/perf-related events, XDP and TC, cgroups, and LSM attachments.
+
+As I mentioned, the Rust compiler also supports [compiling to eBPF bytecode](https://oreil.ly/a5q7M), so this language can be used for both kernel and user space eBPF programming.
+
+###### Note
+
+The ability to write both the kernel side and the user space side natively in Rust without the intermediate dependency on LLVM has attracted Rust programmers to this option. There’s an interesting [discussion on GitHub](https://oreil.ly/nls4l) about why the developers of the [lockc project](https://oreil.ly/_-L6z) (an eBPF-based project that enhances the security of container workloads using LSM hooks) decided to port their project from *libbpf-rs* to Aya.
+
+The project includes [aya-tool](https://oreil.ly/Kd0nf), a utility for generating Rust structure definitions that match kernel data structures so that you don’t have to write them yourself.
+
+The Aya project strongly emphasizes developer experience and makes it easy for newcomers to get started. With that in mind, the [“Aya book”](https://aya-rs.dev/book) is a very readable introduction with some good example code, annotated with helpful explanations.
+
+To give you a brief idea of what eBPF code looks like in Rust, here’s an extract from Aya’s basic XDP example that permits all traffic:
+
 ```cpp
 
 ①
@@ -382,7 +464,23 @@ Aya 项目非常强调开发者体验，并且让新手很容易上手。考虑�
 Aya 还为用户空间加载 eBPF 程序到内核并将其附加到事件的活动生成代码。以下是同一个基本示例的用户空间部分的一些关键行：
 
 ```
-letmutbpf=Bpf::load(include_bytes_aligned!("../../target/bpfel-unknown-none/release/myapp"))?;①letprogram:&mutXdp=bpf.program_mut("myapp").unwrap().try_into()?;②program.load()?;③program.attach(&opt.iface,XdpFlags::default())④
+
+[![1](assets/1.png)](#code_id_10_15)
+
+This line is what defines the section name, equivalent to `SEC("xdp/myapp")` in C.
+
+[![2](assets/2.png)](#code_id_10_16)
+
+The eBPF program called `myapp` calls the function `try_myapp` to process a network packet received at XDP.
+
+[![3](assets/3.png)](#code_id_10_17)
+
+The `try_myapp` function logs the fact that a packet was received and always returns the `XDP_PASS` value that tells the kernel to carry on processing the packet as usual.
+
+Just as we’ve seen in C-based examples throughout this book, the eBPF program gets compiled to an ELF object file. The difference is that Aya uses the Rust compiler instead of Clang to create that file.
+
+Aya also generates code for the user space activities of loading the eBPF program into the kernel and attaching it to an event. Here are a few key lines from the user space side of that same basic example:
+
 ```cpp
 
 ①
@@ -420,20 +518,49 @@ Aya 的维护者 Dave Tucker 和 Alessandro Decina 在[“eBPF 和 Cilium 办公
 您还可以通过一些内置的统计信息获取有关 eBPF 程序性能的信息。运行以下命令以启用它：
 
 ```
-$ sysctl -w kernel.bpf_stats_enabled=1
+
+[![1](assets/1.png)](#code_id_10_19)
+
+Read the eBPF bytecode from the ELF object file produced by the compiler.
+
+[![2](assets/2.png)](#code_id_10_20)
+
+Find the program called `myapp` in that bytecode.
+
+[![3](assets/3.png)](#code_id_10_21)
+
+Load it into the kernel.
+
+[![4](assets/4.png)](#code_id_10_22)
+
+Attach it to the XDP event on a specified network interface.
+
+If you’re a Rust programmer, I highly recommend you explore the [additional examples](https://oreil.ly/bp_Hq) in the “Aya book” in more detail. There’s also a nice [blog post from Kong](https://oreil.ly/mUVIk) that walks through writing an XDP load balancer using Aya.
+
+###### Note
+
+Aya maintainers Dave Tucker and Alessandro Decina joined me for [episode 25 of the “eBPF and Cilium Office Hours” livestream](https://oreil.ly/U7bRu) where they demonstrated and gave an introduction to eBPF programming with Aya.
+
+## Rust-bcc
+
+[Rust-bcc](https://oreil.ly/prP_K) provides Rust bindings that mimic the BCC project’s Python bindings, along with some Rust implementations of some of the BCC set of tracing [tools](https://oreil.ly/Dd2nO).
+
+# Testing BPF Programs
+
+There’s a `bpf()` command, [`BPF_PROG_RUN`](https://oreil.ly/Y2xPC), that allows for running an eBPF program from user space for test purposes.
+
+`BPF_PROG_RUN` (currently) works only with a subset of BPF program types that are mostly networking related.
+
+You can also get information about eBPF program performance with some built-in statistics information. Run the following command to enable it:
+
 ```cpp
 
 这将在`bpftool`的输出中显示有关程序的其他信息，如下所示：
 
 ```
-$ bpftool prog list 
-...
-2179: raw_tracepoint  name raw_tp_exec  tag 7f6d182e48b7ed38  gpl
-        run_time_ns 316876 run_cnt 4
-        loaded_at 2023-01-09T11:07:31+0000  uid 0
-        xlated 216B  jited 264B  memlock 4096B  map_ids 780,777
-        btf_id 953
-        pids hello(19173)
+
+This will show additional information in `bpftool`’s output about programs, like this:
+
 ```
 
 额外的统计信息以粗体显示，这里显示该程序已运行四次，总共耗时约 300 微秒。

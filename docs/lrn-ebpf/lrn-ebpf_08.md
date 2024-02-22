@@ -39,10 +39,10 @@ XDP 程序是由网络数据包到达时触发的。程序检查数据包，当�
 对于一些用例（如防火墙），XDP 程序只需决定是传递数据包还是丢弃数据包。决定是否丢弃数据包的 XDP 程序概述如下：
 
 ```cpp
-SEC("xdp")
-inthello(structxdp_md*ctx){
-booldrop; `drop``=``<``examine``packet``and``decide``whether``to``drop``it``>``;` ``if``(``drop``)`
-`return``XDP_DROP``;` ``else` ``return``XDP_PASS``;` ``}`````
+SEC("xdp")   
+int hello(struct xdp_md *ctx) {   
+    bool drop; `drop` `=` `<``examine` `packet` `and` `decide` `whether` `to` `drop` `it``>``;` ``if` `(``drop``)` 
+        `return` `XDP_DROP``;` ``else` ``return` `XDP_PASS``;` ``}`````
 
 ```cpp
 
@@ -53,7 +53,16 @@ booldrop; `drop``=``<``examine``packet``and``decide``whether``to``drop``it``>``;
 以下是`xdp_md`结构的定义：
 
 ```cpp
-struct`xdp_md`{`__u32`data;`__u32``data_end`;`__u32``data_meta`;/* Below access go through struct xdp_rxq_info */`__u32``ingress_ifindex`;/* rxq->dev->ifindex */`__u32``rx_queue_index`;/* rxq->queue_index  */`__u32``egress_ifindex`;/* txq->dev->ifindex */};
+struct `xdp_md` {
+    `__u32` data;
+    `__u32` `data_end`;
+    `__u32` `data_meta`;
+    /* Below access go through struct xdp_rxq_info */
+    `__u32` `ingress_ifindex`; /* rxq->dev->ifindex */
+    `__u32` `rx_queue_index`;  /* rxq->queue_index  */
+
+    `__u32` `egress_ifindex`;  /* txq->dev->ifindex */
+};
 ```
 
 不要被前三个字段的`__u32`类型所迷惑，因为它们实际上是指针。`data`字段指示数据包开始的内存位置，`data_end`显示数据包结束的位置。正如您在第六章中看到的，为了通过 eBPF 验证器，您必须明确检查对数据包内容的任何读取或写入是否在`data`到`data_end`范围内。
@@ -63,8 +72,8 @@ struct`xdp_md`{`__u32`data;`__u32``data_end`;`__u32``data_meta`;/* Below access 
 为了说明解析网络数据包的基础知识，示例代码中有一个名为`ping()`的 XDP 程序，它在检测到 ping（ICMP）数据包时会生成一行跟踪。以下是该程序的代码：
 
 ```cpp
-SEC("xdp") `int``ping``(``struct``xdp_md``*``ctx``)``{` ``long``protocol``=``lookup_protocol``(``ctx``);` ``if``(``protocol``==``1``)``// ICMP`
-`{` ``bpf_printk``(``"Hello ping"``);` ``}` ``return``XDP_PASS``;` ``}``````cpp`
+SEC("xdp") `int` `ping``(``struct` `xdp_md` `*``ctx``)` `{` ``long` `protocol` `=` `lookup_protocol``(``ctx``);` ``if` `(``protocol` `==` `1``)` `// ICMP`
+   `{` ``bpf_printk``(``"Hello ping"``);` ``}` ``return` `XDP_PASS``;` ``}``````cpp`
 ```
 
 ```cppYou can see this program in action by following these steps:
@@ -120,9 +129,9 @@ The loopback interface receives a ping request, and the XDP program drops it, so
 
 Most of the work in this XDP program is being done in a function called `lookup_protocol()` that determines the Layer 4 protocol type. It’s just an example, not a production-quality implementation of parsing a network packet! But it’s sufficient to give you an idea of how parsing in eBPF works.
 
-The network packet that has been received consists of a string of bytes that are laid out as shown in Figure 8-1.
+The network packet that has been received consists of a string of bytes that are laid out as shown in [Figure 8-1](#layout_of_an_ip_network_packetcomma_sta).
 
-![Layout of an IP network packet, starting with an Ethernet header, followed by an IP header, and then the Layer 4 data](img/lebp_0801.png)
+![Layout of an IP network packet, starting with an Ethernet header, followed by an IP header, and then the Layer 4 data](assets/lebp_0801.png)
 
 ###### Figure 8-1\. Layout of an IP network packet, starting with an Ethernet header, followed by an IP header, and then the Layer 4 data
 
@@ -144,31 +153,31 @@ structiphdr*iph=data+sizeof(structethhdr);⑤if(data+sizeof(structethhdr)+sizeof
 
 ```cpp
 
-①
+[![1](assets/1.png)](#code_id_8_1)
 
 The local variables `data` and `data_end` point to the start and end of the network packet.
 
-②
+[![2](assets/2.png)](#code_id_8_2)
 
 The network packet should start with an Ethernet header.
 
-③
+[![3](assets/3.png)](#code_id_8_3)
 
 But you can’t simply assume this network packet is big enough to hold that Ethernet header! The verifier requires that you check this explicitly.
 
-④
+[![4](assets/4.png)](#code_id_8_4)
 
 The Ethernet header contains a 2-byte field that tells us the Layer 3 protocol.
 
-⑤
+[![5](assets/5.png)](#code_id_8_5)
 
 If the protocol type indicates that it’s an IP packet, the IP header immediately follows the Ethernet header.
 
-![6](img/6.png)
+[![6](assets/6.png)](#code_id_8_6)
 
 You can’t just assume there’s enough room for that IP header in the network packet. Again the verifier requires that you check explicitly.
 
-![7](img/7.png)
+[![7](assets/7.png)](#code_id_8_7)
 
 The IP header contains the protocol byte the function will return to its caller.
 
@@ -190,8 +199,22 @@ XDP 程序不仅限于检查数据包的内容。它们还可以修改数据包�
 
 以下是示例负载均衡器代码中的 XDP 程序：
 
-```
-SEC("xdp_lb")intxdp_load_balancer(structxdp_md*ctx){void*data=(void*)(long)ctx->data;①void*data_end=(void*)(long)ctx->data_end;structethhdr*eth=data;if(data+sizeof(structethhdr)>data_end)returnXDP_ABORTED;if(bpf_ntohs(eth->h_proto)!=ETH_P_IP)returnXDP_PASS;structiphdr*iph=data+sizeof(structethhdr);if(data+sizeof(structethhdr)+sizeof(structiphdr)>data_end)returnXDP_ABORTED;if(iph->protocol!=IPPROTO_TCP)②returnXDP_PASS;if(iph->saddr==IP_ADDRESS(CLIENT))③{charbe=BACKEND_A;④if(bpf_get_prandom_u32()%2)be=BACKEND_B;iph->daddr=IP_ADDRESS(be);⑤eth->h_dest[5]=be;}else{iph->daddr=IP_ADDRESS(CLIENT);![6](img/6.png)eth->h_dest[5]=CLIENT;}iph->saddr=IP_ADDRESS(LB);![7](img/7.png)eth->h_source[5]=LB;iph->check=iph_csum(iph);![8](img/8.png)returnXDP_TX;}
+```# Load Balancing and Forwarding
+
+XDP programs aren’t limited to inspecting the contents of a packet. They can also modify the packet’s contents. Let’s consider what’s involved if you want to build a simple load balancer that takes packets sent to a given IP address and fans those requests to a number of backends that can fulfill the request.
+
+There’s an example of this in the GitHub repo.^([2](ch08.xhtml#ch08fn2)) The setup here is a set of containers that run on the same host. There’s a client, a load balancer, and two backends, each running in their own container. As illustrated in [Figure 8-2](#example_load_balancer_setup), the load balancer receives traffic from the client and forwards it to one of the two backend containers.
+
+![Example load balancer setup](assets/lebp_0802.png)
+
+###### Figure 8-2\. Example load balancer setup
+
+The load balancing function is implemented as an XDP program attached to the load balancer’s eth0 network interface. The return code from this program is `XDP_TX`, indicating that the packet should be sent back out of the interface it came in on. But before that happens, the program has to update the address information in the packet headers.
+
+Although I think it’s useful as a learning exercise, this example code is very, very far from being production ready; for example, it uses hard-coded addresses that assume the exact setup of IP addresses shown in [Figure 8-2](#example_load_balancer_setup). It assumes that the only TCP traffic it will ever receive is requests from the client or responses to the client. It also cheats by taking advantage of the way Docker sets up virtual MAC addresses, using each container’s IP address as the last four bytes of the MAC address for the virtual Ethernet interface for each container. That virtual Ethernet interface is called eth0 from the perspective of the container.
+
+Here’s the XDP program from the example load balancer code:
+
 ```cpp
 
 ①
@@ -233,11 +256,45 @@ IP 头部包括对其内容计算的校验和，由于源和目标 IP 地址都�
 与前面的例子类似，Makefile 包括了指令，不仅构建代码，还使用`bpftool`将 XDP 程序加载并附加到接口上，就像这样：
 
 ```
-xdp: $(BPF_OBJ)
-   bpftool net detach xdpgeneric dev eth0
-   rm -f /sys/fs/bpf/$(TARGET)
-   bpftool prog load $(BPF_OBJ) /sys/fs/bpf/$(TARGET)
-   bpftool net attach xdpgeneric pinned /sys/fs/bpf/$(TARGET) dev eth0
+
+[![1](assets/1.png)](#code_id_8_8)
+
+The first part of this function is practically the same as in the previous example: it locates the Ethernet header and then the IP header in the packet.
+
+[![2](assets/2.png)](#code_id_8_9)
+
+This time it will process only TCP packets, passing anything else it receives on up the stack as if nothing had happened.
+
+[![3](assets/3.png)](#code_id_8_10)
+
+Here the source IP address is checked. If this packet didn’t come from the client, I will assume it is a response going to the client.
+
+[![4](assets/4.png)](#code_id_8_11)
+
+This code generates a pseudorandom choice between backends A and B.
+
+[![5](assets/5.png)](#code_id_8_12)
+
+The destination IP and MAC addresses are updated to match whichever backend was chosen…
+
+[![6](assets/6.png)](#code_id_8_13)
+
+…or if this is a response from a backend (which is the assumption here if it didn’t come from a client), the destination IP and MAC addresses are updated to match the client.
+
+[![7](assets/7.png)](#code_id_8_14)
+
+Wherever this packet is going, the source addresses need to be updated so that it looks as though the packet originated from the load balancer.
+
+[![8](assets/8.png)](#code_id_8_15)
+
+The IP header includes a checksum calculated over its contents, and since the source and destination IP addresses have both been updated, the checksum also needs to be recalculated and replaced in this packet.
+
+###### Note
+
+Since this is a book on eBPF and not networking, I haven’t delved into details such as why the IP and MAC addresses need to be updated or what happens if they aren’t. If you’re interested, I cover this some more in my [YouTube video of the eBPF Summit talk](https://oreil.ly/mQxtT) where I originally wrote this example code.
+
+Much like the previous example, the Makefile includes instructions to not only build the code but also use `bpftool` to load and attach the XDP program to the interface, like this:
+
 ```cpp
 
 这个`make`指令需要在负载均衡器容器*内部*运行，以便 eth0 对应其虚拟以太网接口。这导致一个有趣的问题：一个 eBPF 程序被加载到内核中，只有一个；然而附着点可能在特定的网络命名空间内，并且只在该网络命名空间内可见。³
@@ -287,17 +344,64 @@ eBPF 程序被附加为分类器，但它们也可以在同一个程序中确定
 让我们看一些可以附加在 TC 中的简单程序的示例。第一个简单地生成一行跟踪，然后告诉内核丢弃数据包：
 
 ```
-inttc_drop(struct__sk_buff*skb){ `bpf_trace_printk``(``"[tc] dropping packet``\n``"``);` ``return``TC_ACT_SHOT``;` ``}```cpp
+
+This `make` instruction needs to be run *inside* the load balancer container so that eth0 corresponds to its virtual Ethernet interface. This leads to an interesting point: an eBPF program is loaded into the kernel, of which there is only one; yet the attachment point may be within a particular network namespace and visible only within that network namespace.^([3](ch08.xhtml#ch08fn3))
+
+# XDP Offloading
+
+The idea for XDP originated from a conversation speculating how useful it would be if you could run eBPF programs on a network card to make decisions about individual packets before they even reach the kernel’s networking stack.^([4](ch08.xhtml#ch08fn4)) There are some network interface cards that support this full *XDP offload* capability where they can indeed run eBPF programs on inbound packets on their own processor. This is illustrated in [Figure 8-3](#network_interface_cards_that_support_xd).
+
+![Network interface cards that support XDP offload can process, drop, and retransmit packets without any work required from the host CPU](assets/lebp_0803.png)
+
+###### Figure 8-3\. Network interface cards that support XDP offload can process, drop, and retransmit packets without any work required from the host CPU
+
+This means a packet that gets dropped or redirected back out of the same physical interface—like the packet drop and load balancing examples earlier in this chapter—is never seen by the host’s kernel, and no CPU cycles on the host machine are ever spent processing them, as all the work is done on the network card.
+
+Even if the physical network interface card doesn’t support full XDP offload, many NIC drivers support XDP hooks, which minimizes the memory copying required for an eBPF program to process a packet.^([5](ch08.xhtml#ch08fn5))
+
+This can result in significant performance benefits and allows functionality like load balancing to run very efficiently on commodity hardware.^([6](ch08.xhtml#ch08fn6))
+
+You’ve seen how XDP can be used to process inbound network packets, accessing them as soon as possible as they arrive on a machine. eBPF can also be used to process traffic at other points in the network stack, in whatever direction it is flowing. Let’s move on and think about eBPF programs attached within the TC subsystem.
+
+# Traffic Control (TC)
+
+I mentioned traffic control in the previous chapter. By the time a network packet reaches this point it will be in kernel memory in the form of an [`sk_buff`](https://oreil.ly/TKDCF). This is a data structure that’s used throughout the kernel’s network stack. eBPF programs attached within the TC subsystem receive a pointer to the `sk_buff` structure as the context parameter.
+
+###### Note
+
+You might be wondering why XDP programs don’t also use this same structure for their context. The answer is that the XDP hook happens before the network data reaches the network stack and before the `sk_buff` structure has been set up.
+
+The TC subsystem is intended to regulate how network traffic is scheduled. For example, you might want to limit the bandwidth available to each application so that they all get a fair chance. But when you’re looking at scheduling individual packets, *bandwidth* isn’t a terribly meaningful term, as it’s used for the average amount of data being sent or received. A given application might be very bursty, or another application might be very sensitive to network latency, so TC gives much finer control over the way packets are handled and prioritized.^([7](ch08.xhtml#ch08fn7))
+
+eBPF programs were introduced here to give custom control over the algorithms used within TC. But with the power to manipulate, drop, or redirect packets, eBPF programs attached within TC can also be used as the building blocks for complex network behaviors.
+
+A given piece of network data in the stack flows in one of two directions: *ingress* (inbound from the network interface) or *egress* (outbound toward the network interface). eBPF programs can be attached in either direction and will affect traffic only in that direction. Unlike XDP, it’s possible to attach multiple eBPF programs that will be processed in sequence.
+
+Traditional traffic control is split into *classifiers*, which classify packets based on some rule, and separate *actions*, which are taken based on the output from a classifier and determine what to do with a packet. There can be a series of classifiers, all defined as part of a *qdisc* or queuing discipline.
+
+eBPF programs are attached as a classifier, but they can also determine what action to take within the same program. The action is indicated by the program’s return code (whose values are defined in *linux/pkt_cls.h*):
+
+*   `TC_ACT_SHOT` tells the kernel to drop the packet.
+
+*   `TC_ACT_UNSPEC` behaves as if the eBPF program hadn’t been run on this packet (so it would be passed to the next classifier in the sequence, if there is one).
+
+*   `TC_ACT_OK` tells the kernel to pass the packet to the next layer in the stack.
+
+*   `TC_ACT_REDIRECT` sends the packet to the ingress or egress path of a different network device.
+
+Let’s take a look at a few simple examples of programs that can be attached within TC. The first simply generates a line of trace and then tells the kernel to drop the packet:
+
+```cpp
 
 ```
+```cpp 现在让我们考虑如何仅丢弃数据包的子集。此示例丢弃 ICMP（ping）请求数据包，与本章前面看到的 XDP 示例非常相似：
 
- ```cpp 现在让我们考虑如何仅丢弃数据包的子集。此示例丢弃 ICMP（ping）请求数据包，与本章前面看到的 XDP 示例非常相似：
+```Now let’s consider how to drop only a subset of packets. This example drops ICMP (ping) request packets and is very similar to the XDP example you saw earlier in this chapter:
 
-```
-inttc(struct__sk_buff*skb){ `void``*``data``=``(``void``*``)(``long``)``skb``->``data``;` ``void``*``data_end``=``(``void``*``)(``long``)``skb``->``data_end``;` ``if``(``is_icmp_ping_request``(``data``,``data_end``))``{` ``struct``iphdr``*``iph``=``data``+``sizeof``(``struct``ethhdr``);` ``struct``icmphdr``*``icmp``=``data``+``sizeof``(``struct``ethhdr``)``+``sizeof``(``struct``iphdr``);` ``bpf_trace_printk``(``"[tc] ICMP request for %x type %x``\n``"``,``iph``->``daddr``,` ``icmp``->``type``);` ``return``TC_ACT_SHOT``;` ``}` ``return``TC_ACT_OK``;` ``}```cpp```````cpp`
-```
+```cpp``````cpp`````
+```cpp
 
- ```cppThe `sk_buff` structure has pointers to the start and end of the packet data, very much like the `xdp_md` structure, and packet parsing proceeds in very much the same way. Again, to pass verification you have to explicitly check that any access to data is within the range between `data` and `data_end`.
+ ```The `sk_buff` structure has pointers to the start and end of the packet data, very much like the `xdp_md` structure, and packet parsing proceeds in very much the same way. Again, to pass verification you have to explicitly check that any access to data is within the range between `data` and `data_end`.
 
 You might be wondering why you would want to implement something like this at the TC layer when you have already seen the same kind of functionality implemented with XDP. One good reason is that you can use TC programs for egress traffic, where XDP can only process ingress traffic. Another is that because XDP is triggered as soon as the packet arrives, there is no `sk_buff` kernel data structure related to the packet at that point. If the eBPF program is interested in or wants to manipulate the `sk_buff` the kernel creates for this packet, the TC attachment point is suitable.
 
@@ -307,31 +411,50 @@ To better understand the differences between XDP and TC eBPF programs, read the 
 
 Now let’s consider an example that doesn’t just drop certain packets. This example identifies a ping request being received and responds with a ping response:
 
-```
-inttc_pingpong(struct__sk_buff*skb){void*data=(void*)(long)skb->data;void*data_end=(void*)(long)skb->data_end;if(!is_icmp_ping_request(data,data_end)){①returnTC_ACT_OK;}structiphdr*iph=data+sizeof(structethhdr);structicmphdr*icmp=data+sizeof(structethhdr)+sizeof(structiphdr);swap_mac_addresses(skb);②swap_ip_addresses(skb);// Change the type of the ICMP packet to 0 (ICMP Echo Reply) 
-// (was 8 for ICMP Echo request)
-update_icmp_type(skb,8,0);③// Redirecting a clone of the modified skb back to the interface 
-// it arrived on
-bpf_clone_redirect(skb,skb->ifindex,0);④returnTC_ACT_SHOT;⑤}
 ```cpp
+int tc_pingpong(struct __sk_buff *skb) {
+  void *data = (void *)(long)skb->data;
+  void *data_end = (void *)(long)skb->data_end;
 
-①
+  if (!is_icmp_ping_request(data, data_end)) {      ![1](assets/1.png)
+    return TC_ACT_OK;
+  }
+
+  struct iphdr *iph = data + sizeof(struct ethhdr);
+  struct icmphdr *icmp = data + sizeof(struct ethhdr) + sizeof(struct iphdr);
+
+  swap_mac_addresses(skb);                          ![2](assets/2.png)
+  swap_ip_addresses(skb);
+
+  // Change the type of the ICMP packet to 0 (ICMP Echo Reply) 
+  // (was 8 for ICMP Echo request)
+  update_icmp_type(skb, 8, 0);                      ![3](assets/3.png)
+
+  // Redirecting a clone of the modified skb back to the interface 
+  // it arrived on
+  bpf_clone_redirect(skb, skb->ifindex, 0);         ![4](assets/4.png)
+
+  return TC_ACT_SHOT;                               ![5](assets/5.png)
+}
+```
+
+[![1](assets/1.png)](#code_id_8_16)
 
 The `is_icmp_ping_request()` function parses the packet and checks not only that it’s an ICMP message, but also that it’s an echo (ping) request.
 
-②
+[![2](assets/2.png)](#code_id_8_17)
 
 Since this function is going to send a response to the sender, the source and destination addresses need to be swapped. (You can read the example code if you want to see the nitty-gritty details of this, which also includes updating the IP header checksum.)
 
-③
+[![3](assets/3.png)](#code_id_8_18)
 
 This is converted to an echo response by changing the type field in the ICMP header.
 
-④
+[![4](assets/4.png)](#code_id_8_19)
 
 This helper function sends a clone of the packet back through the interface (`skb->ifindex`) on which it was received.
 
-⑤
+[![5](assets/5.png)](#code_id_8_20)
 
 Since the helper function cloned the packet before sending out the response, the original packet should be dropped.
 
@@ -339,89 +462,107 @@ In normal circumstances, a ping request would be handled later by the kernel’s
 
 Lots of networking capabilities today are handled by user space services, but where they can be replaced by eBPF programs, it’s likely to be great for performance. A packet that’s processed within the kernel doesn’t have to complete its journey through the rest of the stack; there is no need for it to transition to user space for processing, and the response doesn’t require a transition back into the kernel. What’s more, the two could run in parallel—an eBPF program can return `TC_ACT_OK` for any packet that requires complex processing that it can’t handle so that it gets passed up to the user space service as normal.
 
-For me, this is an important aspect of implementing network functionality in eBPF. As the eBPF platform develops (e.g., more recent kernels allowing programs of one million instructions), it’s possible to implement increasingly complex aspects of networking in the kernel. The parts that are not yet implemented in eBPF can still be handled either by the traditional stack within the kernel or in user space. Over time, more and more features can be moved from user space into the kernel, with the flexibility and dynamic nature of eBPF meaning you won’t have to wait for them to be part of the kernel distribution itself. You can load eBPF implementations immediately, just as I discussed in [Chapter 1](ch01.html#what_is_ebpf_and_why_is_it_importantque).
+For me, this is an important aspect of implementing network functionality in eBPF. As the eBPF platform develops (e.g., more recent kernels allowing programs of one million instructions), it’s possible to implement increasingly complex aspects of networking in the kernel. The parts that are not yet implemented in eBPF can still be handled either by the traditional stack within the kernel or in user space. Over time, more and more features can be moved from user space into the kernel, with the flexibility and dynamic nature of eBPF meaning you won’t have to wait for them to be part of the kernel distribution itself. You can load eBPF implementations immediately, just as I discussed in [Chapter 1](ch01.xhtml#what_is_ebpf_and_why_is_it_importantque).
 
-I’ll return to the implementation of networking features in “eBPF and Kubernetes Networking”. But first, let’s consider another use case that eBPF enables: inspecting the decrypted contents of encrypted traffic.``````cpp  ``# 数据包加密和解密
+I’ll return to the implementation of networking features in [“eBPF and Kubernetes Networking”](#ebpf_and_kubernetes_networking). But first, let’s consider another use case that eBPF enables: inspecting the decrypted contents of encrypted traffic.```cpp```  ```# Packet Encryption and Decryption
 
-如果应用程序使用加密来保护其发送或接收的数据，则在加密之前或解密之后将存在数据处于明文状态。回想一下，eBPF 可以几乎在机器的任何地方附加程序，因此如果您可以钩入数据传递并且尚未加密的点，或者刚刚解密后，那么您的 eBPF 程序就可以观察到明文数据。无需提供任何证书来解密流量，就像传统的 SSL 检查工具中需要的那样。
+If an application uses encryption to secure data it sends or receives, there will be a point before it’s encrypted or after it’s decrypted where the data is in the clear. Recall that eBPF can attach programs pretty much anywhere on a machine, so if you can hook into a point where data is being passed and isn’t yet encrypted, or just after it has been decrypted, that would allow your eBPF program to observe that data in the clear. There’s no need to supply any certificates to decrypt the traffic, as you would in a traditional SSL inspection tool.
 
-在许多情况下，应用程序将使用像 OpenSSL 或 BoringSSL 这样的库对数据进行加密，这些库位于用户空间。在这种情况下，流量在到达套接字之前已经被加密，而套接字是网络流量的用户空间/内核边界。如果您想以未加密形式跟踪这些数据，可以使用附加到用户空间代码中正确位置的 eBPF 程序。
+In many cases an application will encrypt data using a library like OpenSSL or BoringSSL that lives in user space. In this case the traffic will already be encrypted by the time it reaches the socket, which is the user space/kernel boundary for network traffic. If you want to trace out this data in its unencrypted form, you can use an eBPF program attached to the right place in the user space code.
 
-## 用户空间 SSL 库
+## User Space SSL Libraries
 
-跟踪加密数据包的解密内容的一种常见方法是钩入对用户空间库（如 OpenSSL 或 BoringSSL）的调用。使用 OpenSSL 的应用程序通过调用名为 `SSL_write()` 的函数发送要加密的数据，并使用 `SSL_read()` 从以加密形式接收的网络中检索明文数据。使用 uprobes 将 eBPF 程序钩入这些函数，允许应用程序观察*使用此共享库的任何应用程序*中的明文数据，在其加密之前或解密之后。而且无需任何密钥，因为这些已经由应用程序提供。
+One common way to trace out the decrypted content of encrypted packets is to hook into calls made to user space libraries like OpenSSL or BoringSSL. An application using OpenSSL sends data to be encrypted by making a call to a function called `SSL_write()` and retrieves cleartext data that was received over the network in encrypted form using `SSL_read()`. Hooking eBPF programs into these functions with uprobes allows an application to observe the data *from any application that uses this shared library* in the clear, before it is encrypted or after it has been decrypted. And there is no need for any keys, because those are already being provided by the application.
 
-Pixie 项目中有一个相当简单的示例称为 [Pixie 项目中的 openssl-tracer](https://oreil.ly/puDp9)，其中 eBPF 程序位于名为 *openssl_tracer_bpf_funcs.c* 的文件中。以下是该代码的一部分，它使用性能缓冲区将数据发送到用户空间（类似于本书中之前看到的示例）：
+There is a fairly straightforward example called [openssl-tracer in the Pixie project](https://oreil.ly/puDp9),^([8](ch08.xhtml#ch08fn8)) within which the eBPF programs are in a file called *openssl_tracer_bpf_funcs.c*. Here’s the part of that code that sends data to user space, using a perf buffer (similar to examples you have seen earlier in this book):
 
-```
-staticintprocess_SSL_data(structpt_regs*ctx,uint64_tid,enum
-ssl_data_event_typetype,constchar*buf){ `...` ``bpf_probe_read``(``event``->``data``,``event``->``data_len``,``buf``);` ``tls_events``.``perf_submit``(``ctx``,``event``,``sizeof``(``struct``ssl_data_event_t``));` ``return``0``;` ``}```cpp``
-
-```
-
- ```cpp 您可以看到使用辅助函数 `bpf_probe_read()` 将 `buf` 中的数据读入 `event` 结构，然后将该 `event` 结构提交到性能缓冲区。
-
-如果此数据被发送到用户空间，可以合理地假设这必须是未加密格式的数据。那么这个数据缓冲区是在哪里获取的？您可以通过查看 `process_SSL_data()` 函数的调用位置来解决这个问题。它在两个位置被调用：一个用于读取数据，一个用于写入数据。图 8-4 说明了在加密形式到达此机器的数据被读取时发生了什么。
-
-当您读取数据时，您向 `SSL_read()` 提供一个指向缓冲区的指针，当函数返回时，该缓冲区将包含未加密的数据。与 kprobes 类似，函数的输入参数（包括缓冲区指针）仅在附加到入口点的 uprobe 中可用，因为它们所在的寄存器在函数执行期间可能会被覆盖。但是在函数退出时，数据将不会在缓冲区中可用，此时您可以使用 uretprobe 读取它。
-
-![eBPF 程序在 SSL_read() 的入口和出口处被钩入 uprobes，以便从缓冲区指针中读取未加密数据](img/lebp_0804.png)
-
-###### 图 8-4：eBPF 程序在`SSL_read()`的入口和出口处挂钩，以便从缓冲指针中读取未加密数据
-
-因此，这个例子遵循了 kprobes 和 uprobes 的常见模式，如图 8-4 所示，入口探针临时使用映射存储输入参数，退出探针可以从中检索这些参数。让我们看看执行此操作的代码，从附加到`SSL_read()`开头的 eBPF 程序开始：
-
-```
-// Function signature being probed: // int SSL_read(SSL *s, void *buf, int num) intprobe_entry_SSL_read(structpt_regs*ctx){uint64_tcurrent_pid_tgid=bpf_get_current_pid_tgid();...constchar*buf=(constchar*)PT_REGS_PARM2(ctx);①active_ssl_read_args_map.update(&current_pid_tgid,&buf);②return0;}
+```cpp
+static int process_SSL_data(struct pt_regs* ctx, uint64_t id, enum  
+ssl_data_event_type type, const char* buf) { `...` ``bpf_probe_read``(``event``->``data``,` `event``->``data_len``,` `buf``);` ``tls_events``.``perf_submit``(``ctx``,` `event``,` `sizeof``(``struct` `ssl_data_event_t``));` ``return` `0``;` ``}`````
 ```cpp
 
-①
+ ```You can see that data from `buf` gets read into an `event` structure using the helper function `bpf_probe_read()`, and then that `event` structure is submitted to a perf buffer.
 
-如此函数的注释所述，缓冲指针是传递给`SSL_read()`函数的第二个参数，该探针将附加到该函数。`PT_REGS_PARM2`宏从上下文中获取此参数。
+If this data is being sent to user space, it’s reasonable to assume this must be the data in unencrypted format. So where is this buffer of data obtained? You can work that out by seeing where the `process_SSL_data()` function is called. It’s called in two places: one for data being read and one for data being written. [Figure 8-4](#ebpf_programs_are_hooked_to_uprobes_at_) illustrates what is happening in the case of reading data that arrives on this machine in encrypted form.
 
-②
+When you’re reading data, you supply a pointer to a buffer to `SSL_read()`, and when the function returns, that buffer will contain the unencrypted data. Much like kprobes, the input parameters to a function—including that buffer pointer—are only available to a uprobe attached to the entry point, as the registers they’re held in might well get overwritten during the function’s execution. But the data won’t be available in the buffer until the function exits, when you can read it using a uretprobe.
 
-缓冲指针存储在哈希映射中，其键是在函数开始时使用辅助函数`bpf_get_current_pid_tgid()`获取的当前进程和线程 ID。
+![eBPF programs are hooked to uprobes at the entry to and exit from SSL_read() so that the unencrypted data can be read from the buffer pointer](assets/lebp_0804.png)
 
-这是退出探针的相应程序：
+###### Figure 8-4\. eBPF programs are hooked to uprobes at the entry to and exit from `SSL_read()` so that the unencrypted data can be read from the buffer pointer
 
-```
-intprobe_ret_SSL_read(structpt_regs*ctx){uint64_tcurrent_pid_tgid=bpf_get_current_pid_tgid();...constchar**buf=active_ssl_read_args_map.lookup(&current_pid_tgid);①if(buf!=NULL){process_SSL_data(ctx,current_pid_tgid,kSSLRead,*buf);②}active_ssl_read_args_map.delete(&current_pid_tgid);③return0;}
+So this example follows a common pattern for kprobes and uprobes, illustrated in [Figure 8-4](#ebpf_programs_are_hooked_to_uprobes_at_), where the entry probe temporarily stores input parameters using a map, from which the exit probe can retrieve them. Let’s look at the code that does this, starting with the eBPF program attached to the start of `SSL_read()`:
+
 ```cpp
+// Function signature being probed: // int SSL_read(SSL *s, void *buf, int num) int probe_entry_SSL_read(struct pt_regs* ctx) {
+  uint64_t current_pid_tgid = bpf_get_current_pid_tgid(); 
+  ...
 
-①
+  const char* buf = (const char*)PT_REGS_PARM2(ctx);         ![1](assets/1.png)
 
-查找当前进程和线程 ID，将其用作键从哈希映射中检索缓冲指针。
+  active_ssl_read_args_map.update(&current_pid_tgid, &buf);  ![2](assets/2.png)
+  return 0;
+}
+```
 
-②
+[![1](assets/1.png)](#code_id_8_21)
 
-如果这不是空指针，则调用`process_SSL_data()`，这是您之前看到的将数据从该缓冲区发送到用户空间的函数，使用 perf 缓冲区。
+As described in the comment for this function, the buffer pointer is the second parameter passed into the `SSL_read()` function to which this probe will be attached. The `PT_REGS_PARM2` macro gets this parameter from the context.
 
-③
+[![2](assets/2.png)](#code_id_8_22)
 
-清理哈希映射中的条目，因为每个条目调用都应该与一个退出配对。
+The buffer pointer is stored in a hash map, for which the key is the current process and thread ID, obtained at the start of the function using the helper `bpf_get_current_pid_tgif()`.
 
-这个例子展示了如何跟踪用户空间应用程序发送和接收的加密数据的明文版本。跟踪本身附加到用户空间库，不能保证每个应用程序都会使用给定的 SSL 库。BCC 项目包括一个名为[*sslsniff*](https://oreil.ly/tFT9p)的实用程序，还支持 GnuTLS 和 NSS。但是，如果某人的应用程序使用其他加密库（甚至，天哪，他们选择“自己编写加密”），uprobes 就无法找到正确的挂钩位置，这些跟踪工具就无法工作。
+Here’s the corresponding program for the exit probe:
 
-甚至有更常见的原因可能导致这种基于 uprobes 的方法不成功。与内核不同（每台[虚拟]机器只有一个内核），用户空间库代码可以有多个副本。如果您使用容器，每个容器可能都有自己的所有库依赖项。您可以在这些库中挂钩 uprobes，但您必须识别要跟踪的特定容器的正确副本。另一种可能性是，应用程序可能不是使用共享的动态链接库，而是静态链接，因此它是一个单独的可执行文件。```  ``# eBPF and Kubernetes Networking
+```cpp
+int probe_ret_SSL_read(struct pt_regs* ctx) {
+  uint64_t current_pid_tgid = bpf_get_current_pid_tgid();
+
+  ...
+  const char** buf = active_ssl_read_args_map.lookup(&current_pid_tgid);   ![1](assets/1.png)
+  if (buf != NULL) {
+    process_SSL_data(ctx, current_pid_tgid, kSSLRead, *buf);               ![2](assets/2.png)
+  }
+
+  active_ssl_read_args_map.delete(&current_pid_tgid);                      ![3](assets/3.png)
+  return 0;
+}
+```
+
+[![1](assets/1.png)](#code_id_8_23)
+
+Having looked up the current process and thread ID, use this as the key to retrieve the buffer pointer from the hash map.
+
+[![2](assets/2.png)](#code_id_8_24)
+
+If this isn’t a null pointer, call `process_SSL_data()`, which is the function you saw earlier that sends the data from that buffer to user space using the perf buffer.
+
+[![3](assets/3.png)](#code_id_8_25)
+
+Clean up the entry in the hash map, since every entry call should be paired with an exit.
+
+This example shows how to trace out the cleartext version of encrypted data that gets sent and received by a user space application. The tracing itself is attached to a user space library, and there’s no guarantee that every application will use a given SSL library. The BCC project includes a utility called [*sslsniff*](https://oreil.ly/tFT9p) that also supports GnuTLS and NSS. But if someone’s application uses some other encryption library (or even, heaven forbid, they chose to “roll their own crypto”), the uprobes simply won’t have the right places to hook to and these tracing tools won’t work.
+
+There are even more common reasons why this uprobe-based approach might not be successful. Unlike the kernel (of which there is only one per [virtual] machine), there can be multiple copies of user space library code. If you’re using containers, each one is likely to have its own set of all library dependencies. You can hook into uprobes in these libraries, but you’d have to identify the right copy for the particular container you want to trace. Another possibility is that rather than using a shared, dynamically linked library, an application might be statically linked so that it’s a single standalone executable.```cpp  ```# eBPF and Kubernetes Networking
 
 Although this book isn’t about Kubernetes, eBPF is so widely used for Kubernetes networking that it’s a great illustration of using the platform to customize the networking stack.
 
 In Kubernetes environments, applications are deployed in *pods*. Each pod is a group of one or more containers that share kernel namespaces and cgroups, isolating pods from each other and from the host machine they are running on.
 
-In particular (for the purposes of this chapter), a pod typically has its own network namespace and its own IP address.⁹ This means the kernel has a set of network stack structures for that namespace, separated from the host’s and from other pods. As shown in Figure 8-5, the pod is connected to the host by a virtual Ethernet connection, and it is allocated its own IP address.
+In particular (for the purposes of this chapter), a pod typically has its own network namespace and its own IP address.^([9](ch08.xhtml#ch08fn9)) This means the kernel has a set of network stack structures for that namespace, separated from the host’s and from other pods. As shown in [Figure 8-5](#network_path_in_kubernetes), the pod is connected to the host by a virtual Ethernet connection, and it is allocated its own IP address.
 
-![Network path in Kubernetes](img/lebp_0805.png)
+![Network path in Kubernetes](assets/lebp_0805.png)
 
 ###### Figure 8-5\. Network path in Kubernetes
 
-You can see from Figure 8-5 that a packet coming from outside the machine destined for an application pod has to travel through the network stack on the host, across the virtual Ethernet connection, and into the pod’s network namespace, and then it has to traverse the network stack again to reach the application.
+You can see from [Figure 8-5](#network_path_in_kubernetes) that a packet coming from outside the machine destined for an application pod has to travel through the network stack on the host, across the virtual Ethernet connection, and into the pod’s network namespace, and then it has to traverse the network stack again to reach the application.
 
 Those two network stacks are running in the same kernel, so the packet is really running through the same processing twice. The more code a network packet has to pass through, the higher the latency, so if it’s possible to shorten the network path, that will likely bring about performance improvements.
 
-An eBPF-based networking solution like Cilium can hook into the network stack to override the kernel’s native networking behavior, as shown in Figure 8-6.
+An eBPF-based networking solution like Cilium can hook into the network stack to override the kernel’s native networking behavior, as shown in [Figure 8-6](#bypassing_iptables_and_conntrack_proces).
 
-![Bypassing iptables and conntrack processing with eBPF](img/lebp_0806.png)
+![Bypassing iptables and conntrack processing with eBPF](assets/lebp_0806.png)
 
 ###### Figure 8-6\. Bypassing iptables and conntrack processing with eBPF
 
@@ -443,9 +584,9 @@ You can read about the benchmarked performance improvements this achieves on the
 
 ## Coordinated Network Programs
 
-A complex networking implementation like Cilium can’t be written as a single eBPF program. As shown in Figure 8-7, it provides several different eBPF programs that are hooked into different parts of the kernel and its network stack.
+A complex networking implementation like Cilium can’t be written as a single eBPF program. As shown in [Figure 8-7](#cilium_consists_of_multiple_coordinated), it provides several different eBPF programs that are hooked into different parts of the kernel and its network stack.
 
-![Cilium consists of multiple coordinated eBPF programs that hook into different points in the kernel](img/lebp_0807.png)
+![Cilium consists of multiple coordinated eBPF programs that hook into different points in the kernel](assets/lebp_0807.png)
 
 ###### Figure 8-7\. Cilium consists of multiple coordinated eBPF programs that hook into different points in the kernel
 
@@ -455,7 +596,7 @@ Cilium supports different networking modes that suit different environments. A f
 
 There is a simple, flat networking mode, in which Cilium allocates IP addresses for all the pods in a cluster from the same CIDR and directly routes traffic between them. There are also a couple of different tunneling modes, in which traffic intended for a pod on a different node gets encapsulated in a message addressed to that destination node’s IP address and decapsulated on that destination node for the final hop into the pod. Different eBPF programs get invoked to handle traffic depending on whether a packet is destined for a local container, the local host, another host on this network, or a tunnel.
 
-In Figure 8-7 you can see multiple TC programs that handle traffic to and from different devices. These devices represent the possible different real and virtual network interfaces where a packet might be flowing:
+In [Figure 8-7](#cilium_consists_of_multiple_coordinated) you can see multiple TC programs that handle traffic to and from different devices. These devices represent the possible different real and virtual network interfaces where a packet might be flowing:
 
 *   The interface to a pod’s network (one end of the virtual Ethernet connection between the pod and the host)
 
@@ -505,9 +646,9 @@ The secure tunnel is set up using the identities of the nodes at either end. The
 
 Some organizations operate a multitenant environment where there’s a need for strong multitenant boundaries and where it’s essential to use certificates to identify every application endpoint. Handling this within every application is a significant burden, so it’s something that more recently has been offloaded to a service mesh layer, but this requires a whole extra set of components to be deployed, causing additional resource consumption, latency, and operational complexity.
 
-eBPF is now enabling a new approach](https://oreil.ly/DSnLZ) that builds on transparent encryption but uses TLS for the initial certificate exchange and endpoint authentication so that the identities can represent individual applications rather than the nodes they are running on, as depicted in [Figure 8-8.
+eBPF is now enabling a [new approach](https://oreil.ly/DSnLZ) that builds on transparent encryption but uses TLS for the initial certificate exchange and endpoint authentication so that the identities can represent individual applications rather than the nodes they are running on, as depicted in [Figure 8-8](#transparent_encryption_between_authenti).
 
-![Transparent encryption between authenticated application identities](img/lebp_0808.png)
+![Transparent encryption between authenticated application identities](assets/lebp_0808.png)
 
 ###### Figure 8-8\. Transparent encryption between authenticated application identities
 
@@ -533,20 +674,74 @@ Here are some ways to learn more about the range of networking use cases for eBP
 
 5.  Use the editor at [*networkpolicy.io*](https://networkpolicy.io) to visualize the effect of network policies in a Kubernetes deployment.
 
-¹ At the time of this writing, around 100 organizations have publicly announced their use of Cilium in its [*USERS.md* file](https://oreil.ly/PC7-G), though this number is growing quickly. Cilium has also been adopted by AWS, Google, and Microsoft.
+^([1](ch08.xhtml#ch08fn1-marker)) At the time of this writing, around 100 organizations have publicly announced their use of Cilium in its [*USERS.md* file](https://oreil.ly/PC7-G), though this number is growing quickly. Cilium has also been adopted by AWS, Google, and Microsoft.
 
-² This example is based on a talk I gave at eBPF Summit 2021 called [“A Load Balancer from scratch”](https://oreil.ly/mQxtT). Build an eBPF load balancer in just over 15 minutes!
+^([2](ch08.xhtml#ch08fn2-marker)) This example is based on a talk I gave at eBPF Summit 2021 called [“A Load Balancer from scratch”](https://oreil.ly/mQxtT). Build an eBPF load balancer in just over 15 minutes!
 
-³ If you want to explore this, try [CTF Challenge 3 from eBPF Summit 2022](https://oreil.ly/YIh_t). I won’t give spoilers here in the book, but you can see the solution in [a walkthrough given by Duffie Cooley and me here](https://oreil.ly/_51rC).
+^([3](ch08.xhtml#ch08fn3-marker)) If you want to explore this, try [CTF Challenge 3 from eBPF Summit 2022](https://oreil.ly/YIh_t). I won’t give spoilers here in the book, but you can see the solution in [a walkthrough given by Duffie Cooley and me here](https://oreil.ly/_51rC).
 
-⁴ See Daniel Borkmann’s presentation [“Little Helper Minions for Scaling Microservices”](https://oreil.ly/_8ZuF) that includes a history of eBPF, where he tells this anecdote.
+^([4](ch08.xhtml#ch08fn4-marker)) See Daniel Borkmann’s presentation [“Little Helper Minions for Scaling Microservices”](https://oreil.ly/_8ZuF) that includes a history of eBPF, where he tells this anecdote.
 
-⁵ Cilium maintains a [list of drivers that support XDP](https://oreil.ly/wCMjB) within the [BPF and XDP Reference Guide](https://oreil.ly/eB7vL).
+^([5](ch08.xhtml#ch08fn5-marker)) Cilium maintains a [list of drivers that support XDP](https://oreil.ly/wCMjB) within the [BPF and XDP Reference Guide](https://oreil.ly/eB7vL).
 
-⁶ Ceznam shared data about the performance boost its team saw when experimenting with an eBPF-based load balancer in [this blog post](https://oreil.ly/0cbCx).
+^([6](ch08.xhtml#ch08fn6-marker)) Ceznam shared data about the performance boost its team saw when experimenting with an eBPF-based load balancer in [this blog post](https://oreil.ly/0cbCx).
 
-⁷ For a more complete overview of TC and its concepts, I recommend Quentin Monnet’s post [“Understanding tc “direct action” mode for BPF”](https://oreil.ly/7gU2A).
+^([7](ch08.xhtml#ch08fn7-marker)) For a more complete overview of TC and its concepts, I recommend Quentin Monnet’s post [“Understanding tc “direct action” mode for BPF”](https://oreil.ly/7gU2A).
 
-⁸ There is also a blog post that accompanies this example at [*https://blog.px.dev/ebpf-openssl-tracing*](https://blog.px.dev/ebpf-openssl-tracing).
+^([8](ch08.xhtml#ch08fn8-marker)) There is also a blog post that accompanies this example at [*https://blog.px.dev/ebpf-openssl-tracing*](https://blog.px.dev/ebpf-openssl-tracing).
 
-⁹ It’s possible for pods to be run in the host’s network namespace so that they share the IP address of the host, but this isn’t usually done unless there’s a good reason for an application running in the pod to require it.``````
+^([9](ch08.xhtml#ch08fn9-marker)) It’s possible for pods to be run in the host’s network namespace so that they share the IP address of the host, but this isn’t usually done unless there’s a good reason for an application running in the pod to require it.```cpp``````cpp  ``# 数据包加密和解密
+
+如果应用程序使用加密来保护其发送或接收的数据，则在加密之前或解密之后将存在数据处于明文状态。回想一下，eBPF 可以几乎在机器的任何地方附加程序，因此如果您可以钩入数据传递并且尚未加密的点，或者刚刚解密后，那么您的 eBPF 程序就可以观察到明文数据。无需提供任何证书来解密流量，就像传统的 SSL 检查工具中需要的那样。
+
+在许多情况下，应用程序将使用像 OpenSSL 或 BoringSSL 这样的库对数据进行加密，这些库位于用户空间。在这种情况下，流量在到达套接字之前已经被加密，而套接字是网络流量的用户空间/内核边界。如果您想以未加密形式跟踪这些数据，可以使用附加到用户空间代码中正确位置的 eBPF 程序。
+
+## 用户空间 SSL 库
+
+跟踪加密数据包的解密内容的一种常见方法是钩入对用户空间库（如 OpenSSL 或 BoringSSL）的调用。使用 OpenSSL 的应用程序通过调用名为 `SSL_write()` 的函数发送要加密的数据，并使用 `SSL_read()` 从以加密形式接收的网络中检索明文数据。使用 uprobes 将 eBPF 程序钩入这些函数，允许应用程序观察*使用此共享库的任何应用程序*中的明文数据，在其加密之前或解密之后。而且无需任何密钥，因为这些已经由应用程序提供。
+
+Pixie 项目中有一个相当简单的示例称为 [Pixie 项目中的 openssl-tracer](https://oreil.ly/puDp9)，其中 eBPF 程序位于名为 *openssl_tracer_bpf_funcs.c* 的文件中。以下是该代码的一部分，它使用性能缓冲区将数据发送到用户空间（类似于本书中之前看到的示例）：
+
+[PRE19]cpp``
+
+[PRE20]cpp 您可以看到使用辅助函数 `bpf_probe_read()` 将 `buf` 中的数据读入 `event` 结构，然后将该 `event` 结构提交到性能缓冲区。
+
+如果此数据被发送到用户空间，可以合理地假设这必须是未加密格式的数据。那么这个数据缓冲区是在哪里获取的？您可以通过查看 `process_SSL_data()` 函数的调用位置来解决这个问题。它在两个位置被调用：一个用于读取数据，一个用于写入数据。图 8-4 说明了在加密形式到达此机器的数据被读取时发生了什么。
+
+当您读取数据时，您向 `SSL_read()` 提供一个指向缓冲区的指针，当函数返回时，该缓冲区将包含未加密的数据。与 kprobes 类似，函数的输入参数（包括缓冲区指针）仅在附加到入口点的 uprobe 中可用，因为它们所在的寄存器在函数执行期间可能会被覆盖。但是在函数退出时，数据将不会在缓冲区中可用，此时您可以使用 uretprobe 读取它。
+
+![eBPF 程序在 SSL_read() 的入口和出口处被钩入 uprobes，以便从缓冲区指针中读取未加密数据](img/lebp_0804.png)
+
+###### 图 8-4：eBPF 程序在`SSL_read()`的入口和出口处挂钩，以便从缓冲指针中读取未加密数据
+
+因此，这个例子遵循了 kprobes 和 uprobes 的常见模式，如图 8-4 所示，入口探针临时使用映射存储输入参数，退出探针可以从中检索这些参数。让我们看看执行此操作的代码，从附加到`SSL_read()`开头的 eBPF 程序开始：
+
+[PRE21]cpp
+
+①
+
+如此函数的注释所述，缓冲指针是传递给`SSL_read()`函数的第二个参数，该探针将附加到该函数。`PT_REGS_PARM2`宏从上下文中获取此参数。
+
+②
+
+缓冲指针存储在哈希映射中，其键是在函数开始时使用辅助函数`bpf_get_current_pid_tgid()`获取的当前进程和线程 ID。
+
+这是退出探针的相应程序：
+
+[PRE22]cpp
+
+①
+
+查找当前进程和线程 ID，将其用作键从哈希映射中检索缓冲指针。
+
+②
+
+如果这不是空指针，则调用`process_SSL_data()`，这是您之前看到的将数据从该缓冲区发送到用户空间的函数，使用 perf 缓冲区。
+
+③
+
+清理哈希映射中的条目，因为每个条目调用都应该与一个退出配对。
+
+这个例子展示了如何跟踪用户空间应用程序发送和接收的加密数据的明文版本。跟踪本身附加到用户空间库，不能保证每个应用程序都会使用给定的 SSL 库。BCC 项目包括一个名为[*sslsniff*](https://oreil.ly/tFT9p)的实用程序，还支持 GnuTLS 和 NSS。但是，如果某人的应用程序使用其他加密库（甚至，天哪，他们选择“自己编写加密”），uprobes 就无法找到正确的挂钩位置，这些跟踪工具就无法工作。
+
+甚至有更常见的原因可能导致这种基于 uprobes 的方法不成功。与内核不同（每台[虚拟]机器只有一个内核），用户空间库代码可以有多个副本。如果您使用容器，每个容器可能都有自己的所有库依赖项。您可以在这些库中挂钩 uprobes，但您必须识别要跟踪的特定容器的正确副本。另一种可能性是，应用程序可能不是使用共享的动态链接库，而是静态链接，因此它是一个单独的可执行文件。[PRE23]```

@@ -34,8 +34,14 @@ eBPF 虚拟机使用 10 个通用寄存器，编号从 0 到 9。此外，寄存
 
 同样的[*linux/bpf.h*头文件](https://oreil.ly/_ZhU2)定义了一个称为`bpf_insn`的结构，它表示一个 BPF 指令：
 
-```
-struct`bpf_insn`{`__u8``code`;/* opcode */①`__u8``dst_reg`:4;/* dest register */②`__u8``src_reg`:4;/* source register */`__s16``off`;/* signed offset */③`__s32``imm`;/* signed immediate constant */};
+```cpp
+struct `bpf_insn` {
+    `__u8` `code`;          /* opcode */                      ![1](assets/1.png) 
+    `__u8` `dst_reg`:4;     /* dest register */               ![2](assets/2.png)
+    `__u8` `src_reg`:4;     /* source register */
+    `__s16` `off`;       /* signed offset */                  ![3](assets/3.png)
+    `__s32` `imm`;       /* signed immediate constant */
+};
 ```
 
 ①
@@ -86,8 +92,20 @@ struct`bpf_insn`{`__u8``code`;/* opcode */①`__u8``dst_reg`:4;/* dest register 
 
 示例程序在*chapter3/hello.bpf.c*中。将 eBPF 程序放入以*bpf.c*结尾的文件名中是一个相当常见的约定，以区分它们与可能存在于同一源代码目录中的用户空间 C 代码。这是整个程序：
 
-```
-#include<linux/bpf.h>①#include<bpf/bpf_helpers.h>intcounter=0;②SEC("xdp")③inthello(void*ctx){④bpf_printk("Hello World %d",counter);counter++;returnXDP_PASS;}charLICENSE[]SEC("license")="Dual BSD/GPL";⑤
+```cpp
+#include <linux/bpf.h>                           ![1](assets/1.png)
+#include <bpf/bpf_helpers.h>
+
+int counter = 0;                                 ![2](assets/2.png)
+
+SEC("xdp")                                       ![3](assets/3.png)
+int hello(void *ctx) {                           ![4](assets/4.png)
+    bpf_printk("Hello World %d", counter);
+    counter++;
+    return XDP_PASS;
+}
+
+char LICENSE[] SEC("license") = "Dual BSD/GPL";  ![5](assets/5.png)
 ```
 
 ①
@@ -126,17 +144,17 @@ struct`bpf_insn`{`__u8``code`;/* opcode */①`__u8``dst_reg`:4;/* dest register 
 
 我们的 eBPF 源代码需要编译成 eBPF 虚拟机可以理解的机器指令：eBPF 字节码。如果您指定了`-target bpf`，则来自[LLVM 项目](https://llvm.org)的 Clang 编译器将执行此操作。以下是一个 Makefile 的摘录，它将执行编译：
 
-```
+```cpp
 hello.bpf.o: %.o: %.c
    clang \ -target bpf \ `-I/usr/include/`$(``shell` `uname` -`m``)`-linux-gnu \ `-g \ `-O2 -c `$<` -o `$@````
 
-```
+```cpp
 
- ```这将从*hello.bpf.c*中的源代码生成一个名为*hello.bpf.o*的对象文件。这里的`-g`标志是可选的，但它会生成调试信息，这样当您检查对象文件时，您可以看到源代码和字节码。让我们检查一下这个对象文件，以更好地理解它包含的 eBPF 代码。```  ```#检查 eBPF 对象文件
+ ```这将从*hello.bpf.c*中的源代码生成一个名为*hello.bpf.o*的对象文件。这里的`-g`标志是可选的，但它会生成调试信息，这样当您检查对象文件时，您可以看到源代码和字节码。让我们检查一下这个对象文件，以更好地理解它包含的 eBPF 代码。```cpp  ```#检查 eBPF 对象文件
 
 文件实用程序通常用于确定文件的内容：
 
-```
+```cpp
 $ file hello.bpf.o
 hello.bpf.o: ELF 64-bit LSB relocatable, eBPF, version 1 (SYSV), with debug_info,
 not stripped
@@ -146,29 +164,29 @@ not stripped
 
 您可以使用`llvm-objdump`进一步检查此对象，以查看 eBPF 指令：
 
-```
+```cpp
 $ llvm-objdump -S hello.bpf.o
 ```
 
 即使您不熟悉反汇编，此命令的输出也不难理解：
 
-```
-hello.bpf.o:    file format elf64-bpf               ①
+```cpp
+hello.bpf.o:    file format elf64-bpf               ![1](assets/1.png)
 
-Disassembly of section xdp:                         ②
+Disassembly of section xdp:                         ![2](assets/2.png)
 
-0000000000000000 <hello>:                           ③
-;  bpf_printk("Hello World %d", counter");          ④ 
+0000000000000000 <hello>:                           ![3](assets/3.png)
+;  bpf_printk("Hello World %d", counter");          ![4](assets/4.png) 
     0:   18 06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 r6 = 0 ll
     2:   61 63 00 00 00 00 00 00 r3 = *(u32 *)(r6 + 0)
     3:   18 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 r1 = 0 ll
     5:   b7 02 00 00 0f 00 00 00 r2 = 15
     6:   85 00 00 00 06 00 00 00 call 6
-;  counter++;                                       ⑤
+;  counter++;                                       ![5](assets/5.png)
     7:   61 61 00 00 00 00 00 00 r1 = *(u32 *)(r6 + 0)
     8:   07 01 00 00 01 00 00 00 r1 += 1
     9:   63 16 00 00 00 00 00 00 *(u32 *)(r6 + 0) = r1
-;  return XDP_PASS;                                 ![6](img/6.png)
+;  return XDP_PASS;                                 ![6](assets/6.png)
    10:   b7 00 00 00 02 00 00 00 r0 = 2
    11:   95 00 00 00 00 00 00 00 exit
 ```
@@ -205,7 +223,7 @@ Disassembly of section xdp:                         ②
 
 例如，让我们看看偏移量为`5`的指令，看起来是这样的：
 
-```
+```cpp
     5:   b7 02 00 00 0f 00 00 00 r2 = 15
 ```
 
@@ -213,7 +231,7 @@ Disassembly of section xdp:                         ②
 
 偏移量为`10`的指令类似：
 
-```
+```cpp
    10:   b7 00 00 00 02 00 00 00 r0 = 2
 ```
 
@@ -231,13 +249,13 @@ Disassembly of section xdp:                         ②
 
 以下是使用`bpftool`将程序加载到内核的示例。请注意，您可能需要 root 权限（或使用`sudo`）来获取`bpftool`所需的 BPF 权限。
 
-```
+```cpp
 $ bpftool prog load hello.bpf.o /sys/fs/bpf/hello
 ```
 
 这将从我们编译的对象文件中加载 eBPF 程序，并将其“固定”到位置*/sys/fs/bpf/hello*。⁴此命令没有输出响应表示成功，但您可以使用`ls`确认程序已经就位：
 
-```
+```cpp
 $ ls /sys/fs/bpf
 hello
 ```
@@ -248,7 +266,7 @@ eBPF 程序已成功加载。让我们使用`bpftool`实用程序来了解更多
 
 `bpftool`实用程序可以列出加载到内核中的所有程序。如果您自己尝试这样做，您可能会在输出中看到几个预先存在的 eBPF 程序，但为了清晰起见，我只会显示与我们的“Hello World”示例相关的行：
 
-```
+```cpp
 $ bpftool prog list 
 ...
 540: xdp  name hello  tag d35b94b4c0c10efb  gpl
@@ -259,7 +277,7 @@ $ bpftool prog list
 
 该程序已被分配 ID 540。这个标识是在加载每个程序时分配的一个数字。知道了 ID，您可以要求`bpftool`显示有关该程序的更多信息。这一次，让我们以美化的 JSON 格式获取输出，以便字段名称和值都是可见的：
 
-```
+```cpp
 $ bpftool prog show id 540 --pretty
 {
     "id": 540,
@@ -325,7 +343,7 @@ $ bpftool prog show id 540 --pretty
 
 让我们使用`bpftool`来显示我们的“Hello World”代码的翻译版本：
 
-```
+```cpp
 $ bpftool prog dump xlated name hello 
 int hello(struct xdp_md * ctx):
 ; bpf_printk("Hello World %d", counter);
@@ -355,7 +373,7 @@ int hello(struct xdp_md * ctx):
 
 `bpftool`实用程序可以生成汇编语言中的 JIT 代码转储。如果您对汇编语言不熟悉，这看起来可能完全难以理解！我只是为了说明 eBPF 代码从源代码到可执行机器指令经历的所有转换。以下是命令及其输出：
 
-```
+```cpp
 $ bpftool prog dump jited name hello 
 int hello(struct xdp_md * ctx):
 bpf_prog_d35b94b4c0c10efb_hello:
@@ -411,7 +429,7 @@ bpf_prog_d35b94b4c0c10efb_hello:
 
 程序类型必须与其附加的事件类型匹配；您将在第七章中了解更多信息。在本例中，这是一个 XDP 程序，您可以使用`bpftool`将示例 eBPF 程序附加到网络接口上的 XDP 事件，如下所示：
 
-```
+```cpp
 $ bpftool net attach xdp id 540 dev eth0
 ```
 
@@ -423,7 +441,7 @@ $ bpftool net attach xdp id 540 dev eth0
 
 您可以使用`bpftool`查看所有网络连接的 eBPF 程序：
 
-```
+```cpp
 $ bpftool net list 
 xdp:
 eth0(2) driver id 540
@@ -437,7 +455,7 @@ ID 为 540 的程序附加到`eth0`接口的 XDP 事件上。此输出还提供�
 
 您还可以使用`ip link`检查网络接口，您将看到类似以下内容的输出（为了清晰起见，已删除了一些细节）：
 
-```
+```cpp
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT
 group default qlen 1000
     ...
@@ -456,7 +474,7 @@ mode DEFAULT group default qlen 1000
 
 此时，*hello* eBPF 程序应该在每次接收到网络数据包时产生跟踪输出。您可以通过运行`cat /sys/kernel/debug/tracing/trace_pipe`来检查这一点。这应该显示很多类似于这样的输出：
 
-```
+```cpp
 <idle>-0       [003] d.s.. 655370.944105: bpf_trace_printk: Hello World 4531
 <idle>-0       [003] d.s.. 655370.944587: bpf_trace_printk: Hello World 4532
 <idle>-0       [003] d.s.. 655370.944896: bpf_trace_printk: Hello World 4533
@@ -480,7 +498,7 @@ mode DEFAULT group default qlen 1000
 
 `bpftool`实用程序可以显示加载到内核中的映射。为了清晰起见，我只会显示与示例“Hello World”程序相关的条目 165 和 166：
 
-```
+```cpp
 $ bpftool map list
 165: array  name hello.bss  flags 0x400
         key 4B  value 4B  max_entries 1  memlock 4096B
@@ -492,7 +510,7 @@ $ bpftool map list
 
 从 C 程序编译的对象文件中的 bss⁶部分通常保存全局变量，您可以使用`bpftool`来检查其内容，就像这样：
 
-```
+```cpp
 $ bpftool map dump name hello.bss
 [{
         "value": {
@@ -509,7 +527,7 @@ $ bpftool map dump name hello.bss
 
 正如您将在第五章中了解到的，`bpftool`能够在映射中漂亮地打印字段名称(这里是变量名`counter`)，只有在 BTF 信息可用时才能打印出来，而这些信息只有在使用`-g`标志进行编译时才包含在内。如果在编译步骤中省略了该标志，您将看到更像这样的东西：
 
-```
+```cpp
 $ bpftool map dump name hello.bss
 key: 00 00 00 00  value: 19 01 00 00
 Found 1 element
@@ -521,7 +539,7 @@ You’ve seen here that the eBPF program uses the semantics of a map to read and
 
 The fact that the other map is named `hello.rodata` gives a hint that this could be read-only data related to our *hello* program. You can dump the contents of this map to see that it holds the string used by the eBPF program for tracing:
 
-```
+```cpp
 $ bpftool map dump name hello.rodata
 [{
         "value": {
@@ -536,7 +554,7 @@ $ bpftool map dump name hello.rodata
 
 If you didn’t compile the object with the `-g` flag, you’ll see output that looks like this:
 
-```
+```cpp
 $ bpftool map dump id 166
 key: 00 00 00 00  value: 48 65 6c 6c 6f 20 57 6f  72 6c 64 20 25 64 00
 Found 1 element
@@ -550,13 +568,13 @@ Now that we’ve finished inspecting this program and its maps, it’s time to c
 
 You can detach the program from the network interface like this:
 
-```
+```cpp
 $ bpftool net detach xdp dev eth0
 ```
 
 There is no output if this command runs successfully, but you can confirm that the program is no longer attached by the lack of XDP entries in the output from `bpftool net list`:
 
-```
+```cpp
 $ bpftool net list 
 xdp:
 
@@ -567,7 +585,7 @@ flow_dissector:
 
 However, the program is still loaded into the kernel:
 
-```
+```cpp
 $ bpftool prog show name hello 
 395: xdp  name hello  tag 9d0e949f89f1a82c  gpl
         loaded_at 2022-12-19T18:20:32+0000  uid 0
@@ -578,7 +596,7 @@ $ bpftool prog show name hello
 
 There’s no inverse of `bpftool prog load` (at least not at the time of this writing), but you can remove the program from the kernel by deleting the pinned pseudofile:
 
-```
+```cpp
 $ rm /sys/fs/bpf/hello
 $ bpftool prog show name hello
 ```
@@ -591,75 +609,29 @@ In the previous chapter you saw tail calls in action, and I mentioned that now t
 
 For illustrative purposes I have written a very simple function that extracts the syscall opcode from the tracepoint arguments:
 
-```
-static__attribute((noinline))intget_opcode(structbpf_raw_tracepoint_args
-*ctx){ `return``ctx``->``args``[``1``];` ``}``
+```cpp
+static __attribute((noinline)) int get_opcode(struct bpf_raw_tracepoint_args 
+                                                                         *ctx) { `return` `ctx``->``args``[``1``];` ``}``
 ```
 
 Given the choice, the compiler would probably inline this very simple function that I’m only going to call from one place. Since that would defeat the point of this example, I have added `__attribute((noinline))` to force the compiler’s hand. In normal circumstances you should probably omit this and allow the compiler to optimize as it sees fit.
 
 The eBPF function that calls this function looks like this:
 
-```
+```cppGiven the choice, the compiler would probably inline this very simple function that I’m only going to call from one place. Since that would defeat the point of this example, I have added `__attribute((noinline))` to force the compiler’s hand. In normal circumstances you should probably omit this and allow the compiler to optimize as it sees fit.
 
-SEC("raw_tp") `int``hello``(``struct``bpf_raw_tracepoint_args``*``ctx``)``{` ``int``opcode``=``get_opcode``(``ctx``);` ``bpf_printk``(``"Syscall: %d"``,``opcode``);` ``return``0``;` ``}
+The eBPF function that calls this function looks like this:
+
 ```
 
 After compiling this to an eBPF object file, you can load it into the kernel and confirm that it is loaded with `bpftool`:
 
-```
-
-$ bpftool prog load hello-func.bpf.o /sys/fs/bpf/hello
-
-$ bpftool prog list name hello
-
-893: raw_tracepoint  name hello  tag 3d9eb0c23d4ab186  gpl
-
-loaded_at 2023-01-05T18:57:31+0000  uid 0
-
-xlated 80B  jited 208B  memlock 4096B  map_ids 204
-
-btf_id 302
-
+```cpp``
 ```
 
 The interesting part of this exercise is inspecting the eBPF bytecode to see the `get_opcode()` function:
 
-```
-
-$ bpftool prog dump xlated name hello
-
-int hello(struct bpf_raw_tracepoint_args * ctx):
-
-; int opcode = get_opcode(ctx);                            ①
-
-0: (85) call pc+7#bpf_prog_cbacc90865b1b9a5_get_opcode
-
-; bpf_printk("Syscall: %d", opcode);
-
-1: (18) r1 = map[id:193][0]+0
-
-3: (b7) r2 = 12
-
-4: (bf) r3 = r0
-
-5: (85) call bpf_trace_printk#-73584
-
-; return 0;
-
-6: (b7) r0 = 0
-
-7: (95) exit
-
-int get_opcode(struct bpf_raw_tracepoint_args * ctx):      ②
-
-; return ctx->args[1];
-
-8: (79) r0 = *(u64 *)(r1 +8)
-
-; return ctx->args[1];
-
-9: (95) exit
+```cppAfter compiling this to an eBPF object file, you can load it into the kernel and confirm that it is loaded with `bpftool`:
 
 ```
 
@@ -693,50 +665,35 @@ You also learned how maps are used to implement global variables for eBPF progra
 
 1.  尝试使用类似以下的`ip link`命令来附加和分离 XDP 程序：
 
+```cpp
+
+The interesting part of this exercise is inspecting the eBPF bytecode to see the `get_opcode()` function:
+
 ```
-    $ ip link set dev eth0 xdp obj hello.bpf.o sec xdp
-    $ ip link set dev eth0 xdp off
-    ```
 
 1.  运行第二章中的任何 BCC 示例。在程序运行时，使用第二个终端窗口使用`bpftool`检查加载的程序。以下是我通过运行*hello-map.py*示例看到的示例：
 
-```
-    $ bpftool prog show name hello 
-    197: kprobe  name hello  tag ba73a317e9480a37  gpl
-            loaded_at 2022-08-22T08:46:22+0000  uid 0
-            xlated 296B  jited 328B  memlock 4096B  map_ids 65
-            btf_id 179
-            pids hello-map.py(2785)
-    ```
+```cpp
+
+[![1](assets/1.png)](#code_id_3_15)
+
+Here you can see the `hello()` eBPF program making a call to `get_opcode()`. The eBPF instruction at offset `0` is `0x85`, which from the instruction set documentation corresponds to “Function call.” Instead of executing the next instruction, which would be at offset 1, execution will jump seven instructions ahead (`pc+7`), which means the instruction at offset `8`.
+
+[![2](assets/2.png)](#code_id_3_16)
+
+Here’s the bytecode for `get_opcode()`, and as you might hope, the first instruction is at offset `8`.
+
+The function call instruction necessitates putting the current state on the eBPF virtual machine’s stack so that when the called function exits, execution can continue in the calling function. Since the stack size is limited to 512 bytes, BPF to BPF calls can’t be very deeply nested.
+
+###### Note
+
+For a lot more detail on tail calls and BPF to BPF calls, there’s an excellent post by Jakub Sitnicki on Cloudflare’s blog: [“Assembly within! BPF tail calls on x86 and ARM”](https://oreil.ly/6kOp3).```
 
 您还可以使用`bpftool prog dump`命令来查看这些程序的字节码和机器码版本。
 
 1.  运行*chapter2*目录中的*hello-tail.py*，在其运行时，查看它加载的程序。您会看到每个尾调用程序都单独列出，就像这样：
 
-```
-    $ bpftool prog list 
-    ...
-    120: raw_tracepoint  name hello  tag b6bfd0e76e7f9aac  gpl
-            loaded_at 2023-01-05T14:35:32+0000  uid 0
-            xlated 160B  jited 272B  memlock 4096B  map_ids 29
-            btf_id 124
-            pids hello-tail.py(3590)
-    121: raw_tracepoint  name ignore_opcode  tag a04f5eef06a7f555  gpl
-            loaded_at 2023-01-05T14:35:32+0000  uid 0
-            xlated 16B  jited 72B  memlock 4096B
-            btf_id 124
-            pids hello-tail.py(3590)
-    122: raw_tracepoint  name hello_exec  tag 931f578bd09da154  gpl
-            loaded_at 2023-01-05T14:35:32+0000  uid 0
-            xlated 112B  jited 168B  memlock 4096B
-            btf_id 124
-            pids hello-tail.py(3590)
-    123: raw_tracepoint  name hello_timer  tag 6c3378ebb7d3a617  gpl
-            loaded_at 2023-01-05T14:35:32+0000  uid 0
-            xlated 336B  jited 356B  memlock 4096B
-            btf_id 124
-            pids hello-tail.py(3590)
-    ```
+```cpp  ```
 
 你还可以使用`bpftool prog dump xlated`来查看字节码指令，并将其与“BPF to BPF Calls”中所见的进行比较。
 

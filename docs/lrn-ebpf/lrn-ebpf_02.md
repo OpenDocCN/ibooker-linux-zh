@@ -15,7 +15,6 @@
 以下是*hello.py*的完整源代码，这是一个使用 BCC 的 Python 库编写的 eBPF“Hello World”应用程序。
 
 ```cpp
-
 #!/usr/bin/python 
 from bcc import BPF
 
@@ -46,8 +45,7 @@ b.trace_print()
 eBPF 程序本身是用 C 代码编写的，就是这部分：
 
 ```cpp
-
-inthello(void*ctx){ `bpf_trace_printk``(``"Hello World!"``);` ``return``0``;` ``}```
+int hello(void *ctx) { `bpf_trace_printk``(``"Hello World!"``);` ``return` `0``;` ``}```
 
 ```cpp
 
@@ -56,28 +54,24 @@ inthello(void*ctx){ `bpf_trace_printk``(``"Hello World!"``);` ``return``0``;` ``
 整个 eBPF 程序被定义为 Python 代码中的一个名为`program`的字符串。这个 C 程序需要在执行之前进行编译，但 BCC 会为你处理这一切。（你将在下一章中看到如何自己编译 eBPF 程序。）你只需要在创建 BPF 对象时将这个字符串作为参数传递，就像下面这行代码一样：
 
 ```cpp
-
 b = BPF(text=program)
 ```
 
 eBPF 程序需要附加到一个事件上，对于这个示例，我选择了附加到系统调用`execve`，这是用于执行程序的系统调用。每当这台机器上的任何东西或任何人启动一个新程序执行时，都会调用`execve()`，这将触发 eBPF 程序。虽然“execve()”名称是 Linux 中的一个标准接口，但在内核中实现它的函数名称取决于芯片架构，但 BCC 为我们提供了一种方便的方法来查找我们正在运行的机器的函数名称：
 
 ```cpp
-
 syscall = b.get_syscall_fnname("execve")
 ```
 
 现在，`syscall`代表了我要使用 kprobe 附加到的内核函数的名称（你在第一章中已经介绍了 kprobe 的概念）。你可以将`hello`函数附加到该事件上，就像这样：
 
 ```cpp
-
 b.attach_kprobe(event=syscall, fn_name="hello")
 ```
 
 此时，eBPF 程序已加载到内核中，并附加到事件，因此每当在机器上启动新的可执行文件时，程序都会被触发。在 Python 代码中所剩的就是读取内核输出的跟踪并将其写入屏幕：
 
 ```cpp
-
 b.trace_print()
 ```
 
@@ -92,7 +86,6 @@ b.trace_print()
 运行此程序，根据您所使用的（虚拟）机器上正在发生的情况，您可能会立即看到生成的跟踪，因为其他进程可能正在使用`execve`系统调用执行程序³。如果您没有看到任何内容，请打开第二个终端并执行任何您喜欢的命令，⁴，您将看到“Hello World”生成的相应跟踪：
 
 ```cpp
-
 $ hello.py
 b'     bash-5412    [001] .... 90432.904952: 0: bpf_trace_printk: Hello World'
 ```
@@ -154,8 +147,22 @@ b'     bash-5412    [001] .... 90432.904952: 0: bpf_trace_printk: Hello World'
 首先，让我们看看 eBPF 程序本身的 C 代码：
 
 ```cpp
+BPF_HASH(counter_table);                                     ![1](assets/1.png)
 
-BPF_HASH(counter_table);①inthello(void*ctx){u64uid;u64counter=0;u64*p;uid=bpf_get_current_uid_gid()&0xFFFFFFFF;②p=counter_table.lookup(&uid);③if(p!=0){④counter=*p;}counter++;⑤counter_table.update(&uid,&counter);![6](img/6.png)return0;}
+int hello(void *ctx) {
+  u64 uid;                                                  
+  u64 counter = 0;
+  u64 *p;
+
+  uid = bpf_get_current_uid_gid() & 0xFFFFFFFF;              ![2](assets/2.png)
+  p = counter_table.lookup(&uid);                            ![3](assets/3.png)
+  if (p != 0) {                                              ![4](assets/4.png)
+     counter = *p;
+  }
+  counter++;                                                 ![5](assets/5.png)
+  counter_table.update(&uid, &counter);                      ![6](assets/6.png)
+  return 0;
+}
 ```
 
 ①
@@ -185,15 +192,13 @@ BPF_HASH(counter_table);①inthello(void*ctx){u64uid;u64counter=0;u64*p;uid=bpf_
 仔细看一下访问哈希表的代码行：
 
 ```cpp
-
-p=counter_table.lookup(&uid);
+  p = counter_table.lookup(&uid);
 ```
 
 `稍后：
 
 ```cpp
-
-counter_table.update(&uid,&counter);
+  counter_table.update(&uid, &counter);
 ```
 
 `如果您认为“这不是正确的 C 代码！”您是绝对正确的。C 不支持像那样在结构上定义方法。⁵这是一个很好的例子，BCC 的 C 版本非常宽松地类似于 C 语言，BCC 在将代码发送到编译器之前会对其进行重写。BCC 提供了一些方便的快捷方式和宏，它将其转换为“正确”的 C。
@@ -201,7 +206,6 @@ counter_table.update(&uid,&counter);
 就像在前面的例子中一样，C 代码被定义为一个名为`program`的字符串。程序被编译，加载到内核中，并附加到`execve` kprobe 上，与之前的“Hello World”示例完全相同。
 
 ```cpp
-
 b = BPF(text=program)
 syscall = b.get_syscall_fnname("execve")
 b.attach_kprobe(event=syscall, fn_name="hello")
@@ -210,8 +214,12 @@ b.attach_kprobe(event=syscall, fn_name="hello")
 这次在 Python 端需要更多的工作来从哈希表中读取信息：
 
 ```cpp
-
-whileTrue:①sleep(2)s=""fork,vinb["counter_table"].items():②s+=f"ID {k.value}: {v.value}\t"print(s)
+while True:                                       ![1](assets/1.png)
+  sleep(2)                                         
+  s = ""
+  for k,v in b["counter_table"].items():          ![2](assets/2.png)
+    s += f"ID {k.value}: {v.value}\t"
+  print(s)
 ```
 
 ①
@@ -225,7 +233,6 @@ BCC 自动创建一个 Python 对象来表示哈希表。此代码循环遍历�
 当你运行这个示例时，你会想要一个第二个终端窗口，你可以在其中运行一些命令。这是我得到的一些示例输出，右侧带有我在另一个终端中运行的命令的注释：
 
 ```cpp
-
 Terminal 1                          Terminal 2
 $ ./hello-map.py 
                                     [blank line(s) until I run something]
@@ -259,8 +266,29 @@ ID 501: 5       ID 0: 2             sudo ls
 这是将加载到内核中的 eBPF 程序：
 
 ```cpp
+BPF_PERF_OUTPUT(output);                                                ![1](assets/1.png)
 
-BPF_PERF_OUTPUT(output);①structdata_t{②intpid;intuid;charcommand[16];charmessage[12];};inthello(void*ctx){structdata_tdata={};③charmessage[12]="Hello World";data.pid=bpf_get_current_pid_tgid()>>32;④data.uid=bpf_get_current_uid_gid()&0xFFFFFFFF;⑤bpf_get_current_comm(&data.command,sizeof(data.command));![6](img/6.png)bpf_probe_read_kernel(&data.message,sizeof(data.message),message);![7](img/7.png)output.perf_submit(ctx,&data,sizeof(data));![8](img/8.png)return0;}
+struct data_t {                                                         ![2](assets/2.png)
+   int pid;
+   int uid;
+   char command[16];
+   char message[12];
+};
+
+int hello(void *ctx) {
+   struct data_t data = {};                                             ![3](assets/3.png)
+   char message[12] = "Hello World";
+
+   data.pid = bpf_get_current_pid_tgid() >> 32;                         ![4](assets/4.png)
+   data.uid = bpf_get_current_uid_gid() & 0xFFFFFFFF;                   ![5](assets/5.png)
+
+   bpf_get_current_comm(&data.command, sizeof(data.command));           ![6](assets/6.png) 
+   bpf_probe_read_kernel(&data.message, sizeof(data.message), message); ![7](assets/7.png)
+
+   output.perf_submit(ctx, &data, sizeof(data));                        ![8](assets/8.png)
+
+   return 0;
+}
 ```
 
 ①
@@ -298,9 +326,18 @@ BCC 为创建一个将消息从内核传递到用户空间的映射定义了宏`
 就像第一个“Hello World”示例中一样，这个 C 程序在 Python 代码中被分配给一个名为`program`的字符串。接下来是 Python 代码的其余部分：
 
 ```cpp
+b = BPF(text=program)                                ![1](assets/1.png)
+syscall = b.get_syscall_fnname("execve")
+b.attach_kprobe(event=syscall, fn_name="hello")
 
-b=BPF(text=program)①syscall=b.get_syscall_fnname("execve")b.attach_kprobe(event=syscall,fn_name="hello")defprint_event(cpu,data,size):②data=b["output"].event(data)print(f"{data.pid}{data.uid}{data.command.decode()}"+\
-f"{data.message.decode()}")b["output"].open_perf_buffer(print_event)③whileTrue:④b.perf_buffer_poll()
+def print_event(cpu, data, size):                    ![2](assets/2.png)
+   data = b["output"].event(data)
+   print(f"{data.pid} {data.uid} {data.command.decode()} " + \
+         f"{data.message.decode()}")
+
+b["output"].open_perf_buffer(print_event)            ![3](assets/3.png)
+while True:                                          ![4](assets/4.png)
+   b.perf_buffer_poll()
 ```
 
 ①
@@ -322,7 +359,6 @@ f"{data.message.decode()}")b["output"].open_perf_buffer(print_event)③whileTrue
 运行此代码会给我们输出，与原始的“Hello World”非常相似：
 
 ```cpp
-
 $ sudo ./hello-buffer.py
 11654 node Hello World
 11655 sh Hello World
@@ -350,8 +386,7 @@ eBPF 代码可以获得这样的上下文信息，这就是使其对可观察性
 您已经看到 eBPF 程序可以调用内核提供的辅助函数，但如果您想将自己编写的代码拆分为函数，该怎么办呢？通常，在软件开发中，将通用代码放入一个函数中，以便从多个地方调用，而不是一遍又一遍地复制相同的行，被认为是一种良好的做法⁸。但在早期，eBPF 程序不允许调用除辅助函数之外的其他函数。为了解决这个问题，程序员们已经指示编译器“始终内联”它们的函数，就像这样：
 
 ```cpp
-
-static__always_inlinevoidmy_function(void*ctx,intval)
+static __always_inline void my_function(void *ctx, int val)
 ```
 
 `通常，源代码中的函数会导致编译器发出跳转指令，这会导致执行跳转到构成所调用函数的一组指令（然后在该函数完成后再次跳回）。您可以在图 2-5 的左侧看到这一点。右侧显示了内联函数的情况：没有跳转指令；相反，函数指令的副本直接在调用函数中发出。
@@ -375,8 +410,7 @@ static__always_inlinevoidmy_function(void*ctx,intval)
 尾调用是使用`bpf_tail_call()`辅助函数进行的，其具有以下签名：
 
 ```cpp
-
-longbpf_tail_call(void**`ctx`*,structbpf_map**`prog_array_map`*,u32*`index`*)
+long bpf_tail_call(void **`ctx`*, struct bpf_map **`prog_array_map`*, u32 *`index`*)
 ```
 
 该函数的三个参数具有以下含义：
@@ -396,22 +430,46 @@ longbpf_tail_call(void**`ctx`*,structbpf_map**`prog_array_map`*,u32*`index`*)
 如果你正在使用 BCC 框架，可以使用稍微简单的形式来进行[尾调用](https://oreil.ly/rT9e1)。
 
 ```cpp
-
-prog_array_map.call(ctx,index)
+prog_array_map.call(ctx, index)
 ```
 
 `在将代码传递给编译步骤之前，BCC 将重写前一行为：
 
 ```cpp
-
-bpf_tail_call(ctx,prog_array_map,index)
+bpf_tail_call(ctx, prog_array_map, index)
 ```
 
 `这是 eBPF 程序及其尾调用的源代码：
 
 ```cpp
+BPF_PROG_ARRAY(syscall, 300);                                   ![1](assets/1.png)
 
-BPF_PROG_ARRAY(syscall,300);①inthello(structbpf_raw_tracepoint_args*ctx){②intopcode=ctx->args[1];③syscall.call(ctx,opcode);④bpf_trace_printk("Another syscall: %d",opcode);⑤return0;}inthello_execve(void*ctx){![6](img/6.png)bpf_trace_printk("Executing a program");return0;}inthello_timer(structbpf_raw_tracepoint_args*ctx){![7](img/7.png)if(ctx->args[1]==222){bpf_trace_printk("Creating a timer");}elseif(ctx->args[1]==226){bpf_trace_printk("Deleting a timer");}else{bpf_trace_printk("Some other timer operation");}return0;}intignore_opcode(void*ctx){![8](img/8.png)return0;}
+int hello(struct bpf_raw_tracepoint_args *ctx) {                ![2](assets/2.png)
+   int opcode = ctx->args[1];                                   ![3](assets/3.png)
+   syscall.call(ctx, opcode);                                   ![4](assets/4.png)
+   bpf_trace_printk("Another syscall: %d", opcode);             ![5](assets/5.png)
+   return 0;
+}
+
+int hello_execve(void *ctx) {                                   ![6](assets/6.png)
+   bpf_trace_printk("Executing a program");
+   return 0;
+}
+
+int hello_timer(struct bpf_raw_tracepoint_args *ctx) {          ![7](assets/7.png)
+   if (ctx->args[1] == 222) {
+       bpf_trace_printk("Creating a timer");
+   } else if (ctx->args[1] == 226) {
+       bpf_trace_printk("Deleting a timer");
+   } else {
+       bpf_trace_printk("Some other timer operation");
+   }
+   return 0;
+}
+
+int ignore_opcode(void *ctx) {                                  ![8](assets/8.png)
+   return 0;
+}
 ```
 
 ①
@@ -449,8 +507,28 @@ BCC 提供了一个`BPF_PROG_ARRAY`宏，用于轻松定义`BPF_MAP_TYPE_PROG_AR
 现在让我们看一下加载和管理这组 eBPF 程序的用户空间代码：
 
 ```cpp
+b = BPF(text=program)                                              
+b.attach_raw_tracepoint(tp="sys_enter", fn_name="hello")           ![1](assets/1.png)
 
-b=BPF(text=program)b.attach_raw_tracepoint(tp="sys_enter",fn_name="hello")①ignore_fn=b.load_func("ignore_opcode",BPF.RAW_TRACEPOINT)②exec_fn=b.load_func("hello_exec",BPF.RAW_TRACEPOINT)timer_fn=b.load_func("hello_timer",BPF.RAW_TRACEPOINT)prog_array=b.get_table("syscall")③prog_array[ct.c_int(59)]=ct.c_int(exec_fn.fd)prog_array[ct.c_int(222)]=ct.c_int(timer_fn.fd)prog_array[ct.c_int(223)]=ct.c_int(timer_fn.fd)prog_array[ct.c_int(224)]=ct.c_int(timer_fn.fd)prog_array[ct.c_int(225)]=ct.c_int(timer_fn.fd)prog_array[ct.c_int(226)]=ct.c_int(timer_fn.fd)# Ignore some syscalls that come up a lot ④prog_array[ct.c_int(21)]=ct.c_int(ignore_fn.fd)prog_array[ct.c_int(22)]=ct.c_int(ignore_fn.fd)prog_array[ct.c_int(25)]=ct.c_int(ignore_fn.fd)...b.trace_print()⑤
+ignore_fn = b.load_func("ignore_opcode", BPF.RAW_TRACEPOINT)       ![2](assets/2.png)
+exec_fn = b.load_func("hello_exec", BPF.RAW_TRACEPOINT)
+timer_fn = b.load_func("hello_timer", BPF.RAW_TRACEPOINT)
+
+prog_array = b.get_table("syscall")                                ![3](assets/3.png)
+prog_array[ct.c_int(59)] = ct.c_int(exec_fn.fd)
+prog_array[ct.c_int(222)] = ct.c_int(timer_fn.fd)
+prog_array[ct.c_int(223)] = ct.c_int(timer_fn.fd)
+prog_array[ct.c_int(224)] = ct.c_int(timer_fn.fd)
+prog_array[ct.c_int(225)] = ct.c_int(timer_fn.fd)
+prog_array[ct.c_int(226)] = ct.c_int(timer_fn.fd)
+
+# Ignore some syscalls that come up a lot ![4](assets/4.png)
+prog_array[ct.c_int(21)] = ct.c_int(ignore_fn.fd)
+prog_array[ct.c_int(22)] = ct.c_int(ignore_fn.fd)
+prog_array[ct.c_int(25)] = ct.c_int(ignore_fn.fd)
+...
+
+b.trace_print()                                                    ![5](assets/5.png)
 ```
 
 ①
@@ -476,7 +554,6 @@ b=BPF(text=program)b.attach_raw_tracepoint(tp="sys_enter",fn_name="hello")①ign
 运行此程序会为在（虚拟）机器上运行的每个系统调用生成跟踪输出，除非操作码具有将其链接到`ignore_opcode()`尾调用的条目。以下是在另一个终端上运行`ls`时的一些示例输出（为了可读性，某些细节已被省略）：
 
 ```cpp
-
 ./hello-tail.py 
 b'   hello-tail.py-2767    ... Another syscall: 62'
 b'   hello-tail.py-2767    ... Another syscall: 62'
@@ -501,25 +578,7 @@ b'              ls-2774    ... Another syscall: 61'
 
 自内核版本 4.2 以来，eBPF 已支持尾调用，但很长一段时间它们与进行 BPF 到 BPF 函数调用不兼容。这一限制在内核 5.10 中被取消。¹⁰
 
-您可以将多达 33 个尾调用链接在一起，再加上每个 eBPF 程序的指令复杂性限制为 100 万条指令，这意味着今天的 eBPF 程序员有很大的灵活性来编写完全在内核中运行的非常复杂的代码。```cpp``  ``# Summary
-
-I hope that by showing some concrete examples of an eBPF program, this chapter helped you consolidate your mental model of eBPF code running in the kernel, triggered by events. You’ve also seen examples of data being passed from the kernel to user space using BPF maps.
-
-Using the BCC framework hides many of the details of how the program is built, loaded into the kernel, and attached to events. In the next chapter I’ll show you a different approach to writing “Hello World,” and we’ll dive deeper into those hidden details.
-
-# Exercises
-
-Here are some optional activities you might like to try (or think about) if you want to explore “Hello World” a bit further:
-
-1.  Adapt the *hello-buffer.py* eBPF program to output different trace messages for odd and even process IDs.
-
-2.  Modify *hello-map.py* so that the eBPF code gets triggered by more than one syscall. For example, `openat()` is commonly called to open files, and `write()` is called to write data to a file. You can start by attaching the *hello* eBPF program to multiple syscall kprobes. Then try having modified versions of the *hello* eBPF program for different syscalls, demonstrating that you can access the same map from multiple different programs.
-
-3.  The *hello-tail.py* eBPF program is an example of a program that attaches to the `sys_enter` raw tracepoint that is hit whenever *any* syscall is called. Change *hello-map.py* to show the total number of syscalls made by each user ID, by attaching it to that same `sys_enter` raw tracepoint.
-
-    Here’s some example output I got after making that change:
-
-    ```
+您可以将多达 33 个尾调用链接在一起，再加上每个 eBPF 程序的指令复杂性限制为 100 万条指令，这意味着今天的 eBPF 程序员有很大的灵活性来编写完全在内核中运行的非常复杂的代码。```cpp``  ```
 
 $ ./hello-map.py
 
@@ -532,33 +591,9 @@ ID 104: 6     ID 101: 34    ID 100: 45    ID 0: 368     ID 501: 38
 ID 104: 6     ID 101: 34    ID 100: 45    ID 0: 533     ID 501: 57
 
 ```cpp
-
-4.  The [`RAW_TRACEPOINT_PROBE` macro provided by BCC](https://oreil.ly/kh-j4) simplifies attaching to raw tracepoints, telling the user space BCC code to automatically attach it to a specified tracepoint. Try it in *hello-tail.py*, like this:
-
-    *   Replace the definition of the `hello()` function with `RAW_TRACEPOINT_PROBE(sys_enter)`.
-
-    *   Remove the explicit attachment call `b.attach_raw_tracepoint()` from the Python code.
-
-    You should see that BCC automatically creates the attachment and the program works exactly the same. This is an example of the many convenient macros that BCC provides.
-
-5.  You could further adapt *hello_map.py* so that the key in the hash table identifies a particular syscall (rather than a particular user). The output will show how many times that syscall has been called across the whole system.
-
-¹ I originally wrote this for a talk titled “The Beginner’s Guide to eBPF Programming.” You can find the original code along with links to the slides and video at [*https://github.com/lizrice/ebpf-beginners*](https://github.com/lizrice/ebpf-beginners).
-
-² There is a more performant way to attach eBPF programs to functions, available from kernel version 5.5 onward, that uses fentry (and the corresponding fexit instead of kretprobe for the exit from a function). I’ll discuss this later in the book, but for now I’m using kprobe to keep the example in this chapter as simple as possible.
-
-³ I quite often use VScode remote to connect to a virtual machine in the cloud. This runs lots of node scripts on the virtual machine, which generates lots of tracing from this “Hello World” app.
-
-⁴ Some commands (`echo` is a common example) might be shell built-ins that run as part of the shell process, rather than executing a new program. These won’t trigger the `execve()` event, so no trace will be generated.
-
-⁵ C++ does, but not C.
-
-⁶ The lower 32 bits are the *thread group ID*. For a single-threaded process, this is the same as the process ID, but additional threads for the process would be given different IDs. The docs for the GNU C library have a good description of the difference between [process and thread group IDs](https://oreil.ly/Wo9k3).
-
-⁷ This is just example code, so I’m not worrying about cleaning up on keyboard interrupt or any other niceties!
-
-⁸ This principle is often called “DRY” (“Don’t Repeat Yourself”), as popularized by [The Pragmatic Programmer](https://oreil.ly/QFich).
-
-⁹ There are some 300 syscalls in Linux, and since I’m not using any recently added syscalls for this example, this is good enough.
-
-¹⁰ Making tail calls from a BPF subprogram requires support from the JIT compiler, which you’ll meet in the next chapter. In the kernel version I used to write the examples in this book, only the JIT compiler on x86 has this support, although [support has been added to ARM in kernel 6.0](https://oreil.ly/KYUYS).`````
+    $ ./hello-map.py 
+    ID 104: 6     ID 0: 225
+    ID 104: 6     ID 101: 34    ID 100: 45    ID 0: 332     ID 501: 19
+    ID 104: 6     ID 101: 34    ID 100: 45    ID 0: 368     ID 501: 38
+    ID 104: 6     ID 101: 34    ID 100: 45    ID 0: 533     ID 501: 57
+    `````

@@ -88,7 +88,7 @@ pid 232272  fd 21: prog_id 398  raw_tracepoint  sched_process_exec
 本章的第一个 eBPF 程序示例称为`kprobe_sys_execve`，它是附加到`execve（）`系统调用的 kprobe。函数及其部分定义如下：
 
 ```cpp
-SEC("ksyscall/execve") `int``BPF_KPROBE_SYSCALL``(``kprobe_sys_execve``,``char``*``pathname``)`
+SEC("ksyscall/execve") `int` `BPF_KPROBE_SYSCALL``(``kprobe_sys_execve``,` `char` `*``pathname``)`
 ```
 
 ``这与您在第五章中看到的内容相同。
@@ -98,7 +98,7 @@ SEC("ksyscall/execve") `int``BPF_KPROBE_SYSCALL``(``kprobe_sys_execve``,``char``
 您可以找到许多示例，其中基于 eBPF 的工具使用 kprobes 附加到系统调用，但是，如前所述，kprobes 也可以附加到内核中的任何非内联函数。我在*hello.bpf.c*中提供了一个示例，该示例将 kprobe 附加到函数`do_execve（）`，并且定义如下：
 
 ```cpp
-SEC("kprobe/do_execve") `int``BPF_KPROBE``(``kprobe_do_execve``,``struct``filename``*``filename``)`
+SEC("kprobe/do_execve") `int` `BPF_KPROBE``(``kprobe_do_execve``,` `struct` `filename` `*``filename``)`
 ```
 
 ``因为`do_execve（）`不是系统调用，所以与前一个示例之间存在一些差异：
@@ -112,7 +112,9 @@ SEC("kprobe/do_execve") `int``BPF_KPROBE``(``kprobe_do_execve``,``struct``filena
 您可能想知道我是如何知道要为此参数使用此类型的。我会告诉你。内核中的`do_execve（）`函数具有以下签名：
 
 ```cpp
-int`do_execve`(struct`filename`*`filename`,constchar`__user`*const`__user`*__argv,constchar`__user`*const`__user`*__envp)
+int `do_execve`(struct `filename` *`filename`,
+    const char `__user` *const `__user` *__argv,
+    const char `__user` *const `__user` *__envp)
 ```
 
 我选择忽略`do_execve（）`参数`__argv`和`__envp`，并且只声明`filename`参数，使用`struct filename *`类型来匹配内核函数的定义。鉴于参数在内存中是顺序排列的，忽略最后的*n*个参数是可以的，但如果您想使用后面的参数，则不能忽略列表中的较早的参数。
@@ -120,7 +122,7 @@ int`do_execve`(struct`filename`*`filename`,constchar`__user`*const`__user`*__arg
 这个`filename`结构在内核内部定义，它说明了 eBPF 编程是内核编程的一个例子：我必须查找`do_execve（）`的定义以找到其参数，以及`struct filename`的定义。即将运行的可执行文件的名称由`filename->name`指向。在示例代码中，我使用以下行检索此名称：
 
 ```cpp
-constchar*name=BPF_CORE_READ(filename,name); `bpf_probe_read_kernel``(``&``data``.``command``,``sizeof``(``data``.``command``),``name``);`
+const char *name = BPF_CORE_READ(filename, name); `bpf_probe_read_kernel``(``&``data``.``command``,` `sizeof``(``data``.``command``),` `name``);`
 ```
 
 ``因此，总结一下：系统调用 kprobe 的上下文参数是表示用户空间传递给系统调用的值的结构。“常规”（非系统调用）kprobe 的上下文参数是表示由调用它的任何内核代码传递给被调用函数的参数的结构，因此结构取决于函数定义。
@@ -208,7 +210,7 @@ print fmt: "filename: 0x%08lx, argv: 0x%08lx, envp: 0x%08lx",
 我使用这些信息在*chapter7/hello.bpf.c*中定义了一个匹配的结构，称为`m⁠y⁠_⁠s⁠y⁠s⁠c⁠a⁠l⁠l⁠s⁠_⁠e⁠n⁠t⁠e⁠r⁠_​e⁠x⁠e⁠c⁠v⁠e`：
 
 ```cpp
-structmy_syscalls_enter_execve{ `unsigned``short``common_type``;` ``unsigned``char``common_flags``;` ``unsigned``char``common_preempt_count``;` ``int``common_pid``;` ``long``syscall_nr``;` ``long``filename_ptr``;` ``long``argv_ptr``;` ``long``envp_ptr``;` ``};``````cpp```
+struct my_syscalls_enter_execve { `unsigned` `short` `common_type``;` ``unsigned` `char` `common_flags``;` ``unsigned` `char` `common_preempt_count``;` ``int` `common_pid``;` ``long` `syscall_nr``;` ``long` `filename_ptr``;` ``long` `argv_ptr``;` ``long` `envp_ptr``;` ``};``````cpp```
 
 ```
 
@@ -217,23 +219,23 @@ structmy_syscalls_enter_execve{ `unsigned``short``common_type``;` ``unsigned``ch
 我的示例 eBPF 程序可以附加到这个 tracepoint，并将这种类型的指针用作其上下文参数，就像这样：
 
 ```
-inttp_sys_enter_execve(structmy_syscalls_enter_execve*ctx){
+int tp_sys_enter_execve(struct my_syscalls_enter_execve *ctx) {
 ```cpp
 
 `然后您可以访问此结构的内容。例如，您可以按如下方式获取文件名指针：
 
 ```
-bpf_probe_read_user_str(&data.command,sizeof(data.command),ctx->filename_ptr);
+bpf_probe_read_user_str(&data.command, sizeof(data.command), ctx->filename_ptr);
 ```cpp
 
 `当您使用 tracepoint 程序类型时，传递给 eBPF 程序的结构已经从一组原始参数映射出来。为了获得更好的性能，您可以直接访问这些原始参数，使用原始 tracepoint eBPF 程序类型。部分定义应该以`raw_tp`（或`raw_tracepoint`）开头，而不是`tp`。您需要将参数从`__u64`转换为 tracepoint 结构使用的任何类型（当 tracepoint 是系统调用的入口时，这些参数取决于芯片架构）。``````cpp  ```## BTF-Enabled Tracepoints
 
-In the previous example I wrote a structure called `my_syscalls_enter_execve` to define the context parameter for my eBPF program. But when you define a structure in your eBPF code or parse the raw arguments, there’s a risk that your code might not match the kernel it’s running on. The good news is that BTF, which you met in [Chapter 5](ch05.html#co_recomma_btfcomma_and_libbpf), also solves this problem.
+In the previous example I wrote a structure called `my_syscalls_enter_execve` to define the context parameter for my eBPF program. But when you define a structure in your eBPF code or parse the raw arguments, there’s a risk that your code might not match the kernel it’s running on. The good news is that BTF, which you met in [Chapter 5](ch05.xhtml#co_recomma_btfcomma_and_libbpf), also solves this problem.
 
 With BTF support, there will be a structure defined in *vmlinux.h* that matches the context structure passed to a tracepoint eBPF program. Your eBPF program should use the section definition `SEC("tp_btf/*tracepoint name*")` where the tracepoint name is one of the available events listed in */sys/kernel/tracing/available_events*. The example program in *chapter7/hello.bpf.c* looks like this:
 
 ```cpp
-SEC("tp_btf/sched_process_exec") `int``handle_exec``(``struct``trace_event_raw_sched_process_exec``*``ctx``)`
+SEC("tp_btf/sched_process_exec") `int` `handle_exec``(``struct` `trace_event_raw_sched_process_exec` `*``ctx``)`
 ```
 
  ``As you can see, the structure name matches the tracepoint name, prefixed with `trace_event_raw_`.``  ``## User Space Attachments
@@ -264,11 +266,11 @@ SEC("uprobe/usr/lib/aarch64-linux-gnu/libssl.so.3/SSL_write")
 
 *   Containers typically run with their own copy of a filesystem, with their own set of dependencies installed in it. The path to a shared library used by a container won’t be the same as the path to a shared library on the host machine.
 
-*   Your eBPF program might need to be aware of the language in which an application was written. For example, in C the arguments to a function are generally passed using registers, but in Go they are passed using the stack,³ so the `pt_args` structure holding register information may be of less use.
+*   Your eBPF program might need to be aware of the language in which an application was written. For example, in C the arguments to a function are generally passed using registers, but in Go they are passed using the stack,^([3](ch07.xhtml#ch07fn3)) so the `pt_args` structure holding register information may be of less use.
 
 That said, there are lots of useful tools that instrument user space applications with eBPF. For example, you can hook into the SSL library to trace out decrypted versions of encrypted information—we’ll explore this in more detail in the next chapter. Another example is continuous profiling of your applications, using tools such as [Parca](https://www.parca.dev).`  `## LSM
 
-`BPF_PROG_TYPE_LSM` programs are attached to the *Linux Security Module (LSM) API*, which is a stable interface within the kernel originally intended for kernel modules to use to enforce security policies. As you’ll see in [Chapter 9](ch09.html#ebpf_for_security), where I’ll discuss this in more detail, eBPF security tooling can now use this interface too.
+`BPF_PROG_TYPE_LSM` programs are attached to the *Linux Security Module (LSM) API*, which is a stable interface within the kernel originally intended for kernel modules to use to enforce security policies. As you’ll see in [Chapter 9](ch09.xhtml#ebpf_for_security), where I’ll discuss this in more detail, eBPF security tooling can now use this interface too.
 
 `BPF_PROG_TYPE_LSM` programs are attached using `bpf(BPF_RAW_TRACEPOINT_OPEN)`, and in many ways they are treated like tracing programs. One interesting characteristic of `BPF_PROG_TYPE_LSM` programs is that the return value affects the way the kernel behaves. A nonzero return code indicates that the security check wasn’t passed, so the kernel won’t proceed with whatever operation it was asked to complete. This is a significant difference from perf-related program types where the return code is ignored.
 
@@ -276,21 +278,21 @@ That said, there are lots of useful tools that instrument user space application
 
 The Linux kernel documentation covers [LSM BPF programs](https://oreil.ly/vcPHY).
 
-The LSM program type isn’t the only one with a role to play in security. Many of the networking-related program types that you’ll see in the next section can be used for network security to permit or deny networking traffic or networking-related operations. You’ll also see more about eBPF being used for security purposes in [Chapter 9](ch09.html#ebpf_for_security).
+The LSM program type isn’t the only one with a role to play in security. Many of the networking-related program types that you’ll see in the next section can be used for network security to permit or deny networking traffic or networking-related operations. You’ll also see more about eBPF being used for security purposes in [Chapter 9](ch09.xhtml#ebpf_for_security).
 
 So far in this chapter you have seen how a set of kernel and user space tracing program types enable visibility over the whole system. The next set of eBPF program types to consider are those that let us hook into the network stack, with the option not merely to observe but also to affect how it handles data being sent and received.```cpp```````cpp``  ```# Networking
 
-There are lots of different eBPF program types intended to process network messages as they pass through various points in the network stack. Figure 7-1 shows where some of the commonly used program types attach. These program types all require `CAP_NET_ADMIN` and `CAP_BPF`, or `CAP_SYS_ADMIN`, capabilities to be permitted.
+There are lots of different eBPF program types intended to process network messages as they pass through various points in the network stack. [Figure 7-1](#bpf_program_types_hook_into_various_poi) shows where some of the commonly used program types attach. These program types all require `CAP_NET_ADMIN` and `CAP_BPF`, or `CAP_SYS_ADMIN`, capabilities to be permitted.
 
 The context passed to these types of programs is the network message in question, although the type of structure depends on the data the kernel has at the relevant point in the network stack. At the bottom of the stack, data is held in the form of Layer 2 network packets, which are essentially a series of bytes that have been or are ready to be transmitted “on the wire.” At the top of the stack, applications use sockets, and the kernel creates socket buffers to handle data being sent and received from these sockets.
 
-![BPF program types hook into various points in the network stack](img/lebp_0701.png)
+![BPF program types hook into various points in the network stack](assets/lebp_0701.png)
 
 ###### Figure 7-1\. BPF program types hook into various points in the network stack
 
 ###### Note
 
-The network layer model is beyond the scope of this book, but it’s covered in many other books, posts, and training courses. I discussed it in [Chapter 10](ch10.html#ebpf_programming) of [*Container Security*](https://www.oreilly.com/library/view/container-security/9781492056690/) (O’Reilly). For the purposes of this book, it’s sufficient to know that Layer 7 covers formats intended for applications to use, such as HTTP, DNS, or gRPC; TCP is at Layer 4; IP is at Layer 3; and Ethernet and WiFi are at Layer 2\. One of the roles of the networking stack is to convert messages between these different formats.
+The network layer model is beyond the scope of this book, but it’s covered in many other books, posts, and training courses. I discussed it in [Chapter 10](ch10.xhtml#ebpf_programming) of [*Container Security*](https://www.oreilly.com/library/view/container-security/9781492056690/) (O’Reilly). For the purposes of this book, it’s sufficient to know that Layer 7 covers formats intended for applications to use, such as HTTP, DNS, or gRPC; TCP is at Layer 4; IP is at Layer 3; and Ethernet and WiFi are at Layer 2\. One of the roles of the networking stack is to convert messages between these different formats.
 
 One big difference between the networking program types and the tracing-related types you saw earlier in this chapter is that they are generally intended to allow for the customization of networking behaviors. That involves two main characteristics:
 
@@ -318,7 +320,7 @@ eBPF programs can be attached to provide custom filters and classifiers for netw
 
 ## XDP
 
-You briefly met XDP (eXpress Data Path) eBPF programs in [Chapter 3](ch03.html#anatomy_of_an_ebpf_program). In that example I loaded the eBPF program and attached it to the `eth0` interface using the following commands:
+You briefly met XDP (eXpress Data Path) eBPF programs in [Chapter 3](ch03.xhtml#anatomy_of_an_ebpf_program). In that example I loaded the eBPF program and attached it to the `eth0` interface using the following commands:
 
 ```cpp
 
@@ -328,7 +330,7 @@ bpftool net attach xdp id 540 dev eth0
 
 ```
 
-It’s worth noting that XDP programs attach to a specific interface (or virtual interface), and you may very well have different XDP programs attached to different interfaces. In [Chapter 8](ch08.html#ebpf_for_networking) you’ll learn more about how XDP programs can be offloaded to network cards or executed by network drivers.
+It’s worth noting that XDP programs attach to a specific interface (or virtual interface), and you may very well have different XDP programs attached to different interfaces. In [Chapter 8](ch08.xhtml#ebpf_for_networking) you’ll learn more about how XDP programs can be offloaded to network cards or executed by network drivers.
 
 XDP programs are another example of programs that can be managed using Linux network utilities—in this case, the `link` subcommand of [iproute2’s ip](https://oreil.ly/8Isau). The roughly equivalent command for loading and attaching the program to `eth0` would be this:
 
@@ -438,8 +440,8 @@ libbpf：内核错误消息：XDP 程序已附加
 
 ```
 
-¹ Except for a few parts of the kernel where kprobes aren’t permitted for security reasons. These are listed in `/sys/kernel/debug/kprobes/blacklist`.
+^([1](ch07.xhtml#ch07fn1-marker)) Except for a few parts of the kernel where kprobes aren’t permitted for security reasons. These are listed in `/sys/kernel/debug/kprobes/blacklist`.
 
-² The only example I have seen so far is in the [cilium/ebpf test suite](https://oreil.ly/rL5E8).
+^([2](ch07.xhtml#ch07fn2-marker)) The only example I have seen so far is in the [cilium/ebpf test suite](https://oreil.ly/rL5E8).
 
-³ Up to Go version 1.17, when a new register-based calling convention was introduced. Nevertheless, I think there will be Go executables built with older versions circulating for some time to come.```
+^([3](ch07.xhtml#ch07fn3-marker)) Up to Go version 1.17, when a new register-based calling convention was introduced. Nevertheless, I think there will be Go executables built with older versions circulating for some time to come.```
