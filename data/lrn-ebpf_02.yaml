@@ -1,0 +1,1535 @@
+- en: Chapter 2\. eBPF’s “Hello World”
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第2章\. eBPF的“Hello World”
+- en: In the previous chapter I discussed why eBPF is so powerful, but it’s OK if
+    you don’t yet feel you have a concrete grasp of what it really means to run eBPF
+    programs. In this chapter I’ll use a simple “Hello World” example to give you
+    a better feel for it.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在前一章中，我讨论了为什么eBPF如此强大，但如果您还没有对运行eBPF程序的真正含义有一个具体的理解，这也是可以的。在本章中，我将使用一个简单的“Hello
+    World”示例来让您更好地理解它。
+- en: 'As you’ll learn while you read through this book, there are several different
+    libraries and frameworks for writing eBPF applications. As a warm-up, I’ll show
+    you what is probably the most accessible approach from a programming point of
+    view: the [BCC Python framework](https://github.com/iovisor/bcc). This offers
+    a very easy way to write basic eBPF programs. For reasons that I’ll cover in [Chapter 5](ch05.html#co_recomma_btfcomma_and_libbpf),
+    it’s not necessarily an approach I would recommend these days for production apps
+    that you’re intending to distribute to other users, but it’s great for taking
+    your first steps.'
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您在阅读本书时将会了解的那样，有几种不同的库和框架可用于编写eBPF应用程序。作为一个热身，我将向您展示可能是从编程角度来看最容易的方法：[BCC
+    Python框架](https://github.com/iovisor/bcc)。这提供了一个非常简单的方式来编写基本的eBPF程序。出于我将在[第5章](ch05.html#co_recomma_btfcomma_and_libbpf)中讨论的原因，这不一定是我建议今天为打算分发给其他用户的生产应用程序选择的方法，但对于初学者来说非常适合。
+- en: Note
+  id: totrans-3
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: If you want to try this code for yourself, it is available at [*https://github.com/lizrice/learning-ebpf*](https://github.com/lizrice/learning-ebpf)
+    in the *chapter2* directory.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想尝试这段代码，可以在[*https://github.com/lizrice/learning-ebpf*](https://github.com/lizrice/learning-ebpf)的*chapter2*目录中找到它。
+- en: You’ll find the BCC project at [*https://github.com/iovisor/bcc*](https://github.com/iovisor/bcc),
+    and the instructions for installing BCC are at [*https://github.com/iovisor/bcc/blob/master/INSTALL.md*](https://github.com/iovisor/bcc/blob/master/INSTALL.md).
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将在[*https://github.com/iovisor/bcc*](https://github.com/iovisor/bcc)找到BCC项目，并且安装BCC的说明在[*https://github.com/iovisor/bcc/blob/master/INSTALL.md*](https://github.com/iovisor/bcc/blob/master/INSTALL.md)。
+- en: BCC’s “Hello World”
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BCC的“Hello World”
+- en: 'The following is the full source code of *hello.py*, an eBPF “Hello World”
+    application^([1](ch02.html#ch02fn1)) written using BCC’s Python library:'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面是使用BCC的Python库编写的eBPF“Hello World”应用程序^([1](ch02.html#ch02fn1))的完整源代码*hello.py*：
+- en: '[PRE0]'
+  id: totrans-8
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'This code consists of two parts: the eBPF program itself that will run in the
+    kernel, and some user space code that loads the eBPF program into the kernel and
+    reads out the trace that it generates. As you can see in [Figure 2-1](#the_user_space_and_kernel_components_of),
+    *hello.py* is the user space part of this application, and `hello()` is the eBPF
+    program that runs in the kernel.'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该代码包括两部分：将在内核中运行的eBPF程序本身，以及将eBPF程序加载到内核并读取其生成的跟踪的一些用户空间代码。正如您在[图 2-1](#the_user_space_and_kernel_components_of)中所看到的，*hello.py*是此应用程序的用户空间部分，`hello()`是运行在内核中的eBPF程序。
+- en: '![The user space and kernel components of “Hello World”](assets/lebp_0201.png)'
+  id: totrans-10
+  prefs: []
+  type: TYPE_IMG
+  zh: '![“Hello World”的用户空间和内核组件](assets/lebp_0201.png)'
+- en: Figure 2-1\. The user space and kernel components of “Hello World”
+  id: totrans-11
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-1\. “Hello World”的用户空间和内核组件
+- en: Let’s dig into each line of the source code to understand it better.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们逐行分析源代码，以更好地理解它。
+- en: The first line tells you this is Python code, and the program that can run it
+    is the Python interpreter (*/usr/bin/python*).
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一行告诉您这是Python代码，可以运行它的程序是Python解释器（*/usr/bin/python*）。
+- en: 'The eBPF program itself is written in C code, and it’s this part:'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF程序本身是用C代码编写的，它就是这部分：
+- en: '[PRE1]'
+  id: totrans-15
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: All the eBPF program does is use a helper function, `bpf_trace_printk()`, to
+    write a message. Helper functions are another feature that distinguishes “extended”
+    BPF from its “classic” predecessor. They are a set of functions that eBPF programs
+    can call to interact with the system; I’ll discuss them further in [Chapter 5](ch05.html#co_recomma_btfcomma_and_libbpf).
+    For now you can just think of this as printing a line of text.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有eBPF程序要做的就是使用一个辅助函数`bpf_trace_printk()`来写入消息。辅助函数是区分其“经典”前身的“扩展”BPF的另一个特征。它们是eBPF程序可以调用以与系统交互的一组函数；我将在[第5章](ch05.html#co_recomma_btfcomma_and_libbpf)进一步讨论它们。现在你可以简单地把它看作是打印一行文本。
+- en: 'The entire eBPF program is defined as a string called `program` in the Python
+    code. This C program needs to be compiled before it can be executed, but BCC takes
+    care of that for you. (You’ll see how to compile eBPF programs yourself in the
+    next chapter.) All you need to do is pass this string as a parameter when creating
+    a BPF object, as in the following line:'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 整个eBPF程序在Python代码中定义为一个名为`program`的字符串。这个C程序在执行之前需要编译，但是BCC会为你处理这一切。（在下一章中，你将看到如何自己编译eBPF程序。）你只需要在创建BPF对象时将这个字符串作为参数传递即可，如下一行所示：
+- en: '[PRE2]'
+  id: totrans-18
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'eBPF programs need to be attached to an event, and for this example I’ve chosen
+    to attach to the system call `execve`, which is the syscall used to execute a
+    program. Whenever anything or anyone starts a new program executing on this machine,
+    that will call `execve()`, which will trigger the eBPF program. Although the “execve()”
+    name is a standard interface in Linux, the name of the function that implements
+    it in the kernel depends on the chip architecture, but BCC gives us a convenient
+    way to look up the function name for the machine we’re running on:'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF程序需要附加到一个事件上，例如我选择了附加到系统调用`execve`上，这是用于执行程序的系统调用。无论在这台机器上的任何事物或任何人启动新程序执行，都将调用`execve()`，这将触发eBPF程序。尽管“execve()”在Linux中是一个标准接口名称，但实现它的内核函数名称取决于芯片架构，但BCC为我们提供了一种便捷的方法来查找正在运行的机器的函数名称：
+- en: '[PRE3]'
+  id: totrans-20
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Now, `syscall` represents the name of the kernel function I’m going to attach
+    to, using a kprobe (you were introduced to the concept of kprobes in [Chapter 1](ch01.html#what_is_ebpf_and_why_is_it_importantque)).^([2](ch02.html#ch02fn2))
+    You can attach the `hello` function to that event, like this:'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，`syscall`表示我要附加到的内核函数的名称，我将使用kprobe（你在[第1章](ch01.html#what_is_ebpf_and_why_is_it_importantque)中已经介绍过kprobe的概念）。^([2](ch02.html#ch02fn2))你可以像这样将`hello`函数附加到该事件上：
+- en: '[PRE4]'
+  id: totrans-22
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'At this point, the eBPF program is loaded into the kernel and attached to an
+    event, so the program will be triggered whenever a new executable gets launched
+    on the machine. All that’s left to do in the Python code is to read the tracing
+    that is output by the kernel and write it on the screen:'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到此为止，eBPF程序已加载到内核并附加到一个事件上，因此每当在机器上启动新的可执行程序时，程序就会被触发。在Python代码中，唯一剩下的就是读取内核输出的跟踪信息并将其显示在屏幕上：
+- en: '[PRE5]'
+  id: totrans-24
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: This `trace_print()` function will loop indefinitely (until you stop the program,
+    perhaps with Ctrl+C), displaying any trace.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此`trace_print()`函数将无限循环（直到你用Ctrl+C停止程序），显示任何跟踪信息。
+- en: '[Figure 2-2](#quotation_markhello_worldquotation_mark) illustrates this code.
+    The Python program compiles the C code, loads it into the kernel, and attaches
+    it to the `execve` syscall kprobe. Whenever any application on this (virtual)
+    machine calls `execve()`, it triggers the eBPF `hello()` program, which writes
+    a line of trace into a specific pseudofile. (I’ll cover where that pseudofile
+    is later in this chapter.) The Python program reads the trace message from the
+    pseudofile and displays it to the user.'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图2-2](#quotation_markhello_worldquotation_mark)展示了这段代码。Python程序编译了C代码，将其加载到内核，并将其附加到`execve`系统调用的kprobe上。每当这台（虚拟）机器上的任何应用程序调用`execve()`时，它都会触发eBPF的`hello()`程序，后者将跟踪消息写入特定的伪文件中。（稍后在本章中我将介绍该伪文件的位置。）Python程序从伪文件中读取跟踪消息并将其显示给用户。'
+- en: '![“Hello World” in operation](assets/lebp_0202.png)'
+  id: totrans-27
+  prefs: []
+  type: TYPE_IMG
+  zh: '![“Hello World”的操作](assets/lebp_0202.png)'
+- en: Figure 2-2\. “Hello World” in operation
+  id: totrans-28
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图2-2. “Hello World”的操作
+- en: Running “Hello World”
+  id: totrans-29
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 运行“Hello World”
+- en: 'Run this program, and depending on what is happening on the (virtual) machine
+    you’re using, you might see tracing being generated straightaway, because other
+    processes could be executing programs^([3](ch02.html#ch02fn3)) with the `execve`
+    syscall. If you don’t see anything, open a second terminal and execute any commands
+    you like,^([4](ch02.html#ch02fn4)) and you’ll see the corresponding trace generated
+    by “Hello World”:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行这个程序，根据你使用的（虚拟）机器上正在发生的情况，你可能会立即看到生成的跟踪，因为其他进程可能会使用`execve`系统调用执行程序^([3](ch02.html#ch02fn3))。如果你没有看到任何内容，请打开第二个终端并执行任何你喜欢的命令^([4](ch02.html#ch02fn4))，你将看到由“Hello
+    World”生成的相应跟踪：
+- en: '[PRE6]'
+  id: totrans-31
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: Note
+  id: totrans-32
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Since eBPF is so powerful, it requires special privileges to use it. Privileges
+    are automatically assigned to the root user, so the easiest way to run eBPF programs
+    is as root, perhaps by using `sudo`. For clarity I won’t include `sudo` in the
+    example commands in this book, but if you ever see an “Operation not permitted”
+    error, the first thing to check is whether you’re trying to run eBPF programs
+    as an unprivileged user.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于 eBPF 非常强大，使用它需要特殊权限。特权会自动分配给 root 用户，所以以 root 用户身份运行 eBPF 程序是最简单的方式，可以使用
+    `sudo`。为了清晰起见，在本书的示例命令中我不会包括 `sudo`，但是如果你看到“操作不允许”错误，首先要检查的是你是否试图以非特权用户身份运行 eBPF
+    程序。
+- en: '`CAP_BPF` was introduced in kernel version 5.8, and it gives sufficient privilege
+    to perform some eBPF operations like creating certain types of map. However, you
+    will probably need additional capabilities:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`CAP_BPF` 是在内核版本 5.8 中引入的，它允许执行一些 eBPF 操作，如创建特定类型的映射。但是，你可能需要额外的特权：'
+- en: '`CAP_PERFMON` and `CAP_BPF` are both required to load tracing programs.'
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`CAP_PERFMON` 和 `CAP_BPF` 都是加载跟踪程序所需的权限。'
+- en: '`CAP_NET_ADMIN` and `CAP_BPF` are both required for loading networking programs.'
+  id: totrans-36
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`CAP_NET_ADMIN` 和 `CAP_BPF` 都是加载网络程序所需的权限。'
+- en: There is a lot more detail on this in the blog post [“Introduction to CAP_BPF”](https://oreil.ly/G2zFO)
+    by Milan Landaverde.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Milan Landaverde 的博客文章 [“Introduction to CAP_BPF”](https://oreil.ly/G2zFO)
+    中有更详细的信息。
+- en: 'As soon as the *hello* eBPF program is loaded and attached to an event, it
+    gets triggered by events that are being generated from preexisting processes.
+    This should reinforce a couple of points that you learned in [Chapter 1](ch01.html#what_is_ebpf_and_why_is_it_importantque):'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦 *hello* eBPF 程序被加载并附加到一个事件上，它就会被从已存在进程中生成的事件触发。这应该强化你在 [第一章](ch01.html#what_is_ebpf_and_why_is_it_importantque)
+    中学到的一些要点：
+- en: eBPF programs can be used to dynamically change the behavior of the system.
+    There’s no need to reboot the machine or restart existing processes. eBPF code
+    starts taking effect as soon as it is attached to an event.
+  id: totrans-39
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: eBPF 程序可以动态改变系统的行为。不需要重新启动机器或者重新启动现有进程。一旦 eBPF 代码附加到事件上，它就会立即开始生效。
+- en: There’s no need to change anything about other applications for them to be visible
+    to eBPF. Wherever you have terminal access on that machine, if you run an executable
+    in it, that will use the `execve()` syscall, and if you have the *hello* program
+    attached to that syscall, it will be triggered to generate tracing output. Likewise,
+    if you have a script that runs executables, that will also trigger the *hello*
+    eBPF program. You don’t need to change anything about the terminal’s shell, the
+    script, or the executables you’re running.
+  id: totrans-40
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 不需要改变其他应用程序的任何内容，它们就能被 eBPF 看到。只要你在该机器上有终端访问权限，在其中运行可执行文件时，它将使用 `execve()` 系统调用；如果你将
+    *hello* 程序附加到该系统调用上，它将被触发以生成跟踪输出。同样，如果你有一个运行可执行文件的脚本，那也会触发 *hello* eBPF 程序。你不需要改变终端的
+    shell、脚本或者你运行的可执行文件。
+- en: The trace output shows not only the `"Hello World`" string, but also some additional
+    contextual information about the event that triggered the *hello* eBPF program
+    to run. In the example output shown at the beginning of this section, the process
+    that made the `execve` system call had a process ID of 5412, and it was running
+    the command `bash`. For trace messages, this contextual information is added as
+    part of the kernel tracing infrastructure (which isn’t specific to eBPF), but
+    as you’ll see later in this chapter, it’s also possible to retrieve contextual
+    information like this within the eBPF program itself.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 跟踪输出不仅显示了 `"Hello World"` 字符串，还显示了触发 *hello* eBPF 程序运行的事件的一些额外上下文信息。在本节开头显示的示例输出中，执行
+    `execve` 系统调用的进程的进程 ID 是 5412，并且正在运行 `bash` 命令。对于跟踪消息，这些上下文信息是作为内核跟踪基础设施的一部分添加的（这并不特定于
+    eBPF），但是后面你将看到，在 eBPF 程序内部也可以检索到类似的上下文信息。
+- en: 'You might be wondering how the Python code knows where to read the tracing
+    output from. The answer is not very sophisticated—the `bpf_trace_printk()` helper
+    function in the kernel always sends output to the same predefined pseudofile location:
+    */sys/kernel/debug/tracing/trace_pipe*. You can confirm this by using `cat` to
+    view its contents; you’ll need root privileges to access it.'
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 也许你想知道 Python 代码是如何知道从哪里读取跟踪输出的。答案并不复杂——内核中的 `bpf_trace_printk()` 辅助函数始终将输出发送到同一预定义的伪文件位置：*/sys/kernel/debug/tracing/trace_pipe*。你可以使用
+    `cat` 命令查看其内容；需要 root 权限来访问它。
+- en: A single trace pipe location is fine for a simple “Hello World” example or for
+    basic debugging purposes, but it’s very limited. There is very little flexibility
+    in the format of the output, and it only supports the output of strings, so it’s
+    not terribly useful for passing structured information. Perhaps most importantly,
+    there is just this one location on the (virtual) machine. If you had multiple
+    eBPF programs running simultaneously, they would all write trace output to the
+    same trace pipe, which could get very confusing for a human operator.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于简单的“Hello World”示例或基本的调试目的，单个跟踪管道位置就足够了，但其功能非常有限。输出格式的灵活性非常小，仅支持字符串输出，因此对于传递结构化信息并不是非常有用。也许最重要的是，在（虚拟）机器上只有这一个位置。如果同时运行多个
+    eBPF 程序，它们都会将跟踪输出写入同一个跟踪管道，这对于人类操作员来说可能会非常混乱。
+- en: 'There’s a much better way to get information out of an eBPF program: use an
+    eBPF map.'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从 eBPF 程序中获取信息的更好方法是使用 eBPF 映射。
+- en: BPF Maps
+  id: totrans-45
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPF 映射
+- en: A *map* is a data structure that can be accessed from an eBPF program and from
+    user space. Maps are one of the really significant features that distinguish extended
+    BPF from its classic predecessor. (You might think this would mean they are commonly
+    referred to as “eBPF maps,” but you’ll frequently see “BPF maps.” As is generally
+    the case, both terms are used interchangeably.)
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*映射*是一种数据结构，可以从 eBPF 程序和用户空间访问。映射是区分扩展 BPF 和其经典前身的一项非常重要的特性之一。（你可能会认为这意味着它们通常被称为“eBPF
+    映射”，但你经常会看到“BPF 映射”的用法。通常情况下，这两个术语可以互换使用。）'
+- en: 'Maps can be used to share data among multiple eBPF programs or to communicate
+    between a user space application and eBPF code running in the kernel. Typical
+    uses include the following:'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 映射可用于在多个 eBPF 程序之间共享数据，或在用户空间应用程序与运行在内核中的 eBPF 代码之间进行通信。典型用途包括以下内容：
+- en: User space writing configuration information to be retrieved by an eBPF program
+  id: totrans-48
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 用户空间编写配置信息以便由 eBPF 程序检索
+- en: An eBPF program storing state, for later retrieval by another eBPF program (or
+    a future run of the same program)
+  id: totrans-49
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一个 eBPF 程序存储状态，以便稍后由另一个 eBPF 程序检索（或同一个程序的未来运行）
+- en: An eBPF program writing results or metrics into a map, for retrieval by the
+    user space app that will present results
+  id: totrans-50
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一个 eBPF 程序将结果或指标写入一个映射，供用户空间应用程序检索并展示结果
+- en: There are various types of BPF maps defined in Linux’s [*uapi/linux/bpf.h* file](https://oreil.ly/1s1GM),
+    and there is some information about them in the [kernel docs](https://oreil.ly/5oUW7).
+    In general they are all key–value stores, and in this chapter you’ll see examples
+    of maps for hash tables, perf and ring buffers, and arrays of eBPF programs.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Linux 的[*uapi/linux/bpf.h*文件](https://oreil.ly/1s1GM)中定义了各种类型的 BPF 映射，并且[内核文档](https://oreil.ly/5oUW7)中也提供了一些相关信息。总体而言，它们都是键-值存储，并且在本章中你将看到用于哈希表、perf
+    和环形缓冲区以及 eBPF 程序数组的映射示例。
+- en: Some map types are defined as arrays, which always have a 4-byte index as the
+    key type; other maps are hash tables that can use some arbitrary data type as
+    the key.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些映射类型被定义为数组，其键类型始终为 4 字节索引；而其他映射则是可以使用任意数据类型作为键的哈希表。
+- en: There are map types that are optimized for particular types of operations, such
+    as [first-in-first-out queues](https://oreil.ly/VSoEp), [first-in-last-out stacks](https://oreil.ly/VSoEp),
+    [least-recently-used data storage](https://oreil.ly/vpsun), [longest-prefix matching](https://oreil.ly/hZ5aM),
+    and [Bloom filters](https://oreil.ly/DzCTK) (a probabilistic data structure designed
+    to provide very fast results on whether an element exists).
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有一些映射类型经过优化，用于特定类型的操作，比如[先进先出队列](https://oreil.ly/VSoEp)，[后进先出栈](https://oreil.ly/VSoEp)，[最近最少使用数据存储](https://oreil.ly/vpsun)，[最长前缀匹配](https://oreil.ly/hZ5aM)，以及[Bloom
+    过滤器](https://oreil.ly/DzCTK)（一种概率数据结构，旨在快速确定元素是否存在）。
+- en: Some eBPF map types hold information about specific types of objects. For example,
+    [sockmaps](https://oreil.ly/UUTHO) and [devmaps](https://oreil.ly/jzKYh) hold
+    information about sockets and network devices and are used by network-related
+    eBPF programs to redirect traffic. A program array map stores a set of indexed
+    eBPF programs, and (as you’ll see later in this chapter) this is used to implement
+    tail calls, where one program can call another. There’s even a [map-of-maps type](https://oreil.ly/038tN)
+    to support storing information about maps.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些 eBPF 映射类型保存特定类型对象的信息。例如，[sockmaps](https://oreil.ly/UUTHO) 和 [devmaps](https://oreil.ly/jzKYh)
+    保存套接字和网络设备的信息，被网络相关的 eBPF 程序用来重定向流量。程序数组映射存储一组索引化的 eBPF 程序，（后面你会看到）用于实现尾调用，其中一个程序可以调用另一个。甚至还有[映射类型的映射](https://oreil.ly/038tN)支持存储关于映射的信息。
+- en: Some map types have per-CPU variants, which is to say that the kernel uses a
+    different block of memory for each CPU core’s version of that map. This might
+    have you wondering about concurrency concerns for maps that are *not* per-CPU,
+    where multiple CPU cores could be accessing the same map simultaneously. Spin
+    lock support for (some) maps was added in kernel version 5.1, and we’ll return
+    to this subject in [Chapter 5](ch05.html#co_recomma_btfcomma_and_libbpf).
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有些映射类型有每个 CPU 变体，也就是说内核为每个 CPU 核心的该映射版本使用不同的内存块。这可能会让你担心那些不是每个 CPU 的映射，多个 CPU
+    核心同时访问同一映射的并发问题。内核版本 5.1 添加了对（某些）映射的自旋锁支持，我们将在[第 5 章](ch05.html#co_recomma_btfcomma_and_libbpf)中回到这个主题。
+- en: The next example (*chapter2/hello-map.py* in the [GitHub repository](https://github.com/lizrice/learning-ebpf))
+    shows some basic operations using a hash table map. It also demonstrates some
+    of BCC’s convenient abstractions that make it very easy to use maps.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一个示例（在[GitHub 仓库](https://github.com/lizrice/learning-ebpf)中的*chapter2/hello-map.py*）展示了使用散列表映射的一些基本操作。它还展示了一些
+    BCC 提供的便捷抽象，使得使用映射变得非常容易。
+- en: Hash Table Map
+  id: totrans-57
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 散列表映射
+- en: Like the previous example in this chapter, this eBPF program will be attached
+    to a kprobe at the entry to the `execve` system call. It’s going to populate a
+    hash table with key–value pairs, where the key is a user ID and the value is a
+    counter for the number of times `execve` is called by a process running under
+    that user ID. In practice, this example will show how many times each different
+    user has run programs.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与本章中前面的示例类似，这个 eBPF 程序将附加到 `execve` 系统调用的入口处。它将使用键-值对填充一个散列表，其中键是用户 ID，值是由该用户
+    ID 下的进程调用 `execve` 的次数计数器。在实际操作中，这个示例将展示每个不同用户运行程序的次数。
+- en: 'First, let’s look at the C code for the eBPF program itself:'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，让我们看看 eBPF 程序本身的 C 代码：
+- en: '[PRE7]'
+  id: totrans-60
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: '[![1](assets/1.png)](#code_id_2_1)'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_2_1)'
+- en: '`BPF_HASH()` is a BCC macro that defines a hash table map.'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_HASH()` 是一个 BCC 宏，用于定义散列表映射。'
+- en: '[![2](assets/2.png)](#code_id_2_2)'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_2_2)'
+- en: '`bpf_get_current_uid_gid()` is a helper function used to obtain the user ID
+    that is running the process that triggered this kprobe event. The user ID is held
+    in the lowest 32 bits of the 64-bit value that gets returned. (The top 32 bits
+    hold the group ID, but that part is masked out.)'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bpf_get_current_uid_gid()` 是一个帮助函数，用于获取触发此 kprobe 事件的进程的用户 ID。用户 ID 存储在返回的
+    64 位值的最低 32 位中。（最高的 32 位存储组 ID，但这部分被掩码掉了。）'
+- en: '[![3](assets/3.png)](#code_id_2_3)'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_2_3)'
+- en: Look for an entry in the hash table with a key matching the user ID. It returns
+    a pointer to the corresponding value in the hash table.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找散列表中键与用户 ID 匹配的条目。它返回指向散列表中相应值的指针。
+- en: '[![4](assets/4.png)](#code_id_2_4)'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#code_id_2_4)'
+- en: If there is an entry for this user ID, set the `counter` variable to the current
+    value in the hash table (pointed to by `p`). If there is no entry for this user
+    ID in the hash table, the pointer will be `0`, and the counter value will be left
+    at `0`.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果此用户 ID 的散列表中有条目，将 `counter` 变量设置为散列表中当前值（由 `p` 指向）。如果散列表中没有此用户 ID 的条目，指针将为
+    `0`，计数器值将保持为 `0`。
+- en: '[![5](assets/5.png)](#code_id_2_5)'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#code_id_2_5)'
+- en: Whatever the current counter value is, it gets incremented by one.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论当前计数器值是多少，它都会增加一。
+- en: '[![6](assets/6.png)](#code_id_2_6)'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#code_id_2_6)'
+- en: Update the hash table with the new counter value for this user ID.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更新散列表，使用新的计数器值更新此用户 ID。
+- en: 'Take a closer look at the lines of code that access the hash table:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 详细查看访问散列表的代码行：
+- en: '[PRE8]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'And later:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 稍后：
+- en: '[PRE9]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: If you’re thinking “that’s not proper C code!” you’re absolutely right. C doesn’t
+    support defining methods on structures like that.^([5](ch02.html#ch02fn5)) This
+    is a great example where BCC’s version of C is very loosely a C-like language
+    that BCC rewrites before it sends the code to the compiler. BCC offers some convenient
+    shortcuts and macros that it converts into “proper” C.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您认为“这不是正确的C代码！”您是完全正确的。C语言不支持在结构体上定义方法的方式。^([5](ch02.html#ch02fn5)) 这是一个很好的例子，BCC的C版本非常宽松地类似于C语言，BCC在将代码发送到编译器之前对其进行了重写。BCC提供了一些方便的快捷方式和宏，它们会转换为“正确”的C代码。
+- en: 'Just like in the previous example, the C code is defined as a string called
+    `program`. The program is compiled, loaded into the kernel, and attached to the
+    `execve` kprobe, in exactly the same way as the previous “Hello World” example:'
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就像前面的示例一样，C代码被定义为一个名为`program`的字符串。该程序被编译，加载到内核中，并附加到`execve` kprobe，与前面的“Hello
+    World”示例完全相同：
+- en: '[PRE10]'
+  id: totrans-79
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'This time a little more work is required on the Python side to read the information
+    out of the hash table:'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这次在Python侧需要更多的工作来从哈希表中读取信息：
+- en: '[PRE11]'
+  id: totrans-81
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: '[![1](assets/1.png)](#code_id_2_7)'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_2_7)'
+- en: This part of the code loops indefinitely, looking for output to display every
+    two seconds.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此代码部分无限循环，每两秒查找一次输出。
+- en: '[![2](assets/2.png)](#code_id_2_8)'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_2_8)'
+- en: BCC automatically creates a Python object to represent the hash table. This
+    code loops through any values and prints them to the screen.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BCC自动创建一个Python对象来表示哈希表。此代码循环遍历任何值并将其打印到屏幕上。
+- en: 'When you run this example, you’ll want a second terminal window where you can
+    run some commands. Here’s some example output I obtained, annotated on the right
+    side with the commands I ran in another terminal:'
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您运行此示例时，您会希望有第二个终端窗口，您可以在其中运行一些命令。右侧带有我在另一个终端中运行的命令的示例输出如下：
+- en: '[PRE12]'
+  id: totrans-87
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'This example generates a line of output every two seconds, whether anything
+    has happened or not. At the end of this output, the hash table contains two entries:'
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例每两秒生成一行输出，无论是否发生任何事件。在此输出结束时，哈希表包含两个条目：
+- en: '`key=501, value=5`'
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`key=501, value=5`'
+- en: '`key=0, value=2`'
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`key=0, value=2`'
+- en: 'In the second terminal, I have the user ID of 501\. Running the `ls` command
+    with this user ID increments the `execve` counter. When I run `sudo ls`, this
+    results in two calls to `execve`: one is the execution of `sudo`, under user ID
+    501; the other is the execution of `ls`, under root’s user ID of 0.'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在第二个终端中，我有用户ID为501。使用此用户ID运行`ls`命令会增加`execve`计数器。当我运行`sudo ls`时，会发生两次`execve`调用：一次是以用户ID
+    501执行`sudo`，另一次是以根用户ID 0执行`ls`。
+- en: In this example, I used a hash table to convey data from the eBPF program to
+    user space. (I could also have used an array type of map here, since the key was
+    an integer; hash tables let you use an arbitrary type as the key.) Hash tables
+    are very convenient when the data is naturally in key–value pairs, but the user
+    space code has to keep polling the table on a regular basis. The Linux kernel
+    already supported the [perf subsystem](https://oreil.ly/nTvvH) for sending data
+    from the kernel to user space, and eBPF includes support for using perf buffers
+    and their successor, BPF ring buffers. Let’s take a look.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此示例中，我使用哈希表将数据从eBPF程序传输到用户空间。（我也可以在此处使用数组类型的映射，因为键是整数；哈希表允许您使用任意类型作为键。）当数据自然处于键值对时，哈希表非常方便，但用户空间代码必须定期轮询表格。Linux内核已经支持从内核向用户空间发送数据的[perf子系统](https://oreil.ly/nTvvH)，而eBPF包括使用perf缓冲区及其后续BPF环形缓冲区的支持。让我们来看看。
+- en: Perf and Ring Buffer Maps
+  id: totrans-93
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Perf 和 Ring Buffer Maps
+- en: In this section I’m going to describe a slightly more sophisticated version
+    of “Hello World” that uses BCC’s `BPF_PERF_OUTPUT` capabilities, which let you
+    write data in a structure of your choosing into a perf ring buffer map.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我将描述一个稍微复杂的“Hello World”版本，它使用了BCC的`BPF_PERF_OUTPUT`功能，允许您将数据按您选择的结构写入到perf环形缓冲区映射中。
+- en: Note
+  id: totrans-95
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: There is a newer construct called “BPF ring buffers” that are now generally
+    preferred over BPF perf buffers, if you have a kernel of version 5.8 or above.
+    Andrii Nakryiko discusses the difference in his [BPF ring buffer](https://oreil.ly/ARRyV)
+    blog post. You’ll see an example of BCC’s `BPF_RINGBUF_OUTPUT` in [Chapter 4](ch04.html#the_bpfleft_parenthesisright_parenthesi).
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在有一种称为“BPF环形缓冲区”的新构造，如果您的内核版本为5.8或以上，通常优先于BPF perf缓冲区。Andrii Nakryiko在他的[BPF环形缓冲区](https://oreil.ly/ARRyV)博客文章中讨论了其中的区别。您将在第4章中看到BCC的`BPF_RINGBUF_OUTPUT`的示例。
+- en: You’ll find the source code for this example in *chapter2/hello-buffer.py* in
+    the *Learning eBPF* [GitHub repository](http://github.com/lizrice/learning-ebpf).
+    As in the first “Hello World” example you saw early in this chapter, this version
+    will write the string `"Hello World"` to the screen every time the `execve()`
+    syscall is used. It will also look up the process ID and the name of the command
+    that makes each `execve()` call so that you’ll get similar output to the first
+    example. This gives me the opportunity to show you a couple more examples of BPF
+    helper functions.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在 *Learning eBPF* [GitHub 仓库](http://github.com/lizrice/learning-ebpf) 的
+    *chapter2/hello-buffer.py* 中找到此示例的源代码。就像在本章早期看到的第一个“Hello World”示例一样，此版本每次使用 `execve()`
+    系统调用时都会向屏幕输出字符串 `"Hello World"`。它还会查找每次调用 `execve()` 的进程ID和命令名称，以便你得到类似于第一个示例的输出。这使我有机会展示一些更多的BPF辅助函数示例。
+- en: 'Here’s the eBPF program that will be loaded into the kernel:'
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面是将加载到内核中的 eBPF 程序：
+- en: '[PRE13]'
+  id: totrans-99
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: '[![1](assets/1.png)](#code_id_2_9)'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_2_9)'
+- en: BCC defines the macro `BPF_PERF_OUTPUT` for creating a map that will be used
+    to pass messages from the kernel to user space. I’ve called this map `output`.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BCC定义了宏 `BPF_PERF_OUTPUT`，用于创建一个映射，将从内核传递消息到用户空间。我将这个映射称为 `output`。
+- en: '[![2](assets/2.png)](#code_id_2_10)'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_2_10)'
+- en: Every time `hello()` is run, the code will write a structure’s worth of data.
+    This is the definition of that structure, which has fields for the process ID,
+    the name of the currently running command, and a text message.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每次运行 `hello()` 时，该代码将写入一个数据结构的数据。以下是该结构的定义，其中包含进程ID、当前运行命令的名称和文本消息。
+- en: '[![3](assets/3.png)](#code_id_2_11)'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_2_11)'
+- en: '`data` is a local variable that holds the data structure to be submitted, and
+    `message` holds the `"Hello World"` string.'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`data` 是一个保存要提交的数据结构的本地变量，`message` 包含字符串 `"Hello World"`。'
+- en: '[![4](assets/4.png)](#code_id_2_12)'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#code_id_2_12)'
+- en: '`bpf_get_current_pid_tgid()` is a helper function that gets the ID of the process
+    that triggered this eBPF program to run. It returns a 64-bit value with the process
+    ID in the top 32 bits.^([6](ch02.html#ch02fn6))'
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bpf_get_current_pid_tgid()` 是一个辅助函数，用于获取触发此 eBPF 程序运行的进程ID。它返回一个64位值，其中进程ID位于前32位中。^([6](ch02.html#ch02fn6))'
+- en: '[![5](assets/5.png)](#code_id_2_13)'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#code_id_2_13)'
+- en: '`bpf_get_current_uid_gid()` is the helper function you saw in the previous
+    example for obtaining the user ID.'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bpf_get_current_uid_gid()` 是你在前面示例中看到的获取用户ID的辅助函数。'
+- en: '[![6](assets/6.png)](#code_id_2_14)'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#code_id_2_14)'
+- en: Similarly, `bpf_get_current_comm()` is a helper function for getting the name
+    of the executable (or “command”) that’s running in the process that made the `execve`
+    syscall. This is a string, not a numeric value like the process and user IDs,
+    and in C you can’t simply assign a string using `=`. You have to pass the address
+    of the field where the string should be written, `&data.command`, as an argument
+    to the helper function.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 类似地，`bpf_get_current_comm()` 是一个辅助函数，用于获取进行 `execve` 系统调用的进程的可执行文件（或“命令”）名称。这是一个字符串，不像进程和用户ID那样是数值。在C语言中，你不能简单地使用
+    `=` 分配一个字符串。你必须将字符串应该写入的字段的地址 `&data.command` 作为辅助函数的参数传递。
+- en: '[![7](assets/7.png)](#code_id_2_15)'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![7](assets/7.png)](#code_id_2_15)'
+- en: For this example, the message is `"Hello World"` every time. `bpf_probe_read_kernel()`
+    copies it into the right place in the data structure.
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于这个例子，每次的消息都是 `"Hello World"`。`bpf_probe_read_kernel()` 将其复制到数据结构的正确位置。
+- en: '[![8](assets/8.png)](#code_id_2_16)'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![8](assets/8.png)](#code_id_2_16)'
+- en: At this point the data structure is populated with the process ID, command name,
+    and message. This call to `output.perf_submit()` puts that data into the map.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时数据结构已填充有进程ID、命令名称和消息。调用 `output.perf_submit()` 将这些数据放入映射中。
+- en: 'Just as in the first “Hello World” example, this C program is assigned to a
+    string called `program` in the Python code. What follows is the rest of the Python
+    code:'
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如在第一个“Hello World”示例中一样，此C程序被分配给Python代码中的一个名为 `program` 的字符串。接下来是Python代码的其余部分：
+- en: '[PRE14]'
+  id: totrans-117
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: '[![1](assets/1.png)](#code_id_2_17)'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_2_17)'
+- en: The lines that compile the C code, load it into the kernel, and attach it to
+    the syscall event are unchanged from the version of “Hello World” you saw earlier.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 编译C代码、将其加载到内核并将其附加到系统调用事件的代码行与之前的“Hello World”版本相同。
+- en: '[![2](assets/2.png)](#code_id_2_18)'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_2_18)'
+- en: '`print_event` is a callback function that will output a line of data to the
+    screen. BCC does some heavy lifting so that I can refer to the map simply as `b["output"]`
+    and grab data from it using `b["output"].event()`.'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`print_event` 是一个回调函数，将向屏幕输出一行数据。BCC 通过一些重活让我可以简单地将映射称为 `b["output"]` 并使用 `b["output"].event()`
+    从中获取数据。'
+- en: '[![3](assets/3.png)](#code_id_2_19)'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_2_19)'
+- en: '`b["output"].open_perf_buffer()` opens the perf ring buffer. The function takes
+    `print_event` as an argument to define that this is the callback function to be
+    used whenever there is data to read from the buffer.'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`b["output"].open_perf_buffer()` 打开性能环形缓冲区。该函数将 `print_event` 作为参数，用于定义每当从缓冲区读取数据时要使用的回调函数。'
+- en: '[![4](assets/4.png)](#code_id_2_20)'
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#code_id_2_20)'
+- en: The program will now loop indefinitely,^([7](ch02.html#ch02fn7)) polling the
+    perf ring buffer. If there is any data available, `print_event` will get called.
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 程序现在将无限循环，^([7](ch02.html#ch02fn7)) 轮询性能环形缓冲区。如果有任何数据可用，`print_event` 将被调用。
+- en: 'Running this code gives us output that’s fairly similar to the original “Hello
+    World”:'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行此代码会给我们提供一个与原始“Hello World”相似的输出：
+- en: '[PRE15]'
+  id: totrans-127
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: As before, you might need to open a second terminal to the same (virtual) machine
+    and run some commands to trigger some output.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与之前一样，您可能需要打开第二个终端到相同（虚拟）机器，并运行一些命令以触发一些输出。
+- en: The big difference between this and the original “Hello World” example is that
+    instead of using a single, central trace pipe, the data is now being passed via
+    a ring buffer map called `output` that was created by this program for its own
+    use, as shown in [Figure 2-4](#using_a_perf_ring_buffer_for_passing_da).
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这与原始的“Hello World”示例之间的主要区别在于，现在不再使用单一的中央跟踪管道，而是通过由此程序为自己使用创建的一个名为 `output`
+    的环形缓冲区映射来传递数据，如[图2-4](#using_a_perf_ring_buffer_for_passing_da)所示。
+- en: '![Using a perf ring buffer for passing data from the kernel to user space](assets/lebp_0204.png)'
+  id: totrans-130
+  prefs: []
+  type: TYPE_IMG
+  zh: '![使用性能环形缓冲区将数据从内核传递到用户空间](assets/lebp_0204.png)'
+- en: Figure 2-4\. Using a perf ring buffer for passing data from the kernel to user
+    space
+  id: totrans-131
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图2-4\. 使用性能环形缓冲区将数据从内核传递到用户空间
+- en: You can verify that the information isn’t going to the trace pipe by using `cat
+    /sys/kernel/debug/tracing/trace_pipe`.
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过使用 `cat /sys/kernel/debug/tracing/trace_pipe` 来验证信息是否不会发送到跟踪管道。
+- en: As well as demonstrating the use of a ring buffer map, this example shows some
+    eBPF helper functions for retrieving contextual information about the event that
+    triggered the eBPF program to run. Here you’ve seen helper functions getting the
+    user ID, the process ID, and the name of the current command. As you’ll see in
+    [Chapter 7](ch07.html#ebpf_program_and_attachment_types), the set of contextual
+    information that’s available and the set of valid helper functions that can be
+    used to retrieve it depend on what type of program it is and what event triggered
+    it.
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了演示环形缓冲区映射的使用外，此示例还展示了一些用于检索触发 eBPF 程序运行事件相关信息的 eBPF 辅助函数。在这里，您已经看到了一些辅助函数，用于获取用户
+    ID、进程 ID 和当前命令的名称。正如您将在[第7章](ch07.html#ebpf_program_and_attachment_types)中看到的那样，可用的上下文信息集和可用于检索它们的有效辅助函数集取决于程序类型及其触发事件。
+- en: The fact that contextual information like this is available to the eBPF code
+    is what makes it so valuable for observability. Whenever an event occurs, an eBPF
+    program can report not only the fact that the event happened but also relevant
+    information about what happened to trigger the event. It’s also highly performant,
+    since all this information can be gathered within the kernel, without the need
+    for any synchronous context switching to user space.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF 代码可以访问此类上下文信息的事实使其在可观察性方面非常有价值。每当事件发生时，eBPF 程序不仅可以报告事件发生的事实，还可以报告触发事件的相关信息。由于所有这些信息都可以在内核中收集，而无需进行任何同步的上下文切换到用户空间，因此它也具有高性能。
+- en: You’ll see further examples in this book where eBPF helper functions are used
+    to gather other contextual data, as well as examples where eBPF programs change
+    the contextual data or even block events from happening altogether.
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本书的后续示例中，您将看到更多使用 eBPF 辅助函数来收集其他上下文数据的示例，以及使用 eBPF 程序更改上下文数据甚至阻止事件发生的示例。
+- en: Function Calls
+  id: totrans-136
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 函数调用
+- en: 'You’ve seen that eBPF programs can call helper functions provided by the kernel,
+    but what if you want to split the code you’re writing into functions? Generally,
+    in software development it’s considered good practice^([8](ch02.html#ch02fn8))
+    to pull common code into a function that you can call from multiple places, rather
+    than duplicating the same lines over and over again. But in the early days, eBPF
+    programs were not permitted to call functions other than helper functions. To
+    work around this, programmers have directed the compiler to “always inline” their
+    functions, like this:'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经看到 eBPF 程序可以调用内核提供的帮助函数，但如果你想将正在编写的代码拆分为函数，该怎么办？一般来说，在软件开发中，将常见代码提取为函数以供多处调用被视为良好实践^([8](ch02.html#ch02fn8))，而不是一遍又一遍地复制相同的代码行。但在早期，除了帮助函数外，eBPF
+    程序不允许调用其他函数。为了解决这个问题，程序员们已经指示编译器“始终内联”它们的函数，就像这样：
+- en: '[PRE16]'
+  id: totrans-138
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Generally, a function in source code results in the compiler emitting a jump
+    instruction, which causes execution to jump to the set of instructions that make
+    up the called function (and then to jump back again when that function has completed).
+    You can see this illustrated on the left side of [Figure 2-5](#layout_of_noninlined_and_inlined_functi).
+    The right side shows what happens when a function is inlined: there is no jump
+    instruction; instead, a copy of the function’s instructions is emitted directly
+    within the calling function.'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常，源代码中的函数导致编译器生成跳转指令，该指令导致执行跳转到组成被调用函数的一组指令（并在该函数完成后再次跳回）。你可以在 [图 2-5](#layout_of_noninlined_and_inlined_functi)
+    的左侧看到这一点。右侧显示了内联函数时发生的情况：没有跳转指令；相反，函数的指令副本直接嵌入到调用函数中。
+- en: '![Layout of noninlined and inlined function instructions](assets/lebp_0205.png)'
+  id: totrans-140
+  prefs: []
+  type: TYPE_IMG
+  zh: '![非内联和内联函数指令的布局](assets/lebp_0205.png)'
+- en: Figure 2-5\. Layout of noninlined and inlined function instructions
+  id: totrans-141
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-5\. 非内联和内联函数指令的布局
+- en: If the function is called from multiple places, that results in multiple copies
+    of that function’s instructions in the compiled executable. (Sometimes the compiler
+    might choose to inline a function for optimization purposes, and that is one reason
+    why you might not be able to attach a kprobe to certain kernel functions. I’ll
+    come back to this in [Chapter 7](ch07.html#ebpf_program_and_attachment_types).)
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果该函数被多处调用，那么编译后的可执行文件中将包含多个该函数的指令副本。（有时编译器可能会选择内联函数以进行优化，这也是你可能无法附加 kprobe
+    到某些内核函数的原因之一。我会在 [第7章](ch07.html#ebpf_program_and_attachment_types) 中再次谈到这点。）
+- en: Starting from Linux kernel 4.16 and LLVM 6.0, the restriction requiring functions
+    to be inlined was lifted so that eBPF programmers could write function calls more
+    naturally. However, this feature, called “BPF to BPF function calls” or “BPF subprograms,”
+    isn’t currently supported by the BCC framework, so let’s come back to it in the
+    next chapter. (You can, of course, continue to use functions with BCC if they
+    are inlined.)
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从 Linux 内核 4.16 和 LLVM 6.0 开始，解除了函数必须内联的限制，以便 eBPF 程序员可以更自然地编写函数调用。然而，这一特性称为“BPF
+    到 BPF 函数调用”或“BPF 子程序”，目前不受 BCC 框架支持，我们将在下一章中再回到这一点。（当然，如果函数被内联，你仍然可以继续在 BCC 中使用函数。）
+- en: 'There is another mechanism for decomposing complex functionality into smaller
+    parts in eBPF: tail calls.'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF 中还有另一种将复杂功能分解为较小部分的机制：尾调用。
+- en: Tail Calls
+  id: totrans-145
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 尾调用
+- en: As described at [ebpf.io](https://oreil.ly/Loyuz), “tail calls can call and
+    execute another eBPF program and replace the execution context, similar to how
+    the `execve()` system call operates for regular processes.” In other words, execution
+    doesn’t return to the caller after a tail call completes.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如在 [ebpf.io](https://oreil.ly/Loyuz) 中描述的，“尾调用可以调用并执行另一个 eBPF 程序，并替换执行上下文，类似于
+    `execve()` 系统调用在常规进程中的操作。” 换句话说，执行在尾调用完成后不会返回给调用者。
+- en: Note
+  id: totrans-147
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: '[Tail calls](https://oreil.ly/cOA1r) are by no means exclusive to eBPF programming.
+    The general motivation behind tail calls is to avoid adding frames to the stack
+    over and over again as a function is called recursively, which can eventually
+    lead to stack overflow errors. If you can arrange your code to call a recursive
+    function as the last thing it does, the stack frame associated with the calling
+    function isn’t really doing anything useful. Tail calls allow for calling a series
+    of functions without growing the stack. This is particularly useful in eBPF where
+    the [stack is limited to 512 bytes](https://oreil.ly/SZmkd).'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[尾调用](https://oreil.ly/cOA1r)并不是eBPF编程专有的。尾调用的一般动机是避免在函数递归调用时一遍又一遍地向栈中添加帧，这最终可能导致栈溢出错误。如果能够安排代码在调用递归函数后作为最后一件事做尾调用，那么与调用函数相关联的栈帧实际上并没有做任何有用的事情。尾调用允许调用一系列函数而不会增长栈。在eBPF中特别有用，因为[栈限制为512字节](https://oreil.ly/SZmkd)。'
+- en: 'Tail calls are made using the `bpf_tail_call()` helper function, which has
+    the following signature:'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`bpf_tail_call()`辅助函数进行尾调用，其签名如下：
+- en: '[PRE17]'
+  id: totrans-150
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'The three arguments to this function have the following meanings:'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此函数的三个参数具有以下含义：
+- en: '`ctx` allows passing the context from the calling eBPF program to the callee.'
+  id: totrans-152
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`ctx`允许从调用eBPF程序传递上下文到被调用程序。'
+- en: '`prog_array_map` is an eBPF map of type `BPF_MAP_TYPE_PROG_ARRAY`, which holds
+    a set of file descriptors that identify eBPF programs.'
+  id: totrans-153
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`prog_array_map`是一个类型为`BPF_MAP_TYPE_PROG_ARRAY`的eBPF映射，其中包含用于标识eBPF程序的一组文件描述符。'
+- en: '`index` indicates which of that set of eBPF programs should be invoked.'
+  id: totrans-154
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`index`指示应调用那一组eBPF程序中的哪一个。'
+- en: This helper is somewhat unusual in that if it succeeds, it never returns. The
+    currently running eBPF program is replaced on the stack by the program being called.
+    The helper could fail, for example, if the indicated program doesn’t exist in
+    the map, in which case the calling program carries on executing.
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个辅助程序有些不同寻常，如果成功，它永远不会返回。当前运行的eBPF程序在栈上被调用的程序替换。如果指定的程序在映射中不存在，例如，辅助程序可能会失败，在这种情况下，调用程序继续执行。
+- en: User space code has to load all the eBPF programs into the kernel (as usual),
+    and it also sets up the program array map.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户空间代码必须将所有eBPF程序加载到内核中（像往常一样），并设置程序数组映射。
+- en: Let’s look at a simple example written in Python using BCC; you’ll find the
+    code in the [GitHub repo](http://github.com/lizrice/learning-ebpf) as *chapter2/hello-tail.py*.
+    The main eBPF program is attached to a tracepoint at the common entry point for
+    all syscalls. This program uses tail calls to trace out specific messages for
+    certain syscall opcodes. If there isn’t a tail call for a given opcode, the program
+    traces out a generic message.
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看一个简单的示例，使用BCC编写的Python代码；你可以在[GitHub存储库](http://github.com/lizrice/learning-ebpf)中找到这段代码，位于*chapter2/hello-tail.py*。主要的eBPF程序附加到了一个跟踪点，该跟踪点是所有系统调用的通用入口点。此程序使用尾调用来跟踪特定系统调用操作码的特定消息。如果对于给定的操作码没有尾调用，程序将跟踪一个通用消息。
+- en: 'If you’re using the BCC framework, to make a [tail call](https://oreil.ly/rT9e1)
+    you can use a line of the slightly simpler form:'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你正在使用BCC框架，为了进行[尾调用](https://oreil.ly/rT9e1)，可以使用略微简化的形式的代码行：
+- en: '[PRE18]'
+  id: totrans-159
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'Before passing the code to the compilation step, BCC will rewrite the preceding
+    line to this:'
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在将代码传递给编译步骤之前，BCC将重写上述行为：
+- en: '[PRE19]'
+  id: totrans-161
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Here is the source code for the eBPF program and its tail calls:'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面是eBPF程序及其尾调用的源代码：
+- en: '[PRE20]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: '[![1](assets/1.png)](#code_id_2_21)'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_2_21)'
+- en: BCC provides a `BPF_PROG_ARRAY` macro for easily defining maps of type `BPF_MAP_TYPE_PROG_ARRAY`.
+    I have called the map `syscall` and allowed for 300 entries,^([9](ch02.html#ch02fn9))
+    which is going to be sufficient for this example.
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BCC提供了一个`BPF_PROG_ARRAY`宏，用于轻松定义类型为`BPF_MAP_TYPE_PROG_ARRAY`的映射。我称这个映射为`syscall`，并允许300个条目，^([9](ch02.html#ch02fn9))
+    这对于这个示例来说已经足够了。
+- en: '[![2](assets/2.png)](#code_id_2_22)'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_2_22)'
+- en: In the user space code that you’ll see shortly, I’m going to attach this eBPF
+    program to the `sys_enter` raw tracepoint, which gets hit whenever any syscall
+    is made. The context passed to an eBPF program attached to a raw tracepoint takes
+    the form of this `bpf_raw_tracepoint_args` structure.
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在即将看到的用户空间代码中，我将把这个eBPF程序附加到`sys_enter`原始跟踪点上，每当进行任何系统调用时都会触发。传递给附加到原始跟踪点的eBPF程序的上下文采用`bpf_raw_tracepoint_args`结构的形式。
+- en: '[![3](assets/3.png)](#code_id_2_23)'
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_2_23)'
+- en: In the case of `sys_enter`, the raw tracepoint arguments include the opcode
+    identifying which syscall is being made.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于`sys_enter`，原始跟踪点参数包括标识正在进行的系统调用的操作码。
+- en: '[![4](assets/4.png)](#code_id_2_24)'
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#code_id_2_24)'
+- en: Here we make a tail call to the entry in the program array whose key matches
+    the opcode. This line of code will be rewritten by BCC to a call to the `bpf_tail_call()`
+    helper function before it passes the source code to the compiler.
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这里，我们对与操作码匹配的程序数组条目进行了一个尾调用。在将源代码传递给编译器之前，BCC将此行代码重写为对`bpf_tail_call()`辅助函数的调用。
+- en: '[![5](assets/5.png)](#code_id_2_25)'
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#code_id_2_25)'
+- en: If the tail call succeeds, this line tracing out the opcode value will never
+    be hit. I’ve used this to provide a default line of trace for opcodes for which
+    there isn’t a program entry in the map.
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果尾调用成功，将不会执行此行跟踪操作码值的代码行。我已经用它来为映射中没有程序入口的操作码提供一个默认的追踪行。
+- en: '[![6](assets/6.png)](#code_id_2_26)'
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#code_id_2_26)'
+- en: '`hello_exec()` is a program that will be loaded into the syscall program array
+    map, to be executed as a tail call when the opcode indicates it’s an `execve()`
+    syscall. It’s just going to generate a line of trace to tell the user a new program
+    is being executed.'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`hello_exec()`是一个将加载到系统调用程序数组映射中的程序，在操作码指示为`execve()`系统调用时作为尾调用执行。它只会生成一行追踪，告诉用户正在执行一个新程序。'
+- en: '[![7](assets/7.png)](#code_id_2_27)'
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![7](assets/7.png)](#code_id_2_27)'
+- en: '`hello_timer()` is another program that will be loaded into the syscall program
+    array. In this case it’s going to be referred to by more than one entry in the
+    program array.'
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`hello_timer()`是另一个将加载到系统调用程序数组中的程序。在这种情况下，它将被多个程序数组条目引用。'
+- en: '[![8](assets/8.png)](#code_id_2_28)'
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![8](assets/8.png)](#code_id_2_28)'
+- en: '`ignore_opcode()` is a tail call program that does nothing. I’ll use this for
+    syscalls where I don’t want any trace to be generated at all.'
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ignore_opcode()`是一个什么都不做的尾调用程序。我会将其用于那些我完全不想生成任何追踪的系统调用。'
+- en: 'Now let’s look at the user space code that loads and manages this set of eBPF
+    programs:'
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看加载和管理这组eBPF程序的用户空间代码：
+- en: '[PRE21]'
+  id: totrans-181
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: '[![1](assets/1.png)](#code_id_2_29)'
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_2_29)'
+- en: Instead of attaching to a kprobe, as you saw earlier, this time the user space
+    code attaches the main eBPF program to the `sys_enter` tracepoint.
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与之前看到的连接到kprobe不同，这次用户空间代码将主eBPF程序连接到了`sys_enter`跟踪点。
+- en: '[![2](assets/2.png)](#code_id_2_30)'
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_2_30)'
+- en: These calls to `b.load_func()` return a file descriptor for each tail call program.
+    Notice that tail calls need to have the same program type as their parent—`BPF.RAW_TRACEPOINT`
+    in this case. Also, it bears pointing out that each tail call program is an eBPF
+    program in its own right.
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些对`b.load_func()`的调用每次都返回一个尾调用程序的文件描述符。请注意，尾调用需要与其父程序具有相同的程序类型——在本例中是`BPF.RAW_TRACEPOINT`。此外，需要指出的是，每个尾调用程序本身就是一个独立的eBPF程序。
+- en: '[![3](assets/3.png)](#code_id_2_31)'
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_2_31)'
+- en: The user space code creates entries in the `syscall` map. The map doesn’t have
+    to be fully populated for every possible opcode; if there is no entry for a particular
+    opcode, it simply means no tail call will be executed. Also, it’s perfectly fine
+    to have multiple entries that point to the same eBPF program. In this case, I
+    want the `hello_timer()` tail call to be executed for any of a set of timer-related
+    syscalls.
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户空间代码会在`syscall`映射中创建条目。映射不必为每个可能的操作码完全填充；如果某个特定操作码没有条目，那就意味着不会执行任何尾调用。此外，有多个条目指向同一个eBPF程序也是完全合理的。在这种情况下，我希望`hello_timer()`尾调用能够对一组与定时器相关的系统调用中的任何一个执行。
+- en: '[![4](assets/4.png)](#code_id_2_32)'
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#code_id_2_32)'
+- en: Some syscalls get run so frequently by the system that a line of trace for each
+    of them clutters up the trace output to the point of unreadability. I’ve used
+    the `ignore_opcode()` tail call for several syscalls.
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 某些系统调用由系统频繁运行，每次运行都生成一行追踪输出，使得输出难以阅读。我已经为几个系统调用使用了`ignore_opcode()`尾调用。
+- en: '[![5](assets/5.png)](#code_id_2_33)'
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#code_id_2_33)'
+- en: Print the trace output to the screen, until the user terminates the program.
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将追踪输出打印到屏幕上，直到用户终止程序运行。
+- en: 'Running this program generates trace output for every syscall that runs on
+    the (virtual) machine, unless the opcode has an entry that links it to the `ignore_opcode()`
+    tail call. Here’s some example output from running `ls` in another terminal (some
+    details have been omitted for readability):'
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行此程序会为在（虚拟）机器上运行的每个系统调用生成追踪输出，除非操作码已与`ignore_opcode()`尾调用链接。以下是在另一个终端中运行`ls`时生成的部分追踪输出示例（为了可读性已省略部分细节）：
+- en: '[PRE22]'
+  id: totrans-193
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: The particular syscalls being executed are beside the point, but you can see
+    that the different tail calls are getting called and are generating trace messages.
+    You can also see the default message `Another syscall` for opcodes that don’t
+    have an entry in the tail call program map.
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正在执行的特定系统调用并不重要，但您可以看到不同的尾调用被调用并生成跟踪消息。您还可以看到对于没有在尾调用程序映射中具有条目的操作码，默认消息为`Another
+    syscall`。
+- en: Note
+  id: totrans-195
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Check out Paul Chaignon’s blog post about the [cost of BPF tail calls](https://oreil.ly/jTxcb)
+    on various different kernel versions.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看保罗·夏尼翁在不同内核版本上关于[BPF尾调用成本](https://oreil.ly/jTxcb)的博客文章。
+- en: Tail calls have been supported in eBPF since kernel version 4.2, but for a long
+    time they were incompatible with making BPF to BPF function calls. This restriction
+    was lifted in kernel 5.10.^([10](ch02.html#ch02fn10))
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自内核版本4.2起，eBPF支持尾调用，但长期以来它们与进行BPF到BPF函数调用不兼容。这一限制在内核5.10中被解除。^([10](ch02.html#ch02fn10))
+- en: The fact that you can chain up to 33 tail calls together, combined with the
+    instruction complexity limit per eBPF program of 1 million instructions, means
+    that today’s eBPF programmers have a lot of leeway to write very complex code
+    to run entirely in the kernel.
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以将最多33个尾调用串联在一起，加上每个eBPF程序的指令复杂性限制为100万条指令，这意味着今天的eBPF程序员可以在内核中编写非常复杂的代码。
+- en: Summary
+  id: totrans-199
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 摘要
+- en: I hope that by showing some concrete examples of an eBPF program, this chapter
+    helped you consolidate your mental model of eBPF code running in the kernel, triggered
+    by events. You’ve also seen examples of data being passed from the kernel to user
+    space using BPF maps.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 希望通过展示一些具体的eBPF程序示例，本章帮助您巩固对运行在内核中的eBPF代码的精神模型，这些代码由事件触发。您还看到了使用BPF映射将数据从内核传递到用户空间的示例。
+- en: Using the BCC framework hides many of the details of how the program is built,
+    loaded into the kernel, and attached to events. In the next chapter I’ll show
+    you a different approach to writing “Hello World,” and we’ll dive deeper into
+    those hidden details.
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用BCC框架隐藏了构建程序、加载到内核并附加到事件的许多细节。在下一章中，我将向您展示编写“Hello World”的不同方法，并深入探讨这些隐藏的细节。
+- en: Exercises
+  id: totrans-202
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 练习
+- en: 'Here are some optional activities you might like to try (or think about) if
+    you want to explore “Hello World” a bit further:'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想进一步探索“Hello World”，可以尝试（或思考）一些可选的活动：
+- en: Adapt the *hello-buffer.py* eBPF program to output different trace messages
+    for odd and even process IDs.
+  id: totrans-204
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将*hello-buffer.py* eBPF程序调整为对奇数和偶数进程ID输出不同的跟踪消息。
+- en: Modify *hello-map.py* so that the eBPF code gets triggered by more than one
+    syscall. For example, `openat()` is commonly called to open files, and `write()`
+    is called to write data to a file. You can start by attaching the *hello* eBPF
+    program to multiple syscall kprobes. Then try having modified versions of the
+    *hello* eBPF program for different syscalls, demonstrating that you can access
+    the same map from multiple different programs.
+  id: totrans-205
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 修改*hello-map.py*，以便eBPF代码可以被多个系统调用触发。例如，`openat()`通常用于打开文件，而`write()`用于向文件写入数据。您可以从将*hello*
+    eBPF程序附加到多个系统调用kprobes开始。然后尝试为不同的系统调用准备修改后的*hello* eBPF程序版本，展示您可以从多个不同的程序访问同一映射。
+- en: The *hello-tail.py* eBPF program is an example of a program that attaches to
+    the `sys_enter` raw tracepoint that is hit whenever *any* syscall is called. Change
+    *hello-map.py* to show the total number of syscalls made by each user ID, by attaching
+    it to that same `sys_enter` raw tracepoint.
+  id: totrans-206
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: '*hello-tail.py* eBPF程序是一个示例程序，它附加到`sys_enter`原始跟踪点，每次调用系统调用时都会触发。修改*hello-map.py*，以显示每个用户ID执行的系统调用总数，方法是将其附加到相同的`sys_enter`原始跟踪点。'
+- en: 'Here’s some example output I got after making that change:'
+  id: totrans-207
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 在我进行了这些更改后，这是我得到的一些示例输出：
+- en: '[PRE23]'
+  id: totrans-208
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'The [`RAW_TRACEPOINT_PROBE` macro provided by BCC](https://oreil.ly/kh-j4)
+    simplifies attaching to raw tracepoints, telling the user space BCC code to automatically
+    attach it to a specified tracepoint. Try it in *hello-tail.py*, like this:'
+  id: totrans-209
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 由BCC提供的[`RAW_TRACEPOINT_PROBE`宏](https://oreil.ly/kh-j4)简化了附加到原始跟踪点的过程，告诉用户空间的BCC代码自动将其附加到指定的跟踪点。尝试在*hello-tail.py*中使用它，就像这样：
+- en: Replace the definition of the `hello()` function with `RAW_TRACEPOINT_PROBE(sys_enter)`.
+  id: totrans-210
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将`hello()`函数的定义替换为`RAW_TRACEPOINT_PROBE(sys_enter)`。
+- en: Remove the explicit attachment call `b.attach_raw_tracepoint()` from the Python
+    code.
+  id: totrans-211
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 从Python代码中删除显式附加调用`b.attach_raw_tracepoint()`。
+- en: You should see that BCC automatically creates the attachment and the program
+    works exactly the same. This is an example of the many convenient macros that
+    BCC provides.
+  id: totrans-212
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 您应该看到BCC自动创建附件，程序的运行完全相同。这是BCC提供的许多便利宏的一个示例。
+- en: You could further adapt *hello_map.py* so that the key in the hash table identifies
+    a particular syscall (rather than a particular user). The output will show how
+    many times that syscall has been called across the whole system.
+  id: totrans-213
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 您可以进一步调整*hello_map.py*，使哈希表中的键标识特定系统调用（而不是特定用户）。输出将显示该系统调用在整个系统中被调用的次数。
+- en: ^([1](ch02.html#ch02fn1-marker)) I originally wrote this for a talk titled “The
+    Beginner’s Guide to eBPF Programming.” You can find the original code along with
+    links to the slides and video at [*https://github.com/lizrice/ebpf-beginners*](https://github.com/lizrice/ebpf-beginners).
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([1](ch02.html#ch02fn1-marker)) 最初我为一个名为“eBPF编程入门指南”的演讲编写了这篇文章。您可以在[*https://github.com/lizrice/ebpf-beginners*](https://github.com/lizrice/ebpf-beginners)找到原始代码以及幻灯片和视频的链接。
+- en: ^([2](ch02.html#ch02fn2-marker)) There is a more performant way to attach eBPF
+    programs to functions, available from kernel version 5.5 onward, that uses fentry
+    (and the corresponding fexit instead of kretprobe for the exit from a function).
+    I’ll discuss this later in the book, but for now I’m using kprobe to keep the
+    example in this chapter as simple as possible.
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([2](ch02.html#ch02fn2-marker)) 有一种更高效的方法可以将eBPF程序附加到函数上，从内核版本5.5开始可用，该方法使用fentry（以及相应的fexit，而不是kretprobe用于函数的退出）。我稍后会在书中讨论这个，但现在我使用kprobe使本章的示例尽可能简单。
+- en: ^([3](ch02.html#ch02fn3-marker)) I quite often use VScode remote to connect
+    to a virtual machine in the cloud. This runs lots of node scripts on the virtual
+    machine, which generates lots of tracing from this “Hello World” app.
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([3](ch02.html#ch02fn3-marker)) 我经常使用VScode远程连接到云中的虚拟机。在虚拟机上运行许多节点脚本，这些节点脚本来自这个“Hello
+    World”应用程序的跟踪。
+- en: ^([4](ch02.html#ch02fn4-marker)) Some commands (`echo` is a common example)
+    might be shell built-ins that run as part of the shell process, rather than executing
+    a new program. These won’t trigger the `execve()` event, so no trace will be generated.
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([4](ch02.html#ch02fn4-marker)) 一些命令（例如`echo`）可能是作为shell内置运行的，而不是执行新程序。这些不会触发`execve()`事件，因此不会生成跟踪。
+- en: ^([5](ch02.html#ch02fn5-marker)) C++ does, but not C.
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([5](ch02.html#ch02fn5-marker)) C++可以，但C语言不行。
+- en: ^([6](ch02.html#ch02fn6-marker)) The lower 32 bits are the *thread group ID*.
+    For a single-threaded process, this is the same as the process ID, but additional
+    threads for the process would be given different IDs. The docs for the GNU C library
+    have a good description of the difference between [process and thread group IDs](https://oreil.ly/Wo9k3).
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([6](ch02.html#ch02fn6-marker)) 低32位是*线程组ID*。对于单线程进程，这与进程ID相同，但进程的其他线程将获得不同的ID。GNU
+    C库的文档对[进程和线程组ID](https://oreil.ly/Wo9k3)的差异有很好的描述。
+- en: ^([7](ch02.html#ch02fn7-marker)) This is just example code, so I’m not worrying
+    about cleaning up on keyboard interrupt or any other niceties!
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([7](ch02.html#ch02fn7-marker)) 这只是示例代码，所以我不会担心在键盘中断或其他方面的清理！
+- en: ^([8](ch02.html#ch02fn8-marker)) This principle is often called “DRY” (“Don’t
+    Repeat Yourself”), as popularized by [The Pragmatic Programmer](https://oreil.ly/QFich).
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([8](ch02.html#ch02fn8-marker)) 这个原则通常被称为“DRY”（“不要重复自己”），由[《务实程序员》](https://oreil.ly/QFich)所推广。
+- en: ^([9](ch02.html#ch02fn9-marker)) There are some 300 syscalls in Linux, and since
+    I’m not using any recently added syscalls for this example, this is good enough.
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([9](ch02.html#ch02fn9-marker)) Linux中有大约300个系统调用，由于我在这个示例中没有使用最近添加的任何系统调用，这已经足够了。
+- en: ^([10](ch02.html#ch02fn10-marker)) Making tail calls from a BPF subprogram requires
+    support from the JIT compiler, which you’ll meet in the next chapter. In the kernel
+    version I used to write the examples in this book, only the JIT compiler on x86
+    has this support, although [support has been added to ARM in kernel 6.0](https://oreil.ly/KYUYS).
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([10](ch02.html#ch02fn10-marker)) 从BPF子程序中进行尾调用需要JIT编译器的支持，您将在下一章中了解到。在我编写本书示例所用的内核版本中，只有x86上的JIT编译器支持此功能，尽管[在内核6.0中已为ARM添加了支持](https://oreil.ly/KYUYS)。

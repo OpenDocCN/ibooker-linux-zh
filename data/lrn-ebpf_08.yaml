@@ -1,0 +1,1765 @@
+- en: Chapter 8\. eBPF for Networking
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第8章。网络中的eBPF
+- en: As you saw in [Chapter 1](ch01.html#what_is_ebpf_and_why_is_it_importantque),
+    the dynamic nature of eBPF allows us to customize the behavior of the kernel.
+    In the world of networking, there is a huge range of desirable behavior that depends
+    on the application. For example, a telecommunications operator might have to interface
+    with telco-specific protocols like SRv6; a Kubernetes environment might need to
+    be integrated with legacy applications; dedicated hardware load balancers can
+    be replaced with XDP programs running on commodity hardware. eBPF allows programmers
+    to build networking features to meet specific needs, without having to force them
+    on all upstream kernel users.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您在[第1章](ch01.html#what_is_ebpf_and_why_is_it_importantque)中看到的，eBPF的动态特性使我们能够定制内核的行为。在网络世界中，有大量依赖于应用的理想行为。例如，电信运营商可能需要与SRv6等电信特定协议进行接口；Kubernetes环境可能需要与旧有应用集成；专用硬件负载均衡器可以由在通用硬件上运行的XDP程序替代。eBPF允许程序员构建满足特定需求的网络功能，而无需将它们强加于所有上游内核用户。
+- en: Network tools based on eBPF are now widely used and have proven to be effective
+    at prolific scale. The CNCF’s [Cilium project](http://cilium.io), for example,
+    uses eBPF as a platform for Kubernetes networking, standalone load balancing,
+    and much more, and it’s used by cloud native adopters in every conceivable industry
+    vertical.^([1](ch08.html#ch08fn1)) Meta has been using eBPF at a vast scale—every
+    packet to and from Facebook since 2017 has been through an XDP program. Another
+    public and hyper-scaled example is Cloudflare’s use of eBPF for DDoS (distributed
+    denial-of-service) protection.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基于eBPF的网络工具现在被广泛应用，并且已被证明在大规模上非常有效。例如，CNCF的[Cilium项目](http://cilium.io)将eBPF作为Kubernetes网络、独立负载均衡等平台，并被云原生采纳者在各行业垂直领域广泛使用。^([1](ch08.html#ch08fn1))
+    自2017年以来，Meta一直在大规模使用eBPF——Facebook来往的每个数据包都经过了XDP程序。另一个公共且高扩展的例子是Cloudflare利用eBPF进行DDoS（分布式拒绝服务）防护。
+- en: These are complex, production-ready solutions, and their details are far beyond
+    the scope of this book, but by reading the examples in this chapter you can get
+    a feel for how eBPF networking solutions like these are built.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些都是复杂的、可投入生产的解决方案，其详细内容远超出本书的范围，但通过阅读本章中的示例，您可以感受到像这样的eBPF网络解决方案是如何构建的。
+- en: Note
+  id: totrans-4
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The code examples for this chapter are in the *chapter8* directory of the repository
+    at [*github.com/lizrice/learning-ebpf*](https://github.com/lizrice/learning-ebpf).
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章的代码示例位于[*github.com/lizrice/learning-ebpf*](https://github.com/lizrice/learning-ebpf)的*chapter8*目录中。
+- en: Packet Drops
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 数据包丢弃
+- en: 'There are several network security features that involve dropping certain incoming
+    packets and allowing others. These features include firewalling, DDoS protection,
+    and mitigating packet-of-death vulnerabilities:'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有几个网络安全功能涉及丢弃某些传入数据包并允许其他数据包通过。这些功能包括防火墙、DDoS防护和减轻“死亡数据包”漏洞：
+- en: Firewalling involves deciding on a per-packet basis whether to allow a packet,
+    based on the source and destination IP addresses and/or port numbers.
+  id: totrans-8
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 防火墙涉及根据源IP地址和/或目标IP地址及端口号逐个数据包地决定是否允许数据包通过。
+- en: DDoS protection adds some complexity, perhaps keeping track of the rate at which
+    packets are arriving from a particular source and/or detecting certain characteristics
+    of the packet contents to determine that an attacker or set of attackers is trying
+    to flood the interface with traffic.
+  id: totrans-9
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: DDoS防护增加了一些复杂性，也许需要跟踪从特定来源到达的数据包速率和/或检测数据包内容的某些特征，以确定攻击者或一组攻击者是否试图通过流量淹没接口。
+- en: A packet-of-death vulnerability is a class of kernel vulnerability in which
+    the kernel fails to safely process a packet crafted in a particular way. An attacker
+    who sends packets with this particular format can exploit the vulnerability, which
+    could potentially cause the kernel to crash. Traditionally, when a kernel vulnerability
+    like this is found, it requires installing a new kernel with the fix, which in
+    turn requires machine downtime. But an eBPF program that detects and drops these
+    malicious packets can be installed dynamically, instantly protecting that host
+    without affecting any applications running on the machine.
+  id: totrans-10
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: “死亡数据包”漏洞是一类内核漏洞，其中内核未能安全处理以特定方式构造的数据包。发送这种特定格式的数据包的攻击者可以利用这一漏洞，这可能导致内核崩溃。传统上，当发现这样的内核漏洞时，需要安装带有修复程序的新内核，这又需要机器停机。但是，安装检测并丢弃这些恶意数据包的eBPF程序可以动态安装，立即保护主机，而不影响正在运行的任何应用程序。
+- en: The decision-making algorithms for features like these are beyond the scope
+    of this book, but let’s explore how eBPF programs attached to the XDP hook on
+    a network interface drop certain packets, which is the basis for implementing
+    these use cases.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些功能的决策算法超出了本书的范围，但让我们探讨一下如何通过附加到网络接口 XDP 钩子上的 eBPF 程序来丢弃某些数据包，这是实现这些用例的基础。
+- en: XDP Program Return Codes
+  id: totrans-12
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: XDP 程序返回码
+- en: 'An XDP program is triggered by the arrival of a network packet. The program
+    examines the packet, and when it’s done, the return code gives a *verdict* that
+    indicates what to do next with that packet:'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当网络数据包到达时，XDP 程序会被触发。程序检查数据包，完成后，返回码给出了一个 *决策*，指示下一步该如何处理该数据包：
+- en: '`XDP_PASS` indicates that the packet should be sent to the network stack in
+    the normal way (as it would have done if there were no XDP program).'
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`XDP_PASS` 表示应该将数据包以正常方式发送到网络堆栈（就像没有 XDP 程序时那样）。'
+- en: '`XDP_DROP` causes the packet to be discarded immediately.'
+  id: totrans-15
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`XDP_DROP` 导致数据包立即被丢弃。'
+- en: '`XDP_TX` sends the packet back out of the same interface it arrived on.'
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`XDP_TX` 将数据包发送回它到达的同一接口。'
+- en: '`XDP_REDIRECT` is used to send it to a different network interface.'
+  id: totrans-17
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`XDP_REDIRECT` 用于将其发送到不同的网络接口。'
+- en: '`XDP_ABORTED` results in the packet being dropped, but its use implies an error
+    case or something unexpected, rather than a “normal” decision to discard a packet.'
+  id: totrans-18
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`XDP_ABORTED` 导致数据包被丢弃，但其使用暗示着错误情况或意外情况，而不是正常的丢弃数据包的决策。'
+- en: 'For some use cases (like firewalling), the XDP program simply has to decide
+    between passing the packet on or dropping it. An outline for an XDP program that
+    decides whether to drop packets looks something like this:'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于某些用例（如防火墙），XDP 程序只需在传递数据包和丢弃数据包之间做出决策。决定是否丢弃数据包的 XDP 程序大纲看起来像这样：
+- en: '[PRE0]'
+  id: totrans-20
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: An XDP program can also manipulate the packet contents, but I’ll come to that
+    later in this chapter.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: XDP 程序还可以操作数据包内容，但我稍后会讲到这一点。
+- en: XDP programs get triggered whenever an inbound network packet arrives on the
+    interface to which it is attached. The `ctx` parameter is a pointer to an `xdp_md`
+    structure, which holds metadata about the incoming packet. Let’s see how you can
+    use this structure to examine the packet’s contents in order to reach a verdict.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每当入站网络数据包到达其附加的接口时，XDP 程序会被触发。`ctx` 参数是指向一个 `xdp_md` 结构体的指针，它保存了关于传入数据包的元数据。让我们看看如何使用这个结构体来检查数据包的内容以做出决策。
+- en: XDP Packet Parsing
+  id: totrans-23
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: XDP 数据包解析
+- en: 'Here’s the definition of the `xdp_md` structure:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里是 `xdp_md` 结构体的定义：
+- en: '[PRE1]'
+  id: totrans-25
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: Don’t be fooled by the `__u32` type for the first three fields, as they are
+    really pointers. The `data` field indicates the location in memory where the packet
+    starts, and `data_end` shows where it ends. As you saw in [Chapter 6](ch06.html#the_ebpf_verifier),
+    to pass the eBPF verifier you will have to explicitly check that any reads or
+    writes to the packet’s contents are within the range `data` to `data_end`.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不要被前三个字段的 `__u32` 类型所误导，它们实际上是指针。`data` 字段指示数据包开始的内存位置，`data_end` 显示其结束位置。正如您在
+    [第 6 章](ch06.html#the_ebpf_verifier) 中看到的，为了通过 eBPF 验证器，您必须明确检查对数据包内容的任何读取或写入是否在
+    `data` 到 `data_end` 的范围内。
+- en: There is also an area in memory ahead of the packet, between `data_meta` and
+    `data`, for storing metadata about this packet. This can be used for coordination
+    between multiple eBPF programs that might process the same packet at various places
+    on its journey through the stack.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数据包之前的内存区域还有一个 `data_meta` 到 `data` 之间的区域，用于存储有关该数据包的元数据。这可以用于多个可能在数据包通过堆栈的不同位置处理相同数据包的
+    eBPF 程序之间的协调。
+- en: 'To illustrate the basics of parsing a network packet, there is an XDP program
+    called `ping()` in the example code, which will simply generate a line of trace
+    whenever it detects a ping (ICMP) packet. Here’s the code for that program:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了说明解析网络数据包的基础知识，在示例代码中有一个名为 `ping()` 的 XDP 程序，它只是在检测到 ping（ICMP）数据包时生成一行跟踪信息。以下是该程序的代码：
+- en: '[PRE2]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'You can see this program in action by following these steps:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以按照以下步骤查看此程序的运行情况：
+- en: Run `make` in the *chapter8* directory. This doesn’t just build the code; it
+    also attaches the XDP program to the loopback interface (called `lo`).
+  id: totrans-31
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在 *chapter8* 目录中运行 `make`。这不仅会构建代码，还会将 XDP 程序附加到回环接口（称为 `lo`）上。
+- en: Run `ping localhost` in one terminal window.
+  id: totrans-32
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在一个终端窗口中运行 `ping localhost`。
+- en: In another terminal window, watch the output generated in the trace pipe by
+    running `cat /sys/kernel/tracing/trace_pipe`.
+  id: totrans-33
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在另一个终端窗口中，通过运行 `cat /sys/kernel/tracing/trace_pipe` 观察生成的跟踪管道输出。
+- en: 'You should see two lines of trace being generated approximately every second,
+    and they should look like this:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每秒应生成大约两行跟踪信息，并且它们应该是这个样子：
+- en: '[PRE3]'
+  id: totrans-35
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: There are two lines of trace per second because the loopback interface is receiving
+    both the ping requests and the ping responses.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每秒会有两行跟踪信息，因为环回接口既接收ping请求也接收ping响应。
+- en: 'You can easily modify this code to drop ping packets by adding a line of code
+    to return `XDP_DROP` when the protocol matches, like this:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以轻松地修改此代码，通过添加一行代码在协议匹配时返回`XDP_DROP`来丢弃ping数据包，如下所示：
+- en: '[PRE4]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'If you try this, you’ll see that output resembling the following is only generated
+    in the trace output once per second:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你尝试这样做，你会看到类似以下输出只在跟踪输出中每秒生成一次：
+- en: '[PRE5]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: The loopback interface receives a ping request, and the XDP program drops it,
+    so the request never gets far enough through the network stack to elicit a response.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 环回接口收到一个ping请求，并且XDP程序丢弃它，因此请求不会通过网络堆栈远到足以引发响应。
+- en: Most of the work in this XDP program is being done in a function called `lookup_protocol()`
+    that determines the Layer 4 protocol type. It’s just an example, not a production-quality
+    implementation of parsing a network packet! But it’s sufficient to give you an
+    idea of how parsing in eBPF works.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个XDP程序中，大部分工作都在一个名为`lookup_protocol()`的函数中完成，该函数确定第4层协议类型。这只是一个示例，不是一个高质量的网络数据包解析实现！但足以让你了解eBPF中解析的工作原理。
+- en: The network packet that has been received consists of a string of bytes that
+    are laid out as shown in [Figure 8-1](#layout_of_an_ip_network_packetcomma_sta).
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 收到的网络数据包由一系列字节组成，布局如[图 8-1](#layout_of_an_ip_network_packetcomma_sta)所示。
+- en: '![Layout of an IP network packet, starting with an Ethernet header, followed
+    by an IP header, and then the Layer 4 data](assets/lebp_0801.png)'
+  id: totrans-44
+  prefs: []
+  type: TYPE_IMG
+  zh: '![以太网头部开始的IP网络数据包的布局，随后是IP头部，然后是第4层数据](assets/lebp_0801.png)'
+- en: Figure 8-1\. Layout of an IP network packet, starting with an Ethernet header,
+    followed by an IP header, and then the Layer 4 data
+  id: totrans-45
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-1\. 以太网头部开始的IP网络数据包的布局，随后是IP头部，然后是第4层数据
+- en: 'The `lookup_protocol()` function takes the `ctx` structure that holds information
+    about where this network packet is in memory and returns the protocol type that
+    it finds in the IP header. The code is as follows:'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lookup_protocol()`函数接受包含有关此网络数据包在内存中位置的信息的`ctx`结构，并返回在IP头部中找到的协议类型。代码如下：'
+- en: '[PRE6]'
+  id: totrans-47
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '[![1](assets/1.png)](#code_id_8_1)'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_8_1)'
+- en: The local variables `data` and `data_end` point to the start and end of the
+    network packet.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 局部变量`data`和`data_end`指向网络数据包的起始和结束位置。
+- en: '[![2](assets/2.png)](#code_id_8_2)'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_8_2)'
+- en: The network packet should start with an Ethernet header.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 网络数据包应该以以太网头部开始。
+- en: '[![3](assets/3.png)](#code_id_8_3)'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_8_3)'
+- en: But you can’t simply assume this network packet is big enough to hold that Ethernet
+    header! The verifier requires that you check this explicitly.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但是你不能简单地假设这个网络数据包足够大，可以容纳以太网头部！验证程序要求你明确检查这一点。
+- en: '[![4](assets/4.png)](#code_id_8_4)'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#code_id_8_4)'
+- en: The Ethernet header contains a 2-byte field that tells us the Layer 3 protocol.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以太网头部包含一个2字节的字段，告诉我们第3层协议。
+- en: '[![5](assets/5.png)](#code_id_8_5)'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#code_id_8_5)'
+- en: If the protocol type indicates that it’s an IP packet, the IP header immediately
+    follows the Ethernet header.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果协议类型表明这是一个IP数据包，则紧随以太网头部的是IP头部。
+- en: '[![6](assets/6.png)](#code_id_8_6)'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#code_id_8_6)'
+- en: You can’t just assume there’s enough room for that IP header in the network
+    packet. Again the verifier requires that you check explicitly.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你不能简单地假设网络数据包中有足够的空间来容纳那个IP头部。再次，验证程序要求你明确检查这一点。
+- en: '[![7](assets/7.png)](#code_id_8_7)'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![7](assets/7.png)](#code_id_8_7)'
+- en: The IP header contains the protocol byte the function will return to its caller.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: IP头部包含协议字节，该函数将返回给其调用者。
+- en: The `bpf_ntohs()` function used by this program ensures that the two bytes are
+    in the order expected on this host. Network protocols are big-endian, but most
+    processors are little-endian, meaning they hold multibyte values in a different
+    order. This function converts (if necessary) from network ordering to host ordering.
+    You should use this function whenever you extract a value from a field in a network
+    packet that’s more than one byte long.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由该程序使用的`bpf_ntohs()`函数确保两个字节按此主机期望的顺序排序。网络协议是大端序的，但大多数处理器是小端序的，这意味着它们以不同的顺序保存多字节值。此函数将（如有必要）从网络顺序转换为主机顺序。当你从网络数据包的字段中提取一个超过一个字节长的值时，应使用此函数。
+- en: 'The simple example here shows how just a few lines of eBPF code can have a
+    dramatic impact on networking functionality. It’s not hard to imagine how more
+    complex rules about which packets to pass and which packets to drop could result
+    in the features I described at the start of this section: firewalling, DDoS protection,
+    and packet-of-death vulnerability mitigation. Now let’s consider how even more
+    functionality can be provided given the power to modify network packets within
+    eBPF programs.'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此简单示例显示了几行eBPF代码如何对网络功能产生巨大影响。不难想象，关于哪些数据包通过和哪些数据包丢弃的更复杂规则可能导致我在本节开头描述的功能：防火墙、DDoS保护和包死亡漏洞的缓解。现在让我们考虑，在eBPF程序内部修改网络数据包的能力下，如何提供更多功能。
+- en: Load Balancing and Forwarding
+  id: totrans-64
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 负载均衡和转发
+- en: XDP programs aren’t limited to inspecting the contents of a packet. They can
+    also modify the packet’s contents. Let’s consider what’s involved if you want
+    to build a simple load balancer that takes packets sent to a given IP address
+    and fans those requests to a number of backends that can fulfill the request.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: XDP程序不仅限于检查数据包内容，还可以修改数据包内容。我们来看看如果要构建一个简单的负载均衡器，将发送到特定IP地址的数据包转发到可以满足请求的多个后端时会涉及哪些内容。
+- en: There’s an example of this in the GitHub repo.^([2](ch08.html#ch08fn2)) The
+    setup here is a set of containers that run on the same host. There’s a client,
+    a load balancer, and two backends, each running in their own container. As illustrated
+    in [Figure 8-2](#example_load_balancer_setup), the load balancer receives traffic
+    from the client and forwards it to one of the two backend containers.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GitHub仓库中有一个示例。^([2](ch08.html#ch08fn2)) 这里的设置是在同一主机上运行的一组容器。有一个客户端、一个负载均衡器和两个后端，每个后端在自己的容器中运行。如图[8-2](#example_load_balancer_setup)所示，负载均衡器接收来自客户端的流量并将其转发到两个后端容器中的一个。
+- en: '![Example load balancer setup](assets/lebp_0802.png)'
+  id: totrans-67
+  prefs: []
+  type: TYPE_IMG
+  zh: '![示例负载均衡器设置](assets/lebp_0802.png)'
+- en: Figure 8-2\. Example load balancer setup
+  id: totrans-68
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图8-2\. 示例负载均衡器设置
+- en: The load balancing function is implemented as an XDP program attached to the
+    load balancer’s eth0 network interface. The return code from this program is `XDP_TX`,
+    indicating that the packet should be sent back out of the interface it came in
+    on. But before that happens, the program has to update the address information
+    in the packet headers.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 负载均衡功能实现为附加到负载均衡器的eth0网络接口的XDP程序。此程序的返回码为`XDP_TX`，表示数据包应通过原接口发送回去。但在此之前，程序必须更新数据包头中的地址信息。
+- en: Although I think it’s useful as a learning exercise, this example code is very,
+    very far from being production ready; for example, it uses hard-coded addresses
+    that assume the exact setup of IP addresses shown in [Figure 8-2](#example_load_balancer_setup).
+    It assumes that the only TCP traffic it will ever receive is requests from the
+    client or responses to the client. It also cheats by taking advantage of the way
+    Docker sets up virtual MAC addresses, using each container’s IP address as the
+    last four bytes of the MAC address for the virtual Ethernet interface for each
+    container. That virtual Ethernet interface is called eth0 from the perspective
+    of the container.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然我认为这个例子作为学习练习很有用，但实际上这个代码离投入生产还有很大距离；例如，它使用硬编码的地址，假设IP地址的确切设置如图[8-2](#example_load_balancer_setup)所示。它假定它将接收的唯一TCP流量是来自客户端的请求或发送到客户端的响应。它还通过利用Docker设置虚拟MAC地址的方式作弊，使用每个容器的IP地址作为每个容器虚拟以太网接口的MAC地址的最后四个字节。从容器的角度来看，该虚拟以太网接口称为eth0。
+- en: 'Here’s the XDP program from the example load balancer code:'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下是示例负载均衡器代码中的XDP程序：
+- en: '[PRE7]'
+  id: totrans-72
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: '[![1](assets/1.png)](#code_id_8_8)'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_8_8)'
+- en: 'The first part of this function is practically the same as in the previous
+    example: it locates the Ethernet header and then the IP header in the packet.'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此函数的前半部分与前面示例中的几乎相同：定位数据包中的以太网头部，然后是IP头部。
+- en: '[![2](assets/2.png)](#code_id_8_9)'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_8_9)'
+- en: This time it will process only TCP packets, passing anything else it receives
+    on up the stack as if nothing had happened.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这次它将仅处理TCP数据包，将收到的其他任何内容原样上交给栈处理，就好像什么都没有发生一样。
+- en: '[![3](assets/3.png)](#code_id_8_10)'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_8_10)'
+- en: Here the source IP address is checked. If this packet didn’t come from the client,
+    I will assume it is a response going to the client.
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此处检查源IP地址。如果该数据包不是来自客户端的，则假设它是发送到客户端的响应。
+- en: '[![4](assets/4.png)](#code_id_8_11)'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#code_id_8_11)'
+- en: This code generates a pseudorandom choice between backends A and B.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此代码生成在A和B后端之间的伪随机选择。
+- en: '[![5](assets/5.png)](#code_id_8_12)'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#code_id_8_12)'
+- en: The destination IP and MAC addresses are updated to match whichever backend
+    was chosen…
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目标IP和MAC地址已更新，以匹配选择的后端…
+- en: '[![6](assets/6.png)](#code_id_8_13)'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#code_id_8_13)'
+- en: …or if this is a response from a backend (which is the assumption here if it
+    didn’t come from a client), the destination IP and MAC addresses are updated to
+    match the client.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: …或者如果这是来自后端的响应（这是本文的假设，如果它不是来自客户端），则目标IP和MAC地址将更新以匹配客户端。
+- en: '[![7](assets/7.png)](#code_id_8_14)'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![7](assets/7.png)](#code_id_8_14)'
+- en: Wherever this packet is going, the source addresses need to be updated so that
+    it looks as though the packet originated from the load balancer.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论这个数据包去往何处，源地址都需要更新，以便看起来像数据包来自负载均衡器。
+- en: '[![8](assets/8.png)](#code_id_8_15)'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![8](assets/8.png)](#code_id_8_15)'
+- en: The IP header includes a checksum calculated over its contents, and since the
+    source and destination IP addresses have both been updated, the checksum also
+    needs to be recalculated and replaced in this packet.
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: IP头部包括计算其内容的校验和，由于源和目标IP地址都已更新，因此此数据包的校验和也需要重新计算和替换。
+- en: Note
+  id: totrans-89
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Since this is a book on eBPF and not networking, I haven’t delved into details
+    such as why the IP and MAC addresses need to be updated or what happens if they
+    aren’t. If you’re interested, I cover this some more in my [YouTube video of the
+    eBPF Summit talk](https://oreil.ly/mQxtT) where I originally wrote this example
+    code.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于这是一本关于eBPF而不是网络的书，我没有深入探讨IP和MAC地址为什么需要更新或如果它们没有更新会发生什么。如果你感兴趣，我在我的[YouTube视频的eBPF峰会演讲](https://oreil.ly/mQxtT)中更详细地介绍了这个例子代码。
+- en: 'Much like the previous example, the Makefile includes instructions to not only
+    build the code but also use `bpftool` to load and attach the XDP program to the
+    interface, like this:'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就像前面的例子一样，Makefile包括了不仅构建代码，还使用`bpftool`加载和附加XDP程序到接口的说明，就像这样：
+- en: '[PRE8]'
+  id: totrans-92
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'This `make` instruction needs to be run *inside* the load balancer container
+    so that eth0 corresponds to its virtual Ethernet interface. This leads to an interesting
+    point: an eBPF program is loaded into the kernel, of which there is only one;
+    yet the attachment point may be within a particular network namespace and visible
+    only within that network namespace.^([3](ch08.html#ch08fn3))'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个`make`指令需要在负载均衡器容器*内部*运行，以便eth0对应其虚拟以太网接口。这带来了一个有趣的观点：一个eBPF程序被加载到内核中，只有一个；然而附着点可能在特定的网络命名空间内，并且只在该网络命名空间内可见。^([3](ch08.html#ch08fn3))
+- en: XDP Offloading
+  id: totrans-94
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: XDP卸载
+- en: The idea for XDP originated from a conversation speculating how useful it would
+    be if you could run eBPF programs on a network card to make decisions about individual
+    packets before they even reach the kernel’s networking stack.^([4](ch08.html#ch08fn4))
+    There are some network interface cards that support this full *XDP offload* capability
+    where they can indeed run eBPF programs on inbound packets on their own processor.
+    This is illustrated in [Figure 8-3](#network_interface_cards_that_support_xd).
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: XDP的想法源自一场关于如果你可以在网络卡上运行eBPF程序来在它们甚至到达内核网络堆栈之前对单个数据包做出决策会有多有用的对话。^([4](ch08.html#ch08fn4))
+    有一些网络接口卡支持完整的*XDP卸载*功能，在这些接口卡上确实可以在其自己的处理器上运行eBPF程序处理入站数据包。这在[图8-3](#network_interface_cards_that_support_xd)中有所说明。
+- en: '![Network interface cards that support XDP offload can process, drop, and retransmit
+    packets without any work required from the host CPU](assets/lebp_0803.png)'
+  id: totrans-96
+  prefs: []
+  type: TYPE_IMG
+  zh: '![支持XDP卸载的网络接口卡可以处理、丢弃和重新传输数据包，而无需主机CPU执行任何工作](assets/lebp_0803.png)'
+- en: Figure 8-3\. Network interface cards that support XDP offload can process, drop,
+    and retransmit packets without any work required from the host CPU
+  id: totrans-97
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图8-3\. 支持XDP卸载的网络接口卡可以处理、丢弃和重新传输数据包，而无需主机CPU执行任何工作
+- en: This means a packet that gets dropped or redirected back out of the same physical
+    interface—like the packet drop and load balancing examples earlier in this chapter—is
+    never seen by the host’s kernel, and no CPU cycles on the host machine are ever
+    spent processing them, as all the work is done on the network card.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这意味着被丢弃或重定向回同一物理接口的数据包——就像本章前面的数据包丢弃和负载均衡示例一样——从未被主机内核看到，主机机器上的任何CPU周期也不会花费在处理它们上，因为所有工作都在网络卡上完成。
+- en: Even if the physical network interface card doesn’t support full XDP offload,
+    many NIC drivers support XDP hooks, which minimizes the memory copying required
+    for an eBPF program to process a packet.^([5](ch08.html#ch08fn5))
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 即使物理网络接口卡不支持完整的XDP卸载，许多网卡驱动程序支持XDP钩子，这样可以最小化eBPF程序处理数据包所需的内存复制。^([5](ch08.html#ch08fn5))
+- en: This can result in significant performance benefits and allows functionality
+    like load balancing to run very efficiently on commodity hardware.^([6](ch08.html#ch08fn6))
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这可以带来显著的性能优势，并且允许像负载均衡这样的功能在普通硬件上运行得非常高效。^([6](ch08.html#ch08fn6))
+- en: You’ve seen how XDP can be used to process inbound network packets, accessing
+    them as soon as possible as they arrive on a machine. eBPF can also be used to
+    process traffic at other points in the network stack, in whatever direction it
+    is flowing. Let’s move on and think about eBPF programs attached within the TC
+    subsystem.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您已经看到XDP如何用于处理入站网络数据包，尽快访问它们到达机器时。eBPF也可以用于处理网络堆栈中其他点的流量，在流向如何流动的任何方向。让我们继续思考在TC子系统内附加的eBPF程序。
+- en: Traffic Control (TC)
+  id: totrans-102
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 流量控制（TC）
+- en: I mentioned traffic control in the previous chapter. By the time a network packet
+    reaches this point it will be in kernel memory in the form of an [`sk_buff`](https://oreil.ly/TKDCF).
+    This is a data structure that’s used throughout the kernel’s network stack. eBPF
+    programs attached within the TC subsystem receive a pointer to the `sk_buff` structure
+    as the context parameter.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我在上一章提到了流量控制。当一个网络数据包到达这一点时，它将以`sk_buff`的形式存在于内核内存中。这是内核网络堆栈中广泛使用的数据结构。附加在TC子系统内的eBPF程序将接收`sk_buff`结构作为上下文参数的指针。
+- en: Note
+  id: totrans-104
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: You might be wondering why XDP programs don’t also use this same structure for
+    their context. The answer is that the XDP hook happens before the network data
+    reaches the network stack and before the `sk_buff` structure has been set up.
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能想知道为什么XDP程序不使用相同的结构作为它们的上下文。答案是，XDP钩子发生在网络数据到达网络堆栈之前，也在`sk_buff`结构设置完成之前。
+- en: The TC subsystem is intended to regulate how network traffic is scheduled. For
+    example, you might want to limit the bandwidth available to each application so
+    that they all get a fair chance. But when you’re looking at scheduling individual
+    packets, *bandwidth* isn’t a terribly meaningful term, as it’s used for the average
+    amount of data being sent or received. A given application might be very bursty,
+    or another application might be very sensitive to network latency, so TC gives
+    much finer control over the way packets are handled and prioritized.^([7](ch08.html#ch08fn7))
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: TC子系统旨在调度网络流量的方式。例如，您可能希望限制每个应用程序可用的带宽，以便它们都有公平的机会。但是，在调度单个数据包时，“带宽”并不是一个非常有意义的术语，因为它用于发送或接收的平均数据量。某个应用程序可能非常突发，或者另一个应用程序可能对网络延迟非常敏感，因此TC可以更精细地控制数据包的处理和优先级。^([7](ch08.html#ch08fn7))
+- en: eBPF programs were introduced here to give custom control over the algorithms
+    used within TC. But with the power to manipulate, drop, or redirect packets, eBPF
+    programs attached within TC can also be used as the building blocks for complex
+    network behaviors.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里介绍了eBPF程序，以便对TC内使用的算法进行自定义控制。但是，通过操纵、丢弃或重定向数据包的能力，附加在TC内的eBPF程序也可以用作复杂网络行为的构建块。
+- en: 'A given piece of network data in the stack flows in one of two directions:
+    *ingress* (inbound from the network interface) or *egress* (outbound toward the
+    network interface). eBPF programs can be attached in either direction and will
+    affect traffic only in that direction. Unlike XDP, it’s possible to attach multiple
+    eBPF programs that will be processed in sequence.'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 堆栈中给定的网络数据在两个方向中流动：*入口*（从网络接口入站）或*出口*（朝向网络接口出站）。eBPF程序可以附加在任一方向，并且只会影响该方向的流量。与XDP不同，可以附加多个按顺序处理的eBPF程序。
+- en: Traditional traffic control is split into *classifiers*, which classify packets
+    based on some rule, and separate *actions*, which are taken based on the output
+    from a classifier and determine what to do with a packet. There can be a series
+    of classifiers, all defined as part of a *qdisc* or queuing discipline.
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传统的流量控制分为*分类器*，根据某些规则对数据包进行分类，以及单独的*操作*，根据分类器的输出确定对数据包的处理方式。可以作为*qdisc*（排队策略）的一部分定义一系列分类器。
+- en: 'eBPF programs are attached as a classifier, but they can also determine what
+    action to take within the same program. The action is indicated by the program’s
+    return code (whose values are defined in *linux/pkt_cls.h*):'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF 程序作为分类器附加，但它们也可以在同一个程序中确定采取的操作。操作由程序的返回代码指示（其值在 *linux/pkt_cls.h* 中定义）：
+- en: '`TC_ACT_SHOT` tells the kernel to drop the packet.'
+  id: totrans-111
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`TC_ACT_SHOT` 指示内核丢弃该数据包。'
+- en: '`TC_ACT_UNSPEC` behaves as if the eBPF program hadn’t been run on this packet
+    (so it would be passed to the next classifier in the sequence, if there is one).'
+  id: totrans-112
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`TC_ACT_UNSPEC` 表现得好像 eBPF 程序并未在此数据包上运行过（因此将其传递给序列中的下一个分类器，如果有的话）。'
+- en: '`TC_ACT_OK` tells the kernel to pass the packet to the next layer in the stack.'
+  id: totrans-113
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`TC_ACT_OK` 指示内核将数据包传递给堆栈中的下一层。'
+- en: '`TC_ACT_REDIRECT` sends the packet to the ingress or egress path of a different
+    network device.'
+  id: totrans-114
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`TC_ACT_REDIRECT` 将数据包发送到不同网络设备的 ingress 或 egress 路径。'
+- en: 'Let’s take a look at a few simple examples of programs that can be attached
+    within TC. The first simply generates a line of trace and then tells the kernel
+    to drop the packet:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们来看几个可以附加在 TC 内的简单程序示例。第一个简单地生成一行跟踪，并告诉内核丢弃该数据包：
+- en: '[PRE9]'
+  id: totrans-116
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Now let’s consider how to drop only a subset of packets. This example drops
+    ICMP (ping) request packets and is very similar to the XDP example you saw earlier
+    in this chapter:'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们考虑如何仅丢弃数据包的子集。这个示例会丢弃 ICMP（ping）请求数据包，与本章早些时候介绍的 XDP 示例非常相似：
+- en: '[PRE10]'
+  id: totrans-118
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: The `sk_buff` structure has pointers to the start and end of the packet data,
+    very much like the `xdp_md` structure, and packet parsing proceeds in very much
+    the same way. Again, to pass verification you have to explicitly check that any
+    access to data is within the range between `data` and `data_end`.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sk_buff` 结构体具有指向数据包数据起始和结束的指针，非常类似于 `xdp_md` 结构体，数据包解析过程也非常相似。再次强调，为了通过验证，必须明确检查对数据的任何访问是否在
+    `data` 和 `data_end` 之间的范围内。'
+- en: You might be wondering why you would want to implement something like this at
+    the TC layer when you have already seen the same kind of functionality implemented
+    with XDP. One good reason is that you can use TC programs for egress traffic,
+    where XDP can only process ingress traffic. Another is that because XDP is triggered
+    as soon as the packet arrives, there is no `sk_buff` kernel data structure related
+    to the packet at that point. If the eBPF program is interested in or wants to
+    manipulate the `sk_buff` the kernel creates for this packet, the TC attachment
+    point is suitable.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或许你会想知道为什么在已经看到 XDP 实现了类似功能的情况下，你还想在 TC 层实现类似的东西。一个很好的理由是，你可以在 egress 流量上使用
+    TC 程序，而 XDP 只能处理 ingress 流量。另一个理由是，因为 XDP 在数据包到达时立即触发，此时与数据包相关的 `sk_buff` 内核数据结构还不存在。如果
+    eBPF 程序对内核为该数据包创建的 `sk_buff` 感兴趣或希望操纵它，TC 附加点是合适的选择。
+- en: Note
+  id: totrans-121
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: To better understand the differences between XDP and TC eBPF programs, read
+    the “Program Types” section in the [BPF and XDP Reference Guide](https://oreil.ly/MWAJL)
+    from the Cilium project.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要更好地理解 XDP 和 TC eBPF 程序之间的区别，请阅读 Cilium 项目的 [BPF 和 XDP 参考指南](https://oreil.ly/MWAJL)
+    中的“程序类型”部分。
+- en: 'Now let’s consider an example that doesn’t just drop certain packets. This
+    example identifies a ping request being received and responds with a ping response:'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们考虑一个不仅仅丢弃某些数据包的示例。这个示例识别到收到了一个 ping 请求，并且会以 ping 响应进行响应：
+- en: '[PRE11]'
+  id: totrans-124
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: '[![1](assets/1.png)](#code_id_8_16)'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_8_16)'
+- en: The `is_icmp_ping_request()` function parses the packet and checks not only
+    that it’s an ICMP message, but also that it’s an echo (ping) request.
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`is_icmp_ping_request()` 函数解析数据包，不仅检查它是否是 ICMP 消息，还检查它是否是回显（ping）请求。'
+- en: '[![2](assets/2.png)](#code_id_8_17)'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_8_17)'
+- en: Since this function is going to send a response to the sender, the source and
+    destination addresses need to be swapped. (You can read the example code if you
+    want to see the nitty-gritty details of this, which also includes updating the
+    IP header checksum.)
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于这个函数将向发送方发送响应，所以需要交换源和目标地址。（如果你想看看这个例子的具体代码，包括更新 IP 标头校验和的细节，可以阅读示例代码。）
+- en: '[![3](assets/3.png)](#code_id_8_18)'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_8_18)'
+- en: This is converted to an echo response by changing the type field in the ICMP
+    header.
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过更改 ICMP 标头中的类型字段，将其转换为回显响应。
+- en: '[![4](assets/4.png)](#code_id_8_19)'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#code_id_8_19)'
+- en: This helper function sends a clone of the packet back through the interface
+    (`skb->ifindex`) on which it was received.
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个辅助函数通过接口（`skb->ifindex`）将数据包的克隆发送回去。
+- en: '[![5](assets/5.png)](#code_id_8_20)'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#code_id_8_20)'
+- en: Since the helper function cloned the packet before sending out the response,
+    the original packet should be dropped.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于辅助函数在发送响应之前克隆了数据包，原始数据包应该被丢弃。
+- en: In normal circumstances, a ping request would be handled later by the kernel’s
+    network stack, but this small example demonstrates how network functionality more
+    generally can be replaced by an eBPF implementation.
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在正常情况下，ping 请求将由内核的网络堆栈稍后处理，但这个小例子演示了如何通过 eBPF 实现替换更广泛的网络功能。
+- en: Lots of networking capabilities today are handled by user space services, but
+    where they can be replaced by eBPF programs, it’s likely to be great for performance.
+    A packet that’s processed within the kernel doesn’t have to complete its journey
+    through the rest of the stack; there is no need for it to transition to user space
+    for processing, and the response doesn’t require a transition back into the kernel.
+    What’s more, the two could run in parallel—an eBPF program can return `TC_ACT_OK`
+    for any packet that requires complex processing that it can’t handle so that it
+    gets passed up to the user space service as normal.
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 今天许多网络功能由用户空间服务处理，但如果可以用 eBPF 程序替代，对性能可能会有很大帮助。在内核中处理的数据包无需完全经过堆栈的其余部分；不需要将其传输到用户空间进行处理，响应也无需再次返回内核。更重要的是，这两者可以并行运行——对于需要复杂处理但
+    eBPF 无法处理的任何数据包，eBPF 程序可以返回 `TC_ACT_OK`，以便正常地将其传递到用户空间服务。
+- en: For me, this is an important aspect of implementing network functionality in
+    eBPF. As the eBPF platform develops (e.g., more recent kernels allowing programs
+    of one million instructions), it’s possible to implement increasingly complex
+    aspects of networking in the kernel. The parts that are not yet implemented in
+    eBPF can still be handled either by the traditional stack within the kernel or
+    in user space. Over time, more and more features can be moved from user space
+    into the kernel, with the flexibility and dynamic nature of eBPF meaning you won’t
+    have to wait for them to be part of the kernel distribution itself. You can load
+    eBPF implementations immediately, just as I discussed in [Chapter 1](ch01.html#what_is_ebpf_and_why_is_it_importantque).
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对我来说，这是在 eBPF 中实现网络功能的一个重要方面。随着 eBPF 平台的发展（例如，最新内核允许一百万条指令的程序），可以在内核中实现越来越复杂的网络功能。目前尚未在
+    eBPF 中实现的部分仍可以由内核中的传统堆栈或用户空间来处理。随着时间的推移，越来越多的功能可以从用户空间移到内核中，eBPF 的灵活性和动态特性意味着你不必等待它们成为内核分发的一部分。你可以立即加载
+    eBPF 实现，就像我在 [第1章](ch01.html#what_is_ebpf_and_why_is_it_importantque) 中讨论的那样。
+- en: 'I’ll return to the implementation of networking features in [“eBPF and Kubernetes
+    Networking”](#ebpf_and_kubernetes_networking). But first, let’s consider another
+    use case that eBPF enables: inspecting the decrypted contents of encrypted traffic.'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我将在 [“eBPF 和 Kubernetes 网络”](#ebpf_and_kubernetes_networking) 的实现中返回到网络功能的实现。但首先，让我们考虑
+    eBPF 另一个能够实现的用例：检查加密流量的解密内容。
+- en: Packet Encryption and Decryption
+  id: totrans-139
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 数据包加密与解密
+- en: If an application uses encryption to secure data it sends or receives, there
+    will be a point before it’s encrypted or after it’s decrypted where the data is
+    in the clear. Recall that eBPF can attach programs pretty much anywhere on a machine,
+    so if you can hook into a point where data is being passed and isn’t yet encrypted,
+    or just after it has been decrypted, that would allow your eBPF program to observe
+    that data in the clear. There’s no need to supply any certificates to decrypt
+    the traffic, as you would in a traditional SSL inspection tool.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果应用程序使用加密来保护发送或接收的数据，那么在加密之前或解密之后会有一个明文数据的点。回想一下，eBPF 可以几乎在机器的任何地方附加程序，因此如果可以钩入数据传递但尚未加密或刚刚解密的点，那么你的
+    eBPF 程序可以观察到这些明文数据。不需要提供任何证书来解密流量，就像在传统的 SSL 检查工具中那样。
+- en: In many cases an application will encrypt data using a library like OpenSSL
+    or BoringSSL that lives in user space. In this case the traffic will already be
+    encrypted by the time it reaches the socket, which is the user space/kernel boundary
+    for network traffic. If you want to trace out this data in its unencrypted form,
+    you can use an eBPF program attached to the right place in the user space code.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在许多情况下，应用程序会使用像 OpenSSL 或 BoringSSL 这样的库来加密数据，这些库存在于用户空间。在这种情况下，数据到达套接字时已经是加密的，而这是网络流量的用户空间/内核边界。如果要以未加密形式跟踪这些数据，可以在用户空间代码中合适的位置使用
+    eBPF 程序。
+- en: User Space SSL Libraries
+  id: totrans-142
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 用户空间 SSL 库
+- en: One common way to trace out the decrypted content of encrypted packets is to
+    hook into calls made to user space libraries like OpenSSL or BoringSSL. An application
+    using OpenSSL sends data to be encrypted by making a call to a function called
+    `SSL_write()` and retrieves cleartext data that was received over the network
+    in encrypted form using `SSL_read()`. Hooking eBPF programs into these functions
+    with uprobes allows an application to observe the data *from any application that
+    uses this shared library* in the clear, before it is encrypted or after it has
+    been decrypted. And there is no need for any keys, because those are already being
+    provided by the application.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 跟踪解密后的加密数据包的一种常见方法是挂接到用户空间库（如OpenSSL或BoringSSL）调用中。使用OpenSSL的应用程序通过调用称为`SSL_write()`的函数发送要加密的数据，并使用`SSL_read()`从网络接收到的以加密形式接收的明文数据。使用uprobes将eBPF程序挂接到这些函数中，允许应用程序在加密或解密之前以及之后观察到从*使用该共享库的任何应用程序*中的数据。而且无需任何密钥，因为这些已经由应用程序提供。
+- en: 'There is a fairly straightforward example called [openssl-tracer in the Pixie
+    project](https://oreil.ly/puDp9),^([8](ch08.html#ch08fn8)) within which the eBPF
+    programs are in a file called *openssl_tracer_bpf_funcs.c*. Here’s the part of
+    that code that sends data to user space, using a perf buffer (similar to examples
+    you have seen earlier in this book):'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Pixie项目中有一个相当简单的示例叫做[openssl-tracer](https://oreil.ly/puDp9)^([8](ch08.html#ch08fn8))，其中eBPF程序位于名为*openssl_tracer_bpf_funcs.c*的文件中。以下是该代码将数据发送到用户空间的部分，使用了类似于本书早期示例的perf缓冲区：
+- en: '[PRE12]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: You can see that data from `buf` gets read into an `event` structure using the
+    helper function `bpf_probe_read()`, and then that `event` structure is submitted
+    to a perf buffer.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以看到`buf`中的数据通过帮助函数`bpf_probe_read()`读入`event`结构，然后将该`event`结构提交到perf缓冲区。
+- en: 'If this data is being sent to user space, it’s reasonable to assume this must
+    be the data in unencrypted format. So where is this buffer of data obtained? You
+    can work that out by seeing where the `process_SSL_data()` function is called.
+    It’s called in two places: one for data being read and one for data being written.
+    [Figure 8-4](#ebpf_programs_are_hooked_to_uprobes_at_) illustrates what is happening
+    in the case of reading data that arrives on this machine in encrypted form.'
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果此数据正在发送到用户空间，可以合理地假设这必须是未加密格式的数据。那么这个数据缓冲区从哪里获得？通过查看调用`process_SSL_data()`函数的位置可以找到答案。在读取到达此计算机的加密数据时，[图 8-4](#ebpf_programs_are_hooked_to_uprobes_at_)说明了正在发生的情况。
+- en: When you’re reading data, you supply a pointer to a buffer to `SSL_read()`,
+    and when the function returns, that buffer will contain the unencrypted data.
+    Much like kprobes, the input parameters to a function—including that buffer pointer—are
+    only available to a uprobe attached to the entry point, as the registers they’re
+    held in might well get overwritten during the function’s execution. But the data
+    won’t be available in the buffer until the function exits, when you can read it
+    using a uretprobe.
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您读取数据时，将指针指向`SSL_read()`的缓冲区，当函数返回时，该缓冲区将包含未加密数据。与kprobes类似，函数的输入参数（包括该缓冲区指针）仅在附加到入口点的uprobe中可用，因为它们所在的寄存器可能在函数执行期间被覆盖。但在函数退出时，直到通过uretprobe可以读取数据，该数据将不会在缓冲区中可用。
+- en: '![eBPF programs are hooked to uprobes at the entry to and exit from SSL_read()
+    so that the unencrypted data can be read from the buffer pointer](assets/lebp_0804.png)'
+  id: totrans-149
+  prefs: []
+  type: TYPE_IMG
+  zh: '![eBPF程序在SSL_read()的入口和出口处钩入uprobes，以便从缓冲指针中读取未加密数据](assets/lebp_0804.png)'
+- en: Figure 8-4\. eBPF programs are hooked to uprobes at the entry to and exit from
+    `SSL_read()` so that the unencrypted data can be read from the buffer pointer
+  id: totrans-150
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-4\. eBPF程序在SSL_read()的入口和出口处钩入uprobes，以便从缓冲指针中读取未加密数据
+- en: 'So this example follows a common pattern for kprobes and uprobes, illustrated
+    in [Figure 8-4](#ebpf_programs_are_hooked_to_uprobes_at_), where the entry probe
+    temporarily stores input parameters using a map, from which the exit probe can
+    retrieve them. Let’s look at the code that does this, starting with the eBPF program
+    attached to the start of `SSL_read()`:'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所以这个示例遵循了kprobes和uprobes的常见模式，如[图 8-4](#ebpf_programs_are_hooked_to_uprobes_at_)所示，入口探针临时使用映射存储输入参数，退出探针可以从中检索。让我们看看执行此操作的代码，从`SSL_read()`的eBPF程序开始：
+- en: '[PRE13]'
+  id: totrans-152
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: '[![1](assets/1.png)](#code_id_8_21)'
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_8_21)'
+- en: As described in the comment for this function, the buffer pointer is the second
+    parameter passed into the `SSL_read()` function to which this probe will be attached.
+    The `PT_REGS_PARM2` macro gets this parameter from the context.
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如此函数的注释所描述的，缓冲区指针是传递给`SSL_read()`函数的第二个参数，这个探测器将附加到这个参数上。`PT_REGS_PARM2`宏从上下文中获取此参数。
+- en: '[![2](assets/2.png)](#code_id_8_22)'
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_8_22)'
+- en: The buffer pointer is stored in a hash map, for which the key is the current
+    process and thread ID, obtained at the start of the function using the helper
+    `bpf_get_current_pid_tgif()`.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 缓冲区指针存储在哈希映射中，其键是在函数开始时使用`bpf_get_current_pid_tgid()`辅助函数获取的当前进程和线程ID。
+- en: 'Here’s the corresponding program for the exit probe:'
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是退出探测器的相应程序：
+- en: '[PRE14]'
+  id: totrans-158
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: '[![1](assets/1.png)](#code_id_8_23)'
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_8_23)'
+- en: Having looked up the current process and thread ID, use this as the key to retrieve
+    the buffer pointer from the hash map.
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 已查找当前进程和线程ID，将其用作从哈希映射中检索缓冲区指针的键。
+- en: '[![2](assets/2.png)](#code_id_8_24)'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_8_24)'
+- en: If this isn’t a null pointer, call `process_SSL_data()`, which is the function
+    you saw earlier that sends the data from that buffer to user space using the perf
+    buffer.
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果这不是空指针，请调用`process_SSL_data()`函数，这个函数之前你看到过，它将数据从缓冲区发送到用户空间，使用perf缓冲区。
+- en: '[![3](assets/3.png)](#code_id_8_25)'
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_8_25)'
+- en: Clean up the entry in the hash map, since every entry call should be paired
+    with an exit.
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 清理哈希映射中的条目，因为每个条目调用都应该与一个退出对应。
+- en: This example shows how to trace out the cleartext version of encrypted data
+    that gets sent and received by a user space application. The tracing itself is
+    attached to a user space library, and there’s no guarantee that every application
+    will use a given SSL library. The BCC project includes a utility called [*sslsniff*](https://oreil.ly/tFT9p)
+    that also supports GnuTLS and NSS. But if someone’s application uses some other
+    encryption library (or even, heaven forbid, they chose to “roll their own crypto”),
+    the uprobes simply won’t have the right places to hook to and these tracing tools
+    won’t work.
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例展示了如何跟踪用户空间应用程序发送和接收的加密数据的明文版本。跟踪本身附加到用户空间库，并不能保证每个应用程序都使用给定的SSL库。BCC项目包括一个名为[*sslsniff*](https://oreil.ly/tFT9p)的实用工具，也支持GnuTLS和NSS。但如果某人的应用程序使用其他加密库（甚至更糟糕的是，选择“自己实现加密”），uprobes根本无法找到正确的挂接点，这些跟踪工具将无法正常工作。
+- en: There are even more common reasons why this uprobe-based approach might not
+    be successful. Unlike the kernel (of which there is only one per [virtual] machine),
+    there can be multiple copies of user space library code. If you’re using containers,
+    each one is likely to have its own set of all library dependencies. You can hook
+    into uprobes in these libraries, but you’d have to identify the right copy for
+    the particular container you want to trace. Another possibility is that rather
+    than using a shared, dynamically linked library, an application might be statically
+    linked so that it’s a single standalone executable.
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种基于uprobes的方法可能不成功的常见原因还有更多。与只有一个（虚拟）机器的内核不同，用户空间库代码可以存在多个副本。如果使用容器，每个容器很可能有自己的所有库依赖集合。您可以在这些库中挂接uprobes，但必须确定要跟踪的特定容器的正确副本。另一种可能性是，应用程序可能不是使用共享的动态链接库，而是静态链接，因此它是一个单独的可执行文件。
+- en: eBPF and Kubernetes Networking
+  id: totrans-167
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: eBPF 和 Kubernetes 网络
+- en: Although this book isn’t about Kubernetes, eBPF is so widely used for Kubernetes
+    networking that it’s a great illustration of using the platform to customize the
+    networking stack.
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管本书不是关于Kubernetes的，但eBPF在Kubernetes网络中被广泛使用，这是使用该平台自定义网络堆栈的一个很好的例证。
+- en: In Kubernetes environments, applications are deployed in *pods*. Each pod is
+    a group of one or more containers that share kernel namespaces and cgroups, isolating
+    pods from each other and from the host machine they are running on.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Kubernetes环境中，应用程序部署在*pods*中。每个pod是一个或多个容器的组合，它们共享内核命名空间和cgroups，将pod与其他pod以及它们所在的主机机器隔离开来。
+- en: In particular (for the purposes of this chapter), a pod typically has its own
+    network namespace and its own IP address.^([9](ch08.html#ch08fn9)) This means
+    the kernel has a set of network stack structures for that namespace, separated
+    from the host’s and from other pods. As shown in [Figure 8-5](#network_path_in_kubernetes),
+    the pod is connected to the host by a virtual Ethernet connection, and it is allocated
+    its own IP address.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 特别是（在本章节的目的上），一个Pod通常有自己的网络命名空间和IP地址。^([9](ch08.html#ch08fn9))这意味着内核为该命名空间拥有一组网络堆栈结构，与主机及其他Pod分开。如[图 8-5](#network_path_in_kubernetes)所示，Pod通过虚拟以太网连接与主机连接，并分配了自己的IP地址。
+- en: '![Network path in Kubernetes](assets/lebp_0805.png)'
+  id: totrans-171
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Kubernetes中的网络路径](assets/lebp_0805.png)'
+- en: Figure 8-5\. Network path in Kubernetes
+  id: totrans-172
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-5\. Kubernetes中的网络路径
+- en: You can see from [Figure 8-5](#network_path_in_kubernetes) that a packet coming
+    from outside the machine destined for an application pod has to travel through
+    the network stack on the host, across the virtual Ethernet connection, and into
+    the pod’s network namespace, and then it has to traverse the network stack again
+    to reach the application.
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从[图 8-5](#network_path_in_kubernetes)可以看出，从机器外部发送给应用Pod的数据包必须经过主机的网络堆栈，跨越虚拟以太网连接进入Pod的网络命名空间，然后再次经过网络堆栈到达应用程序。
+- en: Those two network stacks are running in the same kernel, so the packet is really
+    running through the same processing twice. The more code a network packet has
+    to pass through, the higher the latency, so if it’s possible to shorten the network
+    path, that will likely bring about performance improvements.
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这两个网络堆栈在同一个内核中运行，因此数据包实际上会通过相同的处理两次。网络数据包经过的代码越多，延迟就越高，因此如果可能缩短网络路径，可能会带来性能改进。
+- en: An eBPF-based networking solution like Cilium can hook into the network stack
+    to override the kernel’s native networking behavior, as shown in [Figure 8-6](#bypassing_iptables_and_conntrack_proces).
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基于eBPF的网络解决方案如Cilium可以钩入网络堆栈，覆盖内核的原生网络行为，如[图 8-6](#bypassing_iptables_and_conntrack_proces)所示。
+- en: '![Bypassing iptables and conntrack processing with eBPF](assets/lebp_0806.png)'
+  id: totrans-176
+  prefs: []
+  type: TYPE_IMG
+  zh: '![使用eBPF绕过iptables和conntrack处理](assets/lebp_0806.png)'
+- en: Figure 8-6\. Bypassing iptables and conntrack processing with eBPF
+  id: totrans-177
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-6\. 使用eBPF绕过iptables和conntrack处理
+- en: In particular, eBPF enables replacing iptables and conntrack with a more efficient
+    solution for managing network rules and connection tracking. Let’s discuss why
+    this results in a significant performance improvement in Kubernetes.
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 特别是，eBPF能够用更高效的解决方案替代iptables和conntrack，用于管理网络规则和连接跟踪。让我们讨论为什么这在Kubernetes中会显著提高性能。
+- en: Avoiding iptables
+  id: totrans-179
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 避免使用iptables
+- en: Kubernetes has a component called kube-proxy that implements load balancing
+    behavior, allowing multiple pods to fulfill requests to a service. This has been
+    implemented using iptables rules.
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Kubernetes有一个名为kube-proxy的组件，实现负载均衡行为，允许多个Pod来处理对服务的请求。这是通过iptables规则来实现的。
+- en: Kubernetes offers users the choice of which networking solution to use through
+    the use of the Container Network Interface (CNI). Some CNI plug-ins use iptables
+    rules to implement L3/L4 network policy in Kubernetes; that is, the iptables rules
+    indicate whether to drop a packet because it doesn’t meet the network policy.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Kubernetes为用户提供了通过容器网络接口（CNI）选择网络解决方案的选项。一些CNI插件使用iptables规则来实现Kubernetes中的L3/L4网络策略，即iptables规则指示是否丢弃不符合网络策略的数据包。
+- en: Although iptables was effective for traditional (precontainer) networking, it
+    has some weaknesses when it’s used in Kubernetes. In this environment, pods—and
+    their IP addresses—come and go dynamically, and each time a pod is added or removed,
+    the iptables rules have to be rewritten in their entirety, and this impacts performance
+    at scale. (A [talk](https://oreil.ly/BO0-8) by Haibin Xie and Quinton Hoole at
+    KubeCon in 2017 described how making a single rule update to iptables rules for
+    20,000 services could take five hours.)
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然iptables在传统的（容器前）网络中很有效，但在Kubernetes中使用时存在一些弱点。在这个环境中，Pod及其IP地址动态地出现和消失，每次添加或删除Pod时，iptables规则必须完全重写，这会影响大规模的性能。（在2017年KubeCon上，Haibin
+    Xie和Quinton Hoole的[演讲](https://oreil.ly/BO0-8)描述了为20,000个服务更新iptables规则需要五个小时。）
+- en: 'Updates to iptables aren’t the only performance issues: looking up a rule requires
+    a linear search through the table, which is an O(n) operation, growing linearly
+    with the number of rules.'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对iptables的更新并不是唯一的性能问题：查找规则需要通过表进行线性搜索，这是一个O(n)的操作，随着规则数量线性增长。
+- en: Cilium uses eBPF hash table maps to store network policy rules, connection tracking,
+    and load balancer lookup tables, which can replace iptables for kube-proxy. Both
+    looking up an entry in a hash table and inserting a new one are approximately
+    O(1) operations, which means they scale much, much better.
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Cilium 使用 eBPF 哈希表映射来存储网络策略规则、连接跟踪和负载均衡器查找表，这可以替代 kube-proxy 的 iptables。在哈希表中查找和插入条目都是大约
+    O(1) 的操作，这意味着它们具有更好的扩展性。
+- en: You can read about the benchmarked performance improvements this achieves on
+    the Cilium [blog](https://oreil.ly/9NV99). In the same post you’ll see that Calico,
+    another CNI that has an eBPF option, also achieves better performance when you
+    pick its eBPF implementation over iptables. eBPF offers the most performant mechanisms
+    for scalable, dynamic Kubernetes deployments.
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在 Cilium 的 [博客](https://oreil.ly/9NV99) 中阅读关于其实现的性能改进的基准测试结果。在同一篇文章中，你会看到另一个
+    CNI —— Calico，它也有一个 eBPF 选项，选择其 eBPF 实现而不是 iptables 时性能更好。eBPF 为可扩展、动态的 Kubernetes
+    部署提供了最高性能的机制。
+- en: Coordinated Network Programs
+  id: totrans-186
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 协调网络程序
+- en: A complex networking implementation like Cilium can’t be written as a single
+    eBPF program. As shown in [Figure 8-7](#cilium_consists_of_multiple_coordinated),
+    it provides several different eBPF programs that are hooked into different parts
+    of the kernel and its network stack.
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 像 Cilium 这样复杂的网络实现不能被写成单个 eBPF 程序。如图 [8-7](#cilium_consists_of_multiple_coordinated)
+    所示，它提供了几个不同的 eBPF 程序，这些程序挂钩到内核及其网络堆栈的不同部分。
+- en: '![Cilium consists of multiple coordinated eBPF programs that hook into different
+    points in the kernel](assets/lebp_0807.png)'
+  id: totrans-188
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Cilium 由多个协调的 eBPF 程序组成，这些程序挂钩到内核的不同点](assets/lebp_0807.png)'
+- en: Figure 8-7\. Cilium consists of multiple coordinated eBPF programs that hook
+    into different points in the kernel
+  id: totrans-189
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-7\. Cilium 由多个协调的 eBPF 程序组成，这些程序挂钩到内核的不同点
+- en: As a general principle, Cilium intercepts traffic as soon as it can in order
+    to shorten the processing path for each packet. Messages flowing out from an application
+    pod are intercepted at the socket layer, as close to the application as possible.
+    Inbound packets from the external network are intercepted using XDP. But what
+    about the additional attachment points?
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为一个一般原则，Cilium 尽早拦截流量，以缩短每个数据包的处理路径。从应用程序 Pod 流出的消息在接近应用程序的套接字层被拦截。使用 XDP 拦截来自外部网络的入站数据包。但是附加点呢？
+- en: Cilium supports different networking modes that suit different environments.
+    A full description of this is beyond the scope of this book (you can find more
+    information at [Cilium.io](https://cilium.io)), but I’ll give a brief overview
+    here so that you can see why there are so many different eBPF programs!
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Cilium 支持适合不同环境的不同网络模式。本书不涵盖其全面描述（你可以在 [Cilium.io](https://cilium.io) 找到更多信息），但我会在这里简要概述一下，以便你了解为什么会有这么多不同的
+    eBPF 程序！
+- en: There is a simple, flat networking mode, in which Cilium allocates IP addresses
+    for all the pods in a cluster from the same CIDR and directly routes traffic between
+    them. There are also a couple of different tunneling modes, in which traffic intended
+    for a pod on a different node gets encapsulated in a message addressed to that
+    destination node’s IP address and decapsulated on that destination node for the
+    final hop into the pod. Different eBPF programs get invoked to handle traffic
+    depending on whether a packet is destined for a local container, the local host,
+    another host on this network, or a tunnel.
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 存在一种简单的扁平网络模式，在这种模式下，Cilium 为集群中所有的 Pod 分配相同的 CIDR IP 地址，并直接在它们之间路由流量。还有几种不同的隧道模式，其中用于不同节点上
+    Pod 的流量被封装在一个寻址到目标节点 IP 地址的消息中，并在目标节点上解封装以进行最终的 Pod 内部跳转。根据数据包的目的地，不同的 eBPF 程序被调用来处理流量，无论是本地容器、本地主机、本网络上的另一台主机还是隧道。
+- en: 'In [Figure 8-7](#cilium_consists_of_multiple_coordinated) you can see multiple
+    TC programs that handle traffic to and from different devices. These devices represent
+    the possible different real and virtual network interfaces where a packet might
+    be flowing:'
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [图 8-7](#cilium_consists_of_multiple_coordinated) 中，你可以看到处理来自不同设备流量的多个 TC
+    程序。这些设备代表了可能的不同真实和虚拟网络接口，数据包可能会流经这些接口：
+- en: The interface to a pod’s network (one end of the virtual Ethernet connection
+    between the pod and the host)
+  id: totrans-194
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Pod 网络的接口（连接 Pod 和主机之间的虚拟以太网连接的一端）
+- en: The interface to a network tunnel
+  id: totrans-195
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 网络隧道的接口
+- en: The interface to a physical network device on the host
+  id: totrans-196
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 主机上物理网络设备的接口
+- en: The host’s own network interface
+  id: totrans-197
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 主机自身的网络接口
+- en: Note
+  id: totrans-198
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'If you’re interested in learning more about how packets flow through Cilium,
+    Arthur Chiao wrote this detailed and interesting blog post: [“Life of a Packet
+    in Cilium: Discovering the Pod-to-Service Traffic Path and BPF Processing Logics”](https://oreil.ly/toxsM).'
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您有兴趣了解更多关于数据包如何流经 Cilium 的信息，Arthur Chiao 写了这篇详细且有趣的博客文章：[“Cilium 中数据包的生命周期：发现
+    Pod 到 Service 流量路径和 BPF 处理逻辑”](https://oreil.ly/toxsM)。
+- en: The different eBPF programs attached at these various points in the kernel communicate
+    using eBFP maps and using the metadata that can be attached to network packets
+    as they flow through the stack (which I mentioned when I discussed accessing network
+    packets in the XDP example). These programs don’t just route packets to their
+    destination; they’re also used to drop packets—just like you saw in earlier examples—based
+    on network policies.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 附加在内核中的不同 eBPF 程序使用 eBPF map 进行通信，并使用可以附加到网络数据包的元数据来流经堆栈（在讨论访问 XDP 示例中提到时）。这些程序不仅仅将数据包路由到其目的地；它们还根据网络策略丢弃数据包，就像您在早期示例中看到的那样。
+- en: Network Policy Enforcement
+  id: totrans-201
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 网络策略执行
+- en: You saw at the start of this chapter how eBPF programs can drop packets, and
+    that means they simply won’t reach their destination. This is the basis of network
+    policy enforcement, and conceptually it’s essentially the same whether we are
+    thinking about “traditional” or cloud native firewalling. A policy determines
+    whether a packet should be dropped or not, based on information about its source
+    and/or destination.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章的开头，您看到 eBPF 程序如何丢弃数据包，这意味着它们根本不会到达其目的地。这是网络策略执行的基础，从概念上讲，无论我们是在考虑“传统”的防火墙还是云原生防火墙，它本质上都是相同的。策略根据数据包的源和/或目的地的信息决定是否丢弃数据包。
+- en: In traditional environments, IP addresses are assigned to a particular server
+    for a long period of time, but in Kubernetes, IP addresses come and go dynamically,
+    and the address assigned today for a particular application pod might very well
+    be reused for a completely different application tomorrow. This is why traditional
+    firewalling isn’t terribly effective in cloud native environments. It would be
+    impractical to redefine firewall rules manually every time IP addresses change.
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在传统环境中，IP 地址长期分配给特定服务器，但在 Kubernetes 中，IP 地址是动态分配的，今天分配给特定应用程序 Pod 的地址可能明天完全被重新分配给另一个应用程序使用。这就是为什么传统的防火墙在云原生环境中效果不佳的原因。每次
+    IP 地址变化时手动重新定义防火墙规则是不现实的。
+- en: Instead, Kubernetes supports the concept of a NetworkPolicy resource, which
+    defines firewalling rules based on the labels applied to particular pods rather
+    than based on their IP address. Although the resource type is native to Kubernetes,
+    it’s not implemented by Kubernetes itself. Instead, this functionality is delegated
+    to whatever CNI plug-in you’re using. If you choose a CNI that doesn’t support
+    NetworkPolicy resources, any rules you might configure are simply ignored. On
+    the flip side, CNIs are free to configure custom resources that allow for more
+    sophisticated network policy configurations than the native Kubernetes definition
+    allows. For example, Cilium supports features like DNS-based network policy rules,
+    so you can define whether traffic is or isn’t allowed not based on an IP address
+    but based on the DNS name (e.g., “*example.com*”). You can also define policies
+    for various Layer 7 protocols, for example, allowing or denying traffic for HTTP
+    GET calls but not for POST calls to a particular URL.
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 相反，Kubernetes 支持 NetworkPolicy 资源的概念，该资源基于特定 Pod 上应用的标签定义防火墙规则，而不是基于它们的 IP 地址。尽管资源类型是
+    Kubernetes 本地支持的，但它并非由 Kubernetes 本身实现。相反，这个功能被委托给您正在使用的 CNI 插件。如果选择不支持 NetworkPolicy
+    资源的 CNI，则可能会忽略您配置的任何规则。另一方面，CNI 可以自由配置自定义资源，允许比本地 Kubernetes 定义更复杂的网络策略配置。例如，Cilium
+    支持基于 DNS 的网络策略规则，因此您可以根据 DNS 名称（例如，“*example.com*”）而不是 IP 地址定义是否允许流量。您还可以为各种第
+    7 层协议定义策略，例如允许或拒绝特定 URL 的 HTTP GET 调用的流量，但不允许 POST 调用。
+- en: Note
+  id: totrans-205
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Isovalent’s free hands-on lab [“Getting Started with Cilium”](https://oreil.ly/afdeh)
+    walks you through defining network policies at Layers 3/4 and Layer 7\. Another
+    very useful resource is the Network Policy Editor at [*networkpolicy.io*](http://networkpolicy.io),
+    which visually presents the effects of a network policy.
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Isovalent 的免费实验室 [“Cilium 入门”](https://oreil.ly/afdeh) 会指导您在第 3/4 层和第 7 层定义网络策略。另一个非常有用的资源是
+    [*networkpolicy.io*](http://networkpolicy.io) 上的 Network Policy 编辑器，它以可视化方式展示网络策略的影响。
+- en: As I discussed earlier in this chapter, it’s possible to use iptables rules
+    to drop traffic, and that’s an approach some CNIs have taken to implement Kubernetes
+    NetworkPolicy rules. Cilium uses eBPF programs to drop traffic that doesn’t match
+    the set of rules currently in place. Having seen examples of dropping packets
+    earlier in this chapter, I hope you have a rough mental model for how this would
+    work.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如我在本章早些时候讨论过的，可以使用 iptables 规则来丢弃流量，这是一些 CNIs 用来实现 Kubernetes NetworkPolicy
+    规则的方法。Cilium 使用 eBPF 程序来丢弃不符合当前规则集的流量。希望通过本章前面丢包示例的看法，你对此如何工作有一个初步的心理模型。
+- en: Cilium uses Kubernetes identities to determine whether a given network policy
+    rule applies. In the same way labels define which pods are part of a service in
+    Kubernetes, labels also define Cilium’s security identity for the pod. eBPF hash
+    tables, indexed by these service identities, make for very efficient rule lookups.
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Cilium 使用 Kubernetes 身份来确定特定网络策略规则是否适用。就像标签定义 Kubernetes 中哪些 Pod 是服务的一部分一样，标签也定义了
+    Cilium 中 Pod 的安全标识。通过这些服务标识索引的 eBPF 哈希表，使规则查找非常高效。
+- en: Encrypted Connections
+  id: totrans-209
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 加密连接
+- en: Many organizations have requirements to protect their deployments and their
+    users’ data by encrypting traffic between applications. This can be achieved by
+    writing code in each application to ensure that it sets up secure connections,
+    typically using mutual Traffic Layer Security (mTLS) underpinning an HTTP or gRPC
+    connection. Setting up these connections requires first establishing the identities
+    of the apps at either end of the connection (which is usually achieved by exchanging
+    certificates) and then encrypting the data that flows between them.
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 许多组织需要通过在应用程序中编写代码来加密应用程序之间的流量，以保护其部署和用户数据。通常情况下，这可以通过在每个应用程序中设置安全连接来实现，使用互为流量层安全
+    (mTLS) 作为 HTTP 或 gRPC 连接的基础。建立这些连接需要首先确认连接双方应用程序的身份（通常通过交换证书来实现），然后加密它们之间流动的数据。
+- en: 'In Kubernetes, it’s possible to offload the requirement from the application,
+    either to a service mesh layer or to the underlying network itself. A full discussion
+    of service mesh is beyond the scope of this book, but you might be interested
+    in a piece I wrote on the new stack: [“How eBPF Streamlines the Service Mesh”](https://oreil.ly/5ayvF).
+    Let’s concentrate here on the network layer and how eBPF makes it possible to
+    push the encryption requirement into the kernel.'
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Kubernetes 中，可以将应用程序的需求转移到服务网格层或底层网络本身。本书不涵盖完整的服务网格讨论，但你可能对我在新堆栈上写的一篇文章感兴趣：[“如何通过
+    eBPF 简化服务网格”](https://oreil.ly/5ayvF)。让我们集中在网络层以及 eBPF 如何使将加密需求推入内核成为可能。
+- en: The simplest option to ensure that traffic is encrypted within a Kubernetes
+    cluster is to use *transparent encryption*. It’s called “transparent” because
+    it takes place entirely at the network layer and it’s extremely lightweight from
+    an operational point of view. The applications themselves don’t need to be aware
+    of the encryption at all, and they don’t need to set up HTTPS connections; nor
+    does this approach require any additional infrastructure components running under
+    Kubernetes.
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Kubernetes 集群内确保流量加密的最简单选项是使用*透明加密*。之所以称为“透明”，是因为它完全在网络层进行，从操作角度来看非常轻量级。应用程序本身完全不需要意识到加密的存在，也不需要建立
+    HTTPS 连接；此方法也不需要在 Kubernetes 下运行任何额外的基础设施组件。
+- en: There are two in-kernel encryption protocols in common usage, IPsec and WireGuard^((R)),
+    and they’re both supported in Kubernetes networking by Cilium and Calico CNIs.
+    It’s beyond the scope of this book to discuss the differences between these two
+    protocols, but the key point is that they set up a secure tunnel between two machines.
+    The CNI can choose to connect the eBPF endpoint for a pod via this secure tunnel.
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在当前常见的内核中有两种加密协议，即 IPsec 和 WireGuard^((R))，它们都由 Cilium 和 Calico CNIs 支持在 Kubernetes
+    网络中使用。本书不讨论这两种协议之间的差异，但关键点在于它们建立了两台机器之间的安全隧道。CNI 可选择通过此安全隧道连接 Pod 的 eBPF 端点。
+- en: Note
+  id: totrans-214
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: There is a nice write-up on the [Cilium blog](https://oreil.ly/xjpGP) of how
+    Cilium uses WireGuard^((R)) as well as IPsec to provide encrypted traffic between
+    nodes. The post also gives a brief overview of the performance characteristics
+    of both.
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Cilium 博客有一篇很好的文章，介绍了 Cilium 如何使用 WireGuard^((R)) 和 IPsec 在节点之间提供加密流量。文章还简要概述了两者的性能特征。[Cilium
+    博客](https://oreil.ly/xjpGP)
+- en: The secure tunnel is set up using the identities of the nodes at either end.
+    These identities are managed by Kubernetes anyway, so the administrative burden
+    for an operator is minimal. For many purposes this is sufficient as it ensures
+    that all network traffic in a cluster is encrypted. Transparent encryption can
+    also be used unmodified with NetworkPolicy that uses Kubernetes identities to
+    manage whether traffic can flow between different endpoints in the cluster.
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用节点末端的身份验证来建立安全隧道。这些身份验证由 Kubernetes 管理，因此操作员的管理负担很小。对于许多目的来说，这已经足够了，因为它确保集群中的所有网络流量都是加密的。透明加密也可以与使用
+    Kubernetes 身份验证来管理集群中不同端点之间的流量流动的 NetworkPolicy 无缝使用。
+- en: Some organizations operate a multitenant environment where there’s a need for
+    strong multitenant boundaries and where it’s essential to use certificates to
+    identify every application endpoint. Handling this within every application is
+    a significant burden, so it’s something that more recently has been offloaded
+    to a service mesh layer, but this requires a whole extra set of components to
+    be deployed, causing additional resource consumption, latency, and operational
+    complexity.
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些组织在多租户环境中运作，在这种环境中需要强大的租户边界，并且必须使用证书来标识每个应用端点。在每个应用程序内部处理这些工作是一个重大负担，因此最近已经将其转移到服务网格层，但这需要部署整套额外的组件，增加了资源消耗、延迟和操作复杂性。
+- en: eBPF is now enabling a [new approach](https://oreil.ly/DSnLZ) that builds on
+    transparent encryption but uses TLS for the initial certificate exchange and endpoint
+    authentication so that the identities can represent individual applications rather
+    than the nodes they are running on, as depicted in [Figure 8-8](#transparent_encryption_between_authenti).
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在 eBPF 正在启用一种 [新方法](https://oreil.ly/DSnLZ)，基于透明加密，但使用 TLS 进行初始证书交换和端点认证，以便身份可以表示个别应用程序，而不是它们运行的节点，如
+    [图 8-8](#transparent_encryption_between_authenti) 所示。
+- en: '![Transparent encryption between authenticated application identities](assets/lebp_0808.png)'
+  id: totrans-219
+  prefs: []
+  type: TYPE_IMG
+  zh: '![验证应用身份之间的透明加密](assets/lebp_0808.png)'
+- en: Figure 8-8\. Transparent encryption between authenticated application identities
+  id: totrans-220
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-8. 验证应用身份之间的透明加密
+- en: Once the authentication step has taken place, IPsec or WireGuard^((R)) within
+    the kernel is used to encrypt the traffic that flows between those applications.
+    This has a number of advantages. It allows third-party certificate and identity
+    management tools like cert-manager or SPIFFE/SPIRE to handle the identity part,
+    and the network takes care of encryption so that it’s all entirely transparent
+    to the application. Cilium supports NetworkPolicy definitions that specify endpoints
+    by their SPIFFE ID rather than just by their Kubernetes labels. And perhaps most
+    importantly, this approach can be used with any protocol that travels in IP packets.
+    That’s a big step up from mTLS, which works only for TCP-based connections.
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦完成身份验证步骤，内核中的 IPsec 或 WireGuard^(R) 用于加密应用程序之间流动的流量。这带来了许多优势。它允许第三方证书和身份管理工具（如
+    cert-manager 或 SPIFFE/SPIRE）处理身份部分，网络负责加密，因此对应用程序来说完全透明。Cilium 支持 NetworkPolicy
+    定义，可以通过其 SPIFFE ID 指定端点，而不仅仅是通过其 Kubernetes 标签。也许最重要的是，这种方法可以与在 IP 数据包中传输的任何协议一起使用。这比仅适用于基于
+    TCP 连接的 mTLS 更进了一步。
+- en: There’s not enough room in this book to dive deep into all the internals of
+    Cilium, but I hope this section helped you understand how eBPF is a powerful platform
+    for building complex networking functionality like a fully featured Kubernetes
+    CNI.
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这本书没有足够的篇幅深入讨论 Cilium 的所有内部细节，但我希望本节帮助你理解 eBPF 如何成为构建复杂网络功能（如完全功能的 Kubernetes
+    CNI）的强大平台。
+- en: Summary
+  id: totrans-223
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 总结
+- en: In this chapter you saw eBPF programs attached at a variety of different points
+    in the network stack. I showed examples of basic packet processing, and I hope
+    these gave you an indication of how eBPF can create powerful networking features.
+    You also saw some real-life examples of these networking features, including load
+    balancing, firewalling, security mitigation, and Kubernetes networking.
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您看到了 eBPF 程序附加到网络堆栈中的各种不同点。我展示了基本数据包处理的示例，希望这些示例能让您了解 eBPF 如何创建强大的网络功能。您还看到了一些这些网络功能的实际示例，包括负载平衡、防火墙、安全缓解和
+    Kubernetes 网络。
+- en: Exercises and Further Reading
+  id: totrans-225
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 练习和进一步阅读
+- en: 'Here are some ways to learn more about the range of networking use cases for
+    eBPF:'
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下是了解 eBPF 的各种网络用例的一些方法：
+- en: Modify the example XDP program `ping()` so that it generates different trace
+    messages for ping responses and ping requests. The ICMP header immediately follows
+    the IP header in the network packet (just like the IP header follows the Ethernet
+    header). You’ll likely want to use `struct icmphdr` from *linux/icmp.h* and look
+    at whether the type field shows `ICMP_ECHO` or `ICMP_ECHOREPLY`.
+  id: totrans-227
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 修改示例XDP程序 `ping()`，使其为ping响应和ping请求生成不同的跟踪消息。ICMP标头紧随网络数据包中的IP标头之后（就像IP标头紧随以太网标头之后一样）。你可能想使用
+    `linux/icmp.h` 中的 `struct icmphdr`，并查看类型字段是否显示 `ICMP_ECHO` 或 `ICMP_ECHOREPLY`。
+- en: If you want to dive further into XDP programming, I recommend the xdp-project’s
+    [xdp-tutorial](https://oreil.ly/UmJMF).
+  id: totrans-228
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 如果你想进一步探索XDP编程，我推荐xdp-project的 [xdp-tutorial](https://oreil.ly/UmJMF)。
+- en: Use [sslsniff](https://oreil.ly/Zuww7) from the BCC project to view the contents
+    of encrypted traffic.
+  id: totrans-229
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用 [sslsniff](https://oreil.ly/Zuww7) 来查看BCC项目中加密流量的内容。
+- en: Explore Cilium by using tutorials and labs linked to from the [Cilium website](https://cilium.io/get-started).
+  id: totrans-230
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 通过在 [Cilium网站](https://cilium.io/get-started) 中链接的教程和实验来探索Cilium。
+- en: Use the editor at [*networkpolicy.io*](https://networkpolicy.io) to visualize
+    the effect of network policies in a Kubernetes deployment.
+  id: totrans-231
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用 [*networkpolicy.io*](https://networkpolicy.io) 上的编辑器来可视化Kubernetes部署中网络策略的影响。
+- en: ^([1](ch08.html#ch08fn1-marker)) At the time of this writing, around 100 organizations
+    have publicly announced their use of Cilium in its [*USERS.md* file](https://oreil.ly/PC7-G),
+    though this number is growing quickly. Cilium has also been adopted by AWS, Google,
+    and Microsoft.
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([1](ch08.html#ch08fn1-marker)) 截至撰写本文时，约有100家组织公开宣布在其 [*USERS.md* 文件](https://oreil.ly/PC7-G)
+    中使用Cilium，尽管这一数字正在迅速增长。AWS、Google和Microsoft也采用了Cilium。
+- en: ^([2](ch08.html#ch08fn2-marker)) This example is based on a talk I gave at eBPF
+    Summit 2021 called [“A Load Balancer from scratch”](https://oreil.ly/mQxtT). Build
+    an eBPF load balancer in just over 15 minutes!
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([2](ch08.html#ch08fn2-marker)) 此示例基于我在eBPF Summit 2021上的演讲 [“A Load Balancer
+    from scratch”](https://oreil.ly/mQxtT)。在15分钟内构建一个eBPF负载均衡器！
+- en: ^([3](ch08.html#ch08fn3-marker)) If you want to explore this, try [CTF Challenge
+    3 from eBPF Summit 2022](https://oreil.ly/YIh_t). I won’t give spoilers here in
+    the book, but you can see the solution in [a walkthrough given by Duffie Cooley
+    and me here](https://oreil.ly/_51rC).
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([3](ch08.html#ch08fn3-marker)) 如果你想探索这一点，请尝试来自eBPF Summit 2022的CTF挑战3 [“CTF
+    Challenge 3 from eBPF Summit 2022”](https://oreil.ly/YIh_t)。我不会在这本书中透露剧透，但你可以在由Duffie
+    Cooley和我提供的 [这里的解决方案中](https://oreil.ly/_51rC) 查看。
+- en: ^([4](ch08.html#ch08fn4-marker)) See Daniel Borkmann’s presentation [“Little
+    Helper Minions for Scaling Microservices”](https://oreil.ly/_8ZuF) that includes
+    a history of eBPF, where he tells this anecdote.
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([4](ch08.html#ch08fn4-marker)) 查看丹尼尔·博克曼的演示 [“Little Helper Minions for Scaling
+    Microservices”](https://oreil.ly/_8ZuF)，其中包括eBPF的历史，他在此时讲述了这个轶事。
+- en: ^([5](ch08.html#ch08fn5-marker)) Cilium maintains a [list of drivers that support
+    XDP](https://oreil.ly/wCMjB) within the [BPF and XDP Reference Guide](https://oreil.ly/eB7vL).
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([5](ch08.html#ch08fn5-marker)) Cilium在 [BPF和XDP参考指南](https://oreil.ly/eB7vL)
+    中维护了一个支持XDP的驱动程序列表。
+- en: ^([6](ch08.html#ch08fn6-marker)) Ceznam shared data about the performance boost
+    its team saw when experimenting with an eBPF-based load balancer in [this blog
+    post](https://oreil.ly/0cbCx).
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([6](ch08.html#ch08fn6-marker)) Ceznam在 [这篇博客文章中](https://oreil.ly/0cbCx) 分享了关于团队在使用基于eBPF的负载均衡器时看到的性能提升数据。
+- en: ^([7](ch08.html#ch08fn7-marker)) For a more complete overview of TC and its
+    concepts, I recommend Quentin Monnet’s post [“Understanding tc “direct action”
+    mode for BPF”](https://oreil.ly/7gU2A).
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([7](ch08.html#ch08fn7-marker)) 要更全面地了解TC及其概念，我推荐Quentin Monnet的文章 [“Understanding
+    tc “direct action” mode for BPF”](https://oreil.ly/7gU2A)。
+- en: ^([8](ch08.html#ch08fn8-marker)) There is also a blog post that accompanies
+    this example at [*https://blog.px.dev/ebpf-openssl-tracing*](https://blog.px.dev/ebpf-openssl-tracing).
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([8](ch08.html#ch08fn8-marker)) 这个示例还有一个博客文章，可以在 [*https://blog.px.dev/ebpf-openssl-tracing*](https://blog.px.dev/ebpf-openssl-tracing)
+    中找到。
+- en: ^([9](ch08.html#ch08fn9-marker)) It’s possible for pods to be run in the host’s
+    network namespace so that they share the IP address of the host, but this isn’t
+    usually done unless there’s a good reason for an application running in the pod
+    to require it.
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([9](ch08.html#ch08fn9-marker)) 可以将Pod运行在主机的网络命名空间中，以共享主机的IP地址，但除非应用程序在Pod中需要这样做，否则通常不会这样做。

@@ -1,147 +1,147 @@
 # 第六章：eBPF 验证器
 
-我已经提到了几次验证步骤，因此您已经知道，当您将 eBPF 程序加载到内核时，此验证过程确保程序是安全的。在本章中，我们将深入探讨验证器如何工作以实现这一目标。
+我已经多次提到验证步骤，所以你已经知道当你将 eBPF 程序加载到内核时，这个验证过程确保程序是安全的。在本章中，我们将深入探讨验证器如何工作以实现这一目标。
 
-验证涉及检查程序中的每条可能执行路径，并确保每条指令都是安全的。验证器还对字节码进行了一些更新，以准备执行。在本章中，我将通过从一个有效的示例开始并进行修改来显示一些验证失败的示例，这些修改使该代码对验证器无效。
+验证涉及检查程序的每个可能的执行路径，并确保每条指令都是安全的。验证器还对字节码进行一些更新，以准备执行。在本章中，我将展示一些验证失败的例子，从一个有效的示例开始，逐步进行修改，使该代码对验证器无效。
 
 ###### 注意
 
-本章的示例代码位于[*github.com/lizrice/learning-ebpf*](https://github.com/lizrice/learning-ebpf)存储库的*chapter6*目录中。
+本章的示例代码位于存储库的*chapter6*目录中，该存储库位于[*github.com/lizrice/learning-ebpf*](https://github.com/lizrice/learning-ebpf)。
 
-本章并不试图涵盖验证器进行的每种可能检查。它旨在概述，并提供一些示例，这些示例将帮助您处理编写自己的 eBPF 代码时可能遇到的验证错误。
+本章不试图涵盖验证器进行的每一种可能的检查。它旨在提供一个概述，具有说明性的例子，这些例子将帮助您处理编写自己的 eBPF 代码时可能遇到的验证错误。
 
-要记住的一件事是，验证器是在 eBPF 字节码上工作的，而不是直接在源代码上工作。该字节码取决于编译器的输出。由于编译器优化等原因，源代码的更改可能并不总是会导致字节码中的预期结果，因此相应地，它可能不会给出您在验证器的判断中所期望的结果。例如，验证器将拒绝不可达指令，但编译器在验证器看到它们之前可能会将它们优化掉。
+需要记住的一件事是，验证器在 eBPF 字节码上工作，而不是直接在源代码上工作。该字节码依赖于编译器的输出。由于编译器优化等因素，源代码的更改可能不会始终产生您在字节码中期望的结果，因此相应地，它可能不会给您验证器的预期结果。例如，验证器将拒绝不可达的指令，但编译器在验证器看到它们之前可能会将它们优化掉。
 
 # 验证过程
 
-验证器分析程序以评估所有可能的执行路径。它按顺序逐步执行指令，而不是实际执行它们。在进行过程中，它在一个称为`bpf_reg_state`的结构中跟踪每个寄存器的状态。（我在这里提到的寄存器是您在第三章中遇到的 eBPF 虚拟机中的寄存器。）该结构包括一个称为`bpf_reg_type`的字段，描述了该寄存器中保存的值的类型。有几种可能的类型，包括这些：
+验证器分析程序以评估所有可能的执行路径。它按顺序逐步执行指令，评估而非实际执行它们。在执行过程中，它通过一种称为`bpf_reg_state`的结构来跟踪每个寄存器的状态。（这里提到的寄存器是指你在第三章中遇到的 eBPF 虚拟机的寄存器。）该结构包括一个称为`bpf_reg_type`的字段，描述该寄存器中保存的值的类型。有几种可能的类型，包括以下几种：
 
-+   `NOT_INIT`，表示寄存器尚未设置为值。
++   `NOT_INIT`，表示寄存器尚未被设置为值。
 
-+   `SCALAR_VALUE`，表示寄存器已设置为不代表指针的值。
++   `SCALAR_VALUE`，表示寄存器被设置为不表示指针的值。
 
-+   几种`PTR_TO_*`类型，表示寄存器保存指向某物的指针。例如：
++   几种`PTR_TO_*`类型，指示寄存器保存指向某物的指针。例如：
 
-+   `PTR_TO_CTX`：寄存器保存指向作为 BPF 程序参数传递的上下文的指针。
+    +   `PTR_TO_CTX`：寄存器保存指向传递给 BPF 程序的上下文的指针。
 
-+   `PTR_TO_PACKET`：寄存器指向网络数据包（在内核中保存为`skb->data`）。
+    +   `PTR_TO_PACKET`：寄存器指向网络数据包（在内核中作为`skb->data`保存）。
 
-+   `PTR_TO_MAP_KEY`或`PTR_TO_MAP_VALUE`：我相信您可以猜到这些意味着什么。
+    +   `PTR_TO_MAP_KEY`或`PTR_TO_MAP_VALUE`：我相信你可以猜到这些是什么意思。
 
-还有几种其他`PTR_TO_*`类型，您可以在[*linux/bpf.h*头文件](https://oreil.ly/aWb50)中找到完整的枚举集。
+这里有几种`PTR_TO_*`类型，你可以在[*linux/bpf.h*头文件](https://oreil.ly/aWb50)中找到完整的枚举集合。
 
-`bpf_reg_state`结构还跟踪寄存器可能保存的可能值范围。验证器使用这些信息来确定何时尝试执行无效操作。
+`bpf_reg_state`结构还跟踪寄存器可能持有的可能值范围。验证器利用这些信息来确定是否正在尝试无效操作。
 
-每次验证器到达一个分支时，需要决定是按顺序继续还是跳转到不同的指令时，验证器会将当前所有寄存器的当前状态的副本推送到堆栈上，并探索其中一条可能的路径。它继续评估指令，直到达到程序末尾的返回（或达到它将处理的指令数量上限，目前为一百万条指令¹），然后弹出堆栈上的一个分支以进行下一个评估。如果它发现可能导致无效操作的指令，它将无法通过验证。
+每当验证器遇到一个分支时，在这里需要决定是按顺序继续还是跳转到不同的指令时，验证器都会将当前所有寄存器的当前状态复制推送到堆栈上，并探索其中一条可能的路径。它继续评估指令，直到达到程序末尾的返回指令（或达到它将处理的指令数限制，当前为一百万条指令^(1)），然后弹出堆栈上的分支以评估下一个。如果找到可能导致无效操作的指令，则验证失败。
 
-验证每一种可能性可能会变得计算昂贵，因此在实践中有一些优化称为*状态修剪*，可以避免重新评估程序中本质上等效的路径。当验证器通过程序工作时，它记录程序内某些指令处所有寄存器的状态。如果它以匹配状态的相同指令到达，就不需要继续验证该路径的其余部分，因为已知它是有效的。
+验证每一种可能性都可能导致计算成本过高，因此在实践中有称为*状态修剪*的优化方法，它避免重新评估程序中实质上等效的路径。当验证器通过程序时，在程序的某些指令处记录所有寄存器的状态。如果它后来再次到达相同的指令，并且寄存器处于匹配状态，那么就没有必要继续验证该路径的其余部分，因为已知其有效。
 
-[已经进行了大量工作来优化验证器](https://oreil.ly/pQDES)及其修剪过程。验证器以前在每个跳转指令之前和之后存储修剪状态，但分析表明，这导致平均每四条指令存储一次状态，而其中绝大多数修剪状态永远不会匹配。结果表明，无论分支如何，每 10 条指令存储修剪状态更有效。
+[对验证器进行了大量的优化工作](https://oreil.ly/pQDES)以及其修剪过程。验证器以前在每个跳转指令之前和之后存储修剪状态，但分析表明，这样做导致平均每四条指令左右存储一次状态，并且绝大多数这些修剪状态都不会被匹配。结果证明，无论分支情况如何，每 10 条指令存储一次修剪状态更有效率。
 
 ###### 注意
 
-您可以在[内核文档](https://oreil.ly/atNda)中阅读有关验证工作原理的更多详细信息。
+您可以在[内核文档](https://oreil.ly/atNda)中详细了解验证工作的更多细节。
 
 # 验证器日志
 
-当程序的验证失败时，验证器会生成一个日志，显示它是如何得出程序无效的结论的。如果您使用`bpftool prog load`，验证器日志将输出到 stderr。当您使用*libbpf*编写程序时，您可以使用函数`libbpf_set_print()`来设置一个处理程序，该处理程序将显示（或对任何错误进行其他有用的操作）。（您将在本章的*hello-verifier.c*源代码中看到一个示例。）
+当程序的验证失败时，验证器会生成一个日志，显示它是如何得出程序无效的结论的。如果您使用`bpftool prog load`，则验证器日志将输出到 stderr。当您使用*libbpf*编写程序时，可以使用函数`libbpf_set_print()`设置一个处理程序，它将显示（或执行其他有用的操作）任何错误。（您将在本章的*hello-verifier.c*源代码中看到此示例。）
 
 ###### 注意
 
-如果您真的想深入了解验证器的工作原理，可以让它在成功和失败时生成日志。*hello-verifier.c*文件中也有一个基本示例。它涉及将一个将保存验证器日志内容的缓冲区传递给将程序加载到内核中的*libbpf*调用，然后将该日志内容写入屏幕。
+如果您真的想深入了解验证器的工作原理，您可以要求它在成功和失败时生成日志。在*hello-verifier.c*文件中也有一个基本的示例。它涉及将用于保存验证器日志内容的缓冲区传递到加载程序到内核的*libbpf*调用中，然后将该日志的内容写入屏幕。
 
-验证器日志包括验证器完成的工作总结，大致如下：
+验证器日志包含验证器执行的工作量摘要，类似于以下内容：
 
-```cpp
+```
 processed 61 insns (limit 1000000) max_states_per_insn 0 total_states 4
 peak_states 4 mark_read 3
 ```
 
-在这个例子中，验证器处理了 61 条指令，包括通过不同路径到达同一指令可能多次处理相同指令。请注意，一百万的复杂性限制是程序中指令数量的上限；在实践中，如果代码中有分支，验证器将多次处理一些指令。
+在这个示例中，验证器处理了 61 条指令，可能通过不同的路径多次处理了同一条指令。请注意，100 万的复杂性限制是程序中指令数量的上限；实际上，如果代码中有分支，验证器将多次处理某些指令。
 
-存储的状态总数为 4，对于这个简单的程序，这与存储状态的峰值数量相匹配。如果一些状态已被修剪，峰值数量可能低于总数。
+存储的总状态数为四，对于这个简单的程序来说，这与存储状态的峰值数量匹配。如果某些状态被剪枝了，峰值数量可能会低于总数。
 
-日志输出包括验证器分析的 BPF 指令，以及相应的 C 源代码行（如果对象文件使用`-g`标志构建以包含调试信息），以及验证器状态信息的摘要。以下是与*hello-verifier.bpf.c*程序的前几行相关的验证器日志的示例提取：
+日志输出包括验证器分析的 BPF 指令，以及相应的 C 源代码行（如果目标文件使用了`-g`标志包含了调试信息），以及验证器状态信息的摘要。以下是与*hello-verifier.bpf.c*程序的前几行相关的验证器日志的示例摘录：
 
-```cpp
+```
 0: (bf) r6 = r1
-; data.counter = c;                                              // ①
+; data.counter = c;                                              ![1](img/1.png)
 1: (18) r1 = 0xffff800008178000
 3: (61) r2 = *(u32 *)(r1 +0)
  R1_w=map_value(id=0,off=0,ks=4,vs=16,imm=0) R6_w=ctx(id=0,off=0,imm=0) 
- R10=fp0                                                         // ②
+ R10=fp0                                                         ![2](img/2.png)
 ; c++; 
 4: (bf) r3 = r2
 5: (07) r3 += 1
 6: (63) *(u32 *)(r1 +0) = r3
  R1_w=map_value(id=0,off=0,ks=4,vs=16,imm=0) R2_w=inv(id=1,umax_value=4294967295,
  var_off=(0x0; 0xffffffff)) R3_w=inv(id=0,umin_value=1,umax_value=4294967296,
- var_off=(0x0; 0x1ffffffff)) R6_w=ctx(id=0,off=0,imm=0) R10=fp0  // ③
+ var_off=(0x0; 0x1ffffffff)) R6_w=ctx(id=0,off=0,imm=0) R10=fp0  ![3](img/3.png)
 ```
 
-①
+![1](img/#code_id_6_1)
 
-日志包括源代码行，以便更容易理解输出与源代码的关系。这个源代码是可用的，因为在编译步骤中使用了`-g`标志来构建调试信息。
+日志包括源代码行，以便更容易理解输出与源代码的关系。这些源代码可用，因为在编译步骤中使用了`-g`标志以包含调试信息。
 
-②
+![2](img/#code_id_6_2)
 
-这是日志中输出的一些寄存器状态信息的示例。它告诉我们，在这个阶段，寄存器 1 包含一个映射值，寄存器 6 保存上下文，寄存器 10 是保存局部变量的帧（或堆栈）指针。
+下面是日志中输出的一些寄存器状态信息的示例。它告诉我们，在这个阶段，寄存器 1 包含一个映射值，寄存器 6 保存上下文，寄存器 10 是帧（或堆栈）指针，用于保存局部变量。
 
-③
+![3](img/#code_id_6_3)
 
-这是另一个寄存器状态信息的示例。在这里，您不仅可以看到每个（初始化的）寄存器中保存的值的类型，还可以看到寄存器 2 和寄存器 3 可能值的范围。
+这是寄存器状态信息的另一个例子。在这里，您不仅可以看到每个（初始化的）寄存器中保存的值的类型，还可以看到寄存器 2 和寄存器 3 可能值的范围。
 
-让我们进一步了解一下这些细节。我说寄存器 6 保存上下文，验证器日志用`R6_w=ctx(id=0,off=0,imm=0)`表示了这一点。这是在字节码的第一行中设置的，寄存器 1 被复制到寄存器 6。当调用 eBPF 程序时，寄存器 1 始终保存传递给程序的上下文参数。为什么要将其复制到寄存器 6 呢？嗯，当调用 BPF 辅助函数时，该调用的参数通过寄存器 1 到 5 传递。辅助函数不修改寄存器 6 到 9 的内容，因此将上下文保存到寄存器 6 意味着代码可以调用辅助函数而不会失去对上下文的访问。
+让我们进一步探讨这一点的详细信息。我说寄存器 6 保存上下文，验证器日志通过`R6_w=ctx(id=0,off=0,imm=0)`表示了这一点。这是在字节码的第一行中设置的，其中寄存器 1 被复制到寄存器 6。当调用 eBPF 程序时，寄存器 1 始终保存传递给程序的上下文参数。为什么将其复制到寄存器 6？嗯，当调用 BPF 助手函数时，该调用的参数通过寄存器 1 到 5 传递。助手函数不会修改寄存器 6 到 9 的内容，因此将上下文保存到寄存器 6 意味着代码可以调用助手函数而不会失去对上下文的访问。
 
-寄存器 0 用于从辅助函数和 eBPF 程序中返回值。寄存器 10 始终保存指向 eBPF 堆栈帧的指针（eBPF 程序不能修改它）。
+寄存器 0 用于助手函数的返回值，也用于 eBPF 程序的返回值。寄存器 10 始终保存指向 eBPF 堆栈帧的指针（eBPF 程序不能修改它）。
 
-让我们看看指令 6 后寄存器 2 和 3 的寄存器状态信息：
+让我们看看第 6 条指令后寄存器 2 和寄存器 3 的寄存器状态信息：
 
-```cpp
+```
 R2_w=inv(id=1,umax_value=4294967295,var_off=(0x0; 0xffffffff))
 R3_w=inv(id=0,umin_value=1,umax_value=4294967296,var_off=(0x0; 0x1ffffffff))
 ```
 
-寄存器 2 没有最小值，在这里显示的`umax_value`对应于 0xFFFFFFFF，这是一个 8 字节寄存器中可以保存的最大值。换句话说，在这一点上，寄存器可以保存任何可能的值。
+寄存器 2 没有最小值，这里显示的`umax_value`对应于十进制的 0xFFFFFFFF，这是可以存储在 8 字节寄存器中的最大值。换句话说，在这一点上，寄存器可以存储任何可能的值。
 
-在指令 4 中，寄存器 2 的内容被复制到寄存器 3 中，然后指令 5 将该值加 1。因此，寄存器 3 可以具有大于 1 的任何值。您可以在寄存器 3 的状态信息中看到这一点，其中`umin_value`设置为`1`，`umax_value`设置为`0xFFFFFFFF`。
+在指令 4 中，将寄存器 2 的内容复制到寄存器 3，然后指令 5 对该值加 1。因此，寄存器 3 的值可以是任何大于 1 的值。您可以在寄存器 3 的状态信息中看到这一点，其中`umin_value`设为`1`，而`umax_value`为`0xFFFFFFFF`。
 
-验证器使用有关每个寄存器状态的信息以及每个寄存器可能包含的值范围，来确定程序的可能路径。这也用于我之前提到的状态修剪：如果验证器在代码中的相同位置，具有相同类型和每个寄存器可能值范围的状态，那么就没有必要进一步评估这条路径。而且，如果当前状态是先前看到的状态的子集，那么它也可以被修剪。
+验证器使用有关每个寄存器的状态以及每个寄存器可能包含的值范围的信息，以确定程序的可能路径。这也用于我之前提到的状态修剪：如果验证器在代码中的同一位置，具有相同类型和每个寄存器可能值范围的状态，则无需进一步评估此路径。此外，如果当前状态是稍早前看到的状态的子集，则也可以进行修剪。
 
 # 可视化控制流
 
-验证器探索 eBPF 程序的所有可能路径，如果您试图调试问题，看到这些路径可能会有所帮助。`bpftool`实用程序可以通过生成程序的[DOT 格式](https://oreil.ly/V-1WN)的控制流图来帮助您，然后您可以将其转换为图像格式，就像这样：
+验证器探索 eBPF 程序的所有可能路径，如果您试图调试问题，查看这些路径对自己会有帮助。`bpftool`实用程序可以帮助您通过生成程序的 DOT 格式的控制流图，然后将其转换为图像格式，如下所示：
 
-```cpp
+```
 $ bpftool prog dump xlated name kprobe_exec visual > out.dot
 $ dot -Tpng out.dot > out.png
 ```
 
-这产生了一个控制流的可视化表示，就像图 6-1 中所示的那样。
+这产生了一个类似图 6-1 所示的控制流的可视化表示。
 
-![从控制流图中提取（完整图像可以在本书的 GitHub 存储库的 chapter6/kprobe_exec.png 中找到）](img/lebp_0601.png)
+![控制流图中的剪辑（完整图像可在该书的 GitHub 仓库的 chapter6/kprobe_exec.png 找到）](img/lebp_0601.png)
 
-###### 图 6-1：从控制流图中提取（完整图像可以在本书的[GitHub 存储库](http://github.com/lizrice/learning-ebpf)的 chapter6/kprobe_exec.png 中找到）
+###### 图 6-1\. 控制流图中的剪辑（完整图像可在该书的[GitHub 仓库](http://github.com/lizrice/learning-ebpf)的 chapter6/kprobe_exec.png 找到）
 
-# 验证辅助函数
+# 验证助手函数的有效性
 
-不允许从 eBPF 程序直接调用任何内核函数（除非它已经注册为 kfunc，这将在下一章中介绍），但是 eBPF 提供了许多辅助函数，使程序能够访问内核中的信息。有一个[bpf-helpers manpage](https://oreil.ly/pdLGW)试图记录它们所有。
+不允许从 eBPF 程序直接调用任何内核函数（除非已将其注册为 kfunc，您将在下一章中了解到），但是 eBPF 提供了许多助手函数，使程序能够从内核中访问信息。有一个[bpf-helpers 手册页](https://oreil.ly/pdLGW)试图记录所有这些函数。
 
-不同的辅助函数适用于不同的 BPF 程序类型。例如，辅助函数`bpf_get_current_pid_tgid()`检索当前用户空间进程 ID 和线程 ID，但是从由网络接口接收数据包触发的 XDP 程序中调用它是没有意义的，因为这里没有涉及用户空间进程。通过将*hello* eBPF 程序在*hello-verifier.bpf.c*中的`SEC()`定义从`kprobe`更改为`xdp`，可以看到这一点。尝试加载此程序时，验证器输出给出以下消息：
+不同的助手函数适用于不同的 BPF 程序类型。例如，助手函数`bpf_get_current_pid_tgid()`用于获取当前用户空间的进程 ID 和线程 ID，但是从由网络接口接收数据包触发的 XDP 程序中调用此函数是没有意义的，因为这里没有涉及到用户空间进程。您可以通过将*hello* eBPF 程序中的`SEC()`定义从`kprobe`改为`xdp`来看到这个示例。尝试加载该程序时，验证器的输出会给出以下消息：
 
-```cpp
+```
 ...
 16: (85) call bpf_get_current_pid_tgid#14
 unknown func bpf_get_current_pid_tgid#14
 ```
 
-`unknown func`并不意味着该函数完全未知，只是对于这种 BPF 程序类型是未知的。（BPF 程序类型是下一章的主题；现在你可以将它们视为适用于不同类型事件的程序。）
+`unknown func`并不意味着该函数完全未知，而只是在*此 BPF 程序类型*中未知。 （BPF 程序类型是下一章的一个话题；目前，您可以将它们视为适合附加到不同类型事件的程序。）
 
-# 辅助函数参数
+# 助手函数参数
 
-例如，你可以在[*kernel/bpf/helpers.c*](https://oreil.ly/tjjVR)中找到，每个辅助函数都有一个类似于辅助函数`bpf_map_lookup_elem()`的`bpf_func_proto`结构：
+例如，如果您查看[*kernel/bpf/helpers.c*](https://oreil.ly/tjjVR)^(2)，您会发现每个助手函数都有类似于此示例中`bpf_map_lookup_elem()`助手函数的`bpf_func_proto`结构：
 
-```cpp
+```
 const struct `bpf_func_proto` `bpf_map_lookup_elem_proto` = {
     .`func`      = `bpf_map_lookup_elem`,
     .`gpl_only` = `false`,
@@ -152,278 +152,293 @@ const struct `bpf_func_proto` `bpf_map_lookup_elem_proto` = {
 };
 ```
 
-该结构定义了对辅助函数的参数和返回值的约束。因为验证程序正在跟踪每个寄存器中保存的值的类型，所以它可以发现你尝试向辅助函数传递错误类型的参数。例如，尝试更改*hello*程序中对`bpf_map_lookup_elem()`的调用的参数，如下所示：
+此结构定义了向助手函数传递的参数和返回值的约束条件。由于验证器跟踪每个寄存器中保存的值的类型，它可以发现您尝试向助手函数`bpf_map_lookup_elem()`调用中传递错误类型的参数。例如，尝试更改*hello*程序中对`bpf_map_lookup_elem()`调用的参数，如下所示：
 
-```cpp
+```
 p = bpf_map_lookup_elem(&data, &uid);
 ```
 
-`现在不是传递`&my_config`，而是传递`&data`，这是指向本地变量结构的指针。从编译器的角度来看，这是有效的，因此可以构建 BPF 对象文件*hello-verifier.bpf.o*，但是当你尝试将程序加载到内核时，你会在验证器日志中看到这样的错误：
+现在，不再传递指向映射的指针`&my_config`，而是传递了指向本地变量结构的指针`&data`。从编译器的角度来看，这是有效的，因此可以构建 BPF 对象文件*hello-verifier.bpf.o*，但当您尝试将程序加载到内核时，您会在验证器日志中看到如下错误：
 
-```cpp
+```
 27: (85) call bpf_map_lookup_elem#1
 R1 type=fp expected=map_ptr
 ```
 
-这里，`fp`代表*frame pointer*，它是存储局部变量的栈上内存区域。寄存器 1 加载了名为`data`的局部变量的地址，但该函数期望一个指向映射的指针（如前面显示的`bpf_func_proto`结构中的`arg1_type`字段所示）。通过跟踪每个寄存器中存储的值的类型，验证程序能够发现这种差异。`# 检查许可证
+在这里，`fp`代表*帧指针*，它是存储本地变量的堆栈内存区域。寄存器 1 装载了名为`data`的本地变量的地址，但函数期望一个指向映射的指针（如前面`bpf_func_proto`结构的`arg1_type`字段所示）。通过跟踪每个寄存器中存储的值的类型，验证器能够发现这种差异。
 
-验证程序还检查，如果你使用的是 GPL 许可的 BPF 辅助函数，你的程序也必须具有 GPL 兼容的许可。第六章示例代码*hello-verifier.bpf.c*中的最后一行定义了一个包含字符串`Dual BSD/GPL`的“license”部分。如果删除此行，验证程序的输出将以这样结束：
+# 检查许可证
 
-```cpp
+验证器还检查，如果您使用了 GPL 许可的 BPF 助手函数，您的程序也必须具有 GPL 兼容的许可证。在*hello-verifier.bpf.c*的第六章的最后一行定义了一个“license”部分，其中包含字符串`Dual BSD/GPL`。如果您删除此行，则验证器的输出将以如下方式结束：
+
+```
 ...
 37: (85) call bpf_probe_read_kernel#113
 cannot call GPL-restricted function from non-GPL compatible program
 ```
 
-这是因为`bpf_probe_read_kernel()`辅助函数的`gpl_only`字段设置为`true`。在这个 eBPF 程序中之前调用了其他辅助函数，但它们没有 GPL 许可，所以验证程序不会反对它们的使用。
+这是因为`bpf_probe_read_kernel()`助手函数的`gpl_only`字段设置为`true`。在此 eBPF 程序中早些时候调用了其他助手函数，但它们没有 GPL 许可证，因此验证器不会反对它们的使用。
 
-BCC 项目维护着一个[辅助函数列表](https://oreil.ly/mCpvB)，指示它们是否具有 GPL 许可。如果你对辅助函数的实现细节感兴趣，可以在[BPF 和 XDP 参考指南](https://oreil.ly/kVd6j)中找到相关部分。
+BCC 项目维护着一个[助手函数列表](https://oreil.ly/mCpvB)，指示它们是否具有 GPL 许可证。如果您对助手函数的实现细节更感兴趣，可以在[BPF 和 XDP 参考指南](https://oreil.ly/kVd6j)中的相关部分找到更多详细信息。
 
 # 检查内存访问
 
-验证程序执行了许多检查，以确保 BPF 程序只访问它们应该访问的内存。
+验证器执行多个检查，以确保 BPF 程序只能访问它们应该访问的内存。
 
-例如，在处理网络数据包时，XDP 程序只允许访问构成该网络数据包的内存位置。大多数 XDP 程序都以以下非常相似的内容开头：
-
-```cpp
-SEC("xdp") `int` `xdp_load_balancer``(``struct` `xdp_md` `*``ctx``)` ``{` ``void` `*``data` `=` `(``void` `*``)(``long``)``ctx``->``data``;` ``void` `*``data_end` `=` `(``void` `*``)(``long``)``ctx``->``data_end``;` ``...`````
-
-```cpp
-
- ```作为传递给程序的上下文的`xdp_md`结构描述了已接收的网络数据包。该结构中的`ctx->data`字段是数据包开始的内存位置，`ctx->data_end`是数据包的最后位置。验证程序将确保程序不会超出这些边界。
-
-例如，*hello_verifier.bpf.c*中的以下程序是有效的：
-
-```cpp
-SEC("xdp") `int` `xdp_hello``(``struct` `xdp_md` `*``ctx``)` `{` ``void` `*``data` `=` `(``void` `*``)(``long``)``ctx``->``data``;` ``void` `*``data_end` `=` `(``void` `*``)(``long``)``ctx``->``data_end``;` ``bpf_printk``(``"%x"``,` `data_end``);` ``return` `XDP_PASS``;` ``}``````cpp
-```
-
-```cppThe variables `data` and `data_end` are very similar, but the verifier is smart enough to recognize that `data_end` relates to the end of a packet. Your program is required to check that any values read from the packet aren’t from beyond that location, and it won’t let you “cheat” by modifying the `data_end` value. Try adding the following line just before the `bpf_printk()` call:
+例如，在处理网络数据包时，XDP 程序只允许访问构成该网络数据包的内存位置。大多数 XDP 程序从以下非常相似的内容开始：
 
 ```
+SEC("xdp")
+int xdp_load_balancer(struct xdp_md *ctx)
+{
+   void *data = (void *)(long)ctx->data;
+   void *data_end = (void *)(long)ctx->data_end;
+...
+```
 
+`xdp_md` 结构体作为上下文传递给程序，描述了接收到的网络数据包。该结构体内的 `ctx->data` 字段是数据包开始的内存位置，而 `ctx->data_end` 是数据包的最后位置。验证器将确保程序不会超出这些边界。
+
+例如，在 *hello_verifier.bpf.c* 中的以下程序是有效的：
+
+```
+SEC("xdp")
+int xdp_hello(struct xdp_md *ctx) {
+  void *data = (void *)(long)ctx->data;
+  void *data_end = (void *)(long)ctx->data_end;
+  bpf_printk("%x", data_end);
+  return XDP_PASS;
+}
+```
+
+变量 `data` 和 `data_end` 非常相似，但验证器足够智能，能识别 `data_end` 关联到数据包的末端。你的程序需要检查从数据包读取的任何值是否超出该位置，并且它不允许通过修改 `data_end` 的值来“作弊”。尝试在 `bpf_printk()` 调用之前添加以下行：
+
+```
 data_end++;
-
-```cpp
-
- `The verifier will complain, like this:
-
 ```
 
+验证器会报错，如下所示：
+
+```
 ; data_end++;
-
 1: (07) r3 += 1
-
-R3 禁止在 pkt_end 上进行指针算术运算
-
-```cpp
-
-In another example, when accessing an array you need to make sure there’s no possibility of accessing an index that is beyond the bounds of that array. In the example code there is a section that reads a character out of the `message` array, like this:
-
+R3 pointer arithmetic on pkt_end prohibited
 ```
 
-如果(c<sizeof(message)){ `char``a``=``message``[``c``];` ``bpf_printk``(``"%c"``,``a``);` ``}```cpp
-```
-
-```cppThis is fine because of the explicit check to ensure that the counter variable `c` is no bigger than the size of the message array. Making a simple “off by one” error like the following renders it invalid:
+另一个示例中，在访问数组时，你需要确保不会访问超出数组边界的索引。在示例代码中有一段代码从 `message` 数组中读取字符，如下所示：
 
 ```
-
-如果(c<=sizeof(message)){ `char``a``=``message``[``c``];` ``bpf_printk``(``"%c"``,``a``);` ``}```cpp
+if (c < sizeof(message)) {
+   char a = message[c];
+   bpf_printk("%c", a);
+}
 ```
 
-```cppThe verifier will fail this with an error message similar to this:
+这是没问题的，因为有显式检查确保计数变量 `c` 不会超过消息数组的大小。而像下面这样的简单“差一”的错误会使其无效：
 
 ```
-
-对映值的无效访问，value_size=16 off=16 size=1
-
-R2 的最大值超出了允许的内存范围
-
-```cpp
-
-It’s fairly clear from this message that there is an invalid access to a map value because Register 2 might hold a value that’s too large for indexing the map. If you were debugging this error, you’d want to dig into the log to see what line in the source code was responsible. The log ends like this just before emitting the error message (I have removed some of the state information for clarity):
-
+if (c <= sizeof(message)) {
+   char a = message[c];
+   bpf_printk("%c", a);
+}
 ```
 
-如果(c <= sizeof(message)) {
+验证器将以类似以下的错误消息失败：
 
-30: (25) if r1 > 0xc goto pc+10                                ③
+```
+invalid access to map value, value_size=16 off=16 size=1
+R2 max value is outside of the allowed memory range
+```
 
-R0_w=map_value_or_null(id=2,off=0,ks=4,vs=12,imm=0) R1_w=inv(id=0,
+从这条消息很明显可以看出，由于寄存器 2 可能保存一个对地图索引过大的值，导致对地图值的无效访问。如果你正在调试此错误，你需要深入日志，查看源代码中哪一行负责这个错误。日志在发出错误消息前如下结束（为了清晰起见，我已删除部分状态信息）：
 
-umax_value=12,var_off=(0x0; 0xf)) R6=ctx(id=0,off=0,imm=0) ...
-
+```
+; if (c <= sizeof(message)) {
+30: (25) if r1 > 0xc goto pc+10                                ![3](img/3.png)
+ R0_w=map_value_or_null(id=2,off=0,ks=4,vs=12,imm=0) R1_w=inv(id=0,
+ umax_value=12,var_off=(0x0; 0xf)) R6=ctx(id=0,off=0,imm=0) ...
 ; char a = message[c];
-
-31: (18) r2 = 0xffff800008e00004                               ②
-
-33: (0f) r2 += r1
-
+31: (18) r2 = 0xffff800008e00004                               ![2](img/2.png)
+33: (0f) r2 += r1                                               
 last_idx 33 first_idx 19
+regs=2 stack=0 before 31: (18) r2 = 0xffff800008e00004
+regs=2 stack=0 before 30: (25) if r1 > 0xc goto pc+10
+regs=2 stack=0 before 29: (61) r1 = *(u32 *)(r8 +0)
+34: (71) r3 = *(u8 *)(r2 +0)                                   ![1](img/1.png)
+ R0_w=map_value_or_null(id=2,off=0,ks=4,vs=12,imm=0) R1_w=invP(id=0,
+ umax_value=12,var_off=(0x0; 0xf)) R2_w=map_value(id=0,off=4,ks=4,vs=16,
+ umax_value=12,var_off=(0x0; 0xf),s32_max_value=15,u32_max_value=15)
+ R6=ctx(id=0,off=0,imm=0) ...
+```
 
-寄存器=2 堆栈=0 在 31 之前：(18) r2 = 0xffff800008e00004
+![1](img/#code_id_6_6)
 
-寄存器=2 堆栈=0 在 30 之前：(25) if r1 > 0xc goto pc+10
+从错误处回溯，最后的寄存器状态信息显示寄存器 2 的最大值可能是 `12`。
 
-寄存器=2 堆栈=0 在 29 之前：(61) r1 = *(u32 *)(r8 +0)
+![2](img/#code_id_6_5)
 
-34: (71) r3 = *(u8 *)(r2 +0)                                   ①
+在第 31 指令处，寄存器 2 被设置为内存中的一个地址，然后按寄存器 1 的值递增。输出显示这对应于访问 `message[c]` 的代码行，因此合理推测寄存器 2 被设置为指向消息数组，然后按寄存器 1 中的 `c` 值递增。
 
-R0_w=map_value_or_null(id=2,off=0,ks=4,vs=12,imm=0) R1_w=invP(id=0,
+![3](img/#code_id_6_4)
 
-umax_value=12,var_off=(0x0; 0xf)) R2_w=map_value(id=0,off=4,ks=4,vs=16,
+进一步查找寄存器 1 的值，日志显示其最大值为 `12`（即十六进制的 `0x0c`）。然而，`message` 被定义为一个 12 字节的字符数组，因此只有索引 0 到 11 在其范围内。由此可见，错误来自于源代码中测试 `c <= sizeof(message)`。
 
-umax_value=12,var_off=(0x0; 0xf),s32_max_value=15,u32_max_value=15)
+在第 2 步，我已经从验证器包含在日志中的源代码行中推断了一些寄存器与它们表示的源代码变量之间的关系。如果代码是没有调试信息编译的，您可能需要通过验证器日志来检查这一点。鉴于存在调试信息，使用它是有意义的。
 
-R6=ctx(id=0,off=0,imm=0) ...
+`message` 数组声明为全局变量，您可能还记得来自 第三章 的全局变量是使用映射实现的。这解释了为什么错误消息提到“无效访问映射值”。
 
-```cpp
+# 在解引用指针之前检查指针
 
-[// ①](#code_id_6_6)
+一个让 C 程序崩溃的简单方法是在指针的值为零（也称为*null*）时解引用指针。指针指示内存中值的位置，而零不是有效的内存位置。eBPF 验证器要求在解引用指针之前检查所有指针，以防止这种崩溃发生。
 
-Working backward from the error, the last register state information shows that Register 2 could have a maximum value of `12`.
+*hello-verifier.bpf.c* 中的示例代码寻找可能存在于 `my_config` 散列表映射中的自定义消息，代码如下：
 
-[// ②](#code_id_6_5)
-
-At instruction 31, Register 2 is set to an address in memory and then is incremented by the value of Register 1\. The output shows that this corresponds to the line of code accessing `message[c]`, so it stands to reason that Register 2 is set to point to the message array and then to be incremented by the value of `c`, which is held in the Register 1 register.
-
-[// ③](#code_id_6_4)
-
-Working further back to find the value of Register 1, the log shows that it has a maximum value of `12` (which is hex 0x0c). However, `message` is defined as a 12-byte character array, so only indexes 0 through 11 are within its bounds. From this, you can see that the error springs from the source code testing for `c <= sizeof(message)`.
-
-At step 2, I have inferred the relationship between some registers and the source code variables they represent, from the lines of source code the verifier has helpfully included in the log. You could work back through the verifier log to check that this is true, and indeed you might have to if the code was compiled without debug information. Given the debug information is present, it makes sense to use it.
-
-The `message` array is declared as a global variable, and you might recall from [Chapter 3](ch03.xhtml#anatomy_of_an_ebpf_program) that global variables are implemented using maps. This explains why the error message talks about “invalid access to a map value.”``````cpp```````cpp  ```# Checking Pointers Before Dereferencing Them
-
-One easy way to make a C program crash is to dereference a pointer when the pointer has a zero value (also known as *null*). Pointers indicate where in memory a value is being held, and zero is not a valid memory location. The eBPF verifier requires all pointers to be checked before they are dereferenced so that this type of crash can’t happen.
-
-The example code in *hello-verifier.bpf.c* looks for a custom message that might exist in the `my_config` hash table map for a user, with the following line:
-
-```cpp
+```
 p = bpf_map_lookup_elem(&my_config, &uid);
 ```
 
- `If there’s no entry in this map corresponding to `uid`, this will set `p` (which is a pointer to the message structure `msg_t`) to zero. Here’s a little bit of additional code that attempts to dereference this potentially null pointer:
+如果没有与 `uid` 对应的条目，则将 `p`（指向消息结构 `msg_t` 的指针）设置为零。这里有一小段额外的代码，试图解引用这个可能为空的指针：
 
-```cpp
-char a = p->message[0]; `bpf_printk``(``"%c"``,` `a``);`
+```
+char a = p->message[0];
+bpf_printk("%c", a);
 ```
 
- ``This compiles fine, but the verifier rejects it as follows:
+这段代码可以编译，但验证器会拒绝如下：
 
-```cpp
+```
 ; p = bpf_map_lookup_elem(&my_config, &uid); 
 25: (18) r1 = 0xffff263ec2fe5000
 27: (85) call bpf_map_lookup_elem#1
-28: (bf) r7 = r0                                // ①
+28: (bf) r7 = r0                                ![1](img/1.png)
 ; char a = p->message[0];
-29: (71) r3 = *(u8 *)(r7 +0)                    // ②
+29: (71) r3 = *(u8 *)(r7 +0)                    ![2](img/2.png)
 R7 invalid mem access 'map_value_or_null'
 ```
 
-[// ①](#code_id_6_7)
+![1](img/#code_id_6_7)
 
-The return value from a helper function call gets stored in Register 0\. Here, that value is being stored in Register 7\. This means Register 7 now holds the value of the local variable `p`.
+辅助函数调用的返回值存储在寄存器 0 中。在这里，该值被存储在寄存器 7 中。这意味着寄存器 7 现在保存了局部变量 `p` 的值。
 
-[// ②](#code_id_6_8)
+![2](img/#code_id_6_8)
 
-This instruction attempts to dereference the pointer value `p`. The verifier has been keeping track of the state of Register 7 and knows that it may hold a pointer to a map value, or it might be null.
+此指令尝试解引用指针值 `p`。验证器一直跟踪寄存器 7 的状态，并知道它可能保存指向映射值的指针，或者可能为空。
 
-The verifier rejects this attempt to dereference a null pointer, but the program will pass if there is an explicit check, like this:
+验证器会拒绝尝试解引用空指针的尝试，但如果有显式检查，例如：
 
-```cpp
-if (p != 0) { `char` `a` `=` `p``->``message``[``0``];` ``bpf_printk``(``"%d"``,` `cc``);` ``}```
-```cpp
+```
+if (p != 0) {
+   char a = p->message[0];
+   bpf_printk("%d", cc);
+}
+```
 
- ```Some helper functions incorporate the pointer check for you. For example, if you look at the manpage for bpf-helpers, you’ll find the function signature for `bpf_probe_read_kernel()` is as follows:
+一些辅助函数会为您集成指针检查。例如，如果您查看 bpf-helpers 的 man 页面，您将找到 `bpf_probe_read_kernel()` 的函数签名如下：
 
-```cpp
+```
 long bpf_probe_read_kernel(void **`dst`*, u32 *`size`*, const void **`unsafe_ptr`*)
 ```
 
-The third argument to this function is called `unsafe_ptr`. This is an example of a BPF helper function that helps programmers write safe code by handling checks for you. You’re allowed to pass a potentially null pointer—but only as the third argument called `unsafe_ptr`—and the helper function will check that it’s not null before attempting to deference it.```cpp```  ```# Accessing Context
+此函数的第三个参数称为 `unsafe_ptr`。这是一个 BPF 辅助函数的示例，通过为您处理检查，帮助程序员编写安全代码。您可以传递一个潜在的空指针，但只能作为名为 `unsafe_ptr` 的第三个参数，并且在尝试解引用之前，辅助函数会检查它不为空。
 
-Every eBPF program is passed some context information as an argument, but depending on the program and attachment type, it may be allowed to access only some of that context information. For example, [tracepoint programs](https://oreil.ly/6RFFI) receive a pointer to some tracepoint data. The format of that data depends on the particular tracepoint, but they all start with some common fields—yet those common fields are not accessible to eBPF programs. Only the tracepoint-specific fields that follow can be accessed. Attempting to read or write the wrong fields leads to an `invalid bpf_context access` error. There is an example of this in the exercises at the end of this chapter.
+# 访问上下文
 
-# Running to Completion
+每个 eBPF 程序作为参数传递一些上下文信息，但根据程序和附加类型的不同，可能只允许访问其中的一部分上下文信息。例如，[跟踪点程序](https://oreil.ly/6RFFI) 接收一个指向某些跟踪点数据的指针。该数据的格式取决于特定的跟踪点，但它们都以一些共同字段开头——然而，这些共同字段对 eBPF 程序是不可访问的。只能访问后续的特定于跟踪点的字段。试图读取或写入错误的字段会导致 `invalid bpf_context access` 错误。本章末尾的练习中有一个例子。
 
-The verifier ensures that the eBPF program will run to completion; otherwise, there is a risk that it might consume resources indefinitely. It does this by having a limit on the total number of instructions that it will process, which, as I mentioned earlier, is set at one million instructions at the time of this writing. That limit is [hard-coded into the kernel](https://oreil.ly/IucYm); it’s not a configurable option. If the verifier hasn’t reached the end of the BPF program before it has processed this many instructions, it rejects the program.
+# 运行至完成
 
-One easy way to create a program that never completes is to write a loop that never ends. Let’s see how loops can be created in eBPF programs.
+验证器确保 eBPF 程序能够完成运行；否则，可能会无限消耗资源。为了达到这个目的，它限制了它将处理的总指令数，就像我之前提到的，在撰写本文时设定为一百万条指令。这个限制是 [硬编码进内核](https://oreil.ly/IucYm) 的，不是一个可配置的选项。如果验证器在处理这么多指令之前未到达 BPF 程序的末尾，则会拒绝该程序。
 
-# Loops
+创建一个永不完成的程序的简单方法是编写一个永不结束的循环。让我们看看如何在 eBPF 程序中创建循环。
 
-To guarantee completion, until kernel version 5.3 there was a restriction on loops.^([3](ch06.xhtml#ch06fn3)) Looping through the same instructions requires a jump backward to earlier instructions, and it used to be the case that the verifier would not permit this. eBPF programmers worked around this by using the `#pragma unroll` compiler directive to tell the compiler to write out a set of identical (or very similar) bytecode instructions for each time around the loop. This saved the programmer typing in the same lines many times, but you would see repeated instructions in the emitted bytecode.
+# 循环
 
-From version 5.3 onward the verifier follows branches backward as well as forward as part of its process of checking all the possible execution paths. This means it can accept some loops, provided the execution path remains within the limit of one million instructions.
+为了保证完成，直到内核版本 5.3，对循环有一个限制。[³] 循环通过相同的指令需要向后跳转到较早的指令，过去验证器不允许这种情况发生。eBPF 程序员通过使用 `#pragma unroll` 编译器指令来绕过此问题，告诉编译器为每次循环写出一组相同（或非常相似）的字节码指令。这样节省了程序员重复输入相同代码的时间，但在生成的字节码中会看到重复的指令。
 
-You can see an example of a loop in the example *xdp_hello* program. A version of the loop that passes verification looks like this:
+从 5.3 版本开始，验证器在检查所有可能的执行路径时向后跟随分支，而不仅仅是向前。这意味着它可以接受一些循环，只要执行路径保持在一百万条指令的限制内。
 
-```cpp
-for (int i=0; i < 10; i++) { `bpf_printk``(``"Looping %d"``,` `i``);` ``}``
+您可以在示例 *xdp_hello* 程序中看到一个循环的示例。通过验证的循环版本看起来像这样：
+
+```
+for (int i=0; i < 10; i++) {
+   bpf_printk("Looping %d", i);
+}
 ```
 
- ```cppThe (successful) verifier log will show that it has followed the execution path around this loop 10 times. In doing so, it doesn’t hit the complexity limit of one million instructions. In the exercises for this chapter, there’s another version of this loop that will hit that limit and will fail verification.
+（成功的）验证器日志将显示它已经围绕此循环执行路径 10 次。通过这样做，它不会达到一百万条指令的复杂性限制。在本章的练习中，还有另一个版本的循环将达到该限制并且无法通过验证。
 
-In version 5.17 a new helper function, `bpf_loop()`, was introduced that makes it much easier for the verifier not only to accept loops but also to do it in a much more efficient way. This helper takes the maximum number of iterations as its first argument, and it is also passed a function that is called for each iteration. The verifier only has to validate the BPF instructions in that function once, however many times it might be called. That function can return a nonzero value to indicate that there is no need to call it again, which is used to terminate a loop early once the desired result is achieved.
+在版本 5.17 中引入了一个新的助手函数`bpf_loop()`，它使得验证器不仅更容易接受循环，而且以更高效的方式执行。这个助手函数以其第一个参数作为最大迭代次数，并传递一个在每次迭代中调用的函数。验证器只需验证该函数中的 BPF 指令一次，无论它可能被调用多少次。该函数可以返回一个非零值，以指示无需再次调用它，这用于在达到所需结果后提前终止循环。
 
-There’s also a helper function [`bpf_for_each_map_elem()`](https://oreil.ly/Yg_oQ) that calls a provided callback function for each item in a map.```  ```cpp# Checking the Return Code
+还有一个助手函数[`bpf_for_each_map_elem()`](https://oreil.ly/Yg_oQ)，它调用映射中每个项目的提供的回调函数。
 
-The return code from an eBPF program is stored in Register 0 (`R0`). If the program leaves `R0` uninitialized, the verifier will fail, like this:
+# 检查返回代码
+
+eBPF 程序的返回代码存储在寄存器 0（`R0`）中。如果程序离开`R0`未初始化，验证器会失败，就像这样：
 
 ```
 R0 !read_ok
-```cpp
-
-You can try this by commenting out all the code in a function; for example, modify the `xdp_hello` example to be like this:
-
-```
-SEC("xdp") `int` `xdp_hello``(``struct` `xdp_md` `*``ctx``)` `{` ``void` `*``data` `=` `(``void` `*``)(``long``)``ctx``->``data``;` ``void` `*``data_end` `=` `(``void` `*``)(``long``)``ctx``->``data_end``;` ``// bpf_printk("%x", data_end);`
- `// return XDP_PASS;`
-`}```cpp`
 ```
 
- ```cppThis will fail the verifier. However, if you put the line with the helper function `bpf_printf()` back in, the verifier won’t complain, even though there’s no explicit return value set by the source code!
+你可以通过注释掉一个函数中的所有代码来尝试这个功能；例如，将`xdp_hello`示例修改如下：
 
-This is because Register 0 is also used to hold the return code from a helper function. After returning from a helper function in an eBPF program, Register 0 is no longer uninitialized.```  ```cpp# Invalid Instructions
+```
+SEC("xdp")
+int xdp_hello(struct xdp_md *ctx) {
+ void *data = (void *)(long)ctx->data;
+ void *data_end = (void *)(long)ctx->data_end;
 
-As you know from the discussion of the eBPF (virtual) machine in [Chapter 3](ch03.xhtml#anatomy_of_an_ebpf_program), eBPF programs consist of a set of bytecode instructions. The verifier checks that the instructions in a program are valid bytecode instructions—for example, using only known opcodes.
+ // bpf_printk("%x", data_end);
+ // return XDP_PASS;
+}
+```
 
-It would be considered a bug in the compiler if it emitted invalid bytecode, so you’re not likely to see this kind of verifier error unless you choose (for some reason best known to yourself) to write eBPF bytecode by hand. However, there have been some instructions added more recently, such as the atomic operations. If your compiled bytecode uses these instructions, they would fail verification on an older kernel.
+这将导致验证器失败。然而，如果你把含有助手函数`bpf_printf()`的行放回去，验证器就不会抱怨，即使源代码中没有明确的返回值设置！
 
-# Unreachable Instructions
+这是因为寄存器 0 还用于保存来自助手函数的返回代码。从 eBPF 程序的助手函数返回后，寄存器 0 不再是未初始化的。
 
-The verifier also rejects programs that have unreachable instructions. Oftentimes, these will get optimized out by the compiler anyway.
+# 无效指令
 
-# Summary
+正如你从第三章中对 eBPF（虚拟）机器的讨论中了解到的，eBPF 程序由一组字节码指令组成。验证器检查程序中的指令是否是有效的字节码指令，例如，只使用已知的操作码。
 
-When I first got interested in eBPF, getting code through the verifier seemed like a dark art, where seemingly valid code would get rejected, throwing up what seemed to be arbitrary errors. Over time there have been *lots* of improvements to the verifier, and in this chapter you’ve seen several examples where the verifier log gives hints to help you figure out what the problem is.
+如果编译器生成了无效的字节码，这将被视为编译器的一个错误，因此，除非你选择（出于某种你自己知道的原因）手动编写 eBPF 字节码，否则你不太可能看到这种类型的验证器错误。然而，最近添加了一些指令，如原子操作。如果你的编译字节码使用这些指令，它们将在较旧的内核上验证失败。
 
-These hints are more helpful when you have a mental model of how the eBPF (virtual) machine works, using a set of registers for temporary value storage as it steps through an eBPF program. The verifier keeps track of the types and possible range of values for each register to ensure that eBPF programs are safe to run.
+# 不可达指令
 
-If you try writing some eBPF code of your own, you might find yourself needing assistance to resolve verifier errors. The [eBPF community Slack channel](http://ebpf.io/slack) is a good place to ask for help, and lots of people have also found advice on [StackOverflow](https://oreil.ly/nu_0v).
+验证器还会拒绝具有不可达指令的程序。通常情况下，这些指令在编译器优化时会被剔除。
 
-# Exercises
+# 总结
 
-Here are some more ways to cause a verifier error. See if you can correlate the verifier log output to the errors you get:
+当我第一次对 eBPF 产生兴趣时，通过验证器的代码看起来像是一门黑暗艺术，看似有效的代码会被拒绝，抛出看似随意的错误。随着时间的推移，验证器有了*许多*改进，在本章中你已经看到了几个示例，验证器日志提供了帮助，帮助你找出问题所在。
 
-1.  In [“Checking Memory Access”](#checking_memory_access), you saw the verifier rejecting access beyond the end of the global `message` array. In the example code there’s a section that accesses the local variable `data.message` in a similar way:
+当你对 eBPF（虚拟）机器如何工作有一个心理模型时，这些提示会更有帮助，它使用一组寄存器作为临时值存储，在执行 eBPF 程序时步进。验证器跟踪每个寄存器的类型和可能的值范围，以确保 eBPF 程序可以安全运行。
+
+如果你尝试编写自己的 eBPF 代码，可能会需要帮助来解决验证器错误。[eBPF 社区 Slack 频道](http://ebpf.io/slack) 是一个寻求帮助的好地方，许多人也在 [StackOverflow](https://oreil.ly/nu_0v) 上找到了建议。
+
+# 练习
+
+这里有更多导致验证器错误的方式。看看你能否将验证器日志输出与你收到的错误相关联：
+
+1.  在 “检查内存访问” 中，你看到验证器拒绝超出全局 `message` 数组末尾的访问。在示例代码中，有一个类似方式访问局部变量 `data.message` 的部分：
 
     ```
-    if (c < sizeof(data.message)) { `char` `a` `=` `data``.``message``[``c``];` ``bpf_printk``(``"%c"``,` `a``);` ``}```cpp
+    if (c < sizeof(data.message)) {
+       char a = data.message[c];
+       bpf_printk("%c", a);
+    }
     ```
 
-     ```cppTry adjusting the code to make the same out-by-one mistake by replacing the `<` with `<=`, and you’ll see an error message about `invalid variable-offset read from stack R2`.``` 
-```cpp*   Find the commented-out loops in *xdp_hello* in the example code. Try adding in the first loop that looks like this:
+    尝试调整代码，通过用 `<=` 替换 `<` 来制造相同的越界错误，你会看到关于 `invalid variable-offset read from stack R2` 的错误消息。
+
+1.  在示例代码的 *xdp_hello* 中找到被注释掉的循环。尝试添加第一个看起来像这样的循环：
 
     ```
-    for (int i=0; i < 10; i++) { `bpf_printk``(``"Looping %d"``,` `i``);` ``}``
-    ```cpp
+    for (int i=0; i < 10; i++) {
+       bpf_printk("Looping %d", i);
+    }
+    ```
 
-     ```You should see in the verifier log a repeated series of lines that look something like this:
+    你应该在验证器日志中看到一系列重复的类似以下内容的行：
 
-    ```cpp
+    ```
     42: (18) r1 = 0xffff800008e10009
     44: (b7) r2 = 11
     45: (b7) r3 = 8
@@ -436,86 +451,31 @@ Here are some more ways to cause a verifier error. See if you can correlate the 
     regs=4 stack=0 before 44: (b7) r2 = 11
     ```
 
-    From the log, work out which register is tracking the loop variable `i`.```cpp ```*   Now try adding in a loop that will fail, which looks like this:
+    从日志中找出跟踪循环变量 `i` 的哪个寄存器。
 
-    ```cpp
-    for (int i=0; i < c; i++) { `bpf_printk``(``"Looping %d"``,` `i``);` ``}``
-    ```
-
-     ```cppYou should see that the verifier tries to explore this loop to its conclusion, but it reaches the instruction complexity limit before it completes (because there is no upper bound on the global variable `c`).``` ```cpp*   Write a program that attaches to a tracepoint. (You may have done this already for the exercises in [Chapter 4](ch04.xhtml#the_bpfleft_parenthesisright_parenthesi).) Looking ahead to [“Tracepoints”](ch07.xhtml#tracepoints), you can see a structure definition for the context argument that starts with these fields:
+1.  现在尝试添加一个将失败的循环，看起来像这样：
 
     ```
-    unsigned short common_type; `unsigned` `char` `common_flags``;` ``unsigned` `char` `common_preempt_count``;` ``int` `common_pid``;```cpp
+    for (int i=0; i < c; i++) {
+       bpf_printk("Looping %d", i);
+    }
     ```
 
-     ```cppCreate your own version of a structure that starts like this, and make the context argument in your program a pointer to this structure. In the program, try accessing any of these fields and see that the verifier fails with `invalid bpf_context access`.````
+    你应该看到验证器尝试探索这个循环直到结束，但在完成之前达到了指令复杂性限制（因为全局变量 `c` 没有上限）。
 
-`````` 
+1.  编写一个附加到跟踪点的程序。（你可能已经在 第四章 中完成了练习。）预览 “跟踪点” 时，你可以看到一个从这些字段开始的上下文参数的结构定义：
 
- ```cpp^([1](ch06.xhtml#ch06fn1-marker)) For a long time the limit was 4,096 instructions, which imposed significant restrictions on the complexity of eBPF programs. This limit still applies to unprivileged users running BPF programs.
+    ```
+    unsigned short common_type;
+    unsigned char common_flags;
+    unsigned char common_preempt_count;
+    int common_pid;
+    ```
 
-^([2](ch06.xhtml#ch06fn2-marker)) Helper functions are also defined in some other places in the source code, for example, [*kernel/trace/bpf_trace.c*](https://oreil.ly/cY8y9) and [*net/core/filter.c*](https://oreil.ly/qww-b).
+    创建一个类似这样开始的结构体的版本，并使程序中的上下文参数指向这个结构体的指针。在程序中，尝试访问任何这些字段，并看到验证器因为 `invalid bpf_context access` 失败。
 
-^([3](ch06.xhtml#ch06fn3-marker)) This release brought a number of significant optimizations and improvements to the BPF verifier, which are summarized nicely in the LWN article [“Bounded loops in BPF for the 5.3 kernel”](https://oreil.ly/50BoD).``````这将使验证器失败。但是，如果您将带有辅助函数`bpf_printf()`的行放回去，验证器就不会抱怨，尽管源代码中没有明确设置返回值！
+^(1) 长期以来，指令数限制为 4,096 条，这给 eBPF 程序的复杂性带来了显著限制。对于运行 BPF 程序的非特权用户，此限制仍然适用。
 
-这是因为寄存器 0 也用于保存辅助函数的返回代码。在 eBPF 程序中从辅助函数返回后，寄存器 0 将不再是未初始化的。`````````# 无效指令
+^(2) 辅助函数也在源代码的其他地方定义，例如，[*kernel/trace/bpf_trace.c*](https://oreil.ly/cY8y9) 和 [*net/core/filter.c*](https://oreil.ly/qww-b)。
 
-正如您从第三章对 eBPF（虚拟）机器的讨论中所了解的，eBPF 程序由一组字节码指令组成。验证器检查程序中的指令是否是有效的字节码指令，例如，只使用已知的操作码。
-
-如果编译器发出无效的字节码，那将被视为编译器的错误，因此除非您选择（出于某种原因最了解自己），手动编写 eBPF 字节码，否则不太可能看到这种类型的验证器错误。但是，最近添加了一些指令，例如原子操作。如果您的编译字节码使用这些指令，则它们将在旧内核上失败验证。
-
-# 不可达指令
-
-验证器还会拒绝具有不可达指令的程序。通常情况下，这些指令会被编译器优化掉。
-
-# 总结
-
-当我开始对 eBPF 感兴趣时，通过验证器的代码似乎是一种黑暗的艺术，看似有效的代码会被拒绝，引发看似是任意的错误。随着时间的推移，验证器已经有了*很多*改进，在本章中，您已经看到了几个示例，其中验证器日志提供了提示，帮助您找出问题所在。
-
-当您对 eBPF（虚拟）机器的工作原理有一个心智模型时，这些提示会更有帮助，该机器使用一组寄存器作为临时值存储，以便在 eBPF 程序中进行步进。验证器会跟踪每个寄存器的类型和可能的值范围，以确保 eBPF 程序的安全运行。
-
-如果您尝试编写自己的 eBPF 代码，您可能会发现自己需要帮助来解决验证器错误。[eBPF 社区 Slack 频道](http://ebpf.io/slack)是一个寻求帮助的好地方，许多人也在[StackOverflow](https://oreil.ly/nu_0v)上找到了建议。
-
-# 练习
-
-以下是导致验证器错误的更多方法。看看您是否能将验证器日志输出与您收到的错误相关联：
-
-1.  在“检查内存访问”中，您看到验证器拒绝访问全局`message`数组末尾之外的访问。在示例代码中，有一部分以类似方式访问本地变量`data.message`：
-
-[PRE26]
-
-[PRE27]尝试调整代码，通过用`<=`替换`<`来制造相同的偏差错误，您将看到关于`从堆栈 R2 读取的无效变量偏移`的错误消息。[PRE28]* 在示例代码的*xdp_hello*中找到被注释掉的循环。尝试添加第一个看起来像这样的循环：
-
-[PRE29]
-
-[PRE30]
-
-42: (18) r1 = 0xffff800008e10009
-
-44: (b7) r2 = 11
-
-45: (b7) r3 = 8
-
-46: (85) 调用 bpf_trace_printk#6
-
-R0=inv(id=0) R1_w=map_value(id=0,off=9,ks=4,vs=26,imm=0) R2_w=inv11
-
-R3_w=inv8 R6=pkt_end(id=0,off=0,imm=0) R7=pkt(id=0,off=0,r=0,imm=0)
-
-R10=fp0
-
-last_idx 46 first_idx 42
-
-regs=4 stack=0 在 45 之前：(b7) r3 = 8
-
-regs=4 stack=0 在 44 之前：(b7) r2 = 11
-
-[PRE31] [PRE32]
-
-for(inti=0;i<c;i++){ `bpf_printk``(``"Looping %d"``,``i``);` ``}``
-
-[PRE33]你应该看到验证器试图探索这个循环直到结束，但在完成之前达到了指令复杂性限制（因为全局变量`c`没有上限）。[PRE34]*编写一个附加到跟踪点的程序。（您可能已经在第四章的练习中完成了这个。）预览[“跟踪点”](ch07.html#tracepoints)，您可以看到一个以这些字段开始的上下文参数的结构定义：
-
-[PRE35]
-
-[PRE36]创建自己的版本，以这样开始的结构，并使程序中的上下文参数指向这个结构的指针。在程序中，尝试访问任何这些字段，并查看验证器失败并显示“无效的 bpf_context 访问”。[PRE37][PRE38][PRE39]
+^(3) 该版本为 BPF 验证器带来了许多重要的优化和改进，这些内容在 LWN 文章 [“BPF 在 5.3 内核中的有界循环”](https://oreil.ly/50BoD) 中有详细总结。

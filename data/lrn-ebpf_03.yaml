@@ -1,0 +1,1601 @@
+- en: Chapter 3\. Anatomy of an eBPF Program
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第 3 章\. eBPF 程序解剖
+- en: In the previous chapter you saw a simple eBPF “Hello World” program written
+    using the BCC framework. In this chapter there’s an example version of a “Hello
+    World” program written entirely in C so that you can see some of the details BCC
+    took care of behind the scenes.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在前一章中，您看到了使用 BCC 框架编写的简单 eBPF “Hello World” 程序。本章还展示了一个完全用 C 编写的“Hello World”
+    程序版本，以便查看 BCC 在幕后处理的一些细节。
+- en: This chapter also shows you the stages an eBPF program goes through on its journey
+    from source code to execution, as illustrated in [Figure 3-1](#c_left_parenthesisor_rustright_parenthe).
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章还展示了 eBPF 程序从源代码到执行过程中的各个阶段，如 [图 3-1](#c_left_parenthesisor_rustright_parenthe)
+    所示。
+- en: '![C (or Rust) source code is compiled into eBPF bytecode, which is either JIT-compiled
+    or interpreted into native machine code instructions](assets/lebp_0301.png)'
+  id: totrans-3
+  prefs: []
+  type: TYPE_IMG
+  zh: '![C（或 Rust）源代码编译成 eBPF 字节码，然后 JIT 编译或解释成本地机器码指令](assets/lebp_0301.png)'
+- en: Figure 3-1\. C (or Rust) source code is compiled into eBPF bytecode, which is
+    either JIT-compiled or interpreted into native machine code instructions
+  id: totrans-4
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 3-1\. C（或 Rust）源代码编译成 eBPF 字节码，然后 JIT 编译或解释成本地机器码指令
+- en: An eBPF program is a set of eBPF bytecode instructions. It’s possible to write
+    eBPF code directly in this bytecode, much as it’s possible to program in assembly
+    language. Humans typically find a higher-level programming language easier to
+    deal with, and at least at the time of this writing, I’d say the vast majority
+    of eBPF code is written in C^([1](ch03.html#ch03fn1)) and then compiled to eBPF
+    bytecode.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个 eBPF 程序是一组 eBPF 字节码指令。可以直接在此字节码中编写 eBPF 代码，就像可以使用汇编语言编程一样。人类通常更喜欢使用高级编程语言来处理，至少在撰写本文时，我可以说绝大多数
+    eBPF 代码是用 C^([1](ch03.html#ch03fn1)) 编写并编译成 eBPF 字节码。
+- en: Conceptually, this bytecode runs in an eBPF virtual machine within the kernel.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在概念上，这些字节码在内核中的 eBPF 虚拟机中运行。
+- en: The eBPF Virtual Machine
+  id: totrans-7
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: eBPF 虚拟机
+- en: The eBPF virtual machine, like any virtual machine, is a software implementation
+    of a computer. It takes in a program in the form of eBPF bytecode instructions,
+    and these have to be converted to native machine instructions that run on the
+    CPU.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与任何虚拟机一样，eBPF 虚拟机是计算机的软件实现。它接收 eBPF 字节码指令形式的程序，并将其转换为在 CPU 上运行的本地机器指令。
+- en: In early implementations of eBPF, the bytecode instructions were interpreted
+    within the kernel—that is, every time an eBPF program runs, the kernel examines
+    the instructions and converts them into machine code, which it then executes.
+    Interpreting has since been largely replaced by JIT (just-in-time) compilation
+    for performance reasons and to avoid the possibility of some Spectre-related vulnerabilities
+    in the eBPF interpreter. *Compilation* means the conversion to native machine
+    instructions happens just once, when the program is loaded into the kernel.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 eBPF 的早期实现中，内核内部解释了字节码指令——也就是说，每次运行 eBPF 程序时，内核都会检查指令并将其转换为机器码，然后执行。出于性能和避免
+    eBPF 解释器中一些与 Spectre 相关的漏洞的考虑，解释已大部分被 JIT（即时编译）替代。*编译*意味着程序加载到内核时，将字节码转换为本地机器指令，仅需进行一次。
+- en: eBPF bytecode consists of a set of instructions, and those instructions act
+    on (virtual) eBPF registers. The eBPF instruction set and register model were
+    designed to map neatly to common CPU architectures so that the step of compiling
+    or interpreting from bytecode to machine code is reasonably straightforward.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF 字节码包含一组指令，这些指令作用于（虚拟的）eBPF 寄存器。eBPF 指令集和寄存器模型设计得非常符合常见的 CPU 架构，因此从字节码到机器码的编译或解释步骤相对直接。
+- en: eBPF Registers
+  id: totrans-11
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: eBPF 寄存器
+- en: The eBPF virtual machine uses 10 general-purpose registers, numbered 0 to 9\.
+    Additionally, Register 10 is used as a stack frame pointer (and can only be read,
+    but not written). As a BPF program is executed, values get stored in these registers
+    to keep track of state.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF 虚拟机使用 10 个通用寄存器，编号从 0 到 9。此外，寄存器 10 用作堆栈帧指针（只能读取，不能写入）。在执行 BPF 程序时，这些寄存器中存储的值用于跟踪状态。
+- en: It’s important to understand that these eBPF registers in the eBPF virtual machine
+    are implemented in software. You can see them enumerated from `BPF_REG_0` to `BPF_REG_10`
+    in the [*include/uapi/linux/bpf.h* header file](https://oreil.ly/_ZhU2) of the
+    Linux kernel’s source code.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 理解的重点是，eBPF 虚拟机中的这些 eBPF 寄存器是通过软件实现的。你可以在 Linux 内核源代码的 [*include/uapi/linux/bpf.h*
+    头文件](https://oreil.ly/_ZhU2)中看到它们从 `BPF_REG_0` 到 `BPF_REG_10` 的枚举。
+- en: The context argument to an eBPF program is loaded into Register 1 before its
+    execution begins. The return value from the function is stored in Register 0.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在执行开始之前，eBPF 程序的上下文参数被加载到寄存器 1 中。函数的返回值存储在寄存器 0 中。
+- en: Before calling a function from eBPF code, the arguments to that function are
+    placed in Register 1 through Register 5 (not all the registers are used if there
+    are fewer than five arguments).
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在从 eBPF 代码调用函数之前，该函数的参数被放置在寄存器 1 到寄存器 5 中（如果少于五个参数，则不使用所有寄存器）。
+- en: eBPF Instructions
+  id: totrans-16
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: eBPF 指令
+- en: 'The same [*linux/bpf.h* header file](https://oreil.ly/_ZhU2) defines a structure
+    called `bpf_insn`, which represents a BPF instruction:'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 同样的 [*linux/bpf.h* 头文件](https://oreil.ly/_ZhU2)定义了一个称为 `bpf_insn` 的结构，表示一个 BPF
+    指令：
+- en: '[PRE0]'
+  id: totrans-18
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: '[![1](assets/1.png)](#code_id_3_1)'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_3_1)'
+- en: 'Each instruction has an opcode, which defines what operation the instruction
+    is to perform: for example, adding a value to the contents of a register, or jumping
+    to a different instruction in the program.^([2](ch03.html#ch03fn2)) The Iovisor
+    project’s [“Unofficial eBPF spec”](https://oreil.ly/FXcPu) has a list of the valid
+    instructions.'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个指令都有一个操作码，定义了指令要执行的操作，例如将一个值添加到寄存器的内容中，或者跳转到程序中的另一个指令。^([2](ch03.html#ch03fn2))
+    Iovisor 项目的[“非官方 eBPF 规范”](https://oreil.ly/FXcPu)列出了有效指令的列表。
+- en: '[![2](assets/2.png)](#code_id_3_2)'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_3_2)'
+- en: Different operations might involve up to two registers.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不同的操作可能涉及最多两个寄存器。
+- en: '[![3](assets/3.png)](#code_id_3_3)'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_3_3)'
+- en: Depending on the operation, there might be an offset value and/or an “immediate”
+    integer value.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据操作的不同，可能存在偏移值和/或“立即”整数值。
+- en: This `bpf_insn` structure is 64 bits (or 8 bytes) long. However, sometimes an
+    instruction might need to span more than 8 bytes. If you want to set a register
+    to a 64-bit value, you can’t somehow squeeze all 64 bits of that value into the
+    structure, along with the opcode and register information. In these cases, the
+    instruction uses *wide instruction encoding* that is 16 bytes long in total. You’ll
+    see an example of this in this chapter.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个 `bpf_insn` 结构长达 64 位（或 8 字节）。然而，有时一条指令可能需要跨越超过 8 字节。如果要将寄存器设置为 64 位值，不可能将所有
+    64 位值与操作码和寄存器信息一起挤入结构中。在这些情况下，该指令使用了 *宽指令编码*，总长为 16 字节。你将在本章看到一个例子。
+- en: When loaded into the kernel, the bytecode of an eBPF program is represented
+    by a series of these `bpf_insn` structures. The verifier performs several checks
+    on this information to ensure that the code is safe to run. You’ll learn more
+    about the verification process in [Chapter 6](ch06.html#the_ebpf_verifier).
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当加载到内核中时，eBPF 程序的字节码由一系列 `bpf_insn` 结构表示。验证器对此信息执行多项检查，以确保代码可以安全运行。你将在[第 6 章](ch06.html#the_ebpf_verifier)了解更多关于验证过程的信息。
+- en: 'Most of the different opcodes fall into the following categories:'
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数不同的操作码属于以下类别之一：
+- en: Loading a value into a register (either an immediate value or a value read from
+    memory or from another register)
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将值加载到寄存器中（可以是立即值，也可以是从内存或另一个寄存器中读取的值）
+- en: Storing a value from a register into memory
+  id: totrans-29
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将寄存器中的值存储到内存中
+- en: Performing arithmetic operations such as adding a value to the contents of a
+    register
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 执行算术操作，例如将一个值添加到寄存器的内容中
+- en: Jumping to a different instruction if a particular condition is satisfied
+  id: totrans-31
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果满足特定条件，跳转到另一个指令
+- en: Note
+  id: totrans-32
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: For an overview of eBPF architecture, I recommend the [BPF and XDP Reference
+    Guide](https://oreil.ly/rvm1i) that’s included as part of the Cilium project’s
+    documentation. If you’d like more details, the [kernel documentation](https://oreil.ly/_2XDT)
+    describes the eBPF instructions and encoding quite clearly.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于 eBPF 架构的概述，我推荐阅读 [BPF 和 XDP 参考指南](https://oreil.ly/rvm1i)，它作为 Cilium 项目文档的一部分包含在内。如果你想要更多细节，[内核文档](https://oreil.ly/_2XDT)清楚地描述了
+    eBPF 指令和编码。
+- en: Let’s use another simple example of an eBPF program and follow its journey from
+    C source code, through eBPF bytecode, to machine code instructions.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们以另一个简单的 eBPF 程序为例，从 C 源代码开始，跟随它的旅程，经过 eBPF 字节码，最终到达机器码指令。
+- en: Note
+  id: totrans-35
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: If you want to build and run this code yourself, you’ll find the code along
+    with instructions for setting up an environment to do so at [*github.com/lizrice/learning-ebpf*](https://github.com/lizrice/learning-ebpf).
+    The code for this chapter is in the *chapter3* directory.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想自行构建和运行这段代码，你可以在[*github.com/lizrice/learning-ebpf*](https://github.com/lizrice/learning-ebpf)找到该代码以及设置环境的说明。本章的代码位于*chapter3*目录下。
+- en: The examples in this chapter are written in C using a library called *libbpf*.
+    You’ll learn more about this library in [Chapter 5](ch05.html#co_recomma_btfcomma_and_libbpf).
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章的示例使用C语言编写，使用了名为*libbpf*的库。你将在[第五章](ch05.html#co_recomma_btfcomma_and_libbpf)详细了解这个库。
+- en: eBPF “Hello World” for a Network Interface
+  id: totrans-38
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: eBPF“Hello World”适用于网络接口
+- en: The examples in the previous chapter emitted the trace “Hello World” triggered
+    by a system call kprobe; this time I’m going to show an eBPF program that writes
+    a line of trace when triggered by the arrival of a network packet.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 上一章的示例通过系统调用的kprobe触发了跟踪“Hello World”；这次我将展示一个eBPF程序，它在接收到网络数据包时触发并写入一行跟踪信息。
+- en: Packet processing is a very common application of eBPF. I’ll cover this in a
+    lot more detail in [Chapter 8](ch08.html#ebpf_for_networking), but for now it
+    might be helpful to be aware of the basic idea of an eBPF program that is triggered
+    for every packet of data that arrives on a network interface. The program can
+    inspect and even modify the contents of that packet, and it makes a decision (or
+    *verdict*) on what the kernel should do with that packet. The verdict could tell
+    the kernel to carry on processing it as usual, drop it, or redirect it elsewhere.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数据包处理是eBPF的一个非常常见的应用。我将在[第八章](ch08.html#ebpf_for_networking)中详细讨论这一点，但现在知道一个eBPF程序的基本概念可能会对你有所帮助，该程序会在网络接口上到达的每个数据包上触发。程序可以检查甚至修改数据包的内容，并对内核对该数据包的处理做出决策（或*评判*）。评判可能告诉内核继续像往常一样处理，丢弃或重定向到其他位置。
+- en: In the simple example I’m showing here, the program doesn’t do anything with
+    the network packet; it simply writes out the words *Hello World* and a counter
+    to the trace pipe every time a network packet is received.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我这里展示的简单示例中，程序不会处理网络数据包；每次接收到网络数据包时，它只是将*Hello World*和一个计数器写入跟踪管道。
+- en: 'The example program is in *chapter3/hello.bpf.c*. It’s a fairly common convention
+    to put eBPF programs into filenames ending with *bpf.c* to distinguish them from
+    user space C code that might live in the same source code directory. Here’s the
+    entire program:'
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例程序位于*chapter3/hello.bpf.c*。把eBPF程序放在以*bpf.c*结尾的文件名中是一个相当普遍的约定，以区分可能存放在同一源代码目录中的用户空间C代码。以下是整个程序：
+- en: '[PRE1]'
+  id: totrans-43
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: '[![1](assets/1.png)](#code_id_3_4)'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_3_4)'
+- en: This example starts by including some header files. Just in case you’re not
+    familiar with C coding, every program has to include the header files that define
+    any structures or functions the program is going to use. You can guess from the
+    names that these header files are related to BPF.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个示例首先包含一些头文件。以防你不熟悉C编码，每个程序都必须包含定义程序要使用的任何结构或函数的头文件。从名称可以猜到，这些头文件与BPF相关。
+- en: '[![2](assets/2.png)](#code_id_3_5)'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_3_5)'
+- en: This example shows how eBPF programs can use global variables. This counter
+    will get incremented every time the program runs.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个示例展示了eBPF程序如何使用全局变量。每次程序运行时，这个计数器都会递增。
+- en: '[![3](assets/3.png)](#code_id_3_6)'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_3_6)'
+- en: The macro `SEC()` defines a section called `xdp` that you’ll be able to see
+    in the compiled object file. I’ll come back to how the section name is used in
+    [Chapter 5](ch05.html#co_recomma_btfcomma_and_libbpf), but for now you can simply
+    think of it as defining that it’s an eXpress Data Path (XDP) type of eBPF program.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 宏`SEC()`定义了一个名为`xdp`的段，在编译后的目标文件中可见。我将在[第五章](ch05.html#co_recomma_btfcomma_and_libbpf)再回到段名是如何用于eBPF程序的讨论，但现在你可以简单地将其视为定义了一种称为eXpress数据路径（XDP）的eBPF程序。
+- en: '[![4](assets/4.png)](#code_id_3_7)'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#code_id_3_7)'
+- en: Here you can see the actual eBPF program. In eBPF, the program name is the function
+    name, so this program is called `hello`. It uses a helper function, `bpf_printk`,
+    to write a string of text, increments the global variable `counter`, and then
+    returns the value `XDP_PASS`. This is the verdict indicating to the kernel that
+    it should process this network packet as normal.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里你可以看到实际的eBPF程序。在eBPF中，程序名称即为函数名称，因此该程序称为`hello`。它使用一个辅助函数`bpf_printk`来写入文本字符串，增加全局变量`counter`的值，然后返回值`XDP_PASS`，这是告诉内核应像往常一样处理这个网络数据包的评判结果。
+- en: '[![5](assets/5.png)](#code_id_3_8)'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#code_id_3_8)'
+- en: Finally there is another `SEC()` macro that defines a license string, and this
+    is a crucial requirement for eBPF programs. Some of the BPF helper functions in
+    the kernel are defined as “GPL only.” If you want to use any of these functions,
+    your BPF code has to be declared as having a GPL-compatible license. The verifier
+    (which we will discuss in [Chapter 6](ch06.html#the_ebpf_verifier)) will object
+    if the declared license is not compatible with the functions a program uses. Certain
+    eBPF program types, including those that use BPF LSM (which you’ll learn about
+    in [Chapter 9](ch09.html#ebpf_for_security)), are also [required to be GPL compatible](https://oreil.ly/ItahV).
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后还有另一个`SEC()`宏定义了一个许可字符串，这是 eBPF 程序的一个关键要求。内核中的一些 BPF 辅助函数被定义为“仅限 GPL 使用”。如果你想使用这些函数中的任何一个，你的
+    BPF 代码必须声明为具有 GPL 兼容许可证。验证器（我们将在[第6章](ch06.html#the_ebpf_verifier)讨论）会检查声明的许可证是否与程序使用的函数兼容。包括使用
+    BPF LSM 的某些 eBPF 程序类型，你将在[第9章](ch09.html#ebpf_for_security)了解到，也需要[兼容 GPL](https://oreil.ly/ItahV)。
+- en: Note
+  id: totrans-54
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: You might be wondering why the previous chapter used `bpf_trace_printk()` and
+    this version uses `bpf_printk()`. The short answer is that BCC’s version is called
+    `bpf_trace_printk()` and *libbpf*’s version is `bpf_printk()`, but both of those
+    are wrappers around the kernel function `bpf_trace_printk()`. Andrii Nakryiko
+    wrote a [good post](https://oreil.ly/9mNSY) on this on his blog.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能会想为什么上一章使用了 `bpf_trace_printk()`，而这个版本使用了 `bpf_printk()`。简短的答案是，BCC 的版本称为
+    `bpf_trace_printk()`，*libbpf* 的版本是 `bpf_printk()`，但这两者都是对内核函数 `bpf_trace_printk()`
+    的包装。Andrii Nakryiko 在他的博客上写了一篇[很好的文章](https://oreil.ly/9mNSY)来解释这一点。
+- en: This is an example of an eBPF program that attaches to the XDP hook point on
+    a network interface. You can think of the XDP event being triggered the moment
+    a network packet arrives inbound on a (physical or virtual) network interface.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是一个附加到网络接口上 XDP 钩点的 eBPF 程序示例。你可以将 XDP 事件看作是在网络接口上入站时触发的。
+- en: Note
+  id: totrans-57
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Some network cards support offloading XDP programs so that they can be executed
+    on the network card itself. This means each network packet that arrives can be
+    processed on the card, before it gets anywhere near the machine’s CPU. XDP programs
+    can inspect and even modify each network packet, so this is very useful for doing
+    things like DDoS protection, firewalling, or load balancing in a highly performant
+    way. You’ll learn more about this in [Chapter 8](ch08.html#ebpf_for_networking).
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些网络卡支持将 XDP 程序卸载到网络卡本身以便执行。这意味着每个到达的网络数据包可以在卡上处理，而不需要接近计算机的 CPU。XDP 程序可以检查甚至修改每个网络数据包，因此这对于进行
+    DDoS 保护、防火墙或负载均衡是非常有用的。你将在[第8章](ch08.html#ebpf_for_networking)详细了解这些内容。
+- en: You have seen the C source code, so the next step is to compile it into an object
+    the kernel can understand.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经看过了 C 源代码，下一步是将其编译成内核能理解的对象。
+- en: Compiling an eBPF Object File
+  id: totrans-60
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 编译一个 eBPF 对象文件
+- en: 'Our eBPF source code needs to be compiled into the machine instructions that
+    the eBPF virtual machine can understand: eBPF bytecode. The Clang compiler from
+    the [LLVM project](https://llvm.org) will do this if you specify `-target bpf`.
+    The following is an extract from a Makefile that will do the compilation:'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们的 eBPF 源代码需要编译成 eBPF 虚拟机可以理解的机器指令：eBPF 字节码。如果你指定了 `-target bpf`，LLVM 项目的 Clang
+    编译器将会完成这项工作。以下是一个 Makefile 的片段，用于执行编译：
+- en: '[PRE2]'
+  id: totrans-62
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: This generates an object file called *hello.bpf.o* from the source code in *hello.bpf.c*.
+    The `-g` flag is optional here,^([3](ch03.html#ch03fn3)) but it generates debug
+    information so that you can see the source code alongside the bytecode when you
+    inspect the object file. Let’s inspect this object file to better understand the
+    eBPF code it contains.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这从源代码 *hello.bpf.c* 生成了一个名为 *hello.bpf.o* 的对象文件。这里 `-g` 标志是可选的，^([3](ch03.html#ch03fn3))
+    但它生成调试信息，这样你可以在检查对象文件时看到源代码和字节码。让我们检查一下这个对象文件，以更好地理解它包含的 eBPF 代码。
+- en: Inspecting an eBPF Object File
+  id: totrans-64
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 检查一个 eBPF 对象文件
+- en: 'The file utility is commonly used to determine the contents of a file:'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件工具通常用于确定文件的内容：
+- en: '[PRE3]'
+  id: totrans-66
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: This shows it’s an ELF (Executable and Linkable Format) file, containing eBPF
+    code, for a 64-bit platform with LSB (least significant bit) architecture. It
+    includes debug information if you used the `-g` flag at the compilation step.
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这显示了它是一个 ELF（可执行和可链接格式）文件，包含 eBPF 代码，适用于 LSB（最低有效位）架构的 64 位平台。如果在编译步骤中使用了 `-g`
+    标志，则包括调试信息。
+- en: 'You can inspect this object further with `llvm-objdump` to see the eBPF instructions:'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以使用 `llvm-objdump` 进一步检查这个对象以查看 eBPF 指令：
+- en: '[PRE4]'
+  id: totrans-69
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Even if you’re not familiar with disassembly, the output from this command
+    isn’t too hard to understand:'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 即使你对反汇编不熟悉，这个命令的输出也不难理解：
+- en: '[PRE5]'
+  id: totrans-71
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: '[![1](assets/1.png)](#code_id_3_9)'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_3_9)'
+- en: The first line gives further confirmation that *hello.bpf.o* is a 64-bit ELF
+    file with eBPF code (there’s no particular rhyme or reason why some tools use
+    the term *BPF* and others *eBPF*; as I said earlier, these terms are now practically
+    interchangeable).
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一行进一步确认了 *hello.bpf.o* 是一个具有 eBPF 代码的 64 位 ELF 文件（某些工具使用术语 *BPF* 而另一些使用 *eBPF*
+    并无特定的差异；正如我之前所说，这些术语现在几乎是可互换的）。
+- en: '[![2](assets/2.png)](#code_id_3_10)'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_3_10)'
+- en: Next comes the disassembly of the section labeled `xdp`, which matches the `SEC()`
+    definition in the C source code.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来是标记为 `xdp` 的部分的反汇编，与 C 源代码中的 `SEC()` 定义相匹配。
+- en: '[![3](assets/3.png)](#code_id_3_11)'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#code_id_3_11)'
+- en: This section is a function called `hello`.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这一节是一个名为`hello`的函数。
+- en: '[![4](assets/4.png)](#code_id_3_12)'
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#code_id_3_12)'
+- en: There are five lines of eBPF bytecode instructions that correspond to the source
+    line `bpf_printk("Hello World %d", counter");`.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有五行 eBPF 字节码指令对应于源代码行`bpf_printk("Hello World %d", counter");`。
+- en: '[![5](assets/5.png)](#code_id_3_13)'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#code_id_3_13)'
+- en: Three lines of eBPF bytecode instructions increment the `counter` variable.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 三行 eBPF 字节码指令增加了`counter`变量。
+- en: '[![6](assets/6.png)](#code_id_3_14)'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#code_id_3_14)'
+- en: And another two lines of bytecode are generated from the source code `return
+    XDP_PASS;`.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从源代码 `return XDP_PASS;` 生成了另外两行字节码。
+- en: Unless you’re particularly keen to do so, there’s no real need to understand
+    exactly how each line of bytecode relates to the source. The compiler takes care
+    of generating the bytecode so that you don’t have to think about it! But let’s
+    examine the output in a little more detail so you can get a feel for how this
+    output relates to the eBPF instructions and registers you learned about earlier
+    in this chapter.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除非你特别想这么做，没有必要完全理解每条字节码与源代码的关系。编译器负责生成字节码，你不需要去考虑它！但是让我们更详细地检查一下输出，这样你可以感受一下这个输出如何与本章前面学到的
+    eBPF 指令和寄存器相关联。
+- en: To the left of each line of bytecode you can see the offset of that instruction
+    from wherever `hello` is located in memory. As described earlier in this chapter,
+    eBPF instructions are generally 8 bytes long, and since on a 64-bit platform each
+    memory location can hold 8 bytes, the offset is usually incremented by one for
+    each instruction. However, the first instruction in this program happens to be
+    a wide instruction encoding that requires 16 bytes in order to set Register 6
+    to a 64-bit value of `0`. That places the instruction in the second line of output
+    at offset `2`. After that there is another 16-byte instruction, setting Register
+    1 to a 64-bit value of `0`. And after that, the remaining instructions each fit
+    in 8 bytes, so the offset increments by one in each line.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在每条字节码的左边，你可以看到该指令与内存中的`hello`位置的偏移量。如本章前所述，eBPF 指令通常是 8 字节长，由于在 64 位平台上每个内存位置可以容纳
+    8 字节，因此每条指令的偏移量通常递增一个。但是，该程序的第一条指令恰好是一个广泛的指令编码，需要 16 字节以设置寄存器 6 为`0`的 64 位值。这将该指令放在输出的第二行，偏移量为`2`。接着又有另一条
+    16 字节的指令，将寄存器 1 设置为`0`的 64 位值。然后，剩余的指令每个占用 8 字节，因此偏移量每行递增一。
+- en: The first byte of each line is the opcode that tells the kernel what operation
+    to perform, and on the right side of each instruction line is the human-readable
+    interpretation of the instruction. At the time of this writing, the Iovisor project
+    has the most complete [documentation](https://oreil.ly/nLbLp) of the eBPF opcodes,
+    but the official [Linux kernel documentation](https://oreil.ly/yp-jW) is catching
+    up, and the eBPF Foundation is working on [standard documentation](https://oreil.ly/7ZWzj)
+    that is not tied to a specific operating system.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每行的第一个字节是操作码，告诉内核执行什么操作，在每条指令行的右侧是指令的人类可读解释。在撰写本文时，Iovisor 项目有关 eBPF 操作码的文档是最全面的，但官方的
+    Linux 内核文档正在迎头赶上，而 eBPF 基金会正在制作不限于特定操作系统的[标准文档](https://oreil.ly/7ZWzj)。
+- en: 'For example, let’s take the instruction at offset `5`, which looks like this:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，让我们看看偏移量为`5`的指令：
+- en: '[PRE6]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'The opcode is `0xb7`, and the documentation tells us the pseudocode corresponding
+    to this is `dst = imm`, which can be read as “Set the destination to the immediate
+    value.” The destination is defined by the second byte, `0x02`, which means “Register
+    2.” The “immediate” (or literal) value here is `0x0f`, which is 15 in decimal.
+    So we can understand that this instruction tells the kernel to “set Register 2
+    to value 15.” This corresponds to the output we see on the right side of the instruction:
+    `r2 = 15`.'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 操作码是 `0xb7`，文档告诉我们，对应此操作码的伪代码是 `dst = imm`，可以理解为“将目标设置为立即值”。目标由第二个字节定义，`0x02`
+    意味着“寄存器 2”。这里的“立即值”（或字面值）是 `0x0f`，即十进制的 15。因此，我们可以理解此指令告诉内核“将寄存器 2 设置为值 15”。这对应我们在指令右侧看到的输出：`r2
+    = 15`。
+- en: 'The instruction at offset `10` is similar:'
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 偏移量为 `10` 的指令类似：
+- en: '[PRE7]'
+  id: totrans-91
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: This line also has opcode `0xb7`, and this time it’s setting the value of Register
+    0 to `2`. When an eBPF program finishes running, Register 0 holds the return code,
+    and `XDP_PASS` has the value `2`. This matches the source code, which always returns
+    `XDP_PASS`.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此行的操作码也是 `0xb7`，这次它将寄存器 0 的值设置为 `2`。当 eBPF 程序运行结束时，寄存器 0 包含返回码，而 `XDP_PASS`
+    的值为 `2`。这与源代码匹配，源代码总是返回 `XDP_PASS`。
+- en: You now know that *hello.bpf.o* contains an eBPF program in bytecode. The next
+    step is to load it into the kernel.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您知道 *hello.bpf.o* 包含一个字节码中的 eBPF 程序。下一步是将其加载到内核中。
+- en: Loading the Program into the Kernel
+  id: totrans-94
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 将程序加载到内核中
+- en: For this example we’ll use a utility called `bpftool`. You can also load programs
+    programmatically, and you’ll see examples of that later in the book.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于本示例，我们将使用一个名为 `bpftool` 的实用程序。您还可以以编程方式加载程序，稍后在本书中将看到示例。
+- en: Note
+  id: totrans-96
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Some Linux distributions provide a package that includes `bpftool`, or you can
+    [compile it from source code](https://github.com/libbpf/bpftool). You can find
+    more details about installing or building this tool on [Quentin Monnet’s blog](https://oreil.ly/Yqepv),
+    as well as additional documentation and usage on the [Cilium site](https://oreil.ly/rnTIg).
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些 Linux 发行版提供了一个包，其中包含 `bpftool`，或者您可以[从源代码编译它](https://github.com/libbpf/bpftool)。您可以在[Quentin
+    Monnet 的博客](https://oreil.ly/Yqepv)上找到有关安装或构建此工具的更多详细信息，以及在[Cilium 网站](https://oreil.ly/rnTIg)上的附加文档和用法。
+- en: The following is an example of using `bpftool` to load a program into the kernel.
+    Note that you’ll likely need to be root (or use `sudo`) to get the BPF privileges
+    that `bpftool` requires.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下是使用 `bpftool` 将程序加载到内核的示例。请注意，您可能需要 root 权限（或使用 `sudo`）以获取 `bpftool` 需要的 BPF
+    权限。
+- en: '[PRE8]'
+  id: totrans-99
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'This loads the eBPF program from our compiled object file and “pins” it to
+    the location */sys/fs/bpf/hello*.^([4](ch03.html#ch03fn4)) No output response
+    to this command indicates success, but you can confirm that the program is in
+    place using `ls`:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将从我们编译的对象文件中加载 eBPF 程序，并将其“pin”到位置 */sys/fs/bpf/hello*。^([4](ch03.html#ch03fn4))
+    此命令的无输出响应表示成功，但您可以使用 `ls` 确认该程序已经就位：
+- en: '[PRE9]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: The eBPF program has been successfully loaded. Let’s use the `bpftool` utility
+    to find out more about the program and its status within the kernel.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 已成功加载 eBPF 程序。让我们使用 `bpftool` 实用程序了解有关程序及其在内核中的状态的更多信息。
+- en: Inspecting the Loaded Program
+  id: totrans-103
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 检查已加载的程序
+- en: 'The `bpftool` utility can list all the programs that are loaded into the kernel.
+    If you try this yourself you’ll probably see several preexisting eBPF programs
+    in this output, but for clarity I will just show the lines that relate to our
+    “Hello World” example:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bpftool` 实用程序可以列出加载到内核中的所有程序。如果您自己尝试，可能会在输出中看到几个预先存在的 eBPF 程序，但为了清晰起见，我只会显示与我们的“Hello
+    World”示例相关的行：'
+- en: '[PRE10]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'The program has been assigned the ID 540\. This identity is a number assigned
+    to each program as it’s loaded. Knowing the ID, you can ask `bpftool` to show
+    more information about this program. This time, let’s get the output in prettified
+    JSON format so that the field names are visible, as well as the values:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该程序已被分配 ID 540。此标识是在加载每个程序时分配的编号。知道了这个 ID，您可以要求 `bpftool` 显示关于此程序的更多信息。这次，让我们以格式化的
+    JSON 格式获取输出，以便可见字段名以及值：
+- en: '[PRE11]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Given the field names, a lot of this is straightforward to understand:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 给定字段名，这些内容大部分都很容易理解：
+- en: The program’s ID is 540.
+  id: totrans-109
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 程序的 ID 是 540。
+- en: The `type` field tells us this program can be attached to a network interface
+    using the XDP event. Several other types of BPF programs can be attached to different
+    sorts of events, and we’ll discuss this more in [Chapter 7](ch07.html#ebpf_program_and_attachment_types).
+  id: totrans-110
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`type`字段告诉我们，此程序可以使用XDP事件附加到网络接口。还有几种其他类型的BPF程序可以附加到不同类型的事件上，我们将在[第7章](ch07.html#ebpf_program_and_attachment_types)中进一步讨论。'
+- en: The name of the program is `hello`, which is the function name from the source
+    code.
+  id: totrans-111
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 该程序的名称是`hello`，这是源代码中的函数名称。
+- en: The `tag` is another identifier for this program, which I’ll describe in more
+    detail shortly.
+  id: totrans-112
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`tag`是该程序的另一个标识符，稍后我会详细描述它。'
+- en: The program is defined with a GPL-compatible license.
+  id: totrans-113
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 该程序以GPL兼容许可证定义。
+- en: There’s a timestamp showing when the program was loaded.
+  id: totrans-114
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 显示程序加载的时间戳。
+- en: User ID 0 (which is root) loaded the program.
+  id: totrans-115
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 用户ID 0（即root用户）加载了该程序。
+- en: There are 96 bytes of translated eBPF bytecode in this program, which I’ll show
+    you shortly.
+  id: totrans-116
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 该程序中有96字节的已翻译eBPF字节码，稍后我将向您展示。
+- en: This program has been JIT-compiled, and the compilation resulted in 148 bytes
+    of machine code. I’ll cover this shortly too.
+  id: totrans-117
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 该程序已经进行了JIT编译，并且编译结果是148字节的机器码。我稍后也会详细讨论这个。
+- en: The `bytes _memlock` field tells us this program reserves 4,096 bytes of memory
+    that won’t be paged out.
+  id: totrans-118
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`bytes _memlock`字段告诉我们，该程序保留了4,096字节的内存，不会被分页出去。'
+- en: This program refers to BPF maps with IDs 165 and 166\. This might seem surprising,
+    since there is no obvious reference to maps in the source code. You’ll see later
+    in this chapter how map semantics are used to handle global data in eBPF programs.
+  id: totrans-119
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 此程序引用了ID为165和166的BPF映射。这可能令人惊讶，因为在源代码中并没有明显的映射引用。稍后在本章中，您将看到如何使用映射语义来处理eBPF程序中的全局数据。
+- en: You’ll learn about BTF in [Chapter 5](ch05.html#co_recomma_btfcomma_and_libbpf),
+    but for now just know that `btf_id` indicates there is a block of BTF information
+    for this program. This information is included in the object file only if you
+    compile with the `-g` flag.
+  id: totrans-120
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 您将在[第5章](ch05.html#co_recomma_btfcomma_and_libbpf)了解有关BTF的内容，但现在只需知道`btf_id`指示此程序有一个BTF信息块。仅当您使用`-g`标志编译时，此信息才包含在对象文件中。
+- en: The BPF Program Tag
+  id: totrans-121
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: BPF程序标签
+- en: 'The `tag` is a SHA (Secure Hashing Algorithm) sum of the program’s instructions,
+    which can be used as another identifier for the program. The ID can vary every
+    time you load or unload the program, but the tag will remain the same. The `bpftool`
+    utility accepts references to a BPF program by ID, name, tag, or pinned path,
+    so in the example here, all of the following would give the same output:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`tag`是程序指令的SHA（安全哈希算法）摘要，可以用作程序的另一个标识符。每次加载或卸载程序时，ID可能会变化，但标签将保持不变。`bpftool`实用程序接受通过ID、名称、标签或固定路径引用BPF程序，因此在这里的示例中，以下所有内容将产生相同的输出：'
+- en: '`bpftool prog show id 540`'
+  id: totrans-123
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`bpftool prog show id 540`'
+- en: '`bpftool prog show name hello`'
+  id: totrans-124
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`bpftool prog show name hello`'
+- en: '`bpftool prog show tag d35b94b4c0c10efb`'
+  id: totrans-125
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`bpftool prog show tag d35b94b4c0c10efb`'
+- en: '`bpftool prog show pinned /sys/fs/bpf/hello`'
+  id: totrans-126
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`bpftool prog show pinned /sys/fs/bpf/hello`'
+- en: You could have multiple programs with the same name, and even multiple instances
+    of programs with the same tag, but the ID and pinned path will always be unique.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以具有相同名称的多个程序，甚至具有相同标签的多个程序实例，但ID和固定路径将始终是唯一的。
+- en: The Translated Bytecode
+  id: totrans-128
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 翻译后的字节码
+- en: The `bytes_xlated` field tells us how many bytes of “translated” eBPF code there
+    are. This is the eBPF bytecode after it has passed through the verifier (and possibly
+    been modified by the kernel for reasons I’ll discuss later in this book).
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bytes_xlated`字段告诉我们经过验证器的eBPF字节码中有多少字节的“翻译”代码。这是eBPF字节码，在本书后面我将讨论内核可能因为我稍后会讨论的原因对其进行修改。'
+- en: 'Let’s use `bpftool` to show this translated version of our “Hello World” code:'
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们使用`bpftool`来显示我们“Hello World”代码的翻译版本：
+- en: '[PRE12]'
+  id: totrans-131
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: This looks very similar to the disassembled code you saw earlier in the output
+    from `llvm-objdump`. The offset addresses are the same, and the instructions look
+    similar—for example, we can see the instruction at offset `5` is `r2=15`.
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这看起来与您之前从`llvm-objdump`的输出中看到的反汇编代码非常相似。偏移地址相同，指令看起来也很相似，例如我们可以看到偏移量为`5`的指令是`r2=15`。
+- en: The JIT-Compiled Machine Code
+  id: totrans-133
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: JIT编译的机器码
+- en: The translated bytecode is pretty low level, but it’s not quite machine code
+    yet. eBPF uses a JIT compiler to convert eBPF bytecode to machine code that runs
+    natively on the target CPU. The `bytes_jited` field shows that after this conversation
+    the program is 108 bytes long.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 转换后的字节码相当低级，但还不是机器码。eBPF 使用 JIT 编译器将 eBPF 字节码转换为在目标 CPU 上本地运行的机器码。`bytes_jited`
+    字段显示，在此转换后程序长度为 108 字节。
+- en: Note
+  id: totrans-135
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: For higher performance, eBPF programs are generally JIT-compiled. The alternative
+    is to interpret the eBPF bytecode at runtime. The eBPF instruction set and registers
+    were designed to map fairly closely to native machine instructions to make this
+    interpretation straightforward and therefore relatively fast, but compiled programs
+    will be faster, and most architectures now support JIT.^([5](ch03.html#ch03fn5))
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了更高的性能，eBPF 程序通常是 JIT 编译的。另一种方法是在运行时解释 eBPF 字节码。eBPF 指令集和寄存器设计得相当接近本机机器指令，使得解释变得直观且相对快速，但编译后的程序将更快，并且大多数体系结构现在支持
+    JIT。^([5](ch03.html#ch03fn5))
+- en: 'The `bpftool` utility can generate a dump of this JITed code in assembly language.
+    Don’t worry if you’re not familiar with assembly language and this looks entirely
+    incomprehensible! I have included it only to illustrate all the transformations
+    the eBPF code goes through from source code to the executable machine instructions.
+    Here is the command and its output:'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bpftool` 实用程序可以生成这些 JITed 代码的汇编语言转储。如果你对汇编语言不熟悉，这可能看起来完全难以理解！我只是为了说明从源代码到可执行机器指令的所有转换过程。以下是命令及其输出：'
+- en: '[PRE13]'
+  id: totrans-138
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Note
+  id: totrans-139
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'Some packaged distributions of `bpftool` don’t yet include support for dumping
+    the JITed output, and if that’s the case, you’ll see “Error: No libbfd support.”
+    You can build `bpftool` for yourself by following the instructions at [*https://github.com/libbpf/bpftool*](https://github.com/libbpf/bpftool).'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些打包的 `bpftool` 发行版尚未包含支持转储 JIT 输出的功能，如果是这种情况，你将看到“错误：没有 libbfd 支持。”你可以按照[*https://github.com/libbpf/bpftool*](https://github.com/libbpf/bpftool)上的说明自行构建
+    `bpftool`。
+- en: You’ve seen that the “Hello World” program has been loaded into the kernel,
+    but at this point it’s not yet associated with an event, so nothing will trigger
+    it to run. It needs to be attached to an event.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经看到“Hello World”程序已加载到内核中，但此时它尚未与事件关联，因此没有任何触发器来运行它。它需要附加到一个事件上。
+- en: Attaching to an Event
+  id: totrans-142
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 附加到事件
+- en: 'The program type has to match the type of event it’s being attached to; you’ll
+    learn more about this in [Chapter 7](ch07.html#ebpf_program_and_attachment_types).
+    In this case it’s an XDP program, and you can use `bpftool` to attach the example
+    eBPF program to the XDP event on a network interface, like this:'
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 程序类型必须与其附加的事件类型匹配；你将在[第 7 章](ch07.html#ebpf_program_and_attachment_types)中了解更多。在这种情况下，它是一个
+    XDP 程序，你可以使用 `bpftool` 将示例 eBPF 程序附加到网络接口的 XDP 事件上，如下所示：
+- en: '[PRE14]'
+  id: totrans-144
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: Note
+  id: totrans-145
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: At the time of this writing, the `bpftool` utility doesn’t support the ability
+    to attach all program types, but it has [recently been extended](https://oreil.ly/Tt99p)
+    to auto-attach k(ret)probes, u(ret)probes, and tracepoints.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，`bpftool` 实用程序不支持附加所有程序类型的能力，但已被[最近扩展](https://oreil.ly/Tt99p)以自动附加 k(ret)probes、u(ret)probes
+    和 tracepoints。
+- en: Here I have used the program’s ID of 540, but you can also use the name (provided
+    it is unique) or tag to identify the program being attached. In this example,
+    I have attached the program to the network interface `eth0`.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这里我使用了程序的 ID 540，但你也可以使用名称（假设它是唯一的）或标签来标识被附加的程序。在本例中，我已将程序附加到网络接口 `eth0` 上。
+- en: 'You can view all the network-attached eBPF programs using `bpftool`:'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以使用 `bpftool` 查看所有已附加到网络的 eBPF 程序：
+- en: '[PRE15]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'The program with ID 540 is attached to the XDP event on the `eth0` interface.
+    This output also gives some clues about some other potential events in the network
+    stack that you can attach eBPF programs to: `tc` and `flow_dissector`. More on
+    this in [Chapter 7](ch07.html#ebpf_program_and_attachment_types).'
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ID 为 540 的程序已附加到 `eth0` 接口的 XDP 事件上。此输出还提供了关于网络堆栈中其他潜在事件的一些线索，你可以将 eBPF 程序附加到其中：`tc`
+    和 `flow_dissector`。更多信息请参见[第 7 章](ch07.html#ebpf_program_and_attachment_types)。
+- en: 'You can also inspect the network interfaces using `ip link`, and you’ll see
+    output that looks something like this (some details have been removed for clarity):'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你还可以使用 `ip link` 检查网络接口，你将看到类似以下输出（为清晰起见，已删除了部分细节）：
+- en: '[PRE16]'
+  id: totrans-152
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'In this example there are two interfaces: the loopback interface `lo`, which
+    is used to send traffic to processes on this machine; and the `eth0` interface,
+    which connects this machine to the outside world. This output also shows that
+    `eth0` has a JIT-compiled eBPF program, with identity `540` and tag `9d0e949f89f1a82c`,
+    attached to its XDP hook.'
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个例子中有两个接口：回环接口 `lo`，用于向本机上的进程发送流量；以及 `eth0` 接口，连接本机与外部世界。该输出还显示 `eth0` 有一个
+    JIT 编译的 eBPF 程序，其标识为 `540`，标签为 `9d0e949f89f1a82c`，已附加到其 XDP 钩子上。
+- en: Note
+  id: totrans-154
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: You can also use `ip link` to attach and detach XDP programs to a network interface.
+    I have included this as an exercise at the end of this chapter, and there are
+    further examples in [Chapter 7](ch07.html#ebpf_program_and_attachment_types).
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你也可以使用 `ip link` 命令将 XDP 程序附加到或从网络接口中分离出来。我已经在本章末尾包含了这个作为练习，并且在 [第7章](ch07.html#ebpf_program_and_attachment_types)
+    中有进一步的例子。
+- en: 'At this point, the *hello* eBPF program should be producing trace output every
+    time a network packet is received. You can check this out by running `cat /sys/kernel/debug/tracing/trace_pipe`.
+    This should show a lot of output that looks similar to this:'
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，*hello* eBPF 程序应该在每次接收到网络数据包时产生跟踪输出。你可以通过运行 `cat /sys/kernel/debug/tracing/trace_pipe`
+    来验证这一点。应该会显示类似于以下内容的大量输出：
+- en: '[PRE17]'
+  id: totrans-157
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: If you’re struggling to remember the location of the trace pipe, you can get
+    the same output using the command `bpftool prog tracelog`.
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你记不住跟踪管道的位置，你可以使用命令 `bpftool prog tracelog` 来获取相同的输出。
+- en: In comparison to the output you saw in [Chapter 2](ch02.html#ebpfapostrophes_quotation_markhello_wor),
+    this time there is no command or process ID associated with each of these events;
+    instead, you see `<idle>-0` at the start of each line of trace. In [Chapter 2](ch02.html#ebpfapostrophes_quotation_markhello_wor),
+    each syscall event happened because a process executing a command in user space
+    made a call to the syscall API. That process ID and command are part of the context
+    in which the eBPF program was executed. But in the example here, the XDP event
+    happens due to the arrival of a network packet. There is no user space process
+    associated with this packet—at the point the *hello* eBPF program is triggered,
+    the system hasn’t done anything with the packet other than receive it in memory,
+    and it has no idea what the packet is or where it’s going.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与你在 [第2章](ch02.html#ebpfapostrophes_quotation_markhello_wor) 中看到的输出相比，这一次每个事件的开头都没有与其相关联的命令或进程
+    ID；相反，你会看到每行跟踪的开头是 `<idle>-0`。在 [第2章](ch02.html#ebpfapostrophes_quotation_markhello_wor)
+    中，每个系统调用事件发生是因为在用户空间执行命令的进程调用了系统调用 API。该进程 ID 和命令是执行 eBPF 程序时的上下文的一部分。但在这个例子中，XDP
+    事件发生是由于网络数据包的到达。与该数据包相关联的没有用户空间进程——在触发 *hello* eBPF 程序时，系统仅仅是在内存中接收到该数据包，并且并不知道该数据包是什么，它要去往何处。
+- en: You can see that the counter value that is traced out is being incremented by
+    one each time, as expected. In the source code, `counter` is a global variable.
+    Let’s see how that is implemented in eBPF using a map.
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以看到追踪输出中的计数器值每次递增一个，这是预期的。在源代码中，`counter` 是一个全局变量。让我们看看如何在 eBPF 中使用映射来实现它。
+- en: Global Variables
+  id: totrans-161
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 全局变量
+- en: As you learned in the previous chapter, an eBPF map is a data structure that
+    can be accessed from an eBPF program or from user space. Since the same map can
+    be accessed repeatedly by different runs of the same program, it can be used to
+    hold state from one execution to the next. Multiple programs can also access the
+    same map. Because of these characteristics, map semantics can be repurposed for
+    use as global variables.
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如你在前一章学到的，eBPF 映射是一种数据结构，可以从 eBPF 程序或用户空间访问。由于同一个映射可以被同一程序的不同运行重复访问，它可以用来在不同执行之间保存状态。多个程序也可以访问同一个映射。由于这些特性，映射的语义可以被重新用作全局变量。
+- en: Note
+  id: totrans-163
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Before support for [global variables was added in 2019](https://oreil.ly/IDftt),
+    eBPF programmers had to write maps explicitly to perform the same task.
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [2019年添加全局变量支持之前](https://oreil.ly/IDftt)，eBPF 程序员必须显式编写映射来执行相同的任务。
+- en: You saw earlier that `bpftool` shows this example program using two maps with
+    the identities 165 and 166\. (You will probably see different identities if you
+    try this for yourself, as the identities are assigned when the maps are created
+    in the kernel.) Let’s explore what is in those maps.
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 之前你看到 `bpftool` 显示了这个示例程序使用了两个映射，它们的标识分别是 165 和 166。（如果你自己尝试，可能会看到不同的标识，因为这些标识是在内核中创建映射时分配的。）让我们来探索一下这些映射中有什么。
+- en: 'The `bpftool` utility can show the maps loaded into the kernel. For clarity
+    I will only show the entries 165 and 166 that relate to the example “Hello World”
+    program:'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bpftool`实用程序可以显示加载到内核中的映射。为了清晰起见，我将仅显示与示例“Hello World”程序相关的条目165和166：'
+- en: '[PRE18]'
+  id: totrans-167
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'A bss^([6](ch03.html#ch03fn6)) section in an object file compiled from a C
+    program typically holds global variables, and you can use `bpftool` to inspect
+    its contents, like this:'
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从C程序编译的对象文件中的bss^([6](ch03.html#ch03fn6))部分通常保存全局变量，您可以使用`bpftool`检查其内容，如下所示：
+- en: '[PRE19]'
+  id: totrans-169
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: I could also have used `bpftool map dump id 165` to retrieve the same information.
+    If I run either of these commands again, I’ll see that the counter has increased,
+    as the program has been run every time a network packet is received.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我也可以使用`bpftool map dump id 165`来检索相同的信息。如果再次运行任何一个命令，我会看到计数器增加了，因为程序在每次接收网络数据包时都会运行。
+- en: 'As you’ll learn in [Chapter 5](ch05.html#co_recomma_btfcomma_and_libbpf), `bpftool`
+    is able to pretty-print the field names from a map (here, the variable name `counter`)
+    only if BTF information is available, and that information is included only if
+    you compile with the `-g` flag. If you omitted that flag during the compilation
+    step, you’d see something that looks more like this:'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您将在[第5章](ch05.html#co_recomma_btfcomma_and_libbpf)中了解到的那样，只有在可用BTF信息时，`bpftool`才能漂亮地打印映射（这里是变量名`counter`）的字段名，并且仅当您在编译时使用`-g`标志时才包含该信息。如果在编译步骤中省略了该标志，您将看到类似以下的输出：
+- en: '[PRE20]'
+  id: totrans-172
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: Without BTF information, `bpftool` has no way of knowing what variable name
+    was used in the source code. You can infer that since there is only one item in
+    this map, the hex value `19 01 00 00` must be the current value of `counter` (281
+    in decimal, since the bytes are ordered starting with the least significant byte).
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 没有BTF信息，`bpftool`无法知道源代码中使用的变量名。你可以推断，由于此映射中只有一个项目，十六进制值`19 01 00 00`必须是`counter`的当前值（281的十进制，因为字节按最低有效字节起始排序）。
+- en: You’ve seen here that the eBPF program uses the semantics of a map to read and
+    write to a global variable. Maps are also used to hold static data, as you can
+    see by inspecting the other map.
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您在这里看到eBPF程序使用映射的语义来读取和写入全局变量。映射还用于保存静态数据，如您可以通过检查其他映射看到的那样。
+- en: 'The fact that the other map is named `hello.rodata` gives a hint that this
+    could be read-only data related to our *hello* program. You can dump the contents
+    of this map to see that it holds the string used by the eBPF program for tracing:'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个映射命名为`hello.rodata`表明这可能是与我们的*hello*程序相关的只读数据。您可以转储此映射的内容以查看它包含的eBPF程序用于跟踪的字符串：
+- en: '[PRE21]'
+  id: totrans-176
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'If you didn’t compile the object with the `-g` flag, you’ll see output that
+    looks like this:'
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您没有使用`-g`标志编译对象，则会看到类似以下的输出：
+- en: '[PRE22]'
+  id: totrans-178
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: There is one key–value pair in this map, and the value contains 12 bytes of
+    data ending with a 0\. It probably won’t surprise you that those bytes are the
+    ASCII representation of the string `"Hello World %d"`.
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此映射中有一个键值对，该值包含12个字节的数据，以0结尾。这些字节很可能是字符串`"Hello World %d"`的ASCII表示。
+- en: Now that we’ve finished inspecting this program and its maps, it’s time to clean
+    it up. We’ll start by detaching it from the event that triggers it.
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们已经完成了检查此程序及其映射的工作，是时候清理它了。我们将从触发它的事件中开始分离它。
+- en: Detaching the Program
+  id: totrans-181
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 分离程序
+- en: 'You can detach the program from the network interface like this:'
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以像这样将程序从网络接口分离：
+- en: '[PRE23]'
+  id: totrans-183
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'There is no output if this command runs successfully, but you can confirm that
+    the program is no longer attached by the lack of XDP entries in the output from
+    `bpftool net list`:'
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果此命令成功运行，则不会输出任何内容，但您可以通过`bpftool net list`输出中缺少XDP条目来确认程序已不再附加：
+- en: '[PRE24]'
+  id: totrans-185
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'However, the program is still loaded into the kernel:'
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但是，程序仍加载在内核中：
+- en: '[PRE25]'
+  id: totrans-187
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: Unloading the Program
+  id: totrans-188
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 卸载程序
+- en: 'There’s no inverse of `bpftool prog load` (at least not at the time of this
+    writing), but you can remove the program from the kernel by deleting the pinned
+    pseudofile:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在撰写本文时，`bpftool prog load`没有相反操作（至少没有），但您可以通过删除固定的伪文件从内核中删除程序：
+- en: '[PRE26]'
+  id: totrans-190
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: There is no output from this `bpftool` command because the program is no longer
+    loaded in the kernel.
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于程序不再加载到内核中，因此此`bpftool`命令不会输出任何内容。
+- en: BPF to BPF Calls
+  id: totrans-192
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPF到BPF调用
+- en: In the previous chapter you saw tail calls in action, and I mentioned that now
+    there is also the ability to call functions from within an eBPF program. Let’s
+    take a look at a simple example, which, like the tail call example, can be attached
+    to the `sys_enter` tracepoint, except this time it will trace out the opcode for
+    the syscall. You’ll find the code in *chapter3/hello-func.bpf.c*.
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在上一章中，您看到了尾调用的实际应用，并且我提到现在还可以从 eBPF 程序内调用函数的能力。让我们看一个简单的例子，就像尾调用示例一样，它可以附加到
+    `sys_enter` 跟踪点，但这次它将跟踪系统调用的操作码。您将在 *chapter3/hello-func.bpf.c* 中找到这段代码。
+- en: 'For illustrative purposes I have written a very simple function that extracts
+    the syscall opcode from the tracepoint arguments:'
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了说明问题，我编写了一个非常简单的函数，用于从跟踪点参数中提取系统调用操作码：
+- en: '[PRE27]'
+  id: totrans-195
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: Given the choice, the compiler would probably inline this very simple function
+    that I’m only going to call from one place. Since that would defeat the point
+    of this example, I have added `__attribute((noinline))` to force the compiler’s
+    hand. In normal circumstances you should probably omit this and allow the compiler
+    to optimize as it sees fit.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果可以选择，编译器可能会内联这个非常简单的函数，我只会从一个地方调用它。由于这样会破坏这个示例的目的，我添加了 `__attribute((noinline))`
+    来强制编译器的行为。在正常情况下，您应该省略这一点，允许编译器根据需要进行优化。
+- en: 'The eBPF function that calls this function looks like this:'
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 调用此函数的 eBPF 函数如下所示：
+- en: '[PRE28]'
+  id: totrans-198
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'After compiling this to an eBPF object file, you can load it into the kernel
+    and confirm that it is loaded with `bpftool`:'
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将其编译为 eBPF 对象文件后，您可以将其加载到内核中，并使用 `bpftool` 确认已加载：
+- en: '[PRE29]'
+  id: totrans-200
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'The interesting part of this exercise is inspecting the eBPF bytecode to see
+    the `get_opcode()` function:'
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此练习的有趣部分是检查 eBPF 字节码以查看 `get_opcode()` 函数：
+- en: '[PRE30]'
+  id: totrans-202
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: '[![1](assets/1.png)](#code_id_3_15)'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#code_id_3_15)'
+- en: Here you can see the `hello()` eBPF program making a call to `get_opcode()`.
+    The eBPF instruction at offset `0` is `0x85`, which from the instruction set documentation
+    corresponds to “Function call.” Instead of executing the next instruction, which
+    would be at offset 1, execution will jump seven instructions ahead (`pc+7`), which
+    means the instruction at offset `8`.
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这里，您可以看到 `hello()` eBPF 程序调用了 `get_opcode()`。偏移量为 `0` 的 eBPF 指令是 `0x85`，根据指令集文档，它对应于“函数调用”。而不是执行下一个指令（在偏移量
+    1 处），执行将跳过七个指令（`pc+7`），这意味着在偏移量 `8` 处的指令。
+- en: '[![2](assets/2.png)](#code_id_3_16)'
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#code_id_3_16)'
+- en: Here’s the bytecode for `get_opcode()`, and as you might hope, the first instruction
+    is at offset `8`.
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是 `get_opcode()` 的字节码，正如您希望的那样，第一条指令位于偏移量 `8` 处。
+- en: The function call instruction necessitates putting the current state on the
+    eBPF virtual machine’s stack so that when the called function exits, execution
+    can continue in the calling function. Since the stack size is limited to 512 bytes,
+    BPF to BPF calls can’t be very deeply nested.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 函数调用指令要求将当前状态放入 eBPF 虚拟机的堆栈中，以便在调用的函数退出时，执行可以继续在调用函数中进行。由于堆栈大小限制为 512 字节，BPF
+    到 BPF 的调用不能太深嵌套。
+- en: Note
+  id: totrans-208
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'For a lot more detail on tail calls and BPF to BPF calls, there’s an excellent
+    post by Jakub Sitnicki on Cloudflare’s blog: [“Assembly within! BPF tail calls
+    on x86 and ARM”](https://oreil.ly/6kOp3).'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有关尾调用和 BPF 到 BPF 调用的更多详细信息，请参阅 Cloudflare 博客上 Jakub Sitnicki 的优秀文章：“[在内！x86
+    和 ARM 上的 BPF 尾调用](https://oreil.ly/6kOp3)”。
+- en: Summary
+  id: totrans-210
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 摘要
+- en: In this chapter you saw some example C source code transformed into eBPF bytecode
+    and then compiled to machine code so that it’s ready to be executed in the kernel.
+    You also learned how to use `bpftool` to inspect programs and maps loaded into
+    the kernel, and to attach to XDP events.
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您看到了一些示例 C 源代码转换为 eBPF 字节码，然后编译为机器代码，以便在内核中执行。您还学习了如何使用 `bpftool` 检查加载到内核中的程序和映射，并附加到
+    XDP 事件。
+- en: In addition, you saw examples of different types of eBPF programs triggered
+    by different kinds of events. An XDP event is triggered by the arrival of a packet
+    of data on a network interface, whereas kprobe and tracepoint events are triggered
+    by hitting some particular point in kernel code. I’ll discuss some other eBPF
+    program types in [Chapter 7](ch07.html#ebpf_program_and_attachment_types).
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，您还看到了由不同类型事件触发的不同类型的 eBPF 程序示例。XDP 事件是由数据包在网络接口上的到达触发的，而 kprobe 和 tracepoint
+    事件是由命中内核代码的某个特定点触发的。我将在[第 7 章](ch07.html#ebpf_program_and_attachment_types)讨论一些其他
+    eBPF 程序类型。
+- en: You also learned how maps are used to implement global variables for eBPF programs,
+    and you saw BPF to BPF function calls.
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还学习了如何使用映射来实现 eBPF 程序的全局变量，并看到了 BPF 到 BPF 函数调用。
+- en: The next chapter goes into another level of detail as I show you what’s happening
+    at the system call level when `bpftool`—or any other user space code—loads programs
+    and attaches them to events.
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一章将进一步详细地介绍当`bpftool`或任何其他用户空间代码加载程序并将其附加到事件时，系统调用级别发生了什么。
+- en: Exercises
+  id: totrans-215
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 练习
+- en: 'Here are a few things to try if you want to explore BPF programs further:'
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想进一步探索BPF程序，可以尝试以下几件事情：
+- en: 'Try using `ip link` commands like the following to attach and detach the XDP
+    program:'
+  id: totrans-217
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 尝试使用像下面这样的`ip link`命令来附加和分离XDP程序：
+- en: '[PRE31]'
+  id: totrans-218
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'Run any of the BCC examples from [Chapter 2](ch02.html#ebpfapostrophes_quotation_markhello_wor).
+    While the program is running, use a second terminal window to inspect the loaded
+    program using `bpftool`. Here’s an example of what I saw by running the *hello-map.py*
+    example:'
+  id: totrans-219
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 运行来自[第2章](ch02.html#ebpfapostrophes_quotation_markhello_wor)的任何BCC示例。在程序运行时，使用第二个终端窗口使用`bpftool`检查加载的程序。以下是我运行*hello-map.py*示例时看到的示例：
+- en: '[PRE32]'
+  id: totrans-220
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: You can also use `bpftool prog dump` commands to see the bytecode and machine
+    code versions of those programs.
+  id: totrans-221
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 你也可以使用`bpftool prog dump`命令来查看这些程序的字节码和机器码版本。
+- en: 'Run *hello-tail.py* from the *chapter2* directory, and while it’s running,
+    take a look at the programs it loaded. You’ll see that each tail call program
+    is listed individually, like this:'
+  id: totrans-222
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在*chapter2*目录中运行*hello-tail.py*，同时它在运行时查看加载的程序。你会看到每个尾调用程序都单独列出，就像这样：
+- en: '[PRE33]'
+  id: totrans-223
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: You could also use `bpftool prog dump xlated` to look at the bytecode instructions
+    and compare them to what you saw in [“BPF to BPF Calls”](#bpf_to_bpf_calls).
+  id: totrans-224
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 你也可以使用`bpftool prog dump xlated`来查看字节码指令，并将其与[“BPF to BPF Calls”](#bpf_to_bpf_calls)中看到的内容进行比较。
+- en: '*Be careful with this one, as it may be best to simply think about why this
+    happens rather than trying it!* If you return a `0` value from an XDP program,
+    this corresponds to `XDP_ABORTED`, which tells the kernel to abort any further
+    processing of this packet. This might seem a bit counterintuitive given that the
+    `0` value usually indicates success in C, but that’s how it is. So, if you try
+    modifying the program to return `0` and attach it to a virtual machine’s `eth0`
+    interface, all network packets will get dropped. This will be somewhat unfortunate
+    if you’re using SSH to attach to that machine, and you’ll likely have to reboot
+    the machine to regain access!'
+  id: totrans-225
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: '*要小心这个问题，最好的做法可能是简单地思考为什么会发生这种情况，而不是试图去做！* 如果从一个XDP程序返回`0`值，这对应于`XDP_ABORTED`，告诉内核放弃进一步处理这个数据包。这可能有点违反直觉，因为在C语言中，`0`值通常表示成功，但事实就是如此。所以，如果你尝试修改程序返回`0`并将其附加到虚拟机的`eth0`接口，所有网络数据包将会被丢弃。如果你正在使用SSH连接到这台机器，这将会有些不幸，你可能需要重新启动机器来恢复访问！'
+- en: You could run the program within a container so that the XDP program is attached
+    to a virtual Ethernet interface that only affects that container and not the whole
+    virtual machine. There’s an example of doing this at [*https://github.com/lizrice/lb-from-scratch*](https://github.com/lizrice/lb-from-scratch).
+  id: totrans-226
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 你可以在容器内运行程序，这样XDP程序就会附加到仅影响该容器而不是整个虚拟机的虚拟以太网接口上。在[*https://github.com/lizrice/lb-from-scratch*](https://github.com/lizrice/lb-from-scratch)有一个实现这一点的示例。
+- en: ^([1](ch03.html#ch03fn1-marker)) Increasingly, eBPF programs are also being
+    written in Rust, since the Rust compiler supports eBPF bytecode as a target.
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([1](ch03.html#ch03fn1-marker)) 越来越多的eBPF程序也开始使用Rust编写，因为Rust编译器支持eBPF字节码作为目标。
+- en: ^([2](ch03.html#ch03fn2-marker)) There are a few instructions where the operation
+    is “modified” by the value of other fields in the instruction. For example, there
+    are a set of [atomic instructions](https://oreil.ly/oyTI7) introduced in kernel
+    5.12 that include an arithmetic operation (`ADD`, `AND`, `OR`, `XOR`) that is
+    specified in the `imm` field.
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([2](ch03.html#ch03fn2-marker)) 有几条指令的操作是通过指令中其他字段的值“修改”的。例如，在内核5.12中引入了一组原子指令，包括一个在`imm`字段中指定的算术操作（`ADD`、`AND`、`OR`、`XOR）。
+- en: ^([3](ch03.html#ch03fn3-marker)) The `-g` flag is required to generate BTF information
+    that you’ll need for CO-RE eBPF programs, which I’ll cover in [Chapter 5](ch05.html#co_recomma_btfcomma_and_libbpf).
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([3](ch03.html#ch03fn3-marker)) 生成BTF信息需要使用`-g`标志，这对于CO-RE eBPF程序是必需的，我将在[第5章](ch05.html#co_recomma_btfcomma_and_libbpf)中讨论。
+- en: ^([4](ch03.html#ch03fn4-marker)) In general, this is optional—eBPF programs
+    can be loaded into the kernel without being pinned to a file location—but it’s
+    not optional for `bpftool`, which always has to pin the programs it loads. The
+    reason for this is covered further in [“BPF Program and Map References”](ch04.html#bpf_program_and_map_references).
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([4](ch03.html#ch03fn4-marker)) 通常情况下，这是可选的——eBPF 程序可以加载到内核中而不被固定在文件位置上——但对于`bpftool`来说不是可选的，它加载的程序必须固定。这个原因在[“BPF
+    程序和映射引用”](ch04.html#bpf_program_and_map_references)中进一步讨论。
+- en: ^([5](ch03.html#ch03fn5-marker)) The kernel setting `CONFIG_BPF_JIT` needs to
+    be enabled to take advantage of JIT compilation, and it can be enabled or disabled
+    at runtime with the `net.core.bpf_jit_enable sysctl` setting. See [the docs](https://oreil.ly/4-xi6)
+    for more information on JIT support on different chip architectures.
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([5](ch03.html#ch03fn5-marker)) 要利用 JIT 编译，需要启用内核设置`CONFIG_BPF_JIT`，可以通过`net.core.bpf_jit_enable
+    sysctl`设置在运行时启用或禁用。有关不同芯片架构上 JIT 支持的更多信息，请参阅[文档](https://oreil.ly/4-xi6)。
+- en: ^([6](ch03.html#ch03fn6-marker)) Here, *bss* stands for “block started by symbol.”
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([6](ch03.html#ch03fn6-marker)) 在这里，*bss*代表“block started by symbol”。
