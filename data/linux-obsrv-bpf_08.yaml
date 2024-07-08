@@ -1,0 +1,1594 @@
+- en: Chapter 7\. Express Data Path
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第 7 章。 Express Data Path
+- en: Express Data Path (XDP) is a safe, programmable, high-performance, kernel-integrated
+    packet processor in the Linux network data path that executes BPF programs when
+    the NIC driver receives a packet. This allows XDP programs to make decisions regarding
+    the received packet (drop, modify, or just allow it) at the earliest possible
+    point in time.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Express Data Path（XDP）是 Linux 网络数据路径中的安全、可编程、高性能、与内核集成的数据包处理器，当 NIC 驱动程序接收数据包时，它执行
+    BPF 程序。这使得 XDP 程序能够在最早可能的时间点决定接收到的数据包的处理方式（丢弃、修改或允许通过）。
+- en: 'The execution point is not the only aspect that makes XDP programs fast; other
+    design decisions play a role in that:'
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 执行点并不是使 XDP 程序快速的唯一因素；其他设计决策也起着重要作用：
+- en: There are no memory allocations while doing packet processing with XDP.
+  id: totrans-3
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在使用 XDP 进行数据包处理时不会进行内存分配。
+- en: XDP programs work only with linear, unfragmented packets and have the start
+    and end pointers of the packet.
+  id: totrans-4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: XDP 程序仅适用于线性、非分段数据包，并具有数据包的起始和结束指针。
+- en: There’s no access to full packet metadata, which is why the input context this
+    kind of program receives will be of type `xdp_buff` instead of the `sk_buff` struct
+    you encountered in [Chapter 6](ch06.html#linux_networking).
+  id: totrans-5
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 这种程序接收的输入上下文类型为 `xdp_buff`，而不是在 [第 6 章](ch06.html#linux_networking) 中遇到的 `sk_buff`
+    结构，因此无法访问完整的数据包元数据。
+- en: Because they are eBPF programs, XDP programs have a bounded execution time,
+    and the consequence of this is that their usage has a fixed cost in the networking
+    pipeline.
+  id: totrans-6
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 因为它们是 eBPF 程序，所以 XDP 程序有有限的执行时间，因此它们在网络管道中的使用具有固定的成本。
+- en: When talking about XDP, it is important to remember that it is not a kernel
+    bypass mechanism; it is designed to be integrated with other kernel components
+    and the internal Linux security model.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当谈论 XDP 时，重要的是记住它不是内核绕过机制；它被设计成与其他内核组件和内部 Linux 安全模型集成。
+- en: Note
+  id: totrans-8
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The `xdp_buff` struct is used to present a packet context to a BPF program that
+    uses the direct packet access mechanism provided by the XDP framework. Think of
+    it as a “lightweight” version of the `sk_buff`.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`xdp_buff` 结构用于向使用 XDP 框架提供的直接数据包访问机制的 BPF 程序呈现数据包上下文。可以将其视为“轻量级”版本的 `sk_buff`。'
+- en: The difference between the two is that `sk_buff` also holds and allows you to
+    mingle with the packets’ metadata (proto, mark, type), which is only available
+    at a higher level in the networking pipeline. The fact that `xdp_buff` is created
+    early and doesn’t depend on other kernel layers is one reason it’s faster to obtain
+    and process packets using XDP. The other reason is that `xdp_buff` doesn’t hold
+    references to routes, Traffic Control hooks, or other kind of packet metadata
+    like it would with program types that use an `sk_buff`.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sk_buff` 与 `xdp_buff` 的区别在于，`sk_buff` 还包含并允许您处理数据包的元数据（协议、标记、类型），这些数据只在网络管道的更高级别中才可用。`xdp_buff`
+    之所以更快获取和处理数据包，一是因为它早期创建且不依赖于其他内核层；另一原因是 `xdp_buff` 不保留与路由、流量控制钩子或其他类型的数据包元数据相关的引用。'
+- en: In this chapter we explore the characteristics of XDP programs, the different
+    kinds of XDP programs out there, and how they can be compiled and loaded. After
+    that, to give more context, we discuss real-world use cases for it.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们探讨了 XDP 程序的特性、不同类型的 XDP 程序以及它们的编译和加载方式。此外，为了提供更多背景信息，我们还讨论了其实际用例。
+- en: XDP Programs Overview
+  id: totrans-12
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: XDP 程序概述
+- en: Essentially, what XDP programs do is that they make determinations about the
+    received packet, and then they can edit the received packet’s content or just
+    return a result code. The result code is used to determine what happens to the
+    packet in the form of an action. You can drop the packet, you can transmit it
+    out the same interface, or you can pass it up to the rest of the networking stack.
+    Additionally, to cooperate with the network stack, XDP programs can push and pull
+    a packet’s headers; for example, if the current kernel does not support an encapsulation
+    format or a protocol, an XDP program can de-encapsulate it or translate the protocol
+    and send the result to the kernel for processing.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: XDP 程序的基本功能是确定接收到的数据包，然后可以编辑接收到的数据包内容或仅返回结果代码。结果代码用于确定数据包在操作形式上的处理方式。可以丢弃数据包，可以通过同一接口传输它，也可以将其传递给网络堆栈的其他部分。此外，为了与网络堆栈合作，XDP
+    程序可以推送和拉取数据包的标头；例如，如果当前内核不支持封装格式或协议，XDP 程序可以对其进行解封装或转换协议，并将结果发送给内核进行处理。
+- en: But wait, what’s the correlation between XDP and eBPF?
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但是，请等等，XDP 和 eBPF 之间有什么关联呢？
+- en: It turns out that XDP programs are controlled through the `bpf` syscall and
+    loaded using the program type `BPF_PROG_TYPE_XDP`. Also, the execution driver
+    hook executes BPF bytecode.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 原来 XDP 程序是通过 `bpf` 系统调用进行控制，并使用程序类型 `BPF_PROG_TYPE_XDP` 进行加载。此外，执行驱动钩子执行 BPF
+    字节码。
+- en: An important concept to understand when writing XDP programs is that the contexts
+    where they will run are also called *operation modes*.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在编写 XDP 程序时理解的一个重要概念是，它们将运行的上下文也称为*操作模式*。
+- en: Operation Modes
+  id: totrans-17
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 操作模式
+- en: XDP has three operation modes to accommodate easily testing functions, custom
+    hardware from vendors, and commonly built kernels without custom hardware. Let’s
+    go over each of them.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: XDP 有三种操作模式，以便轻松测试功能、使用厂商定制硬件以及常见内核的构建而无需定制硬件。让我们分别介绍每种模式。
+- en: Native XDP
+  id: totrans-19
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 本机 XDP
+- en: 'This is the default mode. In this mode, the XDP BPF program is run directly
+    out of the networking driver’s early receive path. When using this mode, it’s
+    important to check whether the driver supports it. You can check that by executing
+    the following command against the source tree of a given kernel version:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是默认模式。在此模式下，XDP BPF 程序直接在网络驱动程序的早期接收路径中运行。使用此模式时，重要的是要检查驱动程序是否支持。你可以通过对给定内核版本的源代码树执行以下命令来检查：
+- en: '[PRE0]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'That produces output like this:'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 那会产生类似这样的输出：
+- en: '[PRE1]'
+  id: totrans-23
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'From what we can see, kernel 4.18 supports the following:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从我们所看到的，内核 4.18 支持以下内容：
+- en: Broadcom NetXtreme-C/E network driver `bnxt`
+  id: totrans-25
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Broadcom NetXtreme-C/E 网络驱动程序 `bnxt`
+- en: Cavium `thunderx` driver
+  id: totrans-26
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Cavium `thunderx` 驱动程序
+- en: Intel `i40` driver
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Intel `i40` 驱动程序
+- en: Intel `ixgbe` and `ixgvevf` drivers
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Intel `ixgbe` 和 `ixgvevf` 驱动程序
+- en: Mellanox `mlx4` and `mlx5` drivers
+  id: totrans-29
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Mellanox `mlx4` 和 `mlx5` 驱动程序
+- en: Netronome Network Flow Processor
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Netronome Network Flow Processor
+- en: QLogic `qede` NIC Driver
+  id: totrans-31
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: QLogic `qede` NIC 驱动程序
+- en: TUN/TAP
+  id: totrans-32
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: TUN/TAP
+- en: Virtio
+  id: totrans-33
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Virtio
+- en: With a clear idea of the native operation mode, we can proceed to see how XDP
+    program duties can be directly handled by network cards by using offloaded XDP.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们对本机操作模式有了清晰的概念，我们可以继续看看如何通过使用离线 XDP，网络卡直接处理 XDP 程序职责。
+- en: Offloaded XDP
+  id: totrans-35
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 离线 XDP
+- en: In this mode the XDP BPF program is directly offloaded into the NIC instead
+    of being executed on the host CPU. By pushing execution off of the CPU, this mode
+    has high-performance gains over native XDP.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此模式下，XDP BPF 程序直接被卸载到 NIC 中，而不是在主机 CPU 上执行。通过将执行任务从 CPU 转移到 NIC，该模式相比本机 XDP
+    具有高性能增益。
+- en: 'We can reuse the kernel source tree we just cloned to check what NIC drivers
+    in 4.18 support hardware offload by looking for `XDP_SETUP_PROG_HW`:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们可以重用刚刚克隆的内核源代码树来检查 4.18 版本中哪些 NIC 驱动程序支持硬件卸载，方法是搜索 `XDP_SETUP_PROG_HW`：
+- en: '[PRE2]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'That should output something like this:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 那应该输出类似这样的内容：
+- en: '[PRE3]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: That shows only the Netronome Network Flow Processor (`nfp`) meaning that it
+    can operate in both modes by also supporting hardware offload along with native
+    XDP.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这只显示了 Netronome Network Flow Processor (`nfp`)，这意味着它可以通过同时支持硬件卸载和本机 XDP 运行。
+- en: Now a good question for yourself might be, what do I do when I don’t have network
+    cards and drivers to try my XDP programs? The answer is easy, generic XDP!
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，对你自己来说一个很好的问题可能是，当我没有网络卡和驱动程序来尝试我的 XDP 程序时，我该怎么办呢？答案很简单，通用 XDP！
+- en: Generic XDP
+  id: totrans-43
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 通用 XDP
+- en: This is provided as a test-mode for developers who want to write and run XDP
+    programs without having the capabilities of native or offloaded XDP. Generic XDP
+    has been supported since kernel version 4.12\. You can use this mode, for example,
+    on `veth` devices—we use this mode in the subsequent examples to show the capabilities
+    of XDP without requiring you to buy specific hardware to follow along.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是为了那些想要编写和运行 XDP 程序但又没有本地或离线 XDP 能力的开发者提供的测试模式。通用 XDP 自内核版本 4.12 起已得到支持。例如，你可以在
+    `veth` 设备上使用这种模式——我们在随后的示例中使用这种模式来展示 XDP 的能力，而无需你购买特定的硬件设备以便跟进。
+- en: But who is the actor responsible for the coordination between all of the components
+    and the operation modes? Continue to the next section to learn about the packet
+    processor.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但是，谁是负责协调所有组件和操作模式之间关系的行动者呢？继续下一节以了解数据包处理器。
+- en: The Packet Processor
+  id: totrans-46
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 数据包处理器
+- en: The actor that makes it possible to execute BPF programs on XDP packets and
+    that coordinates the interaction between them and the network stack is the XDP
+    packet processor. The packet processor is the in-kernel component for XDP programs
+    that processes packets on the receive (RX) queue directly as they are presented
+    by the NIC. It ensures that packets are readable and writable and allows you to
+    attach post-processing verdicts in the form of packet processor actions. Atomic
+    program updates and new program loads to the packet processor can be done at runtime
+    without any service interruption in terms of networking and associated traffic.
+    While operating, XDP can be used in “busy polling” mode, allowing you to reserve
+    the CPUs that will have to deal with each RX queue; this avoids context switches
+    and allows immediate packet reactivity upon arrival regardless of IRQ affinities.
+    The other mode XDP can be used in is the “interrupt driven” mode that, on the
+    other hand, does not reserve the CPU but instructs an interrupt acting as an event
+    medium to inform the CPU that it has to deal with a new event while still doing
+    normal processing.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使得在XDP数据包上执行BPF程序并协调它们与网络堆栈之间的交互成为可能的是XDP数据包处理器。数据包处理器是处理XDP程序的内核组件，它直接在由NIC呈现的接收（RX）队列上处理数据包。它确保数据包可读可写，并允许您附加后处理的决策作为数据包处理器的动作形式。可以在运行时执行原子程序更新和新程序加载到数据包处理器，而不会因网络和相关流量方面的服务中断。在操作时，XDP可以在“忙碌轮询”模式下使用，允许您保留将处理每个RX队列的CPU；这避免了上下文切换，并允许在数据包到达时立即做出反应，无论IRQ亲和性如何。XDP还可以使用“中断驱动”模式，该模式不会保留CPU，但会指示一个中断作为事件介质，通知CPU它必须处理一个新事件，同时继续进行正常处理。
+- en: In [Figure 7-1](#xdp-interaction) you can see in the interaction points between
+    RX/TX, applications, the packet processor, and the BPF programs applied to its
+    packets.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [图 7-1](#xdp-interaction) 中，您可以看到RX/TX、应用程序、数据包处理器以及应用于其数据包的BPF程序之间的交互点。
+- en: Notice that there are a few squares with a string prepended by `XDP_` in [Figure 7-1](#xdp-interaction).
+    Those are the XDP result codes, which we cover next.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意到在 [图 7-1](#xdp-interaction) 中有几个以 `XDP_` 开头的字符串的方块。这些是 XDP 结果代码，我们接下来会介绍它们。
+- en: '![Interaction between the XDP packet processor and the network stack, dashed
+    lines represent the packets flow, the bold full line represent the loading of
+    the BPF program in the XDP packet processor.](assets/lbpf_0701.png)'
+  id: totrans-50
+  prefs: []
+  type: TYPE_IMG
+  zh: '![XDP包处理器与网络堆栈之间的交互，虚线代表数据包流动，粗体实线代表BPF程序在XDP包处理器中的加载。](assets/lbpf_0701.png)'
+- en: Figure 7-1\. The packet processor
+  id: totrans-51
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 7-1\. 数据包处理器
+- en: XDP result codes (packet processor actions)
+  id: totrans-52
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: XDP 结果代码（包处理器的动作）
+- en: 'After a decision is made about the packet in the packet processor, it can be
+    expressed using one of the five return codes that then can instruct the network
+    driver on how to process the packet. Let’s dive into the actions that the packet
+    processor performs:'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在数据包处理器中对数据包做出决策之后，可以使用五个返回代码之一来表达这一决策，然后这些代码可以指示网络驱动程序如何处理数据包。让我们深入了解数据包处理器执行的操作：
+- en: Drop (`XDP_DROP`)
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 丢弃 (`XDP_DROP`)
+- en: Drops the packet. This happens at the earliest RX stage in the driver; dropping
+    a packet simply implies recycling it back into the RX ring queue it just “arrived”
+    on. Dropping the packet as early as possible is key for the denial-of-service
+    (DoS) mitigation use cases. This way, dropped packets use as little CPU processing
+    time and power as possible.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 丢弃数据包。这发生在驱动程序的最早RX阶段；丢弃数据包简单地意味着将其回收到刚“到达”的RX环队列中。在拒绝服务（DoS）缓解用例中，尽早丢弃数据包至关重要。这样一来，丢弃的数据包使用的CPU处理时间和功耗尽可能少。
+- en: Forward (`XDP_TX`)
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 转发 (`XDP_TX`)
+- en: Forwards the packet. This can happen before or after the packet has been modified.
+    Forwarding a packet implies bouncing the received packet page back out the same
+    NIC it arrived on.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 转发数据包。这可以在数据包被修改之前或之后发生。转发数据包意味着将接收到的数据包页反弹回到它所在的同一个网卡上。
+- en: Redirect (`XDP_REDIRECT`)
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重定向 (`XDP_REDIRECT`)
+- en: Similar to `XDP_TX` in that it is able to transmit the XDP packet, but it does
+    so through another NIC or into a BPF `cpumap`. In the case of a BPF `cpumap`,
+    the CPUs serving XDP on the NIC’s receive queues can continue to do so and push
+    the packet for processing the upper kernel stack to a remote CPU. This is similar
+    to `XDP_PASS`, but with the ability that the XDP BPF program can keep serving
+    the incoming high load as opposed to temporarily spending work on the current
+    packet for pushing into the upper layers.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与`XDP_TX`类似，它能够通过另一个网卡或者BPF `cpumap`来传输XDP数据包。在BPF `cpumap`的情况下，服务于网卡接收队列上的CPU可以继续执行此操作，并将数据包推送到远程CPU以进行上层内核栈的处理。这类似于`XDP_PASS`，但有一个特点是XDP
+    BPF程序可以继续处理传入的高负载，而不是临时处理当前数据包以推送到上层。
+- en: Pass (`XDP_PASS`)
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传递（`XDP_PASS`）
+- en: 'Passes the packet to the normal network stack for processing. This is equivalent
+    to the default packet handling behavior without XDP. This can be done in one of
+    two ways:'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将数据包传递到正常的网络栈进行处理。这相当于没有XDP时的默认数据包处理行为。可以通过以下两种方式之一实现：
+- en: '*Normal receive* allocates metadata (`sk_buff`), receives the packet onto the
+    stack, and steers the packet to another CPU for processing. It allows for raw
+    interfaces to user-space. This can happen before or after the packet has been
+    modified.'
+  id: totrans-62
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*正常接收*分配元数据（`sk_buff`），接收数据包到栈上，并将数据包传递到另一个CPU进行处理。它允许原始接口到用户空间的传输。这可以在数据包修改前或修改后发生。'
+- en: '*Generic receive offload* (GRO) can perform a receive of large packets and
+    combines packets of the same connection. GRO eventually passes the packet through
+    the “normal receive” flow after processing.'
+  id: totrans-63
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*通用接收卸载*（GRO）可以接收大数据包并合并相同连接的数据包。在处理后，GRO最终将数据包通过“正常接收”流程传递。'
+- en: Code error (`XDP_ABORTED`)
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 代码错误（`XDP_ABORTED`）
+- en: Denotes an eBPF program error and results in the packet being dropped. It is
+    not something a functional program should ever use as a return code. For example,
+    `XDP_ABORTED` would be returned if the program divided by zero. `XDP_ABORTED`’s
+    value will always be zero. It passes the `trace_xdp_exception` tracepoint, which
+    can be additionally monitored to detect misbehavior.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表示eBPF程序错误并导致数据包被丢弃。这不是功能程序应该使用的返回代码。例如，如果程序除以零，则会返回`XDP_ABORTED`。`XDP_ABORTED`的值将始终为零。它通过`trace_xdp_exception`跟踪点传递，可以额外监控以检测不当行为。
+- en: 'These action codes are expressed in the `linux/bpf.h` header file as follows:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些动作代码在`linux/bpf.h`头文件中表示如下：
+- en: '[PRE4]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Because XDP actions determine different behaviors and are an internal mechanism
+    of the packet processor, you can look at a simplified version of [Figure 7-1](#xdp-interaction)
+    focused on only the return actions (see [Figure 7-2](#xdp-result)).
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为XDP动作决定了不同的行为，并且是数据包处理器的内部机制，你可以查看关于返回动作的简化版本的[图 7-1](#xdp-interaction)（参见[图 7-2](#xdp-result)）。
+- en: '![Interaction between XDP actions triggered by a BPF program and the network
+    stack](assets/lbpf_0702.png)'
+  id: totrans-69
+  prefs: []
+  type: TYPE_IMG
+  zh: '![由BPF程序触发的XDP动作与网络栈之间的交互](assets/lbpf_0702.png)'
+- en: Figure 7-2\. XDP action codes
+  id: totrans-70
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 7-2\. XDP动作代码
+- en: An interesting thing about XDP programs is that you don’t usually need to write
+    a loader to load them. There is a good loader in most Linux machines implemented
+    by the `ip` command. The next section describes how to use it.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于XDP程序的一个有趣事实是，通常不需要编写加载器来加载它们。大多数Linux机器上都有一个良好的加载器，由`ip`命令实现。下一节描述如何使用它。
+- en: XDP and iproute2 as a Loader
+  id: totrans-72
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: XDP和iproute2作为加载器
+- en: The `ip` command, available in [iproute2](https://oreil.ly/65zuT), has the ability
+    to act as a frontend to load XDP programs compiled into an ELF file and has full
+    support for maps, map relocation, tail call and object pinning.
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可在[iproute2](https://oreil.ly/65zuT)中使用的`ip`命令具有作为加载XDP程序的前端的能力，该程序已编译为ELF文件，并且完全支持映射、映射重定位、尾调用和对象固定。
+- en: Because loading an XDP program can be expressed as a configuration of an existing
+    network interface, the loader is implemented as part of the `ip link` command,
+    which is the one that does network device configuration.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为加载XDP程序可以表达为现有网络接口的配置，加载器实现为`ip link`命令的一部分，它是执行网络设备配置的命令。
+- en: 'The syntax to load the XDP program is simple:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 加载XDP程序的语法很简单：
+- en: '[PRE5]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Let’s analyze this command parameter by parameter:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们逐个分析这个命令的参数：
+- en: '`ip`'
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ip`'
+- en: This invokes the `ip` command.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这会调用`ip`命令。
+- en: '`link`'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`link`'
+- en: Configures network interfaces.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 配置网络接口。
+- en: '`set`'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`set`'
+- en: Changes device attributes.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改设备属性。
+- en: '`dev eth0`'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`dev eth0`'
+- en: Specifies the network device on which we want to operate and load the XDP program.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 指定我们要操作和加载XDP程序的网络设备。
+- en: '`xdp obj program.o`'
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`xdp obj program.o`'
+- en: 'Loads an XDP program from the ELF file (object) named `program.o`. The `xdp`
+    part of this command tells the system to use the native driver when it is available
+    and fallback to generic otherwise. You can force using a mode or another by using
+    a more specific selector:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从名为 `program.o` 的ELF文件（对象）加载XDP程序。此命令中的 `xdp` 部分告诉系统在可用时使用本地驱动程序，否则回退到通用驱动程序。您可以通过使用更具体的选择器来强制使用某种模式：
+- en: '`xdpgeneric` to use generic XDP'
+  id: totrans-88
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`xdpgeneric` 用于使用通用XDP'
+- en: '`xdpdrv` to use native XDP'
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`xdpdrv` 用于使用本地XDP'
+- en: '`xdpoffload` to use offloaded XDP'
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`xdpoffload` 用于使用卸载的XDP'
+- en: '`sec mysection`'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sec mysection`'
+- en: Specifies the section name `mysection` containing the BPF program to use from
+    the ELF file; if this is not specified, the section named `prog` will be used.
+    If no section is specified in the program, you have to specify `sec .text` in
+    the `ip` invocation.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 指定包含要从ELF文件中使用的BPF程序的部分名称 `mysection`；如果未指定，则将使用名为 `prog` 的部分。如果程序中未指定部分，则必须在
+    `ip` 调用中指定 `sec .text`。
+- en: Let’s see a practical example.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看一个实际的例子。
+- en: The scenario is that we have a system with a web server on port 8000 for which
+    we want to block any access to its pages on the public-facing NIC of the server
+    by disallowing all the TCP connections to it.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 情景是我们有一个带有Web服务器的系统，端口为8000，我们希望通过禁止所有对其页面的访问来阻止服务器公共面向的NIC上的任何TCP连接。
+- en: The first thing that we will need is the web server in question; if you don’t
+    already have one, you can start one with `python3`.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们首先需要的是相关的Web服务器；如果您还没有一个，您可以通过 `python3` 启动一个。
+- en: '[PRE6]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: After your webserver is started, its open port will be shown in the open sockets
+    using `ss`. As you can see the webserver is bound to any interface, `*:8000`,
+    so as of now, any external caller with access to our public interfaces will be
+    able to see its content!
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在启动Web服务器之后，可以通过 `ss` 显示其开放端口的开放套接字。正如您所见，Web服务器绑定到任何接口，`*:8000`，因此目前任何外部调用者都可以访问其内容！
+- en: '[PRE7]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Note
+  id: totrans-99
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Socket statistics, `ss` in the terminal, is a command-line utility used to investigate
+    network sockets in Linux. It is effectively a modern version of `netstat`, and
+    its user experience is similar to Netstat, meaning that you can pass the same
+    arguments and get comparable results.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 套接字统计，终端中的 `ss` 是一个用于在Linux中调查网络套接字的命令行实用程序。它有效地是 `netstat` 的现代版本，其用户体验类似于Netstat，这意味着您可以传递相同的参数并获得可比较的结果。
+- en: 'At this point, we can inspect the network interfaces on the machine that’s
+    running our HTTP server:'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，我们可以检查运行我们的HTTP服务器的机器上的网络接口：
+- en: '[PRE8]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Notice that this machine has three interfaces, and the network topology is
+    simple:'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，此机器有三个接口，网络拓扑很简单：
+- en: '`lo`'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lo`'
+- en: This is just the loopback interface for internal communication.
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这只是用于内部通信的环回接口。
+- en: '`enp0s3`'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`enp0s3`'
+- en: This is the management network tier; administrators will use this interface
+    to connect to the web server to do their operations.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是管理网络层；管理员将使用此接口连接到Web服务器进行操作。
+- en: '`enp0s8`'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`enp0s8`'
+- en: This is the interface open to the public, our web server will need to be hidden
+    from this interface.
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是向公众开放的接口，我们的Web服务器需要隐藏在这个接口之外。
+- en: Now, before loading any XDP program, we can check open ports on the server from
+    another server that can access its network interface, in our case, with IPv4 `192.168.33.11`.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，在加载任何XDP程序之前，我们可以从能够访问其网络接口的另一台服务器上检查服务器的开放端口，在我们的情况下，使用IPv4 `192.168.33.11`。
+- en: 'You can check open ports on a remote host by using `nmap` as follows:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过以下方式使用 `nmap` 检查远程主机的开放端口：
+- en: '[PRE9]'
+  id: totrans-112
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Good! Port 8000 is right there, at this point we need to block it!
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 很好！端口8000就在那里，此时我们需要阻止它！
+- en: Note
+  id: totrans-114
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Network Mapper (`nmap`) is a network scanner that can do host, service, network,
+    and port discovery along with operating system detection. Its main use cases are
+    security auditing and network scanning. When scanning a host for open ports, `nmap`
+    will try every port in the specified (or full) range.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 网络映射器 (`nmap`) 是一种网络扫描器，可以进行主机、服务、网络和端口的发现，以及操作系统的检测。其主要用途是安全审计和网络扫描。在扫描主机的开放端口时，`nmap`
+    会尝试指定（或全部）范围内的每个端口。
+- en: Our program will consist of a single source file named *program.c*, so let’s
+    see what we need to write.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们的程序将由一个名为 *program.c* 的单一源文件组成，让我们看看我们需要写什么。
+- en: 'It needs to use the IPv4 `iphdr` and Ethernet Frame `ethhdr` header structs
+    and also protocol constants and other structs. Let’s include the needed headers,
+    as shown here:'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 需要使用IPv4的`iphdr`和以太网帧`ethhdr`头结构以及协议常量和其他结构体。让我们包含所需的头文件，如下所示：
+- en: '[PRE10]'
+  id: totrans-118
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: After the headers are included, we can declare the `SEC` macro we already met
+    in the previous chapters, used to declare ELF attributes.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 头文件包含完毕后，我们可以声明之前章节中已经遇到的`SEC`宏，用于声明ELF属性。
+- en: '[PRE11]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Now we can declare the main entry point for our program, `myprogram`, and its
+    ELF section name, `mysection`. Our program takes as input context an `xdp_md`
+    struct pointer, the BPF equivalent of the in-driver `xdp_buff`. By using that
+    as the context, we then define the variables we will use next such as the data
+    pointers, the Ethernet, and IP layer structs:'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们可以声明我们程序的主入口点，`myprogram`，以及它的ELF节名称，`mysection`。我们的程序以`xdp_md`结构体指针作为输入上下文，这是驱动中`xdp_buff`的BPF等效物。通过使用它作为上下文，接着我们定义接下来将要使用的变量，比如数据指针、以太网和IP层结构体：
+- en: '[PRE12]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'Because `data` contains the Ethernet frame, we can now extract the IPv4 layer
+    from it. We also check that the offset where we look for the IPv4 layer doesn’t
+    exceed the whole pointer space so that the static verifier stays happy. When the
+    address space is exceeded we just drop the packet:'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为`data`包含以太网帧，我们现在可以从中提取IPv4层。我们还要检查我们寻找IPv4层的偏移量是否超出了整个指针空间，以使静态验证器保持满意。当地址空间超出时，我们只需丢弃数据包：
+- en: '[PRE13]'
+  id: totrans-124
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'Now, after all the verifications and setup, we can implement the real logic
+    for the program, which basically drops every TCP packet while allowing anything
+    else:'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，在所有验证和设置之后，我们可以实现程序的实际逻辑，基本上是丢弃每个TCP数据包，同时允许其他所有数据包通过：
+- en: '[PRE14]'
+  id: totrans-126
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: Now that our program is done, we can save it as *program.c.*
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们的程序完成了，可以将其保存为*program.c*。
+- en: 'The next step is to compile the ELF file *program.o* out of our program using
+    Clang. We can do this compilation step outside the target machine because BPF
+    ELF binaries are not platform dependent:'
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一步是使用Clang将ELF文件*program.o*编译出我们的程序。我们可以在目标机器之外执行此编译步骤，因为BPF ELF二进制文件不依赖于平台：
+- en: '[PRE15]'
+  id: totrans-129
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'Now back on the machine hosting our web server, we can finally load `program.o`
+    against the public network interface `enp0s8` using the `ip` utility with the
+    `set` command, as described earlier:'
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在回到托管我们Web服务器的机器上，我们最终可以使用`ip`实用程序和`set`命令，如前所述，针对公共网络接口`enp0s8`加载`program.o`：
+- en: '[PRE16]'
+  id: totrans-131
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: As you might notice, we select the section `mysection` as the entry point for
+    the program.
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如您所见，我们选择`mysection`节作为程序的入口点。
+- en: 'At this stage, if that command returned zero as the exit code with no errors,
+    we can check the network interface to see whether the program had been loaded
+    correctly:'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此阶段，如果该命令以零作为退出代码返回且没有错误，则我们可以检查网络接口，看看程序是否已正确加载：
+- en: '[PRE17]'
+  id: totrans-134
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'As you can see, our output for `ip a` now has a new detail; after the MTU,
+    it shows `xdpgeneric/id:32`, which is showing two interesting bits of information:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您所看到的，我们的`ip a`输出现在有一个新的细节；在MTU之后，它显示`xdpgeneric/id:32`，显示了两个有趣的信息：
+- en: The driver that had been used, `xdpgeneric`
+  id: totrans-136
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用的驱动程序是`xdpgeneric`
+- en: The ID of the XDP program, `32`
+  id: totrans-137
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: XDP程序的ID是`32`
+- en: 'The last step is to verify that the loaded program is in fact doing what it
+    is supposed to do. We can verify that by executing `nmap` again on an external
+    machine to observe that port 8000 is no longer reachable:'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后一步是验证加载的程序确实在做它应该做的事情。我们可以通过在外部机器上再次执行`nmap`来观察端口8000是否不再可达：
+- en: '[PRE18]'
+  id: totrans-139
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: Another test to verify that it all works can be trying to access the program
+    through a browser or doing any HTTP request. Any kind of test should fail when
+    targeting `192.168.33.11` as the destination. Good job and congratulations on
+    loading your first XDP program!
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个验证它是否工作的测试可以尝试通过浏览器访问程序或进行任何HTTP请求。任何类型的测试应该在将目标定为`192.168.33.11`时失败。干得好，祝贺您成功加载第一个XDP程序！
+- en: 'If you followed all of those steps on a machine that you need to restore to
+    its original state, you can always detach the program and turn off XDP for the
+    device:'
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您在需要将机器恢复到原始状态的机器上完成了所有这些步骤，您可以随时分离程序并关闭设备的XDP：
+- en: '[PRE19]'
+  id: totrans-142
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: Interesting! Loading XDP programs seems easy, doesn’t it?
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有趣！加载XDP程序看起来很容易，不是吗？
+- en: At least when using `iproute2` as the loader, you can skip the part of having
+    to write a loader yourself. In this example, our focus was on `iproute2`, which
+    already implements a loader for XDP programs. However, the programs are in fact
+    BPF programs, so even if `iproute2` can be handy sometimes, you should always
+    remember that you can load your programs using BCC, as shown in the next section,
+    or you can use the `bpf` syscall directly. Having a custom loader has the advantage
+    of allowing you to manage the lifecycle of the program and its interactions with
+    user-space.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 至少在使用`iproute2`作为加载器时，你可以跳过自己编写加载器的部分。在这个例子中，我们的重点是`iproute2`，它已经为XDP程序实现了一个加载器。然而，这些程序实际上是BPF程序，所以即使`iproute2`有时可能很方便，你应该始终记住，你可以像下一节中展示的那样使用BCC加载你的程序，或者你可以直接使用`bpf`系统调用。拥有自定义加载器的优势在于可以管理程序的生命周期及其与用户空间的交互。
+- en: XDP and BCC
+  id: totrans-145
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: XDP和BCC
+- en: Like with any other BPF program, XDP programs can be compiled, loaded, and run
+    using BCC. The following example shows an XDP program that is similar to the one
+    we used for `iproute2` but that has a custom user-space loader made with BCC.
+    The loader in this case is needed because we also want to count the number of
+    packets we encounter while dropping TCP packets.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与任何其他BPF程序一样，XDP程序可以使用BCC进行编译、加载和运行。以下示例展示了一个类似于我们用于`iproute2`的XDP程序，但具有使用BCC制作的自定义用户空间加载器。在这种情况下，加载器是必需的，因为我们还想计数我们在丢弃TCP数据包时遇到的数据包数。
+- en: Like before, we create a kernel-space program named *program.c* first.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与之前一样，我们首先创建一个名为*program.c*的内核空间程序。
+- en: 'In the `iproute2` example, our program needed to import the required headers
+    for struct and function definitions related to BPF and protocols. Here we do the
+    same, but we also declare a map of type `BPF_MAP_TYPE_PERCPU_ARRAY` using the
+    `BPF_TABLE` macro. The map will contain a packet counter for each IP protocol
+    index, which is the reason for the size `256` (the IP specification contains only
+    256 values). We want to use a `BPF_MAP_TYPE_PERCPU_ARRAY` type because that’s
+    the one that guarantees atomicity of the counters at CPU level without locking:'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在`iproute2`的例子中，我们的程序需要导入与BPF和协议相关的结构体和函数定义所需的头文件。在这里我们做了相同的事情，但我们还使用`BPF_TABLE`宏声明了一个类型为`BPF_MAP_TYPE_PERCPU_ARRAY`的映射。这个映射将包含每个IP协议索引的数据包计数器，这也是大小为`256`的原因（IP规范只包含256个值）。我们想使用`BPF_MAP_TYPE_PERCPU_ARRAY`类型，因为它保证了在CPU级别上计数器的原子性，无需锁定：
+- en: '[PRE20]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'After that, we declare our main function, `myprogram`, which takes as a parameter
+    the `xdp_md` struct. The first thing this needs to contain is the variable declarations
+    for the Ethernet IPv4 frames:'
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后，我们声明我们的主函数`myprogram`，它以`xdp_md`结构体作为参数。这个结构体首先需要包含以太网IPv4帧的变量声明：
+- en: '[PRE21]'
+  id: totrans-151
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'After we have all the variable declarations done and can access the `data`
+    pointer that now contains the Ethernet frame and the `ip` pointer with the IPv4
+    packet, we can check whether the memory space is out of bounds. If it is, we drop
+    the packet. If the memory space is OK, we extract the protocol and lookup the
+    `packetcnt` array to get the previous value of the packet counter for the current
+    protocol in the variable `idx`. Then we increment the counter by one. When the
+    increment is handled, we can proceed and check whether the protocol is TCP. If
+    it is, we just drop the packet without questioning; otherwise, we allow it:'
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们完成所有变量声明并可以访问现在包含以太网帧的数据指针和IPv4数据包的`ip`指针后，我们可以检查内存空间是否越界。如果是，我们丢弃数据包。如果内存空间正常，则提取协议并查找`packetcnt`数组以获取当前协议的数据包计数器的先前值，存储在变量`idx`中。然后我们将计数器增加一。处理增量后，我们可以继续检查协议是否为TCP。如果是，则无条件丢弃数据包；否则，允许其通过：
+- en: '[PRE22]'
+  id: totrans-153
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'Now let’s write the loader: `loader.py`.'
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们写加载器：`loader.py`。
+- en: 'It is made of two parts: the actual loading logic and the loop that prints
+    the packet counts.'
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它由两部分组成：实际的加载逻辑和打印数据包计数的循环。
+- en: For the loading logic, we open our program by reading the file *program.c*.
+    With `load_func`, we instruct the `bpf` syscall to use the `myprogram` function
+    as “main” using the program type `BPF.XDP`. That stands for `BPF_PROG_TYPE_XDP`.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于加载逻辑，我们通过读取文件*program.c*打开我们的程序。使用`load_func`，我们指示`bpf`系统调用将`myprogram`函数作为“main”使用程序类型`BPF.XDP`。这代表`BPF_PROG_TYPE_XDP`。
+- en: After the loading, we gain access to the BPF map named `packetcnt` using `get_table`.
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 加载完成后，我们可以使用`get_table`访问名为`packetcnt`的BPF映射。
+- en: Warning
+  id: totrans-158
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Make sure to change the `device` variable from `enp0s8` to the interface you
+    want to work on.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确保将`device`变量从`enp0s8`更改为你要操作的接口。
+- en: '[PRE23]'
+  id: totrans-160
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: The remaining part we need to write is the actual loop to print out the packet
+    counts. Without this, our program will already be able to drop the packets, but
+    we want to see what’s going on there. We have two loops. The outer loop gets keyboard
+    events and terminates when there’s a signal to interrupt the program. When the
+    outer loop breaks, the `remove_xdp` function is called, and the interface is freed
+    from the XDP program.
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们还需要编写的剩余部分是实际循环以打印数据包计数。没有这个，我们的程序已经能够丢弃数据包，但我们想要看看那里发生了什么。我们有两个循环。外部循环获取键盘事件，并在有中断程序的信号时终止。当外部循环中断时，会调用
+    `remove_xdp` 函数，并且接口会从 XDP 程序中释放。
+- en: 'Within the outer loop, the inner loop has the duty of getting back the values
+    from the `packetcnt` map and prints them in the format `*protocol*: *counter*
+    pkt/s`:'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '在外部循环内，内部循环的职责是从 `packetcnt` 映射中获取值，并以 `*protocol*: *counter* pkt/s` 的格式打印出来：'
+- en: '[PRE24]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'Good! Now we can test that program by simply executing the loader with root
+    privileges:'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 很好！现在我们可以通过以 root 权限执行加载器来测试该程序：
+- en: '[PRE25]'
+  id: totrans-165
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'That will output a line every second with the packet counters:'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将每秒输出一行带有数据包计数器的信息：
+- en: '[PRE26]'
+  id: totrans-167
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'We encountered only two types of packets: `6` stands for TCP, and `17` stands
+    for UDP.'
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们遇到的数据包类型只有两种：`6` 代表 TCP，`17` 代表 UDP。
+- en: At this point your brain will probably start thinking about ideas and projects
+    for using XDP, and that’s extremely good! But as always, in software engineering
+    if you want to make a good program, it’s important to write tests first—or at
+    least write tests! The next section covers how you can unit-test XDP programs.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一点上，你的大脑可能已经开始思考关于使用 XDP 的想法和项目，这非常好！但像在软件工程中一样，如果你想要写出一个好程序，写测试是非常重要的——或者至少要写测试！接下来的部分将介绍如何对
+    XDP 程序进行单元测试。
+- en: Testing XDP Programs
+  id: totrans-170
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 测试 XDP 程序
+- en: When working on XDP programs, the most difficult part is that in order to test
+    the actual packet flow, you need to reproduce an environment in which all of the
+    components are aligned to provide the correct packets. Although it’s true that
+    with virtualization technologies nowadays, creating a working environment can
+    be an easy task, it’s also true that a complicated setup can limit the reproducibility
+    and programmability of the test environment. In addition to that, when analyzing
+    the performance aspects of high-frequency XDP programs in a virtualized environment,
+    the cost of virtualization makes the test ineffective because it’s much more substantial
+    than the actual packet processing.
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在开发 XDP 程序时，最困难的部分是为了测试实际的数据包流，需要重现一个所有组件都对齐以提供正确数据包的环境。虽然现在使用虚拟化技术可以很容易地创建工作环境，但复杂的设置也会限制测试环境的可重复性和可编程性。此外，当在虚拟化环境中分析高频率
+    XDP 程序的性能方面时，虚拟化的成本使得测试效果不佳，因为其比实际数据包处理成本更高。
+- en: Fortunately, kernel developers have a solution. They have implemented a command
+    that can be used to test XDP programs, called `BPF_PROG_TEST_RUN`.
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 幸运的是，内核开发者有一个解决方案。他们实现了一个命令，可以用来测试 XDP 程序，名为 `BPF_PROG_TEST_RUN`。
+- en: Essentially, `BPF_PROG_TEST_RUN` gets an XDP program to execute, along with
+    an input packet and an output packet. When the program is executed, the output
+    packet variable is populated, and the return XDP code is returned. This means
+    you can use the output packet and return code in your test assertions! This technique
+    can also be used for `skb` programs.
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_PROG_TEST_RUN` 本质上是让一个 XDP 程序执行，还有一个输入数据包和一个输出数据包。当程序执行时，输出数据包变量被填充，返回的
+    XDP 代码也随之返回。这意味着你可以在你的测试断言中使用输出数据包和返回码！这种技术也可以用于 `skb` 程序。'
+- en: For the sake of completeness and to make this example simple, we use Python
+    and its unit testing framework.
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了完整起见，并且让这个例子简单化，我们使用 Python 和它的单元测试框架。
+- en: XDP Testing Using the Python Unit Testing Framework
+  id: totrans-175
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 Python 单元测试框架进行 XDP 测试
+- en: 'Writing XDP tests with `BPF_PROG_TEST_RUN` and integrating them with the Python
+    unit testing framework `unittest` is a good idea for several reasons:'
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `BPF_PROG_TEST_RUN` 编写 XDP 测试并将其集成到 Python 的单元测试框架 `unittest` 中是一个很好的主意，有几个原因：
+- en: You can load and execute BPF programs using the Python *BCC* library.
+  id: totrans-177
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 你可以使用 Python 的 *BCC* 库来加载和执行 BPF 程序。
+- en: 'Python has one of the best packet crafting and introspection libraries available:
+    `scapy`.'
+  id: totrans-178
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Python 拥有最好的数据包构造和内省库之一：`scapy`。
+- en: Python integrates with C structs using `ctypes`.
+  id: totrans-179
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Python 使用 `ctypes` 与 C 结构体集成。
+- en: 'As said, we need to import all of the needed libraries; that’s the first thing
+    we will do in a file named *test_xdp.py*:'
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如所说，我们需要导入所有必要的库；这是我们将在一个名为*test_xdp.py*的文件中做的第一件事：
+- en: '[PRE27]'
+  id: totrans-181
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: After all the needed libraries are imported, we can proceed and create a test
+    case class named `XDPExampleTestCase`. This test class will contain all of our
+    test cases and a member method (`_xdp_test_run`) that we will use to do assertions
+    and call `bpf_prog_test_run`.
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 导入所有必要的库之后，我们可以继续创建一个名为`XDPExampleTestCase`的测试用例类。这个测试类将包含所有我们的测试用例和一个成员方法（`_xdp_test_run`），我们将在其中进行断言并调用`bpf_prog_test_run`。
+- en: 'In the following code you can see what `_xdp_test_run` looks like:'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下面的代码中，您可以看到`_xdp_test_run`的样子：
+- en: '[PRE28]'
+  id: totrans-184
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'It takes three arguments:'
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它需要三个参数：
+- en: '`given_packet`'
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`given_packet`'
+- en: This is the packet we test our XDP program against; it is the raw packet received
+    by the interface.
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是我们针对我们的XDP程序进行测试的数据包；这是接口接收到的原始数据包。
+- en: '`expected_packet`'
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`expected_packet`'
+- en: This is the packet we expect to receive back after the XDP program processes
+    it; when the XDP program returns an `XDP_DROP` or `XDP_ABORT`, we expect this
+    to be `None`; in all the other cases, the packet remains the same as `given_packet`
+    or can be modified.
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是我们期望在XDP程序处理后收到的数据包；当XDP程序返回`XDP_DROP`或`XDP_ABORT`时，我们期望这个数据包为`None`；在所有其他情况下，数据包保持与`given_packet`相同或可能被修改。
+- en: '`expected_return`'
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`expected_return`'
+- en: This is the expected return of the XDP program after processing our `given_packet`.
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是在处理我们的`given_packet`后XDP程序的预期返回。
+- en: Besides the arguments, the body of this method is simple. It does conversion
+    to C types using the *ctypes* library, and then it calls the `libbcc` equivalent
+    of `BPF_PROG_TEST_RUN`, `libbcc.lib.bpf_prog_test_run`, using as test arguments
+    our packets and their metadata. Then it does all of the assertions based on the
+    results from the test call along with the given values.
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了参数之外，这个方法的主体很简单。它使用*ctypes*库进行C类型转换，然后调用`libbcc`的`BPF_PROG_TEST_RUN`等效方法，`libbcc.lib.bpf_prog_test_run`，使用我们的数据包和它们的元数据作为测试参数。然后根据测试调用的结果以及给定的值进行所有断言。
+- en: After we have that function we can basically just write test cases by crafting
+    different packets to test how they behave when passing through our XDP program,
+    but before doing that, we need to do a `setUp` method for our test.
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了那个函数之后，我们基本上只需通过制作不同的数据包来编写测试用例，以测试它们在通过我们的XDP程序时的行为，但在这样做之前，我们需要为我们的测试做一个`setUp`方法。
+- en: 'This part is crucial because the setup does the actual load of our BPF program
+    named `myprogram` by opening and compiling a source file named *program.c* (that’s
+    the file where our XDP code will be):'
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这部分非常关键，因为设置实际加载我们的名为`myprogram`的BPF程序，通过打开和编译一个名为*program.c*的源文件（这是我们的XDP代码将在其中的文件）：
+- en: '[PRE29]'
+  id: totrans-195
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: After the setup is done, the next step is to write the first behavior we want
+    to observe. Without being too imaginative, we want to test that we will drop all
+    TCP packets.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置完成后，下一步是编写我们想要观察的第一个行为。不要想得太过丰富，我们只想测试我们将丢弃所有TCP数据包。
+- en: 'So we craft a packet in `given_packet`, which is just a TCP packet over IPv4\.
+    Then, using our assertion method, `_xdp_test_run`, we just verify that given our
+    packet, we will get back an `XDP_DROP` with no return packet:'
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因此，我们在`given_packet`中制作一个数据包，这只是一个IPv4上的TCP数据包。然后，使用我们的断言方法`_xdp_test_run`，我们只需验证，根据我们的数据包，我们将得到一个带有没有返回数据包的`XDP_DROP`：
+- en: '[PRE30]'
+  id: totrans-198
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'Because that is not enough, we also want to explicitly test that all UDP packets
+    are allowed. We then craft two UDP packets, one for `given_packet` and one for
+    `expected_packet`, that are essentially the same. In that way we are also testing
+    that UDP packets are not modified while being allowed with `XDP_PASS`:'
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为这还不够，我们还想明确测试所有UDP数据包都是允许的。然后，我们制作两个UDP数据包，一个用于`given_packet`，一个用于`expected_packet`，它们本质上是相同的。这样，我们还在测试UDP数据包在被允许通过`XDP_PASS`时不被修改：
+- en: '[PRE31]'
+  id: totrans-200
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: To make things a bit more complicated, we decided that this system will then
+    allow TCP packets on the condition that they go to port 9090\. When they do, they
+    will also be rewritten to change their destination MAC address to redirect to
+    a specific network interface with address `08:00:27:dd:38:2a`.
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了让事情变得更加复杂，我们决定这个系统将允许TCP数据包，条件是它们要去端口9090。当它们这样做时，它们还将被重写，将它们的目标MAC地址更改为重定向到具有地址`08:00:27:dd:38:2a`的特定网络接口。
+- en: 'Here’s the test case to do that. The `given_packet` has `9090` as a destination
+    port, and we require the `expected_packet` with the new destination and port `9090`
+    again:'
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是执行此操作的测试用例。`given_packet`的目的端口为`9090`，我们要求`expected_packet`具有新的目标和端口`9090`：
+- en: '[PRE32]'
+  id: totrans-203
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'With plenty of test cases, we now write the entry point for our test program,
+    which will just call `unittest.main()` that then loads and executes our tests:'
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们有了大量的测试用例，我们现在编写测试程序的入口点，它将只调用 `unittest.main()`，然后加载并执行我们的测试：
+- en: '[PRE33]'
+  id: totrans-205
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: We have now written tests for our XDP program first! Now that we have the test
+    acting as a specific example of what we want to have, we can write the XDP program
+    that implements it by creating a file named *program.c*.
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们已经为我们的XDP程序编写了测试！现在我们有了测试作为我们想要拥有的特定示例，我们可以编写实现它的XDP程序，方法是创建一个名为 *program.c*
+    的文件。
+- en: 'Our program is simple. It just contains the `myprogram` XDP function with the
+    logic we just tested. As always, the first thing we need to do is to include the
+    needed headers. Those headers are self-explainatory. We have a BPF program that
+    will process TCP/IP flowing over Ethernet:'
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们的程序很简单。它只包含了具有我们刚刚测试过的逻辑的 `myprogram` XDP 函数。与往常一样，我们需要做的第一件事是包含所需的头文件。这些头文件是自我解释的。我们有一个BPF程序，它将处理以太网上传输的TCP/IP：
+- en: '[PRE34]'
+  id: totrans-208
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'Again, as with the other programs in this chapter, we need to check offsets
+    and fill variables for the three layers of our packet: `ethhdr`, `iphdr`, and
+    `tcphdr`, respectively, for Ethernet, IPv4, and TCP:'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如本章中的其他程序一样，我们需要检查偏移量并为我们数据包的三个层（分别为以太网、IPv4和TCP的 `ethhdr`、`iphdr` 和 `tcphdr`）填充变量：
+- en: '[PRE35]'
+  id: totrans-210
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: Once we have the values we can implement our logic.
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦我们有了这些值，我们就可以实现我们的逻辑。
+- en: The first thing we do is to check whether the protocol is TCP `ip->protocol
+    == IPPROTO_TCP`. When it is, we always do an `XDP_DROP`; otherwise, we do an `XDP_PASS`
+    for everything else.
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们做的第一件事是检查协议是否为TCP `ip->protocol == IPPROTO_TCP`。当它是时，我们总是执行 `XDP_DROP`；否则，我们对其他所有情况执行
+    `XDP_PASS`。
+- en: 'In the check for the TCP protocol, we do another control to check whether the
+    destination port is `9090`, `th->dest == htons(9090)`; if it is, we change the
+    destination MAC address at the Ethernet layer and return `XDP_TX` to bounce the
+    packet through the same NIC:'
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在检查TCP协议时，我们还进行另一个控制以检查目标端口是否为 `9090`，`th->dest == htons(9090)`；如果是，则在以太网层更改目标MAC地址并返回
+    `XDP_TX` 通过同一网卡反弹数据包：
+- en: '[PRE36]'
+  id: totrans-214
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'Amazing! Now we can just run our tests:'
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 太棒了！现在我们可以运行我们的测试：
+- en: '[PRE37]'
+  id: totrans-216
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'The output of it will just report that the three tests passed:'
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它的输出将只报告这三个测试通过：
+- en: '[PRE38]'
+  id: totrans-218
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'At this point, breaking things is easier! We can just change the last `XDP_PASS`
+    to `XDP_DROP` in *program.c* and observe what happens:'
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，破坏事物变得更容易！我们可以只需在 *program.c* 中将最后一个 `XDP_PASS` 更改为 `XDP_DROP` 并观察发生的情况：
+- en: '[PRE39]'
+  id: totrans-220
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: Our test failed—the status code did not match, and the test framework reported
+    an error. That’s exactly what we wanted! This is an effective testing framework
+    to write XDP programs with confidence. We now have the ability to make assertions
+    on specific steps and change them accordingly to the behavior that we want to
+    obtain. Then we write the matching code to express that behavior in the form of
+    an XDP program.
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们的测试失败了——状态码不匹配，测试框架报告了一个错误。这正是我们想要的！这是一个有效的测试框架，可以自信地编写XDP程序。现在，我们有能力对特定步骤进行断言并相应地更改它们以获得我们想要的行为。然后，我们编写匹配的代码来表达该行为，形成XDP程序。
+- en: Note
+  id: totrans-222
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: MAC address is short for Media Access Controll address. It is a unique identifier
+    made of two groups of hexadecimal digits that every network interface has and
+    is used in the data link layer (layer 2 in the OSI model) to interconnect devices
+    over technologies like Ethernet, Bluetooth, and WiFi.
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: MAC地址是介质访问控制地址的简称。它是一个由两组十六进制数字组成的唯一标识符，每个网络接口都有，并且用于数据链路层（OSI模型中的第2层），用于连接以太网、蓝牙和WiFi等技术的设备。
+- en: XDP Use Cases
+  id: totrans-224
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: XDP使用案例
+- en: While approaching XDP, it is certainly useful to understand the use cases for
+    which it has been employed by various organizations around the globe. This can
+    help you to imagine why using XDP is better than other techniques such as socket
+    filtering or Traffic Control in certain cases.
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接近XDP时，理解它被全球各地的各种组织采用的用例肯定是有用的。这可以帮助您想象为什么在某些情况下使用XDP比其他技术如套接字过滤或流量控制更好。
+- en: 'Let’s begin with a common one: monitoring.'
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们从一个常见的例子开始：监控。
+- en: Monitoring
+  id: totrans-227
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 监控
+- en: Nowadays, most of the network monitoring systems are implemented either by writing
+    kernel modules or by accessing proc files from user-space. Writing, distributing,
+    and compiling kernel modules is not a task for everyone; it’s a dangerous operation.
+    They are not easy to maintain and debug either. However, the alternative might
+    be even worse. To obtain the same kind of information, such as how many packets
+    a card received in a second, you’d need to open and part a file, in this case
+    */sys/class/net/eth0/statistics/rx_packets*. This might seem like a good idea,
+    but it requires a lot of computing just to obtain some simple information, because
+    using the open syscall is not cheap in some cases.
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如今，大多数网络监控系统要么通过编写内核模块，要么通过从用户空间访问 proc 文件来实现。编写、分发和编译内核模块并非人人能做的任务；这是一项危险的操作。它们也不容易维护和调试。然而，另一种选择可能更糟。要获取类似的信息，例如一秒钟内卡接收了多少个数据包，你需要打开和解析一个文件，比如
+    */sys/class/net/eth0/statistics/rx_packets*。这可能看起来是个不错的主意，但这需要大量计算资源，因为在某些情况下使用
+    open 系统调用并不便宜。
+- en: So, we need a solution that allows us to implement features similar to the ones
+    of a kernel module without having to lose on performance. XDP is perfect for that,
+    because we can use an XDP program to send the data we want to extract in a map.
+    Then the map is consumed by a loader that can store the metrics into a storage
+    backend and apply algorithms to it or plot the results in a graph.
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因此，我们需要一种解决方案，可以在不损失性能的情况下实现类似内核模块功能的特性。XDP 就非常适合这种情况，因为我们可以使用 XDP 程序将要提取的数据发送到一个映射中。然后，这个映射被一个加载器消费，可以将指标存储到后端存储中，并对其应用算法或将结果绘制成图表。
+- en: DDoS Mitigation
+  id: totrans-230
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: DDoS 缓解
+- en: Being able to see packets at the NIC level ensures that any possible packet
+    is intercepted at the first stage, when the system didn’t spend enough computing
+    power yet to understand whether the packets will be useful for the system. In
+    a typical scenario, a `bpf` map can instruct an XDP program to `XDP_DROP` packets
+    from a certain source. That packet list can be generated in user-space after analyzing
+    packets received via another map. Once there’s a match between a packet flowing
+    into the XDP program and an element of the list, the mitigation occurs. The packet
+    is dropped, and the kernel didn’t even need to spend a CPU cycle to handle it.
+    That has the result of making the attacker goal difficult to achieve because,
+    in this case, it wasn’t able to waste any expensive computing resources.
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 能够在网卡级别查看数据包确保在系统还没有花费足够的计算资源来判断数据包是否对系统有用之前拦截任何可能的数据包。在典型场景中，一个 `bpf` 映射可以指示
+    XDP 程序从特定来源的数据包执行 `XDP_DROP` 操作。该数据包列表可以在分析通过另一个映射接收的数据包后，在用户空间生成。一旦 XDP 程序接收到的数据包与列表中的某个元素匹配，就会执行这种缓解操作。数据包被丢弃，内核甚至不需要花费
+    CPU 周期来处理它。这使得攻击者的目标变得更难实现，因为在这种情况下，它无法浪费任何昂贵的计算资源。
+- en: Load Balancing
+  id: totrans-232
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 负载均衡
+- en: An interesting use case for XDP programs, is load balancing; however, XDP can
+    retransmit packets only on the same NIC where they arrived. This means that XDP
+    is not the best option to implement a classic load balancer that sits in front
+    of all your servers and forwards traffic to them. However, this does not mean
+    that XDP is not good for this use case. If we move load balancing from an external
+    server to the same machines serving the application, you immediately see how their
+    NICs can be used to do the job.
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: XDP 程序的一个有趣用例是负载均衡；然而，XDP 只能在接收到数据包的同一网卡上重传数据包。这意味着 XDP 并不是实现经典负载均衡器（位于所有服务器前面并将流量转发到它们）的最佳选择。然而，这并不意味着
+    XDP 对这种用例不适用。如果我们将负载均衡从外部服务器移动到为应用服务的同一台机器上，你立即会看到它们的网卡可以用来完成这项任务。
+- en: In that way, we can create a distributed load balancer where each machine hosting
+    the application helps spread the traffic to the appropriate servers.
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过这种方式，我们可以创建一个分布式负载均衡器，在托管应用程序的每台机器上帮助将流量分发到适当的服务器。
+- en: Firewalling
+  id: totrans-235
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 防火墙
+- en: When people think of firewalling on Linux, they typically think of `iptables`
+    or `netfilter`. With XDP, you can get the same functionality in a completely programmable
+    way directly in the NIC or its driver. Usually, firewalls are expensive machines
+    sitting on top of the network stack or between nodes to control what their communication
+    looks like. When using XDP, however, it’s immediately clear that because XDP programs
+    are very cheap and fast, we could implement the firewalling logic directly into
+    a nodes’ NICs instead of having a set of dedicated machines. A common use case
+    is to have an XDP loader that controls a map with a set of rules changed with
+    a remote procedure call API. The set of rules in the map then is dynamically passed
+    to the XDP programs loaded into every specific machine, to control what it can
+    receive, from who, and in which situation.
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当人们谈论Linux上的防火墙时，通常会想到`iptables`或`netfilter`。通过XDP，您可以以完全可编程的方式直接在网卡或其驱动程序中获得相同的功能。通常，防火墙是昂贵的机器，位于网络堆栈的顶部或节点之间，以控制其通信的外观。然而，使用XDP时，很明显，因为XDP程序非常便宜和快速，我们可以将防火墙逻辑直接实现到节点的网卡中，而不是使用一组专用机器。一个常见的用例是有一个控制具有通过远程过程调用API更改的一组规则的映射的XDP加载器。然后，这些规则集动态传递给加载到每台特定机器上的XDP程序，以控制它可以接收什么，来自谁以及在哪种情况下。
+- en: This alternative doesn’t just make firewalling less expensive; it allows every
+    node to deploy its own level of firewalling without relying on user-space software
+    or the kernel to do that. When this is deployed using offloaded XDP as the operation
+    mode, we obtain the maximum advantage because the processing is not even done
+    by the main node CPU.
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种替代方案不仅使防火墙成本更低，而且允许每个节点部署自己的防火墙级别，而无需依赖用户空间软件或内核来完成。当使用卸载的XDP作为操作模式部署时，我们可以获得最大的优势，因为处理甚至不是由主节点CPU完成的。
+- en: Conclusion
+  id: totrans-238
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: What great skills you have now! I promise that XDP will help you think about
+    network flows in a completely different way from now on. Having to rely on tools
+    like `iptables` or other user-space tools when dealing with network packets is
+    often frustrating and slow. XDP is interesting because it is faster as a result
+    of its direct packet processing capabilities, and because you can write your own
+    logic to deal with the network packets. Because all of that arbitrary code can
+    work with maps and interact with other BPF programs, you have an entire world
+    of possible use cases to invent and explore for your own architectures!
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你拥有了多么了不起的技能！我向你保证，XDP将帮助你从现在开始以完全不同的方式思考网络流量。在处理网络数据包时，必须依赖诸如`iptables`或其他用户空间工具通常令人沮丧且缓慢。XDP之所以有趣，是因为它由于其直接的数据包处理能力而更快，并且你可以编写自己的逻辑来处理网络数据包。因为所有这些任意代码都可以与映射交互，并与其他BPF程序互动，所以你有一个完整的可能用例世界可以为自己的架构发明和探索！
+- en: Even though it is not about networking, the next chapter returns to a lot of
+    the concepts covered here and in [Chapter 6](ch06.html#linux_networking). Again,
+    BPF is used to filter some conditions based on a given input and to filter what
+    a program can do. Don’t forget that the *F* in BPF stands for filter!
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管这不涉及网络，下一章再次回顾了这里和[第6章](ch06.html#linux_networking)中涵盖的许多概念。再次强调，基于给定输入条件，BPF用于过滤某些条件并过滤程序可以执行的操作。不要忘记BPF中的*F*代表过滤器！

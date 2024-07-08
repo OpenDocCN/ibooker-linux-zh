@@ -1,0 +1,696 @@
+- en: Chapter 1\. Introduction to Linux
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第1章 介绍Linux
+- en: Linux is the most widely used operating system, used in everything from mobile
+    devices to the cloud.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 是目前被广泛使用的操作系统，应用范围从移动设备到云端。
+- en: You might not be familiar with the concept of an operating system. Or you might
+    be using an operating system such as Microsoft Windows without giving it too much
+    thought. Or maybe you are new to Linux. To set the scene and get you in the right
+    mindset, we’ll take a bird’s-eye view of operating systems and Linux in this chapter.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能对操作系统的概念并不熟悉。或者你可能在使用像微软Windows这样的操作系统，而并未深究其背后。或者你可能是Linux的新手。为了让你有正确的认知和心态，本章将从鸟瞰视角来看操作系统和Linux。
+- en: We’ll first discuss what *modern* means in the context of the book. Then we’ll
+    review a high-level Linux backstory, looking at important events and phases over
+    the past 30 years. Further, in this chapter you’ll learn what the role of an operating
+    system is in general and how Linux fills this role. We also take a quick look
+    at what Linux distributions are and what resource visibility means.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将首先讨论本书背景下*现代*的含义。然后，我们将回顾Linux在过去30年中的重要事件和阶段。此外，在本章中，你将了解操作系统的角色及Linux如何充当这一角色。我们还会快速浏览Linux发行版以及资源可见性的概念。
+- en: If you’re new to operating systems and Linux, you’ll want to read the entire
+    chapter. If you’re already experienced with Linux, you might want to jump to [“A
+    Ten-Thousand-Foot View of Linux”](#intro-10-view), which provides a visual overview
+    as well as mapping to the book’s chapters.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你对操作系统和Linux还不太了解，建议你阅读整章。如果你已经对Linux有经验，可以直接跳到[“Linux 的一万英尺视角”](#intro-10-view)，这部分提供了视觉概述并与本书章节进行了对应。
+- en: But before we get into the technicalities, let’s first step back a bit and focus
+    on what we mean when we say “modern Linux.” This is, surprisingly, a nontrivial
+    matter.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但在深入技术细节之前，让我们先稍微退后一步，专注于我们说“现代Linux”时的含义。这其实是一个非常复杂的问题。
+- en: What Are Modern Environments?
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 现代环境是什么？
+- en: The book title specifies *modern*, but what does that really mean? Well, in
+    the context of this book, it can mean anything from cloud computing to a Raspberry
+    Pi. In addition, the recent rise of Docker and related innovations in infrastructure
+    has dramatically changed the landscape for developers and infrastructure operators
+    alike.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 书名明确指定为*现代*，但这到底意味着什么呢？在本书的背景下，这可以涵盖从云计算到树莓派等任何内容。此外，Docker及其相关基础设施的最新发展，显著改变了开发人员和基础设施运营者的情景。
+- en: 'Let’s take a closer look at some of these modern environments and the prominent
+    role Linux plays in them:'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们更详细地了解一些现代环境及Linux在其中扮演的重要角色：
+- en: Mobile devices
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 移动设备
+- en: When I say “mobile phone” to our kids, they say, “In contrast to what?” In all
+    fairness and seriousness, these days many phones—depending on who you ask, up
+    to 80% or more—as well as tablets run Android, which is a [Linux variant](https://oreil.ly/bQ6yJ).
+    These environments have aggressive requirements around power consumption and robustness,
+    as we depend on them on a daily basis. If you’re interested in developing Android
+    apps, consider visiting the [Android developer site](https://oreil.ly/xf5kC) for
+    more information.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当我对孩子们说“手机”时，他们会说，“与什么相比？”老实说，在今天，许多手机——根据不同人的说法，高达80%或更多——以及平板电脑都运行着Android，这是一个[Linux
+    变体](https://oreil.ly/bQ6yJ)。这些环境在功耗和稳定性方面有着极高的要求，因为我们每天都依赖它们。如果你对开发Android应用感兴趣，请考虑访问[Android开发者网站](https://oreil.ly/xf5kC)获取更多信息。
+- en: Cloud computing
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 云计算
+- en: With the cloud, we see at scale a similar pattern as in the mobile and micro
+    space. There are new, powerful, secure, and energy-saving CPU architectures such
+    as the successful ARM-based [AWS Graviton](https://oreil.ly/JzHzm) offerings,
+    as well as the established heavy-lifting outsourcing to cloud providers, especially
+    in the context of open source software.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在云端，我们看到类似于移动和微空间的规模模式。有新的、强大的、安全的和节能的CPU架构，例如成功的基于ARM的[AWS Graviton](https://oreil.ly/JzHzm)产品，以及在开源软件环境中特别是在云提供商领域的成熟的大型外包服务。
+- en: Internet of (Smart) Things
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 物联网（智能设备）
+- en: I’m sure you’ve seen a lot of Internet of Things (IoT)–related projects and
+    products, from sensors to drones. Many of us have already been exposed to smart
+    appliances and smart cars. These environments have even more challenging requirements
+    around power consumption than mobile devices. In addition, they might not even
+    be running all the time but, for example, only wake up once a day to transmit
+    some data. Another important aspect of these environments is [real-time capabilities](https://oreil.ly/zBsRy).
+    If you’re interested in getting started with Linux in the IoT context, consider
+    the [AWS IoT EduKit](https://oreil.ly/3x0uf).
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我相信你已经看到了许多与物联网（IoT）相关的项目和产品，从传感器到无人机。我们许多人已经接触过智能家电和智能汽车。这些环境对功耗有更高的要求，甚至可能不是一直运行，比如每天只唤醒一次以传输一些数据。这些环境的另一个重要方面是[实时能力](https://oreil.ly/zBsRy)。如果您有兴趣在IoT环境中开始使用Linux，请考虑[AWS
+    IoT EduKit](https://oreil.ly/3x0uf)。
+- en: Diversity of processor architectures
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 处理器架构的多样性
+- en: For the past 30 years or so, Intel has been the leading CPU manufacturer, dominating
+    the microcomputer and personal computer space. Intel’s x86 architecture was considered
+    the gold standard. The open approach that IBM took (publishing the specifications
+    and enabling others to offer compatible devices) was promising, resulting in x86
+    clones that also used Intel chips, at least initially.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在过去大约30年中，Intel一直是领先的CPU制造商，主导微型计算机和个人计算机领域。Intel的x86架构被视为金标准。IBM采取的开放方式（发布规格并使其他人能够提供兼容设备）前景广阔，导致了使用Intel芯片的x86克隆机，至少在最初是这样的。
+- en: While Intel is still widely used in desktop and laptop systems, with the rise
+    of mobile devices we’ve seen the increasing uptake of the [ARM architecture](https://oreil.ly/sioDd)
+    and recently [RISC-V](https://oreil.ly/Tf0bb). At the same time, multi-arch programming
+    languages and tooling, such as Go or Rust, are becoming more and more widespread,
+    creating a perfect storm.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管Intel在台式机和笔记本系统中仍然广泛使用，但随着移动设备的兴起，我们看到了[ARM架构](https://oreil.ly/sioDd)和最近的[RISC-V](https://oreil.ly/Tf0bb)的日益普及。同时，像Go或Rust这样的多架构编程语言和工具也越来越普及，形成了一场完美的风暴。
+- en: All of these environments are examples of what I consider modern environments.
+    And most, if not all of them, run on or use Linux in one form or another.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有这些环境都是我认为的现代环境的例子。几乎所有这些环境都以某种形式运行或使用Linux。
+- en: Now that we know about the modern (hardware) systems, you might wonder how we
+    got here and how Linux came into being.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们了解了现代（硬件）系统，您可能想知道我们是如何到达这里的，以及Linux是如何产生的。
+- en: The Linux Story (So Far)
+  id: totrans-20
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Linux的故事（到目前为止）
+- en: Linux celebrated its [30th birthday](https://oreil.ly/fkMyT) in 2021\. With
+    billions of users and thousands of developers, the Linux project is, without doubt,
+    a worldwide (open source) success story. But how did it all this start, and how
+    did we get here?
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux在2021年庆祝了[30岁的生日](https://oreil.ly/fkMyT)。拥有数十亿用户和数千名开发人员，Linux项目毫无疑问是一个全球（开源）成功故事。但是这一切是如何开始的，我们又是如何走到今天的呢？
+- en: 1990s
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 1990年代
+- en: 'We can consider Linus Torvalds’s email on August 25, 1991, to the `comp.os.minix`
+    newsgroup as the birth of the Linux project, at least in terms of the public record.
+    This hobby project soon took off, both in terms of lines of code (LOC) and in
+    terms of adoption. For example, after less than three years, Linux 1.0.0 was released
+    with over 176,000 LOCs. By that time, the original goal of being able to run most
+    Unix/GNU software was already well reached. Also, the first commercial offering
+    appeared in the 1990s: Red Hat Linux.'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们可以将Linus Torvalds于1991年8月25日在`comp.os.minix`新闻组中发布的电子邮件视为Linux项目诞生的公开记录。这个业余项目很快就起飞了，无论是在代码行数（LOC）还是采纳率方面。例如，不到三年时间，Linux
+    1.0.0发布，代码行数超过176,000行。到那时，实现运行大多数Unix/GNU软件的最初目标已经实现。此外，上世纪90年代出现了第一个商业版本：Red
+    Hat Linux。
+- en: 2000 to 2010
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 2000年至2010年
+- en: As a “teenager,” Linux was not only maturing in terms of features and supported
+    hardware but was also growing beyond what UNIX could do. In this time period,
+    we also witnessed a huge and ever-increasing buy-in of Linux by the big players,
+    that is, adoption by Google, Amazon, IBM, and so on. It was also the peak of the
+    [distro wars](https://oreil.ly/l6X4Q), resulting in businesses changing their
+    directions.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为一个“青少年”，Linux不仅在功能和支持的硬件方面日益成熟，而且超越了UNIX的能力。在这个时期，我们还见证了Linux被Google、Amazon、IBM等大公司广泛采纳，并且采纳程度不断增加。这也是[发行版之战](https://oreil.ly/l6X4Q)的高峰期，导致企业改变了他们的方向。
+- en: 2010s to now
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 2010年至今
+- en: Linux established itself as the workhorse in data centers and the cloud, as
+    well as for any types of IoT devices and phones. In a sense, one can consider
+    the distro wars as being over (nowadays, most commercial systems are either Red
+    Hat or Debian based), and in a sense, the rise of containers (from 2014/15 on)
+    is responsible for this development.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 在数据中心和云端以及各种物联网设备和手机中确立了自己的地位。从某种意义上说，可以认为发行版之战已经结束（现在，大多数商业系统都基于 Red
+    Hat 或 Debian），而容器的兴起（从2014/15年开始）促成了这一发展。
+- en: 'With this super-quick historic review, necessary to set the context and understand
+    the motivation for the scope of this book, we move on to a seemingly innocent
+    question: Why does anyone need Linux, or an operating system at all?'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过这个超快的历史回顾，有必要来设定背景并理解本书的范围的动机，我们继续看一个看似无辜的问题：为什么任何人都需要 Linux，或者说需要操作系统？
+- en: Why an Operating System at All?
+  id: totrans-29
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 为什么需要操作系统？
+- en: 'Let’s say you do not have an operating system (OS) available or cannot use
+    one for whatever reason. You would then end up doing pretty much everything yourself:
+    memory management, interrupt handling, talking with I/O devices, managing files,
+    configuring and managing the network stack—the list goes on.'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你没有可用的操作系统（OS），或者由于任何原因无法使用它。那么你最终会自己做几乎所有的事情：内存管理，中断处理，与I/O设备通信，文件管理，配置和管理网络堆栈——列举的列表还在继续。
+- en: Note
+  id: totrans-31
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'Technically speaking, an OS is not strictly needed. There are systems out there
+    that do not have an OS. These are usually embedded systems with a tiny footprint:
+    think of an IoT beacon. They simply do not have the resources available to keep
+    anything else around other than one application. For example, with Rust you can
+    use its Core and Standard Library to run any app on [bare metal](https://oreil.ly/zW4j7).'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从技术上讲，操作系统并非绝对必要。有一些系统并没有操作系统。这些通常是具有微小足迹的嵌入式系统：比如物联网信标。它们简单地没有足够的资源来保留除一个应用程序之外的任何其他东西。例如，使用
+    Rust，你可以使用其核心和标准库在[裸机](https://oreil.ly/zW4j7)上运行任何应用程序。
+- en: An operating system takes on all this undifferentiated heavy lifting, abstracting
+    away the different hardware components and providing you with a (usually) clean
+    and nicely designed Application Programming Interface (API), such as is the case
+    with the Linux kernel that we will have a closer look at in [Chapter 2](ch02.xhtml#kernel).
+    We usually call these APIs that an OS exposes *system calls*, or *syscalls* for
+    short. Higher-level programming languages such as Go, Rust, Python, or Java build
+    on top of those syscalls, potentially wrapping them in libraries.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 操作系统承担所有这些未区分的重活，抽象掉不同的硬件组件，并为您提供（通常是）干净和设计良好的应用程序编程接口（API），例如 Linux 内核的情况，我们将在[第二章](ch02.xhtml#kernel)中更详细地查看。我们通常称这些操作系统暴露的API为*系统调用*，或简称为*syscalls*。高级编程语言如
+    Go、Rust、Python 或 Java 建立在这些syscalls的基础上，可能将它们包装在库中。
+- en: All of this allows you to focus on the business logic rather than having to
+    manage the resources yourself, and also takes care of the different hardware you
+    want to run your app on.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有这些使您能够专注于业务逻辑，而不必自己管理资源，同时也能处理您希望在其上运行应用程序的不同硬件。
+- en: Let’s have a look at a concrete example of a syscall. Let’s say we want to identify
+    (and print) the ID of the current user.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们来看一个系统调用的具体例子。假设我们想要识别（并打印）当前用户的ID。
+- en: 'First, we look at the Linux syscall [`getuid(2)`](https://oreil.ly/md15Z):'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我们看看Linux系统调用[`getuid(2)`](https://oreil.ly/md15Z)：
+- en: '[PRE0]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: OK, so this `getuid` syscall is what we could use programmatically, from a library.
+    We will discuss Linux syscalls in greater detail in [“syscalls”](ch02.xhtml#kernel-syscalls).
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 好的，所以这个`getuid`系统调用是我们可以从库中编程使用的。我们将在[“系统调用”](ch02.xhtml#kernel-syscalls)中更详细地讨论Linux系统调用。
+- en: Note
+  id: totrans-39
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: You might be wondering what the `(2)` means in `getuid(2)`. It’s a terminology
+    that the `man` utility (think built-in help pages) uses to indicate the section
+    of the command assigned in `man`, akin to a postal or country code. This is one
+    example where the Unix legacy is apparent; you can find its origin in the [*Unix
+    Programmer’s Manual*, seventh edition, volume 1](https://oreil.ly/DgDrF) from
+    1979.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能会想知道`getuid(2)`中的`(2)`代表什么。这是`man`实用程序（类似于内置帮助页面）用来指示分配给`man`命令的部分的术语，类似于邮政或国家代码。这是
+    Unix 遗产显现出来的一个例子；你可以在[*Unix Programmer’s Manual*，第七版，卷1](https://oreil.ly/DgDrF)中找到其起源，1979年。
+- en: 'On the command line (shell), we would be using the equivalent `id` command
+    that in turn uses the `getuid` syscall:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在命令行（shell）中，我们将使用等效的`id`命令，该命令进而使用`getuid`系统调用：
+- en: '[PRE1]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: Now that you have a basic idea of why using an operating system, in most cases,
+    makes sense, let’s move on to the topic of Linux distributions.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，你对为什么在大多数情况下使用操作系统有了基本的理解，让我们继续讨论Linux发行版的主题。
+- en: Linux Distributions
+  id: totrans-44
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Linux发行版
+- en: When we say “Linux,” it might not be immediately clear what we mean. In this
+    book, we will say “Linux kernel,” or just “kernel,” when we mean the set of syscalls
+    and device drivers. Further, when we refer to [Linux distributions](https://oreil.ly/U9luq)
+    (or *distros*, for short), we mean a concrete bundling of kernel and related components,
+    including package management, file system layout, init system, and a shell, preselected
+    for you.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当我们说“Linux”时，可能不会立即明白我们的意思。在本书中，当我们说“Linux内核”或者只说“内核”时，我们指的是系统调用和设备驱动程序的集合。此外，当我们提到[Linux发行版](https://oreil.ly/U9luq)（简称*distros*）时，我们指的是一种具体的内核及相关组件捆绑，包括包管理器、文件系统布局、init系统和一个为您预先选择的Shell。
+- en: 'Of course, you could do all of this yourself: you could download and compile
+    the kernel, choose a package manager, and so on, and create (or *roll*) your own
+    distro. And that’s what many folks did in the beginning. Over the years, people
+    figured out that it is a better use of their time to leave this packaging (and
+    also security patching) to experts, private or commercial, and simply use the
+    resulting Linux distro.'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当然，你也可以自己动手：你可以下载并编译内核，选择一个包管理器等等，并创建（或者说*roll*出）自己的发行版。许多人在早期就是这样做的。多年来，人们逐渐意识到，把这些打包（以及安全补丁）交给专家（无论是私人还是商业）处理，并简单使用生成的Linux发行版，是更好的时间利用方式。
+- en: Tip
+  id: totrans-47
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: If you are inclined to build your own distribution, maybe because you are a
+    tinkerer or because you have to due to certain business restrictions, I recommend
+    you take a closer look at [Arch Linux](https://oreil.ly/UBSHM), which puts you
+    in control and, with a little effort, allows you to create a very customized Linux
+    distro.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你有意打造自己的发行版，也许是因为你喜欢动手或因为出于某些业务限制，我建议你仔细研究[Arch Linux](https://oreil.ly/UBSHM)，它能让你掌控一切，并且通过一点努力，你可以创建一个非常定制化的Linux发行版。
+- en: To get a feeling for the vastness of the distro space, including traditional
+    distros (Ubuntu, Red Hat Enterprise Linux [RHEL], CentOS, etc., as discussed in
+    [Chapter 6](ch06.xhtml#running-apps)) and modern distros (such as Bottlerocket
+    and Flatcar; see [Chapter 9](ch09.xhtml#advanced)), take a look at [DistroWatch](https://oreil.ly/DWmrr).
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要感受发行版空间的广阔，包括传统的发行版（如Ubuntu、Red Hat Enterprise Linux [RHEL]、CentOS等，详见[第6章](ch06.xhtml#running-apps)）和现代的发行版（如Bottlerocket和Flatcar；详见[第9章](ch09.xhtml#advanced)），请访问[DistroWatch](https://oreil.ly/DWmrr)。
+- en: 'With the distro topic out of the way, let’s move on to a totally different
+    topic: resources and their visibility and isolation.'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于发行版的话题讨论完毕，让我们转移到一个完全不同的话题：资源及其可见性与隔离。
+- en: Resource Visibility
+  id: totrans-51
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 资源可见性
+- en: 'Linux has had, in good UNIX tradition, a by-default global view on resources.
+    This leads us to the question: what does *global view* mean (in contrast to what?),
+    and what are said resources?'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux一直以来，在UNIX的传统下，默认具有全局视图的资源观念。这带来了一个问题：*全局视图*意味着什么（与之相对的是什么？），以及这些资源是什么？
+- en: Note
+  id: totrans-53
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'Why are we talking about resource visibility here in the first place? The main
+    reason is to raise awareness about this topic and to get you in the right state
+    of mind for one of the important themes in the context of modern Linux: containers.
+    Don’t worry if you don’t get all of the details now; we will come back to this
+    topic throughout the book and specifically in [Chapter 6](ch06.xhtml#running-apps),
+    in which we discuss containers and their building blocks in greater detail.'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，为什么我们在这里讨论资源可见性？主要原因是提高对这个主题的认识，并帮助您进入正确的思维状态，以便理解现代Linux背景下的重要主题之一：容器。如果现在您还没有完全理解所有细节，不要担心；我们将在整本书中以及特别是[第6章](ch06.xhtml#running-apps)中多次回到这个主题，详细讨论容器及其构建块。
+- en: You might have heard the saying that in Unix, and by extension Linux, everything
+    is a file. In the context of this book, we consider resources to be anything that
+    can be used to aid the execution of software. This includes hardware and its abstractions
+    (such as CPU and RAM, files), filesystems, hard disk drives, solid-state drives
+    (SSDs), processes, networking-related stuff like devices or routing tables, and
+    credentials representing users.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能听说过在Unix中，以及扩展到Linux，一切皆为文件的说法。在本书的背景下，我们认为资源是任何可以用来辅助软件执行的东西。这包括硬件及其抽象（如CPU和RAM，文件），文件系统，硬盘驱动器，固态硬盘（SSD），进程，与网络相关的设备或路由表，以及代表用户的凭据。
+- en: Warning
+  id: totrans-56
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Not all resources in Linux are files or represented through a file interface.
+    However, there are systems out there, such as [Plan 9](https://oreil.ly/5DkY8),
+    that take this much further.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Linux 中，并非所有资源都是文件或通过文件接口表示。但是，有一些系统（如 [Plan 9](https://oreil.ly/5DkY8)）推动这一点更进一步。
+- en: 'Let’s have a look at a concrete example of some Linux resources. First, we
+    want to query a global property (the Linux version) and then specific hardware
+    information about the CPUs in use (output edited to fit space):'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看一些 Linux 资源的具体示例。首先，我们想查询一个全局属性（Linux 版本），然后查询正在使用的 CPU 的特定硬件信息（输出已编辑以适应空间）：
+- en: '[PRE2]'
+  id: totrans-59
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: '[![1](Images/1.png)](#co_introduction_to_linux_CO1-1)'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_introduction_to_linux_CO1-1)'
+- en: Print the Linux version.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 打印 Linux 版本。
+- en: '[![2](Images/2.png)](#co_introduction_to_linux_CO1-2)'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_introduction_to_linux_CO1-2)'
+- en: Print CPU-related information, filtering for model.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 打印与模型相关的 CPU 信息。
+- en: With the preceding commands, we learned that this system has four Intel i7 cores
+    at its disposal. When you log in with a different user, would you expect to see
+    the same number of CPUs?
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过前述命令，我们了解到该系统有四个英特尔 i7 核心可供使用。当您使用不同用户登录时，您是否期望看到相同数量的 CPU？
+- en: 'Let’s consider a different type of resource: files. For example, if the user
+    `troy` creates a file under `/tmp/myfile` with permission to do so ([“Permissions”](ch04.xhtml#permissions)),
+    would another user, `worf`, see the file or even be able to write to it?'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们考虑一种不同类型的资源：文件。例如，如果用户 `troy` 在 `/tmp/myfile` 下创建一个有权限进行此操作的文件（[“权限”](ch04.xhtml#permissions)），另一个用户
+    `worf` 是否能看到这个文件或者能够对其进行写入？
+- en: 'Or, take the case of a process, that is, a program in memory that has all the
+    necessary resources available to run, such as CPU and memory. Linux identifies
+    a process using its *process ID*, or `PID` for short ([“Process Management”](ch02.xhtml#kernel-process-management)):'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，以进程为例，即存储在内存中具有运行所需所有必要资源的程序，如 CPU 和内存。Linux 使用其 *进程 ID* 或简称 `PID` 来标识进程（详见
+    [“进程管理”](ch02.xhtml#kernel-process-management)）：
+- en: '[PRE3]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: '[![1](Images/1.png)](#co_introduction_to_linux_CO2-1)'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_introduction_to_linux_CO2-1)'
+- en: Print process status—that is, details about the current process—and limit output
+    to show only the first six lines.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 打印进程状态，即当前进程的详细信息，并将输出限制为仅显示前六行。
+- en: Can there be multiple processes with the same `PID` in Linux? What may sound
+    like a silly or useless question turns out to be the basis for containers (see
+    [“Containers”](ch06.xhtml#containers)). The answer is yes, there can be multiple
+    processes with the same `PID`, in different contexts called *namespaces* (see
+    [“Linux Namespaces”](ch06.xhtml#namespaces)). This happens, for example, in a
+    containerized setup, such as when you’re running your app in Docker or Kubernetes.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Linux 中可以有多个具有相同 `PID` 的进程吗？这可能听起来像是一个愚蠢或无用的问题，但事实证明这是容器的基础（详见 [“容器”](ch06.xhtml#containers)）。答案是可以的，可以在不同的上下文中称为
+    *命名空间*（详见 [“Linux 命名空间”](ch06.xhtml#namespaces)）中有多个具有相同 `PID` 的进程，例如在 Docker
+    或 Kubernetes 中运行应用时。
+- en: Every single process might think that it is special, having `PID 1`, which in
+    a more traditional setup is reserved for the root of the user space process tree
+    (see [“The Linux Startup Process”](ch06.xhtml#linux-boot) for more details).
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个单独的进程可能会认为自己很特殊，具有 `PID 1`，在更传统的设置中，这是为用户空间进程树的根保留的位置（详见 [“Linux 启动过程”](ch06.xhtml#linux-boot)）。
+- en: 'What we can learn from these observations is that there can be a global view
+    on a given resource (two users see a file at the exact same location) as well
+    as a local or virtualized view, such as the process example. This raises the question:
+    is everything in Linux by default global? Spoiler: it’s not. Let’s have a closer
+    look.'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从这些观察中我们可以得出的结论是，对于给定的资源可以有全局视图（两个用户在同一位置看到一个文件）以及本地或虚拟化视图，例如进程示例。这引出了一个问题：在
+    Linux 中，默认情况下是否所有内容都是全局的？剧透：并不是。让我们仔细看看。
+- en: Part of the illusion of having multiple users or processes running in parallel
+    is the (restricted) visibility onto resources. The way to provide a local view
+    on (certain supported) resources in Linux is via namespaces (see [“Linux Namespaces”](ch06.xhtml#namespaces)).
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并行运行多个用户或进程的错觉的一部分是（受限）对资源的可见性。在 Linux 中，提供对（某些支持的）资源的本地视图的方法是通过命名空间（详见 [“Linux
+    命名空间”](ch06.xhtml#namespaces)）。
+- en: A second, independent dimension is that of isolation. When I use the term *isolation*
+    here, I don’t necessarily qualify it—that is, I make no assumptions about how
+    well things are isolated. For example, one way to think about process isolation
+    is to restrict the memory consumption so that one process cannot starve other
+    processes. For example, I give your app 1 GB of RAM to use. If it uses more, it
+    gets [out-of-memory](https://oreil.ly/kvk1u) killed. This provides a certain level
+    of protection. In Linux we use a kernel feature called `cgroups` to provide this
+    kind of isolation, and in [“Linux cgroups”](ch06.xhtml#cgroups) you will learn
+    more about it.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个独立的维度是隔离。当我在这里使用“隔离”一词时，并不一定对其进行限定——也就是说，我不假设事物的隔离程度如何。例如，考虑进程隔离的一种方式是限制内存消耗，以使一个进程不能使其他进程饥饿。例如，我给你的应用分配了
+    1 GB 的 RAM 来使用。如果它使用更多，就会被 [内存不足](https://oreil.ly/kvk1u) 杀掉。这提供了一定程度的保护。在 Linux
+    中，我们使用一个称为 `cgroups` 的内核特性来提供这种隔离，你将在 [“Linux cgroups”](ch06.xhtml#cgroups) 中进一步了解它。
+- en: On the other hand, a fully isolated environment gives the appearance that the
+    app is entirely on its own. For example, a virtual machine (VM; see also [“Virtual
+    Machines”](ch09.xhtml#virtual-machines)) can be used to provide you with full
+    isolation.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一方面，一个完全隔离的环境给人的感觉是应用程序完全独立运行。例如，虚拟机（VM；见 [“虚拟机”](ch09.xhtml#virtual-machines)）可以用来提供完全的隔离。
+- en: A Ten-Thousand-Foot View of Linux
+  id: totrans-76
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Linux 的一万英尺视图
+- en: Whoa, we went quite deep into the weeds already. Time to take a deep breath
+    and re-focus. In [Figure 1-1](#fig-10k-view), I’ve tried to provide you with a
+    high-level overview of the Linux operating system, mapping it to the book chapters.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 哇，我们已经深入到了复杂的细节中。是时候深呼吸并重新聚焦了。在 [图 1-1](#fig-10k-view) 中，我试图为您提供 Linux 操作系统的高级概述，将其映射到书的各章节。
+- en: '![lmlx 0101](Images/lmlx_0101.png)'
+  id: totrans-78
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0101](Images/lmlx_0101.png)'
+- en: Figure 1-1\. Mapping the Linux operating system to book chapters
+  id: totrans-79
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-1\. 将 Linux 操作系统映射到书的章节
+- en: At its core, any Linux distro has the kernel, providing the API that everything
+    else builds on. The three core topics of files, networking, and observability
+    follow you everywhere, and you can consider them the most basic building blocks
+    above the kernel. From a pure usage perspective, you will soon learn that you
+    will most often be dealing with the shell (Where is the output file for this app?)
+    and things related to access control (Why does this app crash? Ah, the directory
+    is read-only, doh!).
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从其核心来看，任何 Linux 发行版都有内核，提供一切构建的 API。文件、网络和可观察性这三个核心主题随处可见，你可以将它们视为内核之上最基本的构建模块。从纯使用角度来看，你很快会发现，你最常处理的是
+    shell（这个应用的输出文件在哪里？）和与访问控制相关的事物（为什么这个应用程序崩溃了？啊，这个目录是只读的，笨！）。
+- en: 'As an aside: I’ve collected some interesting topics, from virtual machines
+    to modern distros, in [Chapter 9](ch09.xhtml#advanced). I call these topics “advanced”
+    mainly because I consider them optional. That is, you could get away without learning
+    them. But if you really, really, really want to benefit from the full power that
+    modern Linux can provide you, I strongly recommend that you read [Chapter 9](ch09.xhtml#advanced).
+    I suppose it goes without saying that, by design, the rest of the book—that is
+    [Chapter 2](ch02.xhtml#kernel) to [Chapter 8](ch08.xhtml#observability)—are essential
+    chapters you should most definitely study and apply the content as you go.'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 顺便说一下：我在 [第 9 章](ch09.xhtml#advanced) 中收集了一些有趣的话题，从虚拟机到现代发行版，我称这些话题为“高级”主要是因为我认为它们是可选的。也就是说，你可以不学习它们也能应付过去。但是，如果你真的、真的、真的想要充分利用现代
+    Linux 所能提供的全部功能，我强烈建议你阅读 [第 9 章](ch09.xhtml#advanced)。我想这不言而喻，按设计，书中的其他部分——从 [第
+    2 章](ch02.xhtml#kernel) 到 [第 8 章](ch08.xhtml#observability)——是你绝对应该学习和应用其内容的必要章节。
+- en: Conclusion
+  id: totrans-82
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: When we call something “modern” in the context of this book, we mean using Linux
+    in modern environments, including phones, data centers (of public cloud providers),
+    and embedded systems such as a Raspberry Pi.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当我们在本书的背景下称某些东西为“现代”时，我们指的是在现代环境中使用 Linux，包括手机、数据中心（公共云提供商）和嵌入式系统，比如树莓派。
+- en: In this chapter, I shared a high-level version of the Linux backstory. We discussed
+    the role of an operating system in general—to abstract the underlying hardware
+    and provide a set of basic functions such as process, memory, file, and network
+    management to applications—and how Linux goes about this task, specifically regarding
+    visibility of resources.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我分享了Linux背景的高层次版本。我们讨论了操作系统的一般角色——抽象化底层硬件并为应用程序提供一组基本功能，如进程、内存、文件和网络管理——以及Linux如何在这一任务中进行操作，特别是关于资源可见性的方面。
+- en: 'The following resources will help you continue getting up to speed as well
+    as dive deeper into concepts discussed in this chapter:'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下资源将帮助您继续加快学习速度，并深入探讨本章讨论的概念：
+- en: O’Reilly titles
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: O’Reilly的其他书籍
+- en: '[*Linux Cookbook*](https://oreil.ly/4Y90O) by Carla Schroder'
+  id: totrans-87
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*Linux Cookbook*](https://oreil.ly/4Y90O) 由卡拉·施罗德编著'
+- en: '[*Understanding the Linux Kernel*](https://oreil.ly/aJYyj) by Daniel P. Bovet
+    and Marco Cesati'
+  id: totrans-88
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*深入理解Linux内核*](https://oreil.ly/aJYyj) 由丹尼尔·P·博韦特和马可·切萨蒂编著'
+- en: '[*Efficient Linux at the Command Line*](https://oreil.ly/nWCch) by Daniel J.
+    Barrett'
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*高效Linux命令行*](https://oreil.ly/nWCch) 由丹尼尔·J·巴雷特编著'
+- en: '[*Linux System Programming*](https://oreil.ly/fh85i) by Robert Love'
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*Linux系统编程*](https://oreil.ly/fh85i) 由罗伯特·洛夫编著'
+- en: Other resources
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其他资源
+- en: '[Advanced Programming in the UNIX Environment](https://oreil.ly/hS0G0) is a
+    complete course that offers introductory material and hands-on exercises.'
+  id: totrans-92
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[UNIX环境高级编程](https://oreil.ly/hS0G0) 是一门完整的课程，提供入门材料和实践练习。'
+- en: '[“The Birth of UNIX”](https://oreil.ly/MlQ0J) with Brian Kernighan is a great
+    resource for learning about Linux’s legacy and provides context for a lot of the
+    original UNIX concepts.'
+  id: totrans-93
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“UNIX的诞生”](https://oreil.ly/MlQ0J) 与布莱恩·科尼汉是了解Linux传承的重要资源，为原始UNIX概念提供背景。'
+- en: 'And now, without further ado: let’s start our journey into modern Linux with
+    the core, erm, kernel, of the matter!'
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，毫不拖泥带水地：让我们开始探索现代Linux的核心——嗯，内核，事情的要点！

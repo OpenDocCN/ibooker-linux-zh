@@ -1,0 +1,990 @@
+- en: Chapter 2\. Working with Permissions and Privileged Accounts
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第二章。使用权限和特权帐户
+- en: For sysadmins, the CLI is home. Typing at the keyboard is standard fare. You’ll
+    need to become comfortable with the command line, its idiosyncrasies, and its
+    shortcuts—yes, there are command-line shortcuts. There’s a lot to learn about
+    Linux at the command line. There are dozens of commands, each with dozens of options.
+    Sure, you’ll only use a handful of commands and a limited number of options for
+    each command, but you need to know how to find the options you need and how to
+    use them when you need to.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于系统管理员，命令行界面（CLI）是家园。在键盘上打字是标准操作。您需要熟悉命令行及其特殊性和快捷方式——是的，有命令行快捷方式。关于Linux命令行有很多要学习的内容。有数十个命令，每个命令有数十个选项。当然，您只会使用少量命令和每个命令的有限选项，但是当需要时，您需要知道如何找到所需的选项并如何使用它们。
+- en: The true power of the CLI is in its ease of use. The CLI was the first interface
+    that users and programmers had with which to address their operating environments.
+    The fact that the CLI is still in use some 50 years later is a testament to its
+    power and usefulness to the sysadmin and user alike. This chapter teaches you
+    to work at the command line as a regular user and as a root user. You also learn
+    to set and modify file permissions and the effects that those permissions have
+    on files.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CLI的真正强大之处在于其易用性。CLI是用户和程序员首次与其操作环境交互的界面。事实上，CLI至今仍在使用，这证明了它对系统管理员和用户的强大和实用性。本章教您如何作为普通用户和root用户在命令行上工作。您还将学习设置和修改文件权限以及这些权限对文件的影响。
+- en: Working as a Regular User
+  id: totrans-3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 作为普通用户工作
+- en: 'There are two user types on a Linux system: regular users and a root, or administrator,
+    user. Regular users each receive their own home directory and somewhat limited
+    system use. The root user also has a home directory (*/root*). Regular users have
+    almost unlimited power in their own home directories to create, modify, remove,
+    and manipulate files but have almost no power outside of that single location.
+    Many system commands are available to regular users. In contrast, other commands
+    are restricted to those granted limited root user access through the `sudo` command
+    or direct access to the root user account.'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux系统上有两种用户类型：普通用户和root（管理员）用户。普通用户每个人都有自己的主目录和有限的系统使用权限。root用户也有一个主目录（*/root*）。普通用户在自己的主目录中几乎具有无限的权限来创建、修改、删除和操作文件，但在该单一位置之外几乎没有权限。许多系统命令对普通用户可用。相比之下，其他命令则限制于通过`sudo`命令或直接访问root用户帐户的限制性root用户访问。
+- en: Note
+  id: totrans-5
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The general and most security-conscious rule is that you should always work
+    as a regular user unless some task requires privileged (root user) access, which
+    is covered in the next section.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一般而言，最注重安全性的规则是，除非某些任务需要特权（root用户）访问，否则应始终作为普通用户工作，这将在下一节中介绍。
+- en: Working as the Root User
+  id: totrans-7
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 作为Root用户工作
+- en: 'The root user is the all-powerful account on any Linux system. The root user
+    can create, edit, move, or remove any file on the system. The root user can reboot,
+    change runlevels, and shut down the system. There are three methods of becoming
+    the root user:'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: root用户是任何Linux系统上的超级账户。root用户可以创建、编辑、移动或删除系统上的任何文件。root用户可以重启、更改运行级别和关闭系统。有三种方法成为root用户：
+- en: Logging in as the root user
+  id: totrans-9
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 以root用户身份登录
+- en: Using the `su` (substitute user) command
+  id: totrans-10
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用`su`（切换用户）命令
+- en: Using the `sudo` command
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用`sudo`命令
+- en: Logging in as Root
+  id: totrans-12
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 以Root身份登录
+- en: On some Linux distributions, you can directly log in as the root user on a system
+    via SSH across the network or interactively at the console. Some Linux distributions
+    prevent SSH root logins by default, while others leave it up to the administrators
+    to decide. It’s not recommended to SSH to a system and login as root. The primary
+    reason is that if you allow across-the-network root access to a system, then it’s
+    possible that malicious actors can attempt to brute force a root login. You don’t
+    want this to happen. Later in the book, I’ll show you how to prevent SSH root
+    logins, if not already disabled, on your distribution.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在某些Linux发行版上，您可以通过网络或交互式控制台直接作为root用户登录系统。一些Linux发行版默认禁止SSH root登录，而其他发行版则由管理员决定。不建议通过SSH登录系统并以root身份登录。主要原因是，如果允许跨网络root访问系统，则可能会有恶意用户尝试暴力破解root登录。您不希望这种情况发生。本书稍后将向您展示如何在您的发行版上禁用SSH
+    root登录（如果尚未禁用）。
+- en: You shouldn’t directly log in as root at the console because doing so prevents
+    system logging from recording who has logged in and become root. Recording who
+    uses the root user account is important because when something goes wrong, you
+    want to know which administrator performed the actions. This record-keeping’s
+    purpose is not to lay blame. Still, it is necessary to meet some regulatory requirements
+    and to correct the actions of a system administrator who needs a teachable moment
+    or some advanced training. The next two options we discuss are better, safer ways
+    to become the root user.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不应直接在控制台上以root身份登录，因为这样做会阻止系统记录登录并成为root的用户。记录使用root用户帐户的人很重要，因为出现问题时，您希望知道哪位管理员执行了操作。这种记录的目的不是为了归咎。但它是必要的，以满足一些监管要求，并纠正需要可教授时刻或一些高级培训的系统管理员的行动。我们接下来讨论的两个选项是更好、更安全的成为root用户的方法。
+- en: Using the su Command
+  id: totrans-15
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用su命令
+- en: One of the appropriate methods of becoming the root user is to use the `su`
+    (substitute user) command. The caveat with using `su` is that the user must know
+    the root user password. If administrative users know the root password, it’s difficult
+    to prevent those same administrators from directly logging in as root. Using the
+    `su` command to become root is acceptable, but only if the root password changes
+    after each use. In larger enterprises, security groups maintain root passwords,
+    and system administrators can check out the root password temporarily to perform
+    maintenance.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 成为root用户的适当方法之一是使用`su`（替代用户）命令。使用`su`的一个注意事项是用户必须知道root用户的密码。如果管理用户知道root密码，很难防止这些管理员直接以root身份登录。使用`su`命令成为root是可以接受的，但前提是每次使用后root密码都要更改。在大型企业中，安全组维护root密码，系统管理员可以临时检出root密码进行维护。
+- en: The root user may `su` to any other user account on the system without knowing
+    the user’s password. This power allows administrators to log in as, or become,
+    any user for troubleshooting purposes because it’s often difficult for users to
+    accurately describe problems they’re experiencing. It also prevents a user from
+    revealing their password to an administrator, which should force the user to change
+    their password.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: root用户可以在系统上`su`到任何其他用户帐户而无需知道用户的密码。这种权限允许管理员以故障排除为目的登录或成为任何用户，因为用户往往难以准确描述他们遇到的问题。它还防止用户向管理员透露其密码，这应促使用户更改其密码。
+- en: 'To `su` to another account is a simple procedure. Issue the `su` command and
+    the user account you wish to `su` to. For this example, I use the full prompt
+    rather than just the `$` to demonstrate the user change:'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要`su`到另一个帐户是一个简单的过程。发出`su`命令和您希望`su`到的用户帐户。在本示例中，我使用完整提示而不仅仅是`$`来演示用户更改：
+- en: '[PRE0]'
+  id: totrans-19
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: The `#` prompt informs you that you are now logged in as the root user. In this
+    book, the user prompt is `$` and the root is `#`, to distinguish a standard user’s
+    prompt from the root user’s. Any command you issue now is done with root privilege,
+    which means that you must be careful because there are no restrictions on the
+    account.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`#`提示符通知您现在已作为root用户登录。在本书中，用户提示符为`$`，而root提示为`#`，以区分标准用户的提示符和root用户的提示符。现在发出的任何命令都具有root权限，这意味着您必须小心，因为账户没有限制。'
+- en: 'The better method of using `su` is using the `su -` command because the `-`
+    means that you also want to take on the root user’s full environment rather than
+    just the account privilege. The display is much too long to show here, but if
+    you issue the `env` command, you’ll see the original user’s environment variables
+    rather than root’s:'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用su的更好方法是使用`su -`命令，因为`-`表示您还想采用root用户的完整环境，而不仅仅是账户权限。显示的内容太长，无法在此处显示，但如果发出`env`命令，您将看到原始用户的环境变量，而不是root的环境：
+- en: '[PRE1]'
+  id: totrans-22
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Use the `exit` command to return to the original user account, as shown here:'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`exit`命令返回原始用户帐户，如下所示：
+- en: '[PRE2]'
+  id: totrans-24
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'And now issue the `su` command with the `-` option. You don’t have to specify
+    root in this command because the default is root:'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在使用带有`-`选项的`su`命令。在此命令中无需指定root，因为默认是root：
+- en: '[PRE3]'
+  id: totrans-26
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'The root user’s environment variables are now displayed. Using the `su -` command
+    is the equivalent of logging into the console as the root user. Any user may `su`
+    to any other user account, which requires one to know the other user’s password:'
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在显示root用户的环境变量。使用`su -`命令相当于以root用户身份登录控制台。任何用户都可以`su`到任何其他用户帐户，这需要知道另一个用户的密码：
+- en: '[PRE4]'
+  id: totrans-28
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Using the sudo Command
+  id: totrans-29
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用sudo命令
+- en: The best method to obtain root access is to use the “substitute user do” or
+    “execute a command as another user” (`sudo`) command. The `sudo` command allows
+    an appropriately configured user account to issue individual commands as the root
+    user. The `sudo` command must precede each command issued. On first use, the `sudo`
+    command requires that the *sudoer* (a user account configured for `sudo` use)
+    supply their own password, as shown in the following code listing. Knowledge of
+    the root password isn’t required.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 获得 root 访问权限的最佳方法是使用“替代用户执行”或“作为另一用户执行命令”（`sudo`）命令。`sudo` 命令允许适当配置的用户帐户以 root
+    用户身份发出单独的命令。每个发出的命令必须在 `sudo` 命令之前。首次使用 `sudo` 命令要求 *sudoer*（为 `sudo` 使用配置的用户帐户）提供他们自己的密码，如下面的代码清单所示。不需要知道
+    root 密码。
+- en: '[PRE5]'
+  id: totrans-31
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: The warning that the user is not in the *sudoers* file means that the user account,
+    bjones, is not configured in the */etc/sudoers* file. In the next section, I demonstrate
+    how to set up a user to be a sudoer.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 警告显示用户不在 *sudoers* 文件中意味着用户帐户 bjones 未在 */etc/sudoers* 文件中配置。在下一节中，我将演示如何设置用户为
+    sudoer。
+- en: Note
+  id: totrans-33
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The `sudo` command, the */etc/sudoers* file, and the sudoer user label are interesting
+    because they have their own unique pronunciations. The accepted pronunciation
+    for `sudo` is “soodoo” and sudoer is “soodooer.” Some sysadmins pronounce them
+    as “soodoe” and “soodoe-ers,” but no one takes issue with either pronunciation.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sudo` 命令、*/etc/sudoers* 文件和 sudoer 用户标签非常有趣，因为它们有独特的发音。`sudo` 的接受发音是“soodoo”，sudoer
+    是“soodooer”。一些系统管理员将其发音为“soodoe”和“soodoe-ers”，但这两种发音都没有问题。'
+- en: Creating a Sudoer
+  id: totrans-35
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 创建一个 sudoer
+- en: 'You must have root user access to edit the */etc/sudoers* file and to use the
+    `visudo` utility, whose only purpose is to edit the */etc/sudoers* file. You shouldn’t
+    edit it directly with vi, Emacs, or any other text editor. To edit the */etc/sudoers*
+    file, issue the `visudo` command as root with no options:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您必须具有 root 用户访问权限才能编辑 */etc/sudoers* 文件，并使用 `visudo` 实用程序，其唯一目的是编辑 */etc/sudoers*
+    文件。不应直接使用 vi、Emacs 或任何其他文本编辑器编辑 */etc/sudoers* 文件。要编辑 */etc/sudoers* 文件，请作为 root
+    无选项地发出 `visudo` 命令：
+- en: '[PRE6]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'The */etc/sudoers* file is a simple text file describing users, groups, and
+    commands that can work with root or other user privileges. You can create a sudoer
+    with very restrictive permissions (i.e., to run a single command as root) or permissive:
+    run any command as root without entering a password to do so. I prefer to configure
+    a mixture of the two by creating sudoers who can run any command as root but must
+    supply their password.'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/sudoers* 文件是描述用户、组和可以使用 root 或其他用户权限运行命令的简单文本文件。您可以创建一个具有非常限制性权限（即仅运行单个命令作为
+    root）或宽松权限（即以 root 身份运行任何命令而无需输入密码）的 sudoer。我更喜欢配置两者的混合，通过创建可以作为 root 运行任何命令的
+    sudoer，但必须提供其密码。'
+- en: 'Hundreds of possible configuration scenarios exist for the */etc/sudoers* file
+    and sudoers. It’s out of the scope of this book to explore more than what’s given
+    here as examples. In this first example, I demonstrate how I set up my user account
+    to use `sudo`. My settings require me to enter my password when using `sudo`:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/sudoers* 文件和 sudoers 存在数百种可能的配置方案。本书的范围仅限于此处的示例。在第一个示例中，我演示了如何设置我的用户帐户来使用
+    `sudo`。我的设置要求在使用 `sudo` 时输入密码：'
+- en: '[PRE7]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: I copy the root user’s setting and insert my user account in its place. The
+    setting takes effect immediately. Setting up a user account to use `sudo` without
+    issuing a password is not recommended. Using a password when issuing a command
+    is an attempt to make it more difficult to make mistakes while wielding root privilege.
+    The same can be said of the `sudo` command itself. The theory is that if an administrator
+    has to issue the `sudo` command, they will make fewer mistakes as root because
+    it requires them to think specifically about their command action and its results.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我复制了 root 用户的设置，并将我的用户帐户插入其中。设置立即生效。不建议设置用户帐户以不需要输入密码就能使用 `sudo`。在发出命令时使用密码是为了在行使
+    root 权限时更难出错。`sudo` 命令本身也是如此。理论上，如果管理员必须发出 `sudo` 命令，他们会因为需要具体思考命令动作及其结果而在 root
+    身份下犯的错误会更少。
+- en: Reading and Modifying Permissions
+  id: totrans-42
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 读取和修改权限
+- en: This section teaches you how to read and modify file permissions. You must learn
+    file permissions to set and modify access to files and directories appropriately.
+    Knowing file permissions helps troubleshoot when users can’t access a file or
+    directory.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本节教你如何读取和修改文件权限。 您必须了解文件权限，以适当地设置和修改对文件和目录的访问权限。 知道文件权限有助于在用户无法访问文件或目录时进行故障排除。
+- en: File permissions are simple but central to Linux security. Their simplicity
+    can make them susceptible to neglect and misconfiguration. Frustrated sysadmins
+    sometimes loosen permissions to solve a problem but never return to the issue
+    or reset the permissions to their proper settings.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件权限简单而又关键于Linux安全性。 它们的简单性可能导致忽视和配置错误。 沮丧的系统管理员有时会放宽权限以解决问题，但从不回头或将权限重置为其正确设置。
+- en: Read, Write, and Execute
+  id: totrans-45
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 读取、写入和执行
+- en: 'The three Linux file permissions or modes are read (r), write (w), and execute
+    (x):'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 三种Linux文件权限或模式是读取（r）、写入（w）和执行（x）：
+- en: Read
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 读取
+- en: View a file or list directory contents.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看文件或列出目录内容。
+- en: Write
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 写入
+- en: Create and modify a file or copy, move, and create files in a directory.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建和修改文件或在目录中复制、移动和创建文件。
+- en: Execute
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 执行
+- en: Execute/run a file or `cd` into a directory.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 执行/运行文件或`cd`进入目录。
+- en: As mentioned in [Chapter 1](ch01.xhtml#getting_started_with_linux), a file’s
+    name does not determine whether it’s executable, as is the case for MS Windows
+    (*.exe* files, etc.). A Linux file is executable or not based on its permissions.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如[第 1 章](ch01.xhtml#getting_started_with_linux)中所述，文件的名称不确定是否可执行，这与MS Windows（*.exe*文件等）的情况不同。
+    Linux文件的可执行性取决于其权限。
+- en: Using the rwx designations in permissions is known as *symbolic mode*. The symbolic
+    mode is one of two methods of identifying permissions. The other is the numeric
+    mode, which assigns values to each of the rwx permissions.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用权限中的rwx指示被称为*符号模式*。 符号模式是识别权限的两种方法之一。 另一种是数字模式，它为rwx权限分配值。
+- en: Numerical Permission Values
+  id: totrans-55
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 数值权限值
+- en: Each of the permission modes has its own assigned numerical value. This shortcut
+    method makes setting permissions easier for sysadmins.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每种权限模式都有其分配的数值。 这种快捷方法使系统管理员更容易设置权限。
+- en: The read permission has a value of `4`, write has a value of `2`, and execute
+    has a value of `1`. Permission values can range from `0` to `7`. A zero permission
+    value means no permission. [Table 2-1](#numerical_permission_values) summarizes
+    this idea.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 读取权限的值为`4`，写入权限的值为`2`，执行权限的值为`1`。 权限值范围从`0`到`7`。 零权限值表示无权限。 [表 2-1](#numerical_permission_values)总结了这个概念。
+- en: Table 2-1\. Numerical permission values
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 2-1\. 数值权限值
+- en: '| Permission mode | Numerical value |'
+  id: totrans-59
+  prefs: []
+  type: TYPE_TB
+  zh: '| 权限模式 | 数值 |'
+- en: '| --- | --- |'
+  id: totrans-60
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| Read | `4` |'
+  id: totrans-61
+  prefs: []
+  type: TYPE_TB
+  zh: '| 读取 | `4` |'
+- en: '| Write | `2` |'
+  id: totrans-62
+  prefs: []
+  type: TYPE_TB
+  zh: '| 写入 | `2` |'
+- en: '| Execute | `1` |'
+  id: totrans-63
+  prefs: []
+  type: TYPE_TB
+  zh: '| 执行 | `1` |'
+- en: '| None | `0` |'
+  id: totrans-64
+  prefs: []
+  type: TYPE_TB
+  zh: '| 无 | `0` |'
+- en: In the next section, you will find out how these permissions work together with
+    group permissions to create a simple but complete file security system.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一节中，您将了解这些权限如何与组权限一起创建一个简单但完整的文件安全系统。
+- en: Group Permissions
+  id: totrans-66
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 组权限
+- en: 'Four file permissions apply to a user’s group: user, group, others, and all.
+    The “all” group includes user, group, and others. It is a shorthand method of
+    globally assigning permissions to a file or directory. Each group has a shorthand
+    designation as well, as shown in [Table 2-2](#group_permissions).'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 四个文件权限适用于用户的组：用户、组、其他人和所有人。 “所有人”组包括用户、组和其他人。 这是一种简化的方法，用于全局分配文件或目录的权限。 每个组也有一个简写标识，如[表 2-2](#group_permissions)所示。
+- en: Table 2-2\. Group permissions
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 2-2\. 组权限
+- en: '| Permission group | Value |'
+  id: totrans-69
+  prefs: []
+  type: TYPE_TB
+  zh: '| 权限组 | 值 |'
+- en: '| --- | --- |'
+  id: totrans-70
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| User | `u` |'
+  id: totrans-71
+  prefs: []
+  type: TYPE_TB
+  zh: '| 用户 | `u` |'
+- en: '| Group | `g` |'
+  id: totrans-72
+  prefs: []
+  type: TYPE_TB
+  zh: '| 组 | `g` |'
+- en: '| Other | `o` |'
+  id: totrans-73
+  prefs: []
+  type: TYPE_TB
+  zh: '| 其他 | `o` |'
+- en: '| All | `a` |'
+  id: totrans-74
+  prefs: []
+  type: TYPE_TB
+  zh: '| 所有 | `a` |'
+- en: Users and sysadmins may set permissions on files for each group individually
+    or all groups simultaneously. Each Linux file and directory is assigned read,
+    write, and execute permissions for each group. The next section ties all of the
+    permissions settings together for you.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户和系统管理员可以分别为每个组或同时为所有组设置文件权限。 每个Linux文件和目录都为每个组分配了读、写和执行权限。 下一节将为您整理所有权限设置。
+- en: Bringing Permissions into Focus
+  id: totrans-76
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 引入权限的焦点
+- en: 'In this subsection, I’ll create a simple but complete file security system
+    that shows how all the permissions we’ve discussed work together. The examples
+    in this section will use the file *file.txt*. If you want to follow along with
+    the example, issue the following command to set up your file:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本小节中，我将创建一个简单但完整的文件安全系统，展示我们讨论过的所有权限是如何一起工作的。本节中的示例将使用文件*file.txt*。如果您想要按照示例操作，请执行以下命令设置您的文件：
+- en: '[PRE8]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'This command creates an empty file named *file.txt* for you. Next, issue the
+    `ls` command with the `-l` (long) option to see file permissions:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个命令会为您创建一个名为*file.txt*的空文件。接下来，请使用带有`-l`（长格式）选项的`ls`命令查看文件权限：
+- en: '[PRE9]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: '[Figure 2-1](#special_character_position_and_usercomm) illustrates the positions
+    and their designations (in bold). The first position is for special file types,
+    such as directories with a `d` in that position (`dr-xr-xr-w`). Regular files
+    have a `-` (`-rw-rw-rw-`) to show that they’re not directories or other special
+    files. The next nine positions are user, group, and other permissions locations.
+    The first “triad,” or three positions, are for the user, the second for group,
+    and the final three are for other users.'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图 2-1](#special_character_position_and_usercomm)说明了位置及其指定（用粗体表示）。第一个位置用于特殊文件类型，例如在该位置带有`d`的目录（`dr-xr-xr-w`）。常规文件具有`-`（`-rw-rw-rw-`），表示它们不是目录或其他特殊文件。接下来的九个位置是用户、组和其他用户权限的位置。第一个“三元组”或三个位置是给用户的，第二个是给组的，最后三个是给其他用户的。'
+- en: '![](assets/plsa_0201.png)'
+  id: totrans-82
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0201.png)'
+- en: Figure 2-1\. Special character position and user, group, and other permission
+    locations
+  id: totrans-83
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-1\. 特殊字符位置及用户、组和其他权限位置
+- en: '[Figure 2-2](#numerical_permission_values_and_usercom) shows the numerical
+    permissions for each listing and then an explicit label for the user (`u`), group
+    (`g`), and other (`o`) triads.'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图 2-2](#numerical_permission_values_and_usercom)展示了每个列表的数字权限，以及用户（`u`）、组（`g`）和其他（`o`）三元组的显式标签。'
+- en: '![](assets/plsa_0202.png)'
+  id: totrans-85
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0202.png)'
+- en: Figure 2-2\. Numerical permission values and user, group, and other (ugo) designations
+  id: totrans-86
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-2\. 数字权限值及用户、组和其他（ugo）指定
+- en: As shown in [Figure 2-2](#numerical_permission_values_and_usercom), numerical
+    permissions are additive for each triad to create a permission profile for a file.
+    For example, a file with `-rw-rw-r--` permissions has a numeric permission value
+    of `664`. The read permission has a value of `4` added to the value of the write
+    permission, which is `2`, which equals `6`. All three possible permissions, `rwx`,
+    yield a value of `7`.
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如图 2-2](#numerical_permission_values_and_usercom)所示，数字权限对每个三元组进行累加，以创建文件的权限配置文件。例如，具有`-rw-rw-r--`权限的文件具有数字权限值`664`。读取权限的值为`4`，加上写入权限的值`2`，总和为`6`。所有三种可能的权限`rwx`总和为`7`。
+- en: If a file has permission equal to `750`, the rwx representation is `-rwxr-x---`.
+    This means that others outside the designated user and group have no permission
+    for the file.
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果一个文件的权限等于`750`，则其rwx表示为`-rwxr-x---`。这意味着指定用户和组之外的其他用户对该文件没有权限。
+- en: Note
+  id: totrans-89
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The *other* group is often referred to as *world*. For example, if permissions
+    for a file are `-rw-rw-r--`, this file is referred to as *world readable* rather
+    than as *other readable*. Permissions for the “other” group are especially sensitive
+    because allowing write or execute permissions to files and directories to others
+    (the world) can be a security risk.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*其他*组通常被称为*world*。例如，如果文件的权限为`-rw-rw-r--`，则该文件被称为*world readable*，而不是*other
+    readable*。“其他”组的权限尤其敏感，因为允许其他人（世界）对文件和目录进行写入或执行权限可能会造成安全风险。'
+- en: Next, you’ll learn how to set and change file permissions using multiple methods.
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，您将学习如何使用多种方法设置和更改文件权限。
+- en: Changing File Permissions
+  id: totrans-92
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 更改文件权限
+- en: Setting and changing file permissions or *modes* is a common system administrator
+    task. Each file on the filesystem has permissions that allow or deny access to
+    users, groups, and others. To change file permissions, you use the `chmod` (change
+    mode) command. You can set or modify permissions with the `chmod` command in multiple
+    ways. You don’t have to be consistent. You can use `chmod` with either numeric
+    designations or the rwx and ugo designations, but you can’t combine the two in
+    the same command. I demonstrate several possibilities and practical examples in
+    the following sections.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置和更改文件权限或*模式*是常见的系统管理员任务。文件系统上的每个文件都有权限，允许或拒绝用户、组和其他人的访问。要更改文件权限，你使用`chmod`（更改模式）命令。你可以使用`chmod`命令以多种方式设置或修改权限。你不必保持一致。你可以使用`chmod`命令使用数字表示或rwx和ugo表示，但不能在同一条命令中混合使用。我在以下几节中展示了几种可能性和实际示例。
+- en: Note
+  id: totrans-94
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Some sysadmins find the symbolic (rwx and ugo) method easier to grasp than the
+    numeric (0, 1, 2, 4) method. You can use either or both methods, because they
+    are equivalent.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些系统管理员认为符号（rwx和ugo）方法比数字（0、1、2、4）方法更容易掌握。你可以使用任一或两种方法，因为它们是等效的。
+- en: Symbolic Mode
+  id: totrans-96
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 符号模式
+- en: 'Changing permissions using the symbolic mode method is quite simple. Referring
+    to the original *file.txt* file you created in a previous example, view the original
+    permissions with the `ls -l` command:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用符号模式方法更改权限非常简单。参考你在之前示例中创建的原始*file.txt*文件，使用`ls -l`命令查看原始权限：
+- en: '[PRE10]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'The current file permissions aren’t adequate. You need to restrict anyone else
+    but yourself from even reading this file. How do you do it? You remove the read
+    permission from others. Removing is equivalent to subtraction because you are
+    subtracting a permission from the current ones given to the file. So, to remove
+    read permission from the file, you subtract read from others using the `chmod`
+    command:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当前文件权限不足。你需要限制除你之外的任何人甚至是读取这个文件。你该如何做呢？你需要从其他人那里移除读权限。移除等同于减法，因为你在当前给予文件的权限中减去了一个权限。所以，要从文件中移除读权限，你可以使用`chmod`命令：
+- en: '[PRE11]'
+  id: totrans-100
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: You have removed read permission from the file for others. Now, no one but you
+    can read (or write to) this file.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经从文件中为其他人移除了读权限。现在，除了你之外没有人能够读取（或写入）这个文件。
+- en: 'When you create a shell script and attempt to execute it with `./file.sh` but
+    nothing happens, you should check the file’s permissions to see if you’ve added
+    the execute permission:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你创建一个shell脚本并尝试用`./file.sh`执行它，但什么也没有发生时，你应该检查文件的权限，看看你是否已经添加了执行权限：
+- en: '[PRE12]'
+  id: totrans-103
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'Permission denied? But I just created the file in my home directory! Checking
+    permissions reveals the problem:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 权限被拒绝？但是我刚刚在我的主目录中创建了这个文件！检查权限会揭示问题：
+- en: '[PRE13]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'The file, *file.sh*, is named with a *.sh* extension. Recall that extensions
+    have no effect in Linux and realize that *file.sh* isn’t currently executable
+    because it doesn’t have the execute permission. You receive the “Permission denied”
+    message when attempting to execute it. To fix the problem, add the execute permission
+    for yourself:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件*file.sh*以*.sh*扩展名命名。请记住，在Linux中扩展名不起作用，并且意识到*file.sh*当前不可执行，因为它没有执行权限。当尝试执行它时，会收到“Permission
+    denied”消息。要解决问题，请为自己添加执行权限：
+- en: '[PRE14]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'Now, *file.sh* is executable:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，*file.sh*是可执行的：
+- en: '[PRE15]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: You can add or subtract multiple permissions from a file and even add and subtract
+    permissions within the same command. Here are some examples of each action. The
+    first command removes (deletes—`rm file.txt`) the file from any previous example.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以向文件中添加或移除多个权限，甚至可以在同一条命令中添加和移除权限。以下是每种操作的示例。第一条命令从任何先前示例中删除（`rm file.txt`）文件。
+- en: 'To add multiple permissions to a file:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要向文件中添加多个权限：
+- en: '[PRE16]'
+  id: totrans-112
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'To subtract multiple permissions from a file:'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 若要从文件中减去多个权限：
+- en: '[PRE17]'
+  id: totrans-114
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'Now add execute permission for all groups and remove read permission for others:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在为所有组添加执行权限并移除其他人的读权限：
+- en: '[PRE18]'
+  id: totrans-116
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: Warning
+  id: totrans-117
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Be careful to explicitly define which ugo group you want to add or subtract
+    permissions for. Simply supplying a `+x` or `-r` defaults to all.
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要明确指定要为哪个ugo组添加或移除权限。仅提供`+x`或`-r`默认适用于所有人。
+- en: 'If you don’t specify which groups you wish to add permissions or subtract permissions
+    for, the default behavior is for the system to assume the intended group is *all*.
+    This can be dangerous from a security perspective. Never grant permissions to
+    all groups unless that is what you intend to do. In the following example, the
+    execute permission is granted to all groups because you didn’t explicitly define
+    which group should receive it:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你没有指定想要添加权限或者减少权限的组，系统会默认你是指 *所有* 组。从安全角度来看，这可能是危险的。除非这正是你想要做的事情，否则永远不要向所有组授予权限。在下面的示例中，由于你没有明确定义哪个组应该接收它，所有组都被授予了执行权限：
+- en: '[PRE19]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: Note
+  id: totrans-121
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: To execute an executable file or script that is not in your path, you must provide
+    the explicit path to the file. If the file is in your current directory, you must
+    tell the shell that it is in your current directory and that you’d like to execute
+    it. Use `./script_name.sh` to inform the shell that the file is executable and
+    in your current directory. Here, `script_name.sh` is the file you wish to execute.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要执行一个不在你的路径中的可执行文件或脚本，你必须提供文件的显式路径。如果文件在当前目录中，你必须告诉 shell 它在你的当前目录，并且你想要执行它。使用
+    `./script_name.sh` 告知 shell 文件是可执行的，并且在你的当前目录中。这里，`script_name.sh` 是你希望执行的文件。
+- en: Numeric Mode
+  id: totrans-123
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 数值模式
+- en: For clarity and comparison, the examples in this section are duplicates of the
+    examples in the previous section. But here we use the numeric mode (rather than
+    the symbolic mode) of changing permissions.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了清晰和比较，在本节中的示例与上一节中的示例是重复的。但这里我们使用数值模式（而不是符号模式）来更改权限。
+- en: 'Create a new file and check its permissions:'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个新文件并检查其权限：
+- en: '[PRE20]'
+  id: totrans-126
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'Remove the read permission from the other group using the numeric method. First,
+    calculate the current permission value of the file and then what you want the
+    new value to be. Currently, the file’s permission value is `664`. The desired
+    value is `660`:'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用数值方法从其他组中删除读权限。首先，计算文件的当前权限值，然后计算你想要的新值。目前，文件的权限值是 `664`。期望的值是 `660`：
+- en: '[PRE21]'
+  id: totrans-128
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Using the numeric method, there’s no adding or subtracting of permissions.
+    You simply reassign a permission value to the file. The code shown next is a repeat
+    of what you did just a page ago and is a symbolic example. You added the execute
+    permission to all and subtracted the read permission from others:'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用数值方法，没有添加或减少权限。你只需将一个权限值重新分配给文件。下面显示的代码是前面一页你所做的重复，是一个符号化的例子。你向所有人添加了执行权限，并从其他人那里减少了读权限：
+- en: '[PRE22]'
+  id: totrans-130
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'The numeric equivalent is to reassign the value of the original file (`664`)
+    to the new one (`771`):'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将原文件 (`664`) 的数值重新分配给新文件 (`771`) 的数值等同于数值模式：
+- en: '[PRE23]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: Either method of changing permissions is perfectly acceptable; it doesn’t matter
+    which method you use. Like most sysadmins, I use both methods interchangeably.
+    It depends more on context and how quickly I want to do something. Changing permissions
+    will become automatic to you with some practice and a few mistakes along the way.
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改权限的任何方法都完全可以接受；使用哪种方法并不重要。像大多数系统管理员一样，我可以交替使用这两种方法。更多取决于上下文和我想要快速完成任务的速度。通过一些实践和一些错误，更改权限将对你来说变得自动化。
+- en: 'Default Permissions Explained: umask'
+  id: totrans-134
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解释默认权限：umask
+- en: 'You might have noticed that when you create a new file, it’s created with specific
+    permissions: `664` or `-rw-rw-r--`. For the root user the default permissions
+    for a new file are `644` or `-rw-r--r--`. You might now wonder how this happens.
+    A global setting called a `umask` (user file-creation mask) masks or filters certain
+    permissions from being given to files by default. The execute permission is never
+    given by default, so the `umask` setting does not explicitly mask it. To find
+    out your user account’s default `umask` value, use the `umask` command:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能已经注意到，当你创建一个新文件时，它会以特定的权限创建：`664` 或者 `-rw-rw-r--`。对于根用户，新文件的默认权限是 `644` 或者
+    `-rw-r--r--`。你可能现在想知道这是怎么发生的。一个称为 `umask`（用户文件创建掩码）的全局设置会默认屏蔽或过滤某些文件的权限。执行权限默认不会被赋予，因此
+    `umask` 设置并没有明确屏蔽它。要查看你的用户帐户的默认 `umask` 值，使用 `umask` 命令：
+- en: '[PRE24]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'You might now wonder why the `umask` reports four digits; we’ve only worked
+    with three so far. The first (leftmost) digit is for special permissions such
+    as `setuid`, `setgid`, and `sticky`, which I’ll cover in a later chapter. For
+    now, focus only on the rightmost three digits: `002`. These three digits correspond
+    to rwx permissions for user, group, and other, respectively. When you create a
+    new file, certain permissions are filtered out. In the case of the `002 umask`,
+    the write (`w`) permission is filtered out, so new files are created as `-rw-rw-r--`.
+    The `2` is for write permission. When a new file is created, the write permission
+    is masked from the “other” group and therefore isn’t given to the new file.'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能会想知道为什么`umask`报告四个数字；我们到目前为止只使用了三个。第一个（最左边的）数字用于特殊权限，例如`setuid`，`setgid`和`sticky`，我将在后面的章节中介绍。现在只关注最右边的三个数字：`002`。这三个数字分别对应于用户、组和其他的rwx权限。当您创建一个新文件时，某些权限会被过滤掉。对于`002
+    umask`，写（`w`）权限被过滤掉，因此新文件被创建为`-rw-rw-r--`。`2`表示写权限。创建新文件时，“其他”组的写权限被屏蔽，因此不会授予新文件。
+- en: For the root user, the default `umask` on my system is `0022`. The write (`w`)
+    permission is masked from both group and other. The reason for a `umask` is security.
+    When a regular user creates a file, you don’t want everyone else to be able to
+    write to it—you must explicitly grant this permission. For the root user, the
+    `umask` prevents the root group and others from writing to files by default. This
+    security feature prevents daemons or programs running as root from writing to
+    certain sensitive files such as the */etc/passwd* file. Everyone may read the
+    file but only the root user may write to it.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于根用户，在我的系统上，默认的`umask`是`0022`。写（`w`）权限被同时屏蔽了组和其他。`umask`的原因是安全性。当普通用户创建文件时，您不希望其他人能够写入它，您必须显式授予此权限。对于根用户，`umask`防止根组和其他用户默认写入某些敏感文件，例如*/etc/passwd*文件。每个人都可以读取文件，但只有根用户可以写入它。
+- en: 'You may change your `umask` value by issuing the `umask` command and a new
+    value. This temporarily changes the `umask` during your current login session:'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过发出`umask`命令和一个新值来更改您的`umask`值。这将在您当前的登录会话期间暂时更改`umask`：
+- en: '[PRE25]'
+  id: totrans-140
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'To make this change permanent, which you may change later, do the following
+    to append the new `umask` to the end of the *.bashrc* file that resides in your
+    home directory:'
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使此更改永久生效（稍后可更改），请按以下步骤将新的`umask`追加到位于您主目录中的*.bashrc*文件末尾：
+- en: '[PRE26]'
+  id: totrans-142
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: Every time you log in, your `umask` is set to `006` or `0006` (which are equivalent)
+    and yields a more secure `-rw-rw----` new default file permission.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每次登录时，您的`umask`设置为`006`或`0006`（二者等效），并生成更安全的`-rw-rw----`新默认文件权限。
+- en: Summary
+  id: totrans-144
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 概要
+- en: In this chapter, you gained more experience working at the command line, learned
+    some new commands, and perhaps more importantly, learned to read and modify file
+    permissions. In [Chapter 3](ch03.xhtml#customizing_the_user_experience), you will
+    learn some file editing basics and how to modify the user’s default environment.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您获得了更多在命令行上工作的经验，学习了一些新命令，也许更重要的是，学会了阅读和修改文件权限。在[第三章](ch03.xhtml#customizing_the_user_experience)，您将学习一些文件编辑基础知识以及如何修改用户的默认环境。

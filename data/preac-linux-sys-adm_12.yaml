@@ -1,0 +1,951 @@
+- en: Chapter 12\. Troubleshooting Linux
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第12章。Linux故障排除
+- en: Some have compared Linux troubleshooting to an “exercise in futility,” but troubleshooting
+    Linux is neither so dramatic nor difficult if you simply take time to investigate
+    what’s going on with your system. All too often, rather than perform any relevant
+    troubleshooting, sysadmins will make a quick backup and then reimage (wipe the
+    disk and reinstall) the system. I’m not a fan of this practice, though in cases
+    of significant security breaches, it’s the best option.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有人将Linux故障排除比作“徒劳无功的练习”，但是如果你简单地花时间调查系统发生了什么，Linux故障排除既不那么戏剧性，也不那么困难。太多时候，系统管理员不会执行任何相关的故障排除，而是快速备份，然后重新镜像（擦除磁盘并重新安装）系统。尽管在重大安全漏洞的情况下，这是最佳选择，但我并不赞成这种做法。
+- en: This chapter teaches you general troubleshooting concepts and tools rather than
+    how to troubleshoot a specific issue (such as how to fix a website that’s not
+    working correctly). Troubleshooting individual problems could fill a very thick
+    book or series of books. I discuss operating system troubleshooting, software,
+    hardware, and security in the chapter.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章教授您一般的故障排除概念和工具，而不是如何排除特定问题（例如如何修复工作不正常的网站）。排除个别问题可能需要一本非常厚的书或一系列书籍。本章讨论操作系统故障排除、软件、硬件和安全性。
+- en: This chapter aims to give you some basic troubleshooting skills, introduce you
+    to essential tools, and show you how to find a solution should other options fail.
+    Troubleshooting is a personal process; not everyone approaches it the same way.
+    These procedures and tools have carried me through my career, but your results
+    may vary and, eventually, you’ll find steps and guidelines that work best for
+    you.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章旨在为您提供一些基本的故障排除技能，介绍必要的工具，并向您展示如果其他选项失败，如何找到解决方案。故障排除是一个个人过程；不是每个人都以相同的方式进行。这些过程和工具在我的职业生涯中帮助了我很多，但您的结果可能会有所不同，最终，您会找到最适合您的步骤和指南。
+- en: Let’s begin your lessons in troubleshooting with the operating system itself.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们从操作系统本身开始您的故障排除课程。
+- en: Reviving the Operating System
+  id: totrans-5
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 恢复操作系统
+- en: Troubleshooting the operating system is either very easy or next to impossible.
+    There seems to be no middle ground. System errors are often, but not invariably,
+    fatal. When I use the word *fatal* in this chapter, I mean unrecoverable errors
+    that require you to reimage the system. Operating system problems can be as simple
+    as running a filesystem check (`fsck`) and repairing a few files. It can be as
+    complex as a multiday troubleshooting session ending in a full system reimage.
+    For example, if you experience a kernel panic, your first thought might be to
+    reimage the system, but this is only sometimes necessary.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 故障排除操作系统要么非常容易，要么几乎不可能。似乎没有中间地带。系统错误通常是致命的，但并非必然如此。当我在本章中使用“致命”一词时，我指的是不可恢复的错误，需要重新镜像系统。操作系统问题可能仅仅是运行文件系统检查（`fsck`）并修复一些文件，也可能像多日的故障排除会议最终导致整个系统重新镜像。例如，如果遇到内核恐慌，您可能首先想到重新镜像系统，但这只有时候是必要的。
+- en: The following section demonstrates how to resolve a kernel panic.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来的部分演示了如何解决内核恐慌。
+- en: De-escalating a Kernel Panic
+  id: totrans-8
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 缓解内核恐慌
+- en: There are multiple reasons systems boot with a kernel panic. Most of the time,
+    it’s either a corrupted *initramfs* file or an improperly created *initramfs*
+    file. The *initramfs* file is specific for each kernel, so if you’ve recently
+    upgraded your kernel, it’s possible that the *initramfs* didn’t get created in
+    the install process or that the *initramfs* creation process didn’t go well. Kernel
+    panics can also result from a recent bad patch. Other issues may still cause kernel
+    panics, such as hardware failure, but those listed here are the most common and
+    easily remedied. A relatively simple procedure (discussed next) might make your
+    system bootable again and save the pain of reinstalling everything.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统引导时发生多种原因的内核恐慌。大多数情况下，要么是损坏的*initramfs*文件，要么是未正确创建的*initramfs*文件。*initramfs*文件对每个内核都是特定的，因此，如果您最近升级了内核，则可能在安装过程中未创建*initramfs*，或者*initramfs*创建过程不顺利。内核恐慌也可能是由于最近的错误补丁引起的。其他问题仍可能导致内核恐慌，例如硬件故障，但列出的问题是最常见且容易解决的。一个相对简单的过程（下面讨论）可能使您的系统再次可引导，并避免重新安装所有内容的痛苦。
+- en: Imagine you’ve received a message similar to the example in [Figure 12-1](#linux_kernel_panic).
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 想象一下，您收到了类似于[图 12-1](#linux_kernel_panic)中示例的消息。
+- en: '![](assets/plsa_1201.png)'
+  id: totrans-11
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_1201.png)'
+- en: Figure 12-1\. Linux kernel panic
+  id: totrans-12
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 12-1。Linux内核恐慌
+- en: The screen *freezes* here. There is no “press any key to continue” message.
+    You must power off the system and power it back on to begin a new boot process.
+    At this point, reboot your system and either start from a bootable ISO, or restart
+    and enter the rescue process from the Grub menu. You will be the root user when
+    you boot into rescue mode or use a bootable ISO, so be careful.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 屏幕在这里*冻结*。没有“按任意键继续”消息。你必须关闭系统然后重新开机开始新的启动过程。在此时，重新启动系统，要么从可引导ISO启动，要么重新启动并从Grub菜单进入救援过程。进入救援模式或使用可引导ISO时，你将成为root用户，所以要小心操作。
+- en: 'Display your kernel version:'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示你的内核版本：
+- en: '[PRE0]'
+  id: totrans-15
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'Run the following command to re-create the correct *initramfs* from your kernel:'
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行以下命令从你的内核重新创建正确的*initramfs*：
+- en: '[PRE1]'
+  id: totrans-17
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'You might receive a message similar to the following:'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能会收到类似以下的消息：
+- en: '[PRE2]'
+  id: totrans-19
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'You must create the *initramfs* file using a different command:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用不同命令创建*initramfs*文件：
+- en: '[PRE3]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Reboot your system. Hopefully, it will boot without issue. If you experience
+    another kernel panic after this repair procedure, you could have a bad hard disk,
+    another corrupted boot-related file, or a buggy kernel. Retry the rescue process
+    and install a different kernel. Be sure to have your ISO image handy for the process.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动系统。希望它能够无问题启动。如果在此修复过程后再次遇到内核恐慌，可能是硬盘故障、其他损坏的启动相关文件或者有bug的内核。重试救援过程并安装不同的内核。确保为该过程准备好ISO映像。
+- en: Boot to the root rescue shell, mount your ISO image, and install the kernel
+    that’s available in the ISO image.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动到根救援shell，挂载你的ISO映像，并安装ISO映像中可用的内核。
+- en: 'For this example, your root filesystem is mounted on */mnt/sysimage* and you
+    mounted your ISO under */opt/mnt*:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，你的根文件系统挂载在*/mnt/sysimage*，并且你将ISO挂载在*/opt/mnt*下：
+- en: '[PRE4]'
+  id: totrans-25
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Use the kernel package that’s in the ISO image. Now, reboot your system; if
+    everything goes well, you should have a functioning system. If not, you should
+    consider booting to the rescue environment again—creating a backup of critical
+    files, if necessary—and then reimaging the system. Of course, this process may
+    also result in kernel panic if you have a hardware problem, such as a bad disk
+    or controller.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用ISO映像中的内核包。现在，重新启动系统；如果一切正常，你应该拥有一个正常运行的系统。如果不行，考虑再次引导到救援环境——如果需要，创建关键文件的备份——然后重新安装系统映像。当然，如果硬件问题如坏盘或控制器问题可能导致内核恐慌。
+- en: There are other sources of operating system problems, but they’re so varied
+    that it’s impossible to cover them here. Instead, you should check the system’s
+    logs, which the next section covers.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 操作系统问题的其他来源很多，但它们各不相同，这里不可能全部覆盖。相反，你应该检查系统的日志，下一节将介绍如何处理。
+- en: Scraping System Logs
+  id: totrans-28
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 抓取系统日志：
+- en: Scraping system logs means searching through logs for errors or other relevant
+    messages. However, sysadmins live a good part of their lives in */var/log*; sometimes,
+    log files are all you have to rely on for troubleshooting system problems.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 抓取系统日志意味着搜索日志中的错误或其他相关信息。然而，系统管理员在*/var/log*中度过大部分时间；有时，日志文件是你唯一依赖的故障排除系统问题的工具。
+- en: 'My starting point is to issue a filtered `dmesg` command such as the following:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我的起始点是发出像下面这样过滤的`dmesg`命令：
+- en: '[PRE5]'
+  id: totrans-31
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'This often narrows the possibilities of where to look for a problem with the
+    operating system and hardware. If you don’t find any relevant errors via `dmesg`,
+    you can investigate further using other filters such as `fault`, `failed`, `undefined`,
+    or `unknown`:'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这通常会缩小操作系统和硬件问题可能发生的范围。如果通过`dmesg`未找到相关错误，请尝试使用其他过滤器如`fault`、`failed`、`undefined`或`unknown`进一步调查：
+- en: '[PRE6]'
+  id: totrans-33
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'Use your system’s log files if previous searches reveal nothing of value:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果之前的搜索未发现有价值信息，请使用系统日志文件：
+- en: '[PRE7]'
+  id: totrans-35
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'This might produce a very long list. If it does, I suggest redirecting the
+    output to a file so that you can scrape these results:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这可能会生成一个非常长的列表。如果是这样，建议将输出重定向到文件中，以便后续分析这些结果：
+- en: '[PRE8]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Then you can search for something more specific in this text file:'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后你可以在这个文本文件中搜索更具体的内容：
+- en: '[PRE9]'
+  id: totrans-39
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: I grepped for `host` here, but you should `grep` for whatever term you need
+    to search for in these results. Refine this process until you find the relevant
+    error that fits your problem. It can take time. This is my process, but it usually
+    yields valuable information and provides me with a few next steps for further
+    investigation.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我在这里使用`grep`搜索了`host`，但你应该根据需要搜索这些结果中的任何术语。优化这个过程直到找到符合你问题的相关错误。这可能需要时间。这是我的处理过程，但通常能提供有价值的信息，并为进一步调查提供几个下一步方向。
+- en: The next section deals with software troubleshooting and my process for finding
+    errors and problems.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来的章节将讨论软件故障排除以及我找出错误和问题的过程。
+- en: Unraveling Software Problems
+  id: totrans-42
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 解开软件问题
+- en: Software troubleshooting can be tricky. The root cause of software problems
+    might not be the software. Still, the problem can manifest itself as a software
+    issue until you investigate further. As any experienced sysadmin will tell you,
+    software problems can have root causes in hardware, other software, file corruption
+    or deletion, software dependency issues, network problems, duplicated ports, duplicated
+    IP addresses, and dozens of possible configuration or misconfiguration problems
+    anywhere on the system. Software error messages won’t necessarily pinpoint a solution,
+    but they’re a first step. However, error codes and logs are a good starting place
+    for troubleshooting.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 软件故障排除可能会很棘手。软件问题的根本原因可能不是软件本身。但在进一步调查之前，问题可能会表现为软件问题。正如任何有经验的系统管理员会告诉您的那样，软件问题可能的根本原因可能在硬件、其他软件、文件损坏或删除、软件依赖性问题、网络问题、重复的端口、重复的IP地址以及系统上任何可能的配置或错误配置问题中。软件错误消息不一定会指向解决方案，但它们是排除故障的一个良好起点。然而，错误代码和日志是排除故障的一个良好起点。
+- en: In this section, I direct you to locate and sift through system and application
+    logs and to perform any built-in or vendor-supplied status and configuration checks.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我指导您定位和筛选系统和应用程序日志，并执行任何内置或供应商提供的状态和配置检查。
+- en: Inspecting System Logs
+  id: totrans-45
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 检查系统日志
+- en: System logs are a great starting place to find errors, failures, and successes.
+    Yes, successes are not necessarily benign. Think about the scenario where someone
+    has breached your network, logs into a system with a legitimate account, becomes
+    root, and then exfiltrates confidential data or encrypts your data. It’s only
+    the acting party—the person fraudulently accessing the system—that isn’t legitimate.
+    The system sees every login and action from this malicious actor as normal, legitimate,
+    and successful. These actions probably wouldn’t set off any alarms at all.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统日志是查找错误、故障和成功的好起点。是的，成功不一定是良性的。想象一下这样的情景，有人已经入侵了您的网络，在使用合法账户登录系统后变成了root用户，然后窃取了机密数据或加密了您的数据。只有执行操作的一方——恶意访问系统的人——是不合法的。系统将这个恶意行为视为正常、合法和成功。这些动作可能完全不会引起任何警报。
+- en: Your system logs show what’s happening, so don’t discount checking for successful
+    logins. In a later section of this chapter, I give you an example security script
+    that shows you logins at a glance for your inspection.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的系统日志显示了发生的情况，因此不要忽视检查成功登录情况。在本章后面的一节中，我会给您展示一个安全脚本示例，可以让您一目了然地查看登录情况进行检查。
+- en: System logs are located in */var/log*. To read these files, you must have root
+    privileges.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统日志位于*/var/log*。要读取这些文件，您必须具有根权限。
+- en: 'Although the output is too long and too wide for the text of this book, here
+    are the two troubleshooting filters I use on system logs:'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管输出内容对于本书的文本来说过长且过宽，这里是我在系统日志上使用的两个故障排除过滤器：
+- en: '[PRE10]'
+  id: totrans-50
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: I always use the `-i` option to ignore case so that I’m sure to catch every
+    instance of error and fail regardless of how the log captures them. The next section
+    deals with checking application-specific logs, often more helpful than relying
+    on system logs alone.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我总是使用`-i`选项来忽略大小写，这样我就能确保捕捉到每一个错误和失败的实例，无论日志如何捕捉它们。下一节将介绍检查特定应用程序日志，通常比仅依赖系统日志更有帮助。
+- en: Checking Application Logs
+  id: totrans-52
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 检查应用程序日志
+- en: Fortunately, application logs provide specific errors or error codes that help
+    you troubleshoot software problems. These logs may be located in */var/log*, under
+    the application’s home directory, or in some other directory, but always in a
+    subdirectory named *log* or *logs*. For example, Apache’s logs are often in */var/log/httpd*,
+    but on Red Hat Enterprise Linux–based systems, there is also a symbolic link from
+    */etc/httpd/logs* to */var/log/httpd*. Often these links exist to be backward
+    compatible with other applications.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 幸运的是，应用程序日志提供了特定的错误或错误代码，帮助您排查软件问题。这些日志可能位于*/var/log*下，也可能位于应用程序的主目录下，或者其他某个目录中，但始终位于名为*log*或*logs*的子目录中。例如，Apache的日志通常位于*/var/log/httpd*，但在基于Red
+    Hat Enterprise Linux的系统中，还会有一个从*/etc/httpd/logs*到*/var/log/httpd*的符号链接。通常这些链接是为了与其他应用程序向后兼容而存在的。
+- en: Leveraging Internal Application Checks
+  id: totrans-54
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 利用内部应用程序检查
+- en: Some developers include configuration checkers and specific tools with their
+    software to help you identify, isolate, and troubleshoot problems. These utilities
+    are your best option when facing application-specific configuration issues and
+    failures. Some configuration files have a rather complex syntax, and missing a
+    single parenthesis or semicolon can be extremely difficult to isolate.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些开发人员在他们的软件中包含了配置检查器和特定工具，帮助你识别、隔离和解决问题。面对特定应用程序配置问题和失败时，这些实用程序是你的最佳选择。一些配置文件有相当复杂的语法，遗漏单个括号或分号可能极其难以隔离。
+- en: 'For example, the following command provides excellent feedback to check your
+    Apache HTTP Server configuration syntax. When everything in the *httpd.conf* is
+    configured correctly, you receive a `Syntax OK` message:'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，以下命令提供了检查你的Apache HTTP服务器配置语法的极好反馈。当*httpd.conf*中的所有配置正确时，你将收到`Syntax OK`消息：
+- en: '[PRE11]'
+  id: totrans-57
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'However, if a configuration directive is incorrect, your `configtest` results
+    isolate the problem:'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然而，如果配置指令不正确，你的`configtest`结果会隔离出问题：
+- en: '[PRE12]'
+  id: totrans-59
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'The configuration is also checked on the start or restart of the application:'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动或重新启动应用程序时也会检查配置：
+- en: '[PRE13]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'In the preceding error message, the line `Oct 16 08:49:44 server1 httpd[59189]:
+    AH00526: Syntax error on line 34 of /etc/httpd/conf/httpd.conf:` (part of which
+    has been elided in the preceding code listing) informs me there is a syntax error
+    in my configuration file and I need to investigate further:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '在上述错误消息中，行`Oct 16 08:49:44 server1 httpd[59189]: AH00526: Syntax error on line
+    34 of /etc/httpd/conf/httpd.conf:`（部分在前面的代码列表中被省略）告诉我配置文件中存在语法错误，需要进一步调查：'
+- en: '[PRE14]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'The results of my search don’t help troubleshoot the syntax error, so I use
+    the other recommended system tool, `journalctl`, from the preceding `apachectl`
+    `restart` command (`See "systemctl status httpd.service" and "journalctl -xe"
+    for details.`), the results are just as vague:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我搜索的结果无助于排除语法错误，因此我使用了之前推荐的系统工具`journalctl`，从前面的`apachectl restart`命令 (`查看详细信息，请参阅"systemctl
+    status httpd.service"和"journalctl -xe"。`)，结果同样模糊：
+- en: '[PRE15]'
+  id: totrans-65
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Your best course of action is to examine lines in the *httpd.conf* file you
+    changed that caused the error. Common problems such as misspelling or using an
+    incorrect directive are typical reasons for syntax errors.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你最好的做法是检查你更改的*httpd.conf*文件中引起错误的行。常见问题如拼写错误或使用错误的指令通常是语法错误的原因。
+- en: Managing Firewalls and Their Rules
+  id: totrans-67
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 管理防火墙及其规则
+- en: Firewalls are great for slowing down intruders, but they can also interfere
+    with troubleshooting. Avoid the temptation to disable your firewall during troubleshooting.
+    Instead, add new rules to accommodate what you need to do. You might forget to
+    re-enable the firewall, which can lead to disastrous consequences.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 防火墙非常适合减缓入侵者速度，但它们也可能干扰故障排除。在故障排除过程中避免禁用防火墙的诱惑。相反，添加新规则以适应你需要做的事情。你可能会忘记重新启用防火墙，这可能导致灾难性后果。
+- en: The firewall isn’t 100% foolproof, but it has value in slowing down a would-be
+    intruder. Sometimes its existence is enough to deter a malicious actor and encourage
+    them to seek out easier prey. It’s frustrating to troubleshoot a new service for
+    hours to eventually remember that it could be your firewall causing the problem.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 防火墙并非百分之百防护，但在减缓潜在入侵者方面具有价值。有时候，它的存在足以阻止恶意行为者，并鼓励他们寻找更容易的目标。花费数小时来排查新服务问题最终记住可能是你的防火墙导致了问题，这是非常令人沮丧的。
+- en: Removing and Reinstalling Software
+  id: totrans-70
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 卸载和重新安装软件
+- en: Endless troubleshooting is often an exercise in patience-testing and isn’t recommended.
+    There’s no set standard for how long you should spend troubleshooting a software
+    problem, but at some point, you must determine that further troubleshooting is
+    a waste of your valuable time. You should back up the application’s configuration
+    files and data at that time and then remove and reinstall it.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无尽的故障排除通常是对耐心的考验，不建议这样做。虽然没有设定软件问题需要花费多长时间的标准，但在某个时候，你必须确定进一步的故障排除是浪费宝贵时间。那时候，你应该备份应用程序的配置文件和数据，然后将其删除并重新安装。
+- en: Before reinstalling an application, be sure you have installed the latest stable
+    package available or downloaded the latest stable source code. If you were on
+    the latest version, try returning to an earlier stable version. Also, be sure
+    that your system is updated and has the latest compatible tools and utilities
+    for your application. The *README* or *INSTALL* text files, included with source
+    code packages, often list compatible compiler versions and versions of other required
+    supporting software.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在重新安装应用程序之前，请确保已安装了最新的稳定包或下载了最新的稳定源代码。如果您使用的是最新版本，请尝试返回到较早的稳定版本。此外，请确保您的系统已更新，并具备了应用程序所需的最新兼容工具和实用程序。源代码包中附带的*README*或*INSTALL*文本文件通常列出了兼容的编译器版本和其他所需支持软件的版本。
+- en: Rebooting Your System
+  id: totrans-73
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 重新启动您的系统
+- en: The concept of regular system rebooting is not only foreign to many Linux system
+    administrators; it’s downright unheard of. However, rebooting should be a part
+    of regular system maintenance. Rebooting refreshes both hardware and software
+    configurations, but it also informs you of any failures or problems. For example,
+    you might find that some applications don’t start automatically after a reboot.
+    Perhaps you didn’t `enable` them with a `systemctl enable *service_name*` command.
+    Starting a service places it into memory, sets up listening ports, and allows
+    connectivity. Still, that service, unless enabled, will not start on the next
+    reboot, whether human-initiated or one resulting from a crash.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于许多Linux系统管理员来说，定期重新启动系统的概念不仅陌生，而且几乎闻所未闻。然而，重新启动应该是常规系统维护的一部分。重新启动不仅刷新硬件和软件配置，还能通知您有关任何故障或问题的信息。例如，您可能会发现某些应用程序在重新启动后不会自动启动。也许您没有使用`systemctl
+    enable *service_name*`命令来启用它们。启动一个服务会将其置于内存中，设置监听端口并允许连接。但是，除非启用，否则该服务将不会在下次重启时启动，无论是人为发起的还是由崩溃引起的。
+- en: 'The `dmesg` command informs you of any problems from your latest reboot. You
+    can discover both software and hardware errors by filtering the results. Here
+    are two such examples:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`dmesg`命令会通知您有关最新重新启动中的任何问题。通过过滤结果，您可以发现软件和硬件错误。以下是两个示例：'
+- en: '[PRE16]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: Rebooting your systems shouldn’t be controversial. Monthly warm booting (restart)
+    and quarterly cold booting (power off/on) is a standard part of many enterprise
+    maintenance cycles, as is patching, security auditing, and port scanning. The
+    next section is a discussion of hardware troubleshooting.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动您的系统不应成为争议。每月进行热启动（重启）和每季度进行冷启动（断电/开机）是许多企业维护周期的标准部分，还包括打补丁、安全审计和端口扫描。下一部分将讨论硬件故障排除。
+- en: Dealing with Hardware Failures
+  id: totrans-78
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 处理硬件故障
+- en: Troubleshooting hardware is generally very easy; hardware either works or doesn’t.
+    There are times when hardware begins to fail, and you experience erratic behavior,
+    such as intermittent functionality of a network interface card (NIC) or file corruption
+    on a failing hard disk. But often a hardware device fails and you must replace
+    it. Data center server systems have built-in redundancy of several subsystems
+    so that failures aren’t catastrophic. Always purchase server systems with redundant
+    power supplies, multiple NICs, and plenty of RAM. Set up disks in arrays such
+    as RAID 10 so that failures don’t ruin your evenings and weekends.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常，排除硬件故障非常简单；硬件要么正常工作，要么不工作。当硬件开始故障时，您可能会遇到像网络接口卡（NIC）的间歇性功能或正在失效的硬盘上的文件损坏等不规律行为。但通常，硬件设备发生故障时，您必须更换它。数据中心服务器系统具有多个子系统的内置冗余，以便故障不至于灾难性。始终购买具有冗余电源供应、多个NIC和充足RAM的服务器系统。将磁盘设置为RAID
+    10等阵列，以确保故障不会破坏您的夜晚和周末。
+- en: Even if you have a multidisk array, please note that if one of the drives fails,
+    there will be a performance impact. You’ll receive a warning that a disk has failed,
+    and if you have physical access to the system, it’s easy to determine, via status
+    lights, which disk has failed. And, although there’s an expense involved, you
+    should have multiple new disks on hand to swap out when failures occur. The other
+    option is to migrate to solid-state drives (SSDs) that run cooler and have a longer
+    lifespan than mechanical drives. Remember that heat is the enemy of electronics,
+    which is why data centers seem windy and chilly. Heat dissipation is one of the
+    big problems and major design features of any good data center.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 即使您拥有多磁盘阵列，请注意，如果其中一块驱动器故障，会影响性能。您将收到一条关于磁盘故障的警告，如果您可以物理访问系统，通过状态指示灯很容易确定哪个磁盘已故障。尽管需要花费一些钱，但在发生故障时应该准备好多个新的磁盘进行更换。另一个选择是迁移到比机械硬盘更冷却且寿命更长的固态硬盘（SSD）。请记住，热量是电子设备的敌人，这就是为什么数据中心看起来风大且寒冷的原因之一。散热是任何良好数据中心的主要设计特征和重大问题之一。
+- en: The following sections cover preemptive troubleshooting, diagnostics, and hardware
+    replacement and a discussion of system design.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来的部分涵盖了预防性故障排除、诊断和硬件更换，以及系统设计的讨论。
+- en: Preemptively Troubleshooting Hardware
+  id: totrans-82
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 预防性硬件故障排除
+- en: Unless you have some very smart hardware diagnostics from a blade server system
+    chassis or a third-party software suite, preemptive hardware failure prediction
+    isn’t possible. Native Linux commands provide you with a general listing or status.
+    Still, if your hardware components are operating, it’s rare to find a “flagged”
+    device or to receive a warning about an imminent failure.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除非您拥有来自刀片服务器系统底座或第三方软件套件的智能硬件诊断工具，否则无法预测硬件故障。本机Linux命令提供给您一般的列表或状态。尽管如此，如果您的硬件组件正常运行，很少会出现“标记”设备或收到关于即将发生故障的警告。
+- en: Hardware failures are difficult to predict because, as I mentioned earlier,
+    hardware either works or doesn’t. Some hardware components *can* partially fail.
+    Network interface cards (NICs) can begin to fail and “jabber” or send malformed
+    packets. Jabbering network cards are failing and should be replaced.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于我之前提到的，硬件故障难以预测，因为硬件要么工作，要么不工作。一些硬件组件*可以*部分故障。网络接口卡（NIC）可能会开始失败并“发狂”，或发送格式不正确的数据包。发狂的网络卡正在故障中，应予以更换。
+- en: Mechanical hard disks can partially fail by corrupting files or by booting incorrectly,
+    randomly, or not at all. Sometimes a failing hard drive will temporarily repair
+    itself after a cold boot. Sometimes you can hear a mechanical hard disk spinning
+    up, spinning down, clicking, or *clunking* when they fail. Use a recent backup
+    and replace the drive. Use solid-state drives whenever possible. Mirror your drives
+    whenever possible too. Solid-state drives will fail on a general or all-or-nothing
+    basis. I’ve never seen a solid-state drive partially fail.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 机械硬盘可能会以文件损坏或不正确、随机或根本无法引导的方式部分故障。有时，故障的硬盘在冷启动后可能会暂时修复自身。有时候，当机械硬盘故障时，您会听到它们在旋转、启动、关闭或*咔哒*声。使用最近的备份并更换硬盘。尽可能使用固态硬盘。也尽可能镜像您的驱动器。固态硬盘通常会以全存或全失的方式故障。我从未见过固态硬盘部分失效的情况。
+- en: Memory “sticks” will generally fail on an all-or-nothing basis. I’ve never seen
+    one partially fail. The RAM doesn’t count up completely during the boot process
+    when a memory stick fails. For example, if a system contains 64 GB of RAM, it
+    might only recognize 48 GB. Although memory sticks may fail individually, they
+    are read in pairs. So if you have eight 8 GB memory sticks in a system to add
+    up to a total of 64 GB, and you have a single stick failure, the RAM count fails
+    in pairs. To clarify, if your system has four banks of two memory sticks (8 GB
+    each × 8 sticks = 64 GB), and one memory stick fails, then its paired memory stick
+    will also appear to have failed, and you will see only 48 GB of RAM count up on
+    boot.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内存“条”通常会以全失或全存的方式失败。我从未见过部分失效的情况。当内存条故障时，在启动过程中RAM不会完全计算。例如，如果系统包含64 GB的RAM，可能只会识别48
+    GB。虽然内存条可以单独故障，但它们以对的方式读取。因此，如果您的系统有八个8 GB内存条（共计64 GB），并且单个内存条故障，则RAM计数会以对的方式失效。具体而言，如果您的系统有四个插槽，每个插槽放置两根内存条（每根8
+    GB × 8根 = 64 GB），一根内存条故障，则它的成对内存条也会显示为故障，启动时RAM只会计数48 GB。
+- en: The next section introduces you to a handful of useful hardware commands.
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来的部分将为您介绍几个有用的硬件命令。
+- en: Gathering System Hardware Information
+  id: totrans-88
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 收集系统硬件信息
+- en: I don’t have any bare metal systems with Linux on them. I only have virtual
+    machines to work with. I suggest using the commands discussed in this section
+    to collect hardware data for every unique physical system you manage and keeping
+    this information where you can easily refer to it later. Gather hardware information
+    for each bare-metal system and then collect the same information for a single
+    virtual machine from each virtualization platform. Virtual hardware is very consistent
+    per platform and even between virtual hosts. In other words, if you have all VMware
+    hosts and your host software version is consistent, then your virtual machine
+    hardware should all be the same. Virtual machines may move among hosts without
+    issue because their virtual hardware is generic and consistent regardless of what
+    the underlying hardware looks like.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我没有任何裸机系统上安装 Linux。我只有虚拟机可供使用。我建议使用本节讨论的命令收集每个您管理的唯一物理系统的硬件数据，并将这些信息保存在您稍后可以轻松查阅的地方。收集每个裸机系统的硬件信息，然后为每个虚拟化平台的单个虚拟机收集相同的信息。虚拟硬件在每个平台和虚拟主机之间非常一致。换句话说，如果您有所有
+    VMware 主机且您的主机软件版本一致，那么您的虚拟机硬件应该都是相同的。虚拟机可以在主机之间自由移动，因为它们的虚拟硬件是通用的和一致的，而不管底层硬件是什么样子。
+- en: The commands presented in this section gather information about your hardware,
+    and while some of the information might overlap, it’s still good to gather information
+    from multiple commands. As you’ll see, some commands gather specific details about
+    your hardware, while others gather only product names and functions. You can execute
+    the commands as a regular user, but some warn you to use the root account, or
+    the information might be incomplete or inaccurate. All commands in this section
+    are run as the root user. The output from these commands is generally too long
+    to fully reproduce in this book, but I’ll provide excerpts for each to give you
+    an idea of what the commands report. There are multiple options available for
+    each command that offer custom output and reports. Refer to each command’s man
+    page to learn more about their options. Finally, note that depending on your specific
+    Linux distro, some of the tools discussed might be present and other tools might
+    need to be installed.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本节介绍的命令收集有关您硬件的信息，尽管其中一些信息可能会重叠，但从多个命令收集信息仍然是很好的。正如您将看到的，某些命令收集有关您硬件的具体详细信息，而其他命令仅收集产品名称和功能。您可以以普通用户身份执行这些命令，但某些命令警告您要使用
+    root 帐户，否则信息可能不完整或不准确。本节中的所有命令都是以 root 用户身份运行的。这些命令的输出通常太长，无法在本书中完全重现，但我将为每个命令提供摘录，以便您了解命令的报告内容。每个命令都提供多个选项，可提供自定义输出和报告。有关这些选项的更多信息，请参阅每个命令的
+    man 页面。最后，请注意，根据您的特定 Linux 发行版，某些讨论的工具可能已经存在，而其他工具可能需要安装。
+- en: hwinfo
+  id: totrans-91
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: hwinfo
+- en: 'The `hwinfo` utility probes your system’s hardware and reports on its findings.
+    The report is very long but very thorough. You can use the `--short` option to
+    create an abbreviated summary report. The following listing is the complete short
+    report:'
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`hwinfo` 实用程序探测系统的硬件并报告其发现。报告非常长，但非常详尽。您可以使用 `--short` 选项创建简短摘要报告。以下是完整的简短报告列表：'
+- en: '[PRE17]'
+  id: totrans-93
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: The entire report is very long, but the short version is complete without all
+    the details. Creating both reports for each system you manage is a good strategy.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 整个报告非常长，但简短版本完整而无需所有详细信息。为您管理的每个系统创建两种报告是一个好策略。
+- en: Next, we’ll cover the so-called “`ls` commands” for hardware. Each one begins
+    with the letters `ls` and lists various pieces of a system’s hardware complement.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们将介绍所谓的“`ls` 命令”用于硬件。每个命令以 `ls` 开头，并列出系统硬件组件的各种部分。
+- en: lshw
+  id: totrans-96
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: lshw
+- en: 'The `lshw` utility provides detailed hardware information, including CPU, mainboard,
+    memory, firmware, cache configuration, and bus speeds. You can optionally create
+    an HTML report version with the `-html` option. The following is a partial output
+    from the `lshw` command with no options:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lshw` 实用程序提供详细的硬件信息，包括 CPU、主板、内存、固件、缓存配置和总线速度。您可以使用 `-html` 选项选择创建 HTML 报告版本。以下是使用
+    `lshw` 命令无选项生成的部分输出：'
+- en: '[PRE18]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: The `lshw` utility is a comprehensive hardware snapshot of your system. The
+    remainder of this section’s `ls` commands are specific to subsystems.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lshw` 实用程序是系统详细硬件快照。本节其余的 `ls` 命令是特定于子系统的。'
+- en: lspci
+  id: totrans-100
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: lspci
+- en: 'The `lspci` utility lists all PCI devices, their manufacturer, and version
+    information:'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lspci` 实用程序列出所有 PCI 设备，它们的制造商和版本信息：'
+- en: '[PRE19]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: One of the most interesting options for `lshw` is `-sanitize`, which removes
+    any sensitive information from the report.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lshw` 最有趣的选项之一是 `-sanitize`，它可以从报告中删除任何敏感信息。'
+- en: lsblk
+  id: totrans-104
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: lsblk
+- en: 'The `lsblk` utility lists all block devices, their mount points, sizes, and
+    other information. To view a complete report available from `lsblk`, you must
+    execute it as root because of how it queries information from *sysfs* and the
+    *udev db* (if available):'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lsblk` 实用程序列出所有块设备、它们的挂载点、大小和其他信息。要查看从 `lsblk` 获取的完整报告，必须以 root 身份执行它，因为它查询信息的方式是从
+    *sysfs* 和 *udev db*（如果可用）获取的：'
+- en: '[PRE20]'
+  id: totrans-106
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'You can use other options to extract more information, such as device owner,
+    permissions, and UUID. The output isn’t formatted correctly for this text, but
+    you can enter the following command to see extended block device information:'
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用其他选项来提取更多信息，例如设备所有者、权限和 UUID。此输出未正确格式化用于此文本，但您可以输入以下命令以查看扩展的块设备信息：
+- en: '[PRE21]'
+  id: totrans-108
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: The `lsblk` utility does not report on RAM disk devices.
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lsblk` 实用程序不会报告 RAM 磁盘设备。'
+- en: lscpu
+  id: totrans-110
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: lscpu
+- en: 'The `lscpu` utility reports  architecture information about a system’s CPUs.
+    It has a lot of options, and some must be stacked, or used together, so refer
+    to the man page to review specific requirements for the report you need:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lscpu` 实用程序报告有关系统 CPU 架构的信息。它有很多选项，有些必须叠加使用，因此请参阅手册页以查看您所需报告的具体要求：'
+- en: '[PRE22]'
+  id: totrans-112
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: CPUs rarely fail, but the information is valuable if you need to check for compatibility
+    or when upgrading to a new CPU generation.
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CPU 很少出现故障，但如果需要检查兼容性或升级到新的 CPU 世代时，这些信息是非常有价值的。
+- en: Using these utilities for troubleshooting a system requires gathering pre-failure
+    information as a hardware audit and then comparing those initial reports with
+    those after a suspected failure. A simple `diff` between the pre- and post-failure
+    reports will inform you of any differences. Remember that this works because many
+    of these utilities probe your hardware when you execute them rather than only
+    reading a configuration from a static system text file.
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用这些实用程序来排除系统故障需要收集预故障信息作为硬件审计，然后将这些初始报告与疑似故障后的报告进行比较。简单的 `diff` 可以告诉您预故障和故障后报告之间的任何差异。请记住，这有效是因为许多这些实用程序在执行时探测您的硬件，而不仅仅是从静态系统文本文件中读取配置。
+- en: The next section covers security troubleshooting and tools you use to assess
+    your security.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一节介绍了安全故障排除和评估系统安全所使用的工具。
+- en: Creating Automated Security Checks
+  id: totrans-116
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 创建自动化安全检查
+- en: Before troubleshooting a problem, you must know it exists. The way to find out
+    if you have a problem is through observation via logs, reports, failed processes,
+    removed or damaged files, compromised accounts, and so on. Detecting and fixing
+    security issues is a full-time job for software and personnel. In other words,
+    if you manage more than a handful of server systems, and depending on their criticality,
+    you need to purchase security software with monitoring, automatic updating, notification,
+    and some security tools and utilities for system scanning, auditing, and mitigation.
+    Furthermore, a single tool isn’t sufficient. You need an intrusion detection/prevention
+    system, firewalls, SELinux, anti-malware, and numerous secure system configurations
+    to improve your systems’ overall security profile.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在解决问题之前，您必须知道问题的存在。通过日志、报告、失败的进程、删除或损坏的文件、被 compromise 的帐户等观察方式可以找出问题。检测和修复安全问题是软件和人员的全职工作。换句话说，如果您管理超过几个服务器系统，并且取决于其重要性，您需要购买具有监控、自动更新、通知以及一些系统扫描、审核和减轻工具的安全软件。此外，单一工具是不足够的。您需要入侵检测/防护系统、防火墙、SELinux、反恶意软件和许多安全系统配置来提高系统的整体安全性。
+- en: In this section, I cover creating a daily security report that you can automate
+    for reporting on system security. It’s impossible to watch every system 24 hours
+    per day unless you have some automated processes taking care of it for you. Malicious
+    actors and applications often stop, disrupt, or erase logs to cover their covert
+    operations, so sometimes, the lack of information tells you that you have a problem.
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我介绍了创建每日安全报告的步骤，您可以自动化报告系统安全情况。除非您有一些自动化流程来照顾您，否则每天 24 小时内都不可能监视每个系统。恶意行为者和应用程序经常停止、干扰或擦除日志，以掩盖其秘密操作，因此有时缺乏信息表明您存在问题。
+- en: 'As I start my day, I prefer to view an automated security report as an HTML
+    page to determine if any problems require further investigation. The following
+    is an example of a daily security script (*daily_report.sh*) that I’ve used in
+    the past. The */opt/note* directory is a web-enabled directory aliased as *reports*
+    in my Apache config. I’ve spaced it so that it’s easier to read:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我开始一天的方式是，我更喜欢将自动化的安全报告视为HTML页面，以确定是否需要进一步调查任何问题。以下是我过去使用过的每日安全脚本（*daily_report.sh*）的示例。*/opt/note*目录是一个Web启用的目录，在我的Apache配置中别名为*reports*。我已经将其间隔排版，以便阅读更加容易：
+- en: '[PRE23]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'Creating the report file as *today’sdate.xhtml* ensures you can keep a list
+    of these files for comparison. For example, if you believe you have a possible
+    breach, you can perform a `diff` on two files to see if there are differences
+    you should be aware of:'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建报告文件作为*今天的日期.xhtml*可以确保您可以为比较保留这些文件列表。例如，如果您认为可能存在违规行为，您可以对两个文件执行`diff`以查看是否存在您应该注意的差异：
+- en: '[PRE24]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'No response means the files are the same. However, if you perform a `diff`
+    and receive something similar to the following, you need to begin investigating
+    further:'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 没有响应意味着文件相同。但是，如果您执行`diff`并收到类似以下内容的信息，则需要进一步进行调查：
+- en: '[PRE25]'
+  id: totrans-124
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: This `diff` shows that someone has created a new root-level account, `jamd`,
+    on `10-21-2022`. Unfortunately, the way the intruder created this account, any
+    file that `jamd` touches, modifies, or creates will have root ownership and will
+    look as if the root account created or modified it. And, now that `jamd` has a
+    root account, they can change the root password, remove accounts from */etc/passwd*,
+    and remove the */etc/sudoers* file, essentially excluding system administrators
+    from accessing the system except for through the console.
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此`diff`显示有人在`10-21-2022`创建了一个新的根级帐户`jamd`。不幸的是，入侵者创建此帐户的方式，使得`jamd`触及、修改或创建的任何文件都将具有根用户所有权，并看起来像是根帐户创建或修改了它。现在`jamd`拥有根帐户后，他们可以更改根密码，从*/etc/passwd*中删除帐户，并删除*/etc/sudoers*文件，从而基本上将系统管理员排除在访问系统之外，除非通过控制台。
+- en: Note
+  id: totrans-126
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Intruders rarely lock out system administrators because doing so will cause
+    action and remediation. Instead, intruders try to cover their actions and use
+    the systems for data exfiltration or attack other systems inside or outside the
+    current network.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 入侵者很少锁定系统管理员，因为这样做将引起行动和补救措施。相反，入侵者试图掩盖他们的行动，并使用系统进行数据外泄或攻击当前网络内外的其他系统。
+- en: You can filter logs by specific errors or redirect output from other commands
+    to the file, such as a firewall status check. Place the commands in this script
+    that you use to check on your systems’ security and then set up a `cron` job as
+    `www-data` to run the script daily and check it as soon as you get to work to
+    begin some forensic investigation or breathe easy and continue your day. Ensure
+    that the `www-data` user has read, write, and execute permissions on the */opt/note*
+    directory.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以按特定错误筛选日志，或将其他命令的输出重定向到文件，比如防火墙状态检查。将您用于检查系统安全性的命令放入此脚本中，然后设置一个`cron`作业作为`www-data`，每天运行此脚本，并在上班后立即检查以开始一些取证调查或放心继续您的一天。确保`www-data`用户对*/opt/note*目录具有读取、写入和执行权限。
+- en: Summary
+  id: totrans-129
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 摘要
+- en: Troubleshooting is a learned skill that takes time and experience to sharpen,
+    but remember to rely on your coworkers, knowledge bases, logs, and your favorite
+    internet search engine to help you navigate difficult problems. There’s no shame
+    in looking for help from a variety of sources. And remember, sometimes the best
+    solution is to abandon a lengthy troubleshooting session and start with a clean
+    installation.
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 故障排除是一项需要时间和经验磨练的学习技能，但请记住要依靠您的同事、知识库、日志和您喜爱的互联网搜索引擎来帮助您解决复杂的问题。从各种来源寻求帮助并不丢人。记住，有时最好的解决方案是放弃冗长的故障排除会话，从干净的安装开始。
+- en: '[Chapter 13](ch13.xhtml#securing_your_system) deals with securing your system,
+    an ongoing task requiring focus, skill, and multiple layers of action.'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[第13章](ch13.xhtml#securing_your_system)讨论了保护您的系统，这是一项需要关注、技能和多层行动的持续任务。'

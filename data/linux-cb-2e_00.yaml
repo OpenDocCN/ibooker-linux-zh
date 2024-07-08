@@ -1,0 +1,557 @@
+- en: Preface
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 前言
+- en: Way back in olden times I wrote the first edition of the *Linux Cookbook*, which
+    was released unto a joyous world in 2004\. It sold well, I heard from many happy
+    readers, and some are still my friends.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在很久以前，我写了*Linux Cookbook*的第一版，它于 2004 年面世。它卖得很好，我收到了许多读者的喜悦反馈，其中一些至今仍是我的朋友。
+- en: For a Linux book, 17 years old is ancient. Linux was 14 years old in 2004, a
+    wee baby computer operating system. Even so, it was already a popular and widely
+    used powerhouse, adapting to any role, from tiny embedded devices to mainframes
+    and supercomputers. The rapid growth of Linux is partly due to it being a free
+    clone of Unix, the most mature and powerful operating system of all. The other
+    major factor in the speedy growth and adoption of Linux is the absence of barriers.
+    Anyone can download and try it, and the source code is freely available to anyone
+    who wants to use and contribute to it.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于一本 Linux 书籍来说，17 岁就已经相当古老了。2004 年 Linux 有 14 岁，是一个婴儿般的计算机操作系统。即便如此，它已经是一个流行且广泛使用的强大系统，适应任何角色，从微型嵌入式设备到大型机和超级计算机。Linux
+    的迅速发展部分原因是它是 Unix 的免费克隆，Unix 是历史最悠久和功能最强大的操作系统。Linux 快速增长和广泛采纳的另一个主要因素是没有障碍。任何人都可以下载和尝试使用它，源代码对任何希望使用和贡献的人都是自由开放的。
+- en: At the time it was a great example of form following function, like my first
+    car. It ran, it was reliable, but it wasn’t pretty, and it needed a lot of custom
+    wiggling of this and jiggling of that to keep going. Running a Linux system back
+    then meant learning your way around a hodgepodge of commands, scripts, and configuration
+    files, and a fair bit of wiggling and jiggling. Software management, storage management,
+    networking, audio, video, kernel management, process management…everything required
+    a lot of hands-on work and continual study.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 那时，它是形式服从功能的一个很好的例子，就像我的第一辆车。它能跑，很可靠，但不够漂亮，需要大量定制的摇摆和摆弄来保持运行。当时运行 Linux 系统意味着要学习各种命令、脚本和配置文件，并且需要大量的手动操作和持续学习。软件管理、存储管理、网络、音频、视频、内核管理、进程管理……所有这些都需要大量的实际操作和不断的学习。
+- en: Some 17 years later, every important subsystem in Linux has substantially changed
+    and improved. Now all those manual chores we had to do for basic administration
+    are replaced by what I call “It Just Works Subsystems.” Every aspect of running
+    a Linux system is many times easier, and we can focus on using Linux to do cool
+    things instead of having to wiggle and jiggle this and that just to keep it running.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 17 年后，Linux 中的每个重要子系统都有了显著的改进和变化。现在，我们用所谓的“它只是工作的子系统”取代了所有那些基本管理的手动操作。运行 Linux
+    系统的每个方面都更加简单，我们可以专注于利用 Linux 做一些酷炫的事情，而不是为了维持其运行而不得不摇摆不定。
+- en: I am delighted to present this greatly updated *Linux Cookbook* second edition,
+    and I hope you enjoy learning about all of this cool new goodness.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我很高兴向您介绍这本大大更新的*Linux Cookbook*第二版，希望您喜欢了解所有这些新鲜和精彩的内容。
+- en: Who Should Read This Book
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 适合阅读本书的人
+- en: This book is for people with some computer experience, though not necessarily
+    Linux experience. I’ve done my best to make it as accessible as possible for Linux
+    beginners. You should understand some basic networking concepts, such as IP addressing,
+    Ethernet, WiFi, client, and server. You should know basic computer hardware and
+    have some understanding of using the command line. If you need some help with
+    these, there are abundant resources for learning them; I did not want to get bogged
+    down in teaching material that is already well documented.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这本书适合有一些计算机经验的人士，尽管不一定要有 Linux 经验。我已经尽力使其对 Linux 初学者尽可能易于理解。您应该理解一些基本的网络概念，如
+    IP 地址、以太网、WiFi、客户端和服务器。您应该了解基本的计算机硬件，并且有一定的命令行使用经验。如果您需要帮助，有大量资源可以学习这些内容；我不想陷入教授已经充分记录的材料之中。
+- en: The recipes in this book are hands-on. My goal is for the reader to be successful
+    on the first try, though don’t feel badly if you are not. A general-purpose Linux
+    computer is an extremely complex machine, and there is a lot to learn. Be patient,
+    take your time, and read more than you want to. Chances are the answers you want
+    are just a few sentences away.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这本书中的食谱都是实践性的。我希望读者第一次尝试就能成功，但如果没有成功也不要感到难过。一般用途的 Linux 计算机是一个非常复杂的机器，有很多东西需要学习。要有耐心，花时间多读一些。很可能你想要的答案就在几句话之内。
+- en: Every Linux has built-in documentation for commands called *man pages* (short
+    for “manual pages”). For example, *man 1 ls* documents the *ls*, or list directory
+    contents, command. Type these commands exactly as shown in the book to open the
+    correct man page. You can also find this information online.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个Linux系统都内置了命令的文档，称为*man页*（缩写为“手册页”）。例如，*man 1 ls*记录了*ls*（或列出目录内容）命令。按照本书中显示的命令精确输入，即可打开正确的man页。你也可以在网上找到这些信息。
+- en: Why I Wrote This Book
+  id: totrans-10
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 为什么写这本书
+- en: I have long wanted to write a book like this, that collects what I think are
+    the most necessary Linux skills in one book. Linux is everywhere, and no matter
+    where you find it, Linux is Linux, and the needed skills are the same. The tech
+    world moves fast, and I think you will find this book provides a solid foundation
+    that you can build on, no matter what direction your interests take you.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我长期以来一直想写一本像这样的书，集结我认为是最必要的Linux技能。Linux无处不在，无论你在哪里找到它，Linux都是Linux，所需的技能是相同的。科技世界变化快速，我认为你会发现这本书提供了一个坚实的基础，无论你的兴趣方向如何，都可以在此基础上建立。
+- en: The cookbook format is especially good for teaching fundamentals because it
+    shows how to solve specific real-world problems and separates the wordy explanations
+    from the steps needed to accomplish a task.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 烹饪书籍的格式特别适合教授基础知识，因为它展示了如何解决特定的现实世界问题，并将详细的解释与完成任务所需的步骤分开。
+- en: Navigating This Book
+  id: totrans-13
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 浏览本书
+- en: This book is not a formal training course, where you start at the beginning
+    and work your way to the end. Instead, you can jump in anywhere and hopefully
+    find what you need.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书不是一个正式的培训课程，你不需要从头开始，可以随时跳进去，希望能找到你所需的内容。
+- en: 'It is roughly organized like this:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大致上组织如下：
+- en: Chapters [1](ch01.xhtml#cha-install-linux), [2](ch02.xhtml#managing-grub-bootloader),
+    and [3](ch03.xhtml#cha-stop-start) cover installing Linux, managing the bootloader,
+    stopping and starting, and answer the “Where do I get Linux and how do I make
+    it go” questions.
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 第[1章](ch01.xhtml#cha-install-linux)、[2章](ch02.xhtml#managing-grub-bootloader)和[3章](ch03.xhtml#cha-stop-start)涵盖了安装Linux、管理引导加载程序、停止和启动，解答了“我从哪里获取Linux并让它运行”的问题。
+- en: '[Chapter 4](ch04.xhtml#cha-systemd) provides an introduction to managing services
+    with systemd, which is a big improvement from the old way of having to learn all
+    manner of scripts, configuration files, and commands.'
+  id: totrans-17
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第4章](ch04.xhtml#cha-systemd)介绍了使用systemd管理服务，这是与旧有学习各种脚本、配置文件和命令方式相比的一大进步。'
+- en: '[Chapter 5](ch05.xhtml#cha-users-groups) covers managing users and groups,
+    [Chapter 6](ch06.xhtml#cha-files-directories) is about managing files and directories,
+    and [Chapter 7](Images/ch07.html#cha-backup-recovery) covers backups and recovery.
+    These three chapters are fundamental to system operations and security.'
+  id: totrans-18
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第5章](ch05.xhtml#cha-users-groups)涵盖了用户和组的管理，[第6章](ch06.xhtml#cha-files-directories)讲述了文件和目录的管理，[第7章](Images/ch07.html#cha-backup-recovery)介绍了备份和恢复。这三章对系统操作和安全至关重要。'
+- en: Chapters [8](ch08.xhtml#cha-partitioning-parted), [9](ch09.xhtml#cha-partitioning-gparted),
+    and [11](ch11.xhtml#cha-create-filesystems) are all about partitioning and filesystems,
+    which are fundamental to managing data storage. Data management is the most important
+    aspect of computing.
+  id: totrans-19
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 第[8章](ch08.xhtml#cha-partitioning-parted)、[9章](ch09.xhtml#cha-partitioning-gparted)和[11章](ch11.xhtml#cha-create-filesystems)都涉及分区和文件系统，这些对于数据存储管理至关重要。数据管理是计算的最重要方面。
+- en: '[Chapter 10](Images/ch10.html#cha-discover-hardware) is fun. This chapter is
+    about finding detailed information about your computer hardware without opening
+    the case. Modern PC hardware self-reports a lot of information, and Linux supplements
+    this self-reporting with databases of additional information.'
+  id: totrans-20
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第10章](Images/ch10.html#cha-discover-hardware)非常有趣。这一章节讲述了如何在不打开机箱的情况下获取计算机硬件的详细信息。现代PC硬件能够自动报告大量信息，Linux通过额外信息的数据库补充这些自动报告。'
+- en: Chapters [12](ch12.xhtml#cha-ssh) and [13](ch13.xhtml#cha-openvpn) teach setting
+    up secure remote access, and [Chapter 14](ch14.xhtml#cha-firewalld) introduces
+    the excellent firewalld, the dynamic firewall that easily handles all kinds of
+    complicated scenarios, like roaming between different networks and managing multiple
+    network interfaces.
+  id: totrans-21
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 第[12章](ch12.xhtml#cha-ssh)和[13章](ch13.xhtml#cha-openvpn)教授了如何设置安全的远程访问，[第14章](ch14.xhtml#cha-firewalld)介绍了出色的firewalld，这是一个动态防火墙，能轻松处理各种复杂情景，如在不同网络之间漫游和管理多个网络接口。
+- en: '[Chapter 15](ch15.xhtml#printing_on_linux) introduces new features in CUPS,
+    the Common Unix Printing System, including “driverless” printing, which is especially
+    good for mobile devices because they can connect to a printer without having to
+    download a lot of software.'
+  id: totrans-22
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第15章](ch15.xhtml#printing_on_linux)介绍了CUPS（通用Unix打印系统）的新功能，包括“无驱动”打印，特别适合移动设备，因为它们可以连接到打印机而无需下载大量软件。'
+- en: '[Chapter 16](ch16.xhtml#cha-dns-dhcp) shows how to control your own LAN name
+    services with the excellent Dnsmasq. Dnsmasq has stayed current with support for
+    new protocols, and the old commands and configuration options have not changed.
+    It is a first-rate name server that seamlessly integrates DNS and DHCP for central
+    management of IP addressing and advertising network services.'
+  id: totrans-23
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第16章](ch16.xhtml#cha-dns-dhcp)展示了如何使用优秀的Dnsmasq控制您自己的局域网名称服务。Dnsmasq通过支持新协议和保持旧命令和配置选项不变而保持当前。它是一个一流的名称服务器，无缝集成了DNS和DHCP，用于集中管理IP地址和广告网络服务。'
+- en: '[Chapter 17](ch17.xhtml#keeping_time_ntpd_chrony_and_timesyncd) introduces
+    chrony and timesyncd, two new implementations of the Network Time Protocol (NTP).
+    It also includes the old tried-and-true *ntp* server and client.'
+  id: totrans-24
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第17章](ch17.xhtml#keeping_time_ntpd_chrony_and_timesyncd)介绍了chrony和timesyncd，这两个新的网络时间协议（NTP）实现。还包括旧的经过试验和真实检验的*ntp*服务器和客户端。'
+- en: '[Chapter 18](ch18.xhtml#cha-lan-gateway) introduces installing Linux on the
+    Raspberry Pi, the popular little inexpensive single-board computer, and using
+    it to build an internet firewall/gateway.'
+  id: totrans-25
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第18章](ch18.xhtml#cha-lan-gateway)介绍了在树莓派上安装Linux，这款流行的廉价单板计算机，并利用它构建互联网防火墙/网关。'
+- en: '[Chapter 19](Images/ch19.html#cha-rescue-recovery) shows how to use SystemRescue
+    to reset lost Linux and Windows passwords, rescue nonbooting systems, rescue data
+    on a failing system, and customize SystemRescue to make it even more useful.'
+  id: totrans-26
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第19章](Images/ch19.html#cha-rescue-recovery)展示了如何使用SystemRescue重置丢失的Linux和Windows密码，救援无法启动的系统，救援故障系统上的数据，并定制SystemRescue使其更加实用。'
+- en: Chapters [20](ch20.xhtml#cha-trouble) and [21](ch21.xhtml#troubleshooting_networks)
+    teach basic troubleshooting, with emphasis on searching log files, probing networks,
+    and probing and monitoring hardware.
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 第[20章](ch20.xhtml#cha-trouble)和[21章](ch21.xhtml#troubleshooting_networks)介绍了基本的故障排除，重点是搜索日志文件、探测网络以及探测和监控硬件。
+- en: The [Appendix](app01.xhtml#appendix) contains cheat sheets for managing software
+    installation and maintenance.
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[附录](app01.xhtml#appendix)包含管理软件安装和维护的速查表。'
+- en: Conventions Used in This Book
+  id: totrans-29
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 本书使用的约定
+- en: 'The following typographical conventions are used in this book:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书中使用以下排版约定：
+- en: '*Italic*'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*斜体*'
+- en: Indicates new terms, URLs, email addresses, filenames, and file extensions,
+    as well as to refer to program elements such as Linux variable or function names,
+    databases, data types, environment variables, statements, and keywords.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表示新术语、URL、电子邮件地址、文件名和文件扩展名，以及指向程序元素，如Linux变量或函数名、数据库、数据类型、环境变量、语句和关键字。
+- en: '`Constant width`'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`等宽字体`'
+- en: Used for program listings and some command options.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于程序清单和某些命令选项。
+- en: '**`Constant width bold`**'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '**`等宽字体粗体`**'
+- en: Shows commands or other text that should be typed literally by the user.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示用户应直接输入的命令或其他文本。
+- en: '*`Constant width italic`*'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*`等宽字体斜体`*'
+- en: Shows text that should be replaced with user-supplied values or by values determined
+    by context.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示应由用户提供的值或由上下文确定的值应替换的文本。
+- en: Tip
+  id: totrans-39
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: This element signifies a tip or suggestion.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示提示或建议。
+- en: Note
+  id: totrans-41
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: This element signifies a general note.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示一般注意事项。
+- en: Warning
+  id: totrans-43
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: This element indicates a warning or caution.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示警告或注意事项。
+- en: Using Code Examples
+  id: totrans-45
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用代码示例
+- en: This book is here to help you get your job done. In general, if example code
+    is offered with this book, you may use it in your programs and documentation.
+    You do not need to contact us for permission unless you’re reproducing a significant
+    portion of the code. For example, writing a program that uses several chunks of
+    code from this book does not require permission. Selling or distributing examples
+    from O’Reilly books does require permission. Answering a question by citing this
+    book and quoting example code does not require permission. Incorporating a significant
+    amount of example code from this book into your product’s documentation does require
+    permission.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书旨在帮助您完成工作任务。一般情况下，如果本书提供示例代码，您可以在您的程序和文档中使用它。除非您复制了代码的大部分内容，否则无需征得我们的许可。例如，编写使用本书多个代码片段的程序无需许可。销售或分发来自奥莱利图书的示例则需要许可。引用本书并引用示例代码回答问题无需许可。将本书大量示例代码整合到您产品的文档中则需要许可。
+- en: 'We appreciate, but generally do not require, attribution. An attribution usually
+    includes the title, author, publisher, and ISBN. For example: “*Linux Cookbook*,
+    Second Edition, by Carla Schroder (O’Reilly). Copyright 2021 Carla Schroder, 978-1-492-08716-8.”'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们感谢，但通常不要求署名。署名通常包括标题、作者、出版社和ISBN。例如：“*Linux Cookbook*，第二版，Carla Schroder著（奥莱利）。版权所有2021
+    Carla Schroder，978-1-492-08716-8。”
+- en: If you feel your use of code examples falls outside fair use or the permission
+    given above, feel free to contact us at [*permissions@oreilly.com*](mailto:permissions@oreilly.com).
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您认为您对代码示例的使用超出了合理使用范围或上述许可，请随时通过[*permissions@oreilly.com*](mailto:permissions@oreilly.com)联系我们。
+- en: O’Reilly Online Learning
+  id: totrans-49
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 奥莱利在线学习
+- en: Note
+  id: totrans-50
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: For more than 40 years, [*O’Reilly Media*](http://oreilly.com) has provided
+    technology and business training, knowledge, and insight to help companies succeed.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 超过40年来，[*奥莱利传媒*](http://oreilly.com) 提供技术和商业培训，以及知识和洞察，帮助公司取得成功。
+- en: Our unique network of experts and innovators share their knowledge and expertise
+    through books, articles, and our online learning platform. O’Reilly’s online learning
+    platform gives you on-demand access to live training courses, in-depth learning
+    paths, interactive coding environments, and a vast collection of text and video
+    from O’Reilly and 200+ other publishers. For more information, visit [*http://oreilly.com*](http://oreilly.com).
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们独特的专家和创新者网络通过图书、文章和我们的在线学习平台分享他们的知识和专长。奥莱利的在线学习平台为您提供按需访问的实时培训课程、深入学习路径、交互式编码环境以及来自奥莱利和其他200多家出版商的大量文本和视频。欲了解更多信息，请访问[*http://oreilly.com*](http://oreilly.com)。
+- en: How to Contact Us
+  id: totrans-53
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 如何联系我们
+- en: 'Please address comments and questions concerning this book to the publisher:'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请将有关本书的评论和问题寄送给出版商：
+- en: O’Reilly Media, Inc.
+  id: totrans-55
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 奥莱利传媒公司
+- en: 1005 Gravenstein Highway North
+  id: totrans-56
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1005 Gravenstein Highway North
+- en: Sebastopol, CA 95472
+  id: totrans-57
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Sebastopol, CA 95472
+- en: 800-998-9938 (in the United States or Canada)
+  id: totrans-58
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 800-998-9938（美国或加拿大）
+- en: 707-829-0515 (international or local)
+  id: totrans-59
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 707-829-0515（国际或本地）
+- en: 707-829-0104 (fax)
+  id: totrans-60
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 707-829-0104（传真）
+- en: We have a web page for this book, where we list errata, examples, and any additional
+    information. You can access this page at [*https://oreil.ly/linux-cookbook-2e*](https://oreil.ly/linux-cookbook-2e).
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们为本书设置了一个网页，其中列出了勘误、示例和任何其他信息。您可以访问[*https://oreil.ly/linux-cookbook-2e*](https://oreil.ly/linux-cookbook-2e)。
+- en: Email [*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com) to comment
+    or ask technical questions about this book.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 发送电子邮件至[*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com)评论或询问有关本书的技术问题。
+- en: For news and information about our books and courses, visit [*http://oreilly.com*](http://oreilly.com).
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 欲了解我们的图书和课程的最新信息，请访问[*http://oreilly.com*](http://oreilly.com)。
+- en: 'Find us on Facebook: [*http://facebook.com/oreilly*](http://facebook.com/oreilly).'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Facebook上找到我们：[*http://facebook.com/oreilly*](http://facebook.com/oreilly)。
+- en: 'Follow us on Twitter: [*http://twitter.com/oreillymedia*](http://twitter.com/oreillymedia).'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Twitter上关注我们：[*http://twitter.com/oreillymedia*](http://twitter.com/oreillymedia)。
+- en: 'Watch us on YouTube: [*http://www.youtube.com/oreillymedia*](http://www.youtube.com/oreillymedia).'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在YouTube上观看我们：[*http://www.youtube.com/oreillymedia*](http://www.youtube.com/oreillymedia)。
+- en: Acknowledgments
+  id: totrans-67
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 致谢
+- en: I really lucked out with this book. My editor, Jeff Bleiel, has been unfailingly
+    supportive and helpful, contributed numerous improvements, and kept the whole
+    project organized and on track. If you think herding cats is difficult, try being
+    a book editor.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我真的很幸运能得到这本书。我的编辑Jeff Bleiel一直非常支持和乐于助人，做出了许多改进，并使整个项目保持有序和顺利进行。如果你觉得管理猫很难，试试做一名图书编辑。
+- en: My intern, Kate Urness, was a Linux newbie at the start of this adventure, which
+    made her the perfect reviewer. She tested every recipe and contributed substantially
+    to the accuracy and clarity of the recipes. We drank gallons of coffee and had
+    fun together, which was also a substantial contribution.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我的实习生凯特·尤尔内斯在这次冒险开始时是一个 Linux 新手，这使她成为了完美的审阅者。她测试了每一个配方，并为配方的准确性和清晰度做出了重大贡献。我们一起喝了很多咖啡，也度过了愉快的时光，这也是一个重要的贡献。
+- en: Technical editor Daniel Barrett has a fabulous eye for detail, and relentlessly
+    pressed for more precision in wording and descriptions, and provided many improvements.
+    Providing a book full of commands is the easy part, explaining how they work is
+    the hard part. Every writer should be fortunate to have such a technical editor.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 技术编辑丹尼尔·巴雷特非常注重细节，不懈地追求措辞和描述的准确性，并提供了许多改进意见。提供一本充满命令的书很容易，解释它们如何工作却很难。每个作家都应该很幸运能有这样一位技术编辑。
+- en: Technical editor Jonathan Johnson found things everyone else missed, contributed
+    some super-cool command incantations, and provided humor, and let me tell you,
+    I needed it.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 技术编辑乔纳森·约翰逊发现了其他人都忽视的事物，贡献了一些超酷的命令咒语，并提供了幽默感，而我告诉你，我真的需要它。
+- en: Zan McQuade, acquisitions editor, started this whole crazy deal. There were
+    talks over the years about updating the *Linux Cookbook*, but Zan made it happen.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 收购编辑赞·麦克奎德开始了整个疯狂的交易。多年来我们都在谈论更新《Linux Cookbook》，但赞让它成为现实。
+- en: Great thundering herds of thanks to my wife, Terry, who fed the mules and cats
+    and dogs and me, provided much encouragement, and kept me from running away from
+    home because I lost my mind and agreed to write another book.
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 特别感谢我的妻子特里，她喂养了骡子、猫、狗和我，给予了我很大的鼓励，并阻止我因为失去理智而同意再写一本书而逃离家庭。
+- en: Special thanks to our cats, Duchess ([Figure P-1](#duchess-feet)), Stash ([Figure P-2](#kittyboy)),
+    and Mad Max ([Figure P-3](#max-recliner-remotes)), who appear in this book. They
+    helped greatly by sleeping on my keyboard, not letting me have my chair, and making
+    mysterious loud crashes a lot.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 特别感谢我们的猫，公爵夫人（[图 P-1](#duchess-feet)），斯塔什（[图 P-2](#kittyboy)）和疯狂麦克斯（[图 P-3](#max-recliner-remotes)），它们出现在这本书中。它们通过在我的键盘上睡觉、不让我坐椅子和经常发出神秘的巨响，给了我很大帮助。
+- en: '![Duchess holds my feet down, for my own good.](Images/lcb2_p001.png)'
+  id: totrans-75
+  prefs: []
+  type: TYPE_IMG
+  zh: '![公爵夫人为了我自己的好压住了我的脚。](Images/lcb2_p001.png)'
+- en: Figure P-1\. Duchess holds my feet down, for my own good
+  id: totrans-76
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 P-1\. 公爵夫人为了我自己的好压住了我的脚
+- en: '![Stash cat, our glamour boy.](Images/lcb2_p003.png)'
+  id: totrans-77
+  prefs: []
+  type: TYPE_IMG
+  zh: '![斯塔什猫，我们的魅力男孩。](Images/lcb2_p003.png)'
+- en: Figure P-2\. Stash cat, our glamour boy
+  id: totrans-78
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 P-2\. 斯塔什猫，我们的魅力男孩
+- en: '![Mad Max rests up for the next mayhem.](Images/lcb2_p002.png)'
+  id: totrans-79
+  prefs: []
+  type: TYPE_IMG
+  zh: '![疯狂麦克斯为下一场混战休息。](Images/lcb2_p002.png)'
+- en: Figure P-3\. Mad Max rests up for the next mayhem
+  id: totrans-80
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 P-3\. 疯狂麦克斯为下一场混战休息

@@ -1,0 +1,1349 @@
+- en: Chapter 17\. Keeping Time with ntpd, chrony, and timesyncd
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第 17 章。使用 ntpd、chrony 和 timesyncd 进行时间保持
+- en: Keeping accurate time on your computer, and on all hosts on your network, is
+    easy and automatic with NTP, the Network Time Protocol. NTP is implemented on
+    Linux with *ntpd*, the NTP daemon, *chrony*, the modern replacement for *ntpd*,
+    and systemd’s *timesyncd*. That is right, friends, there are three (at least),
+    count them, three ways to automatically manage time on your Linux computer.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过 NTP，网络时间协议，在你的计算机和网络上所有主机上保持精确的时间是容易且自动的。在 Linux 上，NTP 被实现为 *ntpd*，即 NTP
+    守护进程，*chrony*，即 *ntpd* 的现代替代品，以及 systemd 的 *timesyncd*。没错，朋友们，有三种（至少），数一数，三种方式可以自动管理你的
+    Linux 计算机上的时间。
+- en: '*ntpd* and *chrony* can also function as LAN time servers, while *timesyncd*
+    is a simpler lightweight client with no server functions. *ntpd* and *chrony*
+    are full NTP implementations, while *timesyncd* uses SNTP, the Simple Network
+    Time Protocol.'
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*ntpd* 和 *chrony* 可以作为局域网时间服务器，而 *timesyncd* 则是一个更简单的轻量级客户端，没有服务器功能。*ntpd*
+    和 *chrony* 是完整的 NTP 实现，而 *timesyncd* 使用简单网络时间协议 SNTP。'
+- en: Most Linux distributions provide a default configuration that points to time
+    servers that they maintain. These servers have names like *2.fedora.pool.ntp.org*
+    and *0.ubuntu.pool.ntp.org*. You don’t have to do anything, except be sure to
+    not disable this during installation. In this chapter you will learn how to check
+    your current settings, how to change them, and how to set up a LAN time server.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Linux 发行版提供一个默认配置，指向它们维护的时间服务器。这些服务器的名称如 *2.fedora.pool.ntp.org* 和 *0.ubuntu.pool.ntp.org*。你不必做任何事情，只需确保在安装过程中不要禁用它们。在本章中，您将学习如何检查当前设置，如何更改它们以及如何设置局域网时间服务器。
+- en: There is a worldwide network of time servers that are free for everyone to use,
+    and they are organized into *strata*, starting at stratum 0\. Stratum 0 is the
+    source for all timekeeping, a network of atomic clocks, radio receivers tuned
+    to atomic clocks, and GPS receivers using signals broadcast by GPS satellites.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有一个全球网络的时间服务器供每个人免费使用，并且它们按照 *strata* 组织，从第 0 级开始。第 0 级是所有时间保持的源头，是一个原子钟、调谐到原子钟的无线接收器，以及使用
+    GPS 卫星广播信号的 GPS 接收器的网络。
+- en: Next in line is stratum 1, where the primary time servers reside. The primary
+    time servers in stratum 1 are directly connected to the sources in stratum 0.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来是第 1 级，那里是主要的时间服务器所在。第 1 级的主要时间服务器直接连接到第 0 级的来源。
+- en: Stratum 2 contains thousands of public servers, and they sync with stratum 1.
+    It is good etiquette to connect to stratum 2 servers to prevent the stratum 1
+    servers from being overwhelmed and to not use the stratum 1 servers without a
+    good reason.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第 2 级包含成千上万个公共服务器，并且它们与第 1 级同步。与第 2 级服务器连接是良好的礼仪，以防止第 1 级服务器不堪重负，并且不要没有充分理由地使用第
+    1 级服务器。
+- en: The hierarchy continues on down the line, for example there are stratum 4, 5,
+    and 6 public servers, and private LAN servers that sync with them. It’s not really
+    that orderly; you can designate your private LAN NTP server as stratum 10, and
+    it doesn’t have to connect to stratum 9 servers, but any server it can reach.
+    You don’t have to worry about selecting the correct servers because you will use
+    *pool* servers, which are clusters of NTP servers, rather than individual servers.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 层次结构沿着这条线继续，例如有第 4、5 和 6 级公共服务器，以及与它们同步的私人局域网服务器。实际情况并不那么有条理；你可以将你的私人局域网 NTP
+    服务器指定为第 10 级，并且它不必连接到第 9 级服务器，而是任何它能够到达的服务器。你不必担心选择正确的服务器，因为你将使用 *池* 服务器，这些服务器是
+    NTP 服务器的集群，而不是单个服务器。
+- en: 'When you dig into timekeeping on computers, it becomes confusing and overwhelming,
+    or perhaps fascinating, depending on how nerdy you want to get. Visit the [NTP
+    Pool Project](https://ntppool.org) and [NTP: The Network Time Protocol](http://ntp.org)
+    to learn the nerdy stuff and how to run your own public time server.'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你深入研究计算机上的时间保持时，它会变得令人困惑和不知所措，或许取决于你想要多么迷恋这个话题。访问[NTP 池项目](https://ntppool.org)和[NTP：网络时间协议](http://ntp.org)来学习这些技术和如何运行自己的公共时间服务器。
+- en: There are at least two timekeepers on your Linux system. One is the hardware
+    clock on your motherboard, which is also called the real-time clock (RTC). The
+    other is system time, managed by your Linux kernel. The RTC always has power,
+    even when your machine is turned off, from a battery or capacitor on the motherboard.
+    When your Linux computer starts up, your selected NTP client gets its time from
+    the RTC. Then, after the network is available, it corrects the time according
+    to its upstream time server.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的Linux系统上至少有两个时间管理器。一个是你主板上的硬件时钟，也称为实时时钟（RTC）。另一个是由Linux内核管理的系统时间。即使你的机器关闭了，RTC也会始终有电，这得益于主板上的电池或电容器。当你的Linux计算机启动时，你选择的NTP客户端从RTC获取时间。然后，在网络可用后，它会根据其上游时间服务器纠正时间。
+- en: Your RTC time is set in your BIOS/UEFI, and with some of the commands you will
+    learn about in this chapter. It should always be set to UTC, Coordinated Universal
+    Time, and then the Linux kernel calculates the time for your time zone from the
+    UTC. UTC is similar to Greenwich Mean Time (GMT), though they are not the same.
+    UTC is a time standard and GMT is a time zone. Neither UTC nor GMT change for
+    daylight saving time (DST).
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的RTC时间由BIOS/UEFI设置，并且使用本章中将学到的某些命令。它应该始终设置为协调世界时（UTC），然后Linux内核从UTC计算你的时区时间。UTC类似于格林尼治平均时间（GMT），尽管它们不完全相同。UTC是一个时间标准，而GMT是一个时间区域。UTC和GMT都不会因夏令时改变。
+- en: Time zone data comes from [IETF.org Timezones](https://oreil.ly/gUnet). This
+    is a moving target as countries change their DST dates, opt out of DST, and opt
+    back in. Most Linuxes store this information in */usr/share/zoneinfo/*. The Internet
+    Engineering Task Force (IETF) tracks these changes and makes their databases freely
+    available.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 时区数据来自[IETF.org时区](https://oreil.ly/gUnet)。这是一个动态的目标，因为各国改变其夏令时日期、选择退出夏令时或重新加入。大多数Linux系统将这些信息存储在*/usr/share/zoneinfo/*中。互联网工程任务组（IETF）跟踪这些变化并免费提供他们的数据库。
+- en: 17.1 Finding Which NTP Client Is on Your Linux System
+  id: totrans-12
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 17.1 确定你的Linux系统上使用了哪个NTP客户端
+- en: Problem
+  id: totrans-13
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You read the chapter introduction, and now you know that time synchronization
+    on Linux is managed by *ntpd*, *chrony*, or *timesyncd*, and you need to know
+    which one your Linux system uses.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经阅读了章节介绍，现在你知道在Linux上，时间同步由*ntpd*、*chrony*或*timesyncd*管理，你需要知道你的Linux系统使用的是哪一个。
+- en: Solution
+  id: totrans-15
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *ps* command to see if any of the three time synchronization daemons,
+    *ntpd*, *chronyd*, or *timesyncd* are running on your system:'
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '使用*ps*命令查看系统上是否有这三个时间同步守护进程之一正在运行： '
+- en: '[PRE0]'
+  id: totrans-17
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: If any of these are running, skip ahead to the relevant recipes in this chapter
+    to learn how to manage your time daemon.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果有任何一个正在运行，请跳到本章的相关小节，学习如何管理你的时间守护进程。
+- en: 'If none of these are running, see if your system is using *timedatectl*, which
+    is part of systemd:'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果没有任何一个在运行，请查看你的系统是否在使用*timedatectl*，它是systemd的一部分：
+- en: '[PRE1]'
+  id: totrans-20
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'This output shows that *timedatectl* is running without any time daemons, indicated
+    by *systemd-timesyncd.service active: no*. Double-check by querying the status
+    of *systemd-timesyncd*:'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '这个输出显示*timedatectl*在运行，没有任何时间守护进程，显示*systemd-timesyncd.service active: no*。通过查询*systemd-timesyncd*的状态再次确认：'
+- en: '[PRE2]'
+  id: totrans-22
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: This shows that *systemd-timesyncd* is not running, which means there is no
+    time synchronization on your system, and it is getting its time from your system’s
+    real-time clock (RTC). In this case you need to set up *ntpd*, *chrony*, or *timesyncd*.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这表明*systemd-timesyncd*没有运行，这意味着你的系统没有时间同步，而是从你系统的实时时钟（RTC）获取时间。在这种情况下，你需要设置*ntpd*、*chrony*或*timesyncd*。
+- en: Discussion
+  id: totrans-24
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Some Linux distributions do not use systemd; see [Recipe 4.1](ch04.xhtml#rec-is-systemd-present)
+    to learn how to know if your Linux has it. If you are running a Linux system without
+    systemd, your NTP choices are *ntpd* or *chrony*.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些Linux发行版不使用systemd；查看[第4.1节](ch04.xhtml#rec-is-systemd-present)了解如何知道你的Linux是否安装了它。如果你运行的是没有systemd的Linux系统，则你的NTP选择是*ntpd*或*chrony*。
+- en: If you find both *ntpd* and *chrony* running on the same system, get rid of
+    *ntpd*, as *chrony* is newer, faster, and more reliable. Having both will create
+    conflicts.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你发现系统上同时运行*ntpd*和*chrony*，请删除*ntpd*，因为*chrony*更新更快、更可靠。同时使用两者会造成冲突。
+- en: The output of *timedatectl* has a lot of useful information. The example shows
+    that the RTC is correctly set to the Coordinated Universal Time (UTC) protocol,
+    and that the system time zone is Pacific Daylight Time, PDT. *systemd-timesyncd.service*
+    is not running, and the system has not been synchronized.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*timedatectl*的输出包含大量有用信息。示例显示RTC已正确设置为协调世界时（UTC）协议，并且系统时区为太平洋夏令时，PDT。*systemd-timesyncd.service*未运行，并且系统未同步。'
+- en: See Also
+  id: totrans-28
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[timedatectl: Control the system time and date](https://oreil.ly/QddJ7)'
+  id: totrans-29
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[timedatectl：控制系统时间和日期](https://oreil.ly/QddJ7)'
+- en: '*man 1 ps*'
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ps*'
+- en: 17.2 Using timesyncd for Simple Time Synchronization
+  id: totrans-31
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 17.2 使用 timesyncd 进行简单时间同步
+- en: Problem
+  id: totrans-32
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know how to set up the simplest NTP client to keep the correct time
+    on your computer.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想知道如何设置最简单的NTP客户端以保持计算机上的正确时间。
+- en: Solution
+  id: totrans-34
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Enable synchronization with a public NTP server using the *systemd-timesyncd*
+    daemon, which requires systemd. Check the status of *systemd-timesyncd*:'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*systemd-timesyncd*守护程序启用与公共NTP服务器的同步，该守护程序需要systemd。检查*systemd-timesyncd*的状态：
+- en: '[PRE3]'
+  id: totrans-36
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Enable it with *timedatectl*, and verify that *systemd-timesyncd* started:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*timedatectl*启用它，并验证*systemd-timesyncd*已启动：
+- en: '[PRE4]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'If *systemd-timesyncd* did not start, start it:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果*systemd-timesyncd*未启动，请启动它：
+- en: '[PRE5]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Now see what *timedatectl* reports:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在查看*timedatectl*报告的内容：
+- en: '[PRE6]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: Everything looks correct. Your system is synchronized, all the times are correct,
+    and the *systemd-timesyncd.service* is active.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一切看起来都正确。您的系统已同步，所有时间都正确，并且*systemd-timesyncd.service*处于活动状态。
+- en: 'It is a good practice to configure multiple public time servers for redundancy.
+    Edit */etc/systemd/timesyncd.conf* to add more NTP servers by uncommenting the
+    `NTP` line and entering a space-delimited list of public server pools:'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 配置多个公共时间服务器以增强冗余性是一种良好的实践。编辑*/etc/systemd/timesyncd.conf*以通过取消注释`NTP`行并输入空格分隔的公共服务器池列表来添加更多NTP服务器：
+- en: '[PRE7]'
+  id: totrans-45
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Discussion
+  id: totrans-46
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: In your original */etc/systemd/timesyncd.conf* file, the commented options document
+    the default configuration.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您原始的*/etc/systemd/timesyncd.conf*文件中，注释选项记录了默认配置。
+- en: The pool servers are highly reliable because they are multiple servers in a
+    single pool, rather than individual servers. For best peformance use the pool
+    servers for your region, either the [continental pools](https://oreil.ly/iEipo)
+    or the country pools, which you will find by clicking on the continental pool
+    links.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于它们是单个池中的多个服务器，而不是单个服务器，因此池服务器非常可靠。为了获得最佳性能，请使用适合您地区的池服务器，可以通过单击大陆池链接或国家池找到它们。
+- en: 'Your Linux distribution may configure multiple server pools of their own, such
+    as:'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的Linux发行版可能会配置多个自己的服务器池，例如：
+- en: '[PRE8]'
+  id: totrans-50
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: This is good, and you don’t need to change it, but a more diverse configuration
+    is usually more reliable.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是很好的，您不需要更改它，但通常更多样化的配置通常更可靠。
+- en: See Also
+  id: totrans-52
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 4](ch04.xhtml#cha-systemd)'
+  id: totrans-53
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第四章](ch04.xhtml#cha-systemd)'
+- en: '[NTP Pool Project](https://ntppool.org)'
+  id: totrans-54
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[NTP Pool 项目](https://ntppool.org)'
+- en: '*man 5 timesyncd.conf*'
+  id: totrans-55
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 timesyncd.conf*'
+- en: 17.3 Setting Time Manually with timedatectl
+  id: totrans-56
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 17.3 使用 timedatectl 手动设置时间
+- en: Problem
+  id: totrans-57
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set your system and RTC time manually.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你希望手动设置系统和RTC时间。
+- en: Solution
+  id: totrans-59
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use *timedatectl*. It sets the date, system time, and RTC time with a single
+    command:'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*timedatectl*。它通过单个命令设置日期、系统时间和RTC时间：
+- en: '[PRE9]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'You cannot do this when *systemd-timesyncd* is running, so you must stop it:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当*systemd-timesyncd*正在运行时，您无法执行此操作，因此必须停止它：
+- en: '[PRE10]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'Then enter your new settings in the format shown in the example, YYYY-MM-DD
+    HH:MM:SS, and verify that it worked:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后按照示例中显示的格式YYYY-MM-DD HH:MM:SS输入新的设置，并验证其是否有效：
+- en: '[PRE11]'
+  id: totrans-65
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: If you restart *systemd-timesyncd*, it will override your manual settings.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果重新启动*systemd-timesyncd*，它将覆盖您的手动设置。
+- en: Discussion
+  id: totrans-67
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*timedatectl* has a small set of commands. If you are used to the *date* command
+    for setting the time, and other time and date operations, *timedatectl* may seem
+    lightweight. It is simple by design, and you still have *date* and its numerous
+    options for complex tasks.'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*timedatectl*有一组少量的命令。如果您习惯于使用*date*命令设置时间以及其他时间和日期操作，那么*timedatectl*可能会显得轻量级。它设计简单，您仍然可以使用*date*及其众多选项执行复杂任务。'
+- en: See Also
+  id: totrans-69
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 timesyncd.conf*'
+  id: totrans-70
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 timesyncd.conf*'
+- en: 17.4 Using chrony for Your NTP Client
+  id: totrans-71
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 17.4 使用 chrony 作为您的NTP客户端
+- en: Problem
+  id: totrans-72
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your want a fully featured NTP client/server, and you want to know how to set
+    up *chrony* as your NTP client.
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望拥有功能齐全的NTP客户端/服务器，并且想知道如何将*chrony*设置为您的NTP客户端。
+- en: Solution
+  id: totrans-74
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'First, check if *ntpd* is installed. If it is, remove it. If you have *systemd-timesyncd*,
+    disable it:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，检查是否安装了 *ntpd*。如果安装了，请将其删除。如果您有 *systemd-timesyncd*，请将其禁用：
+- en: '[PRE12]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'Then install *chrony*. The package name on most Linuxes is *chrony*. After
+    installation use the *chronyc* command to check its status:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后安装 *chrony*。大多数 Linux 发行版的软件包名称是 *chrony*。安装后，使用 *chronyc* 命令来检查其状态：
+- en: '[PRE13]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'Success! It is already working, as *8 sources online* tells you. (If it did
+    not start, see the Discussion.) Find your *chrony.conf*, either */etc/chrony.conf*
+    (Fedora) or */etc/chrony/chrony.conf* (Ubuntu), and take a look at the settings.
+    There is not much you need to change, if anything, to use it as a client. Check
+    the NTP server list, where you will see either *server* options or *pool*. The
+    following example on an Ubuntu system includes the default Ubuntu NTP server pools
+    and a local LAN server:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 成功！它已经在工作中，如 *8 sources online* 所示。（如果未启动，请参阅讨论。）找到您的 *chrony.conf*，可能是 */etc/chrony.conf*（Fedora）或
+    */etc/chrony/chrony.conf*（Ubuntu），查看设置。如果需要，您不需要做太多更改就可以用它作为客户端。检查 NTP 服务器列表，您将看到
+    *server* 选项或 *pool*。在 Ubuntu 系统上的以下示例包括默认的 Ubuntu NTP 服务器池和本地 LAN 服务器：
+- en: '[PRE14]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'You could replace some of the Ubuntu server pools with some public server pools
+    to improve reliability with a more diverse set of pools:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用一些公共服务器池替换一些 Ubuntu 服务器池，以提高可靠性和多样性：
+- en: '[PRE15]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Restart *chronyd* after changing the configuration file.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在更改配置文件后重新启动 *chronyd*。
+- en: Discussion
+  id: totrans-84
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*iburst* means synchronize quickly after network interruptions, and *prefer*
+    means always use this server, unless it is not available.'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*iburst* 意味着在网络中断后快速同步，*prefer* 意味着除非不可用，否则始终使用此服务器。'
+- en: That really is all you need to do for a client setup. *chrony* is a full NTP
+    implementation and has many options; see *man 5 chrony.conf* for a complete description.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这确实是客户端设置所需的全部操作。*chrony* 是一个完整的 NTP 实现，并拥有许多选项；详细描述请参阅 *man 5 chrony.conf*。
+- en: 'Manage *chronyd* just like any other service using the following commands:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 管理 *chronyd* 就像使用以下命令管理任何其他服务一样：
+- en: '*systemctl status chrony*'
+  id: totrans-88
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*systemctl status chrony*'
+- en: '*sudo systemctl stop chrony*'
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*sudo systemctl stop chrony*'
+- en: '*sudo systemctl start chrony*'
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*sudo systemctl start chrony*'
+- en: '*sudo systemctl restart chrony*'
+  id: totrans-91
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*sudo systemctl restart chrony*'
+- en: Chrony has several advantages over *ntpd*. The main advantages as a client are
+    better handling of interrupted network connections and faster resyncing when the
+    connection is restored.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Chrony 在客户端方面比 *ntpd* 有几个优点。主要优点包括更好地处理网络连接中断和在恢复连接时更快地重新同步。
+- en: See Also
+  id: totrans-93
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[chrony](https://oreil.ly/1S41c)'
+  id: totrans-94
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[chrony](https://oreil.ly/1S41c)'
+- en: '*man 5 chrony.conf*'
+  id: totrans-95
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 chrony.conf*'
+- en: '*man 1 chronyc*'
+  id: totrans-96
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chronyc*'
+- en: 17.5 Using chrony as a LAN Time Server
+  id: totrans-97
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 17.5 使用 chrony 作为 LAN 时间服务器
+- en: Problem
+  id: totrans-98
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set up *chrony* as your LAN time server.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想将 *chrony* 设置为您的 LAN 时间服务器。
+- en: Solution
+  id: totrans-100
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Just like in [Recipe 17.4](#rec-chrony-client), disable *systemd-timesyncd*
+    and remove *ntpd* if it is on your system. Then install the *chrony* package.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就像在 [Recipe 17.4](#rec-chrony-client) 中一样，如果系统中存在 *systemd-timesyncd*，请禁用它并删除
+    *ntpd*。然后安装 *chrony* 软件包。
+- en: 'Find the configuration file, either */etc/chrony.conf* (Fedora, openSUSE) or
+    */etc/chrony/chrony.conf* (Ubuntu). The following example is a basic configuration:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找配置文件，可以是 */etc/chrony.conf*（Fedora、openSUSE）或 */etc/chrony/chrony.conf*（Ubuntu）。以下示例是一个基本的配置：
+- en: '[PRE16]'
+  id: totrans-103
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Then your clients need your server’s name added to their *chrony.conf* files:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后，您的客户端需要将您的服务器名称添加到其 *chrony.conf* 文件中：
+- en: '[PRE17]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'The *prefer* option means to always use this server as long as it is available.
+    One of the reasons to keep a local time server is to put less of a load on the
+    public time servers. With the *prefer* option you can configure some public servers
+    as backups, in case your local server becomes unavailable, and not worry about
+    burdening them, like this:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*prefer* 选项意味着只要该服务器可用，始终使用此服务器。保留本地时间服务器的原因之一是减轻公共时间服务器的负载。使用 *prefer* 选项，您可以将一些公共服务器配置为备用服务器，以防本地服务器不可用，并且无需担心给它们带来负担，如下所示：'
+- en: '[PRE18]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: Discussion
+  id: totrans-108
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*local stratum 10* configures *chrony* to continue acting as your local NTP
+    server even when your internet connection is interrupted, and *stratum 10* puts
+    your server safely down the strata hierarchy, so that it is lower than any external
+    NTP servers you are using. Allowed values are 1–15\. (Do please use a number other
+    than 10, in case this recipe makes *stratum 10* wildly popular.)'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*local stratum 10* 配置 *chrony* 以继续充当您的本地 NTP 服务器，即使您的互联网连接中断，*stratum 10* 将您的服务器安全地放在层次结构中的较低位置，以便它低于您使用的任何外部
+    NTP 服务器。允许的值为 1–15。请使用除 10 以外的数字，以防此设置使 *stratum 10* 大受欢迎。'
+- en: The *allow* options define the networks that are allowed to use your NTP server.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*allow* 选项定义允许使用你的NTP服务器的网络。'
+- en: '*rtcsync* tells *chrony* to keep your RTC synchronized with system time.'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*rtcsync* 告诉 *chrony* 保持RTC与系统时间同步。'
+- en: '*log* enables logging and defines the events you want logged.'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*log* 启用日志记录并定义需要记录的事件。'
+- en: You may look up the other options in *man 5 chrony.conf*, or in your default
+    *chrony.conf*, which is usually well commented.
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在 *man 5 chrony.conf* 或默认的 *chrony.conf* 中查找其他选项，通常这些文件都有详细的注释。
+- en: See Also
+  id: totrans-114
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[chrony](https://oreil.ly/1S41c)'
+  id: totrans-115
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[chrony](https://oreil.ly/1S41c)'
+- en: '*man 5 chrony.conf*'
+  id: totrans-116
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 chrony.conf*'
+- en: '*man 1 chronyc*'
+  id: totrans-117
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chronyc*'
+- en: 17.6 Viewing chrony Statistics
+  id: totrans-118
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 17.6 查看 chrony 统计信息
+- en: Problem
+  id: totrans-119
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to call up some real-time *chrony* activity and statistics, such as
+    upstream NTP servers, offsets, skew, which server you are currently synced with,
+    and other information.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要调用一些实时的 *chrony* 活动和统计信息，如上游NTP服务器、偏移、偏差、当前与之同步的服务器以及其他信息。
+- en: Solution
+  id: totrans-121
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *chronyc* command. The *tracking* subcommand shows how much correction
+    has been applied, the RTC time, skew, and other information:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *chronyc* 命令。*tracking* 子命令显示已应用的校正量、RTC时间、偏差等信息：
+- en: '[PRE19]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'List your current source servers:'
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出当前源服务器：
+- en: '[PRE20]'
+  id: totrans-125
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'List your current source servers, with descriptions:'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出当前源服务器及其描述：
+- en: '[PRE21]'
+  id: totrans-127
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: The asterisk shows which server your system is currently synchronizing with.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 星号显示你的系统当前正在与哪个服务器同步。
+- en: Discussion
+  id: totrans-129
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*chrony* adjusts for network delays and latency, intermittent connections,
+    and sleep and hibernate modes on client machines. The *chrony* clock never stops,
+    and it keeps your network synchronized even when external name servers are unavailable.'
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*chrony* 调整网络延迟、间歇连接、以及客户端机器的睡眠和休眠模式。*chrony* 时钟从不停止，即使外部名称服务器不可用也能保持网络同步。'
+- en: See Also
+  id: totrans-131
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 chronyc*'
+  id: totrans-132
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chronyc*'
+- en: '[chrony.tuxfamily.org](https://oreil.ly/1S41c)'
+  id: totrans-133
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[chrony.tuxfamily.org](https://oreil.ly/1S41c)'
+- en: 17.7 Using ntpd for Your NTP Client
+  id: totrans-134
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 17.7 使用 ntpd 作为你的NTP客户端
+- en: Problem
+  id: totrans-135
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Yes, you know all about *chrony* and *timesyncd*, and how good they are, but
+    you still want to use *ntpd* as your NTP client.
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是的，你已经了解 *chrony* 和 *timesyncd*，以及它们的优点，但你仍然希望将 *ntpd* 作为你的NTP客户端。
+- en: Solution
+  id: totrans-137
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: No problem, because *ntpd* is actively maintained and does the job just fine.
+    First, make sure that *ntpd* is the only NTP client on your system (see [Recipe
+    17.1](#rec-which-ntp)). On most Linux distributions, look for the *ntp* package
+    to install.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 没问题，因为 *ntpd* 正在积极维护，并且能很好地完成工作。首先确保 *ntpd* 是系统上唯一的NTP客户端（参见 [Recipe 17.1](#rec-which-ntp)）。在大多数Linux发行版中，查找
+    *ntp* 包进行安装。
+- en: 'On most Linux distributions *ntpd* comes with a useful configuration, and starts
+    after installation. Check with the *ps* command:'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在大多数Linux发行版中，*ntpd* 配置有用的配置，并且在安装后启动。用 *ps* 命令检查：
+- en: '[PRE22]'
+  id: totrans-140
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'If it does not start automatically, start it:'
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果不会自动启动，请手动启动：
+- en: '[PRE23]'
+  id: totrans-142
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'While *ntpd* is running, take a look at your configuration file, usually */etc/ntp.conf*.
+    The default configuration for your Linux distribution should work fine for you
+    without changes. If your network has its own LAN server, the following configuration
+    sets the local server as the primary and one Fedora Linux server pool as a fallback:'
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当 *ntpd* 运行时，请查看你的配置文件，通常是 */etc/ntp.conf*。Linux发行版的默认配置应该能正常工作，不需要更改。如果你的网络有自己的LAN服务器，以下配置将本地服务器设置为主服务器，Fedora
+    Linux服务器池作为备用：
+- en: '[PRE24]'
+  id: totrans-144
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: You may keep the default configuration, which works fine for most situations.
+    It is common for Linux distributions to maintain their own NTP server pools and
+    provide these in the default configuration. If you wish to replace these, or add
+    some external public servers, see [continental pools](https://oreil.ly/W70Ba)
+    for a list of the continental NTP server pools, or use your country pools, which
+    you will find by clicking on the continental pool links.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数情况下，你可以保持默认配置，这对大多数情况都适用。Linux发行版通常会维护自己的NTP服务器池，并在默认配置中提供这些信息。如果你希望替换或添加一些外部公共服务器，请查看[continental
+    pools](https://oreil.ly/W70Ba)以获取大洲NTP服务器池的列表，或者使用你国家的池，你可以通过点击大洲池链接找到它们。
+- en: 'When you change */etc/ntp.conf*, restart *ntpd*:'
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当更改 */etc/ntp.conf* 时，重新启动 *ntpd*：
+- en: '[PRE25]'
+  id: totrans-147
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: '[PRE26]'
+  id: totrans-148
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'Check that it is working with *ntpq*. The asterisk shows that the machine is
+    syncing with the LAN NTP server:'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *ntpq* 检查其是否工作。星号显示该机器正在与LAN NTP服务器同步：
+- en: '[PRE27]'
+  id: totrans-150
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: Discussion
+  id: totrans-151
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*iburst* tells *ntpd* to synchronize quickly at system startup.'
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*iburst* 告诉 *ntpd* 在系统启动时快速同步。'
+- en: '*prefer* means use this server, and use the others only when it becomes unavailable.'
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*prefer* 意味着使用这个服务器，并且只在其不可用时使用其他服务器。'
+- en: See Also
+  id: totrans-154
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 ntp.conf*'
+  id: totrans-155
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 ntp.conf*'
+- en: '*man 8 ntpd*'
+  id: totrans-156
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 ntpd*'
+- en: '*man 8 ntpq*'
+  id: totrans-157
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 ntpq*'
+- en: '[NTP Documentation](https://oreil.ly/lpDgk)'
+  id: totrans-158
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[NTP 文档](https://oreil.ly/lpDgk)'
+- en: 17.8 Using ntpd for Your NTP Server
+  id: totrans-159
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 17.8 使用 ntpd 作为您的 NTP 服务器
+- en: Problem
+  id: totrans-160
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know how to run an *ntpd* server for your LAN.
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想知道如何为您的 LAN 运行 *ntpd* 服务器。
+- en: Solution
+  id: totrans-162
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Using *ntpd* for your LAN time server is similar to using it as an NTP client.
+    The configuration is almost the same, with the addition of some access controls.
+    The following example is a complete */etc/ntp.conf* configuration:'
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 LAN 时间服务器上使用 *ntpd* 与作为 NTP 客户端使用它类似。配置几乎相同，只需添加一些访问控制。以下示例是完整的 */etc/ntp.conf*
+    配置：
+- en: '[PRE28]'
+  id: totrans-164
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: Discussion
+  id: totrans-165
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'The driftfile is where *ntpd* tracks the time drift caused by fluctuations
+    in the oscillating frequency of the quartz crystal on your motherboard. You have
+    the following options:'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: driftfile 是 *ntpd* 跟踪由主板上石英晶体振荡频率波动引起的时间漂移的地方。您有以下选项：
+- en: '*restrict default* denies all, permits only what is explicitly allowed, and
+    sets defaults.'
+  id: totrans-167
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*restrict default* 拒绝所有，只允许显式允许的内容，并设置默认值。'
+- en: '*nomodify* does not allow other time servers to make any changes on your system.
+    Queries are allowed.'
+  id: totrans-168
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*nomodify* 不允许其他时间服务器对您的系统进行任何更改。允许查询。'
+- en: '*notrap* disables remote logging.'
+  id: totrans-169
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*notrap* 禁用远程记录。'
+- en: '*nopeer* does not allow peering. Peer servers synchronize with each other,
+    so the only servers allowed to supply time service are specified by the *server*
+    or *pool* directives.'
+  id: totrans-170
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*nopeer* 不允许对等。对等服务器彼此同步，因此唯一允许提供时间服务的服务器由 *server* 或 *pool* 指令指定。'
+- en: '*noquery* disallows remote queries and remote logging.'
+  id: totrans-171
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*noquery* 禁止远程查询和远程记录。'
+- en: '*restrict 127.0.0.1* and *restrict ::1* mean trust localhost.'
+  id: totrans-172
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*restrict 127.0.0.1* 和 *restrict ::1* 表示信任本地主机。'
+- en: The *statistics* section logs your selected statistics into */var/log/ntpstats/*.
+    This is not necessary, but it could be interesting for tracking which upstream
+    NTP servers have the best performance.
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*statistics* 部分将您选择的统计信息记录到 */var/log/ntpstats/* 中。这并非必需，但跟踪哪些上游 NTP 服务器性能最佳可能很有趣。'
+- en: See Also
+  id: totrans-174
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 ntp.conf*'
+  id: totrans-175
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 ntp.conf*'
+- en: '*man 8 ntpd*'
+  id: totrans-176
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 ntpd*'
+- en: '*man 8 ntpq*'
+  id: totrans-177
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 ntpq*'
+- en: '[NTP Documentation](https://oreil.ly/lpDgk)'
+  id: totrans-178
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[NTP 文档](https://oreil.ly/lpDgk)'
+- en: 17.9 Managing Time Zones with timedatectl
+  id: totrans-179
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 17.9 使用 timedatectl 管理时区
+- en: Problem
+  id: totrans-180
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to list all time zones, see your current time zone, and change time
+    zones.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想列出所有时区，查看当前时区并更改时区。
+- en: Solution
+  id: totrans-182
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use *timedatectl*. View your current time zone:'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *timedatectl*。查看当前时区：
+- en: '[PRE29]'
+  id: totrans-184
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'List all time zones:'
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出所有时区：
+- en: '[PRE30]'
+  id: totrans-186
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'The list is over 400 lines long. Use the *grep* command when you know what
+    you are looking for. The list names major cities, for example, Berlin:'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列表超过 400 行。当您知道您要查找什么时，请使用 *grep* 命令。例如，列出主要城市，如柏林：
+- en: '[PRE31]'
+  id: totrans-188
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'Set this as your time zone:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将此设置为您的时区：
+- en: '[PRE32]'
+  id: totrans-190
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: The change takes effect immediately. Run *timedatectl* again to verify.
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 变更立即生效。再次运行 *timedatectl* 验证。
+- en: Discussion
+  id: totrans-192
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: When you work with people in different time zones, use UTC to coordinate meeting
+    times. There are several online time zone converters, such as [Time Zone Converter](https://oreil.ly/NyLj7).
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您与不同时区的人们合作时，请使用 UTC 协调会议时间。有几个在线时区转换器，例如 [时区转换器](https://oreil.ly/NyLj7)。
+- en: You must use the region/city form, as displayed by *timedatectl list-timezones*,
+    to set your time zone. This is defined by the ISO 8601 standard, which defines
+    an unambiguous standard for expressing time zones, time, and dates. The standard
+    uses a “descending notation,” which is the largest values to the smallest values,
+    in sequence. For example, for time zones the order is continent/country/city.
+    The US habit of writing the date as year-day-month does not conform to this standard.
+    Year-month-day is the standard, with a 4-digit year, YYYY-MM-DD. Time is HH:MM:SS,
+    in the 24-hour clock format.
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您必须使用区域/城市格式，如 *timedatectl list-timezones* 所示，来设置您的时区。这由 ISO 8601 标准定义，该标准定义了一种清晰表达时区、时间和日期的标准。该标准使用“降序表示法”，即从最大值到最小值的顺序。例如，对于时区，顺序是大洲/国家/城市。美国习惯将日期写为年-日-月不符合此标准。年-月-日
+    是标准格式，年份为四位数，YYYY-MM-DD。时间为 HH:MM:SS，采用 24 小时制。
+- en: The officially published ISO 8601 standard costs money, but a bit of web searching
+    should find the information for free.
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 官方发布的 ISO 8601 标准需付费，但通过一些网页搜索应该可以免费找到信息。
+- en: See Also
+  id: totrans-196
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 timedatectl*'
+  id: totrans-197
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 timedatectl*'
+- en: 17.10 Managing Time Zones Without timedatectl
+  id: totrans-198
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 17.10 不使用 timedatectl 管理时区
+- en: Problem
+  id: totrans-199
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your Linux system does not have systemd, and you need to know what commands
+    to use to manage time zones.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的 Linux 系统没有 systemd，需要了解如何使用哪些命令来管理时区。
+- en: Solution
+  id: totrans-201
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *date* command to see your current time zone:'
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *date* 命令查看当前时区：
+- en: '[PRE33]'
+  id: totrans-203
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'Or see what */etc/localtime* is linked to:'
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或查看 */etc/localtime* 链接到的内容：
+- en: '[PRE34]'
+  id: totrans-205
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'The */usr/share/zoneinfo* directory contains all time zones:'
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/usr/share/zoneinfo* 目录包含所有时区：'
+- en: '[PRE35]'
+  id: totrans-207
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'Look in the subdirectories to find a city close to yours, for example, Madrid:'
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看子目录以找到与您所在城市接近的城市，例如，马德里：
+- en: '[PRE36]'
+  id: totrans-209
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'Change your time zone by changing the link to */etc/localtime*:'
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过更改链接到 */etc/localtime* 来更改您的时区：
+- en: '[PRE37]'
+  id: totrans-211
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: The change takes effect immediately.
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改立即生效。
+- en: Discussion
+  id: totrans-213
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'This cool command lists all time zones alphabetically:'
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个很酷的命令按字母顺序列出所有时区：
+- en: '[PRE38]'
+  id: totrans-215
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: The *php* command is in the *php-cli* package.
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*php* 命令位于 *php-cli* 包中。'
+- en: Your graphical desktop should have a nice graphical utility for managing time,
+    date, and time zones. If a clock is displayed on your desktop, try right-clicking
+    it to bring up a properties or settings panel.
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的图形桌面应该有一个很好的图形实用程序来管理时间、日期和时区。如果桌面上显示了时钟，请尝试右键单击它以打开属性或设置面板。
+- en: See Also
+  id: totrans-218
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 date*'
+  id: totrans-219
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 date*'
+- en: '*man 1 ln*'
+  id: totrans-220
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ln*'

@@ -1,0 +1,443 @@
+- en: Preface
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 前言
+- en: I love to teach. Some of my earliest memories are of teaching other kids to
+    do something—play chess, paint, or build forts for action figures. I taught other
+    students in high school and college. Teaching is something I do naturally. When
+    I write articles, whitepapers, or books, I adopt the role of a teacher. I place
+    the reader in a classroom and teach them tasks or concepts, such as changing permissions
+    on a file or adding a new user to a system. This is how my mind works. This book,
+    like almost everything I write, is a manifestation of that almost innate desire
+    to teach, pass on some knowledge, and plant a seed of curiosity that grows, blossoms,
+    and spreads to others. I hope you find inspiration in this book that leads you
+    to do the same.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我喜欢教书。我最早的记忆之一是教其他孩子做一些事情——比如下棋、画画或为动作人物建造堡垒。我在高中和大学时期也教过其他学生。教书是我自然而然的事情。当我写文章、白皮书或书籍时，我扮演教师的角色。我把读者放在教室里，教他们任务或概念，比如更改文件权限或向系统添加新用户。这就是我的思维方式。这本书，就像我几乎写的每一件事情一样，体现了我几乎与生俱来的教书欲望，传递一些知识，并播下一颗好奇心的种子，它生长、开花并传播给其他人。我希望你能从这本书中获得灵感，带领你做同样的事情。
+- en: Who Should Read This Book
+  id: totrans-2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 谁应该阅读本书
+- en: This book is for anyone who wants to explore Linux for the first time as a system
+    administrator or for someone who wants to transition to such a role for work or
+    as a serious hobby. It’s also meant for those preparing to take certification
+    exams requiring some Linux knowledge.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书适合想要首次探索 Linux 作为系统管理员的任何人，或者希望转向这样的角色来工作或作为严肃的爱好的人。它还适用于那些准备参加需要一些 Linux
+    知识的认证考试的人。
+- en: Why I Wrote This Book
+  id: totrans-4
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 我为什么写这本书
+- en: I wrote this book to fill existing knowledge gaps for system administrators.
+    I would have purchased this book for myself early in my career and kept it at
+    my desk for reference. Sure, there’s plenty of technical information in the book,
+    as you might expect, but there’s also career guidance and some coverage of the
+    nontechnical aspects of being a system administrator.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我写这本书是为了填补系统管理员现有知识空白。在我职业生涯早期，我肯定会买下这本书，并把它放在我的办公桌上作为参考。当然，这本书中有大量的技术信息，正如你所期望的，但也包括职业指导和一些非技术方面的内容，这些对于成为系统管理员很重要。
+- en: Navigating This Book
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 浏览本书
+- en: 'This book is organized as follows:'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书的组织结构如下：
+- en: '[Chapter 1](ch01.xhtml#getting_started_with_linux) introduces you to Linux
+    via installation and initial setup.'
+  id: totrans-8
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第一章](ch01.xhtml#getting_started_with_linux) 介绍了 Linux 安装和初始设置。'
+- en: '[Chapter 2](ch02.xhtml#working_with_permissions_and_privileged) explores the
+    command-line interface, essential to working with Linux as a system administrator.'
+  id: totrans-9
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第二章](ch02.xhtml#working_with_permissions_and_privileged) 探索了命令行界面，这是系统管理员工作中必不可少的部分。'
+- en: '[Chapter 3](ch03.xhtml#customizing_the_user_experience) demonstrates how to
+    customize the user experience and introduces you to the global system configuration
+    files.'
+  id: totrans-10
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第三章](ch03.xhtml#customizing_the_user_experience) 演示如何定制用户体验，并向你介绍全局系统配置文件。'
+- en: '[Chapter 4](ch04.xhtml#managing_users) focuses on user management.'
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第四章](ch04.xhtml#managing_users) 专注于用户管理。'
+- en: '[Chapter 5](ch05.xhtml#connecting_to_a_network) is an overview of Linux networking.'
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第五章](ch05.xhtml#connecting_to_a_network) 是关于 Linux 网络的概述。'
+- en: '[Chapter 6](ch06.xhtml#installing_and_uninstalling_software) is a how-to for
+    software management.'
+  id: totrans-13
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第六章](ch06.xhtml#installing_and_uninstalling_software) 是关于软件管理的操作指南。'
+- en: '[Chapter 7](ch07.xhtml#managing_storage) deals with storage concepts.'
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第七章](ch07.xhtml#managing_storage) 讨论存储概念。'
+- en: '[Chapter 8](ch08.xhtml#maintaining_system_health) is a discussion of maintaining
+    system health.'
+  id: totrans-15
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第八章](ch08.xhtml#maintaining_system_health) 是关于保持系统健康的讨论。'
+- en: '[Chapter 9](ch09.xhtml#monitoring_your_system) provides you with some tools
+    for monitoring your system.'
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第九章](ch09.xhtml#monitoring_your_system) 为你提供一些系统监控工具。'
+- en: '[Chapter 10](ch10.xhtml#scripting_and_automation) explores scripting and automation.'
+  id: totrans-17
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第十章](ch10.xhtml#scripting_and_automation) 探讨脚本编写和自动化。'
+- en: '[Chapter 11](ch11.xhtml#deploying_samba_for_windows_compatibili) covers Windows
+    interoperability using the Samba suite.'
+  id: totrans-18
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第十一章](ch11.xhtml#deploying_samba_for_windows_compatibili) 讲解使用 Samba 套件实现
+    Windows 互操作性。'
+- en: '[Chapter 12](ch12.xhtml#troubleshooting_linux) teaches some practical troubleshooting
+    techniques.'
+  id: totrans-19
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第十二章](ch12.xhtml#troubleshooting_linux) 教授了一些实用的故障排除技术。'
+- en: '[Chapter 13](ch13.xhtml#securing_your_system) helps you secure your system.'
+  id: totrans-20
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第十三章](ch13.xhtml#securing_your_system) 帮助你保护你的系统。'
+- en: '[Chapter 14](ch14.xhtml#continuing_your_education) summarizes educational opportunities
+    you should explore to keep yourself up-to-date and sharpen your skills.'
+  id: totrans-21
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第14章](ch14.xhtml#continuing_your_education) 总结了您应该探索的教育机会，以保持自己的最新状态并提升技能。'
+- en: '[Chapter 15](ch15.xhtml#making_career_moves) is advice to help you keep your
+    career moving forward.'
+  id: totrans-22
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第15章](ch15.xhtml#making_career_moves) 提供了帮助您推动职业生涯的建议。'
+- en: Conventions Used in This Book
+  id: totrans-23
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 本书使用的惯例
+- en: 'The following typographical conventions are used in this book:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书中使用了以下排版约定：
+- en: '*Italic*'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*斜体*'
+- en: Indicates new terms, URLs, email addresses, filenames, and file extensions.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表示新术语，URL，电子邮件地址，文件名和文件扩展名。
+- en: '`Constant width`'
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`等宽字体`'
+- en: Used for program listings, as well as within paragraphs to refer to program
+    elements such as variable or function names, databases, data types, environment
+    variables, statements, and keywords.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于程序清单，以及段落中引用程序元素，例如变量或函数名称，数据库，数据类型，环境变量，语句和关键字。
+- en: '*`Constant width italic`*'
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*`等宽斜体`*'
+- en: Shows text that should be replaced with user-supplied values or by values determined
+    by context.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示应由用户提供值或由上下文确定值替换的文本。
+- en: Tip
+  id: totrans-31
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: This element signifies a tip or suggestion.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示提示或建议。
+- en: Note
+  id: totrans-33
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: This element signifies a general note.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示一般注释。
+- en: Warning
+  id: totrans-35
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: This element indicates a warning or caution.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示警告或注意。
+- en: Using Code Examples
+  id: totrans-37
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用代码示例
+- en: Supplemental material (code examples, exercises, etc.) is available for download
+    at [*https://oreil.ly/practical-linux-system-admin-code*](https://oreil.ly/practical-linux-system-admin-code).
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 补充材料（代码示例，练习等）可在[*https://oreil.ly/practical-linux-system-admin-code*](https://oreil.ly/practical-linux-system-admin-code)下载。
+- en: If you have a technical question or a problem using the code examples, please
+    send email to [*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com).
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您在使用代码示例时遇到技术问题或困难，请发送电子邮件至[*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com)。
+- en: This book is here to help you get your job done. In general, if example code
+    is offered with this book, you may use it in your programs and documentation.
+    You do not need to contact us for permission unless you’re reproducing a significant
+    portion of the code. For example, writing a program that uses several chunks of
+    code from this book does not require permission. Selling or distributing examples
+    from O’Reilly books does require permission. Answering a question by citing this
+    book and quoting example code does not require permission. Incorporating a significant
+    amount of example code from this book into your product’s documentation does require
+    permission.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书旨在帮助您完成工作。一般情况下，如果本书提供了示例代码，您可以在您的程序和文档中使用它。除非您复制了代码的大部分内容，否则无需征得我们的许可。例如，编写一个使用本书多个代码片段的程序不需要许可。销售或分发O’Reilly书籍中的示例代码则需要许可。通过引用本书并引用示例代码回答问题不需要许可。将本书的大量示例代码整合到您产品的文档中则需要许可。
+- en: 'We appreciate, but generally do not require, attribution. An attribution usually
+    includes the title, author, publisher, and ISBN. For example: “*Practical Linux
+    System Administration* by Kenneth Hess (O’Reilly). Copyright 2023 Hess Media and
+    Consulting, LLC, 978-1-098-10903-5.”'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们欣赏，但通常不需要，署名。署名通常包括标题，作者，出版商和ISBN。例如：“*实用Linux系统管理* 作者 Kenneth Hess（O’Reilly）。版权所有2023年Hess
+    Media and Consulting, LLC，978-1-098-10903-5。”
+- en: If you feel your use of code examples falls outside fair use or the permission
+    given above, feel free to contact us at [*permissions@oreilly.com*](mailto:permissions@oreilly.com).
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您认为您使用的代码示例超出了合理使用范围或上述权限，请随时通过[*permissions@oreilly.com*](mailto:permissions@oreilly.com)联系我们。
+- en: O’Reilly Online Learning
+  id: totrans-43
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: O’Reilly在线学习
+- en: Note
+  id: totrans-44
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: For more than 40 years, [*O’Reilly Media*](https://oreilly.com) has provided
+    technology and business training, knowledge, and insight to help companies succeed.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 超过40年来，[*O’Reilly Media*](https://oreilly.com)已经提供技术和业务培训，知识和见解，帮助公司成功。
+- en: Our unique network of experts and innovators share their knowledge and expertise
+    through books, articles, and our online learning platform. O’Reilly’s online learning
+    platform gives you on-demand access to live training courses, in-depth learning
+    paths, interactive coding environments, and a vast collection of text and video
+    from O’Reilly and 200+ other publishers. For more information, visit [*https://oreilly.com*](https://oreilly.com).
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们独特的专家和创新者网络通过书籍、文章和我们的在线学习平台分享他们的知识和专业知识。O’Reilly的在线学习平台为您提供按需访问实时培训课程、深度学习路径、互动编码环境以及来自O’Reilly和其他200多个出版商的广泛文本和视频资源。有关更多信息，请访问[*https://oreilly.com*](https://oreilly.com)。
+- en: How to Contact Us
+  id: totrans-47
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 如何联系我们
+- en: 'Please address comments and questions concerning this book to the publisher:'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请将有关本书的评论和问题寄给出版商：
+- en: O’Reilly Media, Inc.
+  id: totrans-49
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: O’Reilly Media, Inc.
+- en: 1005 Gravenstein Highway North
+  id: totrans-50
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1005 Gravenstein Highway North
+- en: Sebastopol, CA 95472
+  id: totrans-51
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 加利福尼亚州塞巴斯托波尔95472
+- en: 800-998-9938 (in the United States or Canada)
+  id: totrans-52
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 800-998-9938（在美国或加拿大）
+- en: 707-829-0515 (international or local)
+  id: totrans-53
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 707-829-0515（国际或本地）
+- en: 707-829-0104 (fax)
+  id: totrans-54
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 707-829-0104（传真）
+- en: We have a web page for this book, where we list errata, examples, and any additional
+    information. You can access this page at [*https://oreil.ly/practical-linux-system-admin*](https://oreil.ly/practical-linux-system-admin).
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们有一个本书的网页，我们在那里列出勘误、示例和任何额外信息。您可以访问[*https://oreil.ly/practical-linux-system-admin*](https://oreil.ly/practical-linux-system-admin)。
+- en: Email [*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com) to comment
+    or ask technical questions about this book.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 发邮件至[*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com)评论或询问有关本书的技术问题。
+- en: For news and information about our books and courses, visit [*https://oreilly.com*](https://oreilly.com).
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有关我们的书籍和课程的新闻和信息，请访问[*https://oreilly.com*](https://oreilly.com)。
+- en: 'Find us on LinkedIn: [*https://linkedin.com/company/oreilly-media*](https://linkedin.com/company/oreilly-media)'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在LinkedIn上找到我们：[*https://linkedin.com/company/oreilly-media*](https://linkedin.com/company/oreilly-media)
+- en: 'Follow us on Twitter: [*https://twitter.com/oreillymedia*](https://twitter.com/oreillymedia)'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Twitter上关注我们：[*https://twitter.com/oreillymedia*](https://twitter.com/oreillymedia)
+- en: 'Watch us on YouTube: [*https://www.youtube.com/oreillymedia*](https://www.youtube.com/oreillymedia)'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在YouTube上观看我们：[*https://www.youtube.com/oreillymedia*](https://www.youtube.com/oreillymedia)
+- en: Acknowledgments
+  id: totrans-61
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 致谢
+- en: Being a Linux system administrator requires sacrifices from you and your family.
+    I’ve often stated that a sysadmin’s whole family works for a company. This might
+    be true for any job you have, but it seems especially relevant for system administrators.
+    Linux system administration is a great career choice, but take time for yourself,
+    your spouse, and your children. Remember that you don’t live to work; you work
+    to live. You can’t get missed moments back—the milestones, events, and celebrations
+    that create an existence that will be remembered fondly.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 成为Linux系统管理员需要你和你的家庭做出牺牲。我经常说系统管理员的整个家庭为一家公司工作。这对任何工作可能都是真实的，但似乎对系统管理员尤为相关。Linux系统管理是一个很好的职业选择，但要为自己、配偶和子女留出时间。记住你工作是为了生活，而不是为了活着。你不能把错过的时刻拿回来——里程碑、事件和庆祝活动创造了一个会被温暖地记住的存在。
+- en: Thank you to my wife, Melissa, who always supports my creative pursuits.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 感谢我的妻子梅丽莎，她始终支持我的创意追求。
+- en: 'I’d also like to thank the following people who helped make this book possible:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我也想感谢以下帮助使这本书成为可能的人：
+- en: John Devins, O’Reilly acquisitions editor
+  id: totrans-65
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 约翰·戴文斯，O’Reilly收购编辑
+- en: Jeff Bleiel, O’Reilly development editor
+  id: totrans-66
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 杰夫·布莱尔，O’Reilly开发编辑
+- en: Gregory Hyman, O’Reilly production editor
+  id: totrans-67
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 格雷戈里·海曼，O’Reilly制作编辑
+- en: Technical reviewers Daniel Barrett and Adam McPartlan
+  id: totrans-68
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 技术审阅员丹尼尔·巴雷特和亚当·麦克帕特兰

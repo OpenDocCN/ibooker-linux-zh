@@ -1,0 +1,1535 @@
+- en: Chapter 6\. Linux Networking and BPF
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第6章 Linux网络和BPF
+- en: 'From a networking point of view, we use BPF programs for two main use cases:
+    packet capturing and filtering.'
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从网络角度来看，我们主要使用BPF程序的两个主要用例：数据包捕获和过滤。
+- en: This means that a user-space program can attach a filter to any socket and extract
+    information about packets flowing through it and allow/disallow/redirect certain
+    kinds of packets as they are seen at that level.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这意味着用户空间程序可以将过滤器附加到任何套接字，并提取通过它流动的数据包的信息，并在检测到它们时允许/禁止/重定向某些类型的数据包。
+- en: 'The goal of this chapter is to explain how BPF programs can interact with the
+    Socket Buffer structure at different stages of the network data path in the Linux
+    kernel network stack. We are identifying, as common use cases two types of programs:'
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章的目标是解释BPF程序如何在Linux内核网络堆栈中的不同数据路径阶段与套接字缓冲结构进行交互。我们正在识别两种常见用例程序：
+- en: Program types related to *sockets*
+  id: totrans-4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 与*套接字*相关的程序类型
+- en: Programs written for the BPF-based classifier for *Traffic Control*
+  id: totrans-5
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 针对基于BPF的*流量控制*分类器编写的程序。
+- en: Note
+  id: totrans-6
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The Socket Buffer structure, also called SKB or `sk_buff`, is the one in the
+    kernel that is created and used for every packet sent or received. By reading
+    the SKB you can pass or drop packets and populate BPF maps to create statistics
+    and flow metrics about the current traffic.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 套接字缓冲结构，也称为SKB或`sk_buff`，是内核中为每个发送或接收的数据包创建和使用的结构。通过读取SKB，您可以传递或丢弃数据包，并填充BPF映射以创建有关当前流量的统计信息和流量度量。
+- en: In addition some BPF programs allow you to manipulate the SKB and, by extension,
+    transform the final packets in order to redirect them or change their fundamental
+    structure. For example, on an IPv6-only system, you might write a program that
+    converts all the received packets from IPv4 to IPv6, which can be accomplished
+    by mangling with the packets’ SKB.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，一些BPF程序允许您操作SKB及其扩展，以转换最终数据包的重定向或更改其基本结构。例如，在仅支持IPv6的系统上，您可以编写一个程序，将所有接收到的IPv4数据包转换为IPv6，这可以通过对数据包的SKB进行操作来完成。
+- en: 'Understanding the differences between the different kinds of programs we can
+    write and how different programs lead to the same goal is the key to understanding
+    BPF and eBPF in networking; in the next section we look at the first two ways
+    to do filtering at socket level: by using classic BPF filters, and by using eBPF
+    programs attached to sockets.'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 了解我们可以编写的不同类型程序之间的区别，以及不同程序如何达到相同目标是理解网络中的BPF和eBPF的关键；在下一节中，我们将看看在套接字级别进行过滤的前两种方法：通过使用经典BPF过滤器和通过附加到套接字的eBPF程序。
+- en: BPF and Packet Filtering
+  id: totrans-10
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPF和数据包过滤
+- en: As stated, BPF filters and eBPF programs are the principal use cases for BPF
+    programs in the context of networking; however, originally, BPF programs were
+    synonymous with packet filtering.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如所述，BPF过滤器和eBPF程序是在网络上下文中使用BPF程序的主要用例；然而，最初，BPF程序与数据包过滤是同义词。
+- en: Packet filtering is still one of the most important use cases and has been expanded
+    from classic BPF (cBPF) to the modern eBPF in Linux 3.19 with the addition of
+    map-related functions to the filter program type `BPF_PROG_TYPE_SOCKET_FILTER`.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数据包过滤仍然是最重要的用例之一，并且已从经典BPF（cBPF）扩展到现代eBPF，在Linux 3.19中增加了与过滤程序类型`BPF_PROG_TYPE_SOCKET_FILTER`相关的映射函数。
+- en: 'Filters can be used mainly in three high-level scenarios:'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 过滤器主要可以在三种高级场景中使用：
+- en: Live traffic dropping (e.g., allowing only User Datagram Protocol [UDP] traffic
+    and discarding anything else)
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 实时流量丢弃（例如，只允许用户数据报协议[UDP]流量，并丢弃其他任何内容）。
+- en: Live observation of a filtered set of packets flowing into a live system
+  id: totrans-15
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 直接在实时系统中观察一组经过过滤的数据包的实时流动。
+- en: Retrospective analysis of network traffic captured on a live system, using the
+    *pcap format*, for example
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 对在实时系统上捕获的网络流量进行回顾性分析，例如使用*pcap格式*。
+- en: Note
+  id: totrans-17
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'The term *pcap* comes from the conjunction of two words: packet and capture.
+    The pcap format is implemented as a domain-specific API for packet capturing in
+    a library called Packet Capture Library (*libpcap*). This format is useful in
+    debugging scenarios when you want to save a set of packets that have been captured
+    on a live system directly to a file to analyze them later using a tool that can
+    read a stream of packets exported in the pcap format.'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 术语*pcap*来自两个词的结合：数据包和捕获。 pcap格式实现为用于在名为数据包捕获库（*libpcap*）中捕获数据包的特定领域API。在调试场景中，当您想要保存在实时系统上捕获的一组数据包以便稍后使用能够读取以pcap格式导出的数据包流的工具进行分析时，这种格式非常有用。
+- en: In the following sections we show two different ways to apply the concept of
+    packet filtering with BPF programs. First we show how a common and widespread
+    tool like `tcpdump` acts as a higher-level interface for BPF programs used as
+    filters. Then we write and load our own program using the `BPF_PROG_TYPE_SOCKET_FILTER`
+    BPF program type.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接下来的几节中，我们展示了两种使用BPF程序应用数据包过滤概念的不同方法。首先，我们展示了一个常见且广泛使用的工具`tcpdump`如何作为BPF程序的高级接口用于过滤。然后，我们编写并加载我们自己的程序，使用`BPF_PROG_TYPE_SOCKET_FILTER`
+    BPF程序类型。
+- en: tcpdump and BPF Expressions
+  id: totrans-20
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: tcpdump和BPF表达式
+- en: When talking about live traffic analysis and observation, one of the command-line
+    tools that almost everyone knows about is `tcpdump`. Essentially a frontend for
+    `libpcap`, it allows the user to define high-level filtering expressions. What
+    `tcpdump` does is read packets from a network interface of your choice (or any
+    interface) and then writes the content of the packets it received to stdout or
+    a file. The packet stream can then be filtered using the pcap filter syntax. The
+    pcap filter syntax is a DSL that is used to filter packets using a higher-level
+    set of expressions made by a set of primitives that are generally easier to remember
+    than BPF assembly. It’s out of the scope of this chapter to explain all the primitives
+    and expressions possible in the pcap filter syntax because the entire set can
+    be found in `man 7 pcap-filter`, but we do go through some examples so that you
+    can understand its power.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 谈论实时流量分析和观察时，几乎每个人都知道的一个命令行工具是`tcpdump`。本质上是`libpcap`的一个前端，它允许用户定义高级过滤表达式。`tcpdump`的作用是从你选择的网络接口（或任何接口）读取数据包，然后将接收到的数据包内容写入标准输出或文件中。可以使用pcap过滤语法来过滤数据包流。pcap过滤语法是一种DSL，用于使用一组原语来过滤数据包，这些原语通常比BPF汇编更易记。本章的范围不包括解释pcap过滤语法中所有可能的原语和表达式，因为完整的集合可以在`man
+    7 pcap-filter`中找到，但我们会通过一些示例让你了解其强大之处。
+- en: The scenario is that we are in a Linux box that is exposing a web server on
+    port 8080; this web server is not logging the requests it receives, and we really
+    want to know whether it is receiving any request and how those requests are flowing
+    into it because a customer of the served application is complaining about not
+    being able to get any response while browsing the products page. At this point,
+    we know only that the customer is connecting to one of our products pages using
+    our web application served by that web server, and as almost always happens, we
+    have no idea what could be the cause of that because end users generally don’t
+    try to debug your services for you, and unfortunately we didn’t deploy any logging
+    or error reporting strategy into this system, so we are completely blind while
+    investigating the problem. Fortunately, there’s a tool that can come to our rescue!
+    It is `tcpdump`, which can be told to filter only IPv4 packets flowing in our
+    system that are using the Transmission Control Protocol (TCP) on port 8080\. Therefore,
+    we will be able to analyze the traffic of the web server and understand what are
+    the faulty requests.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 场景是我们位于一个Linux系统上，在端口8080上暴露了一个Web服务器；这个Web服务器没有记录它接收到的请求，而我们真的想知道它是否收到了任何请求，以及这些请求是如何流入的，因为应用服务的客户正在抱怨在浏览产品页面时无法得到任何响应。此时，我们只知道客户正在使用我们的Web应用程序连接到我们的产品页面之一，由该Web服务器提供服务，并且通常情况下，我们不知道问题的根本原因，因为最终用户通常不会为您调试服务，并且不幸的是，我们没有在这个系统中部署任何日志记录或错误报告策略，所以在调查问题时我们完全是盲目的。幸运的是，有一个工具可以帮助我们！它就是`tcpdump`，可以仅过滤在我们系统中使用传输控制协议（TCP）在端口8080上的IPv4数据包。因此，我们将能够分析Web服务器的流量并理解哪些是有问题的请求。
+- en: 'Here’s the command to conduct that filtering with `tcpdump`:'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是使用`tcpdump`进行过滤的命令：
+- en: '[PRE0]'
+  id: totrans-24
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'Let’s take a look at what’s happening in this command:'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看这条命令中发生了什么：
+- en: '`-n` is there to tell `tcpdump` to not convert addresses to the respective
+    names, we want to see the addresses for source and destination.'
+  id: totrans-26
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`-n` 参数告诉`tcpdump`不要将地址转换为相应的名称，我们希望看到源地址和目标地址。'
+- en: '`ip and tcp port 8080` is the pcap filter expression that `tcpdump` will use
+    to filter your packets. `ip` means `IPv4`, `and` is a conjunction to express a
+    more complex filter to allow adding more expressions to match, and then we specify
+    that we are interested only in TCP packets coming from or to port 8080 using `tcp
+    port 8080`. In this specific case a better filter would’ve been `tcp dst port
+    8080` because we are interested only in packets having as the destination port
+    8080 and not packets coming from it.'
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`ip and tcp port 8080` 是 `tcpdump` 将用于过滤数据包的 pcap 过滤表达式。`ip` 表示 `IPv4`，`and`
+    是一个连接词，用于表达更复杂的过滤条件以允许添加更多表达式以匹配，然后我们指定我们只对来自或到达端口 `8080` 的 TCP 数据包感兴趣。在这种特定情况下，更好的过滤器应该是
+    `tcp dst port 8080`，因为我们只对目的端口为 `8080` 的数据包感兴趣，而不是来自该端口的数据包。'
+- en: 'The output of that will be something like this (without the redundant parts
+    like complete TCP handshakes):'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其输出将类似于这样（去除冗余部分，如完整的 TCP 握手）：
+- en: '[PRE1]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: The situation is a lot clearer now! We have a bunch of requests going well,
+    returning a `200 OK` status code, but there is also one with a `500 Internal Server
+    Error` code on the `/api/products` endpoint. Our customer is right; we have a
+    problem listing the products!
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在情况清楚了！我们有一堆请求成功进行，返回了 `200 OK` 状态码，但在 `/api/products` 终端点上还有一个返回了 `500 Internal
+    Server Error` 状态码的请求。我们的客户是对的；我们在列出产品时遇到了问题！
+- en: 'At this point, you might ask yourself, what does all this pcap filtering stuff
+    and `tcpdump` have to do with BPF programs if they have their own syntax? Pcap
+    filters on Linux are compiled to BPF programs! And because `tcpdump` uses pcap
+    filters for the filtering, this means that every time you execute `tcpdump` using
+    a filter, you are actually compiling and loading a BPF program to filter your
+    packets. Fortunately, by passing the `-d` flag to `tcpdump`, you can dump the
+    BPF instructions that it will load while using the specified filter:'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一点上，你可能会问自己，这些 pcap 过滤和 `tcpdump` 的东西与 BPF 程序有什么关系，因为它们有自己的语法？在 Linux 上，Pcap
+    过滤器被编译成 BPF 程序！由于 `tcpdump` 使用 pcap 过滤器进行过滤，这意味着每次你使用带有过滤器的 `tcpdump` 时，实际上都在编译和加载一个
+    BPF 程序来过滤你的数据包。幸运的是，通过传递 `-d` 标志给 `tcpdump`，你可以转储它将在使用指定过滤器时加载的 BPF 指令：
+- en: '[PRE2]'
+  id: totrans-32
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: The filter is the same as the one used in the previous example, but the output
+    now is a set of BPF assembly instructions because of the `-d` flag.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 过滤器与之前示例中使用的相同，但现在的输出是一组 BPF 汇编指令，因为使用了 `-d` 标志。
+- en: 'Here’s the output:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里是输出结果：
+- en: '[PRE3]'
+  id: totrans-35
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Let’s analyze it:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们分析一下：
+- en: '`ldh [12]`'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ldh [12]`'
+- en: (`ld`) Load a (`h`) half-word (`16` bit) from the accumulator at offset 12,
+    which is the Ethertype field, as shown in [Figure 6-1](#ethernet-II-frame-offsets).
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: (`ld`) 从累加器中偏移量为12的地方加载一个半字（`h`），该地方是以太网 II 帧的以太类型字段，如[图 6-1](#ethernet-II-frame-offsets)所示。
+- en: '`jeq #0x800 jt 2 jf 12`'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`jeq #0x800 jt 2 jf 12`'
+- en: (`j`) Jump if (`eq`) equal; check whether the Ethertype value from the previous
+    instruction is equal to `0x800`—which is the identifier for IPv4—and then use
+    the jump destinations that are `2` if true (`jt`) and `12` if false (`jf`), so
+    this will continue to the next instruction if the Internet Protocol is IPv4—otherwise
+    it will jump to the end and return zero.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: (`j`) 条件跳转相等; 检查前一条指令中的以太类型值是否等于 `0x800`—这是 IPv4 的标识符—如果是，使用条件为真时跳转到第 `2` 条指令
+    (`jt`)，为假时跳转到第 `12` 条指令 (`jf`)，所以如果是 Internet 协议为 IPv4，将继续执行下一条指令—否则将跳转到结尾并返回零。
+- en: '`ldb [23]`'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ldb [23]`'
+- en: Load byte into (`ldb`), will load the higher-layer protocol field from the IP
+    frame that can be found at offset `23`—offset `23` comes from the addition of
+    the 14 bytes of the headers in the Ethernet Layer 2 frame (see [Figure 6-1](#ethernet-II-frame-offsets))
+    plus the position the protocol has in the IPv4 header, which is the 9th, so 14
+    + 9 = 23.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过 (`ldb`) 加载一个字节，从 IP 帧中加载高层协议字段，该字段位于偏移量 `23`—偏移量 `23` 来自以太网第二层帧头部的14字节（参见[图 6-1](#ethernet-II-frame-offsets)），加上协议在
+    IPv4 头部的位置，即第9个字节，因此为 14 + 9 = 23。
+- en: '`jeq #0x6 jt 4 jf 12`'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`jeq #0x6 jt 4 jf 12`'
+- en: Again a jump if equal. In this case, we check that the previous extracted protocol
+    is `0` x `6`, which is TCP. If it is, we jump to the next instruction (`4`) or
+    we go to the end (`12`)—if it is not, we drop the packet.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 再次是条件相等的跳转。在这种情况下，我们检查之前提取的协议是否是 `0x6`，即 TCP。如果是，则跳转到下一条指令 (`4`)，否则跳转到结尾 (`12`)—如果不是，则丢弃该数据包。
+- en: '`ldh [20]`'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ldh [20]`'
+- en: This is another load half-word instruction—in this case, it is to load the value
+    of packet offset + fragment offset from the IPv4 header.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是另一条加载半字指令—在这种情况下，是加载 IPv4 头部中数据包偏移量 + 片偏移的值。
+- en: '`jset #0x1fff jt 12 6`'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`jset #0x1fff jt 12 6`'
+- en: This `jset` instruction will jump to `12` if any of the data we found in the
+    fragment offset is true—otherwise, go to `6`, which is the next instruction. The
+    offset after the instruction `0x1fff` says to the `jset` instruction to look only
+    at the last 13 bytes of data. (Expanded it becomes `0001 1111 1111 1111`.)
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果片段偏移中找到的任何数据为真，则此`jset`指令将跳转到`12`——否则，前往`6`，即下一个指令。指令后的偏移量`0x1fff`告诉`jset`指令仅查看数据的最后13个字节。（扩展后变成`0001
+    1111 1111 1111`。）
+- en: '`ldxb 4*([14]&0xf)`'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ldxb 4*([14]&0xf)`'
+- en: (`ld`) Load into x (`x`) what (`b`) is. This instruction will load the value
+    of the IP header length into `x`.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: （`ld`）加载到`x`中（`x`）的是（`b`）。此指令将IP头长度的值加载到`x`中。
+- en: '`ldh [x + 14]`'
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ldh [x + 14]`'
+- en: Another load half-word instruction that will go get the value at offset (`x`
+    + `14`), IP header length + 14, which is the location of the source port within
+    the packet.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个加载半字指令，将获取偏移量为（`x` + `14`），即IP头长度加14，这是数据包中源端口的位置。
+- en: '`jeq #0x1f90 jt 11 jf 9`'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`jeq #0x1f90 jt 11 jf 9`'
+- en: If the value at (`x` + `14`) is equal to `0x1f90` (`8080` in decimal), which
+    means that the source port will be `8080`, continue to `11` or go check whether
+    the destination is on port `8080` by continuing to `9` if this is false.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果（`x` + `14`）处的值等于`0x1f90`（十进制为8080），这意味着源端口将是`8080`，则继续到`11`或通过继续到`9`检查目的地是否位于端口`8080`。
+- en: '`ldh [x + 16]`'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ldh [x + 16]`'
+- en: This is another load half-word instruction that will go get the value at offset
+    (`x` + `16`), which is the location of destination port in the packet.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是另一条加载半字指令，将获取偏移量为（`x` + `16`）的值，这是数据包中目标端口的位置。
+- en: '`jeq #0x1f90 jt 11 jf 12`'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`jeq #0x1f90 jt 11 jf 12`'
+- en: Here’s another jump if equal, this time used to check if the destination is
+    `8080`, go to `11`; if not, go to `12` and discard the packet.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是另一个等于跳转，这次用于检查目的地是否是`8080`，前往`11`；如果不是，则前往`12`丢弃数据包。
+- en: '`ret #262144`'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ret #262144`'
+- en: When this instruction is reached, a match is found—thus return the matched snap
+    length. By default this value is 262,144 bytes. It can be tuned using the `-s`
+    parameter in `tcpdump`.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当达到此指令时，找到匹配项——因此返回匹配的抓取长度。默认情况下，此值为262,144字节。可以使用`tcpdump`中的`-s`参数进行调整。
+- en: '![Diagram showing the Layer 2 Ethernet frame structure and the respective lengths](assets/lbpf_0601.png)'
+  id: totrans-61
+  prefs: []
+  type: TYPE_IMG
+  zh: '![显示第2层以太网帧结构和相应长度的图表](assets/lbpf_0601.png)'
+- en: Figure 6-1\. Layer 2 Ethernet frame structure
+  id: totrans-62
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图6-1\. 第2层以太网帧结构
+- en: 'Here’s the “correct” example because, as we said in the case of our web server,
+    we only need to take into account the packet having 8080 as a destination, not
+    as a source, so the `tcpdump` filter can specify it with the `dst` destination
+    field:'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是“正确”的示例，因为正如我们在我们的Web服务器的情况下所说的，我们只需要考虑数据包的目标是8080，而不是源端口，所以`tcpdump`过滤器可以使用`dst`目标字段指定它：
+- en: '[PRE4]'
+  id: totrans-64
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'In this case, the dumped set of instructions is similar to the previous example,
+    but as you can see, it lacks the entire part about matching the packets with a
+    source of port 8080\. In fact, there’s no `ldh [x + 14]` and the relative `jeq
+    #0x1f90 jt 11 jf 9`.'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '在这种情况下，所转储的指令集与前面的示例类似，但正如您所见，它缺少与源端口为8080匹配数据包的整个部分。事实上，没有`ldh [x + 14]`和相关的`jeq
+    #0x1f90 jt 11 jf 9`。'
+- en: '[PRE5]'
+  id: totrans-66
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Besides just analyzing the generated assembly from `tcpdump`, as we did, you
+    might want to write your own code to filter network packets. It turns out that
+    the biggest challenge in that case would be to actually debug the execution of
+    the code to make sure it matches our expectations; in this case, in the kernel
+    source tree, there’s a tool in `tools/bpf` called `bpf_dbg.c` that is essentially
+    a debugger that allows you to load a program and a pcap file to test the execution
+    step by step.
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了仅分析从`tcpdump`生成的汇编之外，正如我们所做的那样，您可能希望编写自己的代码来过滤网络数据包。事实证明，在这种情况下，实际上调试代码的执行以确保其符合我们的预期是最大的挑战；在内核源树中，有一个名为`tools/bpf`的工具，在其中有一个称为`bpf_dbg.c`的工具，它实质上是一个调试器，允许您逐步加载程序和pcap文件以测试执行步骤。
+- en: Tip
+  id: totrans-68
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: '`tcpdump` can also read directly from a `.pcap` file and apply BPF filters
+    to it.'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`tcpdump`也可以直接从`.pcap`文件中读取，并对其应用BPF过滤器。'
+- en: Packet Filtering for Raw Sockets
+  id: totrans-70
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 原始套接字的数据包过滤
+- en: The `BPF_PROG_TYPE_SOCKET_FILTER` program type allows you to attach the BPF
+    program to a socket. All of the packets received by it will be passed to the program
+    in the form of an `sk_buff` struct, and then the program can decide whether to
+    discard or allow them. This kind of programs also has the ability to access and
+    work on maps.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_PROG_TYPE_SOCKET_FILTER`程序类型允许您将BPF程序附加到套接字上。所有由其接收的数据包将以`sk_buff`结构的形式传递给程序，然后程序可以决定是否丢弃或允许它们。这种程序还具有访问和操作映射的能力。'
+- en: Let’s look at an example to see how this kind of BPF program can be used.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看一个示例，看看这种类型的BPF程序如何使用。
+- en: 'The purpose of our example program is to count the number of TCP, UDP, and
+    Internet Control Message Protocol (ICMP) packets flowing in the interface under
+    observation. To do that, we need the following:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们示例程序的目的是计算接口下流动的TCP、UDP和Internet控制消息协议（ICMP）数据包的数量。为此，我们需要以下内容：
+- en: The BPF program that can see the packets flowing
+  id: totrans-74
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 能够查看流动数据包的BPF程序
+- en: The code to load the program and attach it to a network interface
+  id: totrans-75
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 加载程序并将其附加到网络接口的代码
+- en: A script to compile the program and launch the loader
+  id: totrans-76
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 编译程序并启动加载程序的脚本
+- en: 'At this point, we can write our BPF program in two ways: as C code that is
+    then compiled to an *ELF* file, or directly as a BPF assembly. For this example,
+    we opted to use C code to show a higher-level abstraction and how to use Clang
+    to compile the program. It’s important to note that to make this program, we are
+    using headers and helpers available only in the Linux kernel’s source tree, so
+    the first thing to do is to obtain a copy of it using Git. To avoid differences,
+    you can check out the same commit SHA we’ve used to make this example:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，我们可以用两种方式编写我们的BPF程序：一种是将C代码编译成*ELF*文件，另一种是直接作为BPF汇编。在本例中，我们选择使用C代码来展示更高层次的抽象和如何使用Clang编译程序。需要注意的是，为了编写这个程序，我们使用了仅在Linux内核源代码树中可用的头文件和帮助程序，因此首先要做的是使用Git获取一份副本。为了避免差异，您可以检出我们在此示例中使用的相同提交SHA：
+- en: '[PRE6]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: Tip
+  id: totrans-79
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: To contain BPF support, you will need `clang >= 3.4.0` with `llvm >= 3.7.1`.
+    To verify BPF support in your installation, you can use the command `llc -version`
+    and look to see whether it has the BPF target.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要支持BPF，您需要`clang >= 3.4.0`和`llvm >= 3.7.1`。要验证您的安装中是否支持BPF，请使用命令`llc -version`并查看是否有BPF目标。
+- en: Now that you understand socket filtering, we can get our hands on a BPF program
+    of type `socket`.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您了解了套接字过滤，我们可以着手编写一个类型为`socket`的BPF程序。
+- en: The BPF program
+  id: totrans-82
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: BPF程序
+- en: The main duty of the BPF program here is to access the packet it receives; check
+    whether its protocol is TCP, UDP, or ICMP, and then increment the counter on the
+    map array on the specific key for the found protocol.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里BPF程序的主要任务是访问其接收到的数据包；检查其协议是否为TCP、UDP或ICMP，然后在找到的协议的特定键上递增映射数组中的计数器。
+- en: 'For this program we are going to take advantage of the loading mechanism that
+    parses *ELF* files using the helpers located in *samples/bpf/bpf_load.c* in the
+    kernel source tree. The load function `load_bpf_file` is able to recognize some
+    specific ELF section headers and can associate them to the respective program
+    types. Here’s how that code looks:'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于这个程序，我们将利用使用位于内核源代码树中的*samples/bpf/bpf_load.c*中的帮助程序解析ELF文件的加载机制。`load_bpf_file`函数能够识别一些特定的ELF节头，并可以将它们关联到相应的程序类型。以下是代码的示例：
+- en: '[PRE7]'
+  id: totrans-85
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: The first thing that the code does is to create an association between the section
+    header and an internal variable—like for `SEC("socket")`, we will end up with
+    `bool is_socket=true`.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 代码首先要做的是创建标头部分与内部变量之间的关联，例如对于`SEC("socket")`，我们将得到`bool is_socket=true`。
+- en: 'Later in the same file, we see a set of `if` instructions that create the association
+    between the header and the actual `prog_type` , so for `is_socket`, we end up
+    with `BPF_PROG_TYPE_SOCKET_FILTER`:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在同一文件的后面，我们看到一组`if`指令，它们创建了标头和实际`prog_type`之间的关联，因此对于`is_socket`，我们最终得到`BPF_PROG_TYPE_SOCKET_FILTER`：
+- en: '[PRE8]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: Good, so because we want to write a `BPF_PROG_TYPE_SOCKET_FILTER` program, we
+    need to specify a `SEC("socket")` as an ELF header to our function that will act
+    as an entry point for our BPF program.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 很好，因此因为我们想编写一个`BPF_PROG_TYPE_SOCKET_FILTER`程序，我们需要在我们的函数中指定一个`SEC("socket")`作为ELF头。
+- en: As you can see by that list, there are a variety of program types related to
+    sockets and in general network operations. In this chapter we are showing examples
+    with `BPF_PROG_TYPE_SOCKET_FILTER`; however, you can find a definition of all
+    the other program types in [Chapter 2](ch02.html#running_your_first_BPF_programs).
+    Moreover, in [Chapter 7](ch07.html#express_data_path_XDP) we discuss XDP programs
+    with the program type `BPF_PROG_TYPE_XDP`.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如列表所示，与套接字和一般网络操作相关的各种程序类型。在本章中，我们展示了`BPF_PROG_TYPE_SOCKET_FILTER`的示例；然而，您可以在[第2章](ch02.html#running_your_first_BPF_programs)找到所有其他程序类型的定义。此外，在[第7章](ch07.html#express_data_path_XDP)中，我们讨论了具有程序类型`BPF_PROG_TYPE_XDP`的XDP程序。
+- en: 'Because we want to store the count of packets for every protocol we encounter,
+    we need to create a key/value map where the protocol is key and the packets count
+    as value. For that purpose, we can use a `BPF_MAP_TYPE_ARRAY`:'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为我们希望为遇到的每种协议存储数据包计数，所以需要创建一个键/值映射，其中协议是键，数据包计数是值。为此，我们可以使用`BPF_MAP_TYPE_ARRAY`：
+- en: '[PRE9]'
+  id: totrans-92
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: The map is defined using the `bpf_map_def` struct, and it will be named `countmap`
+    for reference in the program.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`bpf_map_def`结构定义映射，并将其命名为`countmap`以供程序引用。
+- en: 'At this point, we can write some code to actually count the packets. We know
+    that programs of type `BPF_PROG_TYPE_SOCKET_FILTER` are one of our options because
+    by using such a program, we can see all the packets flowing through an interface.
+    Therefore we attach the program to the right header with `SEC("socket")`:'
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此时，我们可以编写一些代码来实际计算数据包的数量。我们知道`BPF_PROG_TYPE_SOCKET_FILTER`类型的程序是我们的一个选择，因为通过使用这样的程序，我们可以看到流经接口的所有数据包。因此，我们使用`SEC("socket")`将程序附加到正确的头部：
+- en: '[PRE10]'
+  id: totrans-95
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: After the ELF header attachment we can use the `load_byte` function to extract
+    the protocol section from the `sk_buff` struct. Then we use the protocol ID as
+    a key to do a `bpf_map_lookup_elem` operation to extract the current counter value
+    from our `countmap` so that we can increment it or set it to 1 if it is the first
+    packet ever. Now we can update the map with the incremented value using `bpf_map_update_elem`.
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在ELF头附加之后，我们可以使用`load_byte`函数从`sk_buff`结构中提取协议部分。然后，我们使用协议ID作为键执行`bpf_map_lookup_elem`操作，从我们的`countmap`中提取当前计数器值，以便我们可以增加它或者如果是第一个数据包则设置为1。现在我们可以使用`bpf_map_update_elem`更新映射的增加值。
+- en: 'To compile the program to an *ELF* file, we just use Clang with `-target bpf`.
+    This command creates a `bpf_program.o` file that we will load using the loader:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要将程序编译成*ELF*文件，我们只需使用带有`-target bpf`的Clang。此命令将创建一个`bpf_program.o`文件，我们将使用加载器加载它：
+- en: '[PRE11]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: Load and attach to a network interface
+  id: totrans-99
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 加载并附加到网络接口
+- en: The loader is the program that actually opens our compiled BPF ELF binary `bpf_program.o`
+    and attaches the defined BPF program and its maps to a socket that is created
+    against the interface under observation, in our case `lo`, the loopback interface.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 加载器是打开我们编译的BPF ELF二进制文件`bpf_program.o`并将定义的BPF程序及其映射附加到一个套接字的程序。该套接字是针对监视接口创建的，本例中为`lo`，即环回接口。
+- en: 'The most important part of the loader is the actual loading of the *ELF* file:'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 加载器最重要的部分是实际加载*ELF*文件：
+- en: '[PRE12]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: This will populate the `prog_fd` array by adding one element that is the file
+    descriptor of our loaded program that we can now attach to the socket descriptor
+    of our loopback interface `lo` opened with `open_raw_sock`.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将通过添加一个元素来填充`prog_fd`数组，该元素是我们加载的程序的文件描述符，现在我们可以将其附加到使用`open_raw_sock`打开的环回接口`lo`的套接字描述符上。
+- en: The attach is done by setting the option `SO_ATTACH_BPF` to the raw socket opened
+    for the interface.
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过将选项`SO_ATTACH_BPF`设置为为接口打开的原始套接字完成附加。
+- en: 'At this point our user-space loader is able to look up map elements while the
+    kernel sends them:'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，我们的用户空间加载器能够在内核发送它们时查找映射元素：
+- en: '[PRE13]'
+  id: totrans-106
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: To do the lookup, we attach to the array map using a `for` loop and `bpf_map_lookup_elem`
+    so that we can read and print the values for the TCP, UDP, and ICMP packet counters,
+    respectively.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要进行查找，我们使用`for`循环和`bpf_map_lookup_elem`附加到数组映射，以便我们可以读取和打印TCP、UDP和ICMP数据包计数器的值。
+- en: The only thing left is to compile the program!
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 唯一剩下的就是编译程序！
+- en: 'Because this program is using *libbpf*, we need to compile it from the kernel
+    source tree we just cloned:'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为这个程序使用*libbpf*，所以我们需要从刚刚克隆的内核源代码树中编译它：
+- en: '[PRE14]'
+  id: totrans-110
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'Now that we have *libbpf*, we can compile the loader using this script:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们有了*libbpf*，我们可以使用这个脚本编译加载器：
+- en: '[PRE15]'
+  id: totrans-112
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'As you can see, the script includes a bunch of headers and the *libbpf* library
+    from the kernel itself, so it must know where to find the kernel source code.
+    To do that, you can replace `$KERNEL_SRCTREE` in it or just write that script
+    into a file and use it:'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如您所见，脚本包含了一堆标头和内核自带的*libbpf*库，因此必须知道在哪里找到内核源代码。为此，您可以在其中替换`$KERNEL_SRCTREE`，或者将该脚本写入文件并使用它：
+- en: '[PRE16]'
+  id: totrans-114
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'At this point the loader will have created a `loader-bin` file that can be
+    finally started along with the BPF program’s *ELF* file (requires root privileges):'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，加载器将创建一个`loader-bin`文件，最终可以与BPF程序的*ELF*文件一起启动（需要root权限）：
+- en: '[PRE17]'
+  id: totrans-116
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: After the program is loaded and started it will do 10 dumps, one every second
+    showing the packet count for each one of the three considered protocols. Because
+    the program is attached to the loopback device `lo`, along with the loader you
+    can run `ping` and see the ICMP counter increasing.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 程序加载并启动后，将进行10次转储，每秒钟显示三个考虑的协议的数据包计数。由于程序附加到回环设备`lo`上，您可以同时运行`ping`并查看增加的ICMP计数。
+- en: 'So run `ping` to generate ICMP traffic to localhost:'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因此运行`ping`以生成发往本地主机的ICMP流量：
+- en: '[PRE18]'
+  id: totrans-119
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'This starts pinging localhost 100 times and outputs something like this:'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将开始向本地主机发送100次ping，并输出类似以下内容：
+- en: '[PRE19]'
+  id: totrans-121
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Then, in another terminal, we can finally run our BPF program:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后，在另一个终端中，我们最终可以运行我们的BPF程序：
+- en: '[PRE20]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'It begins dumping out the following:'
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它开始输出以下内容：
+- en: '[PRE21]'
+  id: totrans-125
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'At this point, you already know a good amount of what is needed to filter packets
+    on Linux using a socket filter eBPF program. Here’s some big news: that’s not
+    the only way! You might want to instrument the packet scheduling subsystem in
+    place by using the kernel instead of on sockets directly. Just read the next section
+    to learn how.'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，您已经了解了使用基于套接字过滤器的eBPF程序在Linux上过滤数据包所需的大部分内容。这里有一个重要消息：这不是唯一的方法！您可能希望通过使用内核而不是直接在套接字上进行操作来在现有的数据包调度子系统中进行仪表化。只需阅读下一节，了解如何操作即可。
+- en: BPF-Based Traffic Control Classifier
+  id: totrans-127
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 基于BPF的流量控制分类器
+- en: Traffic Control is the kernel packet scheduling subsystem architecture. It is
+    made of mechanisms and queuing systems that can decide how packets flow and how
+    they are accepted.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 流量控制是内核包调度子系统的架构。它由机制和排队系统组成，可以决定数据包如何流动以及它们如何被接受。
+- en: 'Some use cases for Traffic Control include, but are not limited to, the following:'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 流量控制的一些用例包括但不限于以下内容：
+- en: Prioritize certain kinds of packets
+  id: totrans-130
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 优先处理某些类型的数据包
+- en: Drop specific kind of packet
+  id: totrans-131
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 丢弃特定类型的数据包
+- en: Bandwidth distribution
+  id: totrans-132
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 带宽分配
+- en: Given that in general Traffic Control is the way to go when you need to redistribute
+    network resources in a system, to get the best out of it, specific Traffic Control
+    configurations should be deployed based on the kind of applications that you want
+    to run. Traffic Control provides a programmable classifier, called `cls_bpf`,
+    to let the hook into different levels of the scheduling operations where they
+    can read and update socket buffer and packet metadata to do things like traffic
+    shaping, tracing, preprocessing, and more.
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 鉴于一般情况下，流量控制是在需要在系统中重新分配网络资源时的方法，为了从中获得最佳效果，应基于想要运行的应用程序类型部署特定的流量控制配置。流量控制提供了一个可编程分类器，称为`cls_bpf`，允许在调度操作的不同级别进行挂钩，从而可以读取和更新套接字缓冲区和数据包元数据，以执行诸如流量整形、跟踪、预处理等操作。
+- en: Support for eBPF in `cls_bpf` was implemented in kernel 4.1, which means that
+    this kind of program has access to eBPF maps, has tail call support, can access
+    IPv4/IPv6 tunnel metadata, and in general use helpers and utilities coming with
+    eBPF.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在内核4.1中实现了对`cls_bpf`中eBPF的支持，这意味着这种类型的程序可以访问eBPF映射、具有尾调用支持、可以访问IPv4/IPv6隧道元数据，并且通常使用eBPF附带的辅助工具和实用程序。
+- en: The tooling used to interact with networking configuration related to Traffic
+    Control is part of the [iproute2](https://oreil.ly/SYGwI) suite, which contains
+    `ip` and `tc`, which are used to manipulate network interfaces and traffic control
+    configuration, respectively.
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于与与流量控制相关的网络配置交互的工具是[iproute2](https://oreil.ly/SYGwI)套件的一部分，其中包含用于操作网络接口和流量控制配置的`ip`和`tc`。
+- en: At this point, learning Traffic Control can be difficult without the proper
+    reference in terms of terminology. The following section can help.
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，在没有适当的术语参考的情况下，学习流量控制可能会很困难。接下来的部分可以提供帮助。
+- en: Terminology
+  id: totrans-137
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 术语
+- en: As mentioned, there are interaction points between Traffic Control and BPF programs,
+    so you need to understand some Traffic Control concepts. If you have already mastered
+    Traffic Control, feel free to skip this terminology section and go straight to
+    the examples.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如前所述，在 Traffic Control 和 BPF 程序之间存在交互点，因此您需要了解一些 Traffic Control 的概念。如果您已经掌握了
+    Traffic Control，可以跳过术语部分，直接进入示例。
+- en: Queueing disciplines
+  id: totrans-139
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 队列调度
+- en: Queuing disciplines (qdisc) define the scheduling objects used to enqueue packets
+    going to an interface by changing the way they are sent; those objects can be
+    classless or classful.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 队列调度（qdisc）定义了用于改变发送到接口的数据包的调度对象的方式；这些对象可以是无类的或有类的。
+- en: The default qdisc is `pfifo_fast`, which is classless and enqueues packets on
+    three FIFO (first in first out) queues that are dequeued based on their priority;
+    this qdisc is not used for virtual devices like the loopback (`lo`) or Virtual
+    Ethernet devices (`veth`) that use `noqueue` instead. Besides being a good default
+    for its scheduling algorithm, `pfifo_fast` also doesn’t require any configuration
+    to work.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认的 qdisc 是 `pfifo_fast`，它是无类的，并在三个 FIFO（先进先出）队列上排队数据包，根据它们的优先级出队；对于像回环（`lo`）或虚拟以太网设备（`veth`）这样的虚拟设备，此
+    qdisc 不适用，而是使用 `noqueue`。除了其调度算法的良好默认设置外，`pfifo_fast` 也不需要任何配置即可工作。
+- en: 'Virtual interfaces can be distinguished from physical interfaces (devices)
+    by asking the */sys* pseudo filesystem:'
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可以通过询问 */sys* 伪文件系统来区分虚拟接口与物理接口（设备）：
+- en: '[PRE22]'
+  id: totrans-143
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'At this point, some confusion is normal. If you’ve never heard about qdiscs,
+    one thing you can do is to use the `ip a` command to show the list of network
+    interfaces configured in the current system:'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，有些混淆是正常的。如果您从未听说过 qdiscs，您可以使用 `ip a` 命令来显示当前系统中配置的网络接口列表：
+- en: '[PRE23]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'This list already tells us something. Can you find the word `qdisc` in it?
+    Let’s analyze the situation:'
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此列表已经告诉我们一些信息。你能在里面找到 `qdisc` 这个词吗？让我们分析一下情况：
+- en: 'We have three network interfaces in this system: `lo`, `enp0s31f6`, and `docker0`.'
+  id: totrans-147
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在这个系统中，我们有三个网络接口：`lo`，`enp0s31f6` 和 `docker0`。
+- en: The `lo` interface is a virtual interface, so it has qdisc `noqueue`.
+  id: totrans-148
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`lo` 接口是一个虚拟接口，因此它具有 `noqueue` qdisc。'
+- en: The `enp0s31f6` is a physical interface. Wait, why is the qdisc here `fq_codel`
+    (fair queue controlled delay)? Wasn’t `pfifo_fast` the default? It turns out that
+    the system we’re testing the commands on is running Systemd, which is setting
+    the default qdisc differently using the kernel parameter `net.core.default_qdisc`.
+  id: totrans-149
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`enp0s31f6` 是一个物理接口。等等，这里为什么是 `fq_codel`（公平队列控制延迟）的 qdisc？难道不是默认的 `pfifo_fast`
+    吗？事实证明，我们正在测试命令的系统正在运行 Systemd，它使用内核参数 `net.core.default_qdisc` 设置默认的 qdisc。'
+- en: The `docker0` interface is a bridge interface, so it uses a `virtual` device
+    and has `noqueue` qdisc.
+  id: totrans-150
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`docker0` 接口是一个桥接口，因此它使用了一个 `虚拟` 设备，并具有 `noqueue` qdisc。'
+- en: The `noqueue` qdisc doesn’t have classes, a scheduler, or a classifier. What
+    it does is that it tries to send the packets immediately. As stated, `noqueue`
+    is used by default by virtual devices, but it’s also the qdisc that becomes effective
+    to any interface when you delete its current associated qdisc.
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`noqueue` qdisc 没有类、调度程序或分类器。它的作用是尝试立即发送数据包。正如所述，虚拟设备默认使用 `noqueue`，但也是在删除当前关联的
+    qdisc 时变为有效的 qdisc。'
+- en: '`fq_codel` is a classless qdisc that classifies the incoming packets using
+    a stochastic model in order to be able to queue traffic flows in a fair way.'
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`fq_codel` 是一个无类 qdisc，它使用随机模型对传入的数据包进行分类，以便能够以公平的方式排队流量。'
+- en: 'The situation should be clearer now; we used the `ip` command to find information
+    about `qdiscs` but it turns out that in the `iproute2` toolbelt there’s also a
+    tool called `tc` that has a specific subcommand for qdiscs you can use to list
+    them:'
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在情况应该更清楚了；我们使用 `ip` 命令查找关于 `qdiscs` 的信息，但事实证明在 `iproute2` 工具包中还有一个称为 `tc` 的工具，它有一个专门的子命令用于列出它们：
+- en: '[PRE24]'
+  id: totrans-154
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'There’s much more going on here! For `docker0` and `lo` we basically see the
+    same information as with `ip a`, but for `enp0s31f6`, for example, it has the
+    following:'
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这里发生了更多的事情！对于 `docker0` 和 `lo`，我们基本上看到与 `ip a` 相同的信息，但对于 `enp0s31f6`，例如，它具有以下内容：
+- en: A limit of 10,240 incoming packets that it can handle.
+  id: totrans-156
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 它可以处理的入站数据包的上限是 10,240。
+- en: As mentioned, the stochastic model used by `fq_codel` wants to queue traffic
+    into different flows, and this output contains the information about how many
+    of them we have, which is 1,024.
+  id: totrans-157
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如前所述，由 `fq_codel` 使用的随机模型希望将流量排队到不同的流中，此输出包含了我们有多少个流的信息，即 1,024。
+- en: Now that the key concepts of qdiscs have been introduced, we can take a closer
+    look at classful and classless qdiscs in the next section to understand their
+    differences and which ones are suitable for BPF programs.
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在已经介绍了队列的关键概念，我们可以在接下来的部分更仔细地研究类型化和无类别队列，以了解它们的区别以及哪些适合BPF程序。
+- en: Classful qdiscs, filters, and classes
+  id: totrans-159
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 类型化队列（Classful qdiscs）、过滤器和类别
+- en: Classful qdiscs allow the definition of classes for different kinds of traffic
+    in order to apply different rules to them. Having a class for a qdisc means that
+    it can contain further qdiscs. With this kind of hieararchy, then, we can use
+    a filter (classifier) to classify the traffic by determining the next class where
+    the packet should be enqueued.
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 类型化队列允许为不同类型的流量定义类别，以便对它们应用不同的规则。对于一个队列，如果有类别存在，则它可以包含进一步的队列。有了这种层次结构，我们可以使用一个过滤器（分类器）通过确定下一个数据包应该入队的类别来对流量进行分类。
+- en: '*Filters* are used to assign packets to a particular class based on their type.
+    Filters are used inside a classful qdiscs to determine in which class the packet
+    should be enqueued, and two or more filters can map to the same class, as shown
+    in [Figure 6-2](#tc-qdisc-filters). Every filter uses a classifier to classify
+    packets based on their information.'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*过滤器* 用于根据其类型将数据包分配到特定的类别。在类型化队列内部使用过滤器来确定数据包应该入队的类别，而且两个或更多个过滤器可以映射到同一个类别，如[图6-2](#tc-qdisc-filters)所示。每个过滤器都使用分类器根据其信息对数据包进行分类。'
+- en: '![A qdisc containing a set of filters that map to two different classes that
+    have associated qdiscs themselves](assets/lbpf_0602.png)'
+  id: totrans-162
+  prefs: []
+  type: TYPE_IMG
+  zh: '![一个包含一组映射到两个不同类别的队列的过滤器的队列](assets/lbpf_0602.png)'
+- en: Figure 6-2\. Classful qdisc with filters
+  id: totrans-163
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图6-2 类型化队列带有过滤器
+- en: As mentioned earlier, `cls_bpf` is the classifier that we want to use to write
+    BPF programs for Traffic Control—we have a concrete example in the next sections
+    on how to use it.
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如前所述，`cls_bpf`是我们想要使用来为Traffic Control编写BPF程序的分类器——在接下来的部分中，我们将展示如何使用具体示例。
+- en: '*Classes* are objects that can live only in a classful qdisc; classes are used
+    in Traffic Control to create hierarchies. Complex hierarchies are made possible
+    by the fact that a class can have filters attached to it, which can then be used
+    as an entry point for another class or for a qdisc.'
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*类别* 是只能存在于类型化队列中的对象；在Traffic Control中，类别用于创建层次结构。通过附加到类别的过滤器，复杂的层次结构成为可能，这些过滤器可以作为另一个类别或队列的入口点使用。'
+- en: Classless qdiscs
+  id: totrans-166
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 无类别队列（Classless qdiscs）
+- en: A classless qdiscs is a qdisc that can’t have any children because it is not
+    allowed to have any classes associated. This means that is not possible to attach
+    filters to classless qdiscs. Because classless qdiscs can’t have children, we
+    can’t add filters and classifiers to them, so classless qdiscs are not interesting
+    from a BPF point of view but still useful for simple Traffic Control needs.
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无类别队列是一种不能有子级的队列，因为它们不允许与任何类别相关联。这意味着无法向无类别队列添加过滤器。由于无类别队列不能有子级，因此无法向其添加过滤器和分类器，因此从BPF的角度来看，无类别队列并不具有吸引力，但对于简单的Traffic
+    Control需求仍然有用。
+- en: After building up some knowledge on qdiscs, filters, and classes, we now show
+    you how to write BPF programs for a `cls_bpf` classifier.
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在了解了一些关于队列、过滤器和类别的知识后，我们现在将向您展示如何为`cls_bpf`分类器编写BPF程序。
+- en: Traffic Control Classifier Program Using cls_bpf
+  id: totrans-169
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用`cls_bpf`进行Traffic Control分类器程序
+- en: As we said, Traffic Control is a powerful mechanism that is made even more powerful
+    thanks to classifiers; however, among all the classifiers, there is one that allows
+    you to program the network data path `cls_bpf` classifier. This classifier is
+    special because it can run BPF programs, but what does that mean? It means that
+    `cls_bpf` will allow you to hook your BPF programs directly in the ingress and
+    egress layers, and running BPF programs hooked to those layers means that they
+    will be able to access the `sk_buff` struct for the respective packets.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Traffic Control（流量控制）是一个强大的机制，得益于分类器（classifiers），其功能更加强大；然而，在所有的分类器中，有一种特殊的分类器能够编程网络数据路径——`cls_bpf`分类器。这个分类器之所以特殊，是因为它可以运行BPF程序，那么这意味着什么呢？这意味着`cls_bpf`允许你将你的BPF程序直接挂接在入口（ingress）和出口（egress）层，而运行挂接在这些层上的BPF程序意味着它们可以访问相应数据包的`sk_buff`结构。
+- en: 'To understand better this relationship between Traffic Control and BPF programs,
+    see [Figure 6-3](#tc-flow-bpf-cls), which shows how BPF programs are loaded against
+    the `cls_bpf` classifier. You will also notice that such programs are hooked into
+    ingress and egress qdiscs. All the other interactions in context are also described.
+    By taking the network interface as the entry point for network traffic, you will
+    see the following:'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要更好地理解Traffic Control和BPF程序之间的这种关系，请参见[图6-3](#tc-flow-bpf-cls)，显示了如何加载针对`cls_bpf`分类器的BPF程序。您还会注意到这些程序被挂接到ingress和egress
+    qdisc中。还描述了上下文中的所有其他交互。通过将网络接口作为网络流量的入口点，您将看到以下内容：
+- en: The traffic first goes to the Traffic Control’s ingress hook.
+  id: totrans-172
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 流量首先进入Traffic Control的ingress挂钩。
+- en: Then the kernel will execute the BFP program loaded into the ingress from userspace
+    for every request coming in.
+  id: totrans-173
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 然后内核将对每个传入请求执行从用户空间加载到ingress的BPF程序。
+- en: After the ingress program is executed, the control is given to the networking
+    stack that informs the user’s application about the networking event.
+  id: totrans-174
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在执行入站程序后，控制权交给了通知用户应用程序有关网络事件的网络堆栈。
+- en: After the application gives a response, the control is passed to the Traffic
+    Control’s egress using another BPF program that executes, and upon completion
+    gives back control to the kernel.
+  id: totrans-175
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 应用程序给出响应后，使用另一个执行的BPF程序将控制权传递给Traffic Control的egress，并在完成后将控制权交还给内核。
+- en: A response is given to the client.
+  id: totrans-176
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 客户端收到了响应。
+- en: You can write BPF programs for Traffic Control in C and compile them using LLVM/Clang
+    with the BPF backend.
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用C语言为Traffic Control编写BPF程序，并使用LLVM/Clang和BPF后端进行编译。
+- en: '![Diagram showing the interactions between Traffic Control and BPF programs
+    loaded using cls_bpf](assets/lbpf_0603.png)'
+  id: totrans-178
+  prefs: []
+  type: TYPE_IMG
+  zh: '![显示Traffic Control和使用cls_bpf加载的BPF程序之间交互的图表](assets/lbpf_0603.png)'
+- en: Figure 6-3\. Loading of BPF programs using Traffic Control
+  id: totrans-179
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图6-3\. 使用Traffic Control加载BPF程序
+- en: Tip
+  id: totrans-180
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: Ingress and egress qdiscs allow you to hook Traffic Control into inbound (ingress)
+    and outbound (egress) traffic, respectively.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ingress和egress qdisc允许您将Traffic Control挂接到入站（ingress）和出站（egress）流量中。
+- en: 'To make this example work, you need to run it on a kernel that has been compiled
+    with `cls_bpf` directly or as a module. To verify that you have everything you
+    need, you can do the following:'
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使此示例正常工作，您需要在已直接或作为模块编译了`cls_bpf`的内核上运行它。为了验证您拥有所需的一切，您可以执行以下操作：
+- en: '[PRE25]'
+  id: totrans-183
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'Make sure you get at least the following output with either `y` or `m`:'
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确保您至少使用`y`或`m`得到以下输出：
+- en: '[PRE26]'
+  id: totrans-185
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'Let’s now see how we write the classifier:'
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看如何编写分类器：
+- en: '[PRE27]'
+  id: totrans-187
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: The “main” of our classifier is the `classification` function. This function
+    is annotated with a section header called `classifier` so that `tc` can know that
+    this is the classifier to use.
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们分类器的“主要”部分是`classification`函数。此函数用`classifier`作为部分标头进行了注释，以便`tc`知道这是要使用的分类器。
+- en: 'At this point, we need to extract some information from the `skb`; the `data`
+    member contains all the data for the current packet and all its protocol details.
+    To let our program know what’s inside of it, we need to cast it to an Ethernet
+    frame (in our case, with the `*eth` variable). To make the static verifier happy,
+    we need to check that the data, summed up with the size of the `eth` pointer,
+    does not exceed the space where `data_end` is. After that, we can go one level
+    inward and get the protocol type from the `h_proto` member in `*eth`:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，我们需要从`skb`中提取一些信息；`data`成员包含当前数据包及其协议详细信息的所有数据。为了让我们的程序知道其中的内容，我们需要将其强制转换为以太网帧（在我们的情况下是使用`*eth`变量）。为了让静态验证程序满意，我们需要检查数据与`data_end`之间的空间，不超过`eth`指针大小的和。之后，我们可以向内再进一步，并从`*eth`中的`h_proto`成员获取协议类型：
+- en: '[PRE28]'
+  id: totrans-190
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'After we have the protocol, we need to convert it from the host to check whether
+    it is equal to the IPv4 protocol, the one we are interested in, and if it is,
+    we check whether the inner packet is HTTP using our own `is_http` function. If
+    it is, we print a debug message stating that we found an HTTP packet:'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了协议后，我们需要将其从主机转换，以检查它是否等于IPv4协议，这是我们感兴趣的协议，如果是，则使用我们自己的`is_http`函数检查内部数据包是否为HTTP。如果是，则打印调试消息表明我们发现了一个HTTP数据包：
+- en: '[PRE29]'
+  id: totrans-192
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: The `is_http` function is similar to our classifier function, but it will start
+    from an `skb` by knowing already the start offset for the IPv4 protocol data.
+    As we did earlier, we need to do a check before accessing the IP protocol data
+    with the `*iph` variable to let the static verifier know our intentions.
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`is_http` 函数与我们的分类器函数类似，但它将从 `skb` 开始，已知 IPv4 协议数据的起始偏移量。与之前一样，在访问 IP 协议数据之前，我们需要通过
+    `*iph` 变量进行检查，以让静态验证器了解我们的意图。'
+- en: 'When that’s done, we just check whether the IPv4 header contains a TCP packet
+    so that we can go ahead. If the packet’s protocol is of type `IPPROTO_TCP`, we
+    need to do some more checks again to get the actual TCP header in the `*tcph`
+    variable:'
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当完成上述操作后，我们只需检查 IPv4 头部是否包含 TCP 数据包，以便进一步操作。如果数据包的协议类型为 `IPPROTO_TCP`，我们需要再次执行一些检查，以获取
+    `*tcph` 变量中的实际 TCP 头部：
+- en: '[PRE30]'
+  id: totrans-195
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: Now that the TCP header is ours, we can go ahead and load the first seven bytes
+    from the `skb` struct at the offset of the TCP payload `poffset`. At this point
+    we can check whether the bytes array is a sequence saying `HTTP`; then we know
+    that the Layer 7 protocol is HTTP, and we can return 1—otherwise, we return zero.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们拥有了 TCP 头部，我们可以继续从 `skb` 结构的 TCP 负载 `poffset` 偏移量加载前七个字节。此时，我们可以检查字节数组是否为表示
+    `HTTP` 的序列；然后我们知道第 7 层协议是 HTTP，我们可以返回 1 —— 否则，返回零。
+- en: As you can see, our program is simple. It will basically allow everything, and
+    when receiving an HTTP packet, it will let us know with a debugging message.
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您所见，我们的程序很简单。它基本上允许一切，当接收到 HTTP 数据包时，将通过调试消息通知我们。
+- en: 'You can compile the program with Clang, using the `bpf` target, as we did before
+    with the socket filter example. We cannot compile this program for Traffic Control
+    in the same way; this will generate an *ELF* file `classifier.o` that will be
+    loaded by `tc` this time and not by our own custom loader:'
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用 Clang 编译该程序，使用 `bpf` 目标，就像我们在套接字过滤示例中所做的那样。我们无法以相同方式为流量控制编译此程序；这将生成一个
+    *ELF* 文件 `classifier.o`，这次将由 `tc` 而不是我们自己的自定义加载器加载：
+- en: '[PRE31]'
+  id: totrans-199
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: Now we can install the program on the interface we want our program to operate
+    on; in our case, it was `eth0`.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，我们可以在希望程序操作的接口上安装程序；在我们的情况下，它是 `eth0`。
+- en: 'The first command will replace the default qdisc for the `eth0` device, and
+    the second one will actually load our `cls_bpf` classifier into that `ingress`
+    classful qdisc. This means that our program will handle all traffic going into
+    that interface. If we want to handle outgoing traffic, we would need to use the
+    `egress` qdisc instead:'
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一个命令将替换 `eth0` 设备的默认 qdisc，第二个命令实际上将我们的 `cls_bpf` 分类器加载到该 `ingress` 类别 qdisc
+    中。这意味着我们的程序将处理进入该接口的所有流量。如果我们想处理出站流量，我们需要使用 `egress` qdisc：
+- en: '[PRE32]'
+  id: totrans-202
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: Our program is loaded now—what we need is to send some HTTP traffic to that
+    interface.
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们的程序已加载完成 —— 我们需要做的是向该接口发送一些 HTTP 流量。
+- en: To do that you need any HTTP server on that interface. Then you can `curl` the
+    interface IP.
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为此，您需要在该接口上拥有任何 HTTP 服务器。然后，您可以 `curl` 该接口 IP。
+- en: 'In case you don’t have one, you can obtain a test HTTP server using Python
+    3 with the `http.server` module. It will open the port 8000 with a directory listing
+    of the current working directory:'
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您没有一个，您可以使用 Python 3 的 `http.server` 模块获取一个测试 HTTP 服务器。它将使用当前工作目录的目录列表在端口
+    8000 打开：
+- en: '[PRE33]'
+  id: totrans-206
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'At this point you can call the server with `curl`:'
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，您可以使用 `curl` 调用服务器：
+- en: '[PRE34]'
+  id: totrans-208
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'After doing that you should see your HTTP response from the HTTP server. You
+    can now get your debugging messages (created with `trace_printk`), confirming
+    that using the dedicated `tc` command:'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成后，您应该能够看到来自 HTTP 服务器的 HTTP 响应。现在，您可以通过使用专用的 `tc` 命令获取调试消息（使用 `trace_printk`
+    创建）来确认：
+- en: '[PRE35]'
+  id: totrans-210
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'The output will be something like this:'
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输出将类似于以下内容：
+- en: '[PRE36]'
+  id: totrans-212
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: Congratulations! You just made your first BPF Traffic Control classifier.
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 恭喜！您刚刚创建了您的第一个 BPF 流量控制分类器。
+- en: Tip
+  id: totrans-214
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: Instead of using a debugging message like we did in this example, you could
+    use a map to communicate to user-space that the interface just received an HTTP
+    packet. We leave this as an exercise for you to do. If you look at `classifier.c`
+    in the previous example, you can get an idea of how to do that by looking at how
+    we used the map `countmap` there.
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与本示例中使用调试消息不同，您可以使用映射来向用户空间通信，指示接口刚刚接收到 HTTP 数据包。我们把这留给您作为练习。如果查看之前示例中的 `classifier.c`，您可以通过查看我们如何在那里使用映射
+    `countmap` 来了解如何做到这一点。
+- en: 'At this point, what you might want is to unload the classifier. You can do
+    that by deleting the ingress qdisc that you just attached to the interface:'
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，你可能想要卸载分类器。您可以通过删除您刚刚附加到接口的入口qdisc来实现这一点：
+- en: '[PRE37]'
+  id: totrans-217
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: Notes on act_bpf and how cls_bpf is different
+  id: totrans-218
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 关于 act_bpf 和 cls_bpf 之间的区别的注意事项
+- en: You might have noticed that another object exists for BPF programs called `act_bpf`.
+    It turns out that `act_bpf` is an action, not a classifier. This makes it operationally
+    different because actions are objects attached to filters, and because of this
+    it is not able to perform filtering directly, requiring Traffic Control to consider
+    all the packets first. For this property, it is usually preferable to use the
+    `cls_bpf` classifier instead of the `act_bpf` action.
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能已经注意到另一个称为 `act_bpf` 的 BPF 程序对象存在。事实证明，`act_bpf` 是一个操作，而不是一个分类器。这使得它在操作上有所不同，因为操作是附加到过滤器的对象，因此它无法直接执行过滤，而需要
+    Traffic Control 先考虑所有数据包。基于这个特性，通常更倾向于使用 `cls_bpf` 分类器而不是 `act_bpf` 操作。
+- en: However, because `act_bpf` can be attached to any classifier, there might be
+    cases for which you find it useful to just reuse a classifier you already have
+    and attach a BPF program to it.
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但是，因为 `act_bpf` 可以附加到任何分类器，可能会有一些情况您发现只需重用您已经拥有的分类器并将 BPF 程序附加到它会很有用。
+- en: Differences Between Traffic Control and XDP
+  id: totrans-221
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Differences Between Traffic Control and XDP
+- en: Even though the Traffic Control `cls_bpf` and XDP programs look very similar,
+    they are pretty different. XDP programs are executed earlier in the ingress data
+    path, before entering into the main kernel network stack, so our program does
+    not have access to a socket buffer struct `sk_buff` like with `tc`. XDP programs
+    instead take a different structure called `xdp_buff`, which is an eager representation
+    of the packet without metadata. All this comes with advantages and disadvantages.
+    For example, being executed even before the kernel code, XDP programs can drop
+    packets in an efficient way. Compared to Traffic Control programs, XDP programs
+    can be attached only to traffic in ingress to the system.
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 即使 Traffic Control 的 `cls_bpf` 和 XDP 程序看起来非常相似，它们实际上有很大的不同。XDP 程序在进入主内核网络堆栈之前在入口数据路径中更早执行，因此我们的程序不像
+    `tc` 那样可以访问套接字缓冲结构 `sk_buff`。相反，XDP 程序采用一种名为 `xdp_buff` 的不同结构，这是一个没有元数据的数据包的即时表示。所有这些都有优缺点。例如，由于在内核代码之前执行，XDP
+    程序可以高效地丢弃数据包。与 Traffic Control 程序相比，XDP 程序只能附加到系统入口流量。
+- en: At this point, you might be asking yourself when it’s an advantage to use one
+    instead of the other. The answer is that because of their nature of not containing
+    all the kernel-enriched data structures and metadata, XDP programs are better
+    for use cases covering OSI layers up to Layer 4\. But let’s not spoil all the
+    content of the next chapter!
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，您可能会问自己何时使用其中一种而不是另一种的优势。答案是，由于它们的特性不包含所有内核增强的数据结构和元数据，因此 XDP 程序更适合覆盖 OSI
+    层直到第四层的用例。但让我们不要提前泄露下一章的所有内容！
+- en: Conclusion
+  id: totrans-224
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: It should now be pretty clear to you that BPF programs are useful for getting
+    visibility and control at different levels of the networking data path. You’ve
+    seen how to take advantage of them to filter packets using high-level tools that
+    generate a BPF assembly. Then we loaded a program to a network socket, and in
+    the end we attached our programs to the Traffic Control ingress qdisc to do traffic
+    classification using BPF programs. In this chapter we also briefly discussed XDP,
+    but be prepared, because in [Chapter 7](ch07.html#express_data_path_XDP) we cover
+    the topic in its entirety by expanding on how XDP programs are constructed, what
+    kind of XDP programs there are, and how to write and test them.
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您应该很清楚 BPF 程序在获取网络数据路径不同级别的可见性和控制方面的用途。您已经看到如何利用它们来使用生成 BPF 汇编的高级工具来过滤数据包。然后我们将程序加载到网络套接字，并最终将我们的程序附加到
+    Traffic Control 入口qdisc 以使用 BPF 程序进行流量分类。在本章中，我们还简要讨论了 XDP，但请准备好，因为在[第7章](ch07.html#express_data_path_XDP)中，我们将详细探讨该主题，扩展讨论
+    XDP 程序的构建方式、有哪些类型的 XDP 程序以及如何编写和测试它们。

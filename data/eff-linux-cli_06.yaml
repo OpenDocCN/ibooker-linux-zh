@@ -1,0 +1,15 @@
+- en: Part II. Next-Level Skills
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第二部分. 下一级技能
+- en: Now that you understand the basics of commands, pipes, the shell, and navigation,
+    it’s time to take the next step. In the following five chapters, I’ll present
+    an abundance of new Linux programs and some important shell concepts. You’ll apply
+    them to construct complex commands and tackle realistic situations on a Linux
+    computer.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你已经了解了命令、管道、shell和导航的基础知识，是时候迈出下一步了。在接下来的五章中，我将介绍大量新的Linux程序和一些重要的shell概念。你将运用它们来构建复杂的命令，并在Linux计算机上应对现实情况。

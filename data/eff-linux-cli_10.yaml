@@ -1,0 +1,1187 @@
+- en: Chapter 8\. Building a Brash One-Liner
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第8章。构建大胆一行命令
+- en: Remember this long, intricate command from the preface?
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还记得前言中那个复杂的命令吗？
+- en: '[PRE0]'
+  id: totrans-2
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'Such magical incantations are called *brash one-liners*.^([1](ch08.xhtml#idm46586639000896))
+    Let’s take this one apart to understand what it does and how it works. The innermost
+    `echo` commands use brace expansion to generate lists of JPEG filenames:'
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这样的魔法咒语被称为*大胆一行命令*。^([1](ch08.xhtml#idm46586639000896)) 我们来拆解一下这个命令，理解它的作用和原理。最内层的`echo`命令使用大括号展开来生成JPEG文件名列表：
+- en: '[PRE1]'
+  id: totrans-4
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Piping the filenames to `sed` replaces space characters with newlines:'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将文件名传输到`sed`中，将空格字符替换为换行符：
+- en: '[PRE2]'
+  id: totrans-6
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'The `paste` command prints the two lists side by side. Process substitution
+    allows `paste` to read the two lists as if they were files:'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`paste`命令会将两个列表并排打印出来。过程替换允许`paste`像它们是文件一样读取这两个列表：'
+- en: '[PRE3]'
+  id: totrans-8
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Prepending `mv` to each line prints a sequence of strings that are `mv` commands:'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在每一行前加上`mv`，可以打印一系列字符串，这些字符串是`mv`命令：
+- en: '[PRE4]'
+  id: totrans-10
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'The purpose of the command is now revealed: it generates 10 commands to rename
+    the image files *1.jpg* through *10.jpg*. The new names are *0.jpg* through *9.jpg*,
+    respectively. Piping the output to `bash` executes the `mv` commands:'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在命令的目的已经显露出来：它生成10个命令来重命名图像文件*1.jpg*至*10.jpg*。新名称分别是*0.jpg*至*9.jpg*。将输出传输到`bash`执行这些`mv`命令：
+- en: '[PRE5]'
+  id: totrans-12
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Brash one-liners are like puzzles. You’re faced with a business problem, such
+    as renaming a set of files, and you apply your toolbox to construct a Linux command
+    to solve it. Brash one-liners challenge your creativity and build your skills.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大胆的一行命令就像是解谜题。面对一个业务问题，比如重命名一组文件，你可以运用你的工具箱构建一个Linux命令来解决它。大胆的一行命令挑战你的创造力并增强你的技能。
+- en: 'In this chapter, you’ll create brash one-liners like the preceding one, step-by-step,
+    using the following magical formula:'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一章中，你将逐步创建像前述那样的大胆一行命令，使用以下的神奇公式：
+- en: Invent a command that solves a piece of the puzzle.
+  id: totrans-15
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 发明一个能解决难题的命令。
+- en: Run the command and check the output.
+  id: totrans-16
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 运行命令并检查输出。
+- en: Recall the command from history and tweak it.
+  id: totrans-17
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 回想一下历史命令并调整它。
+- en: Repeat steps 2 and 3 until the command produces the desired result.
+  id: totrans-18
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 重复步骤2和3，直到命令产生期望的结果。
+- en: This chapter will give your brain a workout. Expect to feel puzzled at times
+    by the examples. Just take things one step at a time, and run the commands on
+    a computer as you read them.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章将让你的大脑得到锻炼。有时候，你可能会被示例搞得一头雾水。只需一步步来，边读边在计算机上运行这些命令。
+- en: Note
+  id: totrans-20
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Some brash one-liners in this chapter are too wide for a single line, so I’ve
+    split them onto multiple lines using backslashes. We do not, however, call them
+    brash two-liners (or brash seven-liners).
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章中的一些大胆一行命令太长，无法容纳在一行内，所以我用反斜杠将它们分成多行。然而，我们不称它们为大胆两行（或大胆七行）。
+- en: Get Ready to Be Brash
+  id: totrans-22
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 准备好变得大胆
+- en: 'Before you launch into creating brash one-liners, take a moment to get into
+    the right mindset:'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在你开始创建大胆一行命令之前，花点时间调整好心态：
+- en: Be flexible.
+  id: totrans-24
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 要灵活。
+- en: Think about where to start.
+  id: totrans-25
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 想想从哪里开始。
+- en: Know your testing tools.
+  id: totrans-26
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 熟悉你的测试工具。
+- en: I’ll discuss each of these ideas in turn.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我会依次讨论每一个想法。
+- en: Be Flexible
+  id: totrans-28
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 要灵活。
+- en: A key to writing brash one-liners is *flexibility*. You’ve learned some awesome
+    tools by this point—a core set of Linux programs (and umpteen ways to run them)
+    along with command history, command-line editing, and more. You can combine these
+    tools in many ways, and a given problem usually has multiple solutions.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 撰写大胆的一行命令的关键是*灵活性*。到现在为止，你学会了一些强大的工具——一套核心的Linux程序（以及运行它们的无数方法），还有命令历史记录、命令行编辑等等。你可以以多种方式结合这些工具，而每个问题通常都有多个解决方案。
+- en: 'Even the simplest Linux tasks can be accomplished in many ways. Consider how
+    you might list *.jpg* files in your current directory. I’ll bet 99.9% of Linux
+    users would run a command like this:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 即使是最简单的Linux任务也有多种完成方式。想想你会如何列出当前目录中的*.jpg*文件。我打赌99.9%的Linux用户会运行像这样的命令：
+- en: '[PRE6]'
+  id: totrans-31
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'But this is just one solution of many. For example, you could list *all* the
+    files in the directory and then use `grep` to match only the names ending in *.jpg*:'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但这只是众多解决方案中的一个例子。例如，你可以列出目录中的*所有*文件，然后使用`grep`仅匹配以*.jpg*结尾的文件名：
+- en: '[PRE7]'
+  id: totrans-33
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Why would you choose this solution? Well, you saw an example in [“Long Argument
+    Lists”](ch07.xhtml#tip_xargs), when a directory contained so many files that they
+    couldn’t be listed by pattern matching. The technique of *grepping for a filename
+    extension* is a robust, general approach for solving all sorts of problems. What’s
+    important here is to be flexible and understand your tools so you can apply the
+    best one in your time of need. That is a wizard’s skill when creating brash one-liners.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为什么选择这种解决方案？嗯，您在[“长参数列表”](ch07.xhtml#tip_xargs)中看到了一个例子，当目录包含太多文件时，无法通过模式匹配列出它们。*按文件扩展名进行grep搜索*
+    的技术是解决各种问题的强大、通用方法。重要的是要灵活并理解您的工具，以便在需要时应用最佳工具。这是创建大胆一行命令时的巫术技能。
+- en: 'All of the following commands list *.jpg* files in the current directory. Try
+    to figure out how each command works:'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下所有命令列出当前目录中的*.jpg*文件。试着弄清楚每个命令的工作原理：
+- en: '[PRE8]'
+  id: totrans-36
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: Are the results identical or do some commands behave a bit differently? Can
+    you come up with any other suitable commands?
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 结果是否相同，还是某些命令的行为有所不同？您能否想出其他合适的命令？
+- en: Think About Where to Start
+  id: totrans-38
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 思考从哪里开始
+- en: Every brash one-liner begins with the output of a simple command. That output
+    might be the contents of a file, part of a file, a directory listing, a sequence
+    of numbers or letters, a list of users, a date and time, or other data. Your first
+    challenge, therefore, is to produce the initial data for your command.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个大胆的一行命令都以一个简单命令的输出开始。该输出可能是文件的内容、文件的一部分、目录列表、一系列数字或字母、用户列表、日期和时间或其他数据。因此，您的第一个挑战是生成命令的初始数据。
+- en: 'For example, if you want to know the 17th letter of the English alphabet, then
+    your initial data could be 26 letters produced by brace expansion:'
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，如果您想知道英语字母表的第17个字母，那么您的初始数据可以是通过大括号扩展产生的26个字母：
+- en: '[PRE9]'
+  id: totrans-41
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Once you can produce this output, the next step is deciding how to massage it
+    to fit your goal. Do you need to slice the output by rows or columns? Join the
+    output with other information? Transform the output in a more complicated way?
+    Look to the programs in Chapters [1](ch01.xhtml#ch_combining_commands) and [5](ch05.xhtml#ch_toolbox)
+    to do that work, like `grep` and `sed` and `cut`, and apply them using the techniques
+    of [Chapter 7](ch07.xhtml#ch_running_commands).
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦您能够生成此输出，下一步就是决定如何进行处理以使其符合您的目标。您是否需要按行或列切片输出？将输出与其他信息连接？以更复杂的方式转换输出？可以查看[第1章](ch01.xhtml#ch_combining_commands)和[第5章](ch05.xhtml#ch_toolbox)中的程序，如`grep`、`sed`和`cut`，并使用[第7章](ch07.xhtml#ch_running_commands)中的技术应用它们。
+- en: 'For this example, you could print the 17th field with `awk`, or remove spaces
+    with `sed` and locate the 17th character with `cut`:'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于这个例子，您可以使用`awk`打印第17个字段，或者使用`sed`删除空格并使用`cut`定位第17个字符：
+- en: '[PRE10]'
+  id: totrans-44
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'As another example, if you want to print the months of the year, your initial
+    data could be the numbers 1 through 12, again produced by brace expansion:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为另一个例子，如果您想打印一年中的月份，您的初始数据可以再次通过大括号扩展生成数字1到12：
+- en: '[PRE11]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'From there, augment the brace expansion so it forms dates for the first day
+    of each month (from `2021-01-01` through `2021-12-01`); then run `date -d` on
+    each line to produce month names:'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从这里开始，扩展大括号以形成每个月第一天的日期（从`2021-01-01`到`2021-12-01`）；然后对每行运行`date -d`以生成月份名称：
+- en: '[PRE12]'
+  id: totrans-48
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'Or, suppose you want to know the length of the longest filename in the current
+    directory. Your initial data could be a directory listing:'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，假设您想知道当前目录中最长文件名的长度。您的初始数据可以是目录列表：
+- en: '[PRE13]'
+  id: totrans-50
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'From there, use `awk` to generate commands to count characters in each filename
+    with `wc -c`:'
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从这里开始，使用`awk`生成命令以计算每个文件名中字符的数量，并使用`wc -c`：
+- en: '[PRE14]'
+  id: totrans-52
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: '(The `-n` option prevents `echo` from printing newline characters, which would
+    throw off each count by one.) Finally, pipe the commands to `bash` to run them,
+    sort the numeric results from high to low, and grab the maximum value (the first
+    line) with `head -n1`:'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: （`-n`选项可以防止`echo`打印换行字符，这会使每个计数多一个。）最后，将命令管道传输给`bash`运行，将数字结果从高到低排序，并使用`head
+    -n1`获取最大值（第一行）：
+- en: '[PRE15]'
+  id: totrans-54
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'This last example was tricky, generating pipelines as strings and passing them
+    to a further pipeline. Nevertheless, the general principle is the same: figure
+    out your starting data and manipulate it to fit your needs.'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后一个例子有些棘手，将管道生成为字符串并将其传递给进一步的管道。尽管如此，一般原则是相同的：找出您的起始数据并将其操纵以满足您的需求。
+- en: Know Your Testing Tools
+  id: totrans-56
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 了解您的测试工具
+- en: 'Building a brash one-liner may require trial and error. The following tools
+    and techniques will help you try different solutions quickly:'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 构建一个大胆的一行代码可能需要反复试验。以下工具和技术将帮助您快速尝试不同的解决方案：
+- en: Use command history and command-line editing.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用命令历史记录和命令行编辑。
+- en: Don’t retype commands while you experiment. Use techniques from [Chapter 3](ch03.xhtml#ch_history)
+    to recall previous commands, tweak them, and run them.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您尝试实验时，请不要重新输入命令。使用[第3章](ch03.xhtml#ch_history)中的技术来回忆先前的命令，调整它们并运行它们。
+- en: Add `echo` to test your expressions.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 添加`echo`来测试您的表达式。
+- en: If you aren’t sure how an expression will evaluate, print it with `echo` beforehand
+    to see the evaluated results on stdout.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您不确定表达式将如何评估，请事先用`echo`打印它以查看stdout上的评估结果。
+- en: Use `ls` or add `echo` to test destructive commands.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`ls`或添加`echo`来测试具有破坏性的命令。
+- en: If your command invokes `rm`, `mv`, `cp`, or other commands that might overwrite
+    or remove files, place `echo` in front of them to confirm which files will be
+    affected. (So, instead of executing `rm`, execute `echo rm`.) Another safety tactic
+    is to replace `rm` with `ls` to list files that would be removed.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的命令调用`rm`、`mv`、`cp`或其他可能覆盖或移除文件的命令，请在它们前面加上`echo`以确认哪些文件将受到影响。（因此，不要执行`rm`，而是执行`echo
+    rm`。）另一个安全策略是用`ls`替换`rm`以列出将被移除的文件。
+- en: Insert a `tee` to view intermediate results.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 插入一个`tee`来查看中间结果。
+- en: 'If you want to view the output (stdout) in the middle of a long pipeline, insert
+    the `tee` command to save output to a file for examination. The following command
+    saves the output from `command3` in the file *outfile*, while piping that same
+    output to `command4`:'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想在长管道中间查看输出（stdout），插入`tee`命令将输出保存到文件以供检查。以下命令将`command3`的输出保存在文件*outfile*中，同时将相同的输出传递给`command4`：
+- en: '[PRE16]'
+  id: totrans-66
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: OK, let’s build some brash one-liners!
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 好的，让我们来构建一些大胆的一行代码吧！
+- en: Inserting a Filename into a Sequence
+  id: totrans-68
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 将文件名插入序列
+- en: 'This brash one-liner is similar to the one that opened the chapter (renaming
+    *.jpg* files), but more detailed. It’s also a real situation I faced while writing
+    this book. Like the previous one-liner, it combines two techniques from [Chapter 7](ch07.xhtml#ch_running_commands):
+    process substitution and piping to `bash`. The result is a repeatable pattern
+    for solving similar problems.'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个大胆的一行代码与打开本章节的那个（重命名*.jpg*文件）相似，但更加详细。这也是我在写这本书时真实遇到的情况。像前一个一行代码一样，它结合了[第7章](ch07.xhtml#ch_running_commands)中的两种技术：进程替换和管道到`bash`。结果是一个可重复使用的模式，用于解决类似问题。
+- en: 'I wrote this book on a Linux computer using a typesetting language called [AsciiDoc](https://asciidoc.org).
+    The language details aren’t important here; what matters is each chapter was a
+    separate file, and originally there were 10 of them:'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我在一台使用名为[AsciiDoc](https://asciidoc.org)的排版语言的Linux计算机上写了这本书。这里并不重要语言的细节；重要的是每一章都是一个单独的文件，最初有10章：
+- en: '[PRE17]'
+  id: totrans-71
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: At some point, I decided to insert an 11th chapter between Chapters 2 and 3\.
+    That meant renaming some files. Chapters 3–10 had to become 4–11, leaving a gap
+    so I could make a new Chapter 3 (*ch03.asciidoc*). I could have renamed the files
+    manually, starting with *ch11.asciidoc* and working backward:^([2](ch08.xhtml#idm46586638858416))
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在某个时候，我决定在第2章和第3章之间插入第11章。这意味着需要重命名一些文件。第3至第10章必须变为第4至第11章，留下一个空隙，以便我可以创建一个新的第3章（*ch03.asciidoc*）。我本可以手动重命名文件，从*ch11.asciidoc*开始向后工作：^([2](ch08.xhtml#idm46586638858416))
+- en: '[PRE18]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: But this method is tedious (imagine if there were 1,000 files instead of 11!),
+    so instead, I generated the necessary `mv` commands and piped them to `bash`.
+    Take a good look at the preceding `mv` commands and think for a moment how you
+    might create them.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但这种方法很繁琐（想象一下如果有1000个文件而不是11个！），所以我生成了必要的`mv`命令并将它们传递给`bash`。好好看看前面的`mv`命令，并思考一下您可能如何创建它们。
+- en: 'Focus first on the original filenames *ch03.asciidoc* through *ch10.asciidoc*.
+    You could print them using brace expansion such as `ch{10..03}.asciidoc`, like
+    the first example in this chapter, but to practice a little flexibility, use the
+    `seq -w` command to print the numbers:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先专注于原始文件名*ch03.asciidoc*到*ch10.asciidoc*。你可以使用花括号扩展打印它们，比如`ch{10..03}.asciidoc`，就像本章节的第一个例子一样，但为了练习一些灵活性，使用`seq
+    -w`命令来打印数字：
+- en: '[PRE19]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Then turn this numeric sequence into filenames by piping it to `sed`:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后通过管道将这个数字序列转换为文件名到`sed`：
+- en: '[PRE20]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'You now have a list of the original filenames. Do likewise for Chapters 4–11
+    to create the destination filenames:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您有一个原始文件名列表。同样地，为第4至11章创建目标文件名：
+- en: '[PRE21]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'To form the `mv` commands, you need to print the original and new filenames
+    side by side. The first example in this chapter solved the “side by side” problem
+    with `paste`, and it used process substitution to treat the two printed lists
+    as files. Do the same here:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要形成`mv`命令，您需要将原始文件名和新文件名并排打印出来。本章第一个示例使用`paste`解决了“并排打印”的问题，并使用进程替换将两个打印列表视为文件。在这里也要做同样的操作：
+- en: '[PRE22]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: Tip
+  id: totrans-83
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: 'The preceding command might look like a lot of typing, but with command history
+    and Emacs-style command-line editing, it’s really not. To go from the single “`seq`
+    and `sed`” line to the `paste` command:'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 上述命令可能看起来很长，但是通过命令历史和Emacs风格的命令行编辑，其实并不复杂。要从单一的“`seq`和`sed`”行转到`paste`命令：
+- en: Recall the previous command from history with the up arrow.
+  id: totrans-85
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用向上箭头从历史记录中调用前一个命令。
+- en: Press Ctrl-A and then Ctrl-K to cut the whole line.
+  id: totrans-86
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 按下Ctrl-A然后Ctrl-K来剪切整行。
+- en: Type the word `paste` followed by a space.
+  id: totrans-87
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 输入单词`paste`，然后加上一个空格。
+- en: Press Ctrl-Y twice to create two copies of the `seq` and `sed` commands.
+  id: totrans-88
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 按两次Ctrl-Y来创建`seq`和`sed`命令的两个副本。
+- en: Use movement and editing keystrokes to modify the second copy.
+  id: totrans-89
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用移动和编辑键来修改第二份副本。
+- en: And so on.
+  id: totrans-90
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 依此类推。
+- en: 'Prepend `mv` to each line by piping the output to `sed`, printing exactly the
+    `mv` commands you need:'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过将输出导向`sed`来在每行前面添加`mv`，打印出您所需的`mv`命令：
+- en: '[PRE23]'
+  id: totrans-92
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'As the final step, pipe the commands to `bash` for execution:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为最后一步，将命令导向`bash`以执行：
+- en: '[PRE24]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'I used exactly this solution for my book. After the `mv` commands ran, the
+    resulting files were Chapters 1, 2, and 4–11, leaving a gap for a new Chapter
+    3:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我在我的书中确实使用了这个解决方案。`mv`命令运行后，生成的文件是第1、2和4-11章，留下了一个新的第3章的空白：
+- en: '[PRE25]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'The pattern I just presented is reusable in all kinds of situations to run
+    a sequence of related commands:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我刚刚呈现的模式可以在各种情况下重复使用以运行一系列相关命令：
+- en: Generate the command arguments as lists on stdout.
+  id: totrans-98
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在stdout上生成命令参数作为列表。
+- en: Print the lists side by side with `paste` and process substitution.
+  id: totrans-99
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用`paste`和进程替换并排打印列表。
+- en: Prepend a command name with `sed` by replacing the beginning-of-line character
+    (`^`) with a program name and a space.
+  id: totrans-100
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用`sed`将命令名称前置，通过替换行首字符（`^`）来添加程序名称和空格。
+- en: Pipe the results to `bash`.
+  id: totrans-101
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将结果导向`bash`。
+- en: Checking Matched Pairs of Files
+  id: totrans-102
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 检查匹配的文件对
+- en: 'This brash-one liner is inspired by a real use of Mediawiki, the software that
+    powers Wikipedia and thousands of other wikis. Mediawiki allows users to upload
+    images for display. Most users follow a manual process via web forms: click Choose
+    File to bring up a file dialog, navigate to an image file and select it, add a
+    descriptive comment in the form, and click Upload. Wiki administrators use a more
+    automated method: a script that reads a whole directory and uploads its images.
+    Each image file (say, *bald_eagle.jpg*) is paired with a text file (*bald_eagle.txt*)
+    containing a descriptive comment about the image.'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个大胆的一行代码受到了Mediawiki的实际用例启发，这是驱动维基百科和成千上万其他维基站点的软件。Mediawiki允许用户上传图片进行显示。大多数用户通过网页表单进行手动过程：点击“选择文件”以弹出文件对话框，浏览到图像文件并选择它，在表单中添加描述性注释，然后点击“上传”。维基管理员使用更自动化的方法：一个脚本读取整个目录并上传其图片。每个图像文件（例如*bald_eagle.jpg*）都与一个文本文件（*bald_eagle.txt*）配对，其中包含关于图像的描述性注释。
+- en: 'Imagine that you’re faced with a directory filled with hundreds of image files
+    and text files. You want to confirm that every image file has a matching text
+    file and vice versa. Here’s a smaller version of that directory:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 想象一下，你面对着一个充满数百个图像文件和文本文件的目录。你希望确认每个图像文件都有一个匹配的文本文件，反之亦然。这里是该目录的较小版本：
+- en: '[PRE26]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'Let’s develop two different solutions to identify any unmatched files. For
+    the first solution, create two lists, one for the JPEG files and one for the text
+    files, and use `cut` to strip off their file extensions *.txt* and *.jpg*:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们开发两种不同的解决方案来识别任何不匹配的文件。对于第一个解决方案，创建两个列表，一个用于JPEG文件，一个用于文本文件，并使用`cut`去掉它们的文件扩展名*.txt*和*.jpg*：
+- en: '[PRE27]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'Then compare the lists with `diff` using process substitution:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后使用进程替换使用`diff`来比较列表：
+- en: '[PRE28]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'You could stop here, because the output indicates that the first list has an
+    extra *blue_jay* (implying *blue_jay.jpg*) and the second list has an extra *oriole*
+    (implying *oriole.txt*). Nevertheless, let’s make the results more precise. Eliminate
+    unwanted lines by grepping for the characters `<` and `>` at the beginning of
+    each line:'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在这里停下来，因为输出表明第一个列表有一个额外的*blue_jay*（意味着*blue_jay.jpg*），第二个列表有一个额外的*oriole*（意味着*oriole.txt*）。尽管如此，让我们使结果更加精确。通过在每行开头grep字符`<`和`>`来消除不需要的行：
+- en: '[PRE29]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'Then use `awk` to append the correct file extension to each filename (`$2`),
+    based on whether the filename is preceded by a leading `<` or `>`:'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后使用`awk`根据文件名（`$2`）前面是`<`还是`>`来附加正确的文件扩展名：
+- en: '[PRE30]'
+  id: totrans-113
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'You now have your list of unmatched files. However, this solution has a subtle
+    bug. Suppose the current directory contained the filename *yellow.canary.jpg*,
+    which has two dots. The preceding command would produce incorrect output:'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你已经有了未匹配文件的列表。然而，这个解决方案存在一个微妙的 bug。假设当前目录包含文件名*yellow.canary.jpg*，其中有两个点。上述命令将产生错误的输出：
+- en: '[PRE31]'
+  id: totrans-115
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'This problem occurs because the two `cut` commands remove characters from the
+    first dot onward, instead of the last dot onward, so *yellow.canary.jpg* is truncated
+    to *yellow* rather than *yellow.canary*. To fix this issue, replace `cut` with
+    `sed` to remove characters from the last dot to the end of the string:'
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此问题发生是因为两个`cut`命令从第一个点开始而不是从最后一个点开始移除字符，所以*yellow.canary.jpg*被截断为*yellow*而不是*yellow.canary*。为了解决这个问题，用`sed`替换`cut`，从最后一个点到字符串末尾删除字符：
+- en: '[PRE32]'
+  id: totrans-117
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'The first solution is now complete. The second solution takes a different approach.
+    Instead of applying `diff` to two lists, generate a single list and weed out matched
+    pairs of filenames. Begin by removing the file extensions with `sed` (using the
+    same sed script as before) and count the occurrences of each string with `uniq
+    -c`:'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一个解决方案现在完成了。第二个解决方案采用了不同的方法。不是将`diff`应用于两个列表，而是生成一个单独的列表并删除匹配的文件名对。首先使用`sed`（使用与之前相同的sed脚本）去掉文件扩展名，并用`uniq
+    -c`计算每个字符串的出现次数：
+- en: '[PRE33]'
+  id: totrans-119
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'Each line of output contains either the number `2`, representing a matched
+    pair of filenames, or `1`, representing an unmatched filename. Use `awk` to isolate
+    lines that begin with whitespace and a `1`, and print only the second field:'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输出的每一行包含数字`2`，表示匹配的文件名对，或者`1`，表示未匹配的文件名。使用`awk`来隔离以空格开头和`1`开头的行，并只打印第二个字段：
+- en: '[PRE34]'
+  id: totrans-121
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'For the final step, how can you add the missing file extensions? Don’t bother
+    with any complicated string manipulations. Just use `ls` to list the actual files
+    in the current directory. Stick an asterisk (a wildcard) onto the end of each
+    line of output with `awk`:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于最后一步，如何添加丢失的文件扩展名？不要费心进行任何复杂的字符串操作。只需使用`ls`列出当前目录中的实际文件。用`awk`在每行输出的末尾添加一个星号（通配符）：
+- en: '[PRE35]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: and feed the lines to `ls` via command substitution. The shell performs pattern
+    matching, and `ls` lists the unmatched filenames. Done!
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并通过命令替换将这些行传递给`ls`。Shell执行模式匹配，而`ls`列出未匹配的文件名。完成！
+- en: '[PRE36]'
+  id: totrans-125
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: Generating a CDPATH from Your Home Directory
+  id: totrans-126
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 从你的主目录生成一个 CDPATH
+- en: 'In the section [“Organize Your Home Directory for Fast Navigation”](ch04.xhtml#cs_homedir),
+    you wrote a complicated `CDPATH` line by hand. It began with `$HOME`, followed
+    by all subdi­r⁠ectories of `$HOME`, and ended with the relative path `..` (parent
+    directory):'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在章节[“Organize Your Home Directory for Fast Navigation”](ch04.xhtml#cs_homedir)中，你手动编写了一个复杂的`CDPATH`行。它以`$HOME`开头，然后是所有`$HOME`的子目录，并以相对路径`..`（父目录）结束：
+- en: '[PRE37]'
+  id: totrans-128
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'Let’s create a brash one-liner to generate that `CDPATH` line automatically,
+    suitable for insertion into a `bash` configuration file. Begin with the list of
+    subdirectories in `$HOME`, using a subshell to prevent the `cd` command from changing
+    your shell’s current directory:'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们创建一个大胆的一行命令来自动生成`CDPATH`行，适合插入到`bash`配置文件中。从`$HOME`中的子目录列表开始，使用子Shell防止`cd`命令改变你的Shell当前目录：
+- en: '[PRE38]'
+  id: totrans-130
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'Add `$HOME/` in front of each directory with `sed`:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`sed`在每个目录前面添加`$HOME/`：
+- en: '[PRE39]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: 'The preceding sed script is slightly complicated because the replacement string,
+    `$HOME/`, contains a forward slash, and `sed` substitutions also use the forward
+    slash as a separator. That’s why my slash is escaped: `$HOME\/`. To simplify things,
+    recall from [“Substitution and Slashes”](ch05.xhtml#tip_sed_slash) that `sed`
+    accepts any convenient character as a separator. Let’s use at signs (`@`) instead
+    of forward slashes so no escaping is needed:'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 前面的`sed`脚本稍微复杂，因为替换字符串`$HOME/`包含一个斜杠，并且`sed`替换也使用斜杠作为分隔符。这就是为什么我的斜杠被转义：`$HOME\/`。为了简化，回想一下在[“Substitution
+    and Slashes”](ch05.xhtml#tip_sed_slash)中提到，`sed`接受任何方便的字符作为分隔符。让我们使用`@`符号代替斜杠，这样就不需要转义了：
+- en: '[PRE40]'
+  id: totrans-134
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: 'Next, lop off the final forward slash with another `sed` expression:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，使用另一个`sed`表达式去掉最后的斜杠：
+- en: '[PRE41]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: 'Print the output on a single line using `echo` and command substitution. Notice
+    that you no longer need plain parentheses around `cd` and `ls` to create a subshell
+    explicitly, because command substitution creates a subshell of its own:'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`echo`和命令替换将输出打印在单行上。请注意，你不再需要显式地在`cd`和`ls`周围使用普通括号创建子shell，因为命令替换会创建自己的子shell：
+- en: '[PRE42]'
+  id: totrans-138
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: 'Add the first directory `$HOME` and the final relative directory `..`:'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 添加第一个目录`$HOME`和最终相对目录`..`：
+- en: '[PRE43]'
+  id: totrans-140
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: 'Change spaces to colons by piping all the output so far to `tr`:'
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过将到目前为止的所有输出管道传输到`tr`来将空格更改为冒号：
+- en: '[PRE44]'
+  id: totrans-142
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: 'Finally, add the `CDPATH` environment variable, and you have generated a variable
+    definition to paste into a `bash` configuration file. Store this command in a
+    script to generate the line anytime, like when you add a new subdirectory to `$HOME`:'
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，添加`CDPATH`环境变量，你就生成了一个变量定义，可以粘贴到`bash`配置文件中。将此命令存储在一个脚本中，随时生成该行，比如当你向`$HOME`添加新子目录时：
+- en: '[PRE45]'
+  id: totrans-144
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: Generating Test Files
+  id: totrans-145
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 生成测试文件
+- en: A common task in the software industry is testing—feeding a wide variety of
+    data to a program to validate that the program behaves as intended. The next brash
+    one-liner generates one thousand files containing random text that could be used
+    in software testing. The number one thousand is arbitrary; you can generate as
+    many files as you want.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在软件行业中的常见任务是测试——向程序提供各种数据以验证程序的预期行为。下一个勇敢的一行生成包含随机文本的一千个文件，这些文件可用于软件测试。数字一千是任意的；你可以生成任意数量的文件。
+- en: The solution will select words randomly from a large text file and create one
+    thousand smaller files with random contents and lengths. A perfect source file
+    is the system dictionary */usr/share/dict/words*, which contains 102,305 words,
+    each on its own line.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该解决方案将随机从大型文本文件中选择单词，并创建一千个包含随机内容和长度的较小文件。一个完美的源文件是系统字典*/usr/share/dict/words*，其中包含102,305个单词，每个单词占一行。
+- en: '[PRE46]'
+  id: totrans-148
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: 'To produce this brash one-liner, you’ll need to solve four puzzles:'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要生成这个勇敢的一行，你需要解决四个谜题：
+- en: Randomly shuffling the dictionary file
+  id: totrans-150
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 随机洗牌字典文件
+- en: Selecting a random number of lines from the dictionary file
+  id: totrans-151
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 从字典文件中随机选择几行
+- en: Creating an output file to hold the results
+  id: totrans-152
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 创建一个输出文件来保存结果
+- en: Running your solution one thousand times
+  id: totrans-153
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 运行你的解决方案一千次
+- en: 'To shuffle the dictionary into random order, use the aptly named command `shuf`.
+    Each run of the command `shuf /usr/share/dict/words` produces more than a hundred
+    thousand lines of output, so peek at the first few random lines using `head`:'
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要将字典随机打乱顺序，使用命令`shuf`，命名得当。每次运行命令`shuf /usr/share/dict/words`都会产生超过十万行的输出，因此使用`head`查看前几行随机行：
+- en: '[PRE47]'
+  id: totrans-155
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: 'Your first puzzle is solved. Next, how can you select a random quantity of
+    lines from the shuffled dictionary? `shuf` has an option, `-n`, to print a given
+    number of lines, but you want the value to change for each output file you create.
+    Fortunately, `bash` has a variable, `RANDOM`, that holds a random positive integer
+    between 0 and 32,767\. Its value changes every time you access the variable:'
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的第一个谜题解决了。接下来，你如何从洗牌后的字典中选择随机数量的行？`shuf`有一个选项`-n`，可以打印给定数量的行，但你希望每次创建输出文件时该值都会变化。幸运的是，`bash`有一个变量`RANDOM`，它保存一个介于0和32,767之间的随机正整数。每次访问该变量时，它的值都会改变：
+- en: '[PRE48]'
+  id: totrans-157
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE48]'
+- en: 'Therefore, run `shuf` with the option `-n $RANDOM` to print a random number
+    of random lines. Again, the full output could be very long, so pipe the results
+    to `wc -l` to confirm that the number of lines changes with each execution:'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因此，运行带有选项`-n $RANDOM`的`shuf`以打印随机数量的随机行。同样，完整输出可能会非常长，因此将结果管道传输到`wc -l`以确认每次执行时行数会改变：
+- en: '[PRE49]'
+  id: totrans-159
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE49]'
+- en: 'You’ve solved the second puzzle. Next, you need one thousand output files,
+    or more specifically, one thousand different filenames. To generate filenames,
+    run the program `pwgen`, which generates random strings of letters and digits:'
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经解决了第二个谜题。接下来，你需要一千个输出文件，或更具体地说，一千个不同的文件名。要生成文件名，请运行程序`pwgen`，它生成字母和数字的随机字符串：
+- en: '[PRE50]'
+  id: totrans-161
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE50]'
+- en: 'Add the option `-N1` to generate just a single string, and specify the string
+    length (10) as an argument:'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 添加选项`-N1`以生成一个字符串，并将字符串长度（10）作为参数指定：
+- en: '[PRE51]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE51]'
+- en: 'Optionally, make the string look more like the name of a text file, using command
+    substitution:'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可选择使用命令替换使字符串看起来更像文本文件的名称：
+- en: '[PRE52]'
+  id: totrans-165
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE52]'
+- en: 'Third puzzle complete! You now have all the tools to generate a single random
+    text file. Use the `-o` option of `shuf` to save its output in a file:'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第三个谜题完成了！现在你拥有生成单个随机文本文件的所有工具。使用`shuf`的`-o`选项将其输出保存在一个文件中：
+- en: '[PRE53]'
+  id: totrans-167
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE53]'
+- en: 'and check the results:'
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并检查结果：
+- en: '[PRE54]'
+  id: totrans-169
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE54]'
+- en: 'Looks good! The final puzzle is how to run the preceding `shuf` command one
+    thousand times. You could certainly use a loop:'
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 看起来不错！最后一个谜题是如何一千次运行前面的`shuf`命令。您当然可以使用循环：
+- en: '[PRE55]'
+  id: totrans-171
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE55]'
+- en: 'but that’s not as fun as creating a brash one-liner. Instead, let’s pregenerate
+    the commands, as strings, and pipe them to `bash`. As a test, print your desired
+    command once using `echo`. Add single quotes to ensure that `$RANDOM` doesn’t
+    evaluate and `pwgen` doesn’t run:'
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但这并不像创建大胆一行一句那么有趣。相反，让我们预先生成命令作为字符串，并通过`bash`管道传递它们。作为测试，使用`echo`打印您想要的命令一次。添加单引号以确保`$RANDOM`不被评估，`pwgen`不运行：
+- en: '[PRE56]'
+  id: totrans-173
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE56]'
+- en: 'This command can easily be piped to `bash` for execution:'
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个命令可以轻松地通过`bash`管道执行：
+- en: '[PRE57]'
+  id: totrans-175
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE57]'
+- en: 'Now, print the command one thousand times using the `yes` command piped to
+    `head`, then pipe the results to `bash`, and you’ve solved the fourth puzzle:'
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，使用`yes`命令通过管道传递给`head`打印一千次您的命令，然后将结果传递给`bash`，您已经解决了第四个谜题：
+- en: '[PRE58]'
+  id: totrans-177
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE58]'
+- en: 'If you’d prefer one thousand random image files instead of text files, use
+    the same technique (`yes`, `head`, and `bash`) and replace `shuf` with a command
+    that generates a random image. Here’s a brash one-liner that I adapted from a
+    [solution by Mark Setchell on Stack Overflow](https://oreil.ly/ruDwG). It runs
+    the command `convert`, from the graphics package ImageMagick, to produce random
+    images of size 100 x 100 pixels consisting of multicolored squares:'
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您更喜欢一千个随机图像文件而不是文本文件，可以使用相同的技术（`yes`、`head`和`bash`），并用生成随机图像的命令替换`shuf`。以下是我从[Stack
+    Overflow上Mark Setchell的解决方案](https://oreil.ly/ruDwG)中改编的大胆一行一句。它运行来自图形包ImageMagick的`convert`命令，以产生大小为100
+    x 100像素的由多彩方块组成的随机图像：
+- en: '[PRE59]'
+  id: totrans-179
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE59]'
+- en: Generating Empty Files
+  id: totrans-180
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 生成空文件
+- en: 'Sometimes all you need for testing is lots of files with different names, even
+    if they’re empty. Generating a thousand empty files named *file0001.txt* through
+    *file1000.txt* is as simple as:'
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有时候，进行测试所需的仅仅是具有不同名称的大量文件，即使它们是空的。生成命名为*file0001.txt*至*file1000.txt*的一千个空文件就像这样简单：
+- en: '[PRE60]'
+  id: totrans-182
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE60]'
+- en: 'If you prefer more interesting filenames, grab them randomly from the system
+    dictionary. Use `grep` to limit the names to lowercase letters for simplicity
+    (avoiding spaces, apostrophes, and other characters that would be special to the
+    shell):'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你喜欢更有趣的文件名，可以随机从系统字典中选择。使用`grep`限制名称为小写字母以简化（避免空格、撇号和其他对shell特殊的字符）：
+- en: '[PRE61]'
+  id: totrans-184
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE61]'
+- en: 'Shuffle the names with `shuf` and print the first thousand with `head`:'
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`shuf`混洗名称并用`head`打印前一千个：
+- en: '[PRE62]'
+  id: totrans-186
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE62]'
+- en: 'Finally, pipe the results to `xargs` to create the files with `touch`:'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，将结果通过`xargs`管道传递给`touch`以创建文件：
+- en: '[PRE63]'
+  id: totrans-188
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE63]'
+- en: Summary
+  id: totrans-189
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 概要
+- en: I hope the examples in this chapter helped to build your skills in writing brash
+    one-liners. Several of them provided reusable patterns that you may find useful
+    in other situations.
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 希望本章的例子有助于培养你编写大胆一行一句的技能。其中几个提供了可重复使用的模式，你可能会在其他情况下发现它们有用。
+- en: 'One caveat: brash one-liners are not the only solution in town. They’re just
+    one approach to working efficiently at the command line. Sometimes you’ll get
+    more bang for the buck by writing a shell script. Other times you’ll find better
+    solutions with a programming language such as Perl or Python. Nevertheless, brash
+    one-liner-writing is a vital skill for performing critical tasks with speed and
+    style.'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意：在城里，大胆的一行一句并非唯一的解决方案。它们只是在命令行高效工作的一种方法。有时候，编写一个shell脚本可能会更有价值。其他时候，使用像Perl或Python这样的编程语言可能会找到更好的解决方案。然而，编写大胆的一行一句是执行关键任务的一项重要技能，快速而富有风格。
+- en: ^([1](ch08.xhtml#idm46586639000896-marker)) The earliest use of this term (that
+    I know of) is the [manpage for lorder(1)](https://oreil.ly/ro621) in BSD Unix
+    4.x. Thanks to Bob Byrnes for finding it.
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([1](ch08.xhtml#idm46586639000896-marker)) 我所知道的此术语最早使用（来自BSD Unix 4.x中的[lorder(1)的manpage](https://oreil.ly/ro621)）。感谢Bob
+    Byrnes找到它。
+- en: ^([2](ch08.xhtml#idm46586638858416-marker)) Starting with *ch03.asciidoc* and
+    working forward would be dangerous—can you see why? If not, create these files
+    with the command `touch ch{01..10}.asciidoc` and try it yourself.
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([2](ch08.xhtml#idm46586638858416-marker)) 从*ch03.asciidoc*开始并向前工作可能是危险的——你能看出为什么吗？如果不能，使用命令`touch
+    ch{01..10}.asciidoc`创建这些文件并自行尝试。

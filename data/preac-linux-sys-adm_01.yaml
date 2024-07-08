@@ -1,0 +1,727 @@
+- en: Chapter 1\. Getting Started with Linux
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第1章 起步使用Linux
+- en: Linux system administration means different things to different people. Administration,
+    for this book, means the daily actions that a Linux system administrator (sysadmin)
+    must take to manage and support users, maintain system health, implement best
+    practices for security, install software, and perform housekeeping tasks. This
+    chapter covers Linux installation, initial setup, and system exploration using
+    simple shell commands.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux系统管理对不同的人来说意味着不同的事情。在这本书中，管理指的是Linux系统管理员（sysadmin）每天必须采取的行动，以管理和支持用户，维护系统健康，实施最佳安全实践，安装软件并执行系统维护任务。本章涵盖了Linux安装、初始设置以及使用简单的Shell命令进行系统探索。
+- en: You’ll spend a significant portion of your time at the command line, also known
+    as the command-line interface (CLI). Linux system administrators rarely install
+    or use GUIs on their supported server systems. This chapter introduces you to
+    the CLI and some simple commands to navigate the filesystem, locate important
+    files, and familiarize yourself with the Linux CLI.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将会在命令行中花费大部分时间，也称为命令行界面（CLI）。Linux系统管理员很少在其支持的服务器系统上安装或使用图形用户界面（GUI）。本章介绍了CLI以及一些简单的命令，用于导航文件系统、定位重要文件并熟悉Linux的CLI。
+- en: Installing Linux
+  id: totrans-3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 安装Linux
+- en: One of the first things every Linux system administrator learns is how to install
+    Linux. There’s no single *correct* way to install Linux, but a few guidelines
+    and suggestions will make your life easier as your users’ needs change.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个Linux系统管理员最先学习的事情之一是如何安装Linux。安装Linux没有单一的*正确*方法，但一些指南和建议会在您用户需求变化时让您的生活更轻松。
+- en: While this section won’t go into detailed step-by-step instructions on installing
+    Linux, the basic steps are outlined here. For most junior-level sysadmins, system
+    installation generally occurs via automated means such as Kickstart or another
+    enterprise-level delivery system.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然本节不会详细介绍如何安装Linux的逐步说明，但基本步骤在这里概述。对于大多数初级系统管理员来说，系统安装通常是通过自动化手段进行，例如Kickstart或其他企业级交付系统。
+- en: Preparing Your System for Linux
+  id: totrans-6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 准备您的Linux系统
+- en: If this is your first time installing Linux, I suggest that you install it into
+    a virtual machine (VM). That way, you don’t have to dedicate an entire piece of
+    hardware to a learning system and you won’t potentially render your system inoperable
+    by attempting to install Linux in parallel to your current system, creating a
+    multiboot computer. (Setting up multibooting is a more advanced concept and is
+    beyond the scope of this book.)
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果这是您第一次安装Linux，建议您将其安装到虚拟机（VM）中。这样，您不必将整个硬件设备用于学习系统，并且您不会通过尝试并行安装Linux而使您的系统无法运行，从而创建一个多启动计算机。（设置多启动是一个更高级的概念，超出了本书的范围。）
+- en: If you don’t already have it installed, a good place to start with virtualization
+    is to download and install the latest version of [VirtualBox](https://oreil.ly/X4dKu).
+    VirtualBox is an application that allows your current computer to act as a VM
+    host system where you may install virtual guests, such as Linux, into a separate,
+    functioning computer system. VirtualBox runs on various host operating systems
+    (OSs) and supports various guest operating systems, including Linux. The host
+    OS and guest OS can be different from one another. Your computer (host OS) can
+    be a Windows, Mac, or Linux-based system but have guest Linux systems installed
+    on it as VirtualBox VMs.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您尚未安装，建议您从[VirtualBox](https://oreil.ly/X4dKu)的最新版本开始进行虚拟化。VirtualBox是一个应用程序，允许您的当前计算机充当虚拟机主机系统，在其上安装诸如Linux之类的虚拟客户机，形成一个独立的、运行正常的计算机系统。VirtualBox可以运行在各种主机操作系统（OS）上，并支持各种客户机操作系统，包括Linux。主机OS和客户机OS可以彼此不同。您的计算机（主机OS）可以是基于Windows、Mac或Linux的系统，但可以在其上安装作为VirtualBox虚拟机的Linux客户机。
+- en: Downloading and Installing Linux
+  id: totrans-9
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 下载并安装Linux
+- en: 'Next, you’ll need to select a Linux distribution (distro) to install so that
+    you can practice issuing commands, changing configurations, rebooting, installing
+    software, creating users, and so on. I suggest you select a Linux distro based
+    on the one your current employer uses. If your company doesn’t use Linux yet or
+    you’re not employed in a system administrator role, then select from one of the
+    following popular distributions:'
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，您需要选择一个Linux发行版（distro）进行安装，以便您可以练习发出命令、更改配置、重新启动、安装软件、创建用户等等。建议您选择一款与您当前雇主使用的发行版类似的Linux发行版。如果您的公司尚未使用Linux，或者您还没有在系统管理员角色上工作，那么可以从以下几种流行的发行版中进行选择：
+- en: '[*Debian*](https://oreil.ly/hxbxl)'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[*Debian*](https://oreil.ly/hxbxl)'
+- en: Debian is a top-level distribution from which many other distributions are derived.
+    Debian is community-supported, open source, and free.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Debian 是一个顶级发行版，许多其他发行版都源自它。Debian 得到社区支持，是开源且免费的。
+- en: '[*OpenSUSE*](https://oreil.ly/hsBY4)'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[*OpenSUSE*](https://oreil.ly/hsBY4)'
+- en: OpenSUSE is a community-supported, top-level distribution with many faithful
+    followers worldwide. Its commercial version, SUSE Linux Enterprise, has widespread
+    adoption.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenSUSE 是一个得到社区支持的顶级发行版，在全球拥有许多忠实的追随者。其商业版本 SUSE Linux Enterprise 有广泛的采用。
+- en: '[*Red Hat Enterprise Linux*](https://oreil.ly/0nvvM)'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[*Red Hat Enterprise Linux*](https://oreil.ly/0nvvM)'
+- en: Red Hat is a commercially supported Linux distro that enjoys worldwide enterprise
+    adoption and is now owned by IBM.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Red Hat 是一款得到商业支持的 Linux 发行版，广受全球企业采纳，现在由 IBM 拥有。
+- en: '[*Ubuntu*](https://oreil.ly/zoK4o)'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[*Ubuntu*](https://oreil.ly/zoK4o)'
+- en: Ubuntu is very popular and has both (Debian-derived) community and commercially
+    supported distributions. Ubuntu also offers ready-made VirtualBox (and other)
+    VMs to help you get a quick start.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ubuntu 非常受欢迎，既有（基于 Debian 的）社区版也有商业支持的发行版。Ubuntu 还提供了预制的 VirtualBox（和其他）虚拟机，帮助您快速启动。
+- en: The downloaded ISO file is a bootable Linux image. You don’t have to do anything
+    to it if you use it to create a VM. A VM will boot from the ISO image and begin
+    the installation process. After configuring your VM in VirtualBox, select Settings
+    from the Oracle VM VirtualBox Manager, as shown in [Figure 1-1](#the_oracle_vm_virtualbox_manager_applic).
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下载的 ISO 文件是一个可引导的 Linux 镜像。如果您使用它创建虚拟机，无需进行任何操作。虚拟机将从 ISO 镜像启动，并开始安装过程。在 VirtualBox
+    中配置您的虚拟机后，从 Oracle VM VirtualBox 管理器中选择“设置”，如[图 1-1](#the_oracle_vm_virtualbox_manager_applic)所示。
+- en: '![](assets/plsa_0101.png)'
+  id: totrans-20
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0101.png)'
+- en: Figure 1-1\. The Oracle VM VirtualBox Manager application and a configured virtual
+    machine
+  id: totrans-21
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-1\. Oracle VM VirtualBox 管理器应用程序和配置的虚拟机
+- en: Then, select Storage, as shown in [Figure 1-2](#virtual_machine_settings_with_storage_s).
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，选择存储，如[图 1-2](#virtual_machine_settings_with_storage_s)所示。
+- en: '![](assets/plsa_0102.png)'
+  id: totrans-23
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0102.png)'
+- en: Figure 1-2\. Virtual machine settings with Storage settings selected
+  id: totrans-24
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-2\. 带有已选择存储设置的虚拟机设置
+- en: Select the empty optical disk drive under the IDE controller in the Storage
+    Devices pane and then select the optical disk icon in the Attributes pane to browse
+    for your ISO image file. [Figure 1-3](#select_the_iso_image_from_the_list) shows
+    several ISO files available in this menu.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在存储设备窗格下选择空的光学磁盘驱动器，然后在属性窗格中选择光学盘图标以浏览您的 ISO 镜像文件。[图 1-3](#select_the_iso_image_from_the_list)显示了此菜单中可用的多个
+    ISO 文件。
+- en: '![](assets/plsa_0103.png)'
+  id: totrans-26
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0103.png)'
+- en: Figure 1-3\. Select the ISO image from the list
+  id: totrans-27
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-3\. 从列表中选择 ISO 镜像
+- en: Once you’ve selected your ISO image, click OK to proceed. When you start your
+    VM, it will boot from this ISO image to begin installation onto your VM’s virtual
+    disk.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选择 ISO 镜像后，单击“确定”以继续。当您启动虚拟机时，它将从此 ISO 镜像启动，开始安装到虚拟磁盘上。
+- en: When your system boots, you can accept the default settings. If you have experience
+    installing Linux, you can change the default settings to suit your needs. Create
+    a user account when prompted to do so. If your distribution prompts you to give
+    the root account a password, do so. You must remember this password because, without
+    it, you’ll have to reinstall your Linux VM or try to recover it. Installing Linux
+    can take several minutes, and a reboot is required at the end of the installation
+    process.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当系统启动时，您可以接受默认设置。如果您有安装 Linux 的经验，可以更改默认设置以适应您的需求。在提示时创建用户帐户。如果您的发行版提示您为 root
+    帐户设置密码，请设置密码。您必须记住此密码，否则您将不得不重新安装 Linux 虚拟机或尝试恢复它。安装 Linux 可能需要几分钟，并且在安装过程结束时需要重新启动。
+- en: Getting to Know Your New Linux System
+  id: totrans-30
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 认识您的新 Linux 系统
+- en: 'After installation, the first thing you need to do is log in using the username
+    and password that you created during installation. You’re placed into your home
+    directory inside a shell (or operating environment) upon login. Your home directory
+    (*/home*) is a subdirectory of the */* directory. The Linux filesystem is a hierarchical
+    filesystem, similar to Microsoft Windows. At the top level, there is the root
+    directory, which is represented by the */* symbol. Windows uses a drive letter,
+    such as *C:*, for the root directory. On Windows, you can have many drive letters
+    with their own root levels, such as *C:*, *D:*, *E:*, and so on. In Linux, there
+    is only one root directory, */*. All other directories are subdirectories of the
+    root directory. The following directory tree illustrates the Linux root directory
+    and its subdirectories:'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装完成后，首先需要使用安装过程中创建的用户名和密码登录。登录后，你将进入一个shell（或操作环境）的主目录。你的主目录（*/home*）是*/*目录的子目录。Linux文件系统是层级文件系统，类似于Microsoft
+    Windows。顶层是根目录，用*/*符号表示。Windows使用诸如*C:*之类的驱动器号表示根目录。在Windows中，你可以有多个驱动器号及其自己的根级目录，如*C:*、*D:*、*E:*等等。在Linux中，只有一个根目录，即*/*。所有其他目录都是根目录的子目录。以下目录树展示了Linux根目录及其子目录：
+- en: '[PRE0]'
+  id: totrans-32
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: Note that there are only directories under the */* (root) filesystem and no
+    individual files, although some Linux distributions have a few symbolically linked
+    files in */*. All files are kept in directories. You’ll explore many of these
+    subdirectories throughout the rest of the book. [Table 1-1](#the_linux_filesystem)
+    provides a brief overview of the files and information in each directory.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，*/*（根）文件系统下只有目录，没有单独的文件，尽管某些Linux发行版在*/*中有一些符号链接文件。所有文件都保存在目录中。本书的其余部分将探索许多这些子目录。[表 1-1](#the_linux_filesystem)
+    提供了每个目录中文件和信息的简要概述。
+- en: Table 1-1\. The Linux filesystem
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表1-1\. Linux文件系统
+- en: '| Directory | Description |'
+  id: totrans-35
+  prefs: []
+  type: TYPE_TB
+  zh: '| 目录 | 描述 |'
+- en: '| --- | --- |'
+  id: totrans-36
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| */* | The root filesystem only contains other directories but no individual
+    files. |'
+  id: totrans-37
+  prefs: []
+  type: TYPE_TB
+  zh: '| */* | 根文件系统仅包含其他目录，没有单独的文件。 |'
+- en: '| */bin* | The binaries directory contains executable files. Points to */usr/bin*.
+    |'
+  id: totrans-38
+  prefs: []
+  type: TYPE_TB
+  zh: '| */bin* | 二进制文件目录包含可执行文件。指向*/usr/bin*。 |'
+- en: '| */dev* | The device directory contains device files to address peripherals.
+    |'
+  id: totrans-39
+  prefs: []
+  type: TYPE_TB
+  zh: '| */dev* | 设备目录包含用于访问外围设备的设备文件。 |'
+- en: '| */etc* | Contains system configuration files for users and services. |'
+  id: totrans-40
+  prefs: []
+  type: TYPE_TB
+  zh: '| */etc* | 包含用户和服务的系统配置文件。 |'
+- en: '| */home* | Users’ home directories. |'
+  id: totrans-41
+  prefs: []
+  type: TYPE_TB
+  zh: '| */home* | 用户的主目录。 |'
+- en: '| */lib* | System libraries files. Points to */usr/lib*. |'
+  id: totrans-42
+  prefs: []
+  type: TYPE_TB
+  zh: '| */lib* | 系统库文件。指向*/usr/lib*。 |'
+- en: '| */media* | Directory for mounting media such as USB drives or DVD disks.
+    |'
+  id: totrans-43
+  prefs: []
+  type: TYPE_TB
+  zh: '| */media* | 用于挂载USB驱动器或DVD光盘等介质的目录。 |'
+- en: '| */mnt* | The mount directory for mounting remote filesystems. |'
+  id: totrans-44
+  prefs: []
+  type: TYPE_TB
+  zh: '| */mnt* | 挂载远程文件系统的挂载目录。 |'
+- en: '| */opt* | Directory in which third-party software is installed. |'
+  id: totrans-45
+  prefs: []
+  type: TYPE_TB
+  zh: '| */opt* | 第三方软件安装目录。 |'
+- en: '| */proc* | A virtual filesystem that tracks system processes. |'
+  id: totrans-46
+  prefs: []
+  type: TYPE_TB
+  zh: '| */proc* | 虚拟文件系统，跟踪系统进程。 |'
+- en: '| */root* | The root user’s home directory. |'
+  id: totrans-47
+  prefs: []
+  type: TYPE_TB
+  zh: '| */root* | 根用户的主目录。 |'
+- en: '| */run* | Variable and volatile runtime data. |'
+  id: totrans-48
+  prefs: []
+  type: TYPE_TB
+  zh: '| */run* | 变量和易失性运行时数据。 |'
+- en: '| */sbin* | System binary (executable) files. |'
+  id: totrans-49
+  prefs: []
+  type: TYPE_TB
+  zh: '| */sbin* | 系统二进制（可执行）文件。 |'
+- en: '| */srv* | Might contain data from system services. |'
+  id: totrans-50
+  prefs: []
+  type: TYPE_TB
+  zh: '| */srv* | 可能包含系统服务的数据。 |'
+- en: '| */sys* | Contains kernel information. |'
+  id: totrans-51
+  prefs: []
+  type: TYPE_TB
+  zh: '| */sys* | 包含内核信息。 |'
+- en: '| */tmp* | Directory for storing session information and temporary files. |'
+  id: totrans-52
+  prefs: []
+  type: TYPE_TB
+  zh: '| */tmp* | 存储会话信息和临时文件的目录。 |'
+- en: '| */usr* | Programs and libraries for users and user-related programs. |'
+  id: totrans-53
+  prefs: []
+  type: TYPE_TB
+  zh: '| */usr* | 用户和用户相关程序的程序和库。 |'
+- en: '| */var* | Variable files such as logs, spools, and queues. |'
+  id: totrans-54
+  prefs: []
+  type: TYPE_TB
+  zh: '| */var* | 变量文件，如日志、队列和队列文件。 |'
+- en: System files are protected from user modification. Only the root (administrative)
+    user can modify system configuration files and settings. Users generally have
+    write access only to their own home directories, the */tmp* directory, and shared
+    directories specifically created and modified by the administrator.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统文件受到用户修改的保护。只有根（管理员）用户才能修改系统配置文件和设置。用户通常只能对自己的主目录、*/tmp*目录以及管理员专门创建和修改的共享目录具有写访问权限。
+- en: In the next section, you learn how to interact with your new Linux system at
+    the command line.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一节中，您将学习如何在命令行中与您的新Linux系统进行交互。
+- en: Learning the CLI
+  id: totrans-57
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 学习命令行界面（CLI）
+- en: The *command-line interface,* or CLI, is how most system administrators interact
+    with their Linux systems because server systems don’t typically have a graphical
+    interface. In Microsoft Windows terminology, a CLI-only system, such as a Linux
+    server, would be equivalent to a Windows Server Core system where you only have
+    access to command-line utilities.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*命令行界面*，或 CLI，是大多数系统管理员与其 Linux 系统进行交互的方式，因为服务器系统通常没有图形界面。在 Microsoft Windows
+    术语中，仅支持 CLI 的系统，如 Linux 服务器，等效于只能访问命令行实用程序的 Windows Server Core 系统。'
+- en: As the name suggests, you interact with the Linux system using commands that
+    you enter with a keyboard or *standard input* (stdin). The source from stdin can
+    also be file redirection, programs, and other sources, but in the context of this
+    book, stdin refers to keyboard input unless otherwise noted. Many commands are
+    informational and display data about the system or system activities to the screen
+    or *standard output* (stdout). Sometimes you’ll receive an error from the system
+    known as standard error (stderr). You’ll see the full and abbreviated versions
+    of these terms used interchangeably throughout this text and in other Linux-related
+    documentation that you’ll find elsewhere.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如名称所示，你使用键盘或*标准输入*（stdin）输入的命令与 Linux 系统进行交互。来自 stdin 的源也可以是文件重定向、程序和其他来源，但在本书的上下文中，stdin
+    指键盘输入，除非另有说明。许多命令是信息性的，将系统或系统活动的数据显示到屏幕或*标准输出*（stdout）。有时你会从系统收到一个错误，称为标准错误（stderr）。在本文和其他与
+    Linux 相关的文档中，你会看到这些术语的完整和缩写版本交替使用。
+- en: You must learn a few commands to interact successfully with the filesystem.
+    By “learn,” I mean commit to memory rather than looking them up online. There
+    are only a few commands like this, and there are a few options that you should
+    also commit to memory so that your interaction with the system becomes natural
+    and efficient. Don’t worry about harming the system with any command I cover—I’ll
+    warn you when a command should be used carefully.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你必须学习一些命令才能成功地与文件系统交互。所谓“学习”，是指记住而不是在线查找。像这样的命令只有几个，还有一些选项你也应该记住，这样你与系统的交互就变得自然而高效。不要担心使用我介绍的任何命令会对系统造成损害——当我覆盖一个命令应谨慎使用时，我会提醒你。
+- en: There are a few things you need to know before jumping into issuing commands.
+    The first is that Linux doesn’t use file extensions. This means that the file
+    *filename.exe* has no more meaning to Linux than the file *Financial_Report.txt*
+    or *Résumé.doc*. They are all files and might not be executable or text files.
+    In Linux, you can name a file almost anything you want to (there are a few limitations),
+    but use whitespace in filenames with caution because doing so requires you to
+    use quotation marks around the filename.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在开始发出命令之前，你需要了解几件事情。首先是 Linux 不使用文件扩展名。这意味着文件 *filename.exe* 对于 Linux 来说与 *Financial_Report.txt*
+    或 *Résumé.doc* 没有更多的意义。它们都是文件，可能不可执行或文本文件。在 Linux 中，你几乎可以为文件命名任何你想要的（有一些限制），但在文件名中使用空格需要谨慎，因为这样做需要在文件名周围使用引号。
+- en: The second thing to know about Linux is that filenames are case-sensitive. In
+    other words, *filename.txt* and *filename.TXT* are two different files. I will
+    prove this later in the chapter. For now, take my word for it. The third thing
+    to know is that a file’s permission determines whether you can execute the file,
+    edit the file, or even look at the file’s contents. Fourth, every Linux location
+    is uniquely named by its path from the root (*/*) directory. For example, if you
+    mention the password file in Linux, it’s shown as */etc/passwd*. This is known
+    as the *absolute* path and is the standard convention for speaking about or referring
+    to files on the system. Fifth, Linux assumes you know what you want to do and
+    that you’ve spelled everything correctly when you issue a command, so be careful,
+    because some actions are irreversible.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 的第二个要知道的事情是文件名区分大小写。换句话说，*filename.txt* 和 *filename.TXT* 是两个不同的文件。这一点我会在本章后面证明。暂时请相信我的话。第三个要知道的是，文件的权限确定了你是否可以执行文件、编辑文件，甚至查看文件的内容。第四，Linux
+    中每个位置都通过其从根目录（*/*）开始的路径唯一命名。例如，如果在 Linux 中提到密码文件，显示为 */etc/passwd*。这被称为*绝对路径*，是关于系统上文件的说法或引用的标准约定。第五，Linux
+    假定你在发出命令时知道自己要做什么，并且拼写都是正确的，所以要小心，因为某些操作是不可逆转的。
+- en: Finally, Linux (like Unix, or more generally “*nix” systems) is not “chatty”
+    like the Windows operating systems are. Linux systems, for example, don’t prompt
+    you with an “Are you sure?” message when you remove (delete) files. Again, the
+    Linux system assumes you want to execute the command you issue if you correctly
+    spell all parts of the command. Spelling counts at the Linux command line.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，Linux（如Unix或更广义上的“*nix”系统）不像Windows操作系统那样“啰嗦”。例如，Linux系统在删除文件时不会提示“你确定吗？”的消息。再次强调，如果你正确拼写命令的所有部分，Linux系统会假定你要执行你发出的命令。在Linux命令行中，拼写很重要。
+- en: Navigating the Linux filesystem means exploring the various system directories,
+    learning to return to your home directory, and listing directory contents differently.
+    If you’re a Windows user and you’ve worked at the Command Prompt (cmd) or PowerShell
+    prompt (PS) on that platform, then the Linux command line will be familiar to
+    you.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 浏览Linux文件系统意味着探索各种系统目录，学会返回主目录，并以不同方式列出目录内容。如果你是Windows用户，并且在该平台上的命令提示符（cmd）或PowerShell提示符（PS）上工作过，那么Linux命令行对你来说将是熟悉的。
+- en: The short list of commands in the following sections will acquaint you with
+    the Linux filesystem, files, and the contents of your home directory.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面几节中的简短命令清单将使你熟悉Linux文件系统、文件以及你的主目录内容。
+- en: pwd
+  id: totrans-66
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: pwd
+- en: 'The `pwd` (print working directory) command displays where you are on the filesystem.
+    If you type the `pwd` command now, followed by the Enter key, the command responds
+    with `/home/*your_login_name*`. Always ensure that you press the Enter key after
+    each command so that you can receive a response:'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`pwd`（打印工作目录）命令显示你在文件系统中的位置。如果现在输入`pwd`命令，然后按Enter键，命令会显示`/home/*your_login_name*`。确保在每个命令后按Enter键，以便接收响应：'
+- en: '[PRE1]'
+  id: totrans-68
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: The `$` is your shell prompt that shows you’re logged into the system as a user.
+    You’ll use this command more later in the chapter.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`$`是你的shell提示符，显示你作为用户登录到系统中。稍后在本章中你会更多地使用这个命令。'
+- en: cd
+  id: totrans-70
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: cd
+- en: 'The `cd` (change directory, or current directory) command places you into a
+    new directory, returns you to your home directory, and moves you to a higher level
+    or a subdirectory. The `cd` command is analogous to the Windows `cd` command:'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cd`（更改目录，或当前目录）命令将你置于一个新目录中，返回到你的主目录，并移动到更高级别或子目录中。`cd`命令类似于Windows的`cd`命令：'
+- en: '[PRE2]'
+  id: totrans-72
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Simply entering `cd` returns you to your home directory regardless of where
+    you are on the filesystem, as demonstrated here:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只需输入`cd`，无论你在文件系统的哪个位置，都能返回到你的主目录，如下所示：
+- en: '[PRE3]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'When you `cd` to a directory, use its absolute path:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你`cd`到一个目录时，请使用它的绝对路径：
+- en: '[PRE4]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'You can `cd` to a subdirectory without the absolute path if you’re currently
+    in the parent directory:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你当前在父目录，可以不使用绝对路径`cd`到子目录：
+- en: '[PRE5]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: The `cd` command is one that you’ll use every time that you connect to a Linux
+    system.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cd`命令是你每次连接到Linux系统时都会使用的命令之一。'
+- en: ls
+  id: totrans-80
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: ls
+- en: 'The `ls` (list) command displays a list of files and directories within the
+    location you specify. If you don’t specify a location, `ls` displays the list
+    of files and directories in your current directory:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ls`（列出）命令显示你指定位置的文件和目录列表。如果你不指定位置，`ls`将显示当前目录中的文件和目录列表：'
+- en: '[PRE6]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'You have no visible files in your home directory yet because you haven’t created
+    any and none exist by default. However, you can list files from other directories
+    by specifying the absolute path to the directory list you wish to see. There are
+    too many files to list here in the /usr/bin directory, so I’ve truncated it to
+    these few:'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的主目录中还没有可见的文件，因为你尚未创建任何文件，而默认情况下也没有文件。不过，你可以通过指定目录列表的绝对路径来列出其他目录中的文件。在/usr/bin目录中有太多文件无法列出，因此我截取了其中的几个：
+- en: '[PRE7]'
+  id: totrans-84
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'There are files in your home directory, but they’re hidden because of the way
+    they’re named. Files that begin with a period (.) are hidden from a regular `ls`
+    command. To see these files, you must use a command option to allow you to see
+    all files:'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的主目录中有文件，但它们因命名方式而被隐藏。以点（.）开头的文件在普通`ls`命令中是隐藏的。要查看这些文件，必须使用命令选项以允许你查看所有文件：
+- en: '[PRE8]'
+  id: totrans-86
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Your listing might vary slightly from this, but understand that all directories
+    and files whose names begin with a period are hidden from standard file lists
+    using the `ls` command with no options. You can `cd` into hidden directories or
+    list files within them:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的清单可能与这个略有不同，但请理解，所有以点开头的目录和文件在使用`ls`命令而不带选项时都被隐藏。你可以`cd`到隐藏目录或列出其中的文件：
+- en: '[PRE9]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: The `ls` command is one you’ll use every time you log into your Linux system
+    and is certainly one that you want to commit to memory. I will use the `ls` command
+    throughout this book and introduce you to many more options for it along the way.
+    Now that you’ve learned the basics of filesystem navigation, it’s time to cover
+    rebooting and shutting down your system.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ls` 命令是您每次登录 Linux 系统时都会使用的命令，确实是您希望记住的命令之一。我将在本书中反复使用 `ls` 命令，并在途中向您介绍更多选项。现在您已经学会了基本的文件系统导航，是时候学习如何重新启动和关闭系统了。'
+- en: Starting, Rebooting, and Shutting Down a Linux System
+  id: totrans-90
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 启动、重新启动和关闭 Linux 系统
+- en: The most basic tasks facing any Linux sysadmin are starting, restarting, and
+    shutting down a system. If you have computer experience, you know that powering
+    off a system without issuing a shutdown command is bad. It’s bad because doing
+    so can, for example, corrupt open files, leave open files in an “open” state,
+    disrupt running services, and cause problems with database transaction logs, possibly
+    resulting in data loss.
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任何 Linux 系统管理员面临的最基本任务是启动、重新启动和关闭系统。如果您有计算机经验，您会知道未发出关闭命令而关闭系统是不好的。这样做是不好的，因为这可能会损坏打开的文件，使打开的文件保持“打开”状态，中断正在运行的服务，并导致数据库事务日志问题，可能导致数据丢失。
+- en: Proper knowledge of how to start, restart, and shut down a system is of great
+    value to sysadmins.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 熟练掌握如何启动、重新启动和关闭系统对系统管理员非常重要。
+- en: Starting a System
+  id: totrans-93
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 启动系统
+- en: For physical systems, you press the power button and release it to start a system.
+    This begins the power-on self-test (POST) and boot process. Watching the console
+    during boot is important because the system notifies you and logs any issues as
+    it starts up. Watch the screen for any errors or anomalies along the way. (The
+    worst message you can experience on boot is a “kernel panic,” which will be covered
+    later in the book.) Hopefully, all is well with your system, and the process ends
+    with a login prompt.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于物理系统，您按下电源按钮并释放它以启动系统。这将开始电源自检（POST）和引导过程。在引导过程中仔细观察控制台非常重要，因为系统在启动时会通知您并记录任何问题。请注意屏幕上的任何错误或异常情况。
+    （在引导过程中可能遇到的最严重消息是“内核恐慌”，这将在本书后面进行讨论。）希望您的系统一切正常，并且进程以登录提示符结束。
+- en: The startup process is quite short but can identify systemic problems such as
+    memory, disk, filesystem, and network issues. I’ll cover troubleshooting in a
+    later chapter, but be aware now that you should watch the boot process carefully,
+    noting any problems for later investigation.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动过程非常简短，但可以识别内存、磁盘、文件系统和网络问题等系统性问题。我将在后面的章节中介绍故障排除，但现在要注意的是，您应该仔细观察引导过程，并记录以后调查的任何问题。
+- en: Restarting a System
+  id: totrans-96
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 重新启动系统
+- en: Restarting or rebooting a system is a standard sysadmin practice. Although you
+    might read or hear the contrary, there’s nothing wrong with rebooting your system.
+    You should do so regularly for all of the reasons stated in the previous section.
+    Restarting a system clears memory, refreshes connections, and ensures the system
+    is healthy. A good reboot can cure certain nagging problems, such as an application
+    that drains your system’s memory, but only temporarily.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动或重启系统是标准的系统管理员实践。尽管您可能会读到或听到相反的意见，但重新启动系统并没有什么不好。出于前面章节中提到的所有原因，您应该定期这样做。重新启动系统会清除内存，刷新连接，并确保系统健康。良好的重新启动可以暂时解决某些令人困扰的问题，例如耗尽系统内存的应用程序。
+- en: Any issues resolved with a reboot should be investigated more thoroughly after
+    the system is up and stable. Restarting a system allows you to troubleshoot before
+    application problems, logging problems, or network problems place the system back
+    into a state when it requires another reboot.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任何通过重新启动解决的问题在系统稳定后应进行更彻底的调查。重新启动系统可以让您在应用程序问题、日志问题或网络问题再次使系统需要重新启动之前进行故障排除。
+- en: Shutting Down a System
+  id: totrans-99
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 关闭系统
+- en: Shutting down means issuing a command that gently and appropriately closes all
+    programs and eventually powers off the system. This gentle shutdown also warns
+    shell users that the system is going down so that everyone can save their work
+    and log off.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关闭意味着发出一个命令，适当地关闭所有程序，并最终关闭系统的电源。这种温和的关闭还会警告 shell 用户系统即将关闭，以便每个人都可以保存工作并退出登录。
+- en: System shutdown should be reserved for hardware maintenance, relocation, or
+    decommissioning. Some enterprise policies require that systems go through a full
+    shutdown once a year to identify hardware issues that might not manifest themselves
+    except through a complete system failure. Technicians and sysadmins usually take
+    this opportunity to perform hardware maintenance or hardware checks at the same
+    time.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统关机应保留用于硬件维护、迁移或停用。某些企业政策要求系统每年进行一次完全关机，以识别可能仅通过完全系统故障才能显现的硬件问题。技术人员和系统管理员通常利用这个机会同时进行硬件维护或检查。
+- en: Summary
+  id: totrans-102
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 摘要
+- en: This first chapter got you up and running with a live Linux system, covered
+    some Linux basics, explored a few essential commands, and instructed you on the
+    how and why of system startup, rebooting, and shutdown. In [Chapter 2](ch02.xhtml#working_with_permissions_and_privileged),
+    you’ll learn more about using the CLI and how to use commands to create, remove,
+    and modify files. You will also learn about Linux permissions, how to set and
+    interpret them, and how to set a global default permission for users.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章带您上手了一个实时的Linux系统，涵盖了一些Linux基础知识，探索了一些基本命令，并指导您如何启动、重启和关机系统的方法及原因。在[第二章](ch02.xhtml#working_with_permissions_and_privileged)，您将进一步了解如何使用CLI以及如何使用命令来创建、删除和修改文件。您还将学习Linux权限，如何设置和解释它们，以及如何为用户设置全局默认权限。

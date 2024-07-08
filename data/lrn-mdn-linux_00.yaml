@@ -1,0 +1,448 @@
+- en: Preface
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 序言
+- en: A warm welcome to *Learning Modern Linux*! I’m glad that we will walk this journey
+    together for a bit. This book is for you if you’ve already been using Linux and
+    are looking for a structured, hands-on approach to dive in deeper, or if you already
+    have experience and want to get some tips and tricks to improve your flow when
+    working with Linux—for example, in a professional setup, such as development or
+    operations.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*学习现代Linux* 热烈欢迎你！我很高兴我们将一同走过这段旅程。如果你已经在使用Linux，并希望深入了解结构化、实践性的方法，或者已经有经验，想要在使用Linux时获得一些技巧和窍门，例如在专业设置（如开发或运维）中，那么这本书适合你。'
+- en: We’ll focus on using Linux for your everyday needs, from development to office-related
+    tasks, rather than on the system administration side of things. Also, we’ll focus
+    on the command line, not visual UIs. So, while 2022 might be the year of Linux
+    on the desktop after all, we’ll use the terminal as the main way to interact with
+    Linux. This has the additional advantage that you can equally apply your knowledge
+    in many different setups, from a Raspberry Pi to the virtual machine of your cloud
+    provider of choice.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将专注于使用Linux来满足你日常需求，从开发到办公任务，而不是系统管理方面的事务。同时，我们将专注于命令行，而不是视觉用户界面。因此，尽管2022年可能终将成为Linux桌面年，我们将使用终端作为与Linux交互的主要方式。这样做的另一个优势是，你可以在多种不同的设置中同样应用你的知识，从树莓派到你选择的云提供商的虚拟机。
+- en: 'Before we start, I’d like to provide some context by sharing my own journey:
+    my first hands-on experience with an operating system was not with Linux. The
+    first operating system I used was AmigaOS (in the late 80s), and after that, in
+    technical high school, I mainly used Microsoft DOS and the then-new Microsoft
+    Windows, specifically around the event system and user interface–related development.
+    Then, in the mid- to late 1990s, during my studies at university, I mainly used
+    Unix-based Solaris and Silicon Graphics machines in the university labs. I really
+    only got into Linux in the mid-2000s in the context of big data and then when
+    I started working with containers, first in 2015 in the context of Apache Mesos
+    (working at Mesosphere), and then with Kubernetes (initially at Red Hat on the
+    OpenShift team and then at AWS on the container service team). That’s where I
+    realized that one needs to master Linux to be effective in this space. Linux is
+    different. Its background, worldwide community of users, and versatility and flexibility
+    make it unique.'
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们开始之前，我想通过分享我的个人经历为你提供一些背景：我的第一次操作系统实际体验并不是Linux。我使用的第一个操作系统是AmigaOS（在80年代末），之后在技术高中期间，我主要使用Microsoft
+    DOS和当时新出现的Microsoft Windows，具体涉及事件系统和用户界面相关的开发。然后，在20世纪90年代中期至晚期，在大学实验室中，我主要使用基于Unix的Solaris和Silicon
+    Graphics机器。我真正开始接触Linux是在2000年代中期，与大数据相关，然后在2015年开始使用容器，首先是在Apache Mesos的背景下（在Mesosphere工作），然后是在Kubernetes上（最初在Red
+    Hat的OpenShift团队，然后在AWS的容器服务团队）。那时我意识到，在这个领域有效工作需要精通Linux。Linux与众不同，其背景、全球用户社区以及多样性和灵活性使其独特。
+- en: Linux is an interesting, ever-growing ecosystem of open source individuals and
+    vendors. It runs on pretty much anything under the sun, from the $50 Raspberry
+    Pi to the virtual machines of your favorite cloud provider to a Mars vehicle.
+    After 30 years in the making, Linux will likely stick around for some time, so
+    now is a good time to get into Linux a bit deeper.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux是一个有趣的、不断增长的开源个体和供应商生态系统。它几乎可以在任何设备上运行，从价格仅为50美元的树莓派到你最喜爱的云提供商的虚拟机，甚至到火星车辆。经过30年的发展，Linux很可能会继续存在一段时间，所以现在是深入学习Linux的好时机。
+- en: Let’s first set some ground rules and expectations. In the preface, I’ll share
+    how you can get the most out of this book as well as some administrative things,
+    like where and how you can try out the topics we’ll work through together.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们首先设定一些基本规则和期望。在序言中，我将分享如何从本书中获得最大收益，以及一些行政事务，比如在哪里以及如何尝试我们将一同探讨的主题。
+- en: About You
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 你的经历
+- en: This book is for those who want or need to use Linux in a professional setup,
+    such as software developers, software architects, QA testing engineers, DevOps
+    and SRE roles, and similar roles. I’ll assume that if you’re a hobbyist encountering
+    Linux when pursuing an activity such as 3D printing or home improvement, you have
+    very little to no knowledge about operating systems in general or Linux/UNIX in
+    particular. You will get the most out of the book if you work through it from
+    beginning to end, as the chapters tend to build on one another; however, you can
+    also use it as a reference if you’re already familiar with Linux.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书适合那些需要或想要在专业环境中使用 Linux 的人士，如软件开发人员、软件架构师、QA 测试工程师、DevOps 和 SRE 角色以及类似角色。我假设如果您是一位业余爱好者，在进行诸如3D打印或家居改善等活动时遇到
+    Linux，您对操作系统一般或特别是 Linux/UNIX 的了解可能非常少或几乎没有。如果您从头到尾地阅读本书，您将会从中受益匪浅，因为各章节往往是相互构建的；但是，如果您已经熟悉
+    Linux，您也可以将其用作参考。
+- en: How to Use the Book
+  id: totrans-8
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 如何使用本书
+- en: The focus of this book is enabling you to use Linux, not administer it. There
+    are plenty of great books about Linux administration out there.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书的重点是让您使用 Linux，而不是管理它。关于 Linux 管理的优秀书籍有很多。
+- en: By the end of this book, you will understand what Linux is ([Chapter 1](ch01.xhtml#intro-to-linux))
+    and what its critical components are (Chapters [2](ch02.xhtml#kernel) and [3](ch03.xhtml#shells-scripting)).
+    You’ll be able to enumerate and use essential access control mechanisms ([Chapter 4](ch04.xhtml#access-control)).
+    You’ll also understand the role of filesystems ([Chapter 5](ch05.xhtml#files))
+    as a fundamental building block in Linux as well as know what apps ([Chapter 6](ch06.xhtml#running-apps))
+    are.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本书结束时，您将了解什么是 Linux（[第1章](ch01.xhtml#intro-to-linux)）及其关键组成部分（第[2](ch02.xhtml#kernel)和[3章](ch03.xhtml#shells-scripting)）。您将能够列举和使用基本的访问控制机制（[第4章](ch04.xhtml#access-control)）。您还将理解文件系统（[第5章](ch05.xhtml#files)）在
+    Linux 中作为基础构建块的角色以及了解应用程序（[第6章](ch06.xhtml#running-apps)）是什么。
+- en: Then, you’ll get some hands-on experience with the Linux networking stack and
+    tooling ([Chapter 7](ch07.xhtml#networking)). Further, you’ll learn about modern
+    operating system observability ([Chapter 8](ch08.xhtml#observability)) and how
+    to apply it to manage your workloads.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，您将通过实践操作了解 Linux 网络堆栈和工具（[第7章](ch07.xhtml#networking)）。此外，您还将了解现代操作系统的可观测性（[第8章](ch08.xhtml#observability)）以及如何应用它来管理您的工作负载。
+- en: You’ll understand how to run Linux applications in modern ways by using containers
+    as well as immutable distros such as Bottlerocket and also how to securely communicate
+    (download files, etc.) and share data using Secure Shell (SSH) and advanced tooling
+    like peer-to-peer and cloud sync mechanisms ([Chapter 9](ch09.xhtml#advanced)).
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将了解如何通过使用容器以及像 Bottlerocket 这样的不可变发行版的现代方法来运行 Linux 应用程序，以及如何通过安全外壳（SSH）和像点对点和云同步机制这样的高级工具安全通信（下载文件等）和共享数据（[第9章](ch09.xhtml#advanced)）。
+- en: 'Following are suggestions for ways you can try things out and follow along
+    (and I strongly recommend you do; learning Linux is like learning a language—you
+    want to practice a lot):'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下是您可以尝试的方式和跟随的建议（我强烈建议您这样做；学习 Linux 就像学习一门语言——您需要大量实践）：
+- en: Get a Linux desktop or laptop. For example, I have a very nice machine called
+    StarBook from [Star Labs](https://oreil.ly/1MbY2). Alternatively, you could use
+    a desktop or laptop that no longer runs a recent Windows version and install Linux
+    on it.
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 获取一台 Linux 桌面或笔记本电脑。例如，我有一台名为[Star Labs](https://oreil.ly/1MbY2)的 StarBook 很不错的机器。或者，您可以使用一台不再运行最新
+    Windows 版本的桌面电脑或笔记本电脑，并在其上安装 Linux。
+- en: If you want to experiment on a different (host) operating system—say, your MacBook
+    or iMac—you could use a virtual machine (VM). For example, on macOS you could
+    use the excellent [Linux-on-Mac](https://oreil.ly/bqVYG).
+  id: totrans-15
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果您想在不同的（主机）操作系统上尝试实验，比如您的 MacBook 或 iMac，您可以使用虚拟机（VM）。例如，在 macOS 上您可以使用优秀的[Linux-on-Mac](https://oreil.ly/bqVYG)。
+- en: Use your cloud provider of choice to spin up a Linux-based VM.
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用您选择的云提供商启动基于 Linux 的虚拟机。
+- en: If you’re into tinkering and want to try out a non-Intel processor architecture
+    such as ARM, you could buy a single-board computer such as the wonderful [Raspberry
+    Pi](https://www.raspberrypi.org).
+  id: totrans-17
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果您喜欢折腾并且想尝试 ARM 等非英特尔处理器架构，您可以购买像[树莓派](https://www.raspberrypi.org)这样的单板计算机。
+- en: 'In any case, you should have an environment at hand and practice a lot. Don’t
+    just read: try out commands and experiment. Try to “break” things, for example,
+    by providing nonsensical or deliberately strange inputs. Before you execute the
+    command, form a hypothesis about the outcome.'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论如何，您都应该准备好环境并进行大量实践。不要只是阅读：尝试执行命令并进行实验。例如，通过提供荒谬或故意奇怪的输入来“破坏”事物。在执行命令之前，先对结果形成假设。
+- en: 'Another tip: always ask *why*. When you see a command or a certain output,
+    try to figure out where it came from and what the underlying component responsible
+    for it is.'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个提示：始终问**为什么**。当你看到一个命令或特定输出时，尝试找出它的来源以及负责它的基础组件。
+- en: Conventions
+  id: totrans-20
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 约定
+- en: 'The following typographical conventions are used in this book:'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书使用以下排版约定：
+- en: '*Italic*'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*斜体*'
+- en: Indicates new terms, URLs, email addresses, filenames, and file extensions.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 指示新术语、网址、电子邮件地址、文件名和文件扩展名。
+- en: '`Constant width`'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`等宽字体`'
+- en: Used for program listings, as well as within paragraphs to refer to program
+    elements such as variable or function names, databases, data types, environment
+    variables, statements, and keywords.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于程序列表，以及在段落中引用程序元素，如变量或函数名、数据库、数据类型、环境变量、语句和关键字。
+- en: '*`Constant width italic`*'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*`等宽斜体`*'
+- en: Shows text that should be replaced with user-supplied values or by values determined
+    by context.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示应替换为用户提供的值或由上下文确定的值的文本。
+- en: Tip
+  id: totrans-28
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: This element signifies a tip or suggestion.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示提示或建议。
+- en: Note
+  id: totrans-30
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: This element signifies a general note.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示一般说明。
+- en: Warning
+  id: totrans-32
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: This element indicates a warning or caution.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示警告或注意。
+- en: Using Code Examples
+  id: totrans-34
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用代码示例
+- en: Supplemental material (code examples, exercises, etc.) is available for download
+    at [*https://oreil.ly/learning-modern-linux-code*](https://oreil.ly/learning-modern-linux-code).
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 补充材料（代码示例、练习等）可在[*https://oreil.ly/learning-modern-linux-code*](https://oreil.ly/learning-modern-linux-code)下载。
+- en: If you have a technical question or a problem using the code examples, please
+    send an email to [*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com).
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您有技术问题或使用代码示例时遇到问题，请发送电子邮件至[*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com)。
+- en: This book is here to help you get your job done. In general, if example code
+    is offered with this book, you may use it in your programs and documentation.
+    You do not need to contact us for permission unless you’re reproducing a significant
+    portion of the code. For example, writing a program that uses several chunks of
+    code from this book does not require permission. Selling or distributing examples
+    from O’Reilly books does require permission. Answering a question by citing this
+    book and quoting example code does not require permission. Incorporating a significant
+    amount of example code from this book into your product’s documentation does require
+    permission.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书旨在帮助您完成工作。一般来说，如果本书提供示例代码，您可以在您的程序和文档中使用它。除非您复制了代码的大部分内容，否则无需联系我们请求权限。例如，编写一个使用本书多个代码块的程序不需要权限。出售或分发O’Reilly书籍中的示例需要权限。引用本书并引用示例代码回答问题不需要权限。将本书中大量示例代码合并到产品文档中需要权限。
+- en: 'We appreciate, but generally do not require, attribution. An attribution usually
+    includes the title, author, publisher, and ISBN. For example: “*Learning Modern
+    Linux* by Michael Hausenblas (O’Reilly). Copyright 2022 Michael Hausenblas, 978-1-098-10894-6.”'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们感谢，但通常不要求归属。归属通常包括标题、作者、出版社和ISBN。例如：“*学习现代Linux*，作者Michael Hausenblas（O’Reilly）。版权所有2022
+    Michael Hausenblas，978-1-098-10894-6。”
+- en: If you feel your use of code examples falls outside fair use or the permission
+    given above, feel free to contact us at [*permissions@oreilly.com*](mailto:permissions@oreilly.com).
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您认为您对代码示例的使用超出了合理使用或上述授权，请随时通过[*permissions@oreilly.com*](mailto:permissions@oreilly.com)联系我们。
+- en: O’Reilly Online Learning
+  id: totrans-40
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: O’Reilly在线学习
+- en: Note
+  id: totrans-41
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: For more than 40 years, [*O’Reilly Media*](http://oreilly.com) has provided
+    technology and business training, knowledge, and insight to help companies succeed.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 40多年来，[*O’Reilly Media*](http://oreilly.com)提供技术和业务培训、知识和洞察，帮助公司取得成功。
+- en: Our unique network of experts and innovators share their knowledge and expertise
+    through books, articles, and our online learning platform. O’Reilly’s online learning
+    platform gives you on-demand access to live training courses, in-depth learning
+    paths, interactive coding environments, and a vast collection of text and video
+    from O’Reilly and 200+ other publishers. For more information, visit [*http://oreilly.com*](http://oreilly.com).
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们独特的专家和创新者网络通过书籍、文章和我们的在线学习平台分享他们的知识和专长。O'Reilly 的在线学习平台提供按需访问的实时培训课程、深入的学习路径、交互式编程环境，以及来自O'Reilly和其他200多家出版商的大量文本和视频。更多信息请访问[*http://oreilly.com*](http://oreilly.com)。
+- en: How to Contact Us
+  id: totrans-44
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 如何联系我们
+- en: 'Please address comments and questions concerning this book to the publisher:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请将有关此书的评论和问题发送至出版商：
+- en: O’Reilly Media, Inc.
+  id: totrans-46
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: O'Reilly Media, Inc.
+- en: 1005 Gravenstein Highway North
+  id: totrans-47
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1005 Gravenstein Highway North
+- en: Sebastopol, CA 95472
+  id: totrans-48
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Sebastopol, CA 95472
+- en: 800-998-9938 (in the United States or Canada)
+  id: totrans-49
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 800-998-9938（美国或加拿大）
+- en: 707-829-0515 (international or local)
+  id: totrans-50
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 707-829-0515（国际或本地）
+- en: 707-829-0104 (fax)
+  id: totrans-51
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 707-829-0104（传真）
+- en: We have a web page for this book, where we list errata, examples, and any additional
+    information. You can access this page at [*https://oreil.ly/learning-modern-linux*](https://oreil.ly/learning-modern-linux).
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们为这本书设立了一个网页，列出勘误、示例和任何额外信息。您可以访问[*https://oreil.ly/learning-modern-linux*](https://oreil.ly/learning-modern-linux)。
+- en: Email [*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com) to comment
+    or ask technical questions about this book.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 发送电子邮件至[*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com)以就此书发表评论或提出技术问题。
+- en: For news and information about our books and courses, visit [*http://oreilly.com*](http://oreilly.com).
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有关我们的书籍和课程的新闻和信息，请访问[*http://oreilly.com*](http://oreilly.com)。
+- en: 'Find us on LinkedIn: [*https://linkedin.com/company/oreilly-media*](https://linkedin.com/company/oreilly-media)'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在LinkedIn上找到我们：[*https://linkedin.com/company/oreilly-media*](https://linkedin.com/company/oreilly-media)
+- en: 'Follow us on Twitter: [*http://twitter.com/oreillymedia*](http://twitter.com/oreillymedia)'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Twitter上关注我们：[*http://twitter.com/oreillymedia*](http://twitter.com/oreillymedia)
+- en: 'Watch us on YouTube: [*http://youtube.com/oreillymedia*](http://youtube.com/oreillymedia)'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在YouTube上观看我们：[*http://youtube.com/oreillymedia*](http://youtube.com/oreillymedia)
+- en: Acknowledgments
+  id: totrans-58
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 致谢
+- en: 'First off, I’d like to thank the fabulous reviewers of the book: Chris Negus,
+    John Bonesio, and Pawel Krupa. Without their feedback, this book wouldn’t be half
+    as good or useful.'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我要感谢这本书的出色审阅人员：克里斯·尼古斯、约翰·博内西奥和帕维尔·克鲁帕。没有他们的反馈，这本书将不会那么出色和有用。
+- en: I want to thank my parents, who enabled my education and laid the foundations
+    for who I am and what I do today. Big kudos to my big sister, Monika, who was
+    my inspiration to get into tech in the first place.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我要感谢我的父母，他们支持我的教育，并为我今天的成就打下了基础。非常感谢我的姐姐莫妮卡，她是我进入科技领域的灵感来源。
+- en: 'I would like to express my deepest gratitude to my very awesome and supportive
+    family: my kids, Saphira, Ranya, and Iannis; my wicked smart and fun wife, Anneliese;
+    our bestest of all dogs, Snoopy; and our newest family member, Charlie the tomcat.'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我要向我那非常棒且支持我的家人表达最深的感激之情：我的孩子们，萨菲拉、兰娅和伊安尼斯；我聪明又有趣的妻子安妮莉丝；我们最好的狗狗史诺比；以及我们最新的家庭成员查理，一只公猫。
+- en: In the context of my Unix and Linux journey, there are way too many people who
+    influenced my thinking and from whom I learned a lot. I had the pleasure and privilege
+    of working with or interacting with many of them, including but not limited to
+    Jérôme Petazzoni, Jessie Frazelle, Brendan Gregg, Justin Garrison, Michael Kerrisk,
+    and Douglas McIlroy.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我Unix和Linux的旅程中，有太多人影响了我的思维，并从他们那里学到了很多。我有幸与许多人共事或互动，其中包括但不限于杰罗姆·佩塔佐尼、杰西·弗雷泽尔、布伦丹·格雷格、贾斯汀·加里森、迈克尔·克里斯克和道格拉斯·麦克尔罗伊。
+- en: Last, but most certainly not least, I’d like to thank the O’Reilly team, especially
+    my development editor, Jeff Bleiel, for shepherding me through the process of
+    writing this book.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后但同样重要的是，我要感谢O'Reilly团队，特别是我的开发编辑杰夫·布莱尔，他在书写过程中给予了我极大的帮助。

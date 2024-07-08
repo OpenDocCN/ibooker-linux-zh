@@ -1,0 +1,1935 @@
+- en: Chapter 3\. Starting, Stopping, Restarting, and Putting Linux into Sleep Modes
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第3章。启动、停止、重启和将Linux置于睡眠模式中
+- en: In this chapter you will learn several ways to stop, start, and restart a Linux
+    system, and how to manage sleep modes. You will learn both the legacy commands
+    and the new systemd commands.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您将学习几种停止、启动和重启Linux系统的方法，以及如何管理睡眠模式。您将学习传统命令和新的systemd命令。
+- en: You will also learn how to set up automated startups and shutdowns. An automated
+    shutdown is nice to remind you to stop working, and you don’t have to remember
+    to shut off your computer for the night. You can set up automated wake-ups and
+    shutdowns on a remote machine, so that you can access it during work hours without
+    leaving it running all the time. If your users are watt wasters who don’t shut
+    off their computers, you can configure them to shut down during off hours.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还将学习如何设置自动启动和关机。自动关机很好地提醒您停止工作，您不必记得晚上关闭计算机。您可以在远程计算机上设置自动唤醒和关机，这样您可以在工作时间内访问它，而不必一直保持运行状态。如果您的用户浪费电力，不关闭计算机，您可以配置它们在非工作时间关机。
+- en: The “three-key salute,” Ctrl-Alt-Delete, is useful when you need to interrupt
+    a startup and reboot, or reboot when a process or application is misbehaving.
+    In graphical desktops you can remap the keys to a more convenient key combination.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '"三键敬礼"，Ctrl-Alt-Delete，在需要中断启动和重启或进程或应用程序行为不端时非常有用。在图形桌面中，您可以将这些键重新映射为更方便的键组合。'
+- en: 'There are a number of legacy shutdown commands that have accumulated over the
+    decades, with a lot of overlapping functionality: *shutdown*, *halt*, *poweroff*,
+    and *reboot*. The *shutdown* command provides the useful options of timed shutdowns,
+    with warnings to all logged-in users. These commands are useful in scripts, in
+    SSH sessions, and anytime you are working from the command line.'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 几十年来积累了许多传统关机命令，具有大量重叠功能：*shutdown*、*halt*、*poweroff*和*reboot*。*shutdown*命令提供了有用的选项，可以定时关闭，并向所有登录用户发出警告。这些命令在脚本、SSH会话中非常有用，以及任何时候您从命令行工作时。
+- en: Root Privileges Not Always Required
+  id: totrans-5
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 不一定需要根权限
+- en: In olden times, root privileges were needed to run the shutdown commands. This
+    is changing, and on many modern Linux distributions, root privileges are not needed
+    for these commands. The examples in this chapter are for normal, unprivileged
+    users. If your particular Linux requires root permissions, it will tell you.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在旧时代，运行关机命令需要根权限。这种情况正在改变，在许多现代Linux发行版中，这些命令不需要根权限。本章的示例适用于普通的非特权用户。如果您的Linux发行版需要根权限，它会告诉您。
+- en: These permissions are controlled by Polkit (formerly PolicyKit) on modern Linux
+    distributions. See *man 8 polkit* to learn more.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些权限由现代Linux发行版上的Polkit（以前是PolicyKit）控制。查看*man 8 polkit*以了解更多信息。
+- en: 'But that’s not all, because in Linux distributions with systemd ([Chapter 4](ch04.xhtml#cha-systemd)),
+    the classic old commands are not installed on the system. Intead, their names
+    are symlinked to the *systemctl* command. You can see this with the *stat* command,
+    like this example for *shutdown*:'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但这还不是全部，因为在带有systemd的Linux发行版中（[第4章](ch04.xhtml#cha-systemd)），经典的旧命令没有安装在系统上。相反，它们的名称被符号链接到*systemctl*命令。您可以使用*stat*命令来查看，就像这个*shutdown*的示例一样：
+- en: '[PRE0]'
+  id: totrans-9
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: The `File:` line displays a symbolic link to */bin/systemctl*. All of the legacy
+    command names, */sbin/shutdown*, */sbin/halt*, */sbin/poweroff*, and */sbin/reboot*,
+    are symlinked to */bin/systemctl*. The symlinks for the legacy command names are
+    provided for backward compatibility. On Linux systems without systemd these symlinks
+    do not exist, and these systems use the legacy executables.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`File:`行显示了一个指向*/bin/systemctl*的符号链接。所有传统命令名称，*/sbin/shutdown*、*/sbin/halt*、*/sbin/poweroff*和*/sbin/reboot*，都被符号链接到*/bin/systemctl*。这些传统命令名称的符号链接是为了向后兼容而提供的。在没有systemd的Linux系统上，这些符号链接不存在，这些系统使用传统的可执行文件。'
+- en: On some Linux distros these symlinks are in */usr/sbin* rather than */sbin*.
+    When you use the legacy command names, they behave the same way on systems with
+    systemd and on systems without systemd.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在一些Linux发行版中，这些符号链接位于*/usr/sbin*而不是*/sbin*。当您使用传统的命令名称时，在有systemd和没有systemd的系统上它们的行为是相同的。
+- en: The power buttons on your graphical desktop are configurable; you should be
+    able to customize which buttons are visible and their location.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的图形桌面上的电源按钮是可配置的；您应该能够自定义可见的按钮以及它们的位置。
+- en: 3.1 Shutting Down with systemctl
+  id: totrans-13
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.1 使用systemctl关机
+- en: Problem
+  id: totrans-14
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to use the *systemctl* commands to shut down and reboot your system.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要使用*systemctl*命令来关机和重启您的系统。
+- en: Solution
+  id: totrans-16
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Halt the system and power off the machine:'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关闭系统并关闭电源：
+- en: '[PRE1]'
+  id: totrans-18
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Another way to halt the system and power off the machine:'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种关闭系统并断电的方法：
+- en: '[PRE2]'
+  id: totrans-20
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Reboot:'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动：
+- en: '[PRE3]'
+  id: totrans-22
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Halt the system without powering off the machine:'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关闭系统但不断电：
+- en: '[PRE4]'
+  id: totrans-24
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Discussion
+  id: totrans-25
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'The *systemctl* shutdown commands do not have the many options that the legacy
+    commands do, which does not matter all that much because there are a lot of redundant
+    options in the legacy commands. There is one significant difference: *systemctl
+    shutdown* lacks the timed shutdown options supported by the *shutdown* command
+    (see [Recipe 3.2](#rec-shutdown)).'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*systemctl* 关机命令没有传统命令中的许多选项，这并不太重要，因为传统命令中有很多冗余选项。有一个显著的区别：*systemctl shutdown*
+    不支持 *shutdown* 命令支持的定时关机选项（参见 [Recipe 3.2](#rec-shutdown)）。'
+- en: See Also
+  id: totrans-27
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 systemd-halt.service*'
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 systemd-halt.service*'
+- en: 3.2 Shutting Down, Timed Shutdowns, and Rebooting with the shutdown Command
+  id: totrans-29
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.2 使用 shutdown 命令进行关机、定时关机和重新启动
+- en: Problem
+  id: totrans-30
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to use timed shutdowns, for example, 10 minutes from now or at a specific
+    time, and warn all logged-in users. Or you want to just shut down now with no
+    frills.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要定时关机，例如在10分钟后或在特定时间，同时警告所有登录用户。或者你只想立即关闭而不需要任何修饰。
+- en: Solution
+  id: totrans-32
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The *shutdown* command works the same way, whether it is symlinked to *systemctl*
+    or the legacy *shutdown* executable.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*shutdown* 命令无论是链接到 *systemctl* 还是传统的 *shutdown* 可执行文件，工作方式都是相同的。'
+- en: The following examples show how to shut down immediately, shut down a certain
+    number of minutes from now, cancel a shut down, shutdown at a specific time, halt,
+    and reboot.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的例子展示了如何立即关闭、在一定分钟后关闭、取消关闭、在特定时间关闭、halt 和 reboot。
+- en: 'Shut down immediately, with no notification to other logged-in users:'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 立即关闭系统，不通知其他登录用户：
+- en: '[PRE5]'
+  id: totrans-36
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Shut down in 10 minutes with notifications:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 10分钟后关机并通知：
+- en: '[PRE6]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'Other users on the system may see this message, depending on which Linux they
+    are using, and if they have a terminal open:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其他系统用户可能会看到此消息，具体取决于他们使用的 Linux 版本以及他们是否打开了终端：
+- en: '[PRE7]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'Cancel the shutdown:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 取消关机：
+- en: '[PRE8]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Logged-in users may see this message:'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 登录用户可能会看到此消息：
+- en: '[PRE9]'
+  id: totrans-44
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Create your own message:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建你自己的消息：
+- en: '[PRE10]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'Rather than specifying minutes to shutdown, you may set a shutdown time in
+    24-hour hh:mm format. The following example shuts down the system at 10:15 P.M.:'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 而不是指定关机的分钟数，你可以按24小时制 hh:mm 格式设置关机时间。以下示例在晚上10:15关机：
+- en: '[PRE11]'
+  id: totrans-48
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Reboot:'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动：
+- en: '[PRE12]'
+  id: totrans-50
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'Halt the system without powering off:'
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关闭系统但不断电：
+- en: '[PRE13]'
+  id: totrans-52
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Running *shutdown* with no options is equivalent to *shutdown -h +1*.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用无选项运行 *shutdown* 相当于 *shutdown -h +1*。
+- en: Discussion
+  id: totrans-54
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*shutdown* sends messages only when you use the *-h* option, except for the
+    *-h now* option, and when you use the *-k* option. These are called *wall* messages,
+    which is short for “write to all logged-in users.” Linux distributions vary in
+    their support of this feature, so other users on your particular Linux may not
+    see these messages.'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*shutdown* 仅在使用 *-h* 选项时发送消息，除非使用 *-h now* 选项或 *-k* 选项。这些称为 *wall* 消息，即“写给所有登录用户”。Linux
+    发行版在支持此功能方面有所不同，因此你的特定 Linux 上的其他用户可能看不到这些消息。'
+- en: '*--help* displays a summary of options.'
+  id: totrans-56
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*--help* 显示选项摘要。'
+- en: '*-H*, *--halt* performs a clean shutdown but does not power off the machine;
+    you must press and hold the power button to power off your machine.'
+  id: totrans-57
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-H*、*--halt* 执行干净的关机但不断电；你必须按住电源按钮来断电。'
+- en: '*-P*, *--poweroff* performs a clean shutdown and powers off the machine.'
+  id: totrans-58
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-P*、*--poweroff* 执行干净的关机并断电。'
+- en: '*-r*, *--reboot* performs a clean shutdown and reboots the machine.'
+  id: totrans-59
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-r*、*-reboot* 执行干净的关机并重新启动机器。'
+- en: '*-k* sends a wall message without shutting down the machine.'
+  id: totrans-60
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-k* 发送一条消息给所有登录用户而不关机。'
+- en: '*--no-wall* disables wall messages.'
+  id: totrans-61
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*--no-wall* 禁用 wall 消息。'
+- en: See Also
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 shutdown*'
+  id: totrans-63
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 shutdown*'
+- en: '*man 1 wall*'
+  id: totrans-64
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 wall*'
+- en: '*man 8 systemd-halt.service*'
+  id: totrans-65
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 systemd-halt.service*'
+- en: 3.3 Shutting Down and Rebooting with halt, reboot, and poweroff
+  id: totrans-66
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.3 使用 halt、reboot 和 poweroff 进行关机和重新启动
+- en: Problem
+  id: totrans-67
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You understand the *shutdown* command, and now you want to know what *halt*,
+    *reboot*, and *poweroff* are for, and how to use them.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你了解 *shutdown* 命令，现在想知道 *halt*、*reboot* 和 *poweroff* 的用途以及如何使用它们。
+- en: Solution
+  id: totrans-69
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: These are all pretty much the same.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些基本上都是相同的。
+- en: '*halt* performs a clean shutdown, stopping all services and processes and unmounting
+    filesystems, but it does not power off the machine. After the *halt* command is
+    finished, you must press and hold the machine’s power button to complete the shutdown.'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*halt* 执行干净的关机，停止所有服务和进程，并卸载文件系统，但不关闭机器。在 *halt* 命令完成后，您必须按住机器的电源按钮来完成关机。'
+- en: '*reboot* performs a clean shutdown and restarts the system.'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*reboot* 执行干净的关机并重新启动系统。'
+- en: '*poweroff* performs a clean shutdown and powers off the machine:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*poweroff* 执行干净的关机并关闭机器：'
+- en: '[PRE14]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'The *halt* and *poweroff* commands can reboot the system:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*halt* 和 *poweroff* 命令可以重新启动系统：'
+- en: '[PRE15]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Discussion
+  id: totrans-77
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you’re thinking this all looks a little weird and redundant, you’re right.
+    As software ages, cruft accumulates and never goes away. Linux has been around
+    since 1991, and started out as a free clone of Unix, which was born in 1969. That
+    is a lot of years for the various contributors to tweak code and add their own
+    favorite features.
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你觉得这看起来有点奇怪和冗余，你是对的。随着软件的老化，垃圾会积累并永远不会消失。Linux 自 1991 年问世以来，起初是 Unix 的免费克隆，Unix
+    则诞生于 1969 年。这些年来，各种贡献者修改代码并添加他们喜爱的功能。
+- en: '*halt* and *poweroff* are the same commands and support the same options:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*halt* 和 *poweroff* 是相同的命令，并支持相同的选项：'
+- en: '*--help* displays a summary of options.'
+  id: totrans-80
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*--help* 显示选项摘要。'
+- en: '*--halt* performs a clean shutdown but does not power off the machine (yes,
+    *halt* and *halt --halt* do the same thing).'
+  id: totrans-81
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*--halt* 执行干净的关机但不关闭机器（是的，*halt* 和 *halt --halt* 作用相同）。'
+- en: '*-p*, *--poweroff* performs a clean shutdown and powers off the machine (yes,
+    *poweroff* and *poweroff --poweroff* do the same thing) .'
+  id: totrans-82
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-p*，*--poweroff* 执行干净的关机并关闭机器（是的，*poweroff* 和 *poweroff --poweroff* 作用相同）。'
+- en: '*--reboot* performs a clean shutdown and restarts the machine.'
+  id: totrans-83
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*--reboot* 执行干净的关机并重新启动机器。'
+- en: '*-f*, *--force* forces an immediate halt or poweroff. Shutdown of all running
+    services is skipped, all processes are killed, and all filesystems are unmounted
+    or mounted read-only. Run it twice to force an unclean shutdown; for example,
+    *poweroff -f -f*, which you should use only when normal shutdown commands fail.'
+  id: totrans-84
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-f*，*--force* 强制立即停止或关机。跳过所有运行中的服务关闭，杀死所有进程，并卸载或以只读方式挂载所有文件系统。当正常关机命令失败时，两次运行它来强制非正常关机；例如，*poweroff
+    -f -f*。'
+- en: '*-w*, *--wtmp-only* does not perform a shutdown, but only writes an entry in
+    */var/log/wtmp*.'
+  id: totrans-85
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-w*，*--wtmp-only* 不执行关机，只在 */var/log/wtmp* 中写入条目。'
+- en: '*-d*, *--no-wtmp* prevents writing a *wtmp* entry.'
+  id: totrans-86
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-d*，*--no-wtmp* 阻止写入 *wtmp* 条目。'
+- en: See Also
+  id: totrans-87
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 8 halt*'
+  id: totrans-88
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 halt*'
+- en: '*man 8 poweroff*'
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 poweroff*'
+- en: '*man 8 systemd-halt.service*'
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 systemd-halt.service*'
+- en: 3.4 Sending Your System into Sleep Modes with systemctl
+  id: totrans-91
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.4 使用 systemctl 将系统置于睡眠模式
+- en: Problem
+  id: totrans-92
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your Linux system has systemd, and you want to use *systemctl* to manage system
+    sleep modes.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的 Linux 系统使用 systemd，您希望使用 *systemctl* 管理系统睡眠模式。
+- en: Solution
+  id: totrans-94
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*systemctl* provides these power saving modes: *suspend*, *hibernate*, *hybrid-sleep*,
+    and *suspend-then-hibernate*.'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*systemctl* 提供这些节能模式：*suspend*、*hibernate*、*hybrid-sleep* 和 *suspend-then-hibernate*。'
+- en: 'Put your system into suspend mode:'
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将您的系统置于挂起模式：
+- en: '[PRE16]'
+  id: totrans-97
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: This stores your current session in RAM and puts all hardware into a suspended
+    state. Wake your system up by pressing any key, moving the mouse, or opening your
+    laptop lid.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这会将当前会话存储在内存中，并将所有硬件置于挂起状态。通过按任意键、移动鼠标或打开笔记本盖子来唤醒系统。
+- en: 'Put your system into hibernate mode:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将您的系统置于休眠模式：
+- en: '[PRE17]'
+  id: totrans-100
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: This stores your session on disk and powers off the machine. Wake it up by pressing
+    the power button, and when it resumes, which can take a minute or two, your session
+    will be restored where you left off.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这会将您的会话存储在磁盘上并关闭机器。按下电源按钮唤醒系统，它可能需要一两分钟来恢复，恢复时会回到您离开的位置。
+- en: 'Put your system into hybrid-sleep mode:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将您的系统置于混合休眠模式：
+- en: '[PRE18]'
+  id: totrans-103
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: This suspends your system to both memory and disk, and shuts off all devices
+    except RAM. If your system RAM loses power, the system resumes from disk. Wake
+    it up by pressing the power button.
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这会将您的系统挂起到内存和磁盘，并关闭除 RAM 外的所有设备。如果系统 RAM 失去电源，系统将从磁盘恢复。按下电源按钮唤醒系统。
+- en: 'Put your system into suspend-then-hibernate mode:'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将您的系统置于挂起后休眠模式：
+- en: '[PRE19]'
+  id: totrans-106
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: '*suspend-then-hibernate* first goes into suspend mode, then enters hibernation
+    after the period of time specified by the HibernateDelaySec= setting in */etc/systemd/sleep.conf*.
+    Wake it up by pressing the power button.'
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*suspend-then-hibernate* 首先进入挂起模式，然后根据 */etc/systemd/sleep.conf* 中的 HibernateDelaySec=
+    设置的时间间隔进入休眠模式。按下电源按钮唤醒系统。'
+- en: Discussion
+  id: totrans-108
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: See the Discussion in [Recipe 3.9](#rec-rtc-wakeups) for details on the different
+    sleep states.
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 详细了解不同睡眠状态，请参见 [Recipe 3.9](#rec-rtc-wakeups) 中的讨论。
+- en: Your graphical desktop should have buttons for entering power saving modes and
+    a graphical configuration tool for controlling events such as screen blanking,
+    screen locking, power button, mouse, and laptop lid actions such as entering a
+    sleep state or powering off.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 桌面环境应该有按钮用于进入省电模式，并有一个图形化配置工具，用于控制诸如屏幕空白、屏幕锁定、电源按钮、鼠标以及笔记本盖盖合等事件。
+- en: Power management tends to work best on laptops and may not behave as expected
+    on your Linux distribution. Power management is affected by your UEFI, CPU capabilities,
+    udev, Advanced Configuration and Power Interface (ACPI), kernel compilation options,
+    and possibly other devices and programs; so much depends on how your particular
+    Linux has implemented power management. Check your Linux distribution documentation.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 电源管理在笔记本电脑上效果最佳，可能不符合您的 Linux 发行版的预期行为。电源管理受到您的 UEFI、CPU 功能、udev、高级配置与电源接口（ACPI）、内核编译选项以及可能的其他设备和程序影响；这很大程度上取决于您的特定
+    Linux 如何实现电源管理。请查阅您的 Linux 发行版文档。
+- en: See Also
+  id: totrans-112
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 systemctl*'
+  id: totrans-113
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 systemctl*'
+- en: '*man 8 systemd-halt.service*'
+  id: totrans-114
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 systemd-halt.service*'
+- en: 3.5 Rebooting Out of Trouble with Ctrl-Alt-Delete
+  id: totrans-115
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.5 通过 Ctrl-Alt-Delete 重新启动解决问题
+- en: Problem
+  id: totrans-116
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want a reliable method of rebooting that always works, even when you are
+    having problems such as crashes and runaway processes.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望一种可靠的重新启动方法，即使在遇到崩溃和运行失控进程等问题时也能正常工作。
+- en: Solution
+  id: totrans-118
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The good old “three-key salute,” Ctrl-Alt-Delete, was made for this. Press and
+    hold these three keys in sequence, and they will override most problems and reboot
+    your system. Ctrl-Alt-Delete is disabled in some Linux distributions, and you
+    can change this.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 古老的“三键敬礼”，Ctrl-Alt-Delete，就是为此而生的。按顺序按住这三个键，它们将覆盖大多数问题并重新启动系统。在某些 Linux 发行版中，Ctrl-Alt-Delete
+    被禁用，您可以进行更改。
+- en: Ctrl-Alt-Delete is controlled by systemd in the Linux console. See [Recipe 3.6](#rec-systemd-ctraltdel)
+    to learn about managing Ctrl-Alt-Delete in systemd.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Linux 控制台中，Ctrl-Alt-Delete 由 systemd 控制。请参见 [Recipe 3.6](#rec-systemd-ctraltdel)
+    了解如何管理 systemd 中的 Ctrl-Alt-Delete。
+- en: For systems without systemd, see the Discussion in this recipe.
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于没有 systemd 的系统，请参阅本章讨论。
+- en: Graphical environments have their own configuration tools for Ctrl-Alt-Delete,
+    independent of systemd. For example, there is a keyboard configuration module
+    in the Xfce4 Settings Manager ([Figure 3-1](#fig-keyboard-shortcuts)); in GNOME,
+    use the Keyboard Settings module in the GNOME Settings utility.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 图形环境有其独立的 Ctrl-Alt-Delete 配置工具，与 systemd 无关。例如，在 Xfce4 设置管理器中有一个键盘配置模块（[Figure 3-1](#fig-keyboard-shortcuts)）；在
+    GNOME 中，请使用 GNOME 设置工具中的键盘设置模块。
+- en: '![Configuring Ctrl-Alt-Deletein Xubuntu](Images/lcb2_0301.png)'
+  id: totrans-123
+  prefs: []
+  type: TYPE_IMG
+  zh: '![在 Xubuntu 中配置 Ctrl-Alt-Delete](Images/lcb2_0301.png)'
+- en: Figure 3-1\. Settings → Keyboard → Applications, configuring keyboard shortcuts
+    in Xubuntu
+  id: totrans-124
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 3-1\. 设置 → 键盘 → 应用程序，在 Xubuntu 中配置键盘快捷键
+- en: If you prefer a different key combination, use any keys you want. You could
+    even use a single key, though that risks rebooting with an accidental key press.
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您喜欢其他组合键，请使用您喜欢的任何键。您甚至可以使用单个键，尽管这可能会因意外按键而重新启动。
+- en: Discussion
+  id: totrans-126
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'On Linux systems that do not use systemd, Ctrl-Alt-Delete is controlled by
+    the */etc/inittab* file. This example, from MX Linux, shows a typical configuration:'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在不使用 systemd 的 Linux 系统上，Ctrl-Alt-Delete 受 */etc/inittab* 文件控制。以下是来自 MX Linux
+    的典型配置示例：
+- en: '[PRE20]'
+  id: totrans-128
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: '*12345* makes it active in runlevels 1, 2, 3, 4, and 5\. *-t1* means wait one
+    second, *-a* calls */etc/shutdown.allow*, and *-r* is reboot. Configure it to
+    power off the system with the *-h* option, just like running *shutdown* from the
+    command line (see [Recipe 3.2](#rec-shutdown)). To disable Ctrl-Alt-Delete, comment
+    out the line with the *shutdown* command.'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*12345* 使其在运行级别 1、2、3、4 和 5 中生效。*-t1* 表示等待一秒，*-a* 调用 */etc/shutdown.allow*，*-r*
+    是重新启动。使用 *-h* 选项配置它以关闭系统，就像从命令行运行 *shutdown* 一样（参见 [Recipe 3.2](#rec-shutdown)）。要禁用
+    Ctrl-Alt-Delete，请注释掉带有 *shutdown* 命令的行。'
+- en: Note that *-t1* and *-a* are not present in all *shutdown* command implementations.
+    The preceding example is from MX Linux. MX Linux supports both the Unix System
+    V initialization system (SysV init) and systemd, and you select the one you want
+    to use from the boot menu.
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意，*-t1* 和 *-a* 并不是所有 *shutdown* 命令实现中都存在。上述示例来自 MX Linux。MX Linux 支持 Unix System
+    V 初始化系统（SysV init）和 systemd，您可以在引导菜单中选择想要使用的系统。
+- en: Ctrl-Alt-Delete is coded into the IBM PC BIOS/UEFI, and it should always reboot
+    a system before the operating system is launched, up to the moment before GRUB
+    launches the operating system.
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ctrl-Alt-Delete编码到IBM PC BIOS/UEFI中，应在启动操作系统之前始终重新启动系统，直到GRUB启动操作系统之前。
+- en: Ctrl-Alt-Delete was created by IBM engineer David Bradley for the IBM PC BIOS.
+    Orignally it was a developer tool and not intended for users. It required two
+    hands by design, to make it difficult to press by accident.
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ctrl-Alt-Delete由IBM工程师David Bradley为IBM PC BIOS创建。最初它是开发者工具，不是为用户设计的。它的设计需要用双手操作，以防意外按下。
+- en: 'Then Microsoft adopted it to bring up the Task Manager on the first press,
+    and to reboot on the second press. Then in Windows NT it was used to access the
+    Windows login screen. Supposedly this was a security measure that prevented users
+    from being deceived by fake login screens, which I never knew was a risk, but
+    that was a long time ago. There is a funny exchange about the invention and use
+    of Ctrl-Alt-Delete between Mr. Bradley and Bill Gates preserved in a YouTube video,
+    which hopefully will stay up forever: [“Control-Alt-Delete: David Bradley & Bill
+    Gates”](https://oreil.ly/e83k6).'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '然后微软采用了它，在第一次按下时弹出任务管理器，并在第二次按下时重启。后来在Windows NT中，它用于访问Windows登录屏幕。据说这是一种安全措施，防止用户被虚假登录屏幕欺骗，这是一个很久以前的风险，但那时候发生过。在YouTube视频中保存了Bradley先生和比尔·盖茨关于Ctrl-Alt-Delete发明和使用的有趣对话，希望它能永远保留：[“Control-Alt-Delete:
+    David Bradley & Bill Gates”](https://oreil.ly/e83k6)。'
+- en: See Also
+  id: totrans-134
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 7 systemd.special*'
+  id: totrans-135
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 7 systemd.special*'
+- en: 3.6 Disabling, Enabling, and Configuring Ctrl-Alt-Delete in the Linux Console
+  id: totrans-136
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.6 禁用、启用和配置Linux控制台中的Ctrl-Alt-Delete
+- en: Problem
+  id: totrans-137
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: systemd controls the behavior of Ctrl-Alt-Delete in the Linux console, and you
+    want to know how to manage it.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd控制Linux控制台中Ctrl-Alt-Delete的行为，您想知道如何管理它。
+- en: Solution
+  id: totrans-139
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: You can check the status, disable or enable Ctrl-Alt-Delete, or change it to
+    power off the system.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以检查状态，禁用或启用Ctrl-Alt-Delete，或将其设置为关闭系统。
+- en: The Ctrl-Alt-Delete unit file is not a service, but a target, so it does not
+    run as a daemon. If the */etc/systemd/system/ctrl-alt-del.target* symlink exists,
+    Ctrl-Alt-Delete is enabled.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ctrl-Alt-Delete单元文件不是服务，而是一个目标，因此不作为守护程序运行。如果存在*/etc/systemd/system/ctrl-alt-del.target*符号链接，则启用Ctrl-Alt-Delete。
+- en: 'The following example disables and masks *ctrl-alt-del.target*:'
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例禁用和mask *ctrl-alt-del.target*：
+- en: '[PRE21]'
+  id: totrans-143
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Unmask and re-enable it:'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 取消mask并重新启用它：
+- en: '[PRE22]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: The changes take effect immediately.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改立即生效。
+- en: 'Change it to power off the system by linking the *ctrl-alt-del.target* unit
+    to the *poweroff.target* unit. First, disable it to remove the existing symlink,
+    then create the new symlink:'
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将其更改为通过将*ctrl-alt-del.target*单元链接到*poweroff.target*单元而关闭系统。首先禁用它以删除现有的符号链接，然后创建新的符号链接：
+- en: '[PRE23]'
+  id: totrans-148
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: Now it will power off the system instead of rebooting.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在它将关闭系统而不是重新启动。
+- en: Discussion
+  id: totrans-150
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Use the *stat* command to see symlinks:'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*stat*命令查看符号链接：
+- en: '[PRE24]'
+  id: totrans-152
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: You should not change any */lib/systemd/system/* links. Instead, create the
+    new symlink in */etc/systemd/system/* so that your change is not overwritten by
+    system updates.
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不应更改任何*/lib/systemd/system/*中的链接。相反，应在*/etc/systemd/system/*中创建新的符号链接，以便您的更改不会被系统更新覆盖。
+- en: See Also
+  id: totrans-154
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 7 systemd.special*'
+  id: totrans-155
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 7 systemd.special*'
+- en: 3.7 Creating Scheduled Shutdowns with cron
+  id: totrans-156
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.7 使用cron创建定时关机
+- en: Problem
+  id: totrans-157
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want your machine to turn itself off at night so you can walk away and not
+    worry about it. Or, your users are careless watt wasters who refuse to develop
+    the habit of shutting their PCs down at night.
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望您的机器在夜间自动关闭，这样您就可以离开而不必担心它。或者，您的用户不爱关心节能，拒绝养成晚上关闭电脑的习惯。
+- en: Solution
+  id: totrans-159
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use *cron* to create scheduled shutdowns. For example, add this line to */etc/crontab*
+    to shut down every night at 10:30 P.M., with a 20-minute warning. Editing */etc/crontab*
+    requires root permissions, and the following example uses the nano text editor:'
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*cron*创建定时关机。例如，将以下行添加到*/etc/crontab*，每晚10:30关闭系统，并提前20分钟警告。编辑*/etc/crontab*需要root权限，以下示例使用nano文本编辑器：
+- en: '[PRE25]'
+  id: totrans-161
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: Warning
+  id: totrans-162
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Before doing this on your work computer, check your employer’s policies. If
+    they run updates and backups at night, then your computer may need to stay on.
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您的工作计算机上执行此操作之前，请查看雇主的政策。如果他们在夜间运行更新和备份，则您的计算机可能需要保持开启状态。
+- en: 'This example runs only at 11 P.M. on weekdays and shuts down immediately:'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例仅在工作日晚上11点运行，并立即关闭系统：
+- en: '[PRE26]'
+  id: totrans-165
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'Another way is to use the *crontab* command as root or with *sudo*:'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种方法是以root身份或使用*sudo*运行*crontab*命令：
+- en: '[PRE27]'
+  id: totrans-167
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: There is no name field when you run *crontab*, as there is in */etc/crontab*.
+    The previous example opens the root user’s crontab in edit mode. Edit and save,
+    then you’re done.
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行 *crontab* 时没有名称字段，就像 */etc/crontab* 中那样。前面的示例打开了根用户的crontab以编辑模式。编辑并保存，然后完成。
+- en: Don’t try to name the file yourself. During editing it is a temporary file,
+    which is automatically renamed by *crontab* when you save it. It will be saved
+    in */var/spool/cron/crontabs*.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不要试图自己命名文件。编辑时，这是一个临时文件，保存时 *crontab* 会自动重命名。它将保存在 */var/spool/cron/crontabs*
+    中。
+- en: Discussion
+  id: totrans-170
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*/etc/crontab* has a name field, so any user can have entries in this file,
+    but only root can edit */etc/crontab*. Users who want to control their own personal
+    crontabs should use the *crontab* command, as personal crontabs do not require
+    root permissions.'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/crontab* 有一个名称字段，因此任何用户都可以在此文件中添加条目，但只有 root 可以编辑 */etc/crontab*。希望控制自己个人
+    crontab 的用户应该使用 *crontab* 命令，因为个人 crontab 不需要 root 权限。'
+- en: The fields in */etc/crontab* can take a little getting used to ([Table 3-1](#crontab_values)),
+    so here are more examples and explanations.
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/crontab* 中的字段可能需要一点时间来适应 ([表 3-1](#crontab_values))，这里有更多示例和解释。'
+- en: Table 3-1\. Table of crontab values
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 3-1\. crontab 值表
+- en: '| Field | Allowed values |'
+  id: totrans-174
+  prefs: []
+  type: TYPE_TB
+  zh: '| 字段 | 允许值 |'
+- en: '| --- | --- |'
+  id: totrans-175
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| minute | 0-59 |'
+  id: totrans-176
+  prefs: []
+  type: TYPE_TB
+  zh: '| 分钟 | 0-59 |'
+- en: '| hour | 0-23 |'
+  id: totrans-177
+  prefs: []
+  type: TYPE_TB
+  zh: '| 小时 | 0-23 |'
+- en: '| day of month | 1-31 |'
+  id: totrans-178
+  prefs: []
+  type: TYPE_TB
+  zh: '| 月份 | 1-12 |'
+- en: '| month | 1-12 |'
+  id: totrans-179
+  prefs: []
+  type: TYPE_TB
+  zh: '| 每月 | 1-31 |'
+- en: '| day of week | 0-7 |'
+  id: totrans-180
+  prefs: []
+  type: TYPE_TB
+  zh: '| 星期 | 0-7 |'
+- en: The asterisk * is a wildcard for “all.”
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 星号 * 是“全部”的通配符。
+- en: 'Shut down only on weekends:'
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 仅在周末关闭：
+- en: '[PRE28]'
+  id: totrans-183
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'There is a quirk in *cron* that Sunday is 0 or 7\. This dates back to very
+    olden times, and I have no idea why it persists. You’ll have to test it to see
+    what works, so you may need to use *6,7* for Saturday, Sunday:'
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*cron* 中有一个怪异之处，即周日为 0 或 7。这可以追溯到很久以前，我不知道为什么会这样持续下去。您必须测试才能确定有效值，因此可能需要使用
+    *6,7* 来表示星期六和星期日：'
+- en: '[PRE29]'
+  id: totrans-185
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'It would be nice to use *sat,sun*, but you can only enter one day by name,
+    and cannot use names in lists. Days of the week and months are named with the
+    first three letters: sat, sun, jan, feb. Case does not matter.'
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*sat,sun*会很方便，但你只能输入一个具体的星期日，而不能在列表中使用名称。星期和月份名称使用首三个字母表示：sat, sun, jan, feb。大小写不敏感。
+- en: 'You can use ranges: 1–4 means 1, 2, 3, and 4.'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用范围：1–4 表示 1, 2, 3 和 4。
+- en: 'Ranges and lists can be mixed: 1, 3, 5, 6-10.'
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 范围和列表可以混合使用：1, 3, 5, 6-10。
+- en: 'Step values follow ranges:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 步长值遵循范围：
+- en: 10–23/2 is every second hour in the range
+  id: totrans-190
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 10–23/2 表示范围内每隔两个小时
+- en: '*/2 in the dow field means every other day'
+  id: totrans-191
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/2 在 dow 字段表示每隔一天'
+- en: 2–6/2 equals 2, 4, 6
+  id: totrans-192
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 2–6/2 等同于 2, 4, 6
+- en: 'The following strings are nice shortcuts that replace the first five fields:'
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的字符串是替代前五个字段的好快捷方式：
+- en: '[PRE30]'
+  id: totrans-194
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: See Also
+  id: totrans-195
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 cron*'
+  id: totrans-196
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 cron*'
+- en: '*man 1 crontab*'
+  id: totrans-197
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 crontab*'
+- en: '*man 5 crontab*'
+  id: totrans-198
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 crontab*'
+- en: 3.8 Scheduling Automated Startups with UEFI Wake-Ups
+  id: totrans-199
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.8 使用UEFI唤醒安排自动启动
+- en: Problem
+  id: totrans-200
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Scheduled shutdowns are so wonderful, you want scheduled wake-ups as well.
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定时关机是非常方便的，你也希望有定时唤醒。
+- en: Solution
+  id: totrans-202
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'You’re in luck, because Linux supports scheduled wake-ups. There are three
+    methods to try: Wake-on-LAN, real-time clock (RTC) wake-ups, or your computer’s
+    UEFI setup, if it has a scheduled wake-up feature.'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你很幸运，因为Linux支持定时唤醒。有三种方法可尝试：网络唤醒（Wake-on-LAN）、实时时钟（RTC）唤醒，或者如果您的计算机具有预定唤醒功能，则可以使用计算机的UEFI设置。
+- en: UEFI wake-ups are the most reliable. [Figure 3-2](#fig-bios-wakeup) shows the
+    scheduled wake-up screen on a Lenovo ThinkPad.
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UEFI 唤醒是最可靠的。[图 3-2](#fig-bios-wakeup) 显示了联想ThinkPad上预定唤醒的屏幕。
+- en: '![Lenovo UEFI wake-up scheduler](Images/lcb2_0302.png)'
+  id: totrans-205
+  prefs: []
+  type: TYPE_IMG
+  zh: '![联想UEFI唤醒调度器](Images/lcb2_0302.png)'
+- en: Figure 3-2\. Scheduling wake-ups in a Lenovo UEFI
+  id: totrans-206
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 3-2\. 在联想UEFI中安排唤醒
+- en: Enter your UEFI setup by pressing the appropriate F*n* key at startup. On Dell,
+    ASUS, and Acer systems this is usually F2; Lenovo uses F1\. This varies, however.
+    For example, some systems use the Delete key, so check your machine’s documentation.
+    Some systems tell which key to press on their startup screens. It can be a bit
+    tricky to press the key at the right time, so start pressing it right after you
+    press the power button, just like banging on an elevator button to make it arrive
+    faster.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在启动时按相应的 F*n* 键进入UEFI设置。在Dell、ASUS和Acer系统上通常是F2；联想使用F1。然而，这会有所不同。例如，某些系统使用删除键，请查看您设备的文档。某些系统在启动屏幕上显示按键信息。要在正确时间按下键可能有点棘手，所以像按电梯按钮那样，尽早按下电源按钮后开始按键。
+- en: If your system does not have a UEFI wake-up feature, try either Wake-on-LAN
+    (see [Recipe 3.10](#rec-wol-wired-wakeups), which requires a second device to
+    send a wake-up signal), or RTC wake-ups (see [Recipe 3.9](#rec-rtc-wakeups)).
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的系统没有 UEFI 唤醒功能，请尝试使用醒来局域网 (参见 [Recipe 3.10](#rec-wol-wired-wakeups)，需要第二个设备发送唤醒信号)
+    或者 RTC 唤醒 (参见 [Recipe 3.9](#rec-rtc-wakeups))。
+- en: Discussion
+  id: totrans-209
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Let’s discuss briefly what BIOS and UEFI mean. When you boot up your computer,
+    the first startup instructions come from the Basic Input Output System (BIOS),
+    or the Unified Extensible Firmware Interface (UEFI) firmware stored on the computer’s
+    motherboard. BIOS is the old legacy system that has been with us since 1980\.
+    UEFI is its modern replacement. UEFI includes legacy BIOS support, though someday
+    this will be removed. Nearly all computers made after the mid-2000s have UEFI.
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们简要讨论一下 BIOS 和 UEFI 的含义。当您启动计算机时，第一批启动指令来自存储在计算机主板上的基本输入输出系统（BIOS）或统一可扩展固件接口（UEFI）固件。BIOS
+    是自 1980 年以来一直存在的旧系统。UEFI 是其现代替代品。UEFI 包括对传统 BIOS 的支持，尽管有一天这将被移除。几乎所有在2000年中期之后制造的计算机都有
+    UEFI。
+- en: UEFI has considerably more features than the old BIOS, and is like a little
+    operating system. The UEFI setup screens control boot order, boot devices, security
+    options, Secure Boot, overclocking, displaying hardware health, networking, and
+    many more functions.
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UEFI 拥有比旧 BIOS 更多的功能，就像一个小型操作系统。UEFI 设置界面控制启动顺序、启动设备、安全选项、安全启动、超频、显示硬件健康状况、网络以及许多其他功能。
+- en: See Also
+  id: totrans-212
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 3.9](#rec-rtc-wakeups)'
+  id: totrans-213
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 3.9](#rec-rtc-wakeups)'
+- en: '[Recipe 3.10](#rec-wol-wired-wakeups)'
+  id: totrans-214
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 3.10](#rec-wol-wired-wakeups)'
+- en: '[Recipe 3.11](#rec-wol-wifi-wakeups)'
+  id: totrans-215
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 3.11](#rec-wol-wifi-wakeups)'
+- en: 3.9 Scheduling Automated Startups with RTC Wake-ups
+  id: totrans-216
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.9 使用 RTC 唤醒调度自动启动
+- en: Problem
+  id: totrans-217
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set up scheduled wake-ups with RTC because your UEFI setup does
+    not have a scheduled wake-up feature, or because you just want to.
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望使用 RTC 设置定时唤醒，因为您的 UEFI 设置没有预定唤醒功能，或者您只是想要这样做。
+- en: Solution
+  id: totrans-219
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use the *rtcwake* command, which should already be present on your system from
+    the *util-linux* package. *rtcwake* stops and wakes your system. You may set it
+    to wake up your system after a specified interval, such as 1800 seconds from now,
+    or at a scheduled time and date.
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *rtcwake* 命令，该命令应该已经存在于您系统中的 *util-linux* 软件包中。*rtcwake* 停止和唤醒您的系统。您可以设置它在指定的时间间隔后唤醒系统，例如从现在开始的
+    1800 秒，或者在预定的时间和日期唤醒系统。
+- en: Your system’s real-time clock (RTC) should be set to Coordinated Universal Time
+    (UTC).
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您系统的实时时钟（RTC）应设置为协调世界时（UTC）。
+- en: 'When *rtcwake* stops your system, it sends it into an ACPI sleep state. Look
+    in */sys/power/state* to see which sleep states your system supports. In the following
+    example, only three of the six ACPI sleep states are supported:'
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当 *rtcwake* 停止您的系统时，它会将其送入 ACPI 睡眠状态。查看 */sys/power/state* 以查看您的系统支持哪些睡眠状态。在以下示例中，只支持六个
+    ACPI 睡眠状态中的三个：
+- en: '[PRE31]'
+  id: totrans-223
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: On non-systemd Linuxes, run *cat /proc/acpi/info*.
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在非 systemd Linux 上，运行 *cat /proc/acpi/info*。
+- en: 'In the above example, we have three sleep states to try. Test each one according
+    to the following example:'
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在上面的示例中，我们有三个待机状态可供尝试。根据以下示例测试每一个：
+- en: '[PRE32]'
+  id: totrans-226
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: '*-m* specifies the standby mode, and *-s* is the number of seconds until the
+    system starts up again. When it is successful, you will see your system go into
+    a sleep state, then wake up, and you will see either a success message or an error
+    message.'
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-m* 指定待机模式，*-s* 是系统重新启动之前的秒数。当成功时，你将看到系统进入睡眠状态，然后唤醒，并且会显示成功或错误信息。'
+- en: 'The following example does a dry run of scheduling a wake-up tomorrow at 8
+    A.M.:'
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例对明天上午 8 点的唤醒进行了模拟运行：
+- en: '[PRE33]'
+  id: totrans-229
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: Remove *-n* to disable the dry run and run it for real.
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 删除 *-n* 以禁用模拟运行，并实际运行它。
+- en: 'The following is a nice, simple */etc/crontab* example to automate shutdowns
+    and wake-ups. The *rtcwake* command suspends to disk at 11 P.M. on weeknights
+    and wakes up 8 hours later:'
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下是一个简单的 */etc/crontab* 示例，用于自动执行关机和唤醒。*rtcwake* 命令在工作日的晚上 11 点将系统挂起到磁盘，并在 8
+    小时后唤醒：
+- en: '[PRE34]'
+  id: totrans-232
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: Discussion
+  id: totrans-233
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Look in your system’s BIOS/UEFI to verify that your hardware clock is set to
+    UTC. If there is no button or some kind of setting to change the real-time clock
+    to UTC, change the time manually to the current UTC time.
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看您系统的 BIOS/UEFI，以验证您的硬件时钟是否设置为 UTC。如果没有按钮或某种设置来将实时时钟更改为 UTC，手动将时间更改为当前的 UTC
+    时间。
+- en: The example that includes *-u -t +$(date +%s -d “tomorrow 08:00”)* converts
+    Unix epoch time to human-readable values. Unix epoch time is the number of seconds
+    elapsed since midnight January 1, 1970 UTC. *date +%s* reports the current Unix
+    epoch time. The *-t* option passes Unix epoch time to *date* for conversion, and
+    *-u* specifies that your hardware clock is set to UTC.
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例中包含的 *-u -t +$(date +%s -d “tomorrow 08:00”)* 将 Unix 纪元时间转换为人类可读的值。Unix 纪元时间是从
+    1970 年 1 月 1 日午夜以来经过的秒数（UTC）。*date +%s* 报告当前的 Unix 纪元时间。*-t* 选项将 Unix 纪元时间传递给
+    *date* 进行转换，*-u* 指定你的硬件时钟设置为 UTC。
+- en: The *no* option for *rtcwake* means do not go into a sleep state, but only set
+    the wake-up time. Remove the *no* option to immediately go into a sleep state.
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*rtcwake* 的 *no* 选项意味着不进入睡眠状态，只设置唤醒时间。去掉 *no* 选项即可立即进入睡眠状态。'
+- en: Real-time clock (RTC) wake-ups are the least reliable. Your system has to be
+    put into an Advanced Configuration and Power Interface (ACPI) sleep state supported
+    by your Linux. ACPI is the modern power management standard for managing sleep
+    states. It is supposed to be vendor neutral and hardware independent, but the
+    standard is complex and hardware vendors often support only a subset of its capabilities.
+    Adding to the fun, the various Linuxes implement it in different ways.
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 实时时钟（RTC）唤醒最不可靠。你的系统必须进入 Linux 支持的 ACPI 睡眠状态。ACPI 是现代电源管理标准，用于管理睡眠状态。它应该是供应商中立和硬件无关的，但标准很复杂，硬件供应商通常仅支持其部分功能。增加乐趣的是，不同的
+    Linux 发行版以不同的方式实现它。
+- en: 'There are six ACPI sleep states, S0-S5\. The Linux kernel is capable of supporting
+    up to four, and distributions vary in which ones and how many:'
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ACPI 有六个睡眠状态，S0-S5。Linux 内核支持最多四个，不同的发行版在支持哪些以及支持多少方面有所不同：
+- en: S0
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: S0
+- en: System is running, monitor may be off, most peripherals are on.
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统正在运行，显示器可能关闭，大多数外设开启。
+- en: S1
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: S1
+- en: Power-on suspended, CPU stops, power to CPU and RAM is on.
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动挂起时，CPU 停止运行，CPU 和 RAM 的电源是打开的。
+- en: S2
+  id: totrans-243
+  prefs: []
+  type: TYPE_NORMAL
+  zh: S2
+- en: CPU is powered off, dirty cache is flushed to RAM.
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CPU 关闭电源，脏缓存被刷新到 RAM。
+- en: S3
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: S3
+- en: Also called standby, sleep, and suspend-to-RAM. Data may not be written to disk.
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 也称为待机、休眠和挂起到 RAM。数据可能不会写入磁盘。
+- en: S4
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: S4
+- en: Hibernation, suspend-to-disk. Everything in RAM is written to disk and the system
+    is powered down.
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 休眠，挂起到磁盘。将所有 RAM 中的数据写入磁盘，然后系统关闭电源。
+- en: S5
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: S5
+- en: Similar to powering the system off, except there is still power to the power
+    button and peripherals, such as the keyboard, network interface, and USB devices.
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 类似于关闭系统电源，但电源按钮和外设（如键盘、网络接口和 USB 设备）仍然供电。
+- en: See Also
+  id: totrans-251
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 cron*'
+  id: totrans-252
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 cron*'
+- en: '*man 8 rtcwake*'
+  id: totrans-253
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 rtcwake*'
+- en: '[Time and Date](https://timeanddate.com)'
+  id: totrans-254
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[时间和日期](https://timeanddate.com)'
+- en: 3.10 Setting Up Remote Wake-Ups with Wake-on-LAN over Wired Ethernet
+  id: totrans-255
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.10 使用有线以太网设置远程唤醒 Wake-on-LAN
+- en: Problem
+  id: totrans-256
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set up remotely triggered wake-ups with Wake-on-LAN because your
+    UEFI setup does not have a scheduled wake-up feature, or it is too simple for
+    your needs, or you want the flexibility to send a wake-up signal at random times.
+    This recipe is for waking up a machine on the same network as the device you use
+    to send the wake-up signal, and your target machine must use a wired Ethernet
+    interface.
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你的 UEFI 设置没有预定的唤醒功能，或者功能过于简单，或者你希望在随机时间发送唤醒信号，你可以设置远程触发唤醒使用 Wake-on-LAN。这个方案是为了在与发送唤醒信号设备相同网络上唤醒一台机器，你的目标机器必须使用有线以太网接口。
+- en: Solution
+  id: totrans-258
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Configure your PC to listen for wake-up requests, then use a second device,
+    such as another computer, a smartphone, or a Raspberry Pi to send the wake-up
+    signal, which is called the *magic packet*. Which isn’t really magic, but merely
+    a specialized packet designed specifically for remote wake-ups. (Yes, I too am
+    sad it is not real magic.)
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 配置你的电脑以监听唤醒请求，然后使用第二个设备，如另一台计算机、智能手机或树莓派发送唤醒信号，称为 *魔术数据包*。它并不是真正的魔术，只是专门为远程唤醒设计的特殊数据包。（是的，我也很遗憾它并非真正的魔术。）
+- en: Start by booting into your system’s UEFI setup and look for settings for enabling
+    Wake-on-LAN.
+  id: totrans-260
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先启动你的系统的 UEFI 设置，寻找启用 Wake-on-LAN 的设置。
+- en: Warning
+  id: totrans-261
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: An important precaution is to disable all settings that enable PXE (preboot
+    execution environment) booting. If PXE boot is enabled, and you have a PXE server
+    (a preboot execution environment server, which is booting from a network installation
+    server) on your network, it is possible that your machine will wake up to PXE
+    boot and install a new image, overwriting the existing installation.
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个重要的预防措施是禁用所有启用PXE（预启动执行环境）引导的设置。如果启用了PXE引导，并且您的网络上有PXE服务器（预启动执行环境服务器，用于从网络安装服务器引导），则可能会导致您的机器唤醒以进行PXE引导并安装新的映像，覆盖现有安装。
+- en: Then exit and finish starting up. Install the *wakeonlan* and *ethtool* packages.
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后退出并完成启动。安装*wakeonlan*和*ethtool*软件包。
+- en: 'Fetch the name of your Ethernet interface, which in this example is *enp0s25*,
+    and use *ethtool* to verify that it supports Wake-on-LAN. The output is abbreviated
+    for clarity:'
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 获取您的以太网接口的名称，在本例中为*enp0s25*，并使用*ethtool*验证其是否支持Wake-on-LAN。为了清晰起见，输出进行了缩写：
+- en: '[PRE35]'
+  id: totrans-265
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: Record the MAC address of your interface. In the preceding *ip* example, the
+    “ether” line lists the MAC address, 9c:ef:d5:fe:8f:20\. Yours will be different,
+    as MAC addresses are unique.
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 记录您接口的MAC地址。在前面的*ip*示例中，“ether”行列出了MAC地址，9c:ef:d5:fe:8f:20。您的地址将不同，因为MAC地址是唯一的。
+- en: '“Supports Wake-on: pumbg” is the magic phrase that verifies your interface
+    has the necessary support, indicated by the *g* switch. The second line, “Wake-on:
+    g,” tells you that it is already enabled. If it is not, enable it:'
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '“Supports Wake-on: pumbg”是验证您的接口是否具备必要支持的魔法短语，由*g*开关指示。第二行“Wake-on: g”告诉您已经启用。如果没有启用，请启用它：'
+- en: '[PRE36]'
+  id: totrans-268
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'If it does not stay enabled after a restart, add an entry like this to */etc/crontab*
+    to run the command after every restart:'
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果重启后未保持启用状态，请像这样向*/etc/crontab*添加一个条目，以便在每次重启后运行命令：
+- en: '[PRE37]'
+  id: totrans-270
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'Shut down the machine, and from a second device on the same network, send the
+    command to wake it up, using the MAC address of your target machine’s Ethernet
+    interface:'
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关闭计算机，然后从同一网络上的第二设备发送命令唤醒它，使用目标机器以太网接口的MAC地址：
+- en: '[PRE38]'
+  id: totrans-272
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'If your target machine and second device are on the same network but in different
+    subnets, specify the broadcast address for your target machine:'
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果目标机器和第二设备在同一网络但不同子网中，需指定目标机器的广播地址：
+- en: '[PRE39]'
+  id: totrans-274
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: Discussion
+  id: totrans-275
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Wake-on-LAN is an Ethernet standard for remotely waking up a computer by sending
+    it a wake-up signal over a network. *wakeonlan* is the name of the command and
+    the name of the package on most Linuxes.
+  id: totrans-276
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Wake-on-LAN是一种通过网络发送唤醒信号远程唤醒计算机的以太网标准。*wakeonlan*是大多数Linux系统上命令和软件包的名称。
+- en: When your computer is shut down, it isn’t really turned off, but is in a low
+    power mode, and can receive and act on the magic packet wake-up signal.
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您的计算机关机时，并非真正关闭，而是处于低功耗模式，可以接收和响应魔术包唤醒信号。
+- en: '*wakeonlan* sends the magic packet over UDP port 9\. The magic packet goes
+    to the network’s broadcast address, and every host on the network receives this
+    packet. The MAC address ensures that only the host with that address will wake
+    up.'
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*wakeonlan*通过UDP端口9发送魔法包。魔法包发送到网络的广播地址，网络上的每台主机都会接收此包。MAC地址确保只有具有该地址的主机会被唤醒。'
+- en: The target machine wakes up just as if you had pressed the power button.
+  id: totrans-279
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目标机器会像按下电源按钮一样唤醒。
+- en: See Also
+  id: totrans-280
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 wakeonlan*'
+  id: totrans-281
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 wakeonlan*'
+- en: '*man 8 ethtool*'
+  id: totrans-282
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 ethtool*'
+- en: '[Recipe 3.8](#rec-uefi-wakeup)'
+  id: totrans-283
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 3.8](#rec-uefi-wakeup)'
+- en: '[Recipe 3.9](#rec-rtc-wakeups)'
+  id: totrans-284
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 3.9](#rec-rtc-wakeups)'
+- en: '[Recipe 3.11](#rec-wol-wifi-wakeups)'
+  id: totrans-285
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 3.11](#rec-wol-wifi-wakeups)'
+- en: 3.11 Setting Up Remote Wake-Ups over WiFi (WoWLAN)
+  id: totrans-286
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 3.11 设置通过WiFi进行远程唤醒（WoWLAN）
+- en: Problem
+  id: totrans-287
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your want to wake up a remote computer via its wireless interface (Wake-on-Wireless
+    LAN, or WoWLAN).
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望通过其无线接口（Wake-on-Wireless LAN，或WoWLAN）唤醒远程计算机。
+- en: Solution
+  id: totrans-289
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: This recipe is for waking up a machine on the same network as the device you
+    use to send the wake-up signal.
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此配方适用于在发送唤醒信号的设备与目标机器位于同一网络上时唤醒机器。
+- en: Your machine must have an onboard wireless interface, either integrated on the
+    motherboard or peripheral component interconnect (PCI). It will not work with
+    a USB interface because there is no power to the USB bus when the machine is shut
+    down.
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的机器必须具有内置无线接口，可以是主板集成的或者是PCI（外围组件互连）的。使用USB接口将无法工作，因为机器关机时USB总线没有供电。
+- en: First, enter the UEFI setup of the machine you want to wake up remotely and
+    enable any Wake-on-LAN settings.
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，进入要远程唤醒的机器的UEFI设置，并启用任何Wake-on-LAN设置。
+- en: Warning
+  id: totrans-293
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: An important precaution is to also disable all settings that enable PXE booting.
+    If PXE boot is enabled and you have a PXE server on your network, it is possible
+    that your machine will wake up to PXE boot and install a new image, overwriting
+    the existing installation.
+  id: totrans-294
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个重要的预防措施是同时禁用所有启用 PXE 启动的设置。如果启用了 PXE 启动，并且在你的网络上有一个 PXE 服务器，你的机器可能会因为 PXE
+    启动而唤醒并安装新的镜像，覆盖现有的安装。
+- en: 'Then exit and finish starting up. Install the *iw* command, and use it to list
+    all of your wireless devices:'
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后退出并完成启动。安装 *iw* 命令，并使用它列出所有的无线设备：
+- en: '[PRE40]'
+  id: totrans-296
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: 'If there is more than one, query the one you want to use. The following example
+    shows a wireless interface that does not support WoWLAN:'
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果有多个设备，请查询你想要使用的设备。以下示例显示了一个不支持 WoWLAN 的无线接口：
+- en: '[PRE41]'
+  id: totrans-298
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: 'The following example is for an interface that supports WoWLAN, and it is not
+    enabled:'
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例适用于支持 WoWLAN 的接口，但未启用：
+- en: '[PRE42]'
+  id: totrans-300
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: 'Enable WoWLAN:'
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启用 WoWLAN：
+- en: '[PRE43]'
+  id: totrans-302
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: '*iw dev* provides the MAC address, which your second device needs to send the
+    magic packet:'
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*iw dev* 提供了 MAC 地址，你的第二台设备需要发送魔术数据包：'
+- en: '[PRE44]'
+  id: totrans-304
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: 'Send the magic packet to a machine on the same network, but in a different
+    subnet, using the broadcast address of the subnet:'
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将魔术数据包发送到同一网络上不同子网中的机器，使用子网的广播地址：
+- en: '[PRE45]'
+  id: totrans-306
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: Discussion
+  id: totrans-307
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: This works well when the remote computer is a laptop, as laptops have integrated
+    wireless network interfaces that typically support more features. Desktop machines
+    usually don’t ship with integrated wireless interfaces, so you must shop carefully
+    for a PCI/PCIe wireless adapter that supports WoWLAN and Linux.
+  id: totrans-308
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当远程计算机是笔记本时，这种方法效果很好，因为笔记本通常有集成的无线网络接口，通常支持更多功能。台式机通常不配备集成的无线接口，因此你必须仔细挑选支持
+    WoWLAN 和 Linux 的 PCI/PCIe 无线适配器。
+- en: See Also
+  id: totrans-309
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 iw*'
+  id: totrans-310
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 iw*'
+- en: '*man 1 wakeonlan*'
+  id: totrans-311
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 wakeonlan*'
+- en: '[Recipe 3.8](#rec-uefi-wakeup)'
+  id: totrans-312
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 3.8 节](#rec-uefi-wakeup)'
+- en: '[Recipe 3.9](#rec-rtc-wakeups)'
+  id: totrans-313
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 3.9 节](#rec-rtc-wakeups)'
+- en: '[Recipe 3.10](#rec-wol-wired-wakeups)'
+  id: totrans-314
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 3.10 节](#rec-wol-wired-wakeups)'

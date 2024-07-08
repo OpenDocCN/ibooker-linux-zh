@@ -1,0 +1,2878 @@
+- en: Chapter 6\. Managing Files and Directories
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第6章。管理文件和目录
+- en: Linux provides strong basic controls for access to files and directories with
+    configurable privileges. Every file and directory has three levels of ownership,
+    including user, group, and other; and multiple levels of access, including read,
+    write, and execute. You can protect your personal files and control who has access
+    to them, and the root user can manage access to commands, scripts, shared files,
+    and system files.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux提供了强大的基本控制来访问可配置权限的文件和目录。每个文件和目录都有三个所有权级别，包括用户、组和其他；以及多个访问级别，包括读取、写入和执行。您可以保护个人文件并控制谁可以访问它们，而根用户可以管理对命令、脚本、共享文件和系统文件的访问。
+- en: Even when you are using stronger access control tools—tools such as SELinux
+    or AppArmor—it is still important to get the fundamentals right.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 即使您正在使用更强的访问控制工具——如SELinux或AppArmor，正确掌握基本原理仍然很重要。
+- en: On a Linux system, both human users and system services have user accounts.
+    Some system services need user accounts to control privileges, just like human
+    users.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Linux系统上，人类用户和系统服务都有用户账户。一些系统服务需要用户账户来控制权限，就像人类用户一样。
+- en: 'Every file has three types of ownership: owner, group, and other (sometimes
+    *other* is expressed as *world*). The owner is a single user, the group owner
+    is a single group, and other is everyone else who has access to the file.'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个文件都有三种类型的所有权：所有者、组和其他（有时*其他*表示为*全球*）。所有者是单个用户，组所有者是单个组，其他是所有能够访问文件的其他人。
+- en: 'Every file has six permission modes—read, write, and executable—and three special
+    modes: the *sticky bit*, *setuid*, and *setgid*.'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个文件有六种权限模式——读取、写入和可执行——以及三种特殊模式：*粘性位*、*设置用户ID*和*设置组ID*。
+- en: File permissions control which users can create, read, edit, or delete a file,
+    and which users can execute a command. The special modes control who can move,
+    delete, or rename a file, and who can execute a command with elevated privileges.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件权限控制哪些用户可以创建、读取、编辑或删除文件，以及哪些用户可以执行命令。特殊模式控制谁可以移动、删除或重命名文件，以及谁可以以提升的权限执行命令。
+- en: Directory permissions control which users can edit or enter a directory and
+    who can read, edit, add, or remove files from a directory.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目录权限控制哪些用户可以编辑或进入目录，以及谁可以读取、编辑、添加或删除目录中的文件。
+- en: 'Remember the fundamental Linux security principle: use the minimum necessary
+    privileges to get the job done.'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 记住基本的Linux安全原则：使用最小必要的权限来完成工作。
+- en: Limitations of Privileges
+  id: totrans-9
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 特权的限制
+- en: Anyone who can read a file can copy it.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任何能够读取文件的人都可以复制它。
+- en: You cannot prevent the root user, or *sudo* users with sufficient privileges,
+    from accessing your files.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您无法阻止根用户或具有足够权限的*sudo*用户访问您的文件。
+- en: Permissions and ownership are functions of filesystems and can be bypassed by
+    reading a storage device from another Linux instance, such as booting up a live
+    Linux from removable media to access the host system, or removing the hard drive
+    and connecting it to a different machine. You only need root privileges on the
+    system that you mount the storage device on, and do not need to know anything
+    about the original file owners and permissions.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 权限和所有权是文件系统的功能，并可以通过从另一个Linux实例读取存储设备来绕过，例如通过从可移动介质引导Live Linux来访问主机系统，或者将硬盘移除并连接到不同的机器。您只需要在挂载存储设备的系统上拥有根权限，并不需要了解原始文件的所有者和权限。
+- en: On a Linux system the root user, also called the superuser, reigns supreme.
+    Root can do almost anything, including editing and deleting other users’ files,
+    entering any directory, and running any command. Normal, or unprivileged, users
+    may temporarily assume root powers with the *sudo* or *su* commands (see Recipes
+    [5.17](ch05.xhtml#rec-su) and [5.18](ch05.xhtml#rec-sudo)).
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Linux系统中，根用户，也称为超级用户，拥有至高无上的权力。根用户几乎可以做任何事情，包括编辑和删除其他用户的文件，进入任何目录和运行任何命令。普通或非特权用户可以通过*sudo*或*su*命令临时拥有根权限（见Recipe
+    [5.17](ch05.xhtml#rec-su)和[5.18](ch05.xhtml#rec-sudo)）。
+- en: Every user has a unique identification (UID), and belongs to at least one group
+    (see [Recipe 5.1](ch05.xhtml#rec-uid-gid)). Every user in a group shares the permissions
+    of that group.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个用户都有唯一的标识符（UID），并且至少属于一个组（见[Recipe 5.1](ch05.xhtml#rec-uid-gid)）。组内的每个用户共享该组的权限。
+- en: 'To see what all of this looks like, take a look at */etc*, which contains system
+    configuration files:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查看这一切是什么样子，请看*/etc*，其中包含系统配置文件：
+- en: '[PRE0]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: The command output shows the directory’s *mode*, or set of permissions, in two
+    forms, *755:drwxr-xr-x*. *755* is octal notation, and *drwxr-xr-x* is symbolic
+    notation. These are two different ways of expressing the same mode, which in this
+    example is unrestricted privileges for the directory owner, and group and other
+    may only enter the directory. File modes are discussed in detail in this chapter.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令输出显示目录的*模式*，或者说权限集合，有两种表示方式，*755:drwxr-xr-x*。*755* 是八进制表示法，*drwxr-xr-x* 是符号表示法。这两种方式表示相同的模式，在这个例子中，表示目录所有者有无限制权限，而组和其他用户只能进入该目录。文件模式在本章节中有详细讨论。
+- en: '*root:root* is the owner and group. Files and directories can have different
+    owners and groups; for example, */etc/cups* is owned by *root:lp*.'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*root:root* 是所有者和组。文件和目录可以有不同的所有者和组；例如，*/etc/cups* 的所有者是*root:lp*。'
+- en: 'In this chapter you will learn about the special modes: the *sticky bit*, *setuid*,
+    and *setgid*. The setuid and setgid modes elevate user and group permissions to
+    the same level as the file owner. These are used only in special cases, and used
+    very carefully because privilege escalation is a potential security risk. The
+    sticky bit prevents anyone but the file owner, or anyone with root privileges,
+    from deleting, renaming, or moving files they do not own in a directory, such
+    as */tmp*.'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，你将学习特殊模式：*粘滞位*、*setuid* 和 *setgid*。setuid 和 setgid 模式将用户和组权限提升到与文件所有者相同的级别。这些只在特殊情况下使用，并且非常谨慎，因为特权升级可能是潜在的安全风险。粘滞位防止除文件所有者或具有
+    root 特权外的任何人删除、重命名或移动目录中他们不拥有的文件，比如 */tmp*。
+- en: You will learn how to set ownership and modes, create and delete files and directories,
+    configure default privileges, transfer file ownership to a different user or group,
+    and copy, move, and rename files and directories.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你将学习如何设置所有权和模式，创建和删除文件和目录，配置默认权限，将文件所有权转移到不同的用户或组，以及复制、移动和重命名文件和目录。
+- en: Using sudo
+  id: totrans-21
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用sudo
+- en: Most of the examples in this recipe use the dollar sign command prompt, $, which
+    indicates an unprivileged user. Depending on your own file permissions, you may
+    need *sudo* for some operations.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本食谱中的大多数示例使用美元符号命令提示符$，表示非特权用户。根据你自己的文件权限，某些操作可能需要使用*sudo*。
+- en: 6.1 Creating Files and Directories
+  id: totrans-23
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.1 创建文件和目录
+- en: Problem
+  id: totrans-24
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to organize your files by placing them in directories.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你希望通过将文件放入目录中来组织你的文件。
+- en: Solution
+  id: totrans-26
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *mkdir* command to create directories. The following example creates
+    a new subdirectory in the current directory:'
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*mkdir*命令创建目录。以下示例在当前目录中创建一个新的子目录：
+- en: '[PRE1]'
+  id: totrans-28
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Create a subdirectory two levels down inside the current directory, and its
+    parent directories, with the *-p* (parent) option:'
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在当前目录下创建一个距离两层的子目录及其父目录，使用*-p*（父级）选项：
+- en: '[PRE2]'
+  id: totrans-30
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Create a new top-level directory, which is relative to root, /. You need root
+    privileges to do this:'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个新的顶级目录，相对于根目录 /。你需要 root 权限才能执行此操作：
+- en: '[PRE3]'
+  id: totrans-32
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'You can set permissions when you create a directory:'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在创建目录时，可以设置权限：
+- en: '[PRE4]'
+  id: totrans-34
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Files are created by applications, such as word processors and image editors,
+    and special commands like *touch*. The *touch* command creates a new empty file:'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件由应用程序（如文字处理器和图像编辑器）和特殊命令（如*touch*）创建。*touch*命令创建一个新的空文件：
+- en: '[PRE5]'
+  id: totrans-36
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: See [Recipe 6.2](#rec-touch-yes) to learn how to use *touch* to quickly create
+    batches of files for testing.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见[食谱 6.2](#rec-touch-yes)学习如何使用*touch*快速创建批量文件进行测试。
+- en: Discussion
+  id: totrans-38
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'If you are having trouble visualizing file trees, and how all directories are
+    relative to /, try the *tree* command. Root, /, is at the top:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你对文件树的可视化和所有目录如何相对于/而言感到困惑，请尝试*tree*命令。根目录 / 在顶部：
+- en: '[PRE6]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'You have probably noticed that this is upside down. In the real world, trees
+    branch from the root, but the *tree* command displays the directory tree branching
+    downward. There is a reason for this: we read screens from the top down.'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能已经注意到这个有些颠倒。在现实世界中，树是从根部分支出来的，但是*tree*命令显示的是目录树向下分支。这有其原因：我们从屏幕顶部向下阅读。
+- en: This example lists only the top-level directories under root. *-L 2* shows second-level
+    directories, *-L 3* goes to three levels, and so on.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例仅列出根目录下的顶级目录。*-L 2* 显示第二级目录，*-L 3* 则显示到第三级，依此类推。
+- en: See Also
+  id: totrans-43
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 6.2](#rec-touch-yes)'
+  id: totrans-44
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[食谱 6.2](#rec-touch-yes)'
+- en: '*man 1 mkdir*'
+  id: totrans-45
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 mkdir*'
+- en: '*man 1 touch*'
+  id: totrans-46
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 touch*'
+- en: '*man 1 yes*'
+  id: totrans-47
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 yes*'
+- en: '*man 1 tree*'
+  id: totrans-48
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 tree*'
+- en: 6.2 Quickly Creating a Batch of Files for Testing
+  id: totrans-49
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.2 快速创建批量文件进行测试
+- en: Problem
+  id: totrans-50
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create batches of files to use for testing file permissions, and
+    for any testing that needs a lot of files in a hurry.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要批量创建文件以测试文件权限，以及任何需要快速大量文件的测试。
+- en: Solution
+  id: totrans-52
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *touch* command. The following example creates a single new empty file:'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*touch*命令。以下示例创建一个新的空文件：
+- en: '[PRE7]'
+  id: totrans-54
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'Create 100 new empty files:'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建100个空文件：
+- en: '[PRE8]'
+  id: totrans-56
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'This creates 100 new files named *file00*, *file01*, *file02*, and so on. You
+    may give them file extensions and name them anything:'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将创建100个新文件，命名为*file00*、*file01*、*file02*等。您可以给它们添加文件扩展名，并随意命名它们：
+- en: '[PRE9]'
+  id: totrans-58
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Put the numbers first in the filename for easy ordering:'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在文件名中首先放置数字以便于排序：
+- en: '[PRE10]'
+  id: totrans-60
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'A fast way to populate the files with content is to use the *yes* command.
+    The following example creates a 500 MB file filled with the repeated line “This
+    is a test file”:'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用*yes*命令快速填充文件内容。以下示例创建一个填充了重复行“This is a test file”的500 MB文件：
+- en: '[PRE11]'
+  id: totrans-62
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Create a batch of 100 files with 1 MB of content in each file:'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个文件内容为1 MB，批量创建100个文件：
+- en: '[PRE12]'
+  id: totrans-64
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'The new files look like this:'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 新文件看起来像这样：
+- en: '[PRE13]'
+  id: totrans-66
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Discussion
+  id: totrans-67
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'You may customize this command in a number of ways: filenames, file sizes,
+    numbering, and the text for *yes*.'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以根据需要自定义此命令的多种方式：文件名、文件大小、编号以及*yes*的文本。
+- en: 'The examples in the recipe pad the numbers in the filenames with leading zeroes
+    so they will order correctly. Most graphical file managers handle ordering numbered
+    filenames correctly, but the default for *ls* is lexicographic order. The following
+    example demonstrates this with a 1- to 3-digit numbering range:'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 配方中的示例将文件名中的数字填充0以正确排序。大多数图形文件管理器正确处理带编号的文件名排序，但*ls*的默认排序是词典顺序。以下示例演示了一个1到3位数的数字范围：
+- en: '[PRE14]'
+  id: totrans-70
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: Lexicographic ordering treats the filenames as text strings instead of integers
+    and characters, and compares each number and letter individually, from left to
+    right. Lexicographic ordering doesn’t know that 10 is smaller than 100, only that
+    101 follows 100, 102 follows 101, and 10t follows 109 because letters follow numbers,
+    so the *t* follows the *9*.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 词典排序将文件名视为文本字符串而不是整数和字符，并逐个比较每个数字和字母，从左到右。词典排序不知道10比100小，只知道101在100之后，102在101之后，以及10t在109之后，因为字母跟在数字后面，所以*t*跟在*9*后面。
+- en: You can use leading zeroes to make all the numbers the same number of characters,
+    or list your files with *ls -v*. This treats the numbers in filenames as integers
+    and not characters, so they are listed in correct numerical order.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用前导零使所有数字具有相同的字符数，或者使用*ls -v*列出文件。这将把文件名中的数字视为整数而不是字符，因此它们将按正确的数字顺序列出。
+- en: See Also
+  id: totrans-73
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 ls*'
+  id: totrans-74
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ls*'
+- en: '*man 1 touch*'
+  id: totrans-75
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 touch*'
+- en: '*man 1 yes*'
+  id: totrans-76
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 yes*'
+- en: 6.3 Working with Relative and Absolute Filepaths
+  id: totrans-77
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.3 使用相对路径和绝对路径
+- en: Problem
+  id: totrans-78
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to understand the difference between relative and absolute filepaths,
+    and how to find where you are in the filesystem.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要理解相对路径和绝对路径的区别，以及如何确定文件系统中的当前位置。
+- en: Solution
+  id: totrans-80
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Absolute filepaths always start at the root, */*, such as */boot* and */etc*.
+    Relative filepaths are relative to your current directory and do not have a leading
+    slash. Suppose you are in your home directory and it contains the following subdirectories:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 绝对路径始终从根目录（/*/*）开始，例如*/boot*和*/etc*。相对路径相对于当前目录，没有前导斜杠。假设您在您的主目录中，并且它包含以下子目录：
+- en: '[PRE15]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'In this example, the absolute path to *Audiobooks* is */home/madmax/Audiobooks*,
+    and the relative path is *Audiobooks*. Use the *cd* command to enter this directory
+    with either the absolute path:'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个例子中，*Audiobooks*的绝对路径是*/home/madmax/Audiobooks*，相对路径是*Audiobooks*。可以使用*cd*命令以绝对路径或者相对路径进入这个目录：
+- en: '[PRE16]'
+  id: totrans-84
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Or the relative path:'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者相对路径：
+- en: '[PRE17]'
+  id: totrans-86
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'The directory you are in is the current working directory, *cwd*. Confirm your
+    *cwd* with the *pwd* (print working directory) command:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您所在的目录是当前工作目录（*cwd*）。使用*pwd*（打印工作目录）命令确认您的*cwd*：
+- en: '[PRE18]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: Discussion
+  id: totrans-89
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Absolute and relative filepaths are a common source of confusion. Remember that
+    when the filepath begins with a slash (/), it is an absolute path. When there
+    is no leading slash, it is relative to your current working directory.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 绝对路径和相对路径常常让人困惑。请记住，当文件路径以斜杠（/）开头时，这是绝对路径。如果没有前导斜杠，则相对于当前工作目录。
+- en: Some applications and commands require relative paths; for example, *rsync*
+    *include* and *exclude* lists use filepaths that are relative to the directories
+    being copied.
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 某些应用程序和命令要求相对路径；例如，*rsync* *include*和*exclude*列表使用相对于正在复制的目录的文件路径。
+- en: See Also
+  id: totrans-92
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 pwd*'
+  id: totrans-93
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 pwd*'
+- en: '[Chapter 7](Images/ch07.html#cha-backup-recovery)'
+  id: totrans-94
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第7章](Images/ch07.html#cha-backup-recovery)'
+- en: 6.4 Deleting Files and Directories
+  id: totrans-95
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.4 删除文件和目录
+- en: Problem
+  id: totrans-96
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You had fun creating a bunch of files and directories, and now you want to get
+    rid of them.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你玩得很开心创建了一堆文件和目录，现在想要摆脱它们。
+- en: Solution
+  id: totrans-98
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use the *rm* (remove) command with caution, because *rm* will happily delete
+    everything you tell it to, so be sure you tell it the right files or directories
+    to delete.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 谨慎使用*rm*（删除）命令，因为*rm*会乐意删除你告诉它的所有内容，所以确保你正确地告诉它要删除的文件或目录。
+- en: 'Delete a single file, with verbose output:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 删除单个文件，并显示详细输出：
+- en: '[PRE19]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Use the *-i* flag to prompt for confirmation first:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*-i*标志在删除前提示确认：
+- en: '[PRE20]'
+  id: totrans-103
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'Add the *-r* (recursive) flag to delete a directory and all of its files and
+    subdirectories. Combining *-r* with *-i* will prompt you for confirmation before
+    each deletion:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 添加*-r*（递归）标志以删除目录及其所有文件和子目录。将*-r*与*-i*结合使用将在每次删除之前提示确认：
+- en: '[PRE21]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: If you are confident you don’t need to be prompted for every deletion, omit
+    the *-i* option.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你确信不需要为每个删除操作提示确认，请省略*-i*选项。
+- en: 'This example deletes only the *jan* subdirectory:'
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例仅删除*jan*子目录：
+- en: '[PRE22]'
+  id: totrans-108
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'This example deletes the *rehearsals* directory and all of its files and subdirectories:'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例删除*rehearsals*目录及其所有文件和子目录：
+- en: '[PRE23]'
+  id: totrans-110
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'Use wildcards to match file names to delete, for example by file extension:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用通配符匹配要删除的文件名，例如按文件扩展名：
+- en: '[PRE24]'
+  id: totrans-112
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'Or by files named with the same text strings:'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者通过同一文本字符串命名的文件：
+- en: '[PRE25]'
+  id: totrans-114
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: If *rm* refuses to delete a file or directory, and you are certain you want
+    to delete it, add the *-f* (force) option.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果*rm*拒绝删除文件或目录，并且你确定要删除它，请添加*-f*（强制）选项。
+- en: Discussion
+  id: totrans-116
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*rm -rf /* will erase your entire root filesystem (if you have root privileges).
+    Some folks think it is a funny prank to tell newbies to do this. It is not funny.
+    It is fun to run it on a test machine, or on a virtual machine, and observe how
+    long the system keeps running because processes in memory are still running, even
+    though the filesystem is erased from disk.'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*rm -rf /* 将擦除整个根文件系统（如果你有根权限）。有些人认为告诉新手这样做很有趣，但实际上并不好笑。在测试机器或虚拟机上运行它，观察内存中的进程仍在运行，即使文件系统已从磁盘中删除。'
+- en: See Also
+  id: totrans-118
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 1 rm*'
+  id: totrans-119
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 rm*'
+- en: 6.5 Copying, Moving, and Renaming Files and Directories
+  id: totrans-120
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.5 复制、移动和重命名文件和目录
+- en: Problem
+  id: totrans-121
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have directories, and you have files. You want to move files into the directories,
+    change filenames, and make copies.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你有目录，也有文件。你想将文件移动到目录中，更改文件名并进行复制。
+- en: Solution
+  id: totrans-123
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use the *cp* command for copying, and the *mv* command for moving or renaming.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*cp*命令进行复制，*mv*命令进行移动或重命名。
+- en: 'This example copies two files from the current working directory into the *~/songs2*
+    directory:'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例将两个文件从当前工作目录复制到*~/songs2*目录：
+- en: '[PRE26]'
+  id: totrans-126
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: The Tilde Represents Your Home Directory
+  id: totrans-127
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 波浪号代表你的主目录
+- en: The tilde is short for your home directory, so in the example, *~/songs2* is
+    the same as */home/duchess/songs2/*.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 波浪号简写为你的主目录，所以在示例中，*~/songs2* 等同于 */home/duchess/songs2/*。
+- en: 'Copy a directory and all of its contents with the *-r* (recursive) option:'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*-r*（递归）选项复制目录及其所有内容：
+- en: '[PRE27]'
+  id: totrans-130
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'The recursive example only copies the directory and its files. Use the *--parents*
+    option to preserve parent directories. The following example copies *songs1* and
+    its contents, and preserves the filepath *duchess/music/songs2/*:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 递归示例仅复制目录及其文件。使用*--parents*选项保留父目录。以下示例复制*songs1*及其内容，并保留文件路径*duchess/music/songs2/*：
+- en: '[PRE28]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: The other contents of *duchess* and *music* are not copied, only *songs2* and
+    its contents.
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*duchess*和*music*的其他内容不会被复制，只有*songs2*及其内容。'
+- en: 'Use the *mv* command to move and rename files. This example moves two files
+    to another directory:'
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*mv*命令移动和重命名文件。此示例将两个文件移动到另一个目录：
+- en: '[PRE29]'
+  id: totrans-135
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'The following example moves a directory into another directory:'
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例将一个目录移动到另一个目录：
+- en: '[PRE30]'
+  id: totrans-137
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: Discussion
+  id: totrans-138
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Some useful *cp* options are:'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些有用的*cp*选项包括：
+- en: '*-a, --archive* preserves all the file attributes, such as mode, ownership,
+    and timestamps.'
+  id: totrans-140
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-a, --archive* 保留所有文件属性，如模式、所有权和时间戳。'
+- en: '*-i, --interactive* prompts before overwriting destination files.'
+  id: totrans-141
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-i, --interactive* 在覆盖目标文件之前提示。'
+- en: '*-u, --update* overwrites an existing destination file only if the source file
+    is newer. This saves time when you’re recopying a batch of files, and some of
+    the copies are unchanged. (*rsync* is better for efficient file transfers by copying
+    only changes, see [Chapter 7](Images/ch07.html#cha-backup-recovery).)'
+  id: totrans-142
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-u, --update* 只有当源文件更新时才覆盖现有的目标文件。这在重新复制一批文件时节省时间，而一些副本未更改。（*rsync* 更适合通过仅复制更改来进行有效文件传输，见[第
+    7 章](Images/ch07.html#cha-backup-recovery)。）'
+- en: '*mv* has some useful options:'
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*mv* 有一些有用的选项：'
+- en: '*-i, --interactive* prompts before overwriting destination files.'
+  id: totrans-144
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-i, --interactive* 在覆盖目标文件之前提示。'
+- en: '*-n, --no-clobber* prevents overwriting destination files.'
+  id: totrans-145
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-n, --no-clobber* 防止覆盖目标文件。'
+- en: '*-u, --update* moves your files only when they are newer than the destination
+    files, or when they are moved for the first time.'
+  id: totrans-146
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-u, --update* 只有当您的文件比目标文件更新或首次移动时，它才会移动。'
+- en: See Also
+  id: totrans-147
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 cp*'
+  id: totrans-148
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 cp*'
+- en: '*man 1 mv*'
+  id: totrans-149
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 mv*'
+- en: 6.6 Setting File Permissions with chmod’s Octal Notation
+  id: totrans-150
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.6 使用chmod的八进制表示设置文件权限
+- en: Problem
+  id: totrans-151
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You know that the *chmod* (change mode) command supports both octal and symbolic
+    notation, and you want to use octal notation to manage file permissions.
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你知道*chmod*（改变模式）命令支持八进制和符号表示法，你想使用八进制表示法来管理文件权限。
+- en: Solution
+  id: totrans-153
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The following examples show how to set different permissions on files using
+    octal notation. The first example grants read-write access to the owner of the
+    *file.txt* file, and excludes all access for group and world:'
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的例子展示了如何使用八进制表示法在文件上设置不同的权限。第一个例子将对*file.txt*文件的所有者授予读写访问权限，并排除组和世界的所有访问权限：
+- en: '[PRE31]'
+  id: totrans-155
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: The file owner can read, edit, and delete the file, while other users can do
+    nothing with it, not even read it, though they can see it listed in a file manager.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件所有者可以读取、编辑和删除文件，而其他用户无法对其进行任何操作，甚至无法读取它，尽管他们可以在文件管理器中看到它列出。
+- en: 'Make a file world readable and writeable, allowing everyone to do whatever
+    they want to it:'
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让一个文件对所有人都可读和可写，允许每个人都可以对其进行任意操作：
+- en: '[PRE32]'
+  id: totrans-158
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'In the next example, *file.txt* is changed to read-write for the file owner
+    and read-only for group and world:'
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一个例子中，*file.txt* 被更改为对文件所有者可读写，对组和世界只读：
+- en: '[PRE33]'
+  id: totrans-160
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'A common permission set is to give the owner and group the same permissions,
+    such as read-write, and to exclude other:'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 常见的权限设置是给所有者和组相同的权限，比如读写，并排除其他人：
+- en: '[PRE34]'
+  id: totrans-162
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'Commands and scripts require the executable bit to be set. This example makes
+    the *backup.sh* script executable and read-write for the owner, executable and
+    readable for group, and inaccessible to other:'
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令和脚本需要设置可执行位。这个例子使*backup.sh*脚本对所有者可执行和读写，对组可执行和可读，而对其他人不可访问：
+- en: '[PRE35]'
+  id: totrans-164
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: Octal notation has four fields, but you probably will use the last three fields
+    the most often, and the first field rarely. The first field is reserved for the
+    special modes (see [Recipe 6.8](#rec-sticky-octal)).
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 八进制表示法有四个字段，但你可能最常使用最后三个字段，很少使用第一个字段。第一个字段保留用于特殊模式（参见[配方 6.8](#rec-sticky-octal)）。
+- en: Discussion
+  id: totrans-166
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Octal notation uses integers 0-7\. [Table 6-1](#table-octal-notation) shows
+    the relationship between owners and permissions.
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 八进制表示法使用整数 0-7。[表 6-1](#table-octal-notation) 显示了所有者和权限之间的关系。
+- en: Table 6-1\. Octal fields
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 6-1\. 八进制字段
+- en: '| Mode | Owner | Group | Other |'
+  id: totrans-169
+  prefs: []
+  type: TYPE_TB
+  zh: '| 模式 | 所有者 | 组 | 其他 |'
+- en: '| --- | --- | --- | --- |'
+  id: totrans-170
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- | --- |'
+- en: '| Read | 4 | 4 | 4 |'
+  id: totrans-171
+  prefs: []
+  type: TYPE_TB
+  zh: '| 读取 | 4 | 4 | 4 |'
+- en: '| Write | 2 | 2 | 2 |'
+  id: totrans-172
+  prefs: []
+  type: TYPE_TB
+  zh: '| 写入 | 2 | 2 | 2 |'
+- en: '| Execute | 1 | 1 | 1 |'
+  id: totrans-173
+  prefs: []
+  type: TYPE_TB
+  zh: '| 执行 | 1 | 1 | 1 |'
+- en: '| No permission | 0 | 0 | 0 |'
+  id: totrans-174
+  prefs: []
+  type: TYPE_TB
+  zh: '| 没有权限 | 0 | 0 | 0 |'
+- en: A file or directory has one user owner, and one group owner. *Other* is everyone
+    else. A directory or executable that is unrestricted to everyone is mode 0777,
+    and an unrestricted file is mode 0666.
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个文件或目录有一个用户所有者和一个组所有者。*其他*是所有其他人。一个无限制对所有人开放的目录或可执行文件是模式 0777，无限制的文件是模式 0666。
+- en: When you’re not familiar with Linux file permissions, it might help to see them
+    in another view, like in [Table 6-2](#permission-description).
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你对Linux文件权限不熟悉时，可能帮助你以另一种视角查看它们，比如在[表 6-2](#permission-description)中。
+- en: Table 6-2\. Linux file permissions
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 6-2\. Linux 文件权限
+- en: '| Permission | Description |'
+  id: totrans-178
+  prefs: []
+  type: TYPE_TB
+  zh: '| 权限 | 描述 |'
+- en: '| --- | --- |'
+  id: totrans-179
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| *7* | Read, write, execute. Directories differ from files because all directories
+    require the executable bit set. You can assign a directory any permissions, just
+    like a file, but without the executable bit no one can enter the directory (with
+    the *cd* command or in a file manager). Scripts and binary commands must have
+    the executable bit set, or they will be treated as ordinary files. |'
+  id: totrans-180
+  prefs: []
+  type: TYPE_TB
+  zh: '| *7* | 读、写、执行。目录与文件不同，因为所有目录都需要设置可执行位。您可以为目录分配任何权限，就像为文件分配权限一样，但如果没有可执行位，没有人可以进入该目录（使用*cd*命令或文件管理器）。脚本和二进制命令必须设置可执行位，否则它们将被视为普通文件。|'
+- en: '| *6* | Read and write. |'
+  id: totrans-181
+  prefs: []
+  type: TYPE_TB
+  zh: '| *6* | 读和写。|'
+- en: '| *5* | Read and execute. This is a common permission for commands. |'
+  id: totrans-182
+  prefs: []
+  type: TYPE_TB
+  zh: '| *5* | 读和执行。这是命令常见的权限。|'
+- en: '| *4* | Read. |'
+  id: totrans-183
+  prefs: []
+  type: TYPE_TB
+  zh: '| *4* | 阅读。|'
+- en: '| *3* | Write and execute. |'
+  id: totrans-184
+  prefs: []
+  type: TYPE_TB
+  zh: '| *3* | 写入和执行。|'
+- en: '| *2* | Write. |'
+  id: totrans-185
+  prefs: []
+  type: TYPE_TB
+  zh: '| *2* | 写入。|'
+- en: '| *1* | Execute. |'
+  id: totrans-186
+  prefs: []
+  type: TYPE_TB
+  zh: '| *1* | 执行。|'
+- en: '| *0* | No permission. |'
+  id: totrans-187
+  prefs: []
+  type: TYPE_TB
+  zh: '| *0* | 无权限。|'
+- en: See Also
+  id: totrans-188
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 1 chmod*'
+  id: totrans-189
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chmod*'
+- en: '[Recipe 6.8](#rec-sticky-octal)'
+  id: totrans-190
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[示例 6.8](#rec-sticky-octal)'
+- en: 6.7 Setting Directory Permissions with chmod’s Octal Notation
+  id: totrans-191
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.7 使用chmod的八进制表示法设置目录权限
+- en: Problem
+  id: totrans-192
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You know that permissions are managed a little differently on directories, and
+    you want to manage them with chmod’s octal notation.
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您知道目录上的权限管理有些不同，并希望使用chmod的八进制表示法来管理它们。
+- en: Solution
+  id: totrans-194
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Directories must have the executable bit set. This might sound a little strange,
+    but it is necessary for entering the directory with the *cd* command or with a
+    file manager.
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目录必须设置可执行位。这听起来有些奇怪，但是对于使用*cd*命令或文件管理器进入目录是必要的。
+- en: 'The following examples creates a shared directory:'
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例创建了一个共享目录：
+- en: '[PRE36]'
+  id: totrans-197
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'This example makes */shared* read-write for the owner and read-only for everyone
+    else:'
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该示例使*/shared*对所有者为读写，对其他所有人为只读：
+- en: '[PRE37]'
+  id: totrans-199
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: The owner has unrestricted privileges to the directory. Group and world may
+    enter the directory and read files, but not edit or add files.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有者对目录有无限制的特权。组和全局可以进入目录并读取文件，但不能编辑或添加文件。
+- en: 'This example applies the same permissions to the existing contents of the directory,
+    using the *-R* (recursive) option:'
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该示例使用*-R*（递归）选项将相同的权限应用于目录中现有的内容：
+- en: '[PRE38]'
+  id: totrans-202
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'The next example restricts the directory and its existing contents to the directory
+    owner. Files and directories inside the directory may have different owners and
+    permissions, but are still inaccessible to group and world:'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一个示例将目录及其现有内容限制为目录所有者。目录内的文件和目录可能具有不同的所有者和权限，但仍然无法访问组和全局：
+- en: '[PRE39]'
+  id: totrans-204
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: 'A common permission set is to give the owner and group the same permissions,
+    such as read-write-execute, and to exclude other:'
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个常见的权限集是为所有者和组分配相同的权限，例如读-写-执行，并排除其他用户：
+- en: '[PRE40]'
+  id: totrans-206
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: Discussion
+  id: totrans-207
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You have a lot of power with groups and directories to control file access.
+    Set up groups according to function, for example various teams could each have
+    their own exclusive shared directories. Most shops don’t need super-fine-grained
+    control and default to more sharing rather than less. Whatever your needs are,
+    the old *chmod* command is still the fundamental tool for controlling file permissions.
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过组和目录具有大量权限来控制文件访问。按功能设置组，例如各个团队可以各自拥有独占的共享目录。大多数情况下不需要超精细的控制，而是默认更多的共享。无论您的需求如何，旧的*chmod*命令仍然是控制文件权限的基本工具。
+- en: See Also
+  id: totrans-209
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 1 chmod*'
+  id: totrans-210
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chmod*'
+- en: 6.8 Using the Special Modes for Special Use Cases
+  id: totrans-211
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.8 使用特殊模式处理特殊用例
+- en: Problem
+  id: totrans-212
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set some permissions not supported by the traditional user-group-other
+    set of permissions, such as allowing unprivileged users to run a command that
+    requires elevated permissions, protecting files in a directory shared by multiple
+    users, or enforcing certain file permissions in a directory.
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想设置一些传统用户-组-其他权限集不支持的权限，例如允许非特权用户运行需要高级权限的命令，保护多用户共享目录中的文件，或者在目录中强制执行某些文件权限。
+- en: Solution
+  id: totrans-214
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The special modes are *sticky bit*, *setuid*, and *setgid* (see [Table 6-3](#table-all-modes-octal)).
+    The sticky bit is applied to directories that contain files owned by multiple
+    users, to prevent users from moving, renaming, or deleting files they do not own:'
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 特殊模式包括*粘滞位*、*setuid*和*setgid*（见[表 6-3](#table-all-modes-octal)）。粘滞位适用于包含多用户拥有文件的目录，以防止用户移动、重命名或删除他们不拥有的文件：
+- en: '[PRE41]'
+  id: totrans-216
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: '*setuid* is applied to executable files, to elevate any user running the command
+    to the same permissions as the owner:'
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setuid* 应用于可执行文件，以将运行该命令的任何用户提升到与所有者相同的权限：'
+- en: '[PRE42]'
+  id: totrans-218
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: 'Apply *setgid* to a directory, so that all newly created files in the directory
+    are assigned to the same group as the directory’s group owner. This is a nice
+    trick for enforcing correct ownership in a shared directory:'
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 *setgid* 应用于目录，以便在目录中创建的所有新文件都分配给与目录组所有者相同的组。这是在共享目录中强制正确所有权的一个好方法：
+- en: '[PRE43]'
+  id: totrans-220
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: '*setgid* may also be applied to files, changing the effective group of the
+    user to the same group as the file owner.'
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setgid* 也可以应用于文件，将用户的有效组更改为与文件所有者相同的组。'
+- en: Discussion
+  id: totrans-222
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*setgid* and *setuid* have the potential to create security holes for an intruder
+    or an untrustworthy user. It is a best practice to use them only when you can’t
+    think of a safer way to accomplish what you want to do, such as using group assignments
+    or *sudo*.'
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setgid* 和 *setuid* 有可能为入侵者或不可信用户创建安全漏洞。最佳实践是只有在无法想到更安全的方法来完成所需操作时，才使用它们，比如使用组分配或
+    *sudo*。'
+- en: '*setuid* is useful for executable files.'
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setuid* 对可执行文件很有用。'
+- en: '*setgid* is useful for directories and files.'
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setgid* 对目录和文件都很有用。'
+- en: The sticky bit is only for directories. [Table 6-3](#table-all-modes-octal)
+    shows the relationship of permissions to owners.
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 粘性位仅适用于目录。[表 6-3](#table-all-modes-octal) 显示了权限与所有者的关系。
+- en: Table 6-3\. Octal fields
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 6-3\. 八进制字段
+- en: '| Mode | Special modes | Owner | Group | World |'
+  id: totrans-228
+  prefs: []
+  type: TYPE_TB
+  zh: '| 模式 | 特殊模式 | 所有者 | 组 | 世界 |'
+- en: '| --- | --- | --- | --- | --- |'
+  id: totrans-229
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- |'
+- en: '| Read |  | 4 | 4 | 4 |'
+  id: totrans-230
+  prefs: []
+  type: TYPE_TB
+  zh: '| 读取 |  | 4 | 4 | 4 |'
+- en: '| Write |  | 2 | 2 | 2 |'
+  id: totrans-231
+  prefs: []
+  type: TYPE_TB
+  zh: '| 写入 |  | 2 | 2 | 2 |'
+- en: '| Execute |  | 1 | 1 | 1 |'
+  id: totrans-232
+  prefs: []
+  type: TYPE_TB
+  zh: '| 执行 |  | 1 | 1 | 1 |'
+- en: '| setuid | 4 |  |  |  |'
+  id: totrans-233
+  prefs: []
+  type: TYPE_TB
+  zh: '| 设置UID | 4 |  |  |  |'
+- en: '| setgid | 2 |  |  |  |'
+  id: totrans-234
+  prefs: []
+  type: TYPE_TB
+  zh: '| setgid | 2 |  |  |  |'
+- en: '| Sticky bit | 1 |  |  |  |'
+  id: totrans-235
+  prefs: []
+  type: TYPE_TB
+  zh: '| 粘性位 | 1 |  |  |  |'
+- en: '| No permission | 0 | 0 | 0 | 0 |'
+  id: totrans-236
+  prefs: []
+  type: TYPE_TB
+  zh: '| 无权限 | 0 | 0 | 0 | 0 |'
+- en: The special mode values may be combined (see [Table 6-4](#table-special-values-octal)).
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可以组合特殊模式值（参见 [表 6-4](#table-special-values-octal)）。
+- en: Table 6-4\. Sticky bit/setgid/setuid values
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 6-4\. 粘性位/setgid/setuid 值
+- en: '| Option name | Octal value |'
+  id: totrans-239
+  prefs: []
+  type: TYPE_TB
+  zh: '| 选项名称 | 八进制值 |'
+- en: '| --- | --- |'
+  id: totrans-240
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| No option set | 0 |'
+  id: totrans-241
+  prefs: []
+  type: TYPE_TB
+  zh: '| 无选项设置 | 0 |'
+- en: '| Sticky bit set | 1 |'
+  id: totrans-242
+  prefs: []
+  type: TYPE_TB
+  zh: '| 设置粘性位 | 1 |'
+- en: '| setgid | 2 |'
+  id: totrans-243
+  prefs: []
+  type: TYPE_TB
+  zh: '| setgid | 2 |'
+- en: '| Sticky bit and setgid | 3 |'
+  id: totrans-244
+  prefs: []
+  type: TYPE_TB
+  zh: '| 粘性位和 setgid | 3 |'
+- en: '| setuid | 4 |'
+  id: totrans-245
+  prefs: []
+  type: TYPE_TB
+  zh: '| 设置UID | 4 |'
+- en: '| Sticky bit and setuid | 5 |'
+  id: totrans-246
+  prefs: []
+  type: TYPE_TB
+  zh: '| 粘性位和设置UID | 5 |'
+- en: '| setgid and setuid | 6 |'
+  id: totrans-247
+  prefs: []
+  type: TYPE_TB
+  zh: '| setgid 和 setuid | 6 |'
+- en: '| Sticky bit, setgid, and setuid | 7 |'
+  id: totrans-248
+  prefs: []
+  type: TYPE_TB
+  zh: '| 粘性位、setgid 和 setuid | 7 |'
+- en: 'A more descriptive name for the sticky bit is *restricted deletion bit*. This
+    bit prevents unprivileged users from removing or renaming a file in a directory,
+    unless they own the file. You can see this on your */tmp* directory, which is
+    world readable and writeable, and contains files owned by multiple users. Using
+    the sticky bit prevents users from moving, renaming, or deleting files they do
+    not own, even if they have write privileges on some files they do not own:'
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 粘性位的更具描述性的名称是 *受限删除位*。此位防止非特权用户在目录中删除或重命名文件，除非它们拥有该文件。您可以在 */tmp* 目录上看到这一点，该目录对所有用户都可读和可写，并包含由多个用户拥有的文件。使用粘性位防止用户移动、重命名或删除他们不拥有的文件，即使他们对某些他们不拥有的文件有写权限：
+- en: '[PRE44]'
+  id: totrans-250
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: The sticky bit is the 1 in 1777.
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 粘性位是 1777 中的 1。
+- en: '*setgid* means set group user identification, and *setuid* is set user identification.
+    These are used to elevate the permissions of an unprivileged user to the same
+    as the user or group owner. This is how unprivileged users can use the *passwd*
+    command to change their own passwords, even though only root has write permissions
+    on */etc/passwd*, and everyone else has only read and execute permissions:'
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setgid* 意味着设置组用户标识，而 *setuid* 是设置用户标识。它们用于将非特权用户的权限提升到与用户或组所有者相同的级别。这就是非特权用户如何能够使用
+    *passwd* 命令更改自己的密码，即使只有 root 对 */etc/passwd* 有写权限，而其他人只有读和执行权限：'
+- en: '[PRE45]'
+  id: totrans-253
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: In */etc/passwd* the 4 in 4755 is *setuid*, which means all users have root
+    powers when they run the command, though their powers are limited to changing
+    their own passwords.
+  id: totrans-254
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 */etc/passwd* 中的 4755 中的 4 是 *setuid*，这意味着所有用户在运行命令时具有 root 权限，尽管它们的权限仅限于更改自己的密码。
+- en: See Also
+  id: totrans-255
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 1 chmod*'
+  id: totrans-256
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chmod*'
+- en: 6.9 Removing the Special Modes in Octal Notation
+  id: totrans-257
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.9 使用八进制表示法删除特殊模式
+- en: Problem
+  id: totrans-258
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to remove the special modes from a file or directory.
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要从文件或目录中删除特殊模式。
+- en: Solution
+  id: totrans-260
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Removing a special mode is a little different from setting it because you need
+    to use an extra leading zero, as in the following example:'
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 删除特殊模式与设置不同，因为您需要使用额外的前导零，如以下示例：
+- en: '[PRE46]'
+  id: totrans-262
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: 'Or replace the leading zeroes with a leading equals sign:'
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者用等号替换前导零：
+- en: '[PRE47]'
+  id: totrans-264
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: See Also
+  id: totrans-265
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 1 chmod*'
+  id: totrans-266
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chmod*'
+- en: 6.10 Setting File Permissions with chmod’s Symbolic Notation
+  id: totrans-267
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.10 使用 chmod 符号表示设置文件权限
+- en: Problem
+  id: totrans-268
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You know that the *chmod* (change mode) command supports both octal and symbolic
+    notation, and you want to use symbolic notation to manage file permissions.
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你知道 *chmod*（更改模式）命令支持八进制和符号表示法，而你希望使用符号表示法来管理文件权限。
+- en: Solution
+  id: totrans-270
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Symbolic notation is more complex than octal notation and behaves differently
+    according to which operator you use.
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 符号表示法比八进制表示法更复杂，并且根据使用的操作符行为不同。
+- en: 'There are three operators: +, -, and =. You can change permissions for everyone
+    with the *a* flag, or individually with *u* for the file owner, *g* for the group,
+    and *-o* for other, which is everyone else:'
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有三个操作符：+、- 和 =。你可以使用 *a* 标志更改每个人的权限，或者使用 *u* 为文件所有者，*g* 为组，*-o* 为其他人（即所有其他人）逐个更改。
+- en: '*+* adds to existing permissions.'
+  id: totrans-273
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*+* 添加到现有权限。'
+- en: '*-* subtracts from existing permissions.'
+  id: totrans-274
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-* 从现有权限中减去。'
+- en: '*=* adds new permissions, and removes any permission bits not listed.'
+  id: totrans-275
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*=* 添加新权限，并删除未列出的任何权限位。'
+- en: 'Suppose that *file.txt* is owner read-write, group read, and other read, or
+    *-rw-r--r--*:'
+  id: totrans-276
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设 *file.txt* 是所有者读写，组读取，其他人读取，或者 *-rw-r--r--*：
+- en: '[PRE48]'
+  id: totrans-277
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE48]'
+- en: 'You want to change it to *-rw-rw-rw-*. Add write permissions to group and other:'
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想把它改成 *-rw-rw-rw-*。给组和其他人增加写权限：
+- en: '[PRE49]'
+  id: totrans-279
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE49]'
+- en: You could also use *a=rw*.
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你也可以使用 *a=rw*。
+- en: 'In the next example the owner of *file.txt* changes it from world readable
+    and writeable to only the file owner can edit it, and group and world can only
+    read it:'
+  id: totrans-281
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一个例子中，*file.txt* 的所有者将其从全局可读可写更改为仅文件所有者可编辑，组和全局只能读取：
+- en: '[PRE50]'
+  id: totrans-282
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE50]'
+- en: 'A common permission set is to give the owner and group the same permissions,
+    such as read-write, and to exclude other:'
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 常见的权限设置是给所有者和组相同的权限，比如读写，并排除其他人：
+- en: '[PRE51]'
+  id: totrans-284
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE51]'
+- en: 'Commands and scripts require the executable bit to be set. This example adds
+    the executable bit to the existing permissions for the file owner:'
+  id: totrans-285
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令和脚本需要设置可执行位。此示例为文件所有者添加可执行位到现有权限：
+- en: '[PRE52]'
+  id: totrans-286
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE52]'
+- en: 'The **`=`** operator is useful for overwriting existing permissions:'
+  id: totrans-287
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '**`=`** 操作符用于覆盖现有权限：'
+- en: '[PRE53]'
+  id: totrans-288
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE53]'
+- en: Discussion
+  id: totrans-289
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The key to using *chmod*’s symbolic notation reliably is to always be explicit
+    and to be mindful of the existing permissions. Add and subtract from existing
+    permissions (except with the = operator, which overwrites), and specify *u*, *g*,
+    *o*, or *-a*.
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *chmod* 符号表示法的关键是始终要明确，并且要注意现有权限。添加和减去现有权限（除了使用 = 操作符会覆盖之外），并指定 *u*、*g*、*o*
+    或 *-a*。
+- en: '*symbolic* notation is designed to be mnemonic, *r* for read, *w* for write,
+    and *x* for execute ([Table 6-5](#table-symbolic-notation-permissions)).'
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*符号* 表示法设计为助记，*r* 代表读取，*w* 代表写入，*x* 代表执行（参见 [表6-5](#table-symbolic-notation-permissions)）。'
+- en: Table 6-5\. Symbolic notation permissions
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表6-5\. 符号表示权限
+- en: '| Mode | Value |'
+  id: totrans-293
+  prefs: []
+  type: TYPE_TB
+  zh: '| 模式 | 值 |'
+- en: '| --- | --- |'
+  id: totrans-294
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| r | read |'
+  id: totrans-295
+  prefs: []
+  type: TYPE_TB
+  zh: '| r | 读取 |'
+- en: '| w | write |'
+  id: totrans-296
+  prefs: []
+  type: TYPE_TB
+  zh: '| w | 写入 |'
+- en: '| x | execute |'
+  id: totrans-297
+  prefs: []
+  type: TYPE_TB
+  zh: '| x | 执行 |'
+- en: The notation for users and groups is also mnemonic ([Table 6-6](#table-symbolic-notation-owners)).
+  id: totrans-298
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户和组的表示法也是助记的（参见 [表6-6](#table-symbolic-notation-owners)）。
+- en: Table 6-6\. Symbolic notation owners
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表6-6\. 符号表示所有者
+- en: '| Owner | Notation |'
+  id: totrans-300
+  prefs: []
+  type: TYPE_TB
+  zh: '| 所有者 | 表示 |'
+- en: '| --- | --- |'
+  id: totrans-301
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| user | u |'
+  id: totrans-302
+  prefs: []
+  type: TYPE_TB
+  zh: '| 用户 | u |'
+- en: '| group | g |'
+  id: totrans-303
+  prefs: []
+  type: TYPE_TB
+  zh: '| 组 | g |'
+- en: '| other | o |'
+  id: totrans-304
+  prefs: []
+  type: TYPE_TB
+  zh: '| 其他 | o |'
+- en: '| all | a |'
+  id: totrans-305
+  prefs: []
+  type: TYPE_TB
+  zh: '| 所有 | a |'
+- en: Just like octal notation, symbolic notation also supports the special modes
+    (see [Recipe 6.11](#rec-sticky-symbolic)).
+  id: totrans-306
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就像八进制表示法一样，符号表示法也支持特殊模式（参见 [食谱6.11](#rec-sticky-symbolic)）。
+- en: 'There are 10 values in symbolic notation, and unset values (which mean no permissions)
+    are represented by a dash, like this example for Duchess’s home directory:'
+  id: totrans-307
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 符号表示法中有10个值，未设置的值（表示没有权限）用破折号表示，例如杜切斯的主目录示例：
+- en: '[PRE54]'
+  id: totrans-308
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE54]'
+- en: In *drwxr-xr-x*, the *d* indicates that this is a directory. There is no comparable
+    value in octal notation.
+  id: totrans-309
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 *drwxr-xr-x* 中，*d* 表示这是一个目录。在八进制表示法中没有可比值。
+- en: The remaining nine values are divided into three triads, and the three values
+    in each triad represent read, write, and execute.
+  id: totrans-310
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 剩下的九个值被分为三个三重组，每个三重组中的三个值代表读、写和执行。
+- en: See Also
+  id: totrans-311
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 chmod*'
+  id: totrans-312
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chmod*'
+- en: 6.11 Setting the Special Modes with chmod’s Symbolic Notation
+  id: totrans-313
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.11 使用 *chmod* 符号表示法设置特殊模式
+- en: Problem
+  id: totrans-314
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set special modes with *chmod*’s symbolic notation.
+  id: totrans-315
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要使用 *chmod* 的符号表示法设置特殊模式。
+- en: Solution
+  id: totrans-316
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The special modes include the *sticky bit*, *setuid*, and *setgid*. These are
+    all set in the executable fields. (See the end of the Discussion in [Recipe 6.10](#rec-chmod-symbolic)
+    if you are not sure what the executable fields are.)
+  id: totrans-317
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 特殊模式包括粘着位、*setuid* 和 *setgid*。这些都在可执行字段中设置。（如果您不确定可执行字段是什么，请参阅 [Recipe 6.10](#rec-chmod-symbolic)
+    讨论的末尾。）
+- en: 'The sticky bit is applied to directories that contain files owned by multiple
+    users to prevent nonowners from moving, renaming, or deleting the files:'
+  id: totrans-318
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 粘着位适用于包含由多个用户拥有的文件的目录，以防止非所有者移动、重命名或删除文件：
+- en: '[PRE55]'
+  id: totrans-319
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE55]'
+- en: 'Apply *setgid* to a directory to set all newly created files in the directory
+    to the same group as the directory. This is a nice trick for enforcing correct
+    ownership in a shared directory:'
+  id: totrans-320
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 *setgid* 应用于目录，以使目录中所有新创建的文件的组与目录相同。这是一个很好的技巧，可以强制在共享目录中确保正确的所有权：
+- en: '[PRE56]'
+  id: totrans-321
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE56]'
+- en: 'Apply *setuid* to an executable file to allow nonroot users to run the executable:'
+  id: totrans-322
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 *setuid* 应用于可执行文件，以允许非 root 用户运行该可执行文件：
+- en: '[PRE57]'
+  id: totrans-323
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE57]'
+- en: '*setuid* and *setgid* have the potential to open security holes; see the Discussion
+    to learn more.'
+  id: totrans-324
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setuid* 和 *setgid* 有可能会存在安全漏洞；请参见讨论了解更多信息。'
+- en: Discussion
+  id: totrans-325
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*setuid* is useful for executable files.'
+  id: totrans-326
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setuid* 对可执行文件很有用。'
+- en: '*setgid* is useful for directories and files.'
+  id: totrans-327
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setgid* 对目录和文件都很有用。'
+- en: The sticky bit is only for directories.
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 粘着位仅适用于目录。
+- en: '[Table 6-7](#table-all-modes-symbolic) shows the relationship between owners
+    and modes.'
+  id: totrans-329
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表 6-7](#table-all-modes-symbolic) 显示所有者和模式之间的关系。'
+- en: Table 6-7\. All symbolic modes
+  id: totrans-330
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 6-7\. 所有符号模式
+- en: '| Mode | User | Group | Other |'
+  id: totrans-331
+  prefs: []
+  type: TYPE_TB
+  zh: '| 模式 | 用户 | 组 | 其他 |'
+- en: '| --- | --- | --- | --- |'
+  id: totrans-332
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- | --- |'
+- en: '| Read | r | r | r |'
+  id: totrans-333
+  prefs: []
+  type: TYPE_TB
+  zh: '| 读取 | r | r | r |'
+- en: '| Write | w | w | w |'
+  id: totrans-334
+  prefs: []
+  type: TYPE_TB
+  zh: '| 写入 | w | w | w |'
+- en: '| Execute | x | x | x |'
+  id: totrans-335
+  prefs: []
+  type: TYPE_TB
+  zh: '| 执行 | x | x | x |'
+- en: '| setuid | s |  |  |'
+  id: totrans-336
+  prefs: []
+  type: TYPE_TB
+  zh: '| setuid | s |  |  |'
+- en: '| setgid |  | s |  |'
+  id: totrans-337
+  prefs: []
+  type: TYPE_TB
+  zh: '| setgid |  | s |  |'
+- en: '| Sticky bit |  |  | t |'
+  id: totrans-338
+  prefs: []
+  type: TYPE_TB
+  zh: '| 粘着位 |  |  | t |'
+- en: 'A more descriptive name for the sticky bit is *restricted deletion bit*. This
+    prevents users from removing or renaming a file in a directory unless they own
+    the file. You can see this on your */tmp* directory, which is world readable and
+    writeable, and contains files for multiple users. Using the sticky bit prevents
+    users from moving, renaming, or deleting files they do not own:'
+  id: totrans-339
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 粘着位的一个更具描述性的名称是 *restricted deletion bit*。这可以防止用户在不拥有文件的情况下删除或重命名目录中的文件。您可以在您的
+    */tmp* 目录中看到这一点，该目录是全局可读写的，并包含多个用户的文件。使用粘着位可以防止用户移动、重命名或删除他们不拥有的文件：
+- en: '[PRE58]'
+  id: totrans-340
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE58]'
+- en: '*setgid* means set group identification, and *setuid* is set user identification.
+    These are used to elevate the permissions of an unprivileged user to the same
+    as the file owner. This is how unprivileged users can use the *passwd* command
+    to change their own passwords, even though only root has write permissions on
+    */etc/passwd*, and everyone else has only read and execute permissions:'
+  id: totrans-341
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setgid* 意味着设置组标识，*setuid* 意味着设置用户标识。这些用于将非特权用户的权限提升到与文件所有者相同的级别。这就是非特权用户如何能够使用*passwd*命令来更改自己的密码，尽管只有
+    root 用户对 */etc/passwd* 具有写权限，而其他所有用户仅具有读和执行权限：'
+- en: '[PRE59]'
+  id: totrans-342
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE59]'
+- en: '*rws* in the user fields means read, write, and execute for all users, with
+    the same permissions as the file owner.'
+  id: totrans-343
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户字段中的 *rws* 表示对所有用户具有与文件所有者相同的读、写和执行权限。
+- en: '*setgid* and *setuid* have the potential to create security holes. It is a
+    best practice to use them only when you can’t devise a safer way to accomplish
+    what you want to do, such as using group assignments or *sudo*.'
+  id: totrans-344
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*setgid* 和 *setuid* 有可能会造成安全漏洞。最好的做法是只有在无法想出更安全的方法来完成所需操作时才使用它们，例如使用组分配或 *sudo*。'
+- en: See Also
+  id: totrans-345
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 chmod*'
+  id: totrans-346
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chmod*'
+- en: 6.12 Setting Permissions in Batches with chmod
+  id: totrans-347
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.12 使用 chmod 批量设置权限
+- en: Problem
+  id: totrans-348
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set permissions on more than one file at a time.
+  id: totrans-349
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要一次设置多个文件的权限。
+- en: Solution
+  id: totrans-350
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*chmod* supports operating on lists of files. You can also use the *find* command
+    and shell wildcards to select the files you want to change.'
+  id: totrans-351
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*chmod* 支持对文件列表进行操作。您也可以使用 *find* 命令和 shell 通配符选择要更改的文件。'
+- en: You May Need sudo
+  id: totrans-352
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 您可能需要 sudo
+- en: If you see “Permission denied” messages, use *sudo*.
+  id: totrans-353
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果看到“权限被拒绝”消息，请使用 *sudo*。
+- en: 'The following example takes a space-delimited list of files and makes them
+    all read-only for everyone:'
+  id: totrans-354
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例将以空格分隔的文件列表设置为所有用户均只读：
+- en: '[PRE60]'
+  id: totrans-355
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE60]'
+- en: 'Set permissions for a directory and its contents, including subdirectories,
+    with the *-R* (recursive) flag:'
+  id: totrans-356
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置目录及其内容（包括子目录）的权限，使用*-R*（递归）标志：
+- en: '[PRE61]'
+  id: totrans-357
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE61]'
+- en: 'You may use wildcards to select files; for example, to make all *.txt* files
+    in the current directory readable and writable to the owner, and to make group
+    and other readable:'
+  id: totrans-358
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用通配符选择文件；例如，使当前目录中的所有*.txt*文件对所有者可读写，并使组和其他人可读：
+- en: '[PRE62]'
+  id: totrans-359
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE62]'
+- en: 'Use a wildcard to select all filenames that start with the same string:'
+  id: totrans-360
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用通配符选择所有以相同字符串开头的文件名：
+- en: '[PRE63]'
+  id: totrans-361
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE63]'
+- en: 'This example makes all files in the current directory read-write for the owner
+    and group, without changing permissions on the directory:'
+  id: totrans-362
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例使当前目录中的所有文件对所有者和组可读写，而不更改目录权限：
+- en: '[PRE64]'
+  id: totrans-363
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE64]'
+- en: 'You can change the mode of all files belonging to a particular user. You may
+    name the user with either their numeric ID or username. This example starts at
+    the root of the filesystem:'
+  id: totrans-364
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以更改属于特定用户的所有文件的模式。您可以使用用户的数字ID或用户名命名用户。此示例从文件系统的根目录开始：
+- en: '[PRE65]'
+  id: totrans-365
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE65]'
+- en: Discussion
+  id: totrans-366
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You need root privileges to search for files in all directories.
+  id: totrans-367
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要具有根权限才能在所有目录中搜索文件。
+- en: The dot (*find .*) tells *find* to start its search in the current directory.
+    You can start your search in any directory.
+  id: totrans-368
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 点号（*find .*）告诉*find*从当前目录开始搜索。您可以从任何目录开始搜索。
+- en: '*-type* limits the results to files, and not directories.'
+  id: totrans-369
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-type* 将结果限制为文件，而不是目录。'
+- en: '*-user* looks for files owned by the specified user.'
+  id: totrans-370
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-user* 查找由指定用户拥有的文件。'
+- en: '*-exec chmod -v 660 {} \;* is a fabulous little incantation that takes the
+    results of the *find* search and runs the *chmod -v 660* command on the results.
+    You can use this for pretty much any command that you want to apply to the results
+    of a *find* search.'
+  id: totrans-371
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-exec chmod -v 660 {} \;* 是一个神奇的小咒语，它接受*find*搜索的结果并在结果上运行*chmod -v 660*命令。您可以将其用于几乎任何您想要应用于*find*搜索结果的命令。'
+- en: See Also
+  id: totrans-372
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 chmod*'
+  id: totrans-373
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chmod*'
+- en: '*man 1 find*'
+  id: totrans-374
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 find*'
+- en: 6.13 Setting File and Directory Ownership with chown
+  id: totrans-375
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.13 使用chown设置文件和目录所有权
+- en: Problem
+  id: totrans-376
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to change ownership on a file or directory.
+  id: totrans-377
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要更改文件或目录的所有权。
+- en: Solution
+  id: totrans-378
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *chown* (change owner) command to change file ownership. The basic
+    command syntax is *chown user:group filename*. You may change only the owner,
+    *chown user: filename*, or only the group, *chown :group filename*.'
+  id: totrans-379
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '使用*chown*（更改所有者）命令更改文件所有权。基本命令语法为*chown 用户:组 文件名*。您可以仅更改所有者，*chown 用户: 文件名*，或仅更改组，*chown
+    :组 文件名*。'
+- en: 'Changing the owner requires root privileges:'
+  id: totrans-380
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改所有者需要根权限：
+- en: '[PRE66]'
+  id: totrans-381
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE66]'
+- en: 'Change the group owner:'
+  id: totrans-382
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改组所有者：
+- en: '[PRE67]'
+  id: totrans-383
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE67]'
+- en: 'Change both the user and group owner:'
+  id: totrans-384
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改用户和组所有者：
+- en: '[PRE68]'
+  id: totrans-385
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE68]'
+- en: Discussion
+  id: totrans-386
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You need root privileges to make changes to files you do not own and to transfer
+    file ownership to another user. You can change group file ownership without root
+    privileges when you belong to both the original group and the new group.
+  id: totrans-387
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要根权限才能更改您不拥有的文件，并将文件所有权转移给另一个用户。如果您属于原始组和新组，则可以在没有根权限的情况下更改组文件所有权。
+- en: The colon is optional when you change only the owner and required when you change
+    the group.
+  id: totrans-388
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您仅更改所有者时冒号是可选的，而更改组时则是必需的。
+- en: See Also
+  id: totrans-389
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 chown*'
+  id: totrans-390
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chown*'
+- en: 6.14 Changing Ownership on Batches of Files with chown
+  id: totrans-391
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.14 使用chown批量更改所有者
+- en: Problem
+  id: totrans-392
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to change ownership of directories and their contents, or just the
+    contents of directories, a list of files, or change ownership of files from one
+    user to another.
+  id: totrans-393
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望更改目录及其内容的所有权，或仅更改目录内容，文件列表，或将文件所有权从一个用户更改为另一个用户。
+- en: Solution
+  id: totrans-394
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*chown* supports operating on lists of files. You can also use the *find* command
+    and shell wildcards to list the files you want to change.'
+  id: totrans-395
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*chown*支持操作文件列表。您还可以使用*find*命令和shell通配符列出要更改的文件。'
+- en: 'To change the owner of several files at once with *chown*, use a space-delimited
+    list:'
+  id: totrans-396
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使用*chown*同时更改多个文件的所有者，请使用空格分隔的文件列表：
+- en: '[PRE69]'
+  id: totrans-397
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE69]'
+- en: 'Change files with a certain file extension in the current directory to a new
+    group:'
+  id: totrans-398
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将当前目录中具有特定文件扩展名的文件更改为新组：
+- en: '[PRE70]'
+  id: totrans-399
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE70]'
+- en: 'Give all of a user’s files in a directory to another user, using their numeric
+    UIDs or usernames:'
+  id: totrans-400
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将一个目录中一个用户的所有文件转移到另一个用户，使用其数字UID或用户名：
+- en: '[PRE71]'
+  id: totrans-401
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE71]'
+- en: 'Use the -find_ command to traverse the entire filesystem, or any directory
+    and its subdirectories, to give all of a user’s files to another user:'
+  id: totrans-402
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*-find_*命令遍历整个文件系统，或任何目录及其子目录，将一个用户的所有文件转移到另一个用户：
+- en: '[PRE72]'
+  id: totrans-403
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE72]'
+- en: Discussion
+  id: totrans-404
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Transferring ownership of all of a user’s files to another user, or to a different
+    group, is useful for cleaning up after users who no longer have accounts on the
+    system.
+  id: totrans-405
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将所有用户文件的所有权转移给另一个用户，或转移到不同的组，对于清理不再在系统上有帐户的用户非常有用。
+- en: See Also
+  id: totrans-406
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 chown*'
+  id: totrans-407
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chown*'
+- en: 6.15 Setting Default Permissions with umask
+  id: totrans-408
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.15 使用 umask 设置默认权限
+- en: Problem
+  id: totrans-409
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to understand why files are created with a certain set of default permissions,
+    and how to configure the defaults yourself.
+  id: totrans-410
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要理解为什么文件以一定的默认权限创建，以及如何自己配置这些默认设置。
+- en: Solution
+  id: totrans-411
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The umask (user file-creation mode mask) controls this behavior. To see what
+    yours is, run the *umask* command:'
+  id: totrans-412
+  prefs: []
+  type: TYPE_NORMAL
+  zh: umask（用户文件创建模式掩码）控制这种行为。要查看你的 umask 是什么，请运行 *umask* 命令：
+- en: '[PRE73]'
+  id: totrans-413
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE73]'
+- en: 'This is how it looks it in symbolic notation:'
+  id: totrans-414
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是用符号表示法表示的样子：
+- en: '[PRE74]'
+  id: totrans-415
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE74]'
+- en: This sets your default permissions to 0775 for directories and 0664 for files,
+    because the umask “masks” the hardcoded default permissions of 0777 and 0666\.
+    Or you can think of it as subtraction, 0777 - 0002 = 0775.
+  id: totrans-416
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将将你的默认权限设置为目录 0775 和文件 0664，因为 umask “掩盖” 了硬编码的默认权限 0777 和 0666。或者你可以将其看作减法，0777
+    - 0002 = 0775。
+- en: 'To change your umask temporarily for the duration of your current session,
+    set it this way:'
+  id: totrans-417
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在当前会话期间临时更改你的 umask，请按以下方式设置：
+- en: '[PRE75]'
+  id: totrans-418
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE75]'
+- en: Set the umask permanently by inserting the line *umask 0022*, or whatever value
+    you want, in your *~/.bashrc* file.
+  id: totrans-419
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在你的 *~/.bashrc* 文件中插入一行 *umask 0022* 或你想要的任何值来永久设置 umask。
+- en: 'Set the default umask for all of your users in */etc/login.defs*:'
+  id: totrans-420
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 */etc/login.defs* 中为所有用户设置默认的 umask：
+- en: '[PRE76]'
+  id: totrans-421
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE76]'
+- en: '[Table 6-8](#table-common-umask) shows some common umask values.'
+  id: totrans-422
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表 6-8](#table-common-umask) 显示了一些常见的 umask 值。'
+- en: Discussion
+  id: totrans-423
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*umask* is a Bash shell built-in, and not an executable program stored in */bin*,
+    */usr/bin*, or any of the other *bin* (binary) directories.'
+  id: totrans-424
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*umask* 是 Bash shell 的内置命令，不是存储在 */bin*、*/usr/bin* 或任何其他 *bin*（二进制）目录中的可执行程序。'
+- en: '[Table 6-8](#table-common-umask) lists some commonly used umask values.'
+  id: totrans-425
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表 6-8](#table-common-umask) 列出了一些常用的 umask 值。'
+- en: Table 6-8\. Common umask values
+  id: totrans-426
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 6-8\. 常见 umask 值
+- en: '| umask | Directories | Files |'
+  id: totrans-427
+  prefs: []
+  type: TYPE_TB
+  zh: '| umask | 目录 | 文件 |'
+- en: '| --- | --- | --- |'
+  id: totrans-428
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| 0002 | 0775 | 0664 |'
+  id: totrans-429
+  prefs: []
+  type: TYPE_TB
+  zh: '| 0002 | 0775 | 0664 |'
+- en: '| 0022 | 0755 | 0644 |'
+  id: totrans-430
+  prefs: []
+  type: TYPE_TB
+  zh: '| 0022 | 0755 | 0644 |'
+- en: '| 0007 | 0770 | 0660 |'
+  id: totrans-431
+  prefs: []
+  type: TYPE_TB
+  zh: '| 0007 | 0770 | 0660 |'
+- en: '| 0077 | 0700 | 0600 |'
+  id: totrans-432
+  prefs: []
+  type: TYPE_TB
+  zh: '| 0077 | 0700 | 0600 |'
+- en: See Also
+  id: totrans-433
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 chmod*'
+  id: totrans-434
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chmod*'
+- en: See the Shell Builtin Commands section of *man 1 bash* to learn more about *umask*
+    and other Bash built-in commands
+  id: totrans-435
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 参见 *man 1 bash* 的 Shell 内置命令部分，了解 *umask* 和其他 Bash 内置命令的更多信息。
+- en: 6.16 Creating Shortcuts (Soft and Hard Links) to Files and Directories
+  id: totrans-436
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.16 创建文件和目录的快捷方式（软链接和硬链接）
+- en: Problem
+  id: totrans-437
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create shortcuts or links to files.
+  id: totrans-438
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要创建文件的快捷方式或链接。
+- en: Solution
+  id: totrans-439
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'There are two types of links in Linux: soft links and hard links. Soft links
+    are for files and directories. Hard links are only for files.'
+  id: totrans-440
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 中有两种链接类型：软链接和硬链接。软链接适用于文件和目录。硬链接仅适用于文件。
+- en: 'Use the *ln* (link) command to create soft and hard links. The following example
+    creates a soft link to an external directory, */files/userstuff*, in Mad Max’s
+    home directory:'
+  id: totrans-441
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *ln*（链接）命令创建软链接和硬链接。以下示例在 Mad Max 的主目录中创建一个指向外部目录 */files/userstuff* 的软链接：
+- en: '[PRE77]'
+  id: totrans-442
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE77]'
+- en: '*/files/userstuff* is the target, and *stuff* is the destination, or soft link
+    name. You can name your soft links anything you want, and move and delete them
+    without affecting their targets. When you open a soft link, it behaves the same
+    way as opening the target.'
+  id: totrans-443
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/files/userstuff* 是目标，而 *stuff* 是目标或软链接名称。你可以任意命名你的软链接，并且移动或删除它们而不影响它们的目标。当你打开一个软链接时，它的行为与打开目标相同。'
+- en: 'Hard links are copies of files. The default for the *ln* command is to create
+    hard links:'
+  id: totrans-444
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 硬链接是文件的副本。 *ln* 命令的默认设置是创建硬链接：
+- en: '[PRE78]'
+  id: totrans-445
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE78]'
+- en: Discussion
+  id: totrans-446
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Soft links are for files and directories, while hard links are only for files.
+  id: totrans-447
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 软链接适用于文件和目录，而硬链接仅适用于文件。
+- en: Soft links
+  id: totrans-448
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 软链接
+- en: Soft links are more commonly called *symlinks*, short for symbolic links.
+  id: totrans-449
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 软链接更常被称为 *symlinks*，是 symbolic links 的缩写。
+- en: Symlinks point to files and directories. When the target of a symlink is deleted,
+    renamed, or moved, the symlink is broken. If you create a new file with the same
+    name as the deleted file, the symlink is restored, even if the content is different.
+  id: totrans-450
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 符号链接指向文件和目录。当符号链接的目标被删除、重命名或移动时，符号链接就会断开。如果你用一个与已删除文件同名但内容不同的新文件替换它，符号链接就会恢复。
+- en: Symlinks can cross filesystems. You can even create symlinks to files or directories
+    that are not permanently available, like USB storage devices or network file shares.
+  id: totrans-451
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 符号链接可以跨文件系统。你甚至可以创建指向永久不可用的文件或目录（如 USB 存储设备或网络文件共享）的符号链接。
+- en: Symlinks are not updated when the target changes (renamed, moved, or deleted).
+    You need to create a new symlink and delete the old one.
+  id: totrans-452
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当目标更改（重命名、移动或删除）时，符号链接不会更新。你需要创建一个新的符号链接并删除旧的符号链接。
+- en: You don’t manage permissions or ownership on symlinks because only the permissions
+    on the target matter.
+  id: totrans-453
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不需要管理符号链接的权限或所有权，因为只有目标的权限才重要。
+- en: 'Symlinks look like this:'
+  id: totrans-454
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 符号链接看起来像这样：
+- en: '[PRE79]'
+  id: totrans-455
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE79]'
+- en: '*File: stuff → /files/userstuff* shows the target that the symlink points to.'
+  id: totrans-456
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*File: stuff → /files/userstuff* 显示符号链接指向的目标。'
+- en: The third line identifies this as a symbolic link.
+  id: totrans-457
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第三行标识这是一个符号链接。
+- en: 'The *l* in *Access: lrwxrwxrwx* identifies this as a symlink.'
+  id: totrans-458
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*Access: lrwxrwxrwx* 中的 *l* 标识这是一个符号链接。'
+- en: 'This is what a symlink looks like in a file listing:'
+  id: totrans-459
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件列表中的符号链接如下所示：
+- en: '[PRE80]'
+  id: totrans-460
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE80]'
+- en: Hard links
+  id: totrans-461
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 硬链接
+- en: 'Files are uniquely identified by *inodes*, and inodes are what hard links point
+    to, rather than filenames. The *ls* command shows inodes with the *-i* option.
+    The inode in this example is 1353, and it is the same for the three hard links:'
+  id: totrans-462
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件通过*索引节点*唯一标识，而硬链接指向的是索引节点，而不是文件名。*ls* 命令通过 *-i* 选项显示索引节点。在这个例子中，索引节点是1353，三个硬链接的索引节点相同：
+- en: '[PRE81]'
+  id: totrans-463
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE81]'
+- en: This is because all three inodes point to the same block of data.
+  id: totrans-464
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为所有三个索引节点指向同一数据块。
+- en: Hard links always work because they point directly to inodes. Files with multiple
+    hard links can be moved, renamed, and edited, and all hard links remain in sync
+    because they all point to the same data block.
+  id: totrans-465
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 硬链接总是有效，因为它们直接指向索引节点。具有多个硬链接的文件可以被移动、重命名和编辑，所有硬链接因指向同一数据块而保持同步。
+- en: Every file on a Linux system starts with a hard link. When you create a hard
+    link, you are creating a new filename for an existing data block.
+  id: totrans-466
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux系统上的每个文件都以硬链接开始。当您创建一个硬链接时，实际上是为现有数据块创建一个新的文件名。
+- en: Hard links cannot cross filesystems, but exist only inside a single filesystem.
+    For example, if you have */* and */home* on separate partitions, you cannot make
+    hard links in */home* for files in */*.
+  id: totrans-467
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 硬链接不能跨文件系统，而只存在于单个文件系统内。例如，如果您的 */* 和 */home* 在不同的分区上，您不能在 */home* 中为 */* 中的文件创建硬链接。
+- en: You can make as many hard links to a file as you like, and the disk space occupied
+    by the data they point to is always the same, regardless of how many hard links
+    it has.
+  id: totrans-468
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以为文件创建任意多的硬链接，它们指向的数据块的磁盘空间始终相同，不管有多少硬链接。
+- en: 'Contrast hard links with making file copies: every copy uses more disk space,
+    each copy is independent, and copies can go anywhere.'
+  id: totrans-469
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将硬链接与复制文件进行对比：每个副本都会使用更多磁盘空间，每个副本都是独立的，副本可以存放在任何位置。
+- en: 'A file is not completely deleted until all hard links are deleted. You can
+    see this with *ls*. The following example shows another view of our example inode
+    with three hard links:'
+  id: totrans-470
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 直到所有硬链接都被删除，文件才算完全删除。您可以使用 *ls* 查看这一点。以下示例显示了我们的例子索引节点及其三个硬链接的另一视图：
+- en: '[PRE82]'
+  id: totrans-471
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE82]'
+- en: 'Compare the File, Size, and Links to a symlink. A hard link is a regular file,
+    and note Links: 3\. This shows there are three hard links to the same data. When
+    you delete a file with more than one hard link, it is not deleted until you delete
+    all of them. Locate all related hard links with the *find* command:'
+  id: totrans-472
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '将文件、大小和符号链接与硬链接进行比较。硬链接是常规文件，注意 *Links: 3*。这表明有三个硬链接指向同一数据。当您删除具有多个硬链接的文件时，只有在删除所有硬链接之后，该文件才会被删除。使用
+    *find* 命令定位所有相关的硬链接：'
+- en: '[PRE83]'
+  id: totrans-473
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE83]'
+- en: Symlinks are used a lot in Linux, hard links not so much. Some backup applications
+    use inodes for deduplication. In olden times, when filesystems were much smaller,
+    running out of inodes was not uncommon. In this case hard links were preferable,
+    because symlinks each have their own inodes, but hard links share inodes.
+  id: totrans-474
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Linux中，符号链接被广泛使用，而硬链接则不那么常见。一些备份应用程序使用索引节点进行重复数据删除。在旧时代，当文件系统较小时，索引节点不足并不罕见。在这种情况下，硬链接更可取，因为每个符号链接都有自己的索引节点，而硬链接共享索引节点。
+- en: 'You can see how many inodes a filesystem has with the *du* command, and how
+    many are used:'
+  id: totrans-475
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用 *du* 命令查看文件系统有多少个索引节点，以及使用了多少个：
+- en: '[PRE84]'
+  id: totrans-476
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE84]'
+- en: With 1% in use, I’m not running out of inodes anytime soon.
+  id: totrans-477
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于使用率仅为1%，我不会很快用完索引节点。
+- en: See Also
+  id: totrans-478
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: man 1 ls
+  id: totrans-479
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: man 1 ls
+- en: 6.17 Hiding Files and Directories
+  id: totrans-480
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 6.17 隐藏文件和目录
+- en: Problem
+  id: totrans-481
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to hide some files and directories so that nobody can see them.
+  id: totrans-482
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望隐藏某些文件和目录，以便其他人看不见。
+- en: Solution
+  id: totrans-483
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: To hide files so nobody can see them, put them on a storage device only you
+    have access to.
+  id: totrans-484
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要隐藏文件，以便其他人看不见，将它们放在只有您访问权限的存储设备上。
+- en: 'To reduce clutter in your file manager, use *dot files* to ignore files. You
+    already have these. Look for a setting like “Show hidden files” in your graphical
+    file manager, or use the *-a* option for *ls*:'
+  id: totrans-485
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在文件管理器中减少混乱，请使用 *点文件* 来忽略文件。您已经有这些文件。在图形文件管理器中查找类似“显示隐藏文件”的设置，或者对 *ls* 使用 *-a*
+    选项：
+- en: '[PRE85]'
+  id: totrans-486
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE85]'
+- en: Prefixing any file with a dot makes it a hidden file, though it is really not
+    hidden, but ignored until you want to see it. This is used mainly in users’ home
+    directories to reduce clutter by not displaying configuration files. These are
+    normal files you can edit, delete, or whatever you want.
+  id: totrans-487
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用`.`作为任何文件的前缀，它就成为了隐藏文件，尽管它实际上并不隐藏，但在你想要查看它之前会被忽略。这主要用于用户的主目录，以减少显示配置文件所带来的混乱。这些都是你可以编辑、删除或者做任何想做的正常文件。
+- en: Discussion
+  id: totrans-488
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Note the single and double dots at the top of the file list. The single dot
+    represents the current directory, and the double dot represents the parent directory.
+    Try it with the *cd* command. The first example stays in the current directory,
+    the second example changes to the parent directory:'
+  id: totrans-489
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意文件列表顶部的单点和双点。单点代表当前目录，双点代表父目录。试着用*cd*命令操作一下。第一个例子保持在当前目录，第二个例子切换到父目录：
+- en: '[PRE86]'
+  id: totrans-490
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE86]'
+- en: Run *cd* with no options to return to your home directory, or *cd -* to return
+    to the last directory you were in.
+  id: totrans-491
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行*cd*而不带选项可以返回到你的主目录，或者运行*cd -*返回到你上次所在的目录。
+- en: See Also
+  id: totrans-492
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: See the Shell Builtin Commands section of *man 1 bash* to learn more about *cd*
+    and other Bash built-in commands
+  id: totrans-493
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 查看*man 1 bash*中的Shell内建命令部分，了解更多关于*cd*和其他Bash内建命令的信息。

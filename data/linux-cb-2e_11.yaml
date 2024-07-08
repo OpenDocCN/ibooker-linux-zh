@@ -1,0 +1,2395 @@
+- en: Chapter 11\. Creating and Managing Filesystems
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第11章。创建和管理文件系统
+- en: Linux supports a lot of filesystems, more than any other operating system. Filesystems
+    are essential to computing and do an astounding amount of work. A computer filesystem
+    stores, organizes, and protects our data, and is under continual stress from being
+    constantly in use. As Linux users we are fortunate to have many first-rate filesystems
+    to choose from.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux支持许多文件系统，比任何其他操作系统都多。文件系统对计算至关重要，执行了大量的工作。计算机文件系统存储、组织和保护我们的数据，并且由于常年被广泛使用而承受着持续的压力。作为Linux用户，我们有幸可以从许多一流的文件系统中进行选择。
+- en: 'In this chapter you will learn about the command-line tools for creating and
+    managing the following general-purpose filesystems, which are fully supported
+    on Linux and well maintained:'
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章将介绍用于创建和管理以下通用文件系统的命令行工具，这些文件系统在Linux上得到完全支持和良好维护：
+- en: Ext4, the Extended Filesystem
+  id: totrans-3
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Ext4，扩展文件系统
+- en: XFS, the X File System; the X stands only for X
+  id: totrans-4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: XFS，X文件系统；X只代表X
+- en: Btrfs, the b-tree filesystem, pronounced Butter FS
+  id: totrans-5
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Btrfs，b树文件系统，发音为Butter FS
+- en: FAT16/32, File Allocation Table 16- and 32-bit
+  id: totrans-6
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: FAT16/32，文件分配表16位和32位
+- en: exFAT, Extended FAT, Microsoft’s newest 64-bit filesytem
+  id: totrans-7
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: exFAT，扩展文件分配表，Microsoft最新的64位文件系统
+- en: Not included in this chapter are Microsoft’s NTFS or Apple’s HFS/HFS+/APFS.
+    Linux has good support for Microsoft’s NTFS, both read and write. To try it, look
+    for *ntfs-3g* (NTFS third generation) packages.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章不包括Microsoft的NTFS或Apple的HFS/HFS+/APFS。Linux对Microsoft的NTFS有很好的支持，包括读写。要尝试，请搜索*ntfs-3g*（NTFS第三代）软件包。
+- en: Support for Apple’s HFS/HFS+/APFS is unreliable. To give it a test drive, look
+    for packages with *hfs* or *apfs* in the names, and make sure the description
+    specifies they are for Apple filesystems.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于Apple的HFS/HFS+/APFS的支持不可靠。要试用，请搜索名称中带有*hfs*或*apfs*的软件包，并确保描述中指定它们是为Apple文件系统而设计的。
+- en: There are many special-purpose filesystems, such as UBIFS and JFFS2 for CompactFlash
+    devices; the compressed filesystem SquashFS, HDFS, CephFS, and GlusterFS for distributed
+    computing; NFS for network file sharing; and many more. These could easily fill
+    a large book by themselves and are not included here. They are freely available
+    to try out and learn.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有许多特殊用途的文件系统，例如用于CompactFlash设备的UBIFS和JFFS2；压缩文件系统SquashFS，用于分布式计算的HDFS，CephFS和GlusterFS；用于网络文件共享的NFS等等。这些内容本身就可以轻松填满一本大书，不在此列出。它们可供自由试用和学习。
+- en: Filesystem Overview
+  id: totrans-11
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 文件系统概述
+- en: Before you can use any storage device, such as a hard disk, USB flash drive,
+    or SD card, it must be partitioned and formatted with a filesystem. Every filesystem
+    must have its own disk partition. A partition can cover an entire disk, or a disk
+    can be divided into multiple partitions. Each partition is like an independent
+    disk, and each partition can have a different filesystem.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您可以使用任何存储设备（例如硬盘、USB闪存驱动器或SD卡）之前，它必须分区并格式化为文件系统。每个文件系统必须有自己的磁盘分区。一个分区可以覆盖整个磁盘，或者一个磁盘可以分成多个分区。每个分区就像一个独立的磁盘，每个分区可以有不同的文件系统。
+- en: A filesystem must be mounted, or attached, to the running filesystem before
+    it is accessible. A filesystem needs a *mountpoint*, which is a directory created
+    for that filesystem. This directory can be anywhere, though the traditional locations
+    are */mnt* and */media*.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在文件系统可以访问之前，必须将其挂载或附加到正在运行的文件系统上。文件系统需要一个*挂载点*，这是为该文件系统创建的目录。这个目录可以放在任何地方，尽管传统的位置是*/mnt*和*/media*。
+- en: You may mount only one filesystem per mountpoint. If you mount a second filesystem,
+    it overwrites the first filesystem.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个挂载点只能挂载一个文件系统。如果挂载第二个文件系统，则会覆盖第一个文件系统。
+- en: A filesystem can be set up to mount automatically at system startup, dynamically
+    when you attach removable media, manually from the command line, or by clicking
+    a button on your desktop or in your file manager. Most Linux distributions take
+    good care of handling removable media. Plug in your USB device or optical disk,
+    and Linux takes care of setting up the mountpoint and automounting it, or setting
+    it up for you to mount it with the click of a button ([Figure 11-1](#fig-filesystem-icons-1)).
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个文件系统可以在系统启动时自动挂载，当您连接可移动媒体时动态挂载，通过命令行手动挂载，或者通过桌面上的按钮或文件管理器点击挂载。大多数Linux发行版都很好地处理可移动媒体。插入您的USB设备或光盘，Linux会负责设置挂载点并自动挂载，或者设置您点击按钮进行挂载（参见[图 11-1](#fig-filesystem-icons-1)）。
+- en: '![Removable media buttons on XFCE desktop](Images/lcb2_1101.png)'
+  id: totrans-16
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Xfce桌面上的可移动媒体按钮](Images/lcb2_1101.png)'
+- en: Figure 11-1\. Removable media buttons on Xfce desktop
+  id: totrans-17
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 11-1。Xfce桌面上的可移动媒体按钮
+- en: Ext4, XFS, Btrfs, and exFAT are *64-bit* filesystems. This means they support
+    a 64-bit block addressing space, which enables much larger file and filesystem
+    sizes than 32- and 16-bit filesystems. 64-bit computing has been around at least
+    since the 1970s on supercomputers, then later on high-end business machines like
+    IBM Power and Sun Microsystems UltraSPARC.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ext4、XFS、Btrfs和exFAT是*64位*文件系统。这意味着它们支持64位块寻址空间，可以支持比32位和16位文件系统更大的文件和文件系统大小。64位计算至少自上世纪70年代以来就存在于超级计算机上，后来又出现在高端商用机器如IBM
+    Power和Sun Microsystems UltraSPARC上。
+- en: My first Windows 3.1/DOS PC, back in the mid-1990s, was a 16-bit system. Windows
+    95 boasted of being the first 32-bit consumer operating system. The first 64-bit
+    filesystems for x86 PCs started appearing in Linux around 2001\. See [Ext4 High
+    Level Design](https://oreil.ly/kufyJ) in the Linux kernel documentation to see
+    nice tables that lay this all out for us, comparing 32- and 64-bit filesystems.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我的第一台Windows 3.1/DOS个人电脑是在上世纪90年代中期，它是一台16位系统。Windows 95 以成为第一个32位消费者操作系统而自豪。第一个面向x86个人电脑的64位文件系统开始出现在Linux中，大约是在2001年。请参见[Ext4高级设计](https://oreil.ly/kufyJ)，在Linux内核文档中查看漂亮的表格，详细比较32位和64位文件系统。
+- en: 64-bit filesystems are backward compatible with 32-bit applications. After all
+    these years it is unlikely you will run into 32-bit apps, though if you do they
+    will run on your modern Linux, provided that it supplies the necessary packages
+    to set up a 32-bit environment.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 64位文件系统向后兼容32位应用程序。这些年来，你不太可能遇到32位应用程序，但如果遇到的话，它们可以在现代Linux上运行，前提是它提供了必要的包来设置32位环境。
+- en: Ext4 and XFS are *journaling* filesystems, and Btrfs is a *copy-on-write* (CoW)
+    filesystem. Journaling and CoW keep your filesystems in consistent states even
+    after a power failure or system crash. Filesystems are complex and busy, and an
+    interruption affects more than just the files you are working on. Interruptions
+    result in large numbers of files with incompleted tasks, and in the olden days
+    this meant possibly losing your whole filesystem.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ext4和XFS是*日志*文件系统，而Btrfs是*写时复制*（CoW）文件系统。日志和CoW可以使你的文件系统在断电或系统崩溃后保持一致的状态。文件系统是复杂且繁忙的，中断会影响不仅仅是你正在操作的文件。中断会导致大量带有未完成任务的文件，而在旧时代，这可能意味着可能会丢失整个文件系统。
+- en: '*Ext4* is the most widely used filesystem on Linux and is the default on the
+    majority of Linux distributions. It’s not exciting. It’s well tested, well supported,
+    and does its job without drama. The Ext4 journal records changes until they are
+    written to disk, providing protection from data loss in the event of an interruption.
+    Ext4 filesystems can be resized, both larger and smaller.'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*Ext4* 是Linux上最广泛使用的文件系统，在大多数Linux发行版上都是默认的。它并不令人兴奋。它经过充分测试、有良好的支持，并且在没有剧烈波动的情况下完成它的工作。Ext4日志记录更改，直到它们被写入磁盘，从而在中断事件中提供数据丢失保护。Ext4文件系统可以调整大小，无论是变大还是变小。'
+- en: '*XFS* was originally a high-performance Unix 64-bit filesystem, ported to Linux
+    in 2001\. XFS is a fast, efficient, reliable journaling filesystem suitable for
+    systems from small personal machines and to multidisk datacenter setups. XFS can
+    be resized larger, but not smaller.'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*XFS* 最初是一个高性能Unix 64位文件系统，2001年移植到Linux。XFS是一个快速、高效、可靠的日志文件系统，适用于从小型个人机器到多磁盘数据中心设置的系统。XFS可以调整大小变大，但不能调整大小变小。'
+- en: '*Btrfs* is an advanced copy-on-write (CoW) filesystem that includes a batch
+    of features not present in the other filesystems in this chapter, including snapshots;
+    RAID 0, 1, and 10; and subvolumes. Subvolumes are wonderfully flexible, as they
+    enable creating multiple filesystem roots on a single partition. CoW is a cool
+    way of creating snapshots in a space-efficient way, where each snapshot contains
+    only the changes from the previous snapshot. When you run into problems, you can
+    roll back to an older known good snapshot. Btrfs resizes smaller and larger.'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*Btrfs* 是一个先进的写时复制（CoW）文件系统，包含一系列在本章其他文件系统中不存在的功能，包括快照；RAID 0、1和10；以及子卷。子卷非常灵活，因为它们允许在单个分区上创建多个文件系统根。CoW是一种通过高效方式创建快照的方式，其中每个快照只包含与前一个快照的更改。当遇到问题时，你可以回滚到一个较旧的已知良好的快照。Btrfs可以调整大小，无论是变小还是变大。'
+- en: '*FAT16/32* are the elderly Microsoft 16- and 32-bit filesystems. FAT32 is the
+    most universal filesystem, supported by Microsoft Windows, Apple’s macOS, Linux,
+    Unix, and DOS operating systems. Use FAT32 for easiest file sharing on portable
+    media. It has one limitation that is a showstopper for some uses, and that is
+    a maximum file size of 4 GB (on media with 4K blocks).'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*FAT16/32*是微软老旧的16位和32位文件系统。FAT32是最通用的文件系统，支持Microsoft Windows、Apple的macOS、Linux、Unix和DOS操作系统。在便携媒体上使用FAT32进行最简单的文件共享。它有一个限制，某些用途可能会成为瓶颈，即文件大小最大为4
+    GB（在具有4K块的介质上）。'
+- en: '*exFAT* is the newest Microsoft 64-bit filesystem, a nice upgrade from FAT32.
+    exFAT is a fast, lightweight filesystem for USB sticks and SD media, and supports
+    much larger file and volume sizes than FAT32\. Wikipedia cites a 16 EiB maximum
+    file size and 128 PiB maximum volume size. It does not have a journal or CoW.'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*exFAT*是微软最新的64位文件系统，是FAT32的一个很好的升级。exFAT是USB闪存和SD媒体的快速轻量级文件系统，支持比FAT32更大的文件和卷大小。维基百科引用了16
+    EiB的最大文件大小和128 PiB的最大卷大小。它没有日志或写时复制（CoW）功能。'
+- en: exFAT is troublesome for Linux users because it is a patented proprietary filesystem,
+    which was not available to Linux as a native filesystem until 2020\. You need
+    to worry about Linux compatibility only if you want to read and copy USB flash
+    drives or SDXC cards formatted with exFAT to your Linux computer. For example,
+    you want to use exFAT-formatted SDXC cards with your digital camera, or audio
+    recording device.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: exFAT对Linux用户来说很麻烦，因为它是一种专利的专有文件系统，直到2020年才作为本地文件系统出现在Linux上。只有当你想要读取和复制使用exFAT格式化的USB闪存驱动器或SDXC卡到你的Linux电脑时，你才需要担心Linux的兼容性。例如，你想要在你的数码相机或音频录制设备上使用exFAT格式化的SDXC卡。
+- en: To use exFAT with Linux you have two options. One is to use the *exfatprogs*,
+    or *exfat-fuse* and *exfat-utils* packages, which are available on most distributions.
+    exFAT FUSE was developed and is maintained outside of the US, making it immune
+    to US patent laws. exFAT FUSE takes advantage of Filesystem in Userspace (FUSE),
+    which enables unprivileged users to run filesystems in userspace. It is not as
+    efficient as a filesystem properly integrated into the kernel, but it works, and
+    you can read and write exFAT files. Some hardy souls try to use exFAT FUSE in
+    shared partitions to share files with Windows and macOS. In theory this should
+    work, though there are sometimes glitches related to how well a particular Windows
+    or macOS release implements exFAT.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在Linux中使用exFAT，你有两个选择。一个是使用*exfatprogs*、*exfat-fuse*和*exfat-utils*包，这些在大多数发行版上都可以找到。exFAT
+    FUSE是在美国之外开发和维护的，因此不受美国专利法的影响。exFAT FUSE利用了用户空间文件系统（FUSE），允许非特权用户在用户空间运行文件系统。它不如完全集成到内核中的文件系统效率高，但它可以读写exFAT文件。一些勇敢的人尝试在共享分区中使用exFAT
+    FUSE与Windows和macOS共享文件。理论上这应该可以工作，尽管有时与特定的Windows或macOS版本实现exFAT的程度有关可能会出现一些小问题。
+- en: The other option is to wait a little while for native support. Microsoft released
+    exFAT in 2006 and licensed it primarily to companies that make embedded systems
+    and embedded media. But times change. Microsoft has become an open source contributor,
+    and a member of the [Open Invention Network (OIN)](https://oreil.ly/AJepb). Microsoft
+    released the exFAT specification in 2019\. Releasing the specification sidestepped
+    licensing hassles with the existing exFAT code, and Linux kernel developers wasted
+    no time writing new code. Native support for exFAT with this shiny new code is
+    in Linux kernel 5.7\. This should find its way into your favorite distro soon;
+    run *uname -r* to see your kernel version.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个选择是稍等片刻以获得本地支持。微软在2006年发布了exFAT，并主要授权给制造嵌入式系统和嵌入式媒体的公司。但时过境迁。微软已成为开源贡献者，并成为[开放发明网络（OIN）](https://oreil.ly/AJepb)的成员。微软在2019年发布了exFAT规范。通过发布规范，绕过了现有exFAT代码的许可问题，Linux内核开发人员迅速编写了新代码。这种全新闪亮的代码在Linux内核5.7中实现了对exFAT的本地支持。这应该很快出现在你喜爱的发行版中；运行*uname
+    -r*查看你的内核版本。
+- en: 11.1 Listing Supported Filesystems
+  id: totrans-30
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.1 列出支持的文件系统
+- en: Problem
+  id: totrans-31
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to know what filesystems are installed on your Linux system.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要知道你的Linux系统上安装了哪些文件系统。
+- en: Solution
+  id: totrans-33
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Read */proc/filesystems* to see a list of installed filesystems:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 阅读*/proc/filesystems*以查看已安装的文件系统列表：
+- en: '[PRE0]'
+  id: totrans-35
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: Discussion
+  id: totrans-36
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: See all those *nodev* entries? Those are all virtual filesystems that exist
+    only in memory and are not attached to a physical device like */dev/sda1*. Systemd
+    manages all of these virtual filesystems.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 看到所有这些*nodev*条目了吗？这些都是只存在于内存中并且未连接到像*/dev/sda1*这样的物理设备的虚拟文件系统。Systemd管理所有这些虚拟文件系统。
+- en: The other filesystems, Ext4, XFS, and so on, are the filesystems we use on our
+    storage devices to store, organize, and protect our data.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其他文件系统，如 Ext4、XFS 等，是我们在存储设备上用来存储、组织和保护数据的文件系统。
+- en: See Also
+  id: totrans-39
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[“sysfs, the filesystem for exporting kernel objects”](https://oreil.ly/QCMN7)
+    is written for developers, but it has useful information for Linux users and admins.'
+  id: totrans-40
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“sysfs，用于导出内核对象的文件系统”](https://oreil.ly/QCMN7) 是为开发者编写的，但对 Linux 用户和管理员也有有用的信息。'
+- en: 11.2 Identifying Your Existing Filesystems
+  id: totrans-41
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.2 辨识现有文件系统
+- en: Problem
+  id: totrans-42
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You do not know what filesystems are already on your system, or on a removable
+    storage disk, and you need to know how to list them.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你不知道系统上已有哪些文件系统，或者可移动存储磁盘上有哪些，需要知道如何列出它们。
+- en: Solution
+  id: totrans-44
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *lsblk* command. You can list just the device names and filesystems
+    with the *NAME* and *FSTYPE* options:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *lsblk* 命令。你可以仅列出设备名称和文件系统，使用 *NAME* 和 *FSTYPE* 选项：
+- en: '[PRE1]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Query a single disk:'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查询单个磁盘：
+- en: '[PRE2]'
+  id: totrans-48
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Or a single partition:'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或单个分区：
+- en: '[PRE3]'
+  id: totrans-50
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'This is my favorite *lsblk* incantation. It shows all device names, filesystem
+    types, filesystem sizes, percentage used, labels, and mountpoints:'
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是我喜欢的 *lsblk* 咒语。它显示所有设备名称、文件系统类型、文件系统大小、使用百分比、标签和挂载点：
+- en: '[PRE4]'
+  id: totrans-52
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Discussion
+  id: totrans-53
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Run *lsblk --help* to see a list of columns. There is quite a bit of useful
+    information, such as PATH, LABEL, UUID, HOTPLUG, MODEL, SERIAL, and SIZE.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行 *lsblk --help* 可以看到列出的信息，如 PATH、LABEL、UUID、HOTPLUG、MODEL、SERIAL 和 SIZE。
+- en: On some distros you may need root permissions to see the filesystem types, UUIDs,
+    and labels.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在某些发行版上，可能需要 root 权限来查看文件系统类型、UUID 和标签。
+- en: '*lsblk* always prints *vfat* for both FAT16 and FAT32 filesystems. Use GParted
+    or *parted* to see whether a filesystem is FAT16 or FAT32.'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lsblk* 总是打印 *vfat* 作为 FAT16 和 FAT32 文件系统。使用 GParted 或 *parted* 查看文件系统是 FAT16
+    还是 FAT32。'
+- en: '*vfat* is Virtual FAT, the kernel’s filesystem driver for FAT16 and FAT32.'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*vfat* 是虚拟 FAT，内核的 FAT16 和 FAT32 文件系统驱动程序。'
+- en: See Also
+  id: totrans-58
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Linux Kernel SCSI Interfaces Guide](https://oreil.ly/beFOx)'
+  id: totrans-59
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Linux 内核 SCSI 接口指南](https://oreil.ly/beFOx)'
+- en: '[Major and minor numbers for block and character devices](https://oreil.ly/NW2S7)'
+  id: totrans-60
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[块设备和字符设备的主次编号](https://oreil.ly/NW2S7)'
+- en: '*man 8 lsblk*'
+  id: totrans-61
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 lsblk*'
+- en: '*man 8 parted*'
+  id: totrans-62
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 parted*'
+- en: '[Chapter 8](ch08.xhtml#cha-partitioning-parted)'
+  id: totrans-63
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第8章](ch08.xhtml#cha-partitioning-parted)'
+- en: '[Chapter 9](ch09.xhtml#cha-partitioning-gparted)'
+  id: totrans-64
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第9章](ch09.xhtml#cha-partitioning-gparted)'
+- en: 11.3 Resizing Filesystems
+  id: totrans-65
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.3 调整文件系统大小
+- en: Problem
+  id: totrans-66
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to enlarge or reduce the size of your filesystem.
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要扩大或缩小文件系统的大小。
+- en: Solution
+  id: totrans-68
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Every filesystem has its own commands for resizing. See Recipes [8.8](ch08.xhtml#rec-resize-partition-fs),
+    [8.9](ch08.xhtml#rec-shrink-partition), and [9.7](ch09.xhtml#rec-resize-partitions-gparted)
+    to learn about resizing filesystems.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每种文件系统都有其自己的调整大小命令。查看配方 [8.8](ch08.xhtml#rec-resize-partition-fs)、[8.9](ch08.xhtml#rec-shrink-partition)
+    和 [9.7](ch09.xhtml#rec-resize-partitions-gparted) 了解调整文件系统大小的方法。
+- en: Discussion
+  id: totrans-70
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The filesystem’s partition must also be resized to match. GParted does this
+    in a single operation (see [Recipe 9.7](ch09.xhtml#rec-resize-partitions-gparted)).
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件系统的分区也必须调整大小以匹配。GParted 在一个操作中完成此操作（参见 [配方 9.7](ch09.xhtml#rec-resize-partitions-gparted)）。
+- en: Recipes [8.8](ch08.xhtml#rec-resize-partition-fs) and [8.9](ch08.xhtml#rec-shrink-partition)
+    use *parted* and filesystem utilities to resize a filesystem and its partition
+    in two steps.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 配方 [8.8](ch08.xhtml#rec-resize-partition-fs) 和 [8.9](ch08.xhtml#rec-shrink-partition)
+    使用 *parted* 和文件系统工具来分两步调整文件系统及其分区大小。
+- en: See Also
+  id: totrans-73
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 8.8](ch08.xhtml#rec-resize-partition-fs)'
+  id: totrans-74
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 8.8](ch08.xhtml#rec-resize-partition-fs)'
+- en: '[Recipe 8.9](ch08.xhtml#rec-shrink-partition)'
+  id: totrans-75
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 8.9](ch08.xhtml#rec-shrink-partition)'
+- en: '[Recipe 9.7](ch09.xhtml#rec-resize-partitions-gparted)'
+  id: totrans-76
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 9.7](ch09.xhtml#rec-resize-partitions-gparted)'
+- en: '*man 8 resize2fs*'
+  id: totrans-77
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 resize2fs*'
+- en: '*man 8 parted*'
+  id: totrans-78
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 parted*'
+- en: '*man 8 xfs_growfs*'
+  id: totrans-79
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 xfs_growfs*'
+- en: '*man 8 btrfs*'
+  id: totrans-80
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 btrfs*'
+- en: '*man 8 fsck.vfat*'
+  id: totrans-81
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 fsck.vfat*'
+- en: 11.4 Deleting Filesystems
+  id: totrans-82
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.4 删除文件系统
+- en: Problem
+  id: totrans-83
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to delete a filesystem and its underlying partition.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要删除一个文件系统及其底层分区。
+- en: Solution
+  id: totrans-85
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'To delete the filesystem and its partition, use *parted*. In this example,
+    */dev/sdb1* is deleted. Verify which partition and filesystem you are going to
+    delete, then make sure the filesystem is unmounted. In the example, the mountpoint
+    is */media/duchess/stuff*:'
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要删除文件系统及其分区，使用 *parted*。在此示例中，*/dev/sdb1* 被删除。确认要删除哪个分区和文件系统，然后确保文件系统已卸载。在示例中，挂载点是
+    */media/duchess/stuff*：
+- en: '[PRE5]'
+  id: totrans-87
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Then use *parted* to delete the partition:'
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后使用 *parted* 删除分区：
+- en: '[PRE6]'
+  id: totrans-89
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: If you prefer a graphical tool, use GParted ([Chapter 9](ch09.xhtml#cha-partitioning-gparted)).
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你偏爱图形工具，可以使用 GParted（[第9章](ch09.xhtml#cha-partitioning-gparted)）。
+- en: Discussion
+  id: totrans-91
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Yes, the command is *umount*, not *unmount*. *umount* dates from the ancient
+    Unix era, when identifiers had a limit of six characters.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是的，命令是*umount*，而不是*unmount*。*umount*来自古老的Unix时代，那时标识符的长度限制为六个字符。
+- en: Deleting all the files in a partition does not delete the filesystem. The filesystem
+    structure remains in place.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 删除分区中的所有文件并不会删除文件系统。文件系统结构仍然存在。
+- en: See Also
+  id: totrans-94
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 dd*'
+  id: totrans-95
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 dd*'
+- en: 11.5 Using a New Filesystem
+  id: totrans-96
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.5 使用新的文件系统
+- en: Problem
+  id: totrans-97
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You just created a nice new filesystem, and you need to mount it.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您刚刚创建了一个漂亮的新文件系统，并且需要挂载它。
+- en: Solution
+  id: totrans-99
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: After creating your new filesystem, you must create a mountpoint, and optionally
+    configure automatic mounting. As discussed in the introduction to this chapter,
+    a new filesystem must be mounted, or attached, to the running filesystem to be
+    usable.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建完新文件系统后，您必须创建一个挂载点，并可选择配置自动挂载。如本章介绍的那样，新文件系统必须挂载或附加到正在运行的文件系统才能使用。
+- en: Ext4, XFS, and Btrfs all have access controls. If you want the files on these
+    filesystems available to anyone other than the root user, you must adjust ownership
+    and permissions. FAT16/32 and exFAT do not have access controls and are wide open
+    to anyone.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ext4、XFS和Btrfs都有访问控制。如果您希望这些文件系统上的文件对除root用户之外的任何人可用，则必须调整所有权和权限。FAT16/32和exFAT没有访问控制，对任何人都是开放的。
+- en: 'Start by mounting your new filesystem. Create a mountpoint, which is a directory,
+    and then mount the filesystem, like this example for Mad Max:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先挂载您的新文件系统。创建一个挂载点，即一个目录，然后像这个疯狂麦克斯的示例一样挂载文件系统：
+- en: '[PRE7]'
+  id: totrans-103
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'The following example sets the ownership of the new filesystem to Mad Max,
+    read-write-execute, with read-only permissions for group and world:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例将新文件系统的所有权设置为疯狂麦克斯，读写执行权限，组和全局只读权限：
+- en: '[PRE8]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: Now Mad Max can access the new filesystem. This mount only lasts until the next
+    system restart; see [Recipe 11.6](#rec-automatic-fs-mount) to learn how to configure
+    automatic filesystem mounts.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，疯狂麦克斯可以访问新的文件系统。这种挂载仅持续到下次系统重启；请参阅[配方 11.6](#rec-automatic-fs-mount)以了解如何配置自动文件系统挂载。
+- en: Only One Filesystem per Mountpoint
+  id: totrans-107
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 仅一个挂载点对应一个文件系统
+- en: Every filesystem needs its own unique mountpoint; you cannot put multiple filesystems
+    on a single mountpoint.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个文件系统都需要有自己独特的挂载点；您不能在单个挂载点上放置多个文件系统。
+- en: Discussion
+  id: totrans-109
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: See [Chapter 6](ch06.xhtml#cha-files-directories) for detailed recipes on managing
+    ownership and permissions.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请参阅[第 6 章](ch06.xhtml#cha-files-directories)以获取有关管理所有权和权限的详细配方。
+- en: The traditional directories that contain mountpoints are */mnt* and */media*.
+    */mnt* is traditionally for static mounts (configured in */etc/fstab*), and */media*
+    is for automounting removable media. You may create your mountpoints wherever
+    you want. The advantage of using the traditional directories is having your mountpoints
+    in a limited number of predictable locations.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包含挂载点的传统目录为*/mnt*和*/media*。*/mnt*传统上用于静态挂载（在*/etc/fstab*中配置），*/media*用于自动挂载可移动介质。您可以在任何地方创建自己的挂载点。使用传统目录的好处是在有限数量的可预测位置拥有您的挂载点。
+- en: 'A shared directory with mountpoints for multiple users could look like this,
+    with a directory for each user:'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个共享目录，为多个用户提供挂载点，可能如下所示，每个用户有一个目录：
+- en: '[PRE9]'
+  id: totrans-113
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Then every filesystem needs its own mountpoint in the user subdirectories.
+    For example, Mad Max has two filesystems mounted at *madmax1* and *madmax2*:'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后，每个文件系统都需要在用户子目录中拥有自己的挂载点。例如，疯狂麦克斯在*madmax1*和*madmax2*上分别挂载了两个文件系统：
+- en: '[PRE10]'
+  id: totrans-115
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: The mountpoints can have any names you want. For example, Mad Max’s mountpoints
+    could be *fs1* and *fs2*, or *fred* and *ethel*, or *max1* and *max2*, whatever
+    helps you remember what they are.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 挂载点可以有任何您想要的名称。例如，疯狂麦克斯的挂载点可以是*fs1*和*fs2*，或者*fred*和*ethel*，或者*max1*和*max2*，任何有助于您记住它们的名称。
+- en: 'Use the *stat* command to see the permissions on a filesystem, like this example
+    for Mad Max’s new filesystem:'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*stat*命令查看文件系统的权限，例如疯狂麦克斯的新文件系统的示例：
+- en: '[PRE11]'
+  id: totrans-118
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'List all filesystem mounts with *mount*:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*mount*列出所有文件系统挂载：
+- en: '[PRE12]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'Use the *mountpoint* command to learn if a directory is a mountpoint:'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*mountpoint*命令来判断一个目录是否为挂载点：
+- en: '[PRE13]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: See Also
+  id: totrans-123
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 chown*'
+  id: totrans-124
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chown*'
+- en: '*man 1 chmod*'
+  id: totrans-125
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chmod*'
+- en: '*man 1 stat*'
+  id: totrans-126
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 stat*'
+- en: 11.6 Creating Automatic Filesystem Mounts
+  id: totrans-127
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.6 创建自动文件系统挂载
+- en: Problem
+  id: totrans-128
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have added a new filesystem, and you want it to automatically mount at system
+    startup.
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您已经添加了一个新的文件系统，并希望在系统启动时自动挂载它。
+- en: Solution
+  id: totrans-130
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'This is what your */etc/fstab* file is for. The following example is added
+    to the existing */etc/fstab* file to create a static mount for the filesystem
+    in [Recipe 11.5](#rec-filesystem-temp-mount), and it will be automatically mounted
+    at startup:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这就是*/etc/fstab*文件的用途。以下示例添加到现有的*/etc/fstab*文件中，以在[Recipe 11.5](#rec-filesystem-temp-mount)中创建文件系统的静态挂载，并将在启动时自动挂载：
+- en: '[PRE14]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'Use the *findmnt* command to test your new configuration:'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*findmnt*命令测试您的新配置：
+- en: '[PRE15]'
+  id: totrans-134
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'The warning “recommended root FS passno is 1 (current is 0)” is not significant.
+    If that is the only warning, and there are no errors, reboot to test, or run the
+    following command to mount your new */etc/fstab* entry:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 警告“推荐的根文件系统passno为1（当前为0）”不重要。如果这是唯一的警告，并且没有错误，请重新启动以进行测试，或者运行以下命令以挂载您的新*/etc/fstab*条目：
+- en: '[PRE16]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: Discussion
+  id: totrans-137
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'This is what the six *fstab* columns are for:'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是六个*fstab*列的用途：
+- en: device
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设备
+- en: The UUID or filesystem LABEL. Don’t use */dev* names because they are not unique,
+    and sometimes they change. Run *lsblk -o UUID,LABEL* to list UUIDs and filesystem
+    labels to use in the *device:* column.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UUID或文件系统标签。不要使用*/dev*名称，因为它们不唯一，有时会更改。运行*lsblk -o UUID,LABEL*以列出要在*device:*列中使用的UUID和文件系统标签。
+- en: mountpoint
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: mountpoint
+- en: The directory you created for the filesystem.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您为文件系统创建的目录。
+- en: type
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 类型
+- en: The filesystem type, for example, *xfs*, *ext4*, or *btrfs*. You may use *auto*
+    for the filesystem type, and the kernel will automatically detect the filesystem
+    type.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件系统类型，例如*xfs*、*ext4*或*btrfs*。您可以使用*auto*作为文件系统类型，内核将自动检测文件系统类型。
+- en: options
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选项
+- en: Your mount options in a comma-delimited list (see below for a list).
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的挂载选项以逗号分隔的列表（请参阅下文的列表）。
+- en: dump
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: dump
+- en: If you’re using the *dump* command for backups, this tells *dump* the backup
+    interval, in days. So, 1 means every day, 2 means every other day, 3 is every
+    third day, and so on. Most likely you are not using *dump* and should enter 0.
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您正在使用*dump*命令进行备份，这告诉*dump*备份间隔，单位为天。因此，1表示每天，2表示隔天，3表示每三天，依此类推。您很可能没有使用*dump*，应该输入0。
+- en: pass
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: pass
+- en: This tells the filesystem checker which filesystem to check first at bootup,
+    if it ever needs to. Make your root filesystem 1, any other Linux filesystems
+    2, and non-Linux filesystems 0.
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这告诉文件系统检查器在启动时首先检查哪个文件系统，如果有必要的话。将根文件系统设置为1，任何其他Linux文件系统设置为2，非Linux文件系统设置为0。
+- en: 'The following *options* define permissions:'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下*选项*定义权限：
+- en: defaults
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: defaults
+- en: The default options are *rw*, *suid*, *dev*, *exec*, *auto*, *nouser*, and *async*.
+    The *defaults* values are overridden by appending additional options, for example
+    *defaults,user* gives the user permission to mount and unmount the filesystem.
+    You may append as many options as you like, or omit *defaults* and list only the
+    options you want.
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认选项是*rw*, *suid*, *dev*, *exec*, *auto*, *nouser*, 和 *async*。*defaults*的值通过追加额外的选项被覆盖，例如*defaults,user*允许用户有权挂载和卸载文件系统。您可以追加尽可能多的选项，或省略*defaults*并仅列出您想要的选项。
+- en: rw
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: rw
+- en: Read/write.
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 读/写。
+- en: ro
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ro
+- en: Read-only.
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只读。
+- en: suid
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: suid
+- en: Allow setuid and setgid bits to operate.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许设置uid和gid位操作。
+- en: dev
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: dev
+- en: Interpret block and character devices.
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 解释块和字符设备。
+- en: exec
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: exec
+- en: Allow binaries to run.
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许运行二进制文件。
+- en: auto
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: auto
+- en: Indicates which filesystems should start at boot.
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 指示哪些文件系统应在启动时启动。
+- en: nouser
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: nouser
+- en: Nonroot users cannot mount or unmount the filesystem.
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 非根用户不能挂载或卸载文件系统。
+- en: async
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: async
+- en: Asynchronous I/O, which is standard for Linux.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 异步I/O，这是Linux的标准设置。
+- en: user
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: user
+- en: Nonroot users can mount and unmount the device, if they mounted it.
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 非根用户可以挂载和卸载设备，如果他们已经挂载了它。
+- en: users
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: users
+- en: Any user can mount and unmount the device.
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任何用户都可以挂载和卸载设备。
+- en: noauto
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: noauto
+- en: Do not automatically mount at boot.
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不自动在启动时挂载。
+- en: ro
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ro
+- en: Mount the filesystem read-only.
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将文件系统挂载为只读。
+- en: noatime
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: noatime
+- en: Do not update the “time accessed” file attribute. *noatime* was used in times
+    past to speed up performance. If you are on a modern computer, it probably won’t
+    make much difference.
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不更新“访问时间”的文件属性。在过去，*noatime*用于提高性能。如果您使用的是现代计算机，可能不会有太大差异。
+- en: gid
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: gid
+- en: Limit access to a group (from */etc/group*); for example, *gid=group1*.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 限制对组的访问（从*/etc/group*）；例如，*gid=group1*。
+- en: See Also
+  id: totrans-182
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 mount*'
+  id: totrans-183
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 mount*'
+- en: '*man 5 fstab*'
+  id: totrans-184
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 fstab*'
+- en: '[systemd](https://systemd.io)'
+  id: totrans-185
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[systemd](https://systemd.io)'
+- en: 11.7 Creating Ext4 Filesystems
+  id: totrans-186
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.7 创建Ext4文件系统
+- en: Problem
+  id: totrans-187
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create a new Ext4 filesystem on an internal or external storage
+    disk.
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想在内部或外部存储磁盘上创建一个新的Ext4文件系统。
+- en: Solution
+  id: totrans-189
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Start with a partition of the size you want for your filesystem. Then use the
+    *mkfs.ext4* command to create the new Ext4 filesystem.
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从您想要的文件系统大小开始分区。然后使用 *mkfs.ext4* 命令创建新的 Ext4 文件系统。
+- en: 'The following example overwrites an existing XFS filesystem with a new Ext4
+    filesystem. When you overwrite an existing filesystem, it must first be unmounted.
+    In this example, the filesystem on */dev/sdb1* is mounted at */media/duchess/stuff*,
+    which you can see with the *df* command:'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例将使用新的 Ext4 文件系统覆盖现有的 XFS 文件系统。当覆盖现有文件系统时，必须首先卸载它。在此示例中，*/dev/sdb1* 上的文件系统挂载在*/media/duchess/stuff*，您可以使用
+    *df* 命令查看：
+- en: '[PRE17]'
+  id: totrans-192
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'You may need root permissions to unmount:'
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能需要 root 权限来卸载：
+- en: '[PRE18]'
+  id: totrans-194
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'Create the new Ext4 filesystem:'
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建新的 Ext4 文件系统：
+- en: '[PRE19]'
+  id: totrans-196
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: You could also create a new partition and put your new filesystem on it; see
+    the examples for creating new partitions in Recipes [8.4](ch08.xhtml#rec-create-gpt)
+    and [9.4](ch09.xhtml#rec-new-partition-gparted).
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以创建一个新的分区，并在其中放置新的文件系统；请参阅配方 [8.4](ch08.xhtml#rec-create-gpt) 和 [9.4](ch09.xhtml#rec-new-partition-gparted)
+    中创建新分区的示例。
+- en: Discussion
+  id: totrans-198
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Overwriting a filesystem destroys all the data on it.
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 覆盖文件系统会销毁其中的所有数据。
+- en: The *-L* option is for creating a volume label. This can be anything you want,
+    up to 16 characters (FAT32 is limited to 11 characters). It is not required, though
+    filesystem labels are useful, and for some operations, such as in */etc/fstab*,
+    can be used in place of the long UUID.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-L* 选项用于创建卷标。这可以是您想要的任何内容，最多16个字符（FAT32限制为11个字符）。虽然文件系统标签很有用，并且在某些操作中（如*/etc/fstab*中），可以替代长UUID使用。'
+- en: The *-n* option does a dry run, so you see what will happen without actually
+    creating the new filesystem.
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-n* 选项执行干运行，因此您可以查看实际创建新文件系统时会发生什么。'
+- en: '*mke2fs* has numerous options, but you will likely use just a few of them:
+    device name, volume label, dry-run, and creating an external journal. Its defaults
+    are set in */etc/mke2fs.conf*, and I suggest not changing them without thorough
+    study of the available settings.'
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*mke2fs* 有很多选项，但您可能只会使用其中几个：设备名称、卷标、干运行以及创建外部日志。其默认设置在*/etc/mke2fs.conf*中，建议在彻底研究可用设置之前不要更改它们。'
+- en: See Also
+  id: totrans-203
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 mke2fs*'
+  id: totrans-204
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 mke2fs*'
+- en: '[Recipe 8.4](ch08.xhtml#rec-create-gpt)'
+  id: totrans-205
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 8.4](ch08.xhtml#rec-create-gpt)'
+- en: '[Recipe 11.5](#rec-filesystem-temp-mount)'
+  id: totrans-206
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 11.5](#rec-filesystem-temp-mount)'
+- en: 11.8 Configuring the Ext4 Journal Mode
+  id: totrans-207
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.8 配置 Ext4 日志模式
+- en: Problem
+  id: totrans-208
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You know that the default journal mode for ext4 is *data=ordered*, which does
+    not journal data, but only metadata. It is a good balance of safety and speed,
+    but you want to set it to *data=journal*, which is the safest.
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您知道 ext4 的默认日志模式是 *data=ordered*，它不记录数据，只记录元数据。这是安全性和速度之间的良好平衡，但您希望将其设置为 *data=journal*，这是最安全的选项。
+- en: Solution
+  id: totrans-210
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *tune2fs* command. First check your existing journal mode with *dmesg*.
+    The filesystem must be mounted:'
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *tune2fs* 命令。首先使用 *dmesg* 检查您的现有日志模式。文件系统必须被挂载：
+- en: '[PRE20]'
+  id: totrans-212
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'That confirms */dev/sdb1* is formatted as Ext4 and has the default *data=ordered*
+    journal mode. Now change it to *data=journal* mode:'
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这证实了*/dev/sdb1* 格式化为 Ext4，并具有默认的 *data=ordered* 日志模式。现在将其更改为 *data=journal*
+    模式：
+- en: '[PRE21]'
+  id: totrans-214
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Unmount and remount, and check again with *dmesg*:'
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 卸载并重新挂载，然后使用 *dmesg* 再次检查：
+- en: '[PRE22]'
+  id: totrans-216
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'If you see multiple lines with conflicting information, like this:'
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您看到像这样的多行冲突信息：
+- en: '[PRE23]'
+  id: totrans-218
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: Reboot, and then you should see only the “mounted filesystem with journalled
+    data mode” line.
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动，然后您应该只看到“以日志数据模式挂载的文件系统”行。
+- en: Discussion
+  id: totrans-220
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'The journal mode command options are named differently, depending on what documentation
+    you are reading. In *man 8 tune2fs*, the following options are listed:'
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不同文档中命名不同的日志模式命令选项。在 *man 8 tune2fs* 中列出了以下选项：
+- en: journal_data
+  id: totrans-222
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: journal_data
+- en: journal_data_ordered
+  id: totrans-223
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: journal_data_ordered
+- en: journal_data_writeback
+  id: totrans-224
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: journal_data_writeback
+- en: 'In the kernel documentation, and a whole lot of how-tos, these are the options:'
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在内核文档中，以及大量的 how-to 中，这些是选项：
+- en: data=journal
+  id: totrans-226
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: data=journal
+- en: data=ordered
+  id: totrans-227
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: data=ordered
+- en: data=writeback
+  id: totrans-228
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: data=writeback
+- en: The *data=* options are meant to be passed to the kernel at boot either in your
+    bootloader configuration, or in */etc/fstab*. I favor using *tune2fs* because
+    it is fast and easy, and works on all Ext4 filesystems regardless of their mount
+    configurations.
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*data=* 选项应该在启动时传递给内核，要么在您的引导程序配置中，要么在*/etc/fstab*中。我倾向于使用 *tune2fs*，因为它快速简便，并且适用于所有
+    Ext4 文件系统，无论它们的挂载配置如何。'
+- en: 'These are the journal modes in order of data safety:'
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些是按数据安全性顺序排列的日志模式：
+- en: data=journal
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: data=journal
+- en: Provides the most protection for your data. All data and metadata are first
+    written to the journal, and then written to the filesystem. In the event of a
+    failure, this gives you the best chance of recovering your data. This is also
+    the most resource intensive, as your changes are written twice.
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为您的数据提供最大的保护。所有数据和元数据首先写入日志，然后写入文件系统。在发生故障时，这为您提供了恢复数据的最佳机会。这也是资源消耗最大的，因为您的更改会被写入两次。
+- en: data=ordered
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: data=ordered
+- en: This does not write your data to the journal. Data is first written to the filesystem,
+    and then metadata is written to the journal. The metadata is logically grouped
+    in order and held in a single transaction. When the metadata is written to disk,
+    its associated data blocks are written first.
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这不会将您的数据写入日志。数据首先写入文件系统，然后元数据写入日志。元数据逻辑上按顺序组合在单个事务中。当元数据写入磁盘时，其关联的数据块首先被写入。
+- en: data=writeback
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: data=writeback
+- en: This is the fastest and the least safe. Data is first written to the filesystem,
+    and then metadata is written to the journal. Data ordering is not preserved. I
+    don’t think the small performance gain is worth the extra risk.
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是最快但最不安全的方法。数据首先写入文件系统，然后元数据写入日志。不保留数据顺序。我认为这种小的性能增益不值得额外的风险。
+- en: See Also
+  id: totrans-237
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 tune2fs*'
+  id: totrans-238
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 tune2fs*'
+- en: '[Kernel documentation for the Ext4 filesystem](https://oreil.ly/Y4ajq)'
+  id: totrans-239
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Ext4文件系统的内核文档](https://oreil.ly/Y4ajq)'
+- en: 11.9 Finding Which Journal Your Ext4 Filesystem Is Attached To
+  id: totrans-240
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.9 查找您的Ext4文件系统附加到哪个日志
+- en: Problem
+  id: totrans-241
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have several Ext4 filesystems, some with internal journals and some with
+    external journals, and you want to know which journals they are using.
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您有几个Ext4文件系统，其中一些具有内部日志，一些具有外部日志，您想知道它们使用的是哪些日志。
+- en: Solution
+  id: totrans-243
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Meet a new command, *dumpe2fs*. This is a part of the *e2fsprogs* suite of
+    ext2/3/4 utilities. Query your Ext4 filesystem:'
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 遇到一个新命令，*dumpe2fs*。这是ext2/3/4工具集*e2fsprogs*的一部分。查询您的Ext4文件系统：
+- en: '[PRE24]'
+  id: totrans-245
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'The *Journal UUID* belongs to the journal. Run *lsblk* to verify details:'
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*Journal UUID*属于日志。运行*lsblk*来验证详细信息：'
+- en: '[PRE25]'
+  id: totrans-247
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'And there it is. An Ext4 filesystem using an internal journal looks like this,
+    without the Journal UUID line:'
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就是这样。使用内部日志的Ext4文件系统如下所示，没有Journal UUID行：
+- en: '[PRE26]'
+  id: totrans-249
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: Discussion
+  id: totrans-250
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: There is always a way to find out where things are in Linux. The *dumpe2fs*
+    command shows a lot of useful information about your Ext4 filesystems, including
+    UUIDs, filesystem creation time, block count, free blocks, journal size, and much
+    more.
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Linux中总是有一种方法可以找出事物的位置。*dumpe2fs*命令显示有关您的Ext4文件系统的大量有用信息，包括UUID、文件系统创建时间、块计数、空闲块、日志大小等等。
+- en: See Also
+  id: totrans-252
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 dumpe2fs*'
+  id: totrans-253
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 dumpe2fs*'
+- en: 11.10 Improving Performance with an External Journal for Ext4
+  id: totrans-254
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.10 使用Ext4的外部日志来提高性能
+- en: Problem
+  id: totrans-255
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have heard that placing the Ext4 journal on a different disk than the filesystem
+    improves performance, and you want to do this.
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您听说将Ext4日志放在不同的磁盘上比文件系统可以提高性能，并且您想要这样做。
+- en: Solution
+  id: totrans-257
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: An external journal improves performance when your journal mode is *data=journal*.
+    (See the Discussion for more information on journal modes.) You may create a new
+    Ext4 filesystem and external journal, or convert an existing filesystem to use
+    an external journal.
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您的日志模式是*data=journal*时，外部日志会提高性能。（有关日志模式的更多信息，请参见讨论。）您可以创建新的Ext4文件系统和外部日志，或者将现有文件系统转换为使用外部日志。
+- en: The two disks must be on the same machine and have similar read and write speeds.
+    If the journal disk is slower than the filesystem disk, you will not see much,
+    if any, of a performance gain. You could use two similar solid-state disks (SSDs),
+    two similar hard disk drives (HDDs), or use a small SSD for the journal and a
+    large HDD for the filesystem, because SSDs are much faster than HDDs.
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 两个磁盘必须在同一台机器上，并且具有相似的读写速度。如果日志磁盘比文件系统磁盘慢，您将看不到多少性能提升，如果有的话。您可以使用两个类似的固态硬盘(SSD)，两个类似的机械硬盘(HDD)，或者将小型SSD用作日志和大型HDD用作文件系统，因为SSD比HDD快得多。
+- en: Locating the Ext4 journal on a separate disk takes several steps. In the following
+    example, we will create two new partitions, one for the journal and one for the
+    new Ext4 filesystem. Then create the journal, then the filesystem, and attach
+    it to the journal.
+  id: totrans-260
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将Ext4日志定位在单独的磁盘上需要几个步骤。在以下示例中，我们将创建两个新分区，一个用于日志，一个用于新的Ext4文件系统。然后创建日志，然后文件系统，并将其连接到日志。
+- en: 'The first partition is for the journal on */dev/sdb5*, 200 GB in size, and
+    the second partition is for the Ext4 filesystem on */dev/sda1*, 500 GB:'
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一个分区用于*/dev/sdb5*上的日志，大小为200 GB，第二个分区用于*/dev/sda1*上的Ext4文件系统，大小为500 GB：
+- en: '[PRE27]'
+  id: totrans-262
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'The external journal and the filesystem must have the same block size, which
+    is specified in the following example with *-b 4096*. If you don’t know the block
+    size, find it with *tune2fs*. The following commands are run in the Bash shell,
+    and not in the *parted* shell:'
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 外部日志和文件系统必须具有相同的块大小，在以下示例中指定为*-b 4096*。如果您不知道块大小，请使用*tune2fs*找到它。以下命令在Bash shell中运行，而不是*parted*
+    shell中运行：
+- en: '[PRE28]'
+  id: totrans-264
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'Now create the journal, which can take a few minutes, and then the new filesystem:'
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在创建日志，可能需要几分钟时间，然后创建新文件系统：
+- en: '[PRE29]'
+  id: totrans-266
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: You’re finished and can use your new filesystem.
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您已经完成并可以使用您的新文件系统。
+- en: 'You can attach an external journal to an existing filesystem with the *tune2fs*
+    command. First clear the journal on the existing filesystem, then link the filesystem
+    to the external journal:'
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用*tune2fs*命令将外部日志附加到现有文件系统。首先清除现有文件系统上的日志，然后将文件系统链接到外部日志：
+- en: '[PRE30]'
+  id: totrans-269
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: Discussion
+  id: totrans-270
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The Ext4 journal provides extra protection for your data, in the event of a
+    disk or system failure, by tracking changes that are not yet written to disk.
+    Even if it loses your most recent changes, it protects the filesystem from being
+    corrupted, so you lose just a little bit instead of the whole works.
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在磁盘或系统故障时，Ext4日志通过跟踪尚未写入磁盘的更改来为您的数据提供额外保护。即使它丢失了您最近的更改，它也保护文件系统免受损坏，这样您只会失去一点而不是全部内容。
+- en: 'Moving the journal to a separate disk on the same machine provides a noticeable
+    performance boost when the journal mode is *data=journal*. Ext4 has three journaling
+    modes: *journal*, *ordered*, and *writeback*. The default is *ordered*. See [Recipe
+    11.8](#rec-journal-mode) to learn about these modes and how to select the one
+    you want to use.'
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将日志移动到同一台机器上的单独磁盘可以显著提升性能，当日志模式为*data=journal*时尤为明显。Ext4有三种日志模式：*journal*、*ordered*和*writeback*。默认是*ordered*。参见[Recipe
+    11.8](#rec-journal-mode)了解这些模式及如何选择您想要使用的模式。
+- en: The caret, *^*, disables a feature. In the example in the recipe, it clears
+    the existing internal journal.
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 插入符号*^*禁用一个功能。在本配方示例中，它清除现有的内部日志。
+- en: Ext4 journals cannot be shared, and can be used by only one filesystem.
+  id: totrans-274
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ext4日志不能共享，并且只能被一个文件系统使用。
+- en: See Also
+  id: totrans-275
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 mke2fs*'
+  id: totrans-276
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 mke2fs*'
+- en: '*man 8 tune2fs*'
+  id: totrans-277
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 tune2fs*'
+- en: '[Chapter 8](ch08.xhtml#cha-partitioning-parted)'
+  id: totrans-278
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第8章](ch08.xhtml#cha-partitioning-parted)'
+- en: '[Chapter 9](ch09.xhtml#cha-partitioning-gparted)'
+  id: totrans-279
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第9章](ch09.xhtml#cha-partitioning-gparted)'
+- en: 11.11 Freeing Space from Reserved Blocks on Ext4 Filesystems
+  id: totrans-280
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.11 在Ext4文件系统上释放保留块的空间
+- en: Problem
+  id: totrans-281
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Most Linux distributions reserve 5% of Ext4 filesystems for the root user and
+    system services. On large modern hard disks that is a lot of space, and you want
+    to free some of that space.
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数Linux发行版为根用户和系统服务保留了Ext4文件系统的5%。在大型现代硬盘上，这是很多空间，您可能希望释放其中的一些空间。
+- en: Solution
+  id: totrans-283
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *tune2fs* command to adjust the size of the free space on an Ext4 filesystem.
+    You may configure it by percentage, like this example that reduces it to 1%:'
+  id: totrans-284
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*tune2fs*命令调整Ext4文件系统上空闲空间的大小。您可以按百分比进行配置，例如以下示例将其减少到1%：
+- en: '[PRE31]'
+  id: totrans-285
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'That is still about 3 gigabytes, with 4K blocks (820,474 x 4,096 = 3,360,661,504
+    bytes). Find your block size:'
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这依然是大约3 GB，使用4K块（820,474 x 4,096 = 3,360,661,504字节）。找到您的块大小：
+- en: '[PRE32]'
+  id: totrans-287
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'You can set a fractional percentage:'
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以设置一个分数百分比：
+- en: '[PRE33]'
+  id: totrans-289
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'That is roughly 800 MB. Or, specify a number of blocks:'
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大约是800 MB。或者，指定一个块数：
+- en: '[PRE34]'
+  id: totrans-291
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: '250,000 4K blocks is about a gigabyte. Check your work:'
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 250,000个4K块大约是1 GB。检查您的工作：
+- en: '[PRE35]'
+  id: totrans-293
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: Discussion
+  id: totrans-294
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you run out of disk space, you can still log in as root and free up space,
+    which you could not do if that 5% was not held in reserve. However, that 5% is
+    a holdover from the days of megabyte hard disks. Hard disks are so large now,
+    you don’t need all that reserved space. For example, 5% of a 1 TB disk is about
+    50 GB. Only a few hundred megabytes of reserved space is necessary. I set mine
+    to a gigabyte. It’s easy to remember and provides more than enough room.
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的磁盘空间不足，仍可以以root用户身份登录并释放空间，如果不保留这5%，则无法执行此操作。然而，这5%是从兆字节硬盘时代遗留下来的。现在硬盘如此之大，您不需要所有这些保留空间。例如，1
+    TB磁盘的5%约为50 GB。只需要几百兆字节的保留空间即可。我将我的设置为1 GB。这很容易记住并提供足够的空间。
+- en: 'Use the *dumpe2fs* command to check out the reserved blocks settings in your
+    Ext4 filesystem:'
+  id: totrans-296
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*dumpe2fs*命令检查您的Ext4文件系统中保留块的设置：
+- en: '[PRE36]'
+  id: totrans-297
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: See Also
+  id: totrans-298
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 dumpe2fs*'
+  id: totrans-299
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 dumpe2fs*'
+- en: '*man 8 tune2fs*'
+  id: totrans-300
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 tune2fs*'
+- en: 11.12 Creating a New XFS Filesystem
+  id: totrans-301
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.12 创建新的 XFS 文件系统
+- en: Problem
+  id: totrans-302
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You like XFS, and want to create a new XFS filesystem.
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您喜欢 XFS，并且想要创建一个新的 XFS 文件系统。
+- en: Solution
+  id: totrans-304
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'You need the *xfsprogs* package installed on your system and a partition for
+    the new filesystem. Then create your new XFS filesystem with *mkfs.xfs*. The following
+    example, on Ubuntu, demonstrates all these steps. The example new partition is
+    */dev/sda1*, and the new filesystem gets an *xfstest* label:'
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要在系统上安装 *xfsprogs* 软件包，并为新文件系统创建一个分区。然后使用 *mkfs.xfs* 创建您的新 XFS 文件系统。以下示例在
+    Ubuntu 上演示了所有这些步骤。示例新分区为 */dev/sda1*，新文件系统标签为 *xfstest*：
+- en: '[PRE37]'
+  id: totrans-306
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'Check your work with *lsblk*:'
+  id: totrans-307
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *lsblk* 检查您的工作：
+- en: '[PRE38]'
+  id: totrans-308
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'Mount your new filesystem, adjust ownership and permissions, and it’s ready
+    to use. The following example mounts it on */mnt/xfstest*, sets ownership to Duchess,
+    read-write for Duchess and read only for everyone else:'
+  id: totrans-309
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 挂载您的新文件系统，调整所有者和权限，它就可以使用了。以下示例将其挂载到 */mnt/xfstest*，将所有权设置为 Duchess，对 Duchess
+    为读写，对其他人为只读：
+- en: '[PRE39]'
+  id: totrans-310
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: Discussion
+  id: totrans-311
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The command output from creating a new XFS filesystem contains a few helpful
+    items, like the block size, number of blocks, and sector size.
+  id: totrans-312
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建新的 XFS 文件系统的命令输出包含几个有用的项目，如块大小、块数和扇区大小。
+- en: See Also
+  id: totrans-313
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 mkfs.xfs*'
+  id: totrans-314
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 mkfs.xfs*'
+- en: 11.13 Resizing an XFS Filesystem
+  id: totrans-315
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.13 调整 XFS 文件系统大小
+- en: Problem
+  id: totrans-316
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to resize an XFS filesystem.
+  id: totrans-317
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要调整一个 XFS 文件系统的大小。
+- en: Solution
+  id: totrans-318
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: You can only increase the size of an XFS filesystem. If you need it to be smaller,
+    you must copy your data to a safe location, create a smaller partition, format
+    it as XFS, then restore your data.
+  id: totrans-319
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您只能增加 XFS 文件系统的大小。如果您需要缩小它，您必须将数据复制到安全位置，创建较小的分区，格式化为 XFS，然后恢复您的数据。
+- en: Increasing the size is less work. You need free space at the end of the partition
+    that your XFS filesystem is on. In the following examples, the new endpoint for
+    the partition is 2700 GB, and the filesystem is mounted at */media/duchess/xfs*.
+  id: totrans-320
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 增加大小工作较少。您需要在 XFS 文件系统所在的分区末尾有空闲空间。在以下示例中，分区的新端点为 2700 GB，并且文件系统挂载在 */media/duchess/xfs*。
+- en: 'Launch *parted*. Print the partition information to verify the correct partition
+    and endpoint, increase the partition size, then quit *parted*:'
+  id: totrans-321
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动 *parted*。打印分区信息以验证正确的分区和端点，增加分区大小，然后退出 *parted*：
+- en: '[PRE40]'
+  id: totrans-322
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: 'Now, expand the filesystem to match the new partition size:'
+  id: totrans-323
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，扩展文件系统以匹配新的分区大小：
+- en: '[PRE41]'
+  id: totrans-324
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: You’re done! Enjoy your new larger filesystem.
+  id: totrans-325
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 搞定！享受您的新更大文件系统。
+- en: Discussion
+  id: totrans-326
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You also have the option to unmount the filesystem and resize it offline. This
+    is a little safer.
+  id: totrans-327
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以卸载文件系统并离线调整大小。这样做更安全一些。
+- en: Using GParted to resize a filesystem is fast and easy; see [Recipe 9.7](ch09.xhtml#rec-resize-partitions-gparted).
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 GParted 调整文件系统大小快速而简便；参见 [配方 9.7](ch09.xhtml#rec-resize-partitions-gparted)。
+- en: See Also
+  id: totrans-329
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 8.8](ch08.xhtml#rec-resize-partition-fs)'
+  id: totrans-330
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 8.8](ch08.xhtml#rec-resize-partition-fs)'
+- en: '[Recipe 9.7](ch09.xhtml#rec-resize-partitions-gparted)'
+  id: totrans-331
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 9.7](ch09.xhtml#rec-resize-partitions-gparted)'
+- en: 11.14 Creating an exFAT Filesystem
+  id: totrans-332
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.14 创建 exFAT 文件系统
+- en: Problem
+  id: totrans-333
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your digital camera flash drive is formatted with the exFAT filesystem, or you
+    have other flash storage devices that use exFAT, and you want to read, write,
+    and edit the files from these devices on your Linux system.
+  id: totrans-334
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的数码相机闪存驱动器格式化为 exFAT 文件系统，或者您有其他使用 exFAT 的闪存设备，并且您希望在 Linux 系统上读取、写入和编辑这些设备上的文件。
+- en: Solution
+  id: totrans-335
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'There are two possible solutions: one is to use the exFAT implementation that
+    runs on Filesystem in Userspace (FUSE). The other solution is to use the native
+    implementation that runs in the Linux kernel, rather than userspace. In this recipe
+    we will use exFAT FUSE because at the time this was written the native implementation
+    had not yet made it into most distribution releases. Look for kernel version 5.7,
+    and check your distribution release notes and news. (Run the *uname -r* command
+    to see your kernel version.)'
+  id: totrans-336
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有两种可能的解决方案：一种是使用在用户空间运行的 exFAT 实现（FUSE）。另一种解决方案是使用在 Linux 内核中而不是用户空间运行的本地实现。在这个配方中，我们将使用
+    exFAT FUSE，因为在撰写本文时，本地实现尚未包含在大多数发行版中。查看内核版本 5.7，并检查您的发行版发布说明和新闻。 （运行 *uname -r*
+    命令查看您的内核版本。）
+- en: The exFAT package names vary. *exfat-fuse* and *exfat-utils* are the older packages.
+    *exfatprogs* is the newest implementation, replacing both *exfat-fuse* and *exfat-utils*.
+    Whatever you have, go ahead and install it.
+  id: totrans-337
+  prefs: []
+  type: TYPE_NORMAL
+  zh: exFAT 包的名称各不相同。*exfat-fuse* 和 *exfat-utils* 是旧版软件包。*exfatprogs* 是最新的实现，替代了 *exfat-fuse*
+    和 *exfat-utils*。无论您安装了什么版本，请继续安装。
+- en: 'The command to create a new exFAT filesystem is the same for both. The following
+    example formats */dev/sdc1* as exFAT:'
+  id: totrans-338
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建新的 exFAT 文件系统的命令对于两者是相同的。以下示例将 */dev/sdc1* 格式化为 exFAT：
+- en: '[PRE42]'
+  id: totrans-339
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: 'exFAT is designed to be simple, so there are not a lot of options. You can
+    give it a label:'
+  id: totrans-340
+  prefs: []
+  type: TYPE_NORMAL
+  zh: exFAT 被设计得很简单，因此选项不多。您可以为其命名标签：
+- en: '[PRE43]'
+  id: totrans-341
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: 'Verify your changes with *lsblk*:'
+  id: totrans-342
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *lsblk* 验证您的更改：
+- en: '[PRE44]'
+  id: totrans-343
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: Discussion
+  id: totrans-344
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You do not need a special exFAT partition to read exFAT files on other devices,
+    but only exFAT installed on your Linux system.
+  id: totrans-345
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不需要专门的 exFAT 分区来读取其他设备上的 exFAT 文件，但只需在您的 Linux 系统上安装 exFAT 即可。
+- en: If you prefer a graphical partitioning tool, GParted does not support exFAT,
+    due to legal concerns. GNOME Disks, called Disks in most GNOME implementations,
+    does support exFAT. You do not have to install GNOME to get Disks; look for the
+    *gnome-disk-utility* package.
+  id: totrans-346
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您更喜欢图形化分区工具，由于法律原因，GParted 不支持 exFAT。GNOME Disks，在大多数 GNOME 实现中称为 Disks，支持
+    exFAT。您不必安装 GNOME 即可获得 Disks；请查找 *gnome-disk-utility* 软件包。
+- en: Microsoft released the exFAT specification in 2019\. Samsung wrote *exfatprogs*
+    and released it in early 2020\. By the time you read this, the latest releases
+    of Fedora, Ubuntu, and openSUSE Tumbleweed should have native exFAT support.
+  id: totrans-347
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Microsoft 在 2019 年发布了 exFAT 规范。Samsung 编写了 *exfatprogs* 并在 2020 年初发布了它。当您阅读本文时，最新版本的
+    Fedora、Ubuntu 和 openSUSE Tumbleweed 应该具有本地的 exFAT 支持。
+- en: See Also
+  id: totrans-348
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 exfat*'
+  id: totrans-349
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 exfat*'
+- en: '*man 8 exfatlabel*'
+  id: totrans-350
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 exfatlabel*'
+- en: 11.15 Creating FAT16 and FAT32 Filesystems
+  id: totrans-351
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.15 创建 FAT16 和 FAT32 文件系统
+- en: Problem
+  id: totrans-352
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to know how to create FAT16 and FAT32 filesystems.
+  id: totrans-353
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要知道如何创建 FAT16 和 FAT32 文件系统。
+- en: Solution
+  id: totrans-354
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: You need the *dosfstools* package, which is installed by default on most Linuxes.
+    The following examples demonstrate creating a new 500 MB partition with *parted*,
+    then formatting the partition with FAT32.
+  id: totrans-355
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要 *dosfstools* 软件包，在大多数 Linux 上默认安装。以下示例演示了使用 *parted* 创建一个新的 500 MB 分区，然后用
+    FAT32 格式化该分区。
+- en: 'Create the new partition, and note how to change the measurement units to MB,
+    and how to use *mkpart* interactively:'
+  id: totrans-356
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建新分区，并注意如何将测量单位更改为 MB，以及如何交互地使用 *mkpart*：
+- en: '[PRE45]'
+  id: totrans-357
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: 'The *partition* name is optional; in the example it is left empty. Now create
+    a nice new FAT32 filesystem:'
+  id: totrans-358
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*分区* 名称是可选的；在本例中为空。现在创建一个漂亮的新 FAT32 文件系统：'
+- en: '[PRE46]'
+  id: totrans-359
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: 'Verify with *lsblk*:'
+  id: totrans-360
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *lsblk* 进行验证：
+- en: '[PRE47]'
+  id: totrans-361
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: Discussion
+  id: totrans-362
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you want a FAT16 filesystem, use *-F 16*.
+  id: totrans-363
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想要 FAT16 文件系统，请使用 *-F 16*。
+- en: FAT16 files and filesystems max out at 4 GB.
+  id: totrans-364
+  prefs: []
+  type: TYPE_NORMAL
+  zh: FAT16 文件和文件系统最多支持 4 GB。
+- en: FAT32 supports a maximum file size of 4 GB, and a maximum partition size of
+    16 TB, using 4 KB sectors and 64 KB clusters.
+  id: totrans-365
+  prefs: []
+  type: TYPE_NORMAL
+  zh: FAT32 支持最大 4 GB 的文件大小，最大 16 TB 的分区大小，使用 4 KB 扇区和 64 KB 簇。
+- en: See Also
+  id: totrans-366
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 8](ch08.xhtml#cha-partitioning-parted)'
+  id: totrans-367
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第8章](ch08.xhtml#cha-partitioning-parted)'
+- en: '[Chapter 9](ch09.xhtml#cha-partitioning-gparted)'
+  id: totrans-368
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第9章](ch09.xhtml#cha-partitioning-gparted)'
+- en: '*man 8 mkfs.fat*'
+  id: totrans-369
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 mkfs.fat*'
+- en: 11.16 Creating a Btrfs Filesystem
+  id: totrans-370
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 11.16 创建 Btrfs 文件系统
+- en: Problem
+  id: totrans-371
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Btrfs sounds cool, and you want to try it out.
+  id: totrans-372
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Btrfs 听起来很酷，您想尝试一下。
+- en: Solution
+  id: totrans-373
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: It is cool, and it is also complex. SUSE Linux Enterprise Server (SLES) and
+    openSUSE are the best Linux distributions to try Btrfs on. SLES and openSUSE are
+    the biggest Btrfs supporters and developers, and they created the excellent Snapper
+    tool for managing Btrfs snapshots. They also provide the most thorough documentation.
+    The default partitioning on an openSUSE/SLES sets up Btrfs subvolumes and automatic
+    snapshots.
+  id: totrans-374
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这很酷，也很复杂。SUSE Linux Enterprise Server (SLES) 和 openSUSE 是尝试 Btrfs 的最佳 Linux
+    发行版。SLES 和 openSUSE 是最大的 Btrfs 支持者和开发者，他们为管理 Btrfs 快照创建了优秀的 Snapper 工具。他们还提供了最详尽的文档。在
+    openSUSE/SLES 上的默认分区设置了 Btrfs 子卷和自动快照。
+- en: Start by downloading the latest openSUSE Tumbleweed. Launch the installer, and
+    when you get to the Suggested Partitioning screen, take a look at the installer’s
+    first proposal ([Figure 11-2](#fig-btrfs-1)).
+  id: totrans-375
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 开始下载最新的 openSUSE Tumbleweed。启动安装程序，在建议分区屏幕时，查看安装程序的第一个建议（[Figure 11-2](#fig-btrfs-1)）。
+- en: '![openSUSE first partitioning proposal](Images/lcb2_1102.png)'
+  id: totrans-376
+  prefs: []
+  type: TYPE_IMG
+  zh: '![openSUSE 的首次分区建议](Images/lcb2_1102.png)'
+- en: Figure 11-2\. openSUSE first partitioning proposal
+  id: totrans-377
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 11-2\. openSUSE 的首次分区建议
+- en: Click Guided Setup to modify this proposal. Skip past the “Enable logical volume
+    management (LVM) / Enable disk encryption” screen, and stop at the Filesystem
+    Options screen. Select “Propose Separate Home Partition,” and format it as Btrfs.
+    Check both boxes for “Propose Separate Swap Partition,” then click Next ([Figure 11-3](#fig-btrfs-2)).
+  id: totrans-378
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 点击“引导设置”以修改此建议。跳过“启用逻辑卷管理（LVM）/启用磁盘加密”屏幕，并停留在文件系统选项屏幕。选择“建议单独的家目录分区”，并将其格式化为
+    Btrfs。勾选“建议单独的交换分区”的两个框，然后点击“下一步”（见 [图 11-3](#fig-btrfs-2)）。
+- en: '![Create home partition](Images/lcb2_1103.png)'
+  id: totrans-379
+  prefs: []
+  type: TYPE_IMG
+  zh: '![创建家目录分区](Images/lcb2_1103.png)'
+- en: Figure 11-3\. Create a home partition
+  id: totrans-380
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 11-3\. 创建一个家目录分区
+- en: This returns you to the Suggested Partitioning screen. If you wish to adjust
+    partition sizes, click Expert Partitioner → Start with Current Proposal ([Figure 11-4](#fig-btrfs-4)).
+    Otherwise click Next and continue with the installation.
+  id: totrans-381
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将带您返回“建议的分区”屏幕。如果您希望调整分区大小，请点击专家分区程序 → 以当前建议开始（见 [图 11-4](#fig-btrfs-4)）。否则，请点击“下一步”继续安装。
+- en: '![Custom partitioning, using current proposal](Images/lcb2_1104.png)'
+  id: totrans-382
+  prefs: []
+  type: TYPE_IMG
+  zh: '![使用当前建议进行自定义分区](Images/lcb2_1104.png)'
+- en: Figure 11-4\. Custom partitioning, using current proposal
+  id: totrans-383
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 11-4\. 使用当前建议进行自定义分区
+- en: When you are finished, you will have a ready-to-use Btrfs Linux system, already
+    set up with good defaults.
+  id: totrans-384
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您完成时，您将拥有一个已设置好良好默认值的可用 Btrfs Linux 系统。
+- en: Discussion
+  id: totrans-385
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Setting up Btrfs manually is a bit of a chore, though as you learn about it
+    you might want to try setting it up manually. I like to learn new things by starting
+    with a working implementation. It is not possible, at least for me, to provide
+    a useful Btrfs how-to in a few recipes. Btrfs is so flexible and so capable, it
+    needs its own book. Which it has, thanks to the good SUSE people. Consult the
+    Startup Guide for installation, and the “System Recovery and Snapshot Management
+    with Snapper” section in the [openSUSE documentation](https://oreil.ly/1Vi9L).
+    Snapper + Btrfs is a great combination for Btrfs management and fast failure recovery.
+  id: totrans-386
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 手动设置 Btrfs 稍显繁琐，但当你了解它时，你可能会想尝试手动设置它。我喜欢通过一个可工作的实现来学习新事物。对我来说，提供几个 Btrfs 的实用方法是不可能的。Btrfs
+    如此灵活和强大，它需要一本专门的书籍。多亏了 SUSE 的热心人，它有了自己的书。请参阅启动指南进行安装，以及 [openSUSE 文档](https://oreil.ly/1Vi9L)
+    中的“系统恢复和快照管理”部分。Snapper + Btrfs 是 Btrfs 管理和快速故障恢复的绝佳组合。
+- en: See Also
+  id: totrans-387
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[The openSUSE Startup and Reference Guides](https://oreil.ly/1Vi9L)'
+  id: totrans-388
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[openSUSE 启动和参考指南](https://oreil.ly/1Vi9L)'
+- en: The Deployment and Administration guides in the [SLES Product Manuals](https://oreil.ly/fX5G9)
+  id: totrans-389
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在 [SLES 产品手册](https://oreil.ly/fX5G9) 中的部署和管理指南

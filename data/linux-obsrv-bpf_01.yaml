@@ -1,0 +1,376 @@
+- en: Preface
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 前言
+- en: In 2015, David was working as a core developer for Docker, the company that
+    made containers popular. His day-to-day work was divided between helping the community
+    and growing the project. Part of his job was reviewing the firehose of pull requests
+    that members of the community sent us; he also had to ensure that Docker worked
+    for all kinds of scenarios, including high-performance workloads that were running
+    and provisioning thousands of containers at any point of time.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 2015年，David 作为Docker的核心开发者，这家公司使容器变得流行。他的日常工作分为帮助社区和推动项目增长。他的工作之一是审查社区成员发送的大量拉取请求；他还必须确保Docker适用于各种场景，包括在任何时候运行和配置数千个容器的高性能工作负载。
+- en: To diagnose performance issues at Docker, we used *flame graphs*, which are
+    advanced visualizations to help you navigate that data easily. The Go programming
+    language makes it really easy to measure and extract application performance data
+    using an embedded HTTP endpoint and generate graphs based on that data. David
+    wrote an article about Go’s profiler capabilities and how you can use its data
+    to generate flame graphs. A big pitfall about the way that Docker collects performance
+    data is that the profiler is disabled by default, so if you’re trying to debug
+    a performance issue, the first action to take is to restart Docker. The main issue
+    with this strategy is that by restarting the service, you’ll probably lose the
+    relevant data that you’re trying to collect, and then you need to wait until the
+    event you’re trying to trace happens again. In David’s article about Docker flame
+    graphs, he mentioned this as a necessary step to measure Docker’s performance,
+    but that it didn’t need to be this way. This realization made him start researching
+    different technologies to collect and analyze any application’s performance, which
+    led him to discover BPF.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Docker诊断性能问题时，我们使用了*火焰图*，这是高级可视化工具，可帮助您轻松地浏览数据。Go编程语言通过嵌入式HTTP端点使得测量和提取应用性能数据变得非常容易，并基于这些数据生成图表。David撰写了一篇关于Go分析器功能的文章，以及如何使用其数据生成火焰图。关于Docker收集性能数据的一个主要问题是分析器默认情况下是禁用的，因此如果您尝试调试性能问题，首要操作是重新启动Docker。这种策略的主要问题在于通过重新启动服务，您可能会丢失正在尝试收集的相关数据，然后需要等待直到再次发生您要跟踪的事件。在David关于Docker火焰图的文章中，他提到这是测量Docker性能的一个必要步骤，但不一定需要这样做。这一认识使他开始研究不同的技术来收集和分析任何应用程序的性能，这导致他发现了BPF。
+- en: In the meantime, but far from David, Lorenzo was looking for a reason to better
+    study the Linux kernel internals, and he discovered that it was easy to get to
+    know many kernel subsystems by approaching them while learning about BPF. A couple
+    of years later, he was able to apply BPF at his job at InfluxData to understand
+    ways to make the data ingestion faster in InfluxCloud. Now Lorenzo is involved
+    in the BPF community and IOVisor, and he works at Sysdig on Falco, a tool that
+    uses BPF to do runtime security for containers and Linux.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与此同时，远离David，Lorenzo 正在寻找一个理由来更好地研究Linux内核的内部机制，他发现通过学习BPF时能够轻松了解许多内核子系统。几年后，他能够在他在InfluxData的工作中应用BPF，以了解如何使InfluxCloud中的数据摄取更快。现在Lorenzo参与了BPF社区和IOVisor，并在Sysdig工作，负责Falco，这是一个使用BPF进行容器和Linux运行时安全性的工具。
+- en: Over the past few years, we’ve used BPF in multiple scenarios, from gathering
+    utilization data from Kubernetes clusters to managing network traffic policies.
+    We’ve learned its ins and outs by using it and by reading many blog posts from
+    technology leaders like Brendan Gregg and Alexei Starovoitov and companies like
+    Cilium and Facebook. Their articles and publications helped us tremendously in
+    the past, and they have also been a huge reference for the development of this
+    book.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在过去的几年中，我们在多种场景中使用了BPF，从收集Kubernetes集群的利用率数据到管理网络流量策略。通过使用它和阅读像Brendan Gregg和Alexei
+    Starovoitov这样的技术领袖以及Cilium和Facebook等公司的许多博客文章，我们深入了解了它的方方面面。他们的文章和出版物在过去对我们帮助很大，并且它们也是本书开发的重要参考。
+- en: After reading many of those resources, we realized that every time we needed
+    to learn something about BPF, we needed to jump between many blog posts, man pages,
+    and other places on the internet. This book is our attempt to put the knowledge
+    scattered across the web in a central location for the next generation of BPF
+    enthusiasts to learn about this fantastic technology.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 阅读了许多这些资源后，我们意识到，每次我们需要学习有关BPF的东西时，我们都需要在许多博客文章、手册页面和互联网的其他地方之间跳转。这本书是我们试图将分散在网络上的知识集中到一个中心位置，供下一代BPF爱好者学习这一美妙技术之用。
+- en: We’ve divided our work between nine different chapters to show you what you
+    can accomplish by using BPF. You can read some chapters in isolation as reference
+    guides, but if you’re new to BPF, we recommend you to read them in order. That
+    will give you an overview of the core concepts in BPF and guide you through the
+    possibilities ahead of you.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将我们的工作分为九个不同的章节，向您展示使用BPF可以实现的功能。您可以单独阅读一些章节作为参考指南，但如果您是BPF的新手，我们建议您按顺序阅读它们。这将使您了解BPF的核心概念，并指导您在前进的道路上的可能性。
+- en: Whether you’re already an expert in observability and performance analysis or
+    you’re researching new possibilities to answer questions about your production
+    systems that you couldn’t solve before, we hope you find new knowledge in this
+    book.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论您是已经是可观察性和性能分析的专家，还是正在研究新的可能性来回答您之前无法解决的生产系统问题，我们希望您能在本书中找到新的知识。
+- en: Conventions Used in This Book
+  id: totrans-8
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 本书使用的约定
+- en: 'The following typographical conventions are used in this book:'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书使用以下排版约定：
+- en: '*Italic*'
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*斜体*'
+- en: Indicates new terms, URLs, email addresses, filenames, and file extensions.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表示新术语、URL、电子邮件地址、文件名和文件扩展名。
+- en: '`Constant width`'
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`Constant width`'
+- en: Used for program listings, as well as within paragraphs to refer to program
+    elements such as variable or function names, databases, data types, environment
+    variables, statements, and keywords.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于程序清单，以及在段落中用于引用程序元素，如变量或函数名称、数据库、数据类型、环境变量、语句和关键字。
+- en: '**`Constant width bold`**'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '**`Constant width bold`**'
+- en: Shows commands or other text that should be typed literally by the user.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示用户应该按照字面意义输入的命令或其他文本。
+- en: '*`Constant width italic`*'
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*`Constant width italic`*'
+- en: Shows text that should be replaced with user-supplied values or by values determined
+    by context.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示应由用户提供值或由上下文确定值的文本。
+- en: Tip
+  id: totrans-18
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: This element signifies a tip or suggestion.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示提示或建议。
+- en: Note
+  id: totrans-20
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: This element signifies a general note.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示一般注释。
+- en: Warning
+  id: totrans-22
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: This element indicates a warning or caution.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此元素表示警告或注意事项。
+- en: Using Code Examples
+  id: totrans-24
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用代码示例
+- en: Supplemental material (code examples, exercises, etc.) is available for download
+    at [*https://oreil.ly/lbpf-repo*](https://oreil.ly/lbpf-repo).
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 补充材料（代码示例、练习等）可在[*https://oreil.ly/lbpf-repo*](https://oreil.ly/lbpf-repo)下载。
+- en: This book is here to help you get your job done. In general, if example code
+    is offered with this book, you may use it in your programs and documentation.
+    You do not need to contact us for permission unless you’re reproducing a significant
+    portion of the code. For example, writing a program that uses several chunks of
+    code from this book does not require permission. Selling or distributing examples
+    from O’Reilly books does require permission. Answering a question by citing this
+    book and quoting example code does not require permission. Incorporating a significant
+    amount of example code from this book into your product’s documentation does require
+    permission.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书旨在帮助您完成工作。一般而言，如果本书提供示例代码，则可以在您的程序和文档中使用它。除非您重现了代码的重要部分，否则无需联系我们以获得许可。例如，编写一个使用本书中几个代码片段的程序不需要许可。销售或分发O'Reilly书籍的示例需要许可。通过引用本书并引用示例代码来回答问题不需要许可。将本书中大量示例代码合并到您产品的文档中需要许可。
+- en: 'We appreciate, but do not require, attribution. An attribution usually includes
+    the title, author, publisher, and ISBN. For example: “*Linux Observability with
+    BPF* by David Calavera and Lorenzo Fontana (O’Reilly). Copyright 2020 David Calavera
+    and Lorenzo Fontana, 978-1-492-05020-9.”'
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们感谢，但不要求署名。通常包括标题、作者、出版商和ISBN号的署名。例如：“*Linux Observability with BPF* by David
+    Calavera and Lorenzo Fontana (O’Reilly). Copyright 2020 David Calavera and Lorenzo
+    Fontana, 978-1-492-05020-9.”
+- en: If you feel your use of code examples falls outside fair use or the permission
+    given here, feel free to contact us at [*permissions@oreilly.com*](mailto:permissions@oreilly.com).
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您认为您使用的代码示例超出了公平使用范围或这里给出的许可，请随时通过[*permissions@oreilly.com*](mailto:permissions@oreilly.com)与我们联系。
+- en: O’Reilly Online Learning
+  id: totrans-29
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: O’Reilly在线学习
+- en: Note
+  id: totrans-30
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: For over 40 years, [*O’Reilly Media*](http://oreilly.com) has provided technology
+    and business training, knowledge, and insight to help companies succeed.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 40多年来，[*O’Reilly Media*](http://oreilly.com)提供技术和商业培训、知识和见解，帮助公司取得成功。
+- en: Our unique network of experts and innovators share their knowledge and expertise
+    through books, articles, conferences, and our online learning platform. O’Reilly’s
+    online learning platform gives you on-demand access to live training courses,
+    in-depth learning paths, interactive coding environments, and a vast collection
+    of text and video from O’Reilly and 200+ other publishers. For more information,
+    please visit [*http://oreilly.com*](http://oreilly.com).
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们独特的专家和创新者网络通过书籍、文章、会议以及我们的在线学习平台分享他们的知识和专业知识。O’Reilly的在线学习平台为您提供按需访问实时培训课程、深入学习路径、交互式编码环境以及来自O’Reilly和其他200多家出版商的大量文本和视频。欲了解更多信息，请访问[*http://oreilly.com*](http://oreilly.com)。
+- en: How to Contact Us
+  id: totrans-33
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 如何联系我们
+- en: 'Please address comments and questions concerning this book to the publisher:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请将有关本书的评论和问题发送至出版商：
+- en: O’Reilly Media, Inc.
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: O’Reilly Media, Inc.
+- en: 1005 Gravenstein Highway North
+  id: totrans-36
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1005 Gravenstein Highway North
+- en: Sebastopol, CA 95472
+  id: totrans-37
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: CA 95472，Sebastopol
+- en: 800-998-9938 (in the United States or Canada)
+  id: totrans-38
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 800-998-9938（美国或加拿大）
+- en: 707-829-0515 (international or local)
+  id: totrans-39
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 707-829-0515（国际或本地）
+- en: 707-829-0104 (fax)
+  id: totrans-40
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 707-829-0104（传真）
+- en: We have a web page for this book, where we list errata, examples, and any additional
+    information. You can access this page at [*https://oreil.ly/linux-bpf*](https://oreil.ly/linux-bpf).
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们为本书创建了一个网页，列出勘误、示例和任何额外信息。您可以访问[*https://oreil.ly/linux-bpf*](https://oreil.ly/linux-bpf)查看这个页面。
+- en: Email [*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com) to comment
+    or ask technical questions about this book.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过电子邮件[*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com)对本书提出评论或技术问题。
+- en: For more information about our books, courses, conferences, and news, see our
+    website at [*http://www.oreilly.com*](http://www.oreilly.com).
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 欲了解有关我们的图书、课程、会议和新闻的更多信息，请访问我们的网站：[*http://www.oreilly.com*](http://www.oreilly.com)。
+- en: 'Find us on Facebook: [*http://facebook.com/oreilly*](http://facebook.com/oreilly)'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Facebook上找到我们：[*http://facebook.com/oreilly*](http://facebook.com/oreilly)
+- en: 'Follow us on Twitter: [*http://twitter.com/oreillymedia*](http://twitter.com/oreillymedia)'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Twitter上关注我们：[*http://twitter.com/oreillymedia*](http://twitter.com/oreillymedia)
+- en: 'Watch us on YouTube: [*http://www.youtube.com/oreillymedia*](http://www.youtube.com/oreillymedia)'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在YouTube上观看我们：[*http://www.youtube.com/oreillymedia*](http://www.youtube.com/oreillymedia)
+- en: Acknowledgments
+  id: totrans-47
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 致谢
+- en: Writing a book is more difficult than we thought, but it was probably one of
+    the most rewarding activities we have done in our lives. Many days and nights
+    went into this book, and it would have not been possible without the help of our
+    partners, families, friends, and dogs. We’d like to thank Debora Pace, Lorenzo’s
+    girlfriend, and his son, Riccardo, for all the patience they had waiting for him
+    during long writing sessions. Thanks also to Lorenzo’s friend Leonardo Di Donato
+    for all the advice provided and in particular for writing about XDP and testing.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 写一本书比我们想象的更困难，但这可能是我们生活中最有价值的活动之一。这本书耗费了许多日夜，如果没有我们的合作伙伴、家人、朋友和狗的帮助，这将是不可能完成的。我们要感谢Debora
+    Pace、Lorenzo的女朋友以及他的儿子Riccardo，在长时间的写作过程中对他们的耐心。同时也感谢Lorenzo的朋友Leonardo Di Donato提供的所有建议，特别是关于XDP和测试的部分。
+- en: We’re eternally grateful to Robin Means, David’s wife, for proofreading early
+    drafts of several chapters and the initial overview that started this book and
+    for helping him write many articles over the years and laughing at his made-up
+    English words that sounded cuter than they really were.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们对Robin Means和David的妻子在早期草稿和开始本书的初步概述的校对表示永远的感激，以及在多年来帮助他撰写许多文章并笑着听他编造的听起来比实际更可爱的英语单词。
+- en: We both want to say a big thank you to all those who made eBPF and BPF possible.
+    To David Miller and Alexei Starovoitov for their continuous contributions to improve
+    the Linux kernel and ultimately eBPF and the community around it. To Brendan Gregg
+    for his willing to share, his enthusiasm, and his work on tooling that make eBPF
+    more accessible to everyone. To the IOVisor group for their vibes, emails, and
+    all the work they put into bpftrace, gobpf, kubectl-trace, and BCC. To Daniel
+    Borkmann for all his inspirational work, in particular on libbpf and the tools
+    infrastructure. To Jessie Frazelle for writing the foreword and being inspirational
+    to both of us and to thousands of developers out there. To Jérôme Petazzoni for
+    being the best technical reviewer we could want; his questions made us rethink
+    many parts of this book and our approach to the code examples in it.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们都想向那些使 eBPF 和 BPF 变得可能的人表示衷心的感谢。感谢 David Miller 和 Alexei Starovoitov 不断贡献改进
+    Linux 内核，最终改进了 eBPF 及其周围的社区。感谢 Brendan Gregg 乐于分享、他的热情以及他在使 eBPF 更加易于访问的工具方面的工作。感谢
+    IOVisor 团队为 bpftrace、gobpf、kubectl-trace 和 BCC 所付出的努力、邮件以及所有工作。感谢 Daniel Borkmann
+    在 libbpf 和工具基础设施方面的所有激励性工作。感谢 Jessie Frazelle 撰写前言并对我们俩以及数千名开发者产生了启发作用。感谢 Jérôme
+    Petazzoni 成为我们最想要的最佳技术评审者；他的问题让我们重新思考了本书的许多部分及其代码示例的处理方式。
+- en: And thank you to all the thousands of Linux kernel contributors, in particular
+    the ones active in the BPF mailing list, for their questions/answers, their patches,
+    and their initiatives. Finally, to all those who have been part of publishing
+    this book at O’Reilly, including our editors, John Devins and Melissa Potter,
+    and all the people behind the scenes who made the cover, reviewed the pages, and
+    made this book be more professional than anything else we have done in our careers.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 感谢所有数千名 Linux 内核贡献者，特别是那些在 BPF 邮件列表中活跃的人，感谢他们的问题/回答、补丁和倡议。最后，感谢所有参与 O'Reilly
+    出版此书的人员，包括我们的编辑 John Devins 和 Melissa Potter，以及所有在幕后制作封面、审核页面的人员，使本书比我们职业生涯中的任何其他作品更加专业。

@@ -1,0 +1,1665 @@
+- en: Chapter 8\. Managing Disk Partitioning with parted
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第 8 章：使用 parted 管理磁盘分区
+- en: All mass storage drives—SATA hard disks, solid state drives, USB drives, SD
+    (Secure Digital), NVMe (Non-Volatile Memory Express), and CompactFlash cards—must
+    be partitioned and formatted with filesystems before you can use them. They all
+    ship with some kind of partitioning and filesystems, which may not be what you
+    want. As your needs change, you will want to repartition your disks and use different
+    filesystems. In this chapter you will learn about using *parted* (partition editor)
+    to manage partitioning.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有的存储驱动器——SATA 硬盘、固态硬盘、USB 驱动器、SD（安全数字）卡、NVMe（非易失性内存表达式）和 CompactFlash 卡——在使用前都必须进行分区和格式化。它们都预装了某种分区和文件系统，可能不符合你的需求。随着需求变化，你可能需要重新分区并使用不同的文件系统。在本章中，你将学习使用
+    *parted*（分区编辑器）管理分区。
+- en: Overview
+  id: totrans-2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 概述
+- en: '*parted* only manages partitioning; see [Chapter 11](ch11.xhtml#cha-create-filesystems)
+    to learn about filesystems. [Chapter 9](ch09.xhtml#cha-partitioning-gparted) covers
+    the graphical frontend to *parted*, GParted, which manages both partitioning and
+    filesystems.'
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*parted* 只管理分区；参见[第 11 章](ch11.xhtml#cha-create-filesystems)学习文件系统。[第 9 章](ch09.xhtml#cha-partitioning-gparted)介绍了图形前端工具
+    GParted，它可以同时管理分区和文件系统。'
+- en: You will also learn about the modern replacement for the Master Boot Record
+    (MBR), which is the elderly and inadequate legacy partition table. The MBR has
+    been supplanted by the new Globally Unique Identifier Partition Table (GUID Partition
+    Table or GPT).
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你还将了解到 Master Boot Record（MBR）的现代替代品，即老旧而不足的传统分区表。MBR 已被新的全局唯一标识分区表（GUID Partition
+    Table 或 GPT）取代。
+- en: '*parted* shows partition information and adds, removes, and resizes partitions.
+    *parted* has just one gotcha: it writes your changes to disk immediately, so you
+    must be careful. GParted does not apply changes until you click a button.'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*parted* 显示分区信息，并添加、删除和调整分区大小。*parted* 只有一个需要注意的地方：它会立即将更改写入磁盘，所以你必须小心。GParted
+    则不会立即应用更改，直到你点击一个按钮。'
+- en: It is a common convenience to call all mass storage devices *disks*, even though
+    many of them are not disks anymore, but solid-state devices, like USB sticks.
+    Why not, when we still dial telephones, and make tape recordings and film videos
+    with our smartphones?
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管很多存储设备不再是磁盘而是固态设备，如 USB 闪存，但称它们为“磁盘”仍是一种常见的便利说法。为什么不呢？我们还在用电话拨号，用智能手机录制磁带录音和视频呢？
+- en: A disk partition is a logical division of a storage disk, a way of dividing
+    the disk into one or more independent regions. A disk must have at least one partition.
+    The number of partitions depends on your needs and whims. After partitioning a
+    disk, you must put a filesystem on each partition, and then you can use it. A
+    single disk may have multiple partitions, and each partition may have a different
+    filesystem.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 磁盘分区是存储磁盘的逻辑分割，是将磁盘划分为一个或多个独立区域的方法。一个磁盘必须至少有一个分区。分区的数量取决于你的需求和喜好。分区完成后，你必须在每个分区上创建文件系统，然后才能使用它。一个单独的磁盘可以有多个分区，每个分区可以有不同的文件系统。
+- en: The disk name on Linux is always */dev* something, which is short for device.
+    For example, */dev/sda* for a hard disk, and */dev/sr0* for an optical drive.
+    Partitions are the disk name plus a number. If */dev/sda* has three partitions,
+    they are */dev/sda1*, */dev/sda2*, and */dev/sda3*.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Linux 上，磁盘名称始终为 */dev* 后跟一些内容，这缩写自 device。例如，硬盘为 */dev/sda*，光驱为 */dev/sr0*。分区是磁盘名称加上一个数字。如果
+    */dev/sda* 有三个分区，它们分别为 */dev/sda1*、*/dev/sda2* 和 */dev/sda3*。
+- en: Partitioning Schemes
+  id: totrans-9
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 分区方案
+- en: 'The default partitioning scheme on some Linux distributions is to stuff the
+    whole installation into a single partition. This works fine, but setting up a
+    few more partitions during installation has some advantages:'
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些 Linux 发行版的默认分区方案是将整个安装内容放入单个分区。这样做没问题，但在安装过程中设置几个更多的分区有其优点：
+- en: Giving */boot* its own partition makes managing multiboot systems easier because
+    the boot files are independent of whatever operating systems you install or remove.
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将 */boot* 单独分区使得管理多重启动系统更加容易，因为启动文件与安装或移除的操作系统独立。
+- en: Put */home* on its own partition to isolate it from the root filesystem, so
+    you can replace your Linux installation without touching */home*. */home* could
+    even be on a separate drive.
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将 */home* 放在单独的分区中可以隔离它与根文件系统，这样你可以在不触及 */home* 的情况下替换 Linux 安装。*/home* 甚至可以在一个独立的驱动器上。
+- en: '*/var* and */tmp* can fill up from runaway processes. Putting them on their
+    own partitions prevents them from interfering with the other filesystems.'
+  id: totrans-13
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/var* 和 */tmp* 可能因为进程失控而填满。将它们放在独立的分区上可以防止它们影响其他文件系统。'
+- en: Putting the swap file on its own partition enables suspend-to-disk.
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将交换文件放在独立的分区上可以启用挂起到磁盘的功能。
+- en: See [Chapter 1](ch01.xhtml#cha-install-linux) to learn more about designing
+    your partitioning layouts.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见[第 1 章](ch01.xhtml#cha-install-linux)了解更多关于设计分区布局的信息。
+- en: 'Partition Tables: GPT and MBR'
+  id: totrans-16
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 分区表：GPT 和 MBR
+- en: The GUID Partition Table (GPT), first released in 2010, is the modern replacement
+    for the antique PC-DOS Master Boot Record (MBR). If your only experience is with
+    the MBR, prepare yourself for a treat, because the GPT is a big improvement.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GUID 分区表（GPT）于 2010 年首次发布，是古老的 PC-DOS 主引导记录（MBR）的现代替代品。如果您只有 MBR 的使用经验，那么准备好迎接新体验，因为
+    GPT 是一个重大进步。
+- en: The MBR was created for IBM PCs way back in the last millennium in the early
+    1980s, during the exciting era of 10-megabyte (MB) hard disks. The MBR goes on
+    the first 512 bytes of the first sector of your disk, preceding the first partition,
+    and holds the bootloader and partition table. The bootloader occupies 446 bytes,
+    the partition table uses 64 bytes, and the remaining 2 bytes store the boot signature.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: MBR 是在上个世纪 80 年代初期 IBM PC 诞生时创建的，当时的硬盘容量为 10 兆字节（MB），是一个激动人心的时代。MBR 放置在磁盘的第一个扇区的前
+    512 字节之内，在第一个分区之前，包含引导加载程序和分区表。引导加载程序占用 446 字节，分区表使用 64 字节，剩余的 2 字节存储引导签名。
+- en: '64 bytes is not much room to store much of anything, so the MBR is limited
+    to four primary partitions. One primary partition may hold an extended partition,
+    which can then be divided into logical partitions. Linux supports (theoretically)
+    an unlimited number of logical partitions. Even with great thundering herds of
+    logical partitions, the MBR is limited to addressing a maximum disk size of 2.2
+    TiB, which these days is barely enough to hold your cat memes. Why this limitation?
+    You can do the math yourself: the MBR is limited to 32 bits of addressing, and
+    can address 2^(32) number of blocks (we’ll discuss blocks and sectors in a moment),
+    so the equation for disks with 512-byte blocks is 2^(32) x 512 = 2.199023256×10^(12)
+    bytes.'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 64 字节的存储空间并不多，所以 MBR 限制为四个主分区。一个主分区可以容纳一个扩展分区，扩展分区可以进一步划分为逻辑分区。Linux 理论上支持无限数量的逻辑分区。即使有大量的逻辑分区，MBR
+    也只能寻址最大 2.2 TiB 的磁盘空间，这在今天勉强能够容纳您的猫咪表情包。为什么会有这个限制？您可以自己算一下：MBR 只能寻址 32 位，可以寻址
+    2^(32) 个块（我们稍后会讨论块和扇区），所以对于每个 512 字节块的磁盘，计算公式为 2^(32) x 512 = 2.199023256×10^(12)
+    字节。
+- en: BIOS and UEFI
+  id: totrans-20
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: BIOS 和 UEFI
+- en: The GPT is part of the UEFI (Unified Extensible Firmware Interface) specification.
+    UEFI replaces your computer’s Basic Input Output System, better known as the PC
+    BIOS, or just plain BIOS. [Figure 8-1](#fig-legacy-bios) is the old legacy BIOS,
+    and [Figure 8-2](#fig-uefi-setup) is a modern UEFI, all full of shiny whizbang
+    features, just like a little operating system.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GPT 是 UEFI（统一可扩展固件接口）规范的一部分。UEFI 取代了您计算机的基本输入输出系统，更为人熟知的是 PC BIOS 或简称 BIOS。[图 8-1](#fig-legacy-bios)
+    是旧的传统 BIOS，[图 8-2](#fig-uefi-setup) 是现代的 UEFI，充满了闪亮的先进功能，就像一个小操作系统一样。
+- en: 'GPT has many advantages over the MBR:'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GPT 相比于 MBR 有很多优势：
+- en: Up to 128 partitions on Linux, numbered 1–128, and no messing with primary and
+    extended partitions
+  id: totrans-23
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Linux 上最多可以有 128 个分区，编号为 1–128，不涉及主分区和扩展分区
+- en: 'Fault-tolerance: copies of the partition table are stored in multiple locations'
+  id: totrans-24
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 容错性：分区表的副本存储在多个位置
+- en: Unique IDs for disks and partitions
+  id: totrans-25
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 磁盘和分区的唯一标识符
+- en: Legacy BIOS/MBR boot mode
+  id: totrans-26
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 传统 BIOS/MBR 启动模式
+- en: Verifies its own integrity and the partition table
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 验证自身完整性和分区表
+- en: Secure Boot
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 安全启动
+- en: '![Legacy BIOS setup](Images/lcb2_0801.png)'
+  id: totrans-29
+  prefs: []
+  type: TYPE_IMG
+  zh: '![传统 BIOS 设置](Images/lcb2_0801.png)'
+- en: Figure 8-1\. Legacy BIOS setup
+  id: totrans-30
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-1\. 传统 BIOS 设置
+- en: '![UEFI setup](Images/lcb2_0802.png)'
+  id: totrans-31
+  prefs: []
+  type: TYPE_IMG
+  zh: '![UEFI 设置](Images/lcb2_0802.png)'
+- en: Figure 8-2\. UEFI setup
+  id: totrans-32
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-2\. UEFI 设置
+- en: The MBR is nearly obsolete, and you should use the GPT. In GPT, the first sector
+    of the disk is reserved for a protective MBR that supports GPT on a BIOS computer,
+    so we can use the GPT on older systems that have a BIOS instead of UEFI. The bootloader
+    and operating system must both be GPT-aware, which has been the case with Linux
+    for years. The only reason to use the MBR is on old computers with old operating
+    systems that do not support the GPT.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: MBR几乎已经过时，你应该使用GPT。在GPT中，磁盘的第一个扇区保留为保护性MBR，支持BIOS计算机上的GPT，因此我们可以在老式系统上使用GPT，这些系统使用BIOS而非UEFI。引导加载程序和操作系统都必须支持GPT，Linux多年来一直支持这一点。只有在不支持GPT的旧计算机和旧操作系统上才需要使用MBR。
+- en: If you have an older system with a BIOS, you cannot upgrade it to UEFI, but
+    must replace the motherboard to get UEFI. Both UEFI and BIOS are integrated into
+    the motherboard.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你有一台带有BIOS的旧系统，无法将其升级为UEFI，而必须更换主板以获得UEFI。UEFI和BIOS都集成在主板中。
+- en: Blocks and Sectors
+  id: totrans-35
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 块和扇区
+- en: Now we will talk about blocks and sectors, and how they affect the maximum sizes
+    of your disks, files, and partitions. *Blocks* are the smallest storage units
+    on a disk that a filesystem can use. These are logical, not physical, divisions.
+    The smallest physical unit of storage is a *sector*. Blocks can span multiple
+    sectors, and a file can span multiple blocks.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们将讨论块和扇区，以及它们对磁盘、文件和分区的最大大小的影响。*块*是文件系统可以使用的磁盘上最小的存储单元。这些是逻辑上的划分，而非物理上的。最小的物理存储单元是*扇区*。块可以跨越多个扇区，文件可以跨越多个块。
+- en: When a file spans multiple blocks, there is a certain amount of waste because
+    files rarely match block sizes. For example, a file that is one byte larger than
+    four blocks uses five blocks. The fifth block holds just that one byte, and that
+    block is exclusive to the file. Because of this you might think that 512-byte
+    blocks are less wasteful. But there is more information stored in a block than
+    just the file.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当文件跨越多个块时，会有一定的浪费，因为文件很少与块大小匹配。例如，一个比四个块大一字节的文件将使用五个块。第五个块仅包含一个字节，并且该块专用于该文件。因此，你可能会认为512字节的块比较节省空间。但一个块中存储的信息比文件还要多。
+- en: Every block, in addition to your file data, stores timestamps, the filename,
+    ownership, permissions, the block ID, and its correct order with other blocks,
+    the inode, and other metadata.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个块除了文件数据外，还存储时间戳、文件名、所有权、权限、块ID、以及它与其他块的正确顺序、inode和其他元数据。
+- en: 4096-byte blocks use one-eighth the metadata of 512-byte blocks. On a 4 TiB
+    hard disk, you need 8,000,000,000 512-byte blocks. With a 4096-byte block size
+    there are only 1,000,000,000 blocks, which represents quite a lot of metadata
+    savings.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 4096字节块使用512字节块的八分之一的元数据。在4 TiB硬盘上，你需要8,000,000,000个512字节块。而使用4096字节块大小时，只需要1,000,000,000个块，这表示了相当大的元数据节省。
+- en: The sector size limits the size of storage volumes. The standard sector size
+    for hard disks has been 512 bytes for some years, and now 4096 bytes is the standard
+    because hard disks have grown so large.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 扇区大小限制了存储卷的大小。硬盘的标准扇区大小多年来一直是512字节，现在则是4096字节，因为硬盘已经变得如此之大。
+- en: The GPT provides 64-bit addressing, supporting 2^(64) total blocks on a single
+    disk, so a hard disk with 512-byte blocks can be as large as 9 zettabytes. With
+    4096-byte blocks, your maximum disk size is 64 zettabytes, which I daresay is
+    sufficient for even the most dedicated cat meme collector. These are theoretical
+    maximums, limited by available hardware, operating system limits, and filesystem
+    support for large volumes. For example, the Ext4 filesystem maxes out at 1 EiB
+    for a single filesystem, and a maximum 16 TiB file size with a 4096-byte block
+    size. XFS supports a maximum filesystem and file size of 8 EiB minus 1 byte.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GPT提供64位寻址，支持单个磁盘上的总块数为2^(64)，因此具有512字节块的硬盘可以达到多达9 ZB的大小。使用4096字节块时，最大磁盘大小为64
+    ZB，我敢说即使是最狂热的猫视频收藏者也足够用了。这些是理论上的最大限制，受可用硬件、操作系统限制以及文件系统对大容量卷的支持所限制。例如，Ext4文件系统对单个文件系统的最大容量为1
+    EiB，对4096字节块大小的文件的最大大小为16 TiB。XFS支持最大文件系统和文件大小为8 EiB减去1字节。
+- en: CDs and DVDs have 2048-byte sectors. Solid-state devices such as USB sticks,
+    SD cards, CompactFlash, and Solid State Drives (SSDs) also have sectors and blocks.
+    The smallest unit on an SSD is called a *page*. Common page sizes are 2 KB, 4
+    KB, 8 KB, and larger. Blocks contain 128 to 256 pages, and block size is typically
+    256 KB to 4 MB.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CD和DVD有2048字节的扇区。像USB闪存、SD卡、CompactFlash和固态硬盘（SSD）这样的固态设备也有扇区和块。SSD上最小的单位称为*页*。常见的页大小有2
+    KB、4 KB、8 KB及更大。块包含128到256页，块大小通常为256 KB到4 MB。
+- en: All of these enormous numbers are a bit dizzying. [Table 8-1](#table-decimal-binary-bytes)
+    summarizes the decimal and binary measurements used to measure disk capacity.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有这些庞大的数字都有点让人眼花缭乱。[表8-1](#table-decimal-binary-bytes)总结了用于测量磁盘容量的十进制和二进制测量。
+- en: Table 8-1\. Decimal and binary multiples of bytes
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表8-1\. 字节的十进制和二进制倍数
+- en: '| Value | Decimal | Value | Binary |'
+  id: totrans-45
+  prefs: []
+  type: TYPE_TB
+  zh: '| Value | Decimal | Value | Binary |'
+- en: '| --- | --- | --- | --- |'
+  id: totrans-46
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- | --- |'
+- en: '| 1 | B byte | 1 | B byte |'
+  id: totrans-47
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1 | B 字节 | 1 | B 字节 |'
+- en: '| 1000 | kB kilobyte | 1024 | KiB kibibyte |'
+  id: totrans-48
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1000 | kB 千字节 | 1024 | KiB 基比字节 |'
+- en: '| 1000² | MB megabyte | 1024² | MiB mebibyte |'
+  id: totrans-49
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1000² | MB 百万字节 | 1024² | MiB 兆比字节 |'
+- en: '| 1000³ | GB gigabyte | 1024³ | GiB gibibyte |'
+  id: totrans-50
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1000³ | GB 十亿字节 | 1024³ | GiB 吉比字节 |'
+- en: '| 1000⁴ | TB terabyte | 1024⁴ | TiB tebibyte |'
+  id: totrans-51
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1000⁴ | TB 兆字节 | 1024⁴ | TiB 提比字节 |'
+- en: '| 1000⁵ | PB petabyte | 1024⁵ | PiB pebibyte |'
+  id: totrans-52
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1000⁵ | PB 百万亿字节 | 1024⁵ | PiB 皮比字节 |'
+- en: '| 1000⁶ | EB exabyte | 1024⁶ | EiB exbibyte |'
+  id: totrans-53
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1000⁶ | EB 百亿字节 | 1024⁶ | EiB 伊比字节 |'
+- en: '| 1000⁷ | ZB zettabyte | 1024⁷ | ZiB zebibyte |'
+  id: totrans-54
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1000⁷ | ZB 十亿亿字节 | 1024⁷ | ZiB 泽比字节 |'
+- en: '| 1000⁸ | YB yottabyte | 1024⁸ | YiB yobibyte |'
+  id: totrans-55
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1000⁸ | YB 十亿亿亿字节 | 1024⁸ | YiB 佑比字节 |'
+- en: The decimal values are powers of 10; for example, a kilobyte is 1000 bytes,
+    or 10³. The binary values are powers of two, so a kibibyte is 2^(10), 1024 bytes.
+    Hard disk manufacturers like to use the decimal format to make their drives look
+    bigger.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 十进制值是10的幂；例如，千字节是1000字节，即10³。二进制值是2的幂，因此基比字节是2^(10)，1024字节。硬盘制造商喜欢使用十进制格式来使他们的驱动器看起来更大。
+- en: Whoever came up with the weird “bibyte” naming scheme just about guaranteed
+    that nobody would ever want to say the names. It’s all a mishmash anyway, as people
+    like to use them interchangeably. At any rate, now you know the difference.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 谁想出这种奇怪的“bibyte”命名方案几乎保证没有人愿意说这些名字。总之，人们喜欢互换使用它们。无论如何，现在您知道了区别。
+- en: 8.1 Unmounting Your Partitions Before Using parted
+  id: totrans-58
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 8.1 使用parted前卸载您的分区
+- en: Problem
+  id: totrans-59
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You know you must unmount your partition, or partitions, before you can make
+    any changes with *parted*, and you need to know how.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您知道在使用*parted*之前必须卸载您的分区或分区，您需要知道如何操作。
+- en: Solution
+  id: totrans-61
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Unmount a partition from your graphical file manager, or use the *umount* command.
+    The following example unmounts */dev/sdc2*:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从图形文件管理器卸载分区，或使用*umount*命令。以下示例卸载*/dev/sdc2*：
+- en: '[PRE0]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: How do you know the correct device name? See [Recipe 8.3](#rec-list-partitions)
+    to learn how to list your attached disks and partitions.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如何确定正确的设备名称？参见[Recipe 8.3](#rec-list-partitions)学习如何列出您连接的磁盘和分区。
+- en: If you are creating a new partition table on a disk, you should unmount all
+    the partitions on it.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您在磁盘上创建新的分区表，应先卸载所有分区。
+- en: Changing a Running System
+  id: totrans-66
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 更改运行中的系统
+- en: It is risky to unmount filesystems attached to the active root filesystem, such
+    as */home*, */var*, or */tmp*, if they are on separate partitions. It is safer
+    to perform partitioning operations from another Linux instance, such as SystemRescue
+    ([Chapter 19](Images/ch19.html#cha-rescue-recovery)), or a second Linux on the
+    same machine ([Chapter 1](ch01.xhtml#cha-install-linux)).
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您在分离分区上有活动根文件系统（如*/home*、*/var*或*/tmp*），卸载这些文件系统是有风险的。在另一个Linux实例中执行分区操作更安全，例如SystemRescue（[第19章](Images/ch19.html#cha-rescue-recovery)），或同一台机器上的第二个Linux（[第1章](ch01.xhtml#cha-install-linux)）。
+- en: Discussion
+  id: totrans-68
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Technically, you mount and unmount filesystems rather than partitions. However,
+    I shall not hold it against you if you say “partitions.”
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从技术上讲，您挂载和卸载文件系统而不是分区。但是，如果您说“分区”，我也不会怪您。
+- en: See Also
+  id: totrans-70
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 8 parted*'
+  id: totrans-71
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 parted*'
+- en: '[Parted User’s Manual](https://oreil.ly/SNyLL)'
+  id: totrans-72
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Parted用户手册](https://oreil.ly/SNyLL)'
+- en: 8.2 Choosing the Command Mode for parted
+  id: totrans-73
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 8.2 选择parted的命令模式
+- en: Problem
+  id: totrans-74
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You know you can start the *parted* command in interactive mode, launching the
+    *parted* command shell, or run it as an ordinary command, and you want to know
+    how to do both.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您知道可以启动*parted*命令以交互模式启动，启动*parted*命令shell，或者将其作为普通命令运行，您想知道如何做这两件事。
+- en: Solution
+  id: totrans-76
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Running *parted* with no options launches the interactive *parted* shell. You
+    need root privileges:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以无选项运行 *parted* 启动交互式 *parted* shell。您需要 root 权限：
+- en: '[PRE1]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: When your normal command prompt changes to *(parted)*, you are in the *parted*
+    shell. Type **`help`** to see a list of commands and their descriptions. There
+    is also help for the individual *parted* commands, for example, *help print*.
+    Type *quit* to exit parted. Most *parted* commands can be abbreviated to their
+    first letter, like *h* and *q*.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您的正常命令提示符更改为 *(parted)* 时，您就处于 *parted* shell 中。输入 **`help`** 查看命令列表及其描述。对于单个
+    *parted* 命令也有帮助，例如，*help print*。输入 *quit* 退出 *parted*。大多数 *parted* 命令可以缩写为它们的第一个字母，如
+    *h* 和 *q*。
+- en: 'Enter a complete command to run *parted* as a normal command in your regular
+    shell, like this example that lists all of your disks:'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输入完整的命令以在常规 shell 中运行 *parted*，例如，列出所有磁盘的以下示例：
+- en: '[PRE2]'
+  id: totrans-81
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: The command runs and exits, and returns to your normal command prompt.
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令运行并退出，然后返回到正常的命令提示符。
+- en: Discussion
+  id: totrans-83
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Be careful in both modes, because *parted* applies your changes immediately.
+    Always have good backups before doing anything with *parted*.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论在哪种模式下都要小心，因为 *parted* 会立即应用您的更改。在使用 *parted* 前务必做好完整的备份。
+- en: See Also
+  id: totrans-85
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 parted*'
+  id: totrans-86
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 parted*'
+- en: '[Parted User’s Manual](https://oreil.ly/SNyLL)'
+  id: totrans-87
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Parted 用户手册](https://oreil.ly/SNyLL)'
+- en: 8.3 Viewing Your Existing Disks and Partitions
+  id: totrans-88
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 8.3 查看现有磁盘和分区
+- en: Problem
+  id: totrans-89
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to see your existing partitions, their sizes, and what filesystems
+    are on them.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望查看现有的分区、它们的大小以及它们上面的文件系统。
+- en: Solution
+  id: totrans-91
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'If you don’t know the names of the disks on your system, run *parted* with
+    no options:'
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果不知道系统上磁盘的名称，请以无选项运行 *parted*：
+- en: '[PRE3]'
+  id: totrans-93
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: When you have not selected a device, *parted* guesses which one you want, usually
+    the first one, and tells you which one it has selected (see *Using /dev/sda* in
+    the preceding example).
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您未选择设备时，*parted* 会猜测您想要的设备，通常是第一个，并告诉您已选择了哪一个（请参阅前面示例中的 *Using /dev/sda*）。
+- en: '*print devices* lists your disk names and sizes:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*print devices* 列出您的磁盘名称和大小：'
+- en: '[PRE4]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Select which device you want to look at, then display its information:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选择您要查看的设备，然后显示其信息：
+- en: '[PRE5]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Type **`quit`** to exit.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输入 **`quit`** 退出。
+- en: 'You can open the *parted* shell to a specific disk:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以打开 *parted* shell 到特定的磁盘：
+- en: '[PRE6]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'Enter **`print`** with no options to see information about this disk:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输入 **`print`** 无选项查看有关此磁盘的信息：
+- en: '[PRE7]'
+  id: totrans-103
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: '*print all* lists all partitions on all devices:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*print all* 列出所有设备上的所有分区：'
+- en: '[PRE8]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Find any unpartitioned free space on any disk:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找任何未分区的空闲空间在任何磁盘上：
+- en: '[PRE9]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Discussion
+  id: totrans-108
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Let’s take a look at what all of this output means:'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看所有这些输出意味着什么：
+- en: '*Model* is the manufacturer’s name for the device.'
+  id: totrans-110
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*Model* 是设备的制造商名称。'
+- en: '*Disk* gives the device name and size.'
+  id: totrans-111
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*Disk* 给出设备名称和大小。'
+- en: '*Sector size* gives both the logical and physical block size. A logical block
+    size of 512B is for backward compatibility with older disk controllers and software.'
+  id: totrans-112
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*Sector size* 给出逻辑和物理块大小。逻辑块大小为 512B，用于与旧版磁盘控制器和软件的兼容性。'
+- en: '*Partition table* tells you the partition type, either *msdos* or *gpt*.'
+  id: totrans-113
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*Partition table* 告诉您分区类型，可以是 *msdos* 或 *gpt*。'
+- en: '*Flags* matter more to Windows than Linux. They identify the partition types,
+    and in some cases are necessary so Windows gets less confused. The full list is
+    in the [*Parted User’s Manual*](https://oreil.ly/SNyLL).'
+  id: totrans-114
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*Flags* 对 Windows 比 Linux 更重要。它们标识分区类型，在某些情况下是必需的，以便 Windows 减少混乱。完整列表在 [*Parted
+    用户手册*](https://oreil.ly/SNyLL) 中。'
+- en: 'These are the partition flags in the examples:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些是示例中的分区标志的含义：
+- en: '*legacy_boot* marks a GPT partition as bootable.'
+  id: totrans-116
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*legacy_boot* 将 GPT 分区标记为可引导。'
+- en: '*msftdata* labels GPT partitions that contain Microsoft filesystems, either
+    NTFS or FAT.'
+  id: totrans-117
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*msftdata* 标记包含 Microsoft 文件系统（NTFS 或 FAT）的 GPT 分区。'
+- en: '*msftres* is a Microsoft reserved partition. This is a special partition that
+    is required by Microsoft on GPT partitions, for use by the operating system. On
+    partitions less than 16 GB in size, the MSR is 32 MB, and on larger drives it
+    is 128 MB.'
+  id: totrans-118
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*msftres* 是微软预留分区。这是一个特殊分区，微软在 GPT 分区上要求使用，用于操作系统。在小于 16 GB 的分区上，MSR 为 32 MB，在更大的驱动器上为
+    128 MB。'
+- en: '*diag* is a Windows recovery partition.'
+  id: totrans-119
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*diag* 是 Windows 的恢复分区。'
+- en: '*boot, esp* both mark the partition as a boot partition. *boot* is an MBR label,
+    and *esp* is a GPT label.'
+  id: totrans-120
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*boot, esp* 都将分区标记为引导分区。*boot* 是 MBR 标签，*esp* 是 GPT 标签。'
+- en: '*swap* marks swap partitions.'
+  id: totrans-121
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*swap* 标记交换分区。'
+- en: See Also
+  id: totrans-122
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*Parted User’s Manual*](https://oreil.ly/SNyLL)'
+  id: totrans-123
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*Parted 用户手册*](https://oreil.ly/SNyLL)'
+- en: '*man 8 parted*'
+  id: totrans-124
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 parted*'
+- en: 8.4 Creating GPT Partitions on a Nonbooting Disk
+  id: totrans-125
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 8.4 在无法引导的磁盘上创建 GPT 分区
+- en: Problem
+  id: totrans-126
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to repartition a disk, removing all data and starting over with a new
+    GUID Partition Table (GPT). This is not a bootable disk with an operating system,
+    but is only for data storage.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要重新分区一个磁盘，删除所有数据，并使用新的GUID分区表（GPT）重新开始。这不是一个具有操作系统的可引导磁盘，只用于数据存储。
+- en: Solution
+  id: totrans-128
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: First, create the new partition table, then create your partitions, then verify
+    that all were created correctly. Be very certain that you select the correct disk;
+    see [Recipe 8.3](#rec-list-partitions) to learn how to list your disks and partitions.
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先创建新的分区表，然后创建你的分区，最后验证所有的操作是否正确。非常确保你选择了正确的磁盘；参见[食谱8.3](#rec-list-partitions)了解如何列出你的磁盘和分区。
+- en: 'In the following example, there is a USB stick at */dev/sdc*, which is used
+    for data storage. It is not a bootable disk with an operating system on it. You
+    must unmount your devices before running *parted*. The first step is to unmount
+    it, then create a new GPT partition table:'
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在以下示例中，有一个用于数据存储的USB存储器位于*/dev/sdc*。它不是一个具有操作系统的可引导磁盘。在运行*parted*之前，你必须卸载你的设备。第一步是卸载它，然后创建一个新的GPT分区表：
+- en: '[PRE10]'
+  id: totrans-131
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'Now you can create new partitions. The following example creates two partitions
+    that are about the same size. You must specify a name for the partition, and the
+    start and end locations for both partitions:'
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你可以创建新的分区了。以下示例创建了大致相同大小的两个分区。你必须为分区指定名称，并指定两个分区的起始和结束位置：
+- en: '[PRE11]'
+  id: totrans-133
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Then check your work, and exit:'
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后检查你的工作，并退出：
+- en: '[PRE12]'
+  id: totrans-135
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'If your start or end points are too close to another partition, you will see
+    an error message. In the following example, the start of the second partition
+    is the same as the end of the first partition:'
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你的起始或结束点太靠近另一个分区，你将看到一个错误消息。在以下示例中，第二个分区的起始点与第一个分区的结束点相同：
+- en: '[PRE13]'
+  id: totrans-137
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Changing it to 200 5MB fixes the error.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将其更改为200 5MB可以修复这个错误。
+- en: Discussion
+  id: totrans-139
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*start* sets the beginning of the new partition. This is always a number value.
+    The `1MB` value in the example means one megabyte from the beginning of the disk.
+    You cannot start at zero because the first 33 sectors are reserved for the EFI
+    label, so the first partition starts at the 34th sector or higher. I start at
+    the one megabyte mark because it is easy to remember.'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*start* 设置新分区的起始位置。这总是一个数值。例如，示例中的`1MB`表示从磁盘开头算起的一兆字节。你不能从零开始，因为前33个扇区用于EFI标签，所以第一个分区从第34个扇区或更高开始。我从一兆标记开始，因为这样更容易记住。'
+- en: '*end* can take a size value or a percentage. In the example, the end of first
+    partition is 200 5MB from the start of the first partition. The second partition
+    ends at 100% of the remaining space. Creating a new partition table wipes out
+    all data on the disk.'
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*end* 可以使用大小值或百分比。例如，第一个分区的结束位置是从第一个分区的起始位置算起的200 5MB。第二个分区的结束位置是剩余空间的100%。创建新的分区表会清除磁盘上的所有数据。'
+- en: You must put filesystems on your new partitions before they are usable (see
+    [Chapter 11](ch11.xhtml#cha-create-filesystems)).
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在分区可用之前，你必须在新的分区上放置文件系统（参见[第11章](ch11.xhtml#cha-create-filesystems)）。
+- en: The warning “You may need to update /etc/fstab” applies only if you change partitions
+    that are in your */etc/fstab* file.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 警告“您可能需要更新/etc/fstab”仅适用于更改了在*/etc/fstab*文件中的分区。
+- en: The syntax for creating new GPT partitions is *mkpart name fs-type start end*.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建新的GPT分区的语法是*mkpart name fs-type start end*。
+- en: '*name* is required. This is anything you want, so you can make it a name that
+    helps you remember what the partition is for.'
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*name* 是必需的。可以任意选择一个名称，以便记住这个分区的用途。'
+- en: The *fs-type* label is not required, but you should specify it so that the partition
+    is assigned the correct filesystem type code. Run *help mkpart* in the *parted*
+    shell to see a list of filesystem labels.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*fs-type*标签不是必需的，但你应该指定它，以便为分区分配正确的文件系统类型代码。在*parted* shell中运行*help mkpart*以查看文件系统标签的列表。'
+- en: Even though you created filesystem labels, there are no filesystems on your
+    disk. Creating filesystems is a separate step.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 即使你创建了文件系统标签，但是磁盘上还没有文件系统。创建文件系统是一个单独的步骤。
+- en: The filesystem labels sometimes disappear. After you put a filesystem on the
+    partition, they will stay put.
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件系统标签有时会消失。在分区上放置文件系统后，它们将保持不变。
+- en: The *parted* help and documentation are a bit confusing on the differences between
+    creating GPT partitions and MS-DOS partitions. When you create a GPT partition,
+    you must create a *name* for it. When you create an MS-DOS partition you must
+    specify a *part-type*, which is one of *primary*, *extended*, or *logical*. There
+    is a fair bit of confusion about this, and the result is admins creating GPT partition
+    names of *primary*, *extended*, and *logical*. This is not correct and you should
+    create *names* for GPT partitions.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*parted* 的帮助和文档在创建 GPT 分区和 MS-DOS 分区之间的差异上有些混乱。当创建 GPT 分区时，必须为其创建一个 *名称*。当创建
+    MS-DOS 分区时，必须指定一个 *part-type*，它可以是 *primary*、*extended* 或 *logical* 中的一个。关于这一点存在相当多的混淆，结果是管理员为
+    GPT 分区创建了 *primary*、*extended* 和 *logical* 的名称。这是不正确的，你应该为 GPT 分区创建 *names*。'
+- en: At any rate, you should not create MS-DOS partition tables because they are
+    obsolete, except on old computers with old software that does not support GPT.
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论如何，你不应该创建 MS-DOS 分区表，因为它们已过时，除非是旧计算机和不支持 GPT 的旧软件。
+- en: See Also
+  id: totrans-151
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[*Parted User’s Manual*](https://oreil.ly/SNyLL)'
+  id: totrans-152
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*Parted 用户手册*](https://oreil.ly/SNyLL)'
+- en: '*man 8 parted*'
+  id: totrans-153
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 parted*'
+- en: '[Chapter 11](ch11.xhtml#cha-create-filesystems)'
+  id: totrans-154
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 11 章](ch11.xhtml#cha-create-filesystems)'
+- en: 8.5 Creating Partitions for Installing Linux
+  id: totrans-155
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 8.5 创建用于安装 Linux 的分区
+- en: Problem
+  id: totrans-156
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to install Linux on a disk and need to know how to partition it.
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想在磁盘上安装 Linux 并需要知道如何对其进行分区。
+- en: Solution
+  id: totrans-158
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use the partition manager in the Linux installer. You can set up your partitions
+    before running the installer, but using the installer’s partition manager ensures
+    that it will be done correctly, and you will see warnings for any errors. See
+    [Recipe 1.8](ch01.xhtml#rec-install-partition) for a suggested partitioning scheme.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 Linux 安装程序中的分区管理器。你可以在运行安装程序之前设置分区，但使用安装程序的分区管理器可以确保正确操作，并且会显示任何错误的警告。参见
+    [Recipe 1.8](ch01.xhtml#rec-install-partition) 获取建议的分区方案。
+- en: Discussion
+  id: totrans-160
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Most Linux installers provide guidance for partitioning for a new installation
+    and also allow manual customizations.
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Linux 安装程序提供了关于新安装分区和手动自定义的指导。
+- en: See Also
+  id: totrans-162
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: The introduction to this chapter for partitioning suggestions
+  id: totrans-163
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 本章的分区建议介绍
+- en: '[Chapter 1](ch01.xhtml#cha-install-linux)'
+  id: totrans-164
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 1 章](ch01.xhtml#cha-install-linux)'
+- en: 8.6 Removing Partitions
+  id: totrans-165
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 8.6 删除分区
+- en: Problem
+  id: totrans-166
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to delete some partitions.
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想删除一些分区。
+- en: Solution
+  id: totrans-168
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Start *parted* in interactive mode for the disk you want to make changes on,
+    then print the partition table:'
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在你想要进行更改的磁盘上启动 *parted* 交互模式，然后打印分区表：
+- en: '[PRE14]'
+  id: totrans-170
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'In this example, delete the second partition by typing *rm 2*. The partition
+    will be immediately removed, and there will not be a confirmation. Then type *p*
+    to verify:'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个例子中，通过输入 *rm 2* 删除第二个分区。该分区将立即被移除，并且不会有确认。然后输入 *p* 进行验证：
+- en: '[PRE15]'
+  id: totrans-172
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Discussion
+  id: totrans-173
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Be very certain you are deleting the correct partitions. It is OK to make written
+    notes and check many times before you start.
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在开始之前一定要非常确定你要删除的是正确的分区。可以写下笔记并检查多次。
+- en: 'If you try to delete a mounted partition, *parted* will warn you with “Warning:
+    Partition /dev/sdc2 is being used. Are you sure you want to continue?” You may
+    go ahead and delete it. Any open files will remain in memory until you reboot
+    or close them, which is kind of fun because you can still read and save the files
+    to a different partition.'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果尝试删除已挂载的分区，*parted* 会发出警告：“警告：分区 /dev/sdc2 正在使用。你确定要继续吗？”你可以继续删除它。任何打开的文件会保留在内存中，直到重新启动或关闭它们，这有点有趣，因为你仍然可以读取并将文件保存到另一个分区。
+- en: See Also
+  id: totrans-176
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 8 parted*'
+  id: totrans-177
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 parted*'
+- en: '[Parted User’s Manual](https://oreil.ly/SNyLL)'
+  id: totrans-178
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Parted 用户手册](https://oreil.ly/SNyLL)'
+- en: 8.7 Recovering a Deleted Partition
+  id: totrans-179
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 8.7 恢复已删除的分区
+- en: Problem
+  id: totrans-180
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You deleted a partition, and now you wish you hadn’t, and you want to get it
+    back.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你删除了一个分区，现在希望没有这样做，并且想要恢复它。
+- en: Solution
+  id: totrans-182
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'If you accidentally deleted a new empty partition, don’t bother trying to recover
+    it, just create it again. If your partition had a filesystem and data on it, then
+    your best chance is to try immediate recovery. In the *parted* shell, use the
+    *rescue* command, and give it the partition’s start and end locations. These can
+    be approximate:'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果意外删除了一个新的空分区，不必尝试恢复它，只需重新创建它。如果你的分区中有文件系统和数据，则最好立即尝试恢复。在 *parted* shell 中，使用
+    *rescue* 命令，并给出分区的起始和结束位置。这些可以是大致的位置：
+- en: '[PRE16]'
+  id: totrans-184
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: '*parted* won’t give you any feedback, so print the partition table to see if
+    the lost partition came back:'
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*parted* 不会给出任何反馈，因此请打印分区表以查看丢失的分区是否恢复：'
+- en: '[PRE17]'
+  id: totrans-186
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: And there it is. With a little luck all of your files are intact.
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就是这样。稍微有点运气，您所有的文件都是完整的。
+- en: Discussion
+  id: totrans-188
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The longer you wait to try to restore a partition, the more likely it will not
+    be restorable because it may be unintentionally overwritten. If you need to delay
+    rescue operations until a later time, put it away in a safe place, if possible.
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 等待恢复分区的时间越长，越可能无法恢复，因为可能会意外覆盖。如果需要延迟救援操作，请将其放在安全的地方。
+- en: As always, your best practice is to always maintain good backups.
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与往常一样，最佳实践是始终保持良好的备份。
+- en: See Also
+  id: totrans-191
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[*Parted User’s Manual*](https://oreil.ly/SNyLL)'
+  id: totrans-192
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*Parted 用户手册*](https://oreil.ly/SNyLL)'
+- en: '*man 8 parted*'
+  id: totrans-193
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 parted*'
+- en: 8.8 Increasing Partition Size
+  id: totrans-194
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 8.8 增加分区大小
+- en: Problem
+  id: totrans-195
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to increase the size of an existing partition, which has a filesystem
+    on it.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要增加具有文件系统的现有分区的大小。
+- en: Solution
+  id: totrans-197
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The following example increases the size of a partition with a filesystem on
+    it. There are two steps: first resize the partition, then resize the filesystem
+    to match. Every filesystem has its own set of tools, and you must use the correct
+    tool for increasing the size. In this recipe, we will resize the Ext4, XFS, Btrfs,
+    and FAT16/32 partitions.'
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例增加了带有文件系统的分区的大小。有两个步骤：首先调整分区大小，然后调整文件系统以匹配。每个文件系统都有其自己的工具集，您必须使用正确的工具来增加大小。在本示例中，我们将调整
+    Ext4、XFS、Btrfs 和 FAT16/32 分区的大小。
+- en: Ext4, XFS, and Btrfs can all be enlarged online or offline. FAT16/32 can be
+    resized only offline and must be unmounted first.
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ext4、XFS 和 Btrfs 可以在线或离线扩展。FAT16/32 只能离线调整大小，并且必须先卸载。
+- en: 'There must be free space at the end of the partition you want to increase.
+    Open the *parted* shell to your selected disk, and look for free space:'
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要在要增加的分区末端有空闲空间。打开 *parted* shell 到您选择的磁盘，并查找空闲空间：
+- en: '[PRE18]'
+  id: totrans-201
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: This shows 981 MB of free space preceding Partition 2, and 510 MB of free space
+    following. You can only change the end point of a partition, so the following
+    examples expand Partition 2 to use all of the 510 MB of free space at the end.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这显示第二分区之前有 981 MB 的空闲空间，后面有 510 MB 的空闲空间。您只能更改分区的结束点，因此以下示例扩展了第二分区以使用末端的所有 510
+    MB 空闲空间。
+- en: 'First, expand the partition to its new end point:'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，将分区扩展到新的结束点：
+- en: '[PRE19]'
+  id: totrans-204
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: You will not see a success message, but if you make a mistake, you will see
+    an error message. Type **`p`** to see the partition table and verify that *resizepart*
+    did what you want.
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不会看到成功消息，但如果出错，您会看到错误消息。键入 **`p`** 查看分区表，并验证 *resizepart* 是否达到您的预期。
+- en: Now you must expand the filesystem to fit the new partition size with the appropriate
+    command for the filesystem. [Table 8-2](#command-increase-fs-size) shows the commands
+    to use for each filesystem, expanding them to fill their partitions.
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，您必须使用适合文件系统的适当命令将文件系统扩展到新的分区大小。[表 8-2](#command-increase-fs-size) 显示了每个文件系统使用的命令，以扩展到其分区的大小。
+- en: Table 8-2\. Commands to increase filesystem sizes
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 8-2\. 增加文件系统大小的命令
+- en: '| Filesystem | Resize command |'
+  id: totrans-208
+  prefs: []
+  type: TYPE_TB
+  zh: '| 文件系统 | 调整大小命令 |'
+- en: '| --- | --- |'
+  id: totrans-209
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| Ext4 | sudo resize2fs /dev/sd*c2* |'
+  id: totrans-210
+  prefs: []
+  type: TYPE_TB
+  zh: '| Ext4 | sudo resize2fs /dev/sd*c2* |'
+- en: '| XFS | sudo xfs_growfs -d /dev/sd*c2* |'
+  id: totrans-211
+  prefs: []
+  type: TYPE_TB
+  zh: '| XFS | sudo xfs_growfs -d /dev/sd*c2* |'
+- en: '| Btrfs | sudo btrfs filesystem resize max /dev/sd*c2* |'
+  id: totrans-212
+  prefs: []
+  type: TYPE_TB
+  zh: '| Btrfs | sudo btrfs filesystem resize max /dev/sd*c2* |'
+- en: '| FAT16/32 | sudo fatresize -i /dev/sd*c2* |'
+  id: totrans-213
+  prefs: []
+  type: TYPE_TB
+  zh: '| FAT16/32 | sudo fatresize -i /dev/sd*c2* |'
+- en: Remember that FAT16/32 must be unmounted first.
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请记住，FAT16/32 必须先卸载。
+- en: Print the partition table in *parted* to check your work.
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 *parted* 中打印分区表以检查您的工作。
+- en: Discussion
+  id: totrans-216
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The examples in this chapter and in [Recipe 8.9](#rec-shrink-partition) are
+    small, using a 4 GB USB stick. This is great for testing, but in real life you
+    will likely be using larger disks. The commands are the same, except for partition
+    sizes.
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章和 [配方 8.9](#rec-shrink-partition) 中的示例都很小，使用的是 4 GB 的 USB 闪存。这对测试很好，但在实际应用中，您可能会使用更大的磁盘。命令相同，只是分区大小不同。
+- en: As always, you should have current backups before you start.
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在开始之前，请务必备份数据。
+- en: You could resize a filesystem to be smaller than the partition, but that doesn’t
+    make sense. Check out [Chapter 11](ch11.xhtml#cha-create-filesystems) to learn
+    all about creating and managing filesystems.
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以将文件系统调整为比分区更小，但这没有意义。查看[第11章](ch11.xhtml#cha-create-filesystems)以了解创建和管理文件系统的全部内容。
+- en: If you are wondering “Where is my favorite filesystem?” I chose Ext4, Btrfs,
+    XFS, and FAT16/32 because those are the most commonly used Linux filesystems,
+    and they are all well maintained.
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想知道“我的最爱文件系统在哪里？”我选择了 Ext4、Btrfs、XFS 和 FAT16/32，因为它们是最常用的 Linux 文件系统，而且它们都有很好的维护。
+- en: See Also
+  id: totrans-221
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 11](ch11.xhtml#cha-create-filesystems)'
+  id: totrans-222
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 11 章](ch11.xhtml#cha-create-filesystems)'
+- en: '*man 8 resize2fs*'
+  id: totrans-223
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 resize2fs*'
+- en: '*man 8 parted*'
+  id: totrans-224
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 parted*'
+- en: '*man 8 xfs_growfs*'
+  id: totrans-225
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 xfs_growfs*'
+- en: '*man 8 btrfs*'
+  id: totrans-226
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 btrfs*'
+- en: '*man 8 fsck.vfat*'
+  id: totrans-227
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 fsck.vfat*'
+- en: 8.9 Shrinking a Partition
+  id: totrans-228
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 8.9 缩小分区
+- en: Problem
+  id: totrans-229
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have a partition with a filesystem on it, and you want to shrink it.
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您有一个带有文件系统的分区，并且想要缩小它。
+- en: Solution
+  id: totrans-231
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: XFS filesystems cannot be reduced in size, only increased. You can shrink Ext4,
+    Btrfs, and FAT16/32\. Ext4 and FAT16/32 must be unmounted before shrinking them.
+    Btrfs can be shrunken online, but it is safer to unmount it first.
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: XFS 文件系统无法缩小，只能增加。您可以缩小 Ext4、Btrfs 和 FAT16/32。在缩小 Ext4 和 FAT16/32 之前，必须卸载它们。Btrfs
+    可以在线缩小，但最好先卸载。
+- en: 'Make sure that the used portion of the filesystem you want to shrink is smaller
+    than the size you want to shrink it to. Use the *du* command to see how much space
+    your files occupy:'
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确保要缩小的文件系统的已使用部分小于您要缩小到的大小。使用 *du* 命令查看您的文件占用了多少空间：
+- en: '[PRE20]'
+  id: totrans-234
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: You should allow about 40% extra room for metadata, wasted block space, and
+    for just in case, so in this example the new size should not be smaller than 1.4
+    GB. If you need room to add more files, then account for that as well.
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您应该为元数据、浪费的块空间以及可能出现的情况留出约 40% 的额外空间，因此在此示例中，新大小不应小于 1.4 GB。如果需要空间添加更多文件，则还要考虑这一点。
+- en: Shrinking partitions is a little more complicated than expanding them. There
+    are more steps, and the filesystems must be shrunk offline. If the partition is
+    on an external storage device, such as a USB stick, unmount it and then shrink
+    it. If it is a partition that belongs to your running system, then you must run
+    *parted* from a bootable rescue disk, or a second Linux on a multiboot system,
+    so that you can unmount the filesystem you want to shrink.
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 缩小分区比扩展它们更复杂一些。有更多的步骤，并且文件系统必须离线缩小。如果分区位于外部存储设备（如 USB 棒）上，请卸载它然后再缩小它。如果它是属于您正在运行的系统的分区，则必须从可启动的救援磁盘或多启动系统的第二个
+    Linux 中运行 *parted*，以便您可以卸载要缩小的文件系统。
+- en: 'After your selected filesystem is unmounted, follow these steps:'
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在卸载您选择的文件系统后，按照以下步骤操作：
+- en: Run a filesystem check
+  id: totrans-238
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 运行文件系统检查
+- en: Shrink the filesystem
+  id: totrans-239
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 缩小文件系统
+- en: Shrink the partition
+  id: totrans-240
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 缩小分区
+- en: 'Run the following command to check the health of an Ext4 filesystem:'
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行以下命令以检查 Ext4 文件系统的健康状态：
+- en: '[PRE21]'
+  id: totrans-242
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Check a Btrfs filesystem:'
+  id: totrans-243
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查 Btrfs 文件系统：
+- en: '[PRE22]'
+  id: totrans-244
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'Check a FAT16/32 filesystem:'
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查 FAT16/32 文件系统：
+- en: '[PRE23]'
+  id: totrans-246
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: When everything checks out, shrink your filesystem. The examples in [Table 8-3](#cmd-decrease-fs-size)
+    shrink the filesystems to 2000 MB.
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当一切都符合要求时，缩小您的文件系统。[表 8-3](#cmd-decrease-fs-size) 中的示例将文件系统缩小到 2000 MB。
+- en: Table 8-3\. Commands to decrease filesystem sizes
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 8-3\. 减少文件系统大小的命令
+- en: '| Filesystem | Resize command |'
+  id: totrans-249
+  prefs: []
+  type: TYPE_TB
+  zh: '| 文件系统 | 缩小命令 |'
+- en: '| --- | --- |'
+  id: totrans-250
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| Ext4 | sudo resize2fs /dev/sd*c2* 2g |'
+  id: totrans-251
+  prefs: []
+  type: TYPE_TB
+  zh: '| Ext4 | sudo resize2fs /dev/sd*c2* 2g |'
+- en: '| Btrfs | sudo btrfs filesystem resize 2g /dev/sd*c2* |'
+  id: totrans-252
+  prefs: []
+  type: TYPE_TB
+  zh: '| Btrfs | sudo btrfs filesystem resize 2g /dev/sd*c2* |'
+- en: '| FAT16/32 | sudo fatresize -s 2G /dev/sd*c2* |'
+  id: totrans-253
+  prefs: []
+  type: TYPE_TB
+  zh: '| FAT16/32 | sudo fatresize -s 2G /dev/sd*c2* |'
+- en: 'Now you can shrink your partition to match the filesystem size. Open the *parted*
+    shell to your device and then run the *resize* command. Specify the partition
+    number and the end point:'
+  id: totrans-254
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，您可以缩小分区以匹配文件系统大小。在您的设备上打开 *parted* shell，然后运行 *resize* 命令。指定分区号和终点：
+- en: '[PRE24]'
+  id: totrans-255
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: Check your work by printing the partition table in *parted*.
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过在 *parted* 中打印分区表来检查您的工作。
+- en: Discussion
+  id: totrans-257
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Storage media is large and cheap. In the olden days, fiddling with partitions
+    was necessary for cramming the most files onto a disk. Now we have the luxury
+    of customizing their sizes for our convenience.
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 存储介质越来越大且价格便宜。在过去，为了将更多文件塞入磁盘，需要调整分区大小。现在我们可以根据自己的需求定制它们的大小。
+- en: See Also
+  id: totrans-259
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 11](ch11.xhtml#cha-create-filesystems)'
+  id: totrans-260
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 11 章](ch11.xhtml#cha-create-filesystems)'
+- en: '*man 8 resize2fs*'
+  id: totrans-261
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 resize2fs*'
+- en: '*man 8 parted*'
+  id: totrans-262
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 parted*'
+- en: '*man 8 btrfs*'
+  id: totrans-263
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 btrfs*'
+- en: '*man 8 fsck.vfat*'
+  id: totrans-264
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 fsck.vfat*'

@@ -1,0 +1,801 @@
+- en: Chapter 21\. Troubleshooting Networks
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第21章。网络故障排除
+- en: Figuring out networking problems is just like any troubleshooting. Know your
+    network, know how to use basic tools well, and be patient and systematic.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 解决网络问题就像任何故障排除一样。了解你的网络，熟练使用基本工具，耐心和系统性十分重要。
+- en: In this chapter we learn how to use *ping*, FPing, Nmap, *httping*, *arping*,
+    and *mtr* to test connectivity, map networks, find rogue services, test website
+    performance, find duplicate IP addresses, and find routing bottlenecks.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们学习如何使用*ping*，FPing，Nmap，*httping*，*arping*和*mtr*测试连通性，映射网络，找到不良服务，测试网站性能，找到重复IP地址以及找到路由瓶颈。
+- en: Diagnostic Hardware
+  id: totrans-3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 诊断硬件
+- en: 'If you find yourself stuck with mysterious unlabeled Ethernet and phone cabling,
+    get yourself an Ethernet/telephone cable test and tone tracker. There are many
+    that cost under $100\. These come in two pieces: one emitter and one receiver.
+    This goes fast with two people, one at each end of a cable. When you find both
+    ends of a cable, label it and move on. You can do it alone, but it is faster with
+    two people.'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你发现自己被神秘的未标记以太网和电话线缠绕住了，那么请获取一台以太网/电话线缆测试和音频跟踪器。有很多款售价低于100美元。这些设备由两部分组成：一个发射器和一个接收器。两人合作使用会更快，一个在每条电缆的一端。当你找到电缆的两端时，请给它贴上标签并继续下一步。你也可以一个人完成，但两个人会更快。
+- en: Multimeters are useful for a lot of jobs, such as finding shorts and opens,
+    testing for continuity and attenuation, determining whether a wire is terminated
+    correctly, testing electric outlets, and testing computer power supplies and motherboards.
+    [Adafruit](https://adafruit.com) is a great site to find excellent tutorials on
+    using a multimeter and learning electronics.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 万用表在很多工作中都很有用，比如找短路和断路、测试连通性和衰减、确定电线是否正确终端、测试电源插座以及测试计算机电源和主板。[Adafruit](https://adafruit.com)是一个非常好的网站，提供关于使用万用表和学习电子学的优秀教程。
+- en: Keep a few spare parts, if you can. Sometimes it is faster to swap out a network
+    interface, cable, or switch to find a defective piece of hardware.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果可能的话，保留一些备用零件。有时更换网络接口、电缆或交换机可以更快地找出有问题的硬件。
+- en: 21.1 Testing Connectivity with ping
+  id: totrans-7
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 21.1 使用ping测试连通性
+- en: Problem
+  id: totrans-8
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Some services or hosts on your network are not accessible or have intermittent
+    failures. You want to figure out if it is a hardware problem, a problem with name
+    services, routing, or something else.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的网络上的某些服务或主机无法访问或出现间歇性故障。你想弄清楚这是否是硬件问题，名称服务问题，路由问题还是其他问题。
+- en: Solution
+  id: totrans-10
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: When you are debugging network problems, start close, and systematically work
+    from closer to farther. This means physical distance and how many routers there
+    are to cross. Start within your local LAN segment. Then proceed to your next LAN
+    segment, if you have more than one, crossing a single router. Then to the next
+    one two routers away, and so on.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你调试网络问题时，从近处开始，系统地逐步从近到远解决。这指的是物理距离和需要经过的路由器数量。首先从本地LAN段开始。然后到下一个LAN段，如果有多个，则跨越一个路由器。然后到下一个距离两个路由器的地方，依此类推。
+- en: 'Start with good old *ping* to test connectivity. First, ping *localhost*:'
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先使用传统的*ping*测试连通性。首先ping *localhost*：
+- en: '[PRE0]'
+  id: totrans-13
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'Stop *ping* by pressing Ctrl-C. Pinging *localhost* first confirms that your
+    network interface is up and operating. If you see “connect: Network is unreachable,”
+    there is a problem with your network interface. Keep some spare USB network interfaces
+    on hand to quickly learn if you have a defective interface.'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '通过按Ctrl-C停止*ping*。首先ping *localhost*确认你的网络接口已经启动并正常运行。如果看到“connect: Network
+    is unreachable”，那么你的网络接口有问题。备有一些备用的USB网络接口可以快速确认是否有损坏的接口。'
+- en: 'Once you have your network interface sorted, ping your hostname to test name
+    resolution, and tell *ping* to stop after three pings:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦网络接口设置好，就ping你的主机名以测试名称解析，并告诉*ping*在三次ping后停止：
+- en: '[PRE1]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: If it returns the correct IP address, your name resolution is set up correctly.
+    If it returns a localhost address, like 127.0.1.1, or “Name or service not known,”
+    something is haywire with your DNS configuration.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果返回正确的IP地址，则你的名称解析已正确设置。如果返回一个类似于127.0.1.1的本地主机地址或者“Name or service not known”，则你的DNS配置有问题。
+- en: When your local DNS is fixed, ping one of your network hosts by hostname. If
+    *ping* fails with “Destination Host Unreachable” try pinging its IP address. If
+    that succeeds, check your DNS. If that fails with the same message, your hostname
+    and address are incorrect, or the host is down.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你的本地DNS修复后，通过主机名ping你的网络主机之一。如果*ping*失败并显示“Destination Host Unreachable”，尝试ping它的IP地址。如果成功了，请检查你的DNS。如果仍然失败并显示相同的消息，则你的主机名和地址可能不正确，或者主机已关闭。
+- en: 'If you cannot reach any external IP addresses, your network interface is probably
+    healthy and the problem is upstream: your Ethernet cable, wireless access point,
+    or switch. “Network is unreachable” means your machine is not connected to the
+    network.'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您无法到达任何外部IP地址，您的网络接口可能正常，问题可能出在上游：您的以太网电缆、无线接入点或交换机上。“网络不可达”意味着您的机器未连接到网络。
+- en: 'When you’re hunting down the source of intermittent outages, set *ping* to
+    run for a length of time, like 500 pings, spaced 2 seconds apart, so you don’t
+    overwhelm the host or your network, and output the results to a text file. The
+    following example appends added information to the file, so you can stop and restart:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你追踪间歇性中断的源头时，设置 *ping* 运行一段时间，比如500次ping，间隔2秒，这样你就不会超载主机或网络，并将结果输出到文本文件中。下面的示例追加了额外的信息到文件中，以便你可以停止和重新开始：
+- en: '[PRE2]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Or, use *tee* to see the output and record it in a file:'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，使用 *tee* 命令查看输出并将其记录到文件中：
+- en: '[PRE3]'
+  id: totrans-23
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: On a multihomed host, use *ping -i interface-name* to specify which interface
+    to use.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在多宿主主机上，使用 *ping -i 接口名称* 来指定要使用的接口。
+- en: Discussion
+  id: totrans-25
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Don’t block *echo-request*, *echo-reply*, *time-exceeded*, or *destination-unreachable*
+    ping messages. Some admins block all ping messages at their firewalls, and this
+    is a mistake because many network functions require at least these four ping messages
+    to operate correctly.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不要阻塞 *echo-request*、*echo-reply*、*time-exceeded* 或 *destination-unreachable*
+    ping消息。一些管理员在其防火墙上阻止所有ping消息，这是一个错误，因为许多网络功能至少需要这四种ping消息才能正常运行。
+- en: The *ping* command actually pings if you use the *-a* (audible) switch, though
+    you will probably have to do a bit of setup to make it work. In olden times we
+    had PC speakers built into computer cases, connected directly to the motherboard,
+    and the kernel module that activated the case speaker automatically loaded at
+    boot. You are probably familiar with the low-fi annoyings beeps emitted from this
+    speaker, and perhaps you even ran some hacks to make it play music.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果使用 *-a*（可听见）开关，则 *ping* 命令实际上会发出ping，尽管您可能需要做一些设置才能使其工作。在早期，我们的PC机箱内置了电脑主板，直接连接到主板，自动加载了激活机箱扬声器的内核模块。你可能熟悉这个扬声器发出的低保真烦人的蜂鸣声，也许您甚至运行了一些黑客技术来让它播放音乐。
+- en: Now, in these here modern times, case speakers are mostly gone, and laptops
+    mostly do not have a motherboard beep anymore. But most PC motherboards still
+    support them, and the modern beep speaker is a little thing ([Figure 21-1](#fig-net-trouble-1)).
+    You will probably have to buy one.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，在现代，桌面音箱大多数已经消失了，大多数笔记本电脑也不再有主板蜂鸣声了。但是大多数PC主板仍然支持它们，现代蜂鸣器是一个小东西（[图 21-1](#fig-net-trouble-1)）。你可能需要购买一个。
+- en: '![Beep speaker for computer motherboard.](Images/lcb2_2101.png)'
+  id: totrans-29
+  prefs: []
+  type: TYPE_IMG
+  zh: '![计算机主板的蜂鸣器。](Images/lcb2_2101.png)'
+- en: Figure 21-1\. Beep speaker for computer motherboard
+  id: totrans-30
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 21-1\. 计算机主板的蜂鸣器
+- en: 'Once you have your beep speaker, load the *pcspkr* kernel module, then confirm
+    it is loaded:'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦安装了蜂鸣器，加载 *pcspkr* 内核模块，然后确认已加载：
+- en: '[PRE4]'
+  id: totrans-32
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Now try it out. Drop to a plain console with Ctrl-Alt-F2, or fire up an X terminal,
+    and use the *echo* command to play the ASCII bell character. All examples are
+    the same thing, different representations of the ASCII character code 7:'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在试一试。切换到纯文本控制台使用Ctrl-Alt-F2，或启动X终端，并使用 *echo* 命令播放ASCII响铃字符。所有示例都是同样的事情，ASCII字符代码7的不同表示：
+- en: '[PRE5]'
+  id: totrans-34
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Or press Ctrl-G.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或按下Ctrl-G。
+- en: If you hear nothing in your graphical terminal, check its settings to enable
+    sounds. *xfce4-terminal* and *gnome-terminal* both play the ASCII bell. *Konsole*
+    supports using your choice of sound files for notifications, but it does not support
+    the beep speaker.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果在图形终端中听不到任何声音，请检查其设置以启用声音。*xfce4-terminal* 和 *gnome-terminal* 都会播放ASCII响铃。*Konsole*
+    支持使用您选择的声音文件进行通知，但不支持蜂鸣器。
+- en: See Also
+  id: totrans-37
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 ping*'
+  id: totrans-38
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 ping*'
+- en: '[IANA list of ICMP parameters](https://oreil.ly/pWYWE)'
+  id: totrans-39
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[ICMP参数的IANA列表](https://oreil.ly/pWYWE)'
+- en: 21.2 Profiling Your Network with fping and nmap
+  id: totrans-40
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 21.2 使用fping和nmap对您的网络进行分析
+- en: Problem
+  id: totrans-41
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to generate a list of all hosts and IP addresses on your network and
+    probe for MAC addresses and open ports.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望生成网络上所有主机和IP地址的列表，并探测MAC地址和开放端口。
+- en: Solution
+  id: totrans-43
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use *fping* and *nmap* to probe your LAN, and record the results.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *fping* 和 *nmap* 探测您的LAN，并记录结果。
+- en: '*fping* pings all the addresses in a range in sequence. This example pings
+    a subnet once, reports which hosts are alive, queries DNS for the hostnames, and
+    prints a summary:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*fping* 按顺序对一个范围内的所有地址进行ping。本示例对一个子网进行一次ping，报告哪些主机是活动的，查询主机名的DNS，并打印汇总：'
+- en: '[PRE6]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: To see the unfiltered output, omit the *2>1 | egrep -v “ICMP|xmt”* part. Any
+    offline machines will not be found, so you could run this at different times to
+    try to capture everything. *>> fping.txt* appends the new results for each run.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查看未经过滤的输出，请省略 *2>1 | egrep -v “ICMP|xmt”* 部分。任何离线的机器都不会被找到，所以你可以在不同时间运行这个命令来尝试捕获所有内容。*>>
+    fping.txt* 将每次运行的新结果追加到文件中。
+- en: 'This *nmap* example performs a similar task, with less verbose output:'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个 *nmap* 示例执行了类似的任务，输出较少：
+- en: '[PRE7]'
+  id: totrans-49
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'That is a rather indigestible lump, so insert a newline before each host and
+    store the output in a new file:'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是一个相当难消化的块，所以在每个主机之前插入一个换行符，并将输出存储在一个新文件中：
+- en: '[PRE8]'
+  id: totrans-51
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Now you have nice groupings:'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你有了良好的分组：
+- en: '[PRE9]'
+  id: totrans-53
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Probe the hosts on your network for open ports:'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 探测你网络中主机的开放端口：
+- en: '[PRE10]'
+  id: totrans-55
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: client2.net is running a DNS and web server. You can run the same probe from
+    outside your firewall to see if they are visible outside of your network.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: client2.net 正在运行 DNS 和 Web 服务器。你可以从防火墙外运行相同的探测，看它们在你的网络之外是否可见。
+- en: The second entry is interesting because it is a network printer running a whole
+    mob of services. The printer documentation says they all have a purpose. The printer
+    supports remote administration through a web control panel, so they could be disabled,
+    if necessary.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第二项条目很有趣，因为它是一个运行多个服务的网络打印机。打印机文档说它们都有各自的目的。打印机支持通过 Web 控制面板进行远程管理，因此如果需要，它们可以被禁用。
+- en: 'Collect a list of hosts and their IP addresses:'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 收集主机及其 IP 地址的列表：
+- en: '[PRE11]'
+  id: totrans-59
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: Discussion
+  id: totrans-60
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*nmap* has numerous options for probing networks. Do not probe other people’s
+    networks without permission because it could be seen as a hostile act, probing
+    for vulnerabilities.'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*nmap* 具有多种选项用于探测网络。未经允许不要探测其他人的网络，因为这可能被视为一种敌对行为，探测漏洞。'
+- en: Running a port scan takes some time, but it is a good idea to do this regularly
+    to see what is happening on your network. It is basic security to run only necessary
+    services and to disable everything else.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行端口扫描需要一些时间，但定期执行此操作以查看网络上正在发生的情况是一个好主意。运行只有必要服务并禁用所有其他服务是基本的安全措施。
+- en: See Also
+  id: totrans-63
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 nmap*'
+  id: totrans-64
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 nmap*'
+- en: '[*https://nmap.org*](https://nmap.org)'
+  id: totrans-65
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://nmap.org*](https://nmap.org)'
+- en: '*man 8 fping*'
+  id: totrans-66
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 fping*'
+- en: '[*https://fping.org*](https://fping.org)'
+  id: totrans-67
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://fping.org*](https://fping.org)'
+- en: 21.3 Finding Duplicate IP Addresses with arping
+  id: totrans-68
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 21.3 使用 arping 查找重复的 IP 地址
+- en: Problem
+  id: totrans-69
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to search your network for duplicate IP addresses.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想搜索你的网络中重复的 IP 地址。
+- en: Solution
+  id: totrans-71
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'This example searches your network for 192.168.1.91 and sends four pings:'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个例子搜索你的网络中的 192.168.1.91 并发送四个 ping：
+- en: '[PRE12]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'All of the MAC addresses are the same, so it found no duplicates. This is an
+    example of *arping* finding duplicate IP addresses:'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有的 MAC 地址都相同，因此它没有找到重复的。这是 *arping* 找到重复 IP 地址的一个例子：
+- en: '[PRE13]'
+  id: totrans-75
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'Use *nmap* to identify the two machines with the same IP address:'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *nmap* 来识别具有相同 IP 地址的两台机器：
+- en: '[PRE14]'
+  id: totrans-77
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: Discussion
+  id: totrans-78
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*arp* is the Address Resolution Protocol, matching IP addresses to MAC addresses.'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*arp* 是地址解析协议，将 IP 地址匹配到 MAC 地址。'
+- en: An advantage of using DHCP to dynamically assign IP addresses is less risk of
+    creating duplicates than setting static IP addresses manually. You can assign
+    static addresses with DHCP; see [Chapter 16](ch16.xhtml#cha-dns-dhcp).
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 DHCP 动态分配 IP 地址的优势在于，比手动设置静态 IP 地址少了创建重复的风险。你可以使用 DHCP 分配静态地址；参见 [第 16 章](ch16.xhtml#cha-dns-dhcp)。
+- en: '*arping* is useful to see if a host is up when *ping* does not find it. Some
+    folks like to block *ping*, which is not a good thing to do because it is essential
+    to network functionality. *arping* cannot be blocked without disabling the ability
+    for network hosts to communicate with each other. *arp*, the Address Resolution
+    Protocol, maintains a table of MAC addresses. When a network host sends a packet
+    to another host, *arp* matches the IP address to the MAC address, and then the
+    packet can be delivered.'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*arping* 用于在 *ping* 找不到主机时查看主机是否在线。有些人喜欢阻止 *ping*，这是不好的，因为它对网络功能至关重要。*arping*
+    无法阻止而不禁用网络主机之间的通信能力。*arp*，地址解析协议，维护一个 MAC 地址表。当网络主机向另一个主机发送数据包时，*arp* 将 IP 地址与
+    MAC 地址匹配，然后可以传递数据包。'
+- en: 'You can see what it looks like when *arp* probes your network to update its
+    address table, with a packet sniffer like *tcpdump*:'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以通过像 *tcpdump* 这样的数据包嗅探器看到 *arp* 探测你的网络以更新其地址表时的情况。
+- en: '[PRE15]'
+  id: totrans-83
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: See Also
+  id: totrans-84
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 16](ch16.xhtml#cha-dns-dhcp)'
+  id: totrans-85
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 16 章](ch16.xhtml#cha-dns-dhcp)'
+- en: '*man 8 arping*'
+  id: totrans-86
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 arping*'
+- en: 21.4 Testing HTTP Throughput and Latency with httping
+  id: totrans-87
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 21.4 使用 httping 测试 HTTP 吞吐量和延迟
+- en: Problem
+  id: totrans-88
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to test a website that you host to see if it loads in a reasonable
+    length of time.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想测试您托管的网站是否能在合理的时间内加载。
+- en: Solution
+  id: totrans-90
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*httping* measures HTTP server throughput and latency. Its simplest invocation
+    tests latency:'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*httping* 测量HTTP服务器的吞吐量和延迟。它最简单的调用测试延迟：'
+- en: '[PRE16]'
+  id: totrans-92
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'This doesn’t tell you how long it takes pages to load, only how long it takes
+    the server, in milliseconds, to respond to a HEAD request, which fetches only
+    the page headers without the content. A GET (*-G*) request fetches the whole page:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这并不告诉您页面加载时间，只告诉您服务器响应头部的时间（以毫秒计），而不包含内容。GET（*-G*）请求会获取整个页面：
+- en: '[PRE17]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'Add the *-r* switch to minimize DNS latency by resolving the hostname just
+    once:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 添加 *-r* 开关以最小化DNS延迟，仅解析一次主机名：
+- en: '[PRE18]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: If minimizing DNS latency makes a large difference, then you need to take a
+    look at your nameservers.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果最小化DNS延迟有很大的差异，则需要查看您的域名服务器。
+- en: 'Test an alternate port, such as 8080, by appending it to the URL:'
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过将其附加到URL来测试备用端口，例如8080：
+- en: '[PRE19]'
+  id: totrans-99
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Use the *-s* switch to display return codes, such as 200 OK, which indicates
+    a successful page load:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *-s* 开关显示返回码，例如200 OK，表示成功加载页面：
+- en: '[PRE20]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: Discussion
+  id: totrans-102
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Run multiple tests at different times of day to gather data that is representative
+    of what your users are experiencing.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在不同时间运行多次测试，收集具有代表性的用户体验数据。
+- en: '*httping* is not a super-sophisticated tester that digs deeply into your site
+    to identify bottlenecks. It is a quick, simple tool to give you an idea of your
+    overall site performance, and to tell you if you need to dig deeper to diagnose
+    performance problems.'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*httping* 不是一个深入分析您站点瓶颈的超级复杂的测试工具。它是一个快速简单的工具，可帮助您了解整体站点性能，并告诉您是否需要深入诊断性能问题。'
+- en: See Also
+  id: totrans-105
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[HTTP return codes](https://oreil.ly/pMvFV)'
+  id: totrans-106
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[HTTP 返回码](https://oreil.ly/pMvFV)'
+- en: '*man 1 httping*'
+  id: totrans-107
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 httping*'
+- en: '[httping](https://oreil.ly/2ts3n)'
+  id: totrans-108
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[httping](https://oreil.ly/2ts3n)'
+- en: 21.5 Using mtr to Find Troublesome Routers
+  id: totrans-109
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 21.5 使用 *mtr* 查找有问题的路由器
+- en: Problem
+  id: totrans-110
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: There is a site you are trying to access, and it is very slow or unreachable.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有一个您正在尝试访问的站点，但它非常缓慢或无法访问。
+- en: Solution
+  id: totrans-112
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use *mtr* (My Traceroute) to see where your packets are going astray. This works
+    better on networks that you control, because the internet is vast and routes change,
+    but when you are having trouble reaching a site it will provide useful information.
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *mtr*（My Traceroute）查看数据包走错的位置。这在您控制的网络上效果更好，因为互联网辽阔，路由会发生变化，但当您无法访问站点时，它将提供有用信息。
+- en: 'Let’s see what wandering path takes us to *carlaschroder.com*:'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看漫游的路径如何带我们到 *carlaschroder.com*：
+- en: '[PRE21]'
+  id: totrans-115
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: m1login.net is my network’s internet gateway router. After that it is all the
+    wild internet. Hop 13 could be a chokepoint, with 60% packet loss. Hop 13 could
+    be part of a load-balancing cluster; note that hop 11 and hop 14 have the same
+    domain name. If it is part of a cluster then the packet loss is not significant.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: m1login.net 是我的网络的互联网网关路由器。之后就是广阔的互联网世界。第13跳可能是一个瓶颈，丢包率为60%。第13跳可能是负载均衡集群的一部分；注意第11跳和第14跳具有相同的域名。如果它是集群的一部分，那么丢包并不重要。
+- en: 'Ping the last hop, hs17.name.tools. The following example looks like everything
+    is working fine:'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ping 最后一跳，hs17.name.tools。以下示例看起来一切正常：
+- en: '[PRE22]'
+  id: totrans-118
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'If *mtr* reveals a problem, use *whois* to look up the domain owner and their
+    contact information:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果 *mtr* 显示问题，请使用 *whois* 查询域名所有者及其联系信息：
+- en: '[PRE23]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: '*whois* also works for IP addresses. The *-H* switch disables the annoying
+    legalese.'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*whois* 也适用于IP地址。*-H* 开关可以禁用烦人的法律术语。'
+- en: 'Capture *mtr* output in a file, with the date and time at the end of each entry:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在每个条目末尾附上日期和时间，将 *mtr* 输出保存到文件中：
+- en: '[PRE24]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: Collect data over time by creating a cron job ([Recipe 3.7](ch03.xhtml#rec-scheduled-shutdowns-cron))
+    to run the preceding *mtr* once per hour, and let it run for a day or two. Don’t
+    forget to turn it off.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过创建一个 cron 作业（[Recipe 3.7](ch03.xhtml#rec-scheduled-shutdowns-cron)）每小时运行前述的
+    *mtr* 并让其运行一天或两天来随时间收集数据。别忘了关闭它。
+- en: Discussion
+  id: totrans-125
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*mtr -wo LSRABW* limits the number of columns to make the example fit better
+    on this page. *mtr -w* is wide format for reports.'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*mtr -wo LSRABW* 限制列数，以便示例更好地适应本页。*mtr -w* 是报告的宽格式。'
+- en: Save your records in case you need to report a problem; the *whois* examples
+    show how to find who to contact.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果需要报告问题，请保存您的记录；*whois* 示例显示如何找到联系人。
+- en: '*mtr* generates a lot of traffic, so take care to not run it too frequently.'
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*mtr* 生成大量流量，因此请小心不要频繁运行它。'
+- en: See Also
+  id: totrans-129
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 mtr*'
+  id: totrans-130
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 mtr*'

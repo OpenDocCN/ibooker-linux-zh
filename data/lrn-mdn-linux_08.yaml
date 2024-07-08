@@ -1,0 +1,2198 @@
+- en: Chapter 8\. Observability
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第8章。可观测性
+- en: You need visibility into what’s going on across the stack—from the kernel to
+    user-facing parts. Often, you get that visibility by knowing the right tool for
+    the task.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要了解整个堆栈的运行情况——从内核到面向用户的部分。通常，您可以通过知道任务的正确工具来获得这种可见性。
+- en: 'This chapter is all about gathering and using different signals that Linux
+    and its applications generate so that you can make informed decisions. For example,
+    you’ll see how you can do the following:'
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章重点讨论收集和利用Linux及其应用程序生成的不同信号，以便您能够做出明智的决策。例如，您将看到如何执行以下操作：
+- en: Figure out how much memory a process consumes
+  id: totrans-3
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 弄清楚进程消耗了多少内存
+- en: Understand how soon you will run out of disk space
+  id: totrans-4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 理解磁盘空间将会在多快的时间内耗尽
+- en: Get an alert on custom events for security reasons
+  id: totrans-5
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 获取安全事件的自定义事件警报
+- en: To establish a common vocabulary, we’ll first review different signal types
+    you might come across, such as system or application logs, metrics, and process
+    traces. We’ll also have a look at how to go about troubleshooting and measuring
+    performance. Next, we’ll focus on logs specifically, reviewing different options
+    and semantics. Then, we’ll cover monitoring for different resource types, such
+    as CPU cycles, memory, or I/O traffic. We’ll review different tools that you can
+    use and show certain end-to-end setup you may wish to adopt.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了建立共同的词汇表，我们首先将回顾您可能遇到的不同信号类型，例如系统或应用程序日志、指标和进程跟踪。我们还将探讨如何进行故障排除和性能测量。接下来，我们将重点介绍日志，回顾不同的选项和语义。然后，我们将涵盖不同资源类型的监控，例如CPU周期、内存或I/O流量。我们将审视您可以使用的不同工具，并展示您可能希望采用的特定端到端设置。
+- en: You’ll learn that observability is often reactionary. That is, something crashes
+    or runs slowly, and you start looking at processes and their CPU or memory usage,
+    or dig into the logs. But there are also times when observability has more of
+    an investigative nature—for example, when you want to figure out how long certain
+    algorithms take. Last but not least, you can use predictive (rather than reactive)
+    observability. For example, you can be alerted on a condition in the future, extrapolating
+    the current behavior (disk usage for a predictable load is a good example where
+    that might work well).
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将了解到可观测性通常是一种反应性的。也就是说，某些情况下会出现崩溃或运行缓慢，然后您开始查看进程及其CPU或内存使用情况，或者深入查看日志。但有时可观测性更具调查性质——例如，当您想要弄清楚某些算法需要多长时间时。最后但同样重要的是，您可以使用预测性（而不是反应性）的可观测性。例如，您可以在将来的某种条件下收到警报，推测当前行为（对于可预测负载的磁盘使用情况就是一个很好的例子）。
+- en: Likely the best visual overview on observability comes from performance maestro
+    Brendan Gregg. [Figure 8-1](#fig-linux-o11y), taken from his [Linux Performance
+    site](https://oreil.ly/KlzQP), gives you a feeling for the wealth of moving parts
+    and tooling available.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于可观测性的最佳视觉概述可能来自性能专家Brendan Gregg。从他的[Linux Performance站点](https://oreil.ly/KlzQP)获取的[图8-1](#fig-linux-o11y)让您感受到可用的各种移动部件和工具的丰富性。
+- en: '![lmlx 0801](Images/lmlx_0801.png)'
+  id: totrans-9
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0801](Images/lmlx_0801.png)'
+- en: 'Figure 8-1\. Linux observability overview. *Credit*: Brendan Gregg (shared
+    under CC BY-SA 4.0 license)'
+  id: totrans-10
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图8-1\. Linux可观测性概述。*来源*：Brendan Gregg（在CC BY-SA 4.0许可下共享）
+- en: Observability is an exciting topic with many use cases and lots of (open source)
+    tooling available, so let’s first establish a strategy and look at some common
+    terms used.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可观测性是一个涵盖许多用例和大量（开源）工具的令人兴奋的主题，因此让我们首先建立一个策略，并查看一些常用术语。
+- en: Basics
+  id: totrans-12
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 基础知识
+- en: Before we get into the observability terminology, let’s step back a bit and
+    look at how you turn the information provided into actionable insights and use
+    it to fix an issue or optimize an app in a structured manner.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们深入讨论可观测性术语之前，让我们退后一步，看看如何将提供的信息转化为可操作的洞察力，并以结构化方式修复问题或优化应用程序。
+- en: Observability Strategy
+  id: totrans-14
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 可观测性策略
+- en: One widely established strategy in the observability context is the [OODA loop
+    (observe–orient–decide–act)](https://oreil.ly/zLLET). It offers a structured way
+    to test a hypothesis based on observed data and act upon it—that is, a way to
+    get actionable insights from signals.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在可观测性背景下广泛使用的一种策略是[OODA循环（观察-定向-决策-行动）](https://oreil.ly/zLLET)。它提供了一种基于观察数据进行假设测试并采取行动的结构化方法——即从信号中获取可操作的洞察力。
+- en: For example, let’s say an application is slow. Let’s further assume there are
+    multiple possible reasons for this (not enough memory, too few CPU cycles, network
+    I/O insufficient, etc.). First, you want to be able to measure each resource consumption.
+    Then you would change each resource allocation individually (keeping the others
+    unchanged) and measure the outcome.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，假设一个应用程序运行缓慢。我们进一步假设有多种可能的原因（内存不足、CPU周期太少、网络I/O不足等）。首先，您需要能够测量每个资源的消耗情况。然后，您将分别更改每个资源的分配（保持其他资源不变）并测量结果。
+- en: Does the performance improve after you provided more RAM to the app? If so,
+    you may have found the reason. If not, you continue with a different resource,
+    always measuring the consumption and trying to relate to the observed impact on
+    the situation.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您为应用程序提供更多的RAM后性能有所改善吗？如果是这样，您可能已经找到了原因。如果没有，您将继续尝试其他资源，始终测量消耗并尝试将其与观察到的情况影响联系起来。
+- en: Terminology
+  id: totrans-18
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 术语
+- en: 'There are a range of terms in the observability space,^([1](ch08.xhtml#idm45805428798080))
+    and not all have formal definitions. In addition, the meanings might slightly
+    differ if you’re looking at a single machine or are in a networked (distributed)
+    setup:'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在可观测性领域存在一系列术语，^([1](ch08.xhtml#idm45805428798080))并非所有术语都有正式的定义。此外，如果您观察单个机器或处于网络化（分布式）设置中，其含义可能会略有不同：
+- en: Observability
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可观察性
+- en: Assessing the internal state of a system (such as Linux) by measuring external
+    information, usually with the goal of acting upon it. For example, if you notice
+    that your system reacts sluggishly, and measure how much main memory is available,
+    you might find that a particular app hogs all the memory, and you may decide to
+    terminate it to remedy the situation.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过测量外部信息来评估系统（例如Linux）的内部状态，通常的目的是对其进行响应。例如，如果您注意到系统反应迟钝，并且测量可用主存储器的数量，您可能会发现某个特定的应用程序占用了所有的内存，于是您可能决定终止它以解决问题。
+- en: Signal types
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 信号类型
+- en: Different ways to represent and emit information about the state of a system,
+    either via symbolic means (payload is text, such as the case with logs) or numerical
+    values (as with metrics) or combinations thereof. See also [“Signal Types”](#o11y-signals).
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表示和发出关于系统状态的信息的不同方式，可以通过符号方式（负载为文本，例如日志的情况）或数值方式（如指标的情况），或者它们的组合。另请参见[“信号类型”](#o11y-signals)。
+- en: Source
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 源
+- en: Generates signals, potentially of different types. Sources can be the Linux
+    operating system or an application.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 生成信号，可能是不同类型的信号。源可以是Linux操作系统或应用程序。
+- en: Destination
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目的地
+- en: Where you consume, store, and further process signals. We call a destination
+    that exposes a user interface (GUI, TUI, or CLI) a *frontend*. For example, a
+    log viewer or a dashboard plotting time series is a frontend, whereas an S3 bucket
+    is not (but can still act as a destination for, say, logs).
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 消费、存储和进一步处理信号的地方称为**目的地**。我们将暴露用户界面（GUI、TUI或CLI）的目的地称为*前端*。例如，日志查看器或绘制时间序列的仪表板就是前端，而S3存储桶则不是（但仍可作为日志等信息的目的地）。
+- en: Telemetry
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 遥测
+- en: The process of extracting signals from sources and transporting (or routing,
+    shipping) the signals to destinations, often employing agents that collect and/or
+    preprocess signals (for example, filter or downsample).
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从源中提取信号并将信号传输（或路由、发送）到目的地的过程，通常使用代理收集和/或预处理信号（例如过滤或下采样）。
+- en: Signal Types
+  id: totrans-30
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 信号类型
+- en: '*Signals* are how we communicate the state of a system for further processing
+    or interpretation. By and large we distinguish between text payload (which is
+    most suited for a human to search and interpret) and numerical payload (good for
+    both machines and, in processed form, for humans). The three basic and common
+    signal types relevant to our discussion in this chapter are: logs, metrics, and
+    traces.'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*信号*是我们用来传达系统状态以供进一步处理或解释的方式。总体而言，我们区分文本负载（最适合人类搜索和解释）和数值负载（对于机器和处理后的人类都很好）。在本章讨论中，与我们讨论相关的三种基本且常见的信号类型是：日志、指标和跟踪。'
+- en: Logs
+  id: totrans-32
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 日志
+- en: '*Logs* are a fundamental signal type that every system, to some extent, generates.
+    Logs are discrete events with a textual payload, meant for human consumption.
+    Typically, these events are timestamped. Ideally, the logs are structured so that
+    there is a clear meaning defined for each part of the log message. This meaning
+    is potentially expressed through a formal schema so that validation can be automatically
+    performed.'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*日志*是每个系统在某种程度上都会生成的基本信号类型。日志是离散事件，具有文本载荷，供人类使用。通常，这些事件都有时间戳。理想情况下，日志应该结构化，以便每个日志消息的每个部分都有清晰的含义。这种含义可能通过形式化模式来表达，以便可以自动进行验证。'
+- en: Interestingly, while every log has some structure (even if it’s not well defined
+    and parsing is hard, potentially due to delimiter or edge cases), you will often
+    hear the term *structured logging*. When people say that, they actually mean that
+    the log is structured using JSON.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有趣的是，虽然每个日志都有一些结构（即使它不是明确定义的，解析起来可能很困难，可能是由于分隔符或边缘情况），你经常会听到术语*结构化日志*。当人们这么说时，他们实际上是指使用
+    JSON 结构化的日志。
+- en: While automating log content is hard (given its textual nature), logs are still
+    very useful for humans, and thus they will likely stay the dominating signal type
+    for some time. We’ll dig deeper into handling logs in [“Logging”](#logging). Logs
+    are the most important signal type (for our considerations), and that’s why we’ll
+    spend most of the time in this chapter dealing with them.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管自动化日志内容很难（因为它是文本性质的），但日志对人类仍然非常有用，因此它们可能会在一段时间内继续是主要的信号类型。我们将在[“记录”](#logging)中深入探讨处理日志的内容。日志是最重要的信号类型（对我们的考虑而言），这就是为什么我们在本章中大部分时间都将处理它们。
+- en: Metrics
+  id: totrans-36
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 指标
+- en: '*Metrics* are (usually regularly) sampled numerical data points, forming a
+    time series. The individual data points can have additional context in the form
+    of dimensions or identifying metadata. Normally, you don’t directly consume the
+    raw metrics; instead, you use some sort of aggregation or graphical representation,
+    or you get notified if a certain condition is met. Metrics can be useful both
+    for operational tasks and for troubleshooting to answer questions like how many
+    transactions an app completed or how long a certain operation took (in the past
+    X minutes).'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*指标*通常是定期采样的数值数据点，形成时间序列。这些单独的数据点可以通过维度或标识元数据提供额外的上下文。通常情况下，你不会直接使用原始指标数据；而是使用某种聚合或图形表示，或者在满足特定条件时得到通知。指标既可用于操作任务，也可用于故障排除，以回答诸如应用完成多少交易或某个操作耗时多长时间（过去
+    X 分钟）等问题。'
+- en: 'We distinguish between different types of metrics:'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们区分不同类型的指标：
+- en: Counter
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 计数器
+- en: The value of a counter can only ever go up (besides resetting a counter to zero).
+    An example of a counter metric is the total number of requests handled by a service
+    or the bytes sent via an interface over a time period.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 计数器的值只能不断增加（除非将计数器重置为零）。计数器指标的一个示例是服务处理的总请求数或某段时间内通过接口发送的字节数。
+- en: Gauges
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 测量值
+- en: A gauge value can go up or down. For example, you gauge the currently available
+    overall main memory or the number of processes running.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 测量值可以增加或减少。例如，您可以测量当前可用的总内存或运行的进程数。
+- en: Histograms
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 直方图
+- en: A sophisticated way to build a distribution of values. Using buckets, histograms
+    allow you to assess how the data overall is structured. They also enable you to
+    make flexible statements (such as 50% or 90% of the values fall into a certain
+    range).
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 构建值分布的复杂方式。使用桶，直方图允许你评估数据的整体结构。它们还使你能够进行灵活的陈述（例如，50% 或 90% 的值落入某个范围内）。
+- en: In [“Monitoring”](#monitoring), we have a look at a range of tools that you
+    can use for simple use cases, and in [“Prometheus and Grafana”](#prometheus-grafana),
+    you see an advanced example setup for metrics.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[“监控”](#monitoring)中，我们将看到一系列可用于简单用例的工具，在[“Prometheus 和 Grafana”](#prometheus-grafana)中，您将看到一种高级示例设置用于指标。
+- en: Traces
+  id: totrans-46
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 跟踪
+- en: '*Traces* are a dynamic collection of runtime information (for example, information
+    about what syscalls a process uses, or the sequence of events in the kernel, for
+    a given cause). Traces are often used not only for debugging but also for performance
+    assessments. We have a look at this advanced topic in [“Tracing and Profiling”](#tracing).'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*跟踪*是运行时信息的动态集合（例如，有关进程使用的系统调用的信息，或者给定原因的内核事件序列）。跟踪通常不仅用于调试，还用于性能评估。我们将在[“跟踪和性能分析”](#tracing)中详细研究这个高级主题。'
+- en: Logging
+  id: totrans-48
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 记录
+- en: 'As mentioned before, logs are (a collection of) discrete events with a textual
+    payload, optimized for human consumption. Let’s decompose this statement to understand
+    it better:'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如前所述，日志是（一组）文本有效负载的离散事件，优化供人类消费。让我们分解这个陈述以更好地理解它：
+- en: Discrete events
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 离散事件
+- en: Think of a discrete event in the context of the codebase. You want to share
+    information about what is going on in the code using an (atomic) log item. For
+    example, you emit a log line that a database connection has been established successfully.
+    Another log item might be to flag an error because a file is missing. Keep the
+    scope of the log message small and specific, so it’s easier for someone consuming
+    the message to find the respective location in the code.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在代码库的上下文中，想象一个离散事件。您希望使用（原子性）日志项共享关于代码中正在进行的情况的信息。例如，您发出一个日志行，指示数据库连接已成功建立。另一个日志项可能是因为文件丢失而标记错误。保持日志消息的范围小而具体，这样消费消息的人更容易找到代码中相应的位置。
+- en: Textual payload
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文本有效负载
+- en: The payload of a log message is of textual nature. The default consumers are
+    humans. In other words, no matter if you’re using a log viewer on the command
+    line, or a fancy log-processing system with visual UI, a human reads and interprets
+    the content of the log message and decides on an action based on it.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 日志消息的有效负载是文本性质的。默认的消费者是人类。换句话说，无论您是在命令行上使用日志查看器还是在具有可视化用户界面的高级日志处理系统中，人类读取和解释日志消息的内容，并根据此内容决定采取行动。
+- en: 'From a structural perspective, overall, a log comprises the following:'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从结构上看，总体而言，日志包括以下内容：
+- en: A collection of log items, messages, or lines
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一组日志项、消息或行
+- en: Captures information about a discrete event.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 捕获关于离散事件的信息。
+- en: Metadata or context
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 元数据或上下文
+- en: Can be present on a per-message basis as well as on a global scope (the entire
+    log file, for example).
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可以以每条消息的方式出现，也可以在全局范围（例如整个日志文件）上出现。
+- en: A format for how an individual log message is to be interpreted
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个用于解释单个日志消息的格式
+- en: Defines the log’s parts and meanings. Examples are line-oriented, space-separated
+    messages or a JSON schema.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义日志的部分和含义。例如，面向行的、空格分隔的消息或JSON模式。
+- en: In [Table 8-1](#tab-log-formats), you can see some common log formats. There
+    are many (more-specific, narrower-scoped) formats and frameworks—for example,
+    for database or programming languages.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[表8-1](#tab-log-formats)中，您可以看到一些常见的日志格式。例如，用于数据库或编程语言的（更具体、范围更窄的）格式和框架有许多。
+- en: Table 8-1\. Common log formats
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表8-1. 常见日志格式
+- en: '| Format | Note |'
+  id: totrans-63
+  prefs: []
+  type: TYPE_TB
+  zh: '| 格式 | 注意 |'
+- en: '| --- | --- |'
+  id: totrans-64
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| [Common event format](https://oreil.ly/rHBWs) | Developed by ArcSight; used
+    for devices, security use cases |'
+  id: totrans-65
+  prefs: []
+  type: TYPE_TB
+  zh: '| [常见事件格式](https://oreil.ly/rHBWs) | 由ArcSight开发；用于设备、安全用例 |'
+- en: '| [Common log format](https://oreil.ly/Da7uC) | For web servers; see also extended
+    log format |'
+  id: totrans-66
+  prefs: []
+  type: TYPE_TB
+  zh: '| [常见日志格式](https://oreil.ly/Da7uC) | 用于Web服务器；另见扩展日志格式 |'
+- en: '| [Graylog extended log format](https://oreil.ly/6MBHm) | Developed by Graylog;
+    improves Syslog |'
+  id: totrans-67
+  prefs: []
+  type: TYPE_TB
+  zh: '| [Graylog扩展日志格式](https://oreil.ly/6MBHm) | 由Graylog开发；改进Syslog |'
+- en: '| Syslog | For operating systems, apps, devices; see [“Syslog”](#syslog) |'
+  id: totrans-68
+  prefs: []
+  type: TYPE_TB
+  zh: '| Syslog | 用于操作系统、应用程序、设备；参见[“Syslog”](#syslog) |'
+- en: '| [Embedded metric format](https://oreil.ly/LeXhe) | Developed by Amazon (both
+    logs and metrics) |'
+  id: totrans-69
+  prefs: []
+  type: TYPE_TB
+  zh: '| [嵌入式度量格式](https://oreil.ly/LeXhe) | 由亚马逊开发（既有日志又有度量） |'
+- en: As a good practice, you want to avoid overhead with logs (enabling fast lookups
+    and a small footprint—that is, not taking up too much disk space). In this context,
+    log rotation, for example, via [`logrotate`](https://oreil.ly/jX6Jy), is used.
+    An advanced concept called *data temperature* may also be useful, moving older
+    log files to cheaper and slower storage (attached disk, S3 bucket, Glacier).
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为良好的实践，您希望避免日志的开销（启用快速查找和小的占地面积——即不占用太多磁盘空间）。在这种情况下，例如通过[`logrotate`](https://oreil.ly/jX6Jy)进行日志轮换是常用的。一个称为*数据温度*的高级概念也可能很有用，将较旧的日志文件移动到更便宜和更慢的存储（附加磁盘、S3存储桶、Glacier）中。
+- en: Warning
+  id: totrans-71
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: There’s one case where you need to be careful about logging information, especially
+    in production environments. Whenever you decide to emit a log line in your app,
+    ask yourself if you could potentially leak sensitive information. This sensitive
+    information could be a password, an API key, or even simply user-identifying information
+    (email, account ID).
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有一个情况需要特别注意日志信息，特别是在生产环境中。每当您决定在应用程序中发出一条日志行时，请问自己是否可能泄露敏感信息。这些敏感信息可能是密码、API密钥，甚至只是用户识别信息（电子邮件、帐户ID）。
+- en: The problem is that the logs are usually stored in a persistent form (say, on
+    local disk or even in an S3 bucket). This means that even long after the process
+    has terminated, someone could get access to the sensitive information and use
+    it for an attack.
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 问题在于日志通常以持久形式存储（例如在本地磁盘上或甚至在S3存储桶中）。这意味着即使进程终止后很长时间，某人仍然可以访问敏感信息并用于攻击。
+- en: To signal the importance or intended target consumer of a log item, logs often
+    define levels (for example `DEBUG` for development, `INFO` for normal status,
+    or `ERROR` for unexpected situations that may require human intervention).
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了标志一个日志项的重要性或预期的目标消费者，日志通常定义级别（例如 `DEBUG` 用于开发，`INFO` 用于正常状态，或 `ERROR` 用于意外情况可能需要人工干预）。
+- en: 'Now it’s time to get our hands dirty: let’s start with something simple and,
+    as an overview, have a look at Linux’s central log directory (output shortened
+    for readability):'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在是动手的时候了：让我们从一些简单的东西开始，并作为一个概述，看看Linux的中央日志目录（为了易读性而缩短输出）：
+- en: '[PRE0]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: '[![1](Images/1.png)](#co_observability_CO1-1)'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO1-1)'
+- en: Logs of the `apt` package manager
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`apt` 包管理器的日志'
+- en: '[![2](Images/2.png)](#co_observability_CO1-2)'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO1-2)'
+- en: Logs of all login attempts (successful and failed) and authentication processes
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有登录尝试（成功和失败）和认证过程的日志
+- en: '[![3](Images/3.png)](#co_observability_CO1-3)'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_observability_CO1-3)'
+- en: Failed login attempts
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 登录尝试失败
+- en: '[![4](Images/4.png)](#co_observability_CO1-4)'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_observability_CO1-4)'
+- en: Printing related logs
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 打印相关日志
+- en: '[![5](Images/5.png)](#co_observability_CO1-5)'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_observability_CO1-5)'
+- en: Logs of the `dpkg` package manager
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`dpkg` 包管理器的日志'
+- en: '[![6](Images/6.png)](#co_observability_CO1-6)'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](Images/6.png)](#co_observability_CO1-6)'
+- en: Device driver logs; use `dmesg` to inspect
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设备驱动程序日志；使用 `dmesg` 进行检查
+- en: '[![7](Images/7.png)](#co_observability_CO1-7)'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![7](Images/7.png)](#co_observability_CO1-7)'
+- en: System install logs (when the Linux distro was originally installed)
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统安装日志（Linux发行版最初安装时）
+- en: '[![8](Images/8.png)](#co_observability_CO1-8)'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![8](Images/8.png)](#co_observability_CO1-8)'
+- en: The `journalctl` location; see [“journalctl”](#journalctl) for details
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`journalctl` 的位置；详见[“journalctl”](#journalctl)了解详情'
+- en: '[![9](Images/9.png)](#co_observability_CO1-9)'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![9](Images/9.png)](#co_observability_CO1-9)'
+- en: The kernel logs
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核日志
+- en: '[![10](Images/10.png)](#co_observability_CO1-10)'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![10](Images/10.png)](#co_observability_CO1-10)'
+- en: All last logins of all users; use `lastlog` to inspect
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有用户的最后登录；使用 `lastlog` 进行检查
+- en: '[![11](Images/11.png)](#co_observability_CO1-11)'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![11](Images/11.png)](#co_observability_CO1-11)'
+- en: NTP-related logs (see also [“Network Time Protocol”](ch07.xhtml#ntp))
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: NTP相关的日志（也参见[“Network Time Protocol”](ch07.xhtml#ntp)）
+- en: '[![12](Images/12.png)](#co_observability_CO1-12)'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![12](Images/12.png)](#co_observability_CO1-12)'
+- en: The `syslogd` location; see [“Syslog”](#syslog) for details
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`syslogd` 的位置；详见[“Syslog”](#syslog)了解详情'
+- en: 'One common pattern for consuming logs live (that is, as it happens) is to *follow
+    logs*; that is, you watch the end of the log as new log lines are added (edited
+    to fit):'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个常见的实时消费日志的模式（即在其发生时）是*跟随日志*；也就是说，你可以在日志的末尾观看新添加的日志行（编辑以适应）：
+- en: '[PRE1]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: '[![1](Images/1.png)](#co_observability_CO2-1)'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO2-1)'
+- en: Follow the logs of the `syslogd` process with the `-f` option.
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `-f` 选项跟随 `syslogd` 进程的日志。
+- en: '[![2](Images/2.png)](#co_observability_CO2-2)'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO2-2)'
+- en: An example log line; see [“Syslog”](#syslog) for the format.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个示例日志行；详见[“Syslog”](#syslog)了解格式。
+- en: Tip
+  id: totrans-107
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: 'If you want to see the log output of a process and at the same time store it
+    in a file, you can use the [`tee` command](https://oreil.ly/X1Gqo):'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想看一个进程的日志输出，并同时将其存储在文件中，你可以使用[`tee` 命令](https://oreil.ly/X1Gqo)：
+- en: '[PRE2]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: Now you’d see the output of `someprocess` in your terminal, and the output would
+    at the same time be stored in *some.log*. Note that we’re using the `-a` option
+    to append to the log file, otherwise it would be truncated.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你会在终端看到 `someprocess` 的输出，并且同时输出会存储在 *some.log* 中。请注意，我们使用 `-a` 选项来追加到日志文件，否则它会被截断。
+- en: Let’s now have a look at the two most commonly used Linux logging systems.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看两个最常用的Linux日志系统。
+- en: Syslog
+  id: totrans-112
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Syslog
+- en: Syslog is a logging standard for a range of sources, from the kernel to daemons
+    to user space. It has its roots in networked environments, and today the protocol
+    comprises a textual format defined in [RFC 5424](https://oreil.ly/1Qqng), along
+    with deployment scenarios and security considerations. [Figure 8-2](#fig-syslog-format)
+    shows the high-level format of Syslog, but be aware that there are many seldom-used
+    optional fields.
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Syslog是一种用于从内核到守护程序再到用户空间的各种来源的日志记录标准。它起源于网络环境，今天该协议包括在[RFC 5424](https://oreil.ly/1Qqng)中定义的文本格式，以及部署场景和安全注意事项。[Figure 8-2](#fig-syslog-format)显示了Syslog的高级格式，但请注意，还有许多很少使用的可选字段。
+- en: '![lmlx 0802](Images/lmlx_0802.png)'
+  id: totrans-114
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0802](Images/lmlx_0802.png)'
+- en: Figure 8-2\. Syslog format as per RFC 5424
+  id: totrans-115
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图8-2\. 根据RFC 5424定义的Syslog格式
+- en: 'The Syslog format as defined in RFC 5424 has the following header fields (with
+    `TS` and `HN` the most often used):'
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如RFC 5424中定义的Syslog格式具有以下头字段（其中`TS`和`HN`最常使用）：
+- en: '`PRI`'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`PRI`'
+- en: The message facility/severity
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 消息设施/严重性
+- en: '`VER`'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`VER`'
+- en: The Syslog protocol number (usually left out since it can only be 1)
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Syslog协议号（通常被省略，因为它只能是1）
+- en: '`TS`'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`TS`'
+- en: Contains the time when the message was generated using ISO 8601 format
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包含使用ISO 8601格式生成消息的时间
+- en: '`HN`'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`HN`'
+- en: Identifies the machine that sent the message
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 标识发送消息的机器
+- en: '`APP`'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`APP`'
+- en: Identifies the application (or a device) that sent the message
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 识别发送消息的应用程序（或设备）
+- en: '`PID`'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`PID`'
+- en: Identifies the process that sent the message
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 标识发送消息的进程
+- en: '`MID`'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`MID`'
+- en: An optional message ID
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可选的消息ID
+- en: The format also includes *structured data*, which is the payload in a structured
+    (key/value-based) list where each element is bounded by `[ ]`.
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 格式还包括*结构化数据*，这是以结构化（键/值为基础）列表形式的有效负载，其中每个元素由`[ ]`界定。
+- en: 'Usually, one would use the [`syslogd` binary](https://oreil.ly/su6IX) to take
+    care of the log management. Over time, other options have become available that
+    you should be aware of:'
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常，人们会使用[`syslogd`二进制文件](https://oreil.ly/su6IX)来管理日志。随着时间的推移，其他选择也已经出现，你应该知道：
+- en: '[`syslog-ng`](https://oreil.ly/qETe9)'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`syslog-ng`](https://oreil.ly/qETe9)'
+- en: An enhanced log daemon that you can use as a drop-in replacement for `syslogd`
+    and that in addition supports TLS, content-based filtering, and logging into databases
+    such as PostgreSQL and MongoDB. Available since late 1990.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一种增强的日志守护程序，可以作为`syslogd`的替代品，并且支持TLS、基于内容的过滤以及将日志记录到诸如PostgreSQL和MongoDB等数据库中。自1990年末推出以来就可用。
+- en: '[`rsyslog`](https://oreil.ly/QDPmv)'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`rsyslog`](https://oreil.ly/QDPmv)'
+- en: Extends the Syslog protocol and can also be used with `systemd`. Available since
+    2004.
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 扩展了Syslog协议，也可以与`systemd`一起使用。自2004年起可用。
+- en: 'Despite its age, the Syslog family of protocols and tools is still around and
+    widely available. With `systemd` becoming the de facto standard of init systems,
+    used in every major Linux distro, there is, however, a new way to go about logging:
+    meet the `systemd` journal.'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管其年龄较大，Syslog系列协议和工具仍然广泛存在并可用。随着`systemd`成为所有主要Linux发行版中的事实标准，用于所有主要Linux发行版的init系统，然而，关于日志记录还有一种新的方式：来看看`systemd`日志。
+- en: journalctl
+  id: totrans-138
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: journalctl
+- en: 'In [“systemd”](ch06.xhtml#systemd), we briefly touched upon a component that
+    is part of the `systemd` ecosystem, responsible for log management: [`journalctl`](https://oreil.ly/M4sbo).
+    In contrast to Syslog and the other systems we’ve used so far, `journalctl` uses
+    a binary format to store the log items. This allows faster access and better storage
+    footprints.'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[“systemd”](ch06.xhtml#systemd)中，我们简要介绍了`systemd`生态系统的一个组件，负责日志管理：[`journalctl`](https://oreil.ly/M4sbo)。与迄今为止使用的Syslog和其他系统不同，`journalctl`使用二进制格式存储日志项。这样可以实现更快的访问和更好的存储效果。
+- en: The binary storage format did attract some criticism when it was introduced
+    since people are not able to continue to use the familiar `tail`, `cat`, and `grep`
+    commands to view and search logs. Having said that, while one has to learn a new
+    way to interact with logs when using `journalctl`, the learning curve is not too
+    bad.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当引入二进制存储格式时，确实引起了一些批评，因为人们无法继续使用熟悉的`tail`、`cat`和`grep`命令查看和搜索日志。尽管如此，使用`journalctl`时，人们需要学习与日志交互的新方式，学习曲线并不陡峭。
+- en: Let’s have a look at some common tasks. If you launch `journalctl` without parameters,
+    it will present itself as an interactive pager (you can use the arrow keys or
+    space bar to scroll through it and exit with `q`) for all the logs.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们来看看一些常见任务。如果你不带任何参数启动`journalctl`，它将呈现为一个交互式分页器（你可以使用箭头键或空格键滚动并用`q`退出），显示所有日志。
+- en: 'To restrict the time range, you can, for example, use the following:'
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要限制时间范围，例如可以使用以下命令：
+- en: '[PRE3]'
+  id: totrans-143
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: '[![1](Images/1.png)](#co_observability_CO3-1)'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO3-1)'
+- en: Restrict the time range to what happened in the past three hours.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 限制时间范围到过去三小时发生的事情。
+- en: '[![2](Images/2.png)](#co_observability_CO3-2)'
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO3-2)'
+- en: Another way to restrict the time range, with explicit start and stop times.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种限制时间范围的方式，带有明确的开始和结束时间。
+- en: 'You can limit the output to specific `systemd` units like so (assuming there
+    is a service called `abc.service`):'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以限制输出到特定的`systemd`单元，例如（假设有一个名为`abc.service`的服务）：
+- en: '[PRE4]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Tip
+  id: totrans-150
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: 'The `journalctl` tool has a powerful way to format the output of the log items.
+    Using the `--output` (or `-o` for short) parameter, you can optimize the output
+    for a certain use case. Important values are the following:'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`journalctl`工具具有强大的日志项输出格式化方式。使用`--output`（或简写为`-o`）参数，您可以优化输出以适应特定的用例。重要的值如下：'
+- en: '`cat`'
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cat`'
+- en: Short form, without time stamp or source
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简短形式，没有时间戳或来源
+- en: '`short`'
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`short`'
+- en: The default, emulating Syslog output
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认情况下，模拟Syslog输出
+- en: '`json`'
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`json`'
+- en: One JSON-formatted entry per line (for automation)
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每行一个JSON格式的条目（用于自动化）
+- en: 'You can have the same experience to follow the logs as you’d have with `tail
+    -f` using the following:'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用以下方式跟随日志，就像使用`tail -f`一样：
+- en: '[PRE5]'
+  id: totrans-159
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Let’s put all the preceding information together into a concrete example. Assume
+    you want to relaunch a security component of the Linux distro, managed by `systemd`:
+    [AppArmor](https://www.apparmor.net). That is, in one terminal we restart the
+    service using `systemctl restart apparmor`, and in another we execute the following
+    command (output edited; the actual output is one log item per line):'
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们将前面的所有信息放在一起，形成一个具体的示例。假设您希望重新启动由`systemd`管理的Linux发行版的安全组件：[AppArmor](https://www.apparmor.net)。也就是说，在一个终端中我们使用`systemctl
+    restart apparmor`重新启动服务，在另一个终端中我们执行以下命令（输出经过编辑；实际输出是每行一个日志项）：
+- en: '[PRE6]'
+  id: totrans-161
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '[![1](Images/1.png)](#co_observability_CO4-1)'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO4-1)'
+- en: Follow the logs of the AppArmor service.
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 跟随AppArmor服务的日志。
+- en: '[![2](Images/2.png)](#co_observability_CO4-2)'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO4-2)'
+- en: After `systemd` has stopped the service, here it comes back up again.
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在`systemd`停止服务后，它会再次启动。
+- en: With that we are at the end of the logging section and move on to numerical
+    values with metrics and the wider topic of monitoring.
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这样我们就到了日志部分的结尾，然后转向数值值和更广泛的监控主题。
+- en: Monitoring
+  id: totrans-167
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 监控
+- en: '*Monitoring* is the capturing of system and application metrics for a variety
+    of reasons. For example, you may be interested in how long something takes or
+    how many resources a process consumes (performance monitoring), or you may be
+    troubleshooting an unhealthy system. The two types of activities you’ll carry
+    out most often in the context of monitoring are as follows:'
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*监控*是为了各种原因捕获系统和应用程序指标。例如，您可能对某个操作花费的时间或进程消耗的资源（性能监控）感兴趣，或者您可能正在排除一个不健康的系统。在监控的上下文中，您最常执行的两种活动如下：'
+- en: Tracking one or more metrics (over time)
+  id: totrans-169
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 跟踪一个或多个指标（随时间变化）
+- en: Alerting on a condition
+  id: totrans-170
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在条件上发出警报
+- en: In this section, we first focus on some foundations and tools you should be
+    aware of, and as we move further into the section, we get into more advanced techniques
+    that may be relevant only in certain situations.
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我们首先关注您应该了解的一些基础知识和工具，随着我们深入到更多只在特定情况下相关的高级技术。
+- en: 'Let’s look at a simple example that displays some basic metrics, such as how
+    long a system is running, memory usage, and more, using the [`uptime` command](https://oreil.ly/smiz6):'
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看一个简单的例子，显示一些基本的指标，比如系统运行时间，内存使用情况等，使用[`uptime`命令](https://oreil.ly/smiz6)：
+- en: '[PRE7]'
+  id: totrans-173
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: '[![1](Images/1.png)](#co_observability_CO5-1)'
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO5-1)'
+- en: Use the `uptime` command to display some basic system metrics.
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`uptime`命令显示一些基本的系统指标。
+- en: '[![2](Images/2.png)](#co_observability_CO5-2)'
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO5-2)'
+- en: 'Separated by commas, the output tells us how long the system is running, the
+    number of users logged in, and then (in the `load average` section) three gauges:
+    the 1-minute, 5-minute, and 15-minute average. These averages are the number of
+    jobs in the run queue or waiting for disk I/O; the numbers are normalized and
+    indicate how busy the CPUs are. For example, here the load average for the past
+    5 minutes was 0.2 (which in isolation doesn’t tell you much, so you have to compare
+    it with the other values and track it over time).'
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以逗号分隔，输出告诉我们系统运行的时间、登录的用户数，然后是 `load average` 部分的三个指标：1分钟、5分钟和15分钟的平均值。这些平均值是运行队列中作业数或等待磁盘
+    I/O 的作业数；这些数字已经归一化，并且表示 CPU 使用率。例如，这里过去5分钟的负载平均值为0.2（单独看并不能告诉您太多，因此您必须与其他值进行比较并跟踪它随时间的变化）。
+- en: 'Next, let’s monitor some basic memory utilization, using the `free` command
+    (output compressed to fit):'
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，让我们监视一些基本的内存利用情况，使用 `free` 命令（输出压缩以适应）：
+- en: '[PRE8]'
+  id: totrans-179
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: '[![1](Images/1.png)](#co_observability_CO6-1)'
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO6-1)'
+- en: Show memory usage using a human-friendly output.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用人类友好的输出显示内存使用情况。
+- en: '[![2](Images/2.png)](#co_observability_CO6-2)'
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO6-2)'
+- en: 'The memory stats: total/used/free/shared memory, memory used in buffers and
+    used for caching (use `-w` if you don’t want the combined value), and the available
+    memory.'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内存统计信息：总使用/空闲/共享内存，用于缓冲区和缓存的内存（如果不想得到合并值，请使用 `-w`），以及可用内存。
+- en: '[![3](Images/3.png)](#co_observability_CO6-3)'
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_observability_CO6-3)'
+- en: The total/used/free amount of swap space—that is, physical memory moved out
+    to a swap disk space.
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 总交换空间的总量/已使用/空闲空间，即移动到交换磁盘空间的物理内存。
+- en: 'A more sophisticated way to look at memory usage is using the [`vmstat` (short
+    for virtual memory stats) command](https://oreil.ly/x8wrI). The following example
+    uses `vmstat` in a self-updating manner (output edited to fit):'
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看内存使用情况的更复杂方法是使用 [`vmstat`（虚拟内存统计）命令](https://oreil.ly/x8wrI)。以下示例以自更新方式使用
+    `vmstat`（输出编辑以适应）：
+- en: '[PRE9]'
+  id: totrans-187
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: '[![1](Images/1.png)](#co_observability_CO7-1)'
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO7-1)'
+- en: Show memory stats. The argument `1` means to print a new summary line every
+    second.
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示内存统计信息。参数 `1` 表示每秒打印一个新的摘要行。
+- en: '[![2](Images/2.png)](#co_observability_CO7-2)'
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO7-2)'
+- en: 'Some important column headers: `r` is for the number of processes running or
+    waiting for CPU (should be less than or equal to the number of CPUs you have),
+    `free` is the free main memory in KB, `in` is the number of interrupts per second,
+    `cs` is the number of context switches per second, and `us` to `st` are percentages
+    of total CPU time across user space, kernel, idle, and the like.'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些重要的列标题：`r` 表示运行或等待 CPU 的进程数（应小于或等于您拥有的 CPU 数量），`free` 是以 KB 为单位的空闲主内存，`in`
+    是每秒中断数，`cs` 是每秒上下文切换数，`us` 到 `st` 是总 CPU 时间的百分比，涵盖用户空间、内核、空闲等。
+- en: 'To see how long a certain operation takes, you can use the `time` command:'
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查看某个操作花费了多长时间，您可以使用 `time` 命令：
+- en: '[PRE10]'
+  id: totrans-193
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: '[![1](Images/1.png)](#co_observability_CO8-1)'
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO8-1)'
+- en: Measure how long recursively listing all */etc* subdirectories takes (we throw
+    away all output, including errors, with `2&> /dev/null`).
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 测量递归列出所有 */etc* 子目录所需的时间（我们使用 `2&> /dev/null` 丢弃所有输出，包括错误）。
+- en: '[![2](Images/2.png)](#co_observability_CO8-2)'
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO8-2)'
+- en: The total (wall clock) time it took (not really useful other than for performance).
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 总共（挂钟）所需的时间（除了性能外并不真正有用）。
+- en: '[![3](Images/3.png)](#co_observability_CO8-3)'
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_observability_CO8-3)'
+- en: How long `ls` itself spent on-CPU (user space).
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ls` 本身在CPU上花费的时间（用户空间）。'
+- en: '[![4](Images/4.png)](#co_observability_CO8-4)'
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_observability_CO8-4)'
+- en: How long `ls` was waiting for Linux to do something (kernel space).
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ls` 等待 Linux 执行某些操作的时间（内核空间）。'
+- en: In the previous example, if you’re interested in how long an operation took,
+    taking the sum of `user` and `sys` is a good approximation, and the ratio of the
+    two gives you a good idea where it spends most of the execution time.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在前面的例子中，如果您对操作花费了多长时间感兴趣，将 `user` 和 `sys` 的总和作为一个很好的近似值，并且两者的比率可以很好地告诉您执行时间大部分花费在哪里。
+- en: 'Now we focus on some more specific topics: network interfaces and block devices.'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们专注于一些更具体的主题：网络接口和块设备。
+- en: Device I/O and Network Interfaces
+  id: totrans-204
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 设备 I/O 和网络接口
+- en: 'With [`iostat`](https://oreil.ly/L4Pbu) you can monitor I/O devices (output
+    edited):'
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 [`iostat` 命令](https://oreil.ly/L4Pbu) 可以监视 I/O 设备（输出编辑）：
+- en: '[PRE11]'
+  id: totrans-206
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: '[![1](Images/1.png)](#co_observability_CO9-1)'
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO9-1)'
+- en: Use `iostat` to show I/O device metrics. With `-z`, we tell it to show only
+    devices where there was some activity, and the `--human` makes the output nicer
+    (units are in human-readable form).
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `iostat` 显示 I/O 设备指标。使用 `-z`，我们告诉它仅显示有活动的设备，而 `--human` 则使输出更友好（单位以人类可读的形式显示）。
+- en: '[![2](Images/2.png)](#co_observability_CO9-2)'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO9-2)'
+- en: 'Example row: `tps` is the number of transfers (I/O requests) per second for
+    that device, `read` is data volume, and `wrtn` is written data.'
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例行：`tps` 表示每秒传输（I/O 请求）的次数，`read` 表示数据量，`wrtn` 表示写入的数据量。
+- en: 'Next up: network interfaces with the [`ss` command](https://oreil.ly/BAIiv)
+    that can dump socket statistics (see also [“Sockets”](ch07.xhtml#sockets)). The
+    following command lists both TCP and UDP sockets along with process IDs (output
+    edited to fit):'
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来是：使用 [`ss` 命令](https://oreil.ly/BAIiv) 查看可以转储套接字统计信息的网络接口（参见 [“套接字”](ch07.xhtml#sockets)）。以下命令列出了
+    TCP 和 UDP 套接字以及进程 ID（输出已编辑以适应）：
+- en: '[PRE12]'
+  id: totrans-212
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: '[![1](Images/1.png)](#co_observability_CO10-1)'
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO10-1)'
+- en: 'Use `ss` with the following options: with `-a`, we select all (that is, both
+    listening and nonlistening sockets); the `-t` and `-u` select TCP and UDP, respectively;
+    and `-p` shows the processes using the sockets.'
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `ss` 和以下选项：用 `-a` 选择所有（即监听和非监听的套接字）；`-t` 和 `-u` 分别选择 TCP 和 UDP；`-p` 显示正在使用套接字的进程。
+- en: '[![2](Images/2.png)](#co_observability_CO10-2)'
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO10-2)'
+- en: 'An example socket in use. It’s an established TCP connection between local
+    IPv4 address `192.168.178.40` and remote `74.125.193.188` that seems idle: both
+    data queued for receive (`Recv-Q`) and transmit (`Send-Q`) report zero.'
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正在使用的一个套接字示例。这是一个本地 IPv4 地址 `192.168.178.40` 和远程 `74.125.193.188` 之间建立的已建立的
+    TCP 连接，看起来处于空闲状态：接收队列 (`Recv-Q`) 和发送队列 (`Send-Q`) 均报告为零。
+- en: Note
+  id: totrans-217
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: An outdated way to gather and display interface stats is using [`netstat`](https://oreil.ly/UBqge).
+    For example, if you want to have a continuously updated view on TCP and UDP, including
+    process ID and using IP addresses rather than FQDNs, you could use `netstat -ctulpn`.
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个过时的收集和显示接口统计信息的方法是使用 [`netstat`](https://oreil.ly/UBqge)。例如，如果你想要对 TCP 和 UDP
+    有一个持续更新的视图，包括进程 ID 并使用 IP 地址而不是 FQDN，你可以使用 `netstat -ctulpn`。
+- en: '[`lsof`](https://oreil.ly/qDT67) stands for “list open files” and is a versatile
+    tool with many use cases. The following example shows `lsof` used in the context
+    of network connections (output edited to fit):'
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`lsof`](https://oreil.ly/qDT67) 的意思是“列出打开的文件”，是一个功能强大的工具，有许多用途。以下示例展示了 `lsof`
+    在网络连接上的应用（输出已编辑以适应）。'
+- en: '[PRE13]'
+  id: totrans-220
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: '[![1](Images/1.png)](#co_observability_CO11-1)'
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO11-1)'
+- en: List privileged TCP ports (needs `root` privileges).
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出特权 TCP 端口（需要 `root` 权限）。
+- en: 'Another usage example for `lsof` is a process-centric view: if you know the
+    PID of a process (here, Chrome), you can use `lsof` to track file descriptors,
+    I/O, etc. (output edited to fit):'
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个 `lsof` 的用法示例是进程为中心的视图：如果你知道一个进程的 PID（这里是 Chrome），你可以使用 `lsof` 来跟踪文件描述符、I/O
+    等（输出已编辑以适应）：
+- en: '[PRE14]'
+  id: totrans-224
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: There are many more tools for (performance) monitoring available—for example,
+    [`sar`](https://oreil.ly/dYWwR) (covering a range of counters, nice for scripts)
+    and [`perf`](https://oreil.ly/TJ4gP)—some of which we will discuss in [“Advanced
+    Observability”](#advanced-o11y).
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有许多更多用于（性能）监控的工具可用，例如 [`sar`](https://oreil.ly/dYWwR)（涵盖各种计数器，非常适合脚本）和 [`perf`](https://oreil.ly/TJ4gP）—我们将在
+    [“高级可观察性”](#advanced-o11y) 中讨论其中一些。
+- en: Now that you have a handle on individual tools, let’s move on to integrated
+    tools that allow you to interactively monitor Linux.
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你已经掌握了各个工具，让我们转向允许你交互式监控 Linux 的集成工具。
+- en: Integrated Performance Monitors
+  id: totrans-227
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 集成性能监视器
+- en: 'Using the tooling we discussed in the previous section, such as `lsof` or `vmstat`,
+    is a good starting point and also useful in scripts. For more convenient monitoring,
+    you may prefer integrated solutions. These typically come with a textual user
+    interface (TUI), sometimes in color, and offer the following features:'
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用我们在前一节讨论的工具，比如 `lsof` 或 `vmstat`，是一个很好的起点，也适用于脚本。为了更方便的监控，你可能更喜欢集成解决方案。这些通常带有文本用户界面（TUI），有时还带有颜色，并提供以下功能：
+- en: Support for multiple resource types (CPU, RAM, I/O)
+  id: totrans-229
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 支持多种资源类型（CPU、RAM、I/O）
+- en: Interactive sorting and filtering (by process, user, resource)
+  id: totrans-230
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 交互式排序和过滤（按进程、用户、资源）
+- en: Live updates and drill-down into details such as a process group or even cgroups
+    and namespaces
+  id: totrans-231
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 实时更新和深入查看详细信息，如进程组甚至 cgroups 和命名空间
+- en: 'For example, the widely available [`top`](https://oreil.ly/NqKO2) provides
+    an overview in the header—akin to what we saw in the `uptime` output—and then
+    a tabular rendering of CPU and memory details, followed by a list of processes
+    you can track (output edited):'
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，广泛可用的 [`top`](https://oreil.ly/NqKO2) 在标题中提供了一个概述——类似于我们在 `uptime` 输出中看到的内容——然后是CPU和内存详细信息的表格渲染，接着是您可以跟踪的进程列表（输出已编辑）：
+- en: '[PRE15]'
+  id: totrans-233
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: '[![1](Images/1.png)](#co_observability_CO12-1)'
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO12-1)'
+- en: Summary of system (compare with `uptime` output)
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统概要（与 `uptime` 输出比较）
+- en: '[![2](Images/2.png)](#co_observability_CO12-2)'
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO12-2)'
+- en: Task statistics
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任务统计
+- en: '[![3](Images/3.png)](#co_observability_CO12-3)'
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_observability_CO12-3)'
+- en: CPU usage statistics (user, kernel, etc.; similar to `vmstat` output)
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CPU 使用统计（用户、内核等；类似于 `vmstat` 输出）
+- en: '[![4](Images/4.png)](#co_observability_CO12-4)'
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_observability_CO12-4)'
+- en: The dynamic process list, including details on a per-process level; comparable
+    to `ps aux` output
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 动态进程列表，包括每个进程级别的详细信息；类似于 `ps aux` 输出
+- en: Tip
+  id: totrans-242
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: 'The following are the most important keys to remember in `top`:'
+  id: totrans-243
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下是在 `top` 中记住的最重要的按键：
+- en: '`?`'
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`?`'
+- en: To list the help (including key mappings)
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出帮助（包括键映射）
+- en: '`V`'
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`V`'
+- en: To toggle to and from process tree view
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 切换到和从进程树视图
+- en: '`m`'
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`m`'
+- en: To sort by memory usage
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按内存使用率排序
+- en: '`P`'
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`P`'
+- en: To sort by CPU consumption
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按 CPU 消耗排序
+- en: '`k`'
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`k`'
+- en: To send a signal (like to `kill`)
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 发送信号（例如 `kill`）
+- en: '`q`'
+  id: totrans-254
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`q`'
+- en: To quit
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 退出
+- en: 'While `top` is available in virtually any environment, there are a number of
+    alternatives available, including the following:'
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然 `top` 在几乎任何环境中都可用，但还有许多其他可用的替代品，包括以下内容：
+- en: '[`htop`](https://oreil.ly/P9elE) ([Figure 8-3](#fig-htop))'
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`htop`](https://oreil.ly/P9elE)（[图 8-3](#fig-htop)）'
+- en: An incremental `top` improvement that is faster than `top` and has a nicer user
+    interface.
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个增强型 `top`，比 `top` 更快且具有更好的用户界面。
+- en: '[`atop`](https://oreil.ly/luRoU) ([Figure 8-4](#fig-atop))'
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`atop`](https://oreil.ly/luRoU)（[图 8-4](#fig-atop)）'
+- en: A powerful alternative to `top`. In addition to CPU and memory, it covers resources
+    such as I/O and network stats in great detail.
+  id: totrans-260
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个强大的替代品，比 `top` 更强大。除了CPU和内存外，还详细涵盖了I/O和网络统计信息。
+- en: '[`below`](https://oreil.ly/XdOHB)'
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`below`](https://oreil.ly/XdOHB)'
+- en: A relatively new tool that is notable especially because it is cgroups v2–aware
+    (see [“Linux cgroups”](ch06.xhtml#cgroups)). Other tools do not understand cgroups
+    and hence provide only a global resource view.
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个相对较新的工具，特别值得注意，因为它支持 cgroups v2（参见[“Linux cgroups”](ch06.xhtml#cgroups)）。其他工具不理解
+    cgroups，因此仅提供全局资源视图。
+- en: '![lmlx 0803](Images/lmlx_0803.png)'
+  id: totrans-263
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0803](Images/lmlx_0803.png)'
+- en: Figure 8-3\. A screenshot of the `htop` tool
+  id: totrans-264
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-3\. `htop` 工具的截图
+- en: '![lmlx 0804](Images/lmlx_0804.png)'
+  id: totrans-265
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0804](Images/lmlx_0804.png)'
+- en: Figure 8-4\. A screenshot of the `atop` tool
+  id: totrans-266
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-4\. `atop` 工具的截图
+- en: 'There are a number of other integrated monitoring tools available that go beyond
+    the basic sources or that specialize in certain use cases. These include but are
+    not limited to the following:'
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有许多其他集成的监控工具可用，超越基本来源或专门用途。包括但不限于以下内容：
+- en: '[glances](https://oreil.ly/zOC9e)'
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[glances](https://oreil.ly/zOC9e)'
+- en: A powerful hybrid that covers devices in addition to the usual resources
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个强大的混合体，除了常规资源外还涵盖设备
+- en: '[guider](https://oreil.ly/uqBH1)'
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[guider](https://oreil.ly/uqBH1)'
+- en: An integrated performance analyzer that allows you to display and graph a range
+    of metrics
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个集成的性能分析器，允许您显示和绘制各种指标范围
+- en: '[neoss](https://oreil.ly/O4BHS)'
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[neoss](https://oreil.ly/O4BHS)'
+- en: For network traffic monitoring; an `ss` replacement that offers a nice TUI
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于网络流量监控；`ss` 的替代品，提供了良好的 TUI
+- en: '[mtr](https://oreil.ly/uL38A)'
+  id: totrans-274
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[mtr](https://oreil.ly/uL38A)'
+- en: For network traffic monitoring; a more powerful alternative to `traceroute`
+    (see [“Routing”](ch07.xhtml#routing) for details on `traceroute`)
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于网络流量监控；比 `traceroute` 更强大的替代品（参见[“路由”](ch07.xhtml#routing)以获取有关 `traceroute`
+    的详细信息）
+- en: Now that you have a broad understanding of the tooling to consume system metrics,
+    let’s see how you can expose those from your own code.
+  id: totrans-276
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经对从自己的代码公开系统指标的工具有了广泛的了解，让我们看看如何执行此操作。
+- en: Instrumentation
+  id: totrans-277
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 仪表化
+- en: So far we’ve focused on signals coming from the kernel or existing applications
+    (that is, code that you don’t own). Now we move to the topic of how you can, similar
+    to logs, equip your code to emit metrics.
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到目前为止，我们关注的信号来自内核或现有应用程序（即您不拥有的代码）。现在我们转向如何像日志一样，为您的代码配备发出指标的功能。
+- en: 'The process of inserting code to emit signals, especially metrics, is mainly
+    relevant if you’re developing software. This process is usually referred to as
+    *instrumentation*, and there are two common instrumentation strategies: *autoinstrumentation*
+    (no additional effort for you as a developer) and *custom instrumentation*, where
+    you manually insert code snippets to, for example, emit a metric at a certain
+    point in your code base.'
+  id: totrans-279
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将代码插入以发出信号（特别是指标）的过程，如果您是开发软件，这个过程通常是相关的。这个过程通常称为*仪器化*，并且有两种常见的仪器化策略：*自动仪器化*（作为开发者，您无需额外的工作）和*自定义仪器化*，在其中您手动插入代码片段，例如在代码库的某个点发出一个指标。
+- en: You can use [StatsD](https://oreil.ly/XOYFE), with client-side libraries available
+    for a number of programming languages, such as [Ruby](https://oreil.ly/VfE4D),
+    [Node.js](https://oreil.ly/G9Jt3), [Python](https://oreil.ly/hQBMf), and [Go](https://oreil.ly/whpZV).
+    StatsD is nice, but it has a few limitations, especially in dynamic environments
+    such as Kubernetes or IoT. In those environments, a different approach—sometimes
+    called *pull-based* or *scraping*—is usually a better choice. With scraping, applications
+    expose metrics (usually via an HTTP endpoint), and an agent then calls this endpoint
+    to retrieve metrics, rather than configuring the app with where to send the metrics
+    to. We’ll return to this topic in [“Prometheus and Grafana”](#prometheus-grafana).
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用[StatsD](https://oreil.ly/XOYFE)，针对多种编程语言提供了客户端库，例如[ Ruby](https://oreil.ly/VfE4D)，[
+    Node.js](https://oreil.ly/G9Jt3)，[ Python](https://oreil.ly/hQBMf) 和 [ Go](https://oreil.ly/whpZV)。StatsD
+    很好用，但在 Kubernetes 或 IoT 等动态环境中存在一些限制。在这些环境中，通常更好的选择是一种称为*拉取式*或*抓取*的不同方法。使用抓取，应用程序公开指标（通常通过
+    HTTP 端点），然后代理调用此端点以检索指标，而不是配置应用程序发送指标的位置。我们将在[“Prometheus 和 Grafana”](#prometheus-grafana)中返回该主题。
+- en: Advanced Observability
+  id: totrans-281
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 高级可观测性
+- en: Now that you know the basics of Linux observability, let’s have a look at some
+    more advanced topics in this space.
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经了解了 Linux 可观测性的基础知识，让我们来看看这个领域中的一些更高级的主题。
+- en: Tracing and Profiling
+  id: totrans-283
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 跟踪和分析
+- en: 'The term *tracing* is overloaded: in the context of Linux, on a single machine,
+    tracing means capturing the process execution (function calls in user space, syscalls,
+    etc.) over time.'
+  id: totrans-284
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*跟踪*这个术语有多重含义：在 Linux 的上下文中，在单台机器上，跟踪意味着随时间捕获进程执行（用户空间的函数调用，系统调用等）。'
+- en: Note
+  id: totrans-285
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: In a distributed setup like containerized microservices in Kubernetes or a bunch
+    of Lambda functions that are part of a serverless app, we sometimes shorten [*distributed
+    tracing*](https://oreil.ly/tTjY9) (for example, with OpenTelemetry and Jaeger)
+    to *tracing*. This type of tracing is out of scope for this book.
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在分布式设置中，例如在 Kubernetes 中容器化的微服务或一堆 Lambda 函数作为无服务器应用的一部分，我们有时会将[*分布式跟踪*](https://oreil.ly/tTjY9)（例如使用
+    OpenTelemetry 和 Jaeger）缩写为*跟踪*。这种类型的跟踪不在本书的讨论范围之内。
+- en: 'There are a number of data sources in the context of a single Linux machine.
+    You can use the following as sources for tracing:'
+  id: totrans-287
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在单台 Linux 机器的上下文中，有许多数据源。您可以使用以下内容作为跟踪的数据源：
+- en: The Linux kernel
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 内核
+- en: Traces can come from functions in the kernel or be triggered by syscalls. Examples
+    include [kernel probes](https://oreil.ly/lAolL) (kprobes) or [kernel tracepoints](https://oreil.ly/wZcXE).
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 跟踪可以来自内核中的函数或者由系统调用触发。例如包括[内核探测器](https://oreil.ly/lAolL) (kprobes) 或者[内核跟踪点](https://oreil.ly/wZcXE)。
+- en: User space
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户空间
+- en: Application function calls, for example via [user space probes (uprobes)](https://oreil.ly/I8ICY),
+    can act as a source for traces.
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 应用程序功能调用，例如通过[用户空间探测器 (uprobes)](https://oreil.ly/I8ICY)，可以作为跟踪的数据源。
+- en: 'Use cases for tracing include the following:'
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 跟踪的用例包括以下内容：
+- en: Debugging a program using, for example, the [`strace`](https://strace.io) tracing
+    tool
+  id: totrans-293
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用例如[`strace`](https://strace.io)跟踪工具来调试程序。
+- en: Performance analysis with a frontend, using [`perf`](https://oreil.ly/izMpR)
+  id: totrans-294
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用前端进行性能分析，使用[`perf`](https://oreil.ly/izMpR)工具。
+- en: Warning
+  id: totrans-295
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: You may be tempted to use `strace` everywhere; however, you should be aware
+    of the overhead it causes. This is particularly relevant for production environments.
+    Read [“strace Wow Much Syscall”](https://oreil.ly/eSLOT) by Brendan Gregg to understand
+    the background.
+  id: totrans-296
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能会倾向于在所有地方使用`strace`；然而，您应该意识到它所带来的开销。这在生产环境中尤为重要。阅读Brendan Gregg的[“strace
+    Wow Much Syscall”](https://oreil.ly/eSLOT)以了解其背景。
+- en: See [Figure 8-5](#fig-perf) for an example output of `sudo perf top`, which
+    generates a summary by process.
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见[图 8-5](#fig-perf)作为`sudo perf top`的示例输出，它生成一个按进程汇总的摘要。
+- en: '![lmlx 0805](Images/lmlx_0805.png)'
+  id: totrans-298
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0805](Images/lmlx_0805.png)'
+- en: Figure 8-5\. A screenshot of the `perf` tracing tool
+  id: totrans-299
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图8-5\. `perf`追踪工具的屏幕截图
+- en: 'Going forward, it seems that eBPF (see [“A Modern Way to Extend the Kernel:
+    eBPF”](ch02.xhtml#ebpf)) will become the de facto standard to implement tracing,
+    especially for custom cases. It has a rich ecosystem and growing vendor support,
+    so if you’re looking for a future-proof tracing method, make sure it’s using eBPF.'
+  id: totrans-300
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 未来看来，eBPF（参见[“扩展内核的现代方法：eBPF”](ch02.xhtml#ebpf)）将成为实现追踪的事实标准，特别是对于定制案例。它拥有丰富的生态系统和不断增长的供应商支持，因此如果您正在寻找一种具有未来保障的追踪方法，请确保使用eBPF。
+- en: One particular use case for tracing is *profiling*—that is, to identify frequently
+    called code sections. Some relevant low-level tooling for profiling include [`pprof`](https://oreil.ly/tETfk),
+    [Valgrind](https://oreil.ly/p9HQJ), and [flame graph visualizations](https://oreil.ly/bCgbJ).
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 追踪的一个特定用例是*性能分析*，即识别频繁调用的代码部分。一些相关的低级分析工具包括[`pprof`](https://oreil.ly/tETfk)，[Valgrind](https://oreil.ly/p9HQJ)，以及[火焰图可视化](https://oreil.ly/bCgbJ)。
+- en: There are many options to consume `perf` output interactively and visualize
+    traces; for example, see Mark Hansen’s blog post [“Linux perf Profiler UIs”](https://oreil.ly/dGH1S).
+  id: totrans-302
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有许多选项可以交互地消耗`perf`的输出并可视化追踪结果；例如，请参阅Mark Hansen的博客文章[“Linux perf Profiler UIs”](https://oreil.ly/dGH1S)。
+- en: '*Continuous profiling* is an advanced variant of profiling, which captures
+    traces (kernel and user space) over time. Once these timestamped traces are collected,
+    you can plot and compare them and drill down into interesting segments. One very
+    promising example is the eBPF-based open source project [parca](https://www.parca.dev),
+    shown in [Figure 8-6](#fig-parca).'
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*持续性分析*是分析的高级变体，它随时间捕获（内核和用户空间）追踪数据。一旦收集到这些时间戳追踪数据，您可以绘制并比较它们，深入研究感兴趣的段落。一个非常有前途的例子是基于eBPF的开源项目[parca](https://www.parca.dev)，如[图8-6](#fig-parca)所示。'
+- en: '![lmlx 0806](Images/lmlx_0806.png)'
+  id: totrans-304
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0806](Images/lmlx_0806.png)'
+- en: Figure 8-6\. A screenshot of parca, a continuous profiling tool
+  id: totrans-305
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图8-6\. parca的屏幕截图，一个持续性分析工具
+- en: Prometheus and Grafana
+  id: totrans-306
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Prometheus和Grafana
+- en: If you’re dealing with metrics over time (time series data), using the [Prometheus](https://prometheus.io)
+    and [Grafana](https://grafana.com) combo is something you may want to consider
+    for advanced observability.
+  id: totrans-307
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您正在处理随时间变化的指标数据（时间序列数据），使用[Prometheus](https://prometheus.io)和[Grafana](https://grafana.com)组合是您可能希望考虑的高级可观察性工具。
+- en: I’ll show you a simple, single-machine setup that you can use to dashboard and
+    even alert on things going on in your Linux machine.
+  id: totrans-308
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我将向您展示一个简单的单机设置，您可以在Linux机器上的仪表板上查看并甚至对发生的事件设置警报。
+- en: We’ll use the [node exporter](https://oreil.ly/0L4KJ) to expose a range of system
+    metrics, from CPU to memory and network. We’ll then use Prometheus to scrape the
+    node exporter. Scraping means that Prometheus calls an HTTP endpoint that the
+    node exporter offers via the URL path */metrics*, returning the metrics in [OpenMetrics
+    format](https://openmetrics.io). For that to happen, we need to configure Prometheus
+    with the URL of the node exporter’s HTTP endpoint. The final step in our setup
+    is using Prometheus as a datasource in Grafana, where you can see the time series
+    data (metrics over time) in dashboards and can even alert on certain conditions,
+    such as low disk space or CPUs overloading.
+  id: totrans-309
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将使用[node exporter](https://oreil.ly/0L4KJ)来公开一系列系统指标，从CPU到内存和网络。然后我们将使用Prometheus来抓取node
+    exporter的数据。抓取意味着Prometheus调用node exporter提供的HTTP端点，通过URL路径*/metrics*返回[OpenMetrics格式](https://openmetrics.io)的指标数据。为此，我们需要配置Prometheus，使其使用node
+    exporter的HTTP端点URL。我们设置的最后一步是在Grafana中使用Prometheus作为数据源，您可以在仪表板中查看时间序列数据（随时间变化的指标），甚至可以根据某些条件（如低磁盘空间或CPU超载）设置警报。
+- en: 'So, as a first step, download and untar the node exporter, and have it run
+    the binary with `./node_exporter &` in the background. You can check if it’s running
+    properly with the following (output edited):'
+  id: totrans-310
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因此，作为第一步，下载并解压node exporter，并在后台运行二进制文件`./node_exporter &`。您可以使用以下命令检查它是否正常运行（输出已编辑）：
+- en: '[PRE16]'
+  id: totrans-311
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: Now that we have the signal data source set up, we run both Prometheus and Grafana
+    as containers. For the following, you’ll need Docker (see [“Docker”](ch06.xhtml#docker))
+    installed and configured.
+  id: totrans-312
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们已经设置好信号数据源，我们将Prometheus和Grafana都作为容器运行。为了继续操作，您需要安装和配置Docker（参见[“Docker”](ch06.xhtml#docker)）。
+- en: 'Create a Prometheus configuration file called *prometheus.yml* with the following
+    content:'
+  id: totrans-313
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个名为*prometheus.yml*的Prometheus配置文件，内容如下：
+- en: '[PRE17]'
+  id: totrans-314
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: '[![1](Images/1.png)](#co_observability_CO13-1)'
+  id: totrans-315
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_observability_CO13-1)'
+- en: Prometheus itself exposes metrics, so we include this (self-monitoring).
+  id: totrans-316
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Prometheus本身会暴露指标数据，所以我们将其包含在内（自我监控）。
+- en: '[![2](Images/2.png)](#co_observability_CO13-2)'
+  id: totrans-317
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_observability_CO13-2)'
+- en: That’s our node exporter. Since we’re running Prometheus in Docker, we can’t
+    use `localhost` but rather use the IP address Docker uses by default.
+  id: totrans-318
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是我们的节点导出器。由于我们在 Docker 中运行 Prometheus，不能使用`localhost`，而是要使用 Docker 默认使用的 IP
+    地址。
+- en: 'We use the Prometheus configuration file we created in the previous step and
+    mount it into the container via a volume, like so:'
+  id: totrans-319
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们使用之前创建的 Prometheus 配置文件，并通过卷将其挂载到容器中，操作如下：
+- en: '[PRE18]'
+  id: totrans-320
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: '[![1](Images/1.png)](#custom_co_observability_CO14-1)'
+  id: totrans-321
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#custom_co_observability_CO14-1)'
+- en: The parameters here make Docker remove the container on exit (`--rm`), run as
+    a daemon (`-d`), and expose the port 9090 (`-p`) so we can use it from our machine.
+  id: totrans-322
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里的参数使 Docker 在退出时删除容器（`--rm`），作为守护进程运行（`-d`），并公开端口 9090（`-p`），这样我们可以从本地使用它。
+- en: '[![2](Images/2.png)](#custom_co_observability_CO14-2)'
+  id: totrans-323
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#custom_co_observability_CO14-2)'
+- en: Mapping our config file as a volume into the container. Note that here you will
+    have to replace */home/mh9/lml/o11y/* with the path where you stored it. Also,
+    this has to be an absolute path. So, if you want to keep this flexible, you could
+    use `$PWD` in bash or `(pwd)` in Fish rather than the hardcoded path.
+  id: totrans-324
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将我们的配置文件作为卷映射到容器中。请注意，在此处，你需要用存储路径替换*/home/mh9/lml/o11y/*。此外，这必须是绝对路径。因此，如果你希望保持灵活性，可以在
+    bash 中使用`$PWD`，或者在 Fish 中使用`(pwd)`，而不是硬编码的路径。
+- en: After you’ve executed the previous command, open *localhost:9000* in your browser,
+    then click Targets in the Status dropdown menu at the top. You should, after a
+    few seconds, see something like the screen shown in [Figure 8-7](#fig-prometheus),
+    confirming that Prometheus has successfully scraped metrics from itself and the
+    node exporter.
+  id: totrans-325
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 执行了上述命令后，在浏览器中打开*localhost:9000*，然后在顶部的状态下拉菜单中点击 Targets。几秒钟后，你应该会看到类似图 8-7
+    中显示的屏幕，证明 Prometheus 已成功从自身和节点导出器中抓取了指标。
+- en: '![lmlx 0807](Images/lmlx_0807.png)'
+  id: totrans-326
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0807](Images/lmlx_0807.png)'
+- en: Figure 8-7\. A screenshot of Prometheus targets in the Web UI
+  id: totrans-327
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-7\. Prometheus Web UI 中的目标截图
+- en: 'Next, we launch Grafana:'
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们启动 Grafana：
+- en: '[PRE19]'
+  id: totrans-329
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'After you’ve executed the preceding command, open *localhost:3000* in your
+    browser and use `admin` for both the username and password. Next, we need to do
+    two things:'
+  id: totrans-330
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 执行了上述命令后，在浏览器中打开*localhost:3000*，并使用`admin`作为用户名和密码。接下来，我们需要做两件事：
+- en: Add [Prometheus as a datasource](https://oreil.ly/9Efhy) in Grafana, using `172.17.0.1:9100`
+    as the URL
+  id: totrans-331
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在 Grafana 中添加[Prometheus 作为数据源](https://oreil.ly/9Efhy)，使用`172.17.0.1:9100`作为
+    URL
+- en: Import the [Node Exporter Full dashboard](https://oreil.ly/RpCDe)
+  id: totrans-332
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 导入[Node Exporter Full 仪表板](https://oreil.ly/RpCDe)
+- en: Once you’ve done this, you should see something akin to [Figure 8-8](#fig-grafana).
+  id: totrans-333
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成此操作后，你应该会看到类似图 8-8 的内容。
+- en: '![lmlx 0808](Images/lmlx_0808.png)'
+  id: totrans-334
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0808](Images/lmlx_0808.png)'
+- en: Figure 8-8\. A screenshot of the Grafana UI with the Node Exporter Full dashboard
+  id: totrans-335
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 8-8\. Node Exporter Full 仪表板的 Grafana UI 截图
+- en: That was some exciting advanced observability for Linux, using modern tooling.
+    Given that the Prometheus/Grafana setup is more elaborate and has a number of
+    moving parts, you’ll likely not use it for a trivial task. In other words, the
+    Linux native tooling we discussed in this section should go a long way; however,
+    there are more advanced use cases—for example, home automation or a media server—where
+    you want to have a more complete solution, in which case Prometheus/Grafana makes
+    a lot of sense.
+  id: totrans-336
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是关于 Linux 的一些令人兴奋的高级可观察性，使用现代工具。考虑到 Prometheus/Grafana 的设置更为复杂，涉及多个组件，你可能不会用它来完成一个简单的任务。换句话说，在本节讨论的
+    Linux 本地工具中，应该能够解决大部分问题；然而，在更高级的用例中，例如家庭自动化或媒体服务器，你可能需要更完整的解决方案，这时 Prometheus/Grafana
+    就显得非常合适。
+- en: Conclusion
+  id: totrans-337
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: In this chapter, we looked at making sure you’re not flying blind when you’re
+    running into issues with your Linux system. The main signal types you’d typically
+    use for diagnostics are logs (textual) and metrics (numerical). For advanced cases,
+    you can apply profiling techniques, rendering resource usage of processes along
+    with the execution context (source file and lines of the source code that is being
+    executed).
+  id: totrans-338
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们确保在遇到 Linux 系统问题时不会盲目操作。你通常用于诊断的主要信号类型是日志（文本）和指标（数值）。对于高级情况，你可以应用分析技术，显示进程的资源使用情况以及执行上下文（正在执行的源文件和行）。
+- en: 'If you want to learn more and dive deeper into this topic, have a look at these
+    resources:'
+  id: totrans-339
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想进一步了解并深入探讨这个主题，请查看以下资源：
+- en: Basics
+  id: totrans-340
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基础知识
+- en: '[*Systems Performance: Enterprise and the Cloud*, second edition](https://oreil.ly/sxtPd),
+    by Brendan Gregg (Addison-Wesley)'
+  id: totrans-341
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*系统性能：企业与云* 第二版](https://oreil.ly/sxtPd)，作者 Brendan Gregg（Addison-Wesley）'
+- en: '[“Linux Performance Analysis in 60,000 Milliseconds”](https://oreil.ly/YVxJt)'
+  id: totrans-342
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“在 60,000 毫秒内分析 Linux 性能”](https://oreil.ly/YVxJt)'
+- en: Logging
+  id: totrans-343
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 日志
+- en: '[“Linux Logging Complete Guide”](https://oreil.ly/fMNT7)'
+  id: totrans-344
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 日志完全指南”](https://oreil.ly/fMNT7)'
+- en: '[“Unix/Linux—System Logging”](https://oreil.ly/hnMGz)'
+  id: totrans-345
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Unix/Linux—系统日志”](https://oreil.ly/hnMGz)'
+- en: '[“syslog-ng” on ArchWiki](https://oreil.ly/wzRqG)'
+  id: totrans-346
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[ArchWiki 上的 “syslog-ng”](https://oreil.ly/wzRqG)'
+- en: '[fluentd website](https://oreil.ly/hJ3nr)'
+  id: totrans-347
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[fluentd 网站](https://oreil.ly/hJ3nr)'
+- en: Monitoring
+  id: totrans-348
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 监控
+- en: '[“80+ Linux Monitoring Tools for SysAdmins”](https://oreil.ly/C4ZJX)'
+  id: totrans-349
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“80+ 适用于系统管理员的 Linux 监控工具”](https://oreil.ly/C4ZJX)'
+- en: '[“Monitoring StatsD: Metric Types, Format and Code Examples”](https://oreil.ly/JaUEK)'
+  id: totrans-350
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“监控 StatsD：度量类型、格式和代码示例”](https://oreil.ly/JaUEK)'
+- en: Advanced
+  id: totrans-351
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 高级
+- en: '[“Linux Performance”](https://oreil.ly/EIPYd)'
+  id: totrans-352
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 性能”](https://oreil.ly/EIPYd)'
+- en: '[“Linux Tracing Systems & How They Fit Together”](https://oreil.ly/SuGPM)'
+  id: totrans-353
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 追踪系统及其相关组件”](https://oreil.ly/SuGPM)'
+- en: '[“Profilerpedia: A Map of the Software Profiling Ecosystem”](https://oreil.ly/Sk0zL)'
+  id: totrans-354
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Profilerpedia：软件性能分析生态系统地图”](https://oreil.ly/Sk0zL)'
+- en: '[“On the State of Continuous Profiling”](https://oreil.ly/wHLqr)'
+  id: totrans-355
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“持续性能分析现状”](https://oreil.ly/wHLqr)'
+- en: '[eBPF website](https://oreil.ly/DFYMN)'
+  id: totrans-356
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[eBPF 网站](https://oreil.ly/DFYMN)'
+- en: '[“Monitoring Linux Host Metrics with the Node Exporter”](https://oreil.ly/5fA6z)'
+  id: totrans-357
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“使用 Node Exporter 监控 Linux 主机指标”](https://oreil.ly/5fA6z)'
+- en: Having completed this chapter and those that preceded it, you now know the basics
+    of Linux, from kernel to shell to filesystems and networking. The last chapter
+    of this book is a collection of advanced topics that didn’t quite fit in other
+    chapters. You may find them interesting and useful, depending on your goals, but
+    for most day-to-day tasks, you now know everything you need to get by.
+  id: totrans-358
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过完成本章和之前的章节，您现在了解了从内核到Shell再到文件系统和网络的Linux基础知识。本书的最后一章包含了一些高级主题，这些主题在其他章节中并不适合。根据您的目标，您可能会发现它们有趣且有用，但对于大多数日常任务而言，您现在已经掌握了所需的一切。
+- en: ^([1](ch08.xhtml#idm45805428798080-marker)) *Observability* is also sometimes
+    referred to with the numeronym *o11y*, as there are 11 letters between the *o*
+    and the *y*.
+  id: totrans-359
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([1](ch08.xhtml#idm45805428798080-marker)) *可观测性*有时也被称为数字术语 *o11y*，因为在 *o*
+    和 *y* 之间有11个字母。

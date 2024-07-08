@@ -1,0 +1,934 @@
+- en: Chapter 9\. Monitoring Your System
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第9章\. 监控您的系统
+- en: Monitoring is not optional. It’s essential. Every system administrator must
+    monitor their system’s performance, health, and security with a vigilant eye.
+    It’s impossible to manually monitor your systems and also perform your other administrative
+    tasks, so you must rely on automated software, specific system configurations,
+    and a reporting system to update you on each system’s status.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 监控不是可选的。它是必需的。每个系统管理员都必须通过警惕的眼光监视其系统的性能、健康和安全性。手动监视系统并执行其他管理任务是不可能的，因此您必须依赖自动化软件、特定的系统配置和报告系统来更新每个系统的状态。
+- en: This chapter explores native monitoring tools and guides you in gathering performance
+    and health statistics for your systems.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章探讨了本地监控工具，并指导您收集系统的性能和健康统计信息。
+- en: Maintaining Vigilance on CPU, Memory, and Disk Performance and Capacity
+  id: totrans-3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 保持对CPU、内存和磁盘性能和容量的警觉
+- en: The three primary monitoring focal points in Linux systems are CPU, memory,
+    and disk performance.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux系统中的三个主要监控焦点是CPU、内存和磁盘性能。
+- en: Note
+  id: totrans-5
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Network capacity on local area networks (LANs) isn’t usually much of an issue,
+    especially with gigabit network speeds. Many data centers/server rooms use 10-gigabit
+    connections so that system-to-system communications are practically instantaneous
+    and backups, even huge ones, are of no consequence. That said, checking network
+    performance will only require a few minutes of your day, so why not include it?
+    The data exists and is freely available to you, so display it, study it, and act
+    on it if you see a negative trend.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本地区域网络（LAN）上的网络容量通常不是什么大问题，尤其是在千兆网络速度下。许多数据中心/服务器房间使用10千兆连接，因此系统间通信几乎是即时的，即使是大型备份也没有问题。话虽如此，检查网络性能只需要您几分钟时间，为什么不包括呢？数据存在且可以自由获取，因此请展示它、研究它，并在看到负面趋势时采取行动。
+- en: This chapter focuses on CPU, memory, and disk performance and capacity.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章重点介绍CPU、内存和磁盘的性能和容量。
+- en: Tracking CPU Usage
+  id: totrans-8
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 跟踪CPU使用率
+- en: The CPU is often at the top of the list of system components to monitor. It’s
+    at the top of the list because it’s the system’s powerhouse. Suppose your system’s
+    CPU continuously operates above 80% utilization. In that case, it’s possible that
+    your system doesn’t have enough CPU to power the operating system and all of a
+    host’s running applications. It’s also conceivable that an application coding
+    problem or security breach issue sends your CPU’s utilization into the “red” zone.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CPU通常位于系统组件列表的顶部，需要监视。它处于顶部是因为它是系统的动力源。如果您的系统CPU持续运行在80%以上的利用率，可能是系统没有足够的CPU来支持操作系统和所有运行的应用程序。还有可能是应用程序编码问题或安全漏洞问题导致CPU利用率进入“红色”区域。
+- en: There are numerous tools available to help you monitor and assess CPU utilization.
+    The simplest and most readily available are `top` and `ps`. These commands are
+    part of the standard build on every Linux distribution.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有许多可用工具可帮助您监视和评估CPU利用率。最简单和最常见的是`top`和`ps`命令，它们是每个Linux发行版的标准构建的一部分。
+- en: The top commands
+  id: totrans-11
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: top命令
+- en: As a system administrator, you’ve possibly encountered `top` or one of its related
+    commands, such as `atop` or `htop`. The `top` utility is standard on most Linux
+    distributions, but you’ll have to install `atop` and `htop` packages from your
+    distribution’s repositories. The `top` commands give you a real-time view of your
+    system’s “top” processes. By default, `top` lists those that consume the most
+    CPU at the top of the view.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为系统管理员，您可能遇到过`top`或其相关命令之一，如`atop`或`htop`。`top`实用程序在大多数Linux发行版中是标准的，但您需要从发行版的存储库安装`atop`和`htop`软件包。`top`命令提供了实时查看系统“顶级”进程的视图。默认情况下，`top`列出了消耗CPU最多的进程。
+- en: top
+  id: totrans-13
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+  zh: top
+- en: All users may issue the `top` command and change sorting options from CPU (default)
+    to memory, time, and PID, as shown in [Figure 9-1](#the_top_command_sorted_by_percent_cpu).
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有用户可以使用`top`命令，并从CPU（默认）更改排序选项到内存、时间和PID，如[图 9-1](#the_top_command_sorted_by_percent_cpu)所示。
+- en: '![](assets/plsa_0901.png)'
+  id: totrans-15
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0901.png)'
+- en: Figure 9-1\. The top command sorted by % CPU
+  id: totrans-16
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-1\. 按% CPU排序的top命令
+- en: Use Shift + M to switch to memory usage mode, as shown in [Figure 9-2](#the_top_command_is_sorted_by_memory_con).
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用Shift + M切换到内存使用模式，如[图 9-2](#the_top_command_is_sorted_by_memory_con)所示。
+- en: '![](assets/plsa_0902.png)'
+  id: totrans-18
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0902.png)'
+- en: Figure 9-2\. The top command is sorted by Memory consumption usage
+  id: totrans-19
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-2\. 按内存消耗排序的top命令
+- en: To see how long your processes have run, use Shift + S to sort by time, as shown
+    in [Figure 9-3](#top_processes_sorted_by_time).
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查看进程运行了多长时间，请使用 Shift + S 来按时间排序，如 [图 9-3](#top_processes_sorted_by_time) 所示。
+- en: '![](assets/plsa_0903.png)'
+  id: totrans-21
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0903.png)'
+- en: Figure 9-3\. Top processes sorted by time
+  id: totrans-22
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-3\. 按时间排序的顶部进程
+- en: '[Table 9-1](#keyboard_shortcuts_for_some_sorting_opt) provides you with a few
+    keyboard shortcuts to `top`’s sorting options.'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表 9-1](#keyboard_shortcuts_for_some_sorting_opt) 提供了一些 `top` 的排序选项的键盘快捷键。'
+- en: Table 9-1\. Keyboard shortcuts for some sorting options
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 9-1\. 一些排序选项的键盘快捷键
+- en: '| Key | Sorting |'
+  id: totrans-25
+  prefs: []
+  type: TYPE_TB
+  zh: '| Key | Sorting |'
+- en: '| --- | --- |'
+  id: totrans-26
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| Shift + M | `%MEM` (memory usage) |'
+  id: totrans-27
+  prefs: []
+  type: TYPE_TB
+  zh: '| Shift + M | `%MEM`（内存使用率） |'
+- en: '| Shift + P | `%CPU` (CPU usage—the default) |'
+  id: totrans-28
+  prefs: []
+  type: TYPE_TB
+  zh: '| Shift + P | `%CPU`（CPU使用率 - 默认） |'
+- en: '| Shift + S | `TIME` (running time) |'
+  id: totrans-29
+  prefs: []
+  type: TYPE_TB
+  zh: '| Shift + S | `TIME`（运行时间） |'
+- en: From a cursory glance at `top`’s output, you might find it difficult to know
+    which value is in focus. So it’s often necessary to use one of the keyboard shortcuts
+    to apply a known sorting scheme to reset your view. If I forget which sorting
+    scheme I’m running, I cycle through CPU, memory, and time to check.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 浏览 `top` 的输出，你可能发现很难知道哪个值是焦点。因此，通常需要使用其中一个键盘快捷键来应用已知的排序方案以重置你的视图。如果我忘记了正在运行的排序方案，我会循环查看
+    CPU、内存和时间来检查。
+- en: The standard `top` command is useful, but for many sysadmins, the displayed
+    information isn’t sufficient for informed decision-making. The `atop` and `htop`
+    commands, not installed by default on most distributions, provide you with a broader
+    view of what’s happening.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 标准的 `top` 命令很有用，但对于许多系统管理员来说，显示的信息并不足以支持明智的决策。`atop` 和 `htop` 命令在大多数发行版上默认未安装，但它们提供了更广泛的系统状态视图。
+- en: atop
+  id: totrans-32
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+  zh: '`atop`'
+- en: The `atop` utility is an advanced system and process monitor. `atop` displays
+    standard top processes in the lower pane but provides insight into CPU, memory,
+    disk, and network performance in the upper pane, as shown in [Figure 9-4](#the_atop_command).
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`atop` 实用程序是一个先进的系统和进程监视器。`atop` 在下方窗格显示标准的顶部进程，但在上方窗格提供 CPU、内存、磁盘和网络性能的洞察，如
+    [图 9-4](#the_atop_command) 所示。'
+- en: '![](assets/plsa_0904.png)'
+  id: totrans-34
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0904.png)'
+- en: Figure 9-4\. The atop command
+  id: totrans-35
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-4\. `atop` 命令
+- en: 'The [`atop` man page](https://oreil.ly/Fu2Sw) describes `atop` as follows:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`atop` 的 man 手册](https://oreil.ly/Fu2Sw) 如下描述 `atop`：'
+- en: The program `atop` is an interactive monitor to view the load on a Linux system.
+    It shows the occupation of the most critical hardware resources (from a performance
+    point of view) on the system level, i.e., CPU, memory, disk, LVM, swap usage,
+    and network. It also shows which processes are responsible for the indicated load
+    concerning CPU and memory load on the process level.
+  id: totrans-37
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: '`atop` 程序是一个交互式监视器，用于查看 Linux 系统的负载情况。它显示系统级别上最关键的硬件资源（从性能角度看），即 CPU、内存、磁盘、LVM、交换空间使用情况和网络。它还显示了哪些进程负责
+    CPU 和内存负载的指示负载。'
+- en: You may run `atop` as a regular user or as the root user. Depending on which
+    user (regular or root) executes the command, the command displays a message that
+    informs you of which mode you’re using.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以作为普通用户或 root 用户运行 `atop`。根据命令是由哪个用户（普通用户还是 root 用户）执行的，命令将显示一条消息，告知你当前使用的模式。
+- en: 'When run as root:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为 root 用户运行时：
+- en: '[PRE0]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'When run as a regular user:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为普通用户运行时：
+- en: '[PRE1]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: The views are the same for both modes. Still, in restricted view, there are
+    actions that you can’t take, such as using `kill` on processes that you don’t
+    own. As mentioned earlier, the `atop` utility appeals to sysadmins because it
+    displays focused performance values for critical system parameters. These statistics
+    are handy because you don’t have to search for performance-specific data or use
+    a potentially expensive third-party tool to extract the information. The `atop`
+    utility is an essential part of a system administrator’s toolbox.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这两种模式的视图相同。但在受限视图中，有一些你不能执行的操作，比如在非自己拥有的进程上使用 `kill` 命令。正如前面提到的，`atop` 实用程序对系统管理员非常有吸引力，因为它显示了关键系统参数的重点性能值。这些统计数据非常方便，因为你无需搜索特定的性能数据或使用可能昂贵的第三方工具来提取信息。`atop`
+    实用程序是系统管理员工具箱的重要组成部分。
+- en: htop
+  id: totrans-44
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+  zh: htop
+- en: The `htop` utility is another system performance viewer that displays the same
+    information as the standard `top` utility but is color-coded and has a convenient
+    command menu. As you can see in [Figure 9-5](#the_htop_utility_running_in_cpu_usage_m),
+    the `htop` utility’s current usage mode is highlighted (`CPU%`). The current mode
+    is CPU usage. The menu helps execute specific commands without the administrator
+    having to memorize keystrokes for each action.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`htop`实用程序是另一个系统性能查看器，显示与标准`top`实用程序相同的信息，但具有彩色编码和方便的命令菜单。如您在[图 9-5](#the_htop_utility_running_in_cpu_usage_m)中所见，`htop`实用程序的当前使用模式被突出显示（`CPU%`）。当前模式是CPU使用率。菜单可帮助执行特定命令，管理员无需记忆每个操作的按键。'
+- en: '![](assets/plsa_0905.png)'
+  id: totrans-46
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0905.png)'
+- en: Figure 9-5\. The `htop` utility running in CPU usage mode
+  id: totrans-47
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-5\. `htop`实用程序在CPU使用模式下运行的示意图
+- en: ps
+  id: totrans-48
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: ps
+- en: The `ps` command displays information about running processes. You can view
+    your own processes, all processes, and the process table in different formats
+    using command options or switches. The `ps` command is common to all Linux distributions.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ps`命令显示有关运行中进程的信息。您可以使用命令选项或开关以不同格式查看自己的进程、所有进程和进程表。`ps`命令在所有Linux发行版中都很常见。'
+- en: 'To view all processes your user account owns, use the `ps` command with the
+    `-ux` option:'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查看您的用户帐户拥有的所有进程，请使用带有`-ux`选项的`ps`命令：
+- en: '[PRE2]'
+  id: totrans-51
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'You may also view all processes by owner using the `-aux` switch combination:'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您也可以使用`-aux`开关组合按所有者查看所有进程：
+- en: '[PRE3]'
+  id: totrans-53
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: The full process table is too long to show here, but you can see from the listing
+    that the displayed results show processes in ascending order of process ID (PID).
+    The `top` command in the previous section is a dynamic process table that you
+    can order by CPU, memory, and other performance measurements.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完整的进程表过长无法在此展示，但您可以从列表中看到，显示的结果按进程ID（PID）升序显示。前一节的`top`命令是一个动态进程表，您可以按CPU、内存和其他性能测量排序。
+- en: The remaining utilities in this section are not as well-known as the `top` or
+    `ps` commands but are important enough for you to learn about and explore the
+    features and functions of each.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本节中其余的实用程序不像`top`或`ps`命令那样著名，但足够重要，您应该学习并探索每个工具的功能和功能。
+- en: glances
+  id: totrans-56
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: glances
+- en: '`glances`, shown in [Figure 9-6](#glancesapostrophe_dynamic_display_with),
+    is another `top` program. It is a cross-platform monitoring tool. The developer(s)
+    rearranged and colorized the display, but the information is similar to what you
+    see in the `htop` utility.'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`glances`，如[图 9-6](#glancesapostrophe_dynamic_display_with)，是另一个`top`程序。它是一个跨平台的监控工具。开发者重新排列并着色显示，但信息与您在`htop`实用程序中看到的类似。'
+- en: '![](assets/plsa_0906.png)'
+  id: totrans-58
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_0906.png)'
+- en: Figure 9-6\. `glances`’ dynamic display with `CPU%` focus
+  id: totrans-59
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-6\. `glances`的动态显示，焦点在`CPU%`
+- en: Press the M key (Shift is not required for shortcuts in `glances`) to change
+    the focus from `CPU%` to `MEM%`, and press T to switch to `TIME`. Press C to return
+    to `CPU%` on the display.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按下M键（不需要Shift键的快捷键在`glances`中）将焦点从`CPU%`切换到`MEM%`，按T键切换到`TIME`。按C键返回显示的`CPU%`。
+- en: Note
+  id: totrans-61
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: If your system is CPU-constrained or you suspect it to be CPU-constrained, don’t
+    use `glances` as your primary CPU performance check because it consumes about
+    15% of your CPU as opposed to `top`’s 3%–5%.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的系统受到CPU约束或怀疑受到CPU约束，请不要将`glances`用作主要CPU性能检查工具，因为它消耗大约15%的CPU，而`top`只需3%–5%。
+- en: You may also run `glances` in a client/server configuration, export data to
+    multiple formats, and change its display settings. Consult the man page for a
+    list of `glances`’ features and options.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您也可以在客户端/服务器配置中运行`glances`，导出数据到多种格式，并更改其显示设置。请参阅`glances`的手册页以获取`glances`功能和选项的列表。
+- en: Exploring sysstat Monitoring
+  id: totrans-64
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 探索`sysstat`监控
+- en: The `sysstat` (System Status) package is a native tool. In other words, it’s
+    a prepackaged, standard monitoring tool that’s free and freely available on any
+    Linux distribution. You can compile it from source code if you prefer, but it’s
+    generally available in package form for all major distributions.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sysstat`（系统状态）包是一个本地工具。换句话说，它是一个预打包的标准监控工具，在任何Linux发行版上都是免费且自由可用的。如果您愿意，可以从源代码编译它，但它通常以软件包形式提供给所有主要发行版。'
+- en: 'The following is excerpted from the `sysstat` man page:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下摘自`sysstat`手册页：
+- en: The sysstat package contains the sar, sadf, mpstat, iostat, tapestat, pidstat,
+    cifsiostat tools for Linux.
+  id: totrans-67
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: '`sysstat`包含用于Linux的sar、sadf、mpstat、iostat、tapestat、pidstat、cifsiostat工具。'
+- en: ''
+  id: totrans-68
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: sar is the system activity reporter utility.
+  id: totrans-69
+  prefs:
+  - PREF_BQ
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: sar是系统活动报告工具。
+- en: ''
+  id: totrans-70
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: ''
+  id: totrans-71
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: sadf is the system activity data formatter that displays data collected by sar
+    in multiple formats (CSV, XML, etc.).
+  id: totrans-72
+  prefs:
+  - PREF_BQ
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`sadf` 是系统活动数据格式化程序，以多种格式（CSV、XML等）显示 `sar` 收集的数据。'
+- en: ''
+  id: totrans-73
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: ''
+  id: totrans-74
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: iostat is the input/output statistics utility that displays CPU utilization
+    and disk I/O statistics.
+  id: totrans-75
+  prefs:
+  - PREF_BQ
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`iostat` 是显示CPU利用率和磁盘I/O统计信息的输入/输出统计工具。'
+- en: ''
+  id: totrans-76
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: ''
+  id: totrans-77
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: tapestat displays tape and tape drive statistics.
+  id: totrans-78
+  prefs:
+  - PREF_BQ
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`tapestat` 显示磁带和磁带驱动器的统计信息。'
+- en: ''
+  id: totrans-79
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: ''
+  id: totrans-80
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: mpstat is the multi-processor statistics utility that displays global and per-processor
+    statistics.
+  id: totrans-81
+  prefs:
+  - PREF_BQ
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`mpstat` 是显示全局和每个处理器统计信息的多处理器统计工具。'
+- en: ''
+  id: totrans-82
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: ''
+  id: totrans-83
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: pidstat reports statistics for Linux processes by process ID.
+  id: totrans-84
+  prefs:
+  - PREF_BQ
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pidstat` 按进程ID报告Linux进程的统计信息。'
+- en: ''
+  id: totrans-85
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: ''
+  id: totrans-86
+  prefs:
+  - PREF_BQ
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: cifsiostat is the CIFS (Samba/SMB) I/O statistics utility.
+  id: totrans-87
+  prefs:
+  - PREF_BQ
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`cifsiostat` 是CIFS（Samba/SMB）I/O统计工具。'
+- en: Reporting System Activity
+  id: totrans-88
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 系统活动报告
+- en: The `sar` utility is the most used of the `sysstat` suite of commands. The system
+    activity reporting tool displays performance statistics from midnight to the current
+    time. By default, `sar` only displays the current day’s metrics.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sar` 实用程序是 `sysstat` 命令套件中使用最多的工具。这个系统活动报告工具显示从午夜到当前时间的性能统计数据。默认情况下，`sar`
+    只显示当天的指标。'
+- en: You can save the information collected by `sar` in a file in a binary format.
+    The statistics reported by `sar` include I/O transfer rates, paging, process-related
+    performance, interrupts, network activity, memory utilization, swap space utilization,
+    CPU utilization, kernel activities, TTY statistics, and more. The `sysstat` package
+    fully supports both single and multiprocessor systems.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以将 `sar` 收集的信息保存在二进制格式的文件中。`sar` 报告的统计信息包括I/O传输速率、分页、与进程相关的性能、中断、网络活动、内存利用率、交换空间利用率、CPU利用率、内核活动、TTY统计等等。
+    `sysstat` 软件包完全支持单处理器和多处理器系统。
+- en: 'Using the `sar` command with no options displays CPU statistics (default):'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `sar` 命令无选项显示CPU统计信息（默认情况下）：
+- en: '[PRE4]'
+  id: totrans-92
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'You can filter `sar` results using command options. For example, to display
+    CPU statistics, use the `-u` option. The `-u` option displays the same results
+    as the `sar` command with no options. Add the `ALL` keyword to include all CPU-related
+    statistics:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用命令选项过滤 `sar` 的结果。例如，要显示CPU统计信息，请使用 `-u` 选项。 `-u` 选项显示与 `sar` 命令无选项相同的结果。添加
+    `ALL` 关键字以包括所有与CPU相关的统计信息：
+- en: '[PRE5]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'The `-B` option displays paging statistics:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-B` 选项显示分页统计信息：'
+- en: '[PRE6]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'The `-b` option reports I/O and transfer rate statistics:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-b` 选项报告I/O和传输速率统计信息：'
+- en: '[PRE7]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: As demonstrated, the `sar` command is versatile and has many options for displaying
+    system performance data. Refer to the `sar` man page for an extensive list of
+    options. The next section covers displaying `sar` data in multiple formats using
+    the `sadf` command.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如示例所示，`sar` 命令非常灵活，并有多个选项用于显示系统性能数据。请参阅 `sar` 手册获取详尽的选项列表。下一节将介绍使用 `sadf` 命令以多种格式显示
+    `sar` 数据。
+- en: Displaying System Activity Data in Multiple Formats
+  id: totrans-100
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 以多种格式显示系统活动数据
+- en: 'The `sadf` command sends `sar` data to different output types to make ingesting
+    its data into a database or displaying it on a web page easier. For example, the
+    following command displays `sar` data from the 21st of the month in a format that’s
+    easy to import into a database:'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sadf` 命令将 `sar` 数据发送到不同的输出类型，以便将其数据导入数据库或在网页上显示更容易。例如，以下命令以易于导入数据库的格式显示本月21日的
+    `sar` 数据：'
+- en: '[PRE8]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'In addition to using `sadf` with historical data, you can also use it with
+    current data:'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了与历史数据一起使用 `sadf`，还可以与当前数据一起使用：
+- en: '[PRE9]'
+  id: totrans-104
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'There are too many possible options for generating different data outputs using
+    `sadf` to list here. Search online for more examples or experiment with options
+    from the `sadf` man page. The next sections deal with specific statistics output
+    from other `sysstat` utilities: `iostat`, `tapestat`, `mpstat`, `pidstat`, and
+    `cifsiostat`. Their relevance depends on your hardware configuration. For example,
+    very few, if any, businesses still use tape drives for backups.'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `sadf` 生成不同数据输出的选项太多，无法在此列出。请在网上搜索更多示例或尝试来自 `sadf` 手册的选项。接下来的章节将处理其他 `sysstat`
+    实用程序（如 `iostat`、`tapestat`、`mpstat`、`pidstat` 和 `cifsiostat`）的具体统计输出：它们的相关性取决于您的硬件配置。例如，几乎没有任何企业仍在使用磁带驱动器进行备份。
+- en: Monitoring System I/O Device Loading with iostat
+  id: totrans-106
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 `iostat` 监控系统I/O设备负载
+- en: Like other “stat” commands, the first metric you see is a statistics summary
+    or summary metric from the time since the system was last booted. Generally, you
+    run the stat commands in multiples to see current statistics or use the `-y` option
+    to ignore the summary metric. In this first example, the summary information is
+    included; in the second, the summary is omitted.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与其他“stat”命令类似，你看到的第一个指标是从系统上次启动以来的统计摘要或总结指标。通常，你会多次运行stat命令以查看当前统计信息，或者使用`-y`选项忽略总结指标。在第一个示例中，包括摘要信息；在第二个示例中，摘要被省略了。
+- en: 'Here it is with the summary information included:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是包含摘要信息的回应：
+- en: '[PRE10]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'Here it is with the summary information omitted:'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是不包含摘要信息的回应：
+- en: '[PRE11]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: The statistics on a quiet virtual machine aren’t very interesting, but at least
+    you see which metrics the utility yields in its reports. Like the other `sysstat`
+    utilities, `iostat` has several options you can glean from the man pages.
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在安静的虚拟机上，统计数据可能并不是很有趣，但至少你能看到该实用程序在报告中产生了哪些指标。与其他`sysstat`实用程序一样，`iostat`有几个选项可以从手册页中获取。
+- en: Kicking It Old-School with the tapestat Utility
+  id: totrans-113
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用磁带统计实用程序回到老派
+- en: I haven’t used a tape drive in more than 15 years as of this writing. Virtual
+    tape drives (hard disks masquerading as tape drives) have replaced the old streaming
+    tape systems. I’m covering `tapestat` here for legacy purposes because there’s
+    always an old “unsupported” system lying about somewhere with a tape drive installed.
+    The information on it is always more valuable than gold, and you might have to
+    retrieve it. This section won’t help you retrieve the information, but you can
+    see some tape drive–related statistics from its operation.
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在写这篇文章时，我已经有超过15年没有使用磁带驱动器了。虚拟磁带驱动器（将硬盘伪装成磁带驱动器）已经取代了旧的流式磁带系统。我在这里介绍`tapestat`是为了遗留目的，因为总有一个旧的“不支持”的系统上还有一个安装了磁带驱动器的设备。关于它的信息比黄金还要珍贵，你可能需要检索这些信息。本节不会帮助你检索信息，但你可以从其操作中看到一些与磁带驱动器相关的统计数据。
+- en: 'This is the response I receive when I run `tapestat` on my Linux VM:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是我在我的Linux虚拟机上运行`tapestat`时收到的响应：
+- en: '[PRE12]'
+  id: totrans-116
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: That’s the message you’re likely to receive when you type the `tapestat` command.
+    Tape drives are part of history and were not part of anyone’s good old days. If
+    you’re still using one, your output will provide you with interesting and useful
+    statistics.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你输入`tapestat`命令时，你可能会收到的消息。磁带驱动器已经成为历史的一部分，并且不是任何人的“好日子”的一部分。如果你仍在使用它，你的输出将为你提供有趣和有用的统计信息。
+- en: Collecting Processor Statistics
+  id: totrans-118
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 收集处理器统计信息
+- en: 'Using the `mpstat` (multiprocessor statistics) utility, you can display multiprocessor
+    and uniprocessor statistics for your systems. Issuing the `mpstat` command with
+    no options displays a summary for all processors:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`mpstat`（多处理器统计）实用程序，你可以显示系统的多处理器和单处理器统计信息。使用`mpstat`命令而无选项显示所有处理器的摘要：
+- en: '[PRE13]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'You see that the system contains two processors, so you know that you can view
+    individual processor performance. View individual processors by specifying option
+    `-P` and the processor number. Remember that processor numbering begins with `0`.
+    For a two-processor system, you have processor `0` and processor `1`. The following
+    command displays statistics for processor `1`:'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统中包含两个处理器，因此可以查看各个处理器的性能。通过指定选项`-P`和处理器编号来查看各个处理器。请记住，处理器编号从`0`开始。对于双处理器系统，有处理器`0`和处理器`1`。以下命令显示处理器`1`的统计信息：
+- en: '[PRE14]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'You may also view all processors by specifying the `ALL` option:'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你还可以通过指定`ALL`选项查看所有处理器：
+- en: '[PRE15]'
+  id: totrans-124
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'Similar to other “stat” commands, you can request a display at an interval
+    in seconds and a specified number of iterations. For example, the following executes
+    `mpstat` every five seconds and three iterations:'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与其他“stat”命令类似，你可以请求在几秒钟的间隔和指定的迭代次数内显示。例如，以下命令每五秒执行一次`mpstat`，迭代三次：
+- en: '[PRE16]'
+  id: totrans-126
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: On a busier system, the numbers are far more informative. You can determine
+    if a particular processor is at or above capacity and then selectively bind processes
+    (changing the processor affinity of a process) to other processors to relieve
+    the stress on `CPU0`. The next utility, `pidstat`, displays which processor a
+    particular process is bound to.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在更忙碌的系统上，数字会更具信息性。你可以确定特定处理器是否在或超过容量，并选择性地将进程绑定到其他处理器以减轻对`CPU0`的压力。接下来的实用程序`pidstat`显示特定进程绑定到哪个处理器。
+- en: Monitoring Linux Tasks with pidstat
+  id: totrans-128
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用pidstat监视Linux任务
+- en: 'The `pidstat` command is used to monitor individual tasks currently managed
+    by the Linux kernel. The default command, with no options passed to it, displays
+    only active tasks (tasks with nonzero statistics values) in the report:'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`pidstat`命令用于监视当前由Linux内核管理的单个任务。默认命令，未传递任何选项给它，仅在报告中显示活动任务（具有非零统计值的任务）：'
+- en: '[PRE17]'
+  id: totrans-130
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'A handy use of the `pidstat` utility is to check system usage by an individual
+    user:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`pidstat`实用程序的一个便利用途是检查单个用户的系统使用情况：'
+- en: '[PRE18]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: The `pidstat` utility has significant value if you’re tracking down a rogue
+    user or process consuming too many system resources.
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`pidstat` 实用程序在跟踪耗费太多系统资源的恶意用户或进程时具有重要价值。'
+- en: Watching Windows-Compatible Filesystem Statistics with cifsiostat
+  id: totrans-134
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用`cifsiostat`监视与Windows兼容的文件系统统计信息
+- en: The `cifsiostat` command displays statistics about read and write operations
+    on Common Internet File System (CIFS) or Samba filesystems. Many system administrators
+    will maintain CIFS to be compatible with their Windows users. Windows users may
+    map drive letters to CIFS shares, similar to mapping to a shared folder on a Windows
+    system. Using CIFS makes it easier to maintain some compatibility between Windows
+    desktop systems and Linux servers. CIFS may also make using Windows Server systems
+    unnecessary because many Windows services may be duplicated using the protocol.
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cifsiostat` 命令显示关于在Common Internet File System (CIFS)或Samba文件系统上读取和写入操作的统计信息。许多系统管理员会维护CIFS以与其Windows用户兼容。Windows用户可以将驱动器映射到CIFS共享，类似于在Windows系统上映射到共享文件夹。使用CIFS可以更轻松地在Windows桌面系统和Linux服务器之间维护一些兼容性。CIFS也可能使得使用Windows
+    Server系统变得不必要，因为许多Windows服务可以使用该协议复制。'
+- en: 'Use the `cifsiostat` command to display statistics:'
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`cifsiostat`命令显示统计信息：
+- en: '[PRE19]'
+  id: totrans-137
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'If `cifsiostat` doesn’t work on your systems, ensure that you have CIFS/Samba
+    installed and operating correctly. Add Samba users to your system. Set up writeable/browseable
+    shares. Start/restart and enable Samba using the following commands:'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果`cifsiostat`在您的系统上不起作用，请确保已正确安装和运行CIFS/Samba。将Samba用户添加到您的系统中。设置可写/可浏览的共享。使用以下命令启动/重新启动和启用Samba：
+- en: '[PRE20]'
+  id: totrans-139
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'Also, be sure that the `cifs` kernel module is loaded:'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 同样，请确保已加载`cifs`内核模块：
+- en: '[PRE21]'
+  id: totrans-141
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: Summary
+  id: totrans-142
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 总结
+- en: In this chapter, you learned about monitoring your system’s performance as well
+    as the tools with which you can track those statistics. Unfortunately, there isn’t
+    a single tool that does everything. Many system administrators install commercial
+    monitoring tools to remedy the lack of a global, free monitoring tool. There have
+    been a few attempts in the past to create such free tools, but they were either
+    abandoned by their developers or sold to commercial companies.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您了解了如何监控系统性能以及可以使用哪些工具来跟踪这些统计信息。不幸的是，并没有一种单一的工具可以做到一切。许多系统管理员安装商业监控工具来弥补缺乏全局免费监控工具的问题。过去曾有一些尝试创建此类免费工具的企图，但它们要么被其开发者放弃，要么被出售给商业公司。
+- en: Monitoring your systems is a required task, and it’s more than a simple up/down
+    status check. You must maintain constant vigilance over your systems’ performance
+    and capacity to minimize outages and provide business continuity to your applications
+    and resources.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 监控您的系统是一个必需的任务，它不仅仅是简单的上/下状态检查。您必须对系统的性能和容量保持持续的警惕，以尽量减少停机时间，并为您的应用程序和资源提供业务连续性。

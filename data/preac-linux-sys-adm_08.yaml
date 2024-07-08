@@ -1,0 +1,1835 @@
+- en: Chapter 8\. Maintaining System Health
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第八章 维护系统健康
+- en: Maintaining system health is a broad topic that includes preventative maintenance,
+    housekeeping, patching, security tasks, user maintenance, and monitoring and mitigating
+    various types of sprawl. Maintaining the health of your systems is an active task,
+    not a passive one.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 维护系统健康是一个广泛的主题，包括预防性维护、日常管理、补丁、安全任务、用户维护以及监控和减少各种类型的扩展。保持系统健康是一项主动任务，而不是被动的。
+- en: Monitoring can help. Automating periodic cleanup of certain areas can help.
+    Automating updates can help, but you must actively watch logs, check space and
+    sprawl, and take care of user maintenance tasks. Many of these tasks require eyes
+    on screens and hands on keyboards. Far fewer system administrators would be required
+    if you could automate every aspect of system health maintenance.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 监控是有帮助的。定期清理特定区域可以帮助。自动化更新也有帮助，但您必须积极地查看日志、检查空间和扩展，并处理用户维护任务。如果您能自动化系统健康维护的每个方面，系统管理员的需求将大大减少。
+- en: This chapter covers both automated and manual system health maintenance tasks.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章涵盖了自动化和手动系统健康维护任务。
+- en: Keeping Your System Clutter-Free
+  id: totrans-4
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 保持系统无杂物
+- en: 'Housekeeping is something that no one loves to do. It’s tedious, time-consuming,
+    and can anger users to the point of reporting your behavior to management, which
+    is never a good thing. As long as you comply with corporate policy and don’t apply
+    any of your own, you’ll have material to refer your angry users to. The rules
+    for decluttering a system are the same for any maintenance you do: have a good
+    backup available if you remove a critical file or directory by accident. The following
+    sections detail how to keep your systems clutter-free.'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 日常管理是没人愿意做的事情。它繁琐、耗时，可能会激怒用户，甚至向管理层举报你的行为，这从来不是好事。只要您遵守公司政策，不应用任何自己的政策，您将有材料可以提醒生气的用户。清理系统的规则与您进行的任何维护相同：如果意外删除了关键文件或目录，请确保有可靠的备份。以下各节详细介绍了如何保持系统无杂物。
+- en: Cleaning the /tmp Directory
+  id: totrans-6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 清理 /tmp 目录
+- en: The */tmp* directory is a shared directory. It’s shared with all users, applications,
+    and system processes. Anyone may write to this directory, which is bad for administrators
+    because having unlimited access to a system directory can have fatal consequences.
+    If the original administrator didn’t create the */tmp* directory as a separate
+    filesystem with access to limited space, users or applications can potentially
+    fill up all of the space. The */tmp* directory should never be a part of the same
+    partition as */* for this reason.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/tmp* 目录是一个共享目录。它与所有用户、应用程序和系统进程共享。任何人都可以写入此目录，这对管理员来说是不利的，因为拥有对系统目录的无限访问权限可能会产生致命后果。如果原始管理员没有将
+    */tmp* 目录创建为一个具有有限空间访问权限的单独文件系统，用户或应用程序可能会填满所有空间。因此，出于这个原因，*/tmp* 目录绝不能作为与 */*
+    相同分区的一部分。'
+- en: The */tmp* directory is tricky from a housekeeping perspective for sysadmins
+    because there are no restrictions on users, applications, or the system. Because
+    any user may write to it, they might expect that it’s extra, available free space
+    where they can store downloads and other files. To make this directory a less
+    desirable location to store files, you should create a `cron` job to run every
+    night, after backups, to remove any nonsystem files.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于系统管理员来说，*/tmp* 目录在日常管理方面有些棘手，因为用户、应用程序或系统没有任何限制。因为任何用户都可以写入它，他们可能会认为这是额外的可用空间，可以存储下载和其他文件。为了使该目录成为一个不太理想的存储位置，您应该创建一个
+    `cron` 作业，每晚在备份后运行，以删除任何非系统文件。
+- en: Note
+  id: totrans-9
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: In many enterprises, automated scripts remove user-created files from the */tmp*
+    directory every night, and most exclude */tmp* directories from backups.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在许多企业中，自动脚本每晚都会从 */tmp* 目录中删除用户创建的文件，并且大多数情况下将 */tmp* 目录排除在备份之外。
+- en: The solution to the */tmp* dilemma if you don’t want to create a separate filesystem
+    and mount it on */tmp* is to enable *tmp.mount*. This service creates a temporary
+    filesystem (tmpfs) and mounts it as */tmp*. One of the features is that it’s volatile
+    storage (RAM) and filling it up won’t cause stability issues on your system.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您不想为 */tmp* 创建单独的文件系统并将其挂载到 */tmp* 上，解决方案是启用 *tmp.mount*。此服务会创建一个临时文件系统（tmpfs），并将其挂载为
+    */tmp*。其中一个特点是它是易失性存储（RAM），填充它不会导致系统稳定性问题。
+- en: To enable *tmp.mount* on your system, complete the following steps.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在您的系统上启用 *tmp.mount*，请完成以下步骤。
+- en: 'First, check your */tmp* directory mount point to see if you need to configure
+    *tmp.mount*:'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，检查 */tmp* 目录的挂载点，看是否需要配置 *tmp.mount*：
+- en: '[PRE0]'
+  id: totrans-14
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'As you can see, my */tmp* has the flaw of being a subdirectory of the */* filesystem.
+    Enable *tmp.mount* and then start it:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您所见，我的 */tmp* 有一个缺陷，即它是 */* 文件系统的子目录。启用 *tmp.mount*，然后启动它：
+- en: '[PRE1]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: Now, the */tmp* directory is no longer a subdirectory of */*. Enabling *tmp.mount*
+    makes this configuration persistent, which means it is a permanent change and
+    will be automatically created each time the system is booted.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，*/tmp* 目录不再是 */* 文件系统的子目录。启用 *tmp.mount* 使此配置持久化，这意味着这是一个永久性的更改，并且每次系统启动时都会自动创建。
+- en: The next section deals with keeping the */home* directory usable for everyone.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一部分介绍如何保持 */home* 目录对所有人可用。
+- en: Making /home a Livable Space for Everyone
+  id: totrans-19
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使 /home 对每个人都是一个宜居的空间
+- en: 'The */home* directory is a shared directory because it contains all users’
+    home directories, except for the root user. For example, suppose you have users
+    `tux`, `penguin`, and `gentoo` on your system. Their home directories will look
+    like the following:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/home* 目录是一个共享目录，因为它包含除 root 用户外所有用户的主目录。例如，假设您的系统上有用户 `tux`、`penguin` 和 `gentoo`。它们的主目录如下：'
+- en: '[PRE2]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'On systems where the */home* directory is on the same filesystem as the */*
+    directory, there is a potential that users can fill up */* and cause system problems,
+    much the same as filling up */tmp*, as discussed in the previous section. Because
+    of the nature of files contained in */home*, you can’t create and mount a volatile
+    filesystem for it. The */home* directory must be a permanently mounted filesystem,
+    preferably not part of */*. If it is part of */*, there are two approaches to
+    correct it. The first entails the following:'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在系统中，如果 */home* 目录与 */* 目录位于同一文件系统中，则可能导致用户填满 */* 目录并引发系统问题，就像填满 */tmp* 一样，在前一节中讨论过。由于
+    */home* 中包含的文件的性质，您无法为其创建和挂载易失性文件系统。*/home* 目录必须是一个永久挂载的文件系统，最好不是 */* 的一部分。如果它是
+    */* 的一部分，则有两种方法可以更正它。第一种方法如下所述：
+- en: Shrinking an existing LVM filesystem
+  id: totrans-23
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 缩小现有的 LVM 文件系统
+- en: Creating a partition and filesystem
+  id: totrans-24
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 创建分区和文件系统
+- en: Mounting that filesystem as */home*
+  id: totrans-25
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将该文件系统挂载为 */home*
+- en: 'The second approach involves the following:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第二种方法涉及以下步骤：
+- en: Installing a new disk
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 安装新硬盘
+- en: Creating a new partition
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 创建新分区
+- en: Mounting that new partition as */home*
+  id: totrans-29
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将新分区挂载为 */home*
+- en: For the demonstration in this chapter, I’ll use the second approach of installing
+    a new disk for */home*.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章演示中，我将使用第二种方法为 */home* 安装新硬盘。
+- en: 'The steps to complete this are as follows:'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成这些步骤的详细过程如下：
+- en: Create or install a new disk.
+  id: totrans-32
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 创建或安装一个新硬盘。
+- en: Create a new partition on the disk.
+  id: totrans-33
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在硬盘上创建新的分区。
+- en: Make the filesystem on the new partition.
+  id: totrans-34
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在新分区上创建文件系统。
+- en: Mount the new partition on */mnt*.
+  id: totrans-35
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将新分区挂载到 */mnt*。
+- en: Copy or move all files from */home* to */mnt*.
+  id: totrans-36
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将所有文件从 */home* 复制或移动到 */mnt*。
+- en: Remove all files from */home*.
+  id: totrans-37
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 从 */home* 中删除所有文件。
+- en: Unmount the new partition from */mnt*.
+  id: totrans-38
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 卸载位于 */mnt* 的新分区。
+- en: Mount the new partition on */home*.
+  id: totrans-39
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将新分区挂载到 */home*。
+- en: Add an entry for */home* in */etc/fstab*.
+  id: totrans-40
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在 */etc/fstab* 中为 */home* 添加条目。
+- en: I added a 1 GB disk to my VM to demonstrate these steps. The following sections
+    explain how to complete each step in this process.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我向我的虚拟机添加了一个 1 GB 硬盘来演示这些步骤。以下各节详细说明如何完成此过程中的每一步。
+- en: Create a new partition on the disk
+  id: totrans-42
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 在硬盘上创建新的分区
+- en: 'Identify the new disk by listing all disk block devices on the system:'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过列出系统上的所有磁盘块设备来识别新硬盘：
+- en: '[PRE3]'
+  id: totrans-44
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'The `sdc` (*/dev/sdc*) device is the new disk. It is the 1 GB disk I added
+    to the virtual machine. To create a new partition on the disk, use the `fdisk`
+    utility:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 新磁盘设备（*/dev/sdc*）是新增的 1 GB 硬盘。为了在该硬盘上创建新的分区，请使用 `fdisk` 实用程序：
+- en: '[PRE4]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'List the `sdc` block device to verify that the partition */dev/sdc1* exists:'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出 `sdc` 块设备以验证分区 */dev/sdc1* 是否存在：
+- en: '[PRE5]'
+  id: totrans-48
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: The */dev/sdc1* partition exists and is ready to have a filesystem created on
+    it.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/dev/sdc1* 分区已存在并准备好在其上创建文件系统。'
+- en: Create the filesystem
+  id: totrans-50
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 创建文件系统
+- en: 'For the */home* directory, format it as the `ext4` filesystem type:'
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于 */home* 目录，将其格式化为 `ext4` 文件系统类型：
+- en: '[PRE6]'
+  id: totrans-52
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'Verify that you correctly created the `ext4` filesystem on */dev/sdc1*:'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确认你在 */dev/sdc1* 上正确创建了 `ext4` 文件系统：
+- en: '[PRE7]'
+  id: totrans-54
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Mount the new partition
+  id: totrans-55
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 挂载新分区
+- en: 'To use the new partition, you must mount it. I use */mnt* as the temporary
+    mount point to copy files from */home* to the new partition I will eventually
+    mount as */home*. If I mount */dev/sdc1* onto */home* now, I can’t copy the files
+    because mounting on */home* hides its files from view. Mounting a device onto
+    a nonempty directory hides its contents and makes its files inaccessible:'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使用新分区，必须将其挂载。我使用 */mnt* 作为临时挂载点，将文件从 */home* 复制到最终将挂载为 */home* 的新分区。如果现在将 */dev/sdc1*
+    挂载到 */home* 上，就无法复制文件，因为在 */home* 上挂载会隐藏其文件。将设备挂载到非空目录会隐藏其内容并使其文件无法访问：
+- en: '[PRE8]'
+  id: totrans-57
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: Copy files from /home to /mnt
+  id: totrans-58
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 从 */home* 复制文件到 */mnt*
+- en: 'Copy all files from the */home* directory to preserve all (`-a`) permissions,
+    links, and timestamps:'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将所有文件从 */home* 目录复制以保留所有 (`-a`) 权限、链接和时间戳：
+- en: '[PRE9]'
+  id: totrans-60
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Remove all files from /home
+  id: totrans-61
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 删除 */home* 下的所有文件
+- en: 'The reason that I remove all files from the original */home* directory is that
+    it releases disk space back to the */* filesystem, which is one of the reasons
+    why we’re going through this exercise. The following command removes all directories
+    under */home* without removing the */home* directory. There’s no need to remove
+    */home*:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我删除原始 */home* 目录中的所有文件的原因是将磁盘空间释放回 */* 文件系统，这也是我们进行此操作的原因之一。以下命令删除 */home* 下的所有目录，而不删除
+    */home* 目录本身。无需删除 */home*：
+- en: '[PRE10]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: Unmount /dev/sdc1 from /mnt
+  id: totrans-64
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 从 */mnt* 卸载 */dev/sdc1*
+- en: 'Unmount */dev/sdc1* from */mnt*:'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从 */mnt* 卸载 */dev/sdc1*：
+- en: '[PRE11]'
+  id: totrans-66
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: Mount the new partition on /home
+  id: totrans-67
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 将新分区挂载到 */home*
+- en: 'Mount the new partition onto the */home* directory:'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将新分区挂载到 */home* 目录：
+- en: '[PRE12]'
+  id: totrans-69
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: The true test of this exercise is to log in as a user and check if everything
+    works as expected.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过作为用户登录并检查一切是否按预期工作来对此操作进行真实测试。
+- en: Create the /etc/fstab entry
+  id: totrans-71
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 创建 */etc/fstab* 条目
+- en: The */home* directory won’t mount automatically after a system reboot because
+    */home* is on a different partition that is not listed in */etc/fstab*. You must
+    create an */etc/fstab* entry for it.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/home* 目录在系统重启后不会自动挂载，因为 */home* 在不在 */etc/fstab* 中列出的另一个分区上。您必须为其创建一个 */etc/fstab*
+    条目。'
+- en: 'My */etc/fstab* entry for */dev/sdc1* is as follows:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我的 */etc/fstab* 条目为 */dev/sdc1* 如下：
+- en: '[PRE13]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: This */etc/fstab* entry makes the mount persistent.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此 */etc/fstab* 条目使挂载持久化。
+- en: The next section deals with archiving and removing “stale” and duplicated files
+    from shared directories.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一部分涉及将共享目录中“过时”和重复的文件归档和删除。
+- en: Decluttering Shared Directories
+  id: totrans-77
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 清理共享目录
+- en: Keeping shared directories free of clutter is difficult. It might be impossible,
+    but there are some things you can do to confront the issue using system tools
+    and some planning. This section explores some utilities that can simplify decluttering
+    and housekeeping.
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 保持共享目录无杂物是困难的。可能是不可能的，但您可以使用系统工具和一些计划来解决这个问题。本节探讨了一些可以简化清理和维护的实用程序。
+- en: Deduplicating Files with fdupes
+  id: totrans-79
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 fdupes 进行文件去重
+- en: '`fdupes` is a popular deduplication utility. `fdupes` finds duplicate files
+    in a given set of directories. The [`fdupes` man page](https://oreil.ly/XERaf)
+    describes the command’s function as follows:'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`fdupes` 是一个流行的重复文件删除实用程序。`fdupes` 可以在给定的一组目录中找到重复的文件。[`fdupes` 手册页面](https://oreil.ly/XERaf)描述了该命令的功能如下：'
+- en: Searches the given path for duplicate files. Such files are found by comparing
+    file sizes and MD5 signatures, followed by a byte-by-byte comparison.
+  id: totrans-81
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: 在给定路径搜索重复文件。这些文件通过比较文件大小和 MD5 签名来找到，然后进行逐字节比较。
+- en: 'You can install `fdupes` from your distribution’s repositories, but it’s better
+    to grab the patched version from a GitHub repository using the following steps:'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以从您的发行版仓库安装 `fdupes`，但最好使用以下步骤从 GitHub 仓库获取修补版本：
+- en: '[PRE14]'
+  id: totrans-83
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: This patched version has more options such as the one you’re most likely to
+    use as a system administrator in a production environment. When you use `fdupes`
+    on a directory, you can just look at the duplicates, delete the duplicates (not
+    recommended), or remove the duplicates but provide soft links to one of the files
+    (recommended). This solution presents a problem only if the original file no longer
+    exists. But providing a soft link to one of the files is far less invasive than
+    removing the duplicates, which may result in tickets, phone calls, and reprimands.
+    Examples [8-1](#list_duplicate_files_and_their_sizes) through [8-3](#provide_links_to_one_of_the_files)
+    illustrate how to use `fdupe``s` to find duplicates, generate a report, and then
+    only provide links to one of the files.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个打补丁的版本有更多选项，特别是在生产环境中作为系统管理员最有可能使用的选项之一。当你在一个目录上使用 `fdupes` 时，你可以只查看重复项，删除重复项（不推荐），或删除重复项并为其中一个文件创建软链接（推荐）。只有当原始文件不存在时，这种解决方案才会出现问题。但是提供一个文件的软链接比删除重复项要少得多，后者可能导致工单、电话和训斥。示例
+    [8-1](#list_duplicate_files_and_their_sizes) 到 [8-3](#provide_links_to_one_of_the_files)
+    展示了如何使用 `fdupes` 查找重复文件，生成报告，然后仅为其中一个文件提供链接。
+- en: Example 8-1\. List duplicate files and their sizes
+  id: totrans-85
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+  zh: 示例 8-1\. 列出重复文件及其大小
+- en: '[PRE15]'
+  id: totrans-86
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: The `-r` option is recursive, which means check the specified directory and
+    all its subdirectories. The `-S` option means to report the file sizes.
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-r` 选项是递归的，这意味着检查指定目录及其所有子目录。`-S` 选项表示报告文件大小。'
+- en: In [Example 8-2](#generate_a_duplicate_file_report_using), the `-m` option tells
+    `fdupes` to print a report of any duplicates found.
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [示例 8-2](#generate_a_duplicate_file_report_using) 中，`-m` 选项告诉 `fdupes` 打印任何找到的重复文件的报告。
+- en: Example 8-2\. Generate a duplicate file report using the `-m` option
+  id: totrans-89
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+  zh: 示例 8-2\. 使用 `-m` 选项生成重复文件报告
+- en: '[PRE16]'
+  id: totrans-90
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: In [Example 8-3](#provide_links_to_one_of_the_files), `fdupes` replaces duplicate
+    files with hard links using the `-L` option. Only the first found file in each
+    group of duplicates remains intact.
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [示例 8-3](#provide_links_to_one_of_the_files) 中，`fdupes` 使用 `-L` 选项用硬链接替换重复文件。每组重复文件中仅保留第一个找到的文件。
+- en: Example 8-3\. Provide links to one of the files
+  id: totrans-92
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+  zh: 示例 8-3\. 为其中一个文件提供链接
+- en: '[PRE17]'
+  id: totrans-93
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'Using the selective delete option, `-d`, you’re prompted for which file(s)
+    you want to keep. Again, deleting files is highly discouraged. Proceed at your
+    own risk:'
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用选择性删除选项 `-d`，你会被提示选择要保留的文件。再次强调，不建议删除文件。请自行决定是否继续：
+- en: '[PRE18]'
+  id: totrans-95
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: This option removes files except for the one(s) you preserve and does not create
+    links. Check the online help and man pages for `fdupes` for other options.
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此选项除了保留的文件外都会删除文件，并且不会创建链接。查看 `fdupes` 的在线帮助和手册页面获取其他选项。
+- en: Tackling /home File Sprawl with Quotas
+  id: totrans-97
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 处理 /home 文件过度增长问题与配额
+- en: Some system administrators and users find that using quotas is a harsh solution
+    to dealing with file sprawl. I find it a good solution that works well in various
+    situations to help deal with users who chronically use up more than their fair
+    share of disk space. You can implement quotas on any directory, but you certainly
+    want to consider it for shared directories and */home*.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些系统管理员和用户认为使用配额对付文件过度增长是一个严厉的解决方案。我认为它是一个在各种情况下都很好用的解决方案，可以帮助处理那些经常占用超过其应有份额的磁盘空间的用户。你可以在任何目录上实施配额，但肯定要考虑为共享目录和
+    */home* 目录设置配额。
+- en: 'The first task is to install `quota`, if your system doesn’t have it:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一个任务是安装 `quota`，如果你的系统还没有的话：
+- en: '[PRE19]'
+  id: totrans-100
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'To use the `quota` system, you’ll need to have an `xfs` filesystem handy and
+    mounted. Mine, for example, is */home*. Create an entry in */etc/fstab* for the
+    `xfs` filesystem. Here is the */etc/fstab* entry for */home* where I want to enforce
+    quotas:'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使用 `quota` 系统，你需要准备并挂载一个 `xfs` 文件系统。例如，我的挂载在 */home* 下。为 `xfs` 文件系统在 */etc/fstab*
+    中创建一个条目。以下是 */etc/fstab* 中关于 */home* 的条目，我希望强制执行配额：
+- en: '[PRE20]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'Next, create two new empty files on */home*: *quota.group* and *quota.user*.
+    These two files must exist in any directory that’s configured for quotas, which
+    are used by the `quota` system:'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，在 */home* 下创建两个新的空文件：*quota.group* 和 *quota.user*。在任何配置了配额的目录中，这两个文件必须存在，配额系统使用它们：
+- en: '[PRE21]'
+  id: totrans-104
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Then, enable quotas  with the `quotaon` command:'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后，使用 `quotaon` 命令启用配额：
+- en: '[PRE22]'
+  id: totrans-106
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: The system is now ready to apply quotas to users’ accounts. The following command
+    sets a very low `quota` value for demonstration purposes. The soft limit is 50
+    MB, and the hard limit is 80 MB. You receive a warning when you exceed the soft
+    limit, but the `quota` system prevents you from exceeding the hard limit. You
+    can also limit the number of inodes (file metadata structures) that a user may
+    consume. The inode limit is a bit harsher because a user might generate thousands
+    of tiny text files that only amount to a few megabytes, but it limits the number
+    of files users can create. There are hard and soft limits for inodes as well.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统现在已准备好为用户账户应用配额。 以下命令为演示目的设置了一个非常低的`quota`值。 软限制为50 MB，硬限制为80 MB。 当您超过软限制时，您会收到警告，但`quota`系统会阻止您超过硬限制。
+    您还可以限制用户可能消耗的索引节点（文件元数据结构）的数量。 索引节点限制可能更严格，因为用户可能生成成千上万个只占用几兆字节的小文本文件，但它限制了用户可以创建的文件数量。
+    索引节点也有硬限制和软限制。
+- en: '[PRE23]'
+  id: totrans-108
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'The following is an example of what the user sees when they exceed a quota. 
+    The `head` command creates a 51 MB file to illustrate how quotas truncate files
+    that exceed a set quota limit:'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下是用户在超过配额时看到的示例。 `head`命令创建一个51 MB的文件，以说明配额如何截断超过设定配额限制的文件：
+- en: '[PRE24]'
+  id: totrans-110
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: You can see that when the user reached their hard limit, the system truncated
+    the files they attempted to create (*fillit1.txt*). If no quota had been placed
+    on the user, they would have had two 51 MB files.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以看到，当用户达到他们的硬限制时，系统截断了他们试图创建的文件（*fillit1.txt*）。 如果用户没有设置配额，他们将拥有两个51 MB的文件。
+- en: 'Quotas prevent users from consuming more than a given amount of space on a
+    filesystem or directory. Still, they should only be enforced on users who violate
+    company policy or egregiously store personal files on company systems. You can
+    easily remove a quota limit from a user’s account by setting all limits to `0`:'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 配额防止用户在文件系统或目录上消耗超过一定量的空间。 但它们只应对违反公司政策或在公司系统上极端存储个人文件的用户执行。 您可以通过将所有限制设置为`0`轻松地从用户账户中删除配额限制：
+- en: '[PRE25]'
+  id: totrans-113
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: Now there are no warnings (or truncations) about exceeding limits. The `djones`
+    account no longer has quota limits imposed on it.
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在关于超过限制的警告（或截断）已经消失。 `djones`账户不再对其施加配额限制。
+- en: That’s a good introduction to quotas, what they can do for you as an administrator,
+    and how they can keep your users in check with their space usage. The next topic
+    to explore is patching, an essential task for any administrator wanting to keep
+    their system running smoothly.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是对配额的一个很好的介绍，作为管理员，它们能为您做些什么，以及它们如何通过空间使用情况来控制您的用户。 接下来要探讨的话题是补丁，这是任何想要保持系统顺畅运行的管理员必不可少的任务。
+- en: Patching Your Way to a Healthy System
+  id: totrans-116
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 补丁：保持系统健康的途径
+- en: 'Patching, to the new system administrator, might sound like you’re putting
+    duct tape on a system to hold it together temporarily while you locate the real
+    fix for a problem. Patching is an essential task and perhaps is a misnomer for
+    what it is: updating system utilities, daemons, and applications with fixes supplied
+    by developers. A software patch fixes a specific problem. A good example is applying
+    a patch to the SSH daemon to resolve new vulnerabilities that can render a system
+    susceptible to attack and compromise.'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于新的系统管理员来说，补丁听起来可能像是在系统上放置胶带，暂时将其固定在一起，同时您寻找问题的真正解决方案。 补丁是一项基本任务，也许对于它的称呼并不准确：更新由开发者提供的系统实用程序、守护进程和应用程序修复。
+    软件补丁修复了特定的问题。 一个很好的例子是对SSH守护进程应用补丁以解决新的漏洞，这可能使系统容易受到攻击和妥协。
+- en: Patching isn’t always security-focused. Often, patches fix a stability problem,
+    plug a memory leak, or repair a broken feature. Remember that patching a Linux
+    system rarely means that you’ll have to initiate a reboot, but if you update a
+    service, you’ll want to restart that service unless the patching process takes
+    care of that for you. If the patching process restarts a service, a message will
+    appear on the screen informing you of the restart. To be safe, I often reboot
+    after a major patch event to ensure that the system and its services receive a
+    restart. A *major* patch event includes multiple fixes and often a kernel update.
+    If you are inside your maintenance window and have updated several services, the
+    kernel, or other critical system software, I suggest you reboot the system.
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 补丁并不总是专注于安全。通常，补丁修复稳定性问题、堵塞内存泄漏或修复损坏的功能。请记住，对 Linux 系统进行补丁几乎不意味着您必须启动重新启动，但如果更新了一个服务，您将需要重新启动该服务，除非补丁过程已经为您处理了这一点。如果补丁过程重新启动了一个服务，屏幕上将出现消息通知您重新启动。为了安全起见，在主要补丁事件后，我经常重新启动以确保系统及其服务得到重新启动。*主要*补丁事件包括多个修复以及通常的内核更新。如果您在维护窗口内并更新了多个服务、内核或其他关键系统软件，我建议您重新启动系统。
+- en: Some system administrators automate their patching by setting up a `cron` job
+    to periodically check for and install patches. That scenario works, but you should
+    have a test system or two that you manually update to see what’s to be updated,
+    how the system reacts to those updates, and how the system responds after a reboot.
+    You don’t want or need any surprises from a bad patch session.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些系统管理员通过设置`cron`作业来自动化他们的补丁管理，定期检查并安装补丁。这种场景有效，但你应该有一个或两个测试系统，手动更新以查看需要更新的内容，系统对这些更新的反应以及重启后系统的响应。你不希望也不需要因为糟糕的补丁而遇到任何意外。
+- en: Now, let’s look at how to patch two types of Linux systems—a Red Hat–based system
+    and a Debian-based system.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，让我们看看如何对两种类型的 Linux 系统进行补丁管理——基于 Red Hat 的系统和基于 Debian 的系统。
+- en: Patching a Red Hat Enterprise Linux–Based System
+  id: totrans-121
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '**Red Hat Enterprise Linux-Based 系统的补丁**'
+- en: 'To initiate patches on a Red Hat Enterprise Linux–based system, use `yum` or
+    `dnf`. For this demonstration, I use `yum`, but `dnf` is the preferred command
+    for versions 8 and above of Red Hat Enterprise Linux:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在基于 Red Hat Enterprise Linux 的系统上启动补丁过程，请使用`yum`或`dnf`。在此演示中，我使用`yum`，但在 Red
+    Hat Enterprise Linux 8 及更高版本中，`dnf`是首选命令：
+- en: '[PRE26]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: As you can see from the truncated listing above, it’s been a while since I last
+    updated this system (287 packages require upgrading). I included the parts I want
+    you to see, such as a new kernel update and the new OpenSSH server (SSHD), to
+    demonstrate that I will reboot this system after the updates. I prefer to install
+    manually by not providing the `-y` option so that I can view everything that needs
+    an upgrade before I proceed.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如你从上面截断的列表中可以看到，我已经很久没有更新这个系统了（287 个软件包需要升级）。我包括了我想让你看到的部分，例如一个新的内核更新和新的 OpenSSH
+    服务器（SSHD），以演示我在更新后将重新启动此系统。我喜欢通过不提供`-y`选项手动安装，这样我可以在继续之前查看所有需要升级的内容。
+- en: Note
+  id: totrans-125
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: '**注意**'
+- en: 'The default behavior for YUM/DNF updates is not installing them. You receive
+    the following prompt:'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: YUM/DNF 更新的默认行为是不安装它们。你将收到以下提示：
+- en: '[PRE27]'
+  id: totrans-127
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: The updates will not install if you press the Enter key because the `N` is the
+    default response. You must explicitly approve the installation by answering with
+    a `y` here.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果按下 Enter 键，更新将不会安装，因为`N`是默认响应。你必须在此处明确批准安装，通过输入`y`来确认。
+- en: It’s generally OK to proceed with updates on production systems if you’ve installed
+    and verified them on test systems first. Installing patches not verified on test
+    systems might cause stability problems or application/library conflicts, especially
+    if you run older versions of some programs.
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你在测试系统上安装并验证了更新，通常可以放心在生产系统上继续更新。安装未在测试系统上验证的补丁可能会导致稳定性问题或应用程序/库冲突，特别是如果你在运行某些旧程序版本。
+- en: Patching a Debian-Based Linux System
+  id: totrans-130
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '**Debian-Based Linux 系统的补丁**'
+- en: 'Patching a Debian-based system is similar to patching a Red Hat Enterprise
+    Linux–based system with a couple of subtle differences. The first difference is
+    that you use the `apt` command to install updates to the system:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于基于 Debian 的系统，补丁过程类似于基于 Red Hat Enterprise Linux 的系统，但有一些细微的差异。第一个差异是你使用`apt`命令来安装系统更新：
+- en: '[PRE28]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: The other difference is in the approval procedure. Notice the `Do you want to
+    continue? [Y/n]` prompt. The `Y` is capitalized, which means that if you press
+    the Enter key, the updates will install in your system. Remember that when updating
+    a Red Hat Enterprise Linux–based system, if you press the Enter key, the updates
+    don’t install. But also note that `apt` doesn’t have an automatic approval option
+    (`-y`) like `yum` or `dnf`.
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个不同之处在于批准程序。请注意`是否要继续？[Y/n]`提示符。`Y`是大写的，这意味着如果您按Enter键，更新将安装在您的系统上。请记住，在更新基于Red
+    Hat Enterprise Linux的系统时，如果按Enter键，更新将不会安装。但请注意，`apt`没有像`yum`或`dnf`那样的自动批准选项（`-y`）。
+- en: Note
+  id: totrans-134
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: '`unattended-upgrades` is a package you can install that will allow you to update
+    your Debian-based system automatically.'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`unattended-upgrades`是一个可以安装的包，它将允许您自动更新基于Debian的系统。'
+- en: 'As stated earlier, you should always install updates and upgrades on test systems
+    first. If you set up automated updates, this is more difficult to do unless you
+    create a clever schedule for updating your systems similar to the following:'
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如前所述，您应始终首先在测试系统上安装更新和升级。如果您设置了自动更新，除非您为更新系统创建一个类似以下的巧妙时间表，否则这将更加困难：
+- en: Test systems
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 测试系统
+- en: Manual updates every Tuesday
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每周二手动更新
+- en: Development systems
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 开发系统
+- en: Manual updates every other Thursday
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每隔两周的星期四手动更新
+- en: Production systems
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 生产系统
+- en: Monthly updates last Sunday of the month
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每月更新每月最后一个星期日
+- en: This schedule, or similar, allows you to check automated updates before installing
+    them to your production systems. If you have an automation or enterprise management
+    tool that allows you to suspend `cron` jobs in case of a problem, you can better
+    control your automated patching. If you don’t have such a tool and have more than
+    a handful of systems to manage, I suggest you explore an automation tool such
+    as Ansible to deliver new configuration files, scripts, and so on to your systems.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个计划或类似计划允许您在将自动更新安装到生产系统之前检查它们。如果您有一个允许您在出现问题时暂停`cron`作业的自动化或企业管理工具，您可以更好地控制自动修补。如果您没有这样的工具并且需要管理多个系统，我建议您探索像Ansible这样的自动化工具，以便向您的系统交付新的配置文件、脚本等。
+- en: An automation system also helps when applying zero-day or other emergency patches
+    to your systems. Patching, like backups, needs your close attention. Keeping your
+    systems running smoothly and securely by regularly applying the latest patches
+    is vital to your system administrator duties.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当向您的系统应用零日或其他紧急补丁时，自动化系统也是有帮助的。像备份一样，打补丁需要您的密切关注。通过定期应用最新的补丁，保持系统平稳安全对您作为系统管理员的职责至关重要。
+- en: Securing Your Systems
+  id: totrans-145
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 保护您的系统
+- en: While regular patching should be part of an overall security plan, there are
+    some basic security settings unrelated to the topic of patching that I will cover
+    in this section. Again, an automated system such as Ansible can help greatly in
+    saving time and effort in maintaining the security of dozens, hundreds, or thousands
+    of systems.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管定期打补丁应成为整体安全计划的一部分，但与打补丁主题无关的一些基本安全设置我将在本节中进行介绍。同样，像Ansible这样的自动化系统可以大大节省维护几十、几百或几千个系统的时间和精力。
+- en: Not all systems can be treated equally when applying security measures. For
+    example, your DMZ (internet-facing) systems, database systems, web servers, application
+    servers, and file storage systems each (as a group) need different security settings.
+    You can rarely apply a single security policy covering every type of system. A
+    few general security measures apply to every system regardless of function, but
+    to state that you’re going to set up a single, generic security plan is unrealistic.
+    You must apply security configurations to each system type to focus on specific
+    vulnerabilities.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并非所有系统在应用安全措施时可以被平等对待。例如，您的DMZ（面向互联网）系统、数据库系统、Web服务器、应用服务器和文件存储系统每个（作为一个组）都需要不同的安全设置。您几乎不可能对每种类型的系统都应用单一的安全策略。一些通用的安全措施适用于每种系统，无论其功能如何，但声明您将设置一个统一的通用安全计划是不现实的。您必须为每种系统类型应用安全配置，以便专注于特定的漏洞。
+- en: For example, can you think of particular security settings that apply to web
+    servers but not file servers? In the case of a web server, you’ll need to implement
+    certificates to secure your web communications. You should concentrate on securing
+    shared directories and user accounts on a file server. Are you going to allow
+    Samba shares on your file servers? Are you going to allow uploads onto your web
+    servers? How you and your users interact with a system dictates its security concerns,
+    not the fact that it’s a generic Linux system.
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，你能否想到适用于Web服务器但不适用于文件服务器的特定安全设置？在Web服务器的情况下，您需要实施证书来保护您的Web通信。您应该集中精力保护文件服务器上的共享目录和用户帐户。您是否打算在文件服务器上允许Samba共享？您是否打算允许向Web服务器上传文件？您和您的用户如何与系统交互决定了其安全问题，而不是它是一个通用的Linux系统的事实。
+- en: '[Table 8-1](#linux_service_security_guidelines) shows some example security
+    guidelines for your Linux systems with specific purposes and workloads.'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表 8-1](#linux_service_security_guidelines) 展示了针对具有特定目的和工作负载的Linux系统的一些安全指南示例。'
+- en: Table 8-1\. Linux service security guidelines
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 8-1\. Linux服务安全指南
+- en: '| Purpose/workload | Examples | Security measure |'
+  id: totrans-151
+  prefs: []
+  type: TYPE_TB
+  zh: '| 目的/工作负载 | 示例 | 安全措施 |'
+- en: '| --- | --- | --- |'
+  id: totrans-152
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| All servers | Miscellaneous services | SSH, */etc/hosts.allow* and */etc/hosts.deny*
+    restrictions, firewall, SELinux |'
+  id: totrans-153
+  prefs: []
+  type: TYPE_TB
+  zh: '| 所有服务器 | 杂项服务 | SSH, */etc/hosts.allow* 和 */etc/hosts.deny* 限制, 防火墙, SELinux
+    |'
+- en: '| Web server | Apache, NGINX, IHS, others | TLS, certificates, HTTPS |'
+  id: totrans-154
+  prefs: []
+  type: TYPE_TB
+  zh: '| Web服务器 | Apache, NGINX, IHS, 其他 | TLS, 证书, HTTPS |'
+- en: '| Database server | MySQL, PostgreSQL, others | Tunnel over SSH, restrict connections
+    to localhost |'
+  id: totrans-155
+  prefs: []
+  type: TYPE_TB
+  zh: '| 数据库服务器 | MySQL, PostgreSQL, 其他 | SSH隧道, 限制连接到本地主机 |'
+- en: '| File server | Samba shares, NFS shares, SSH | Active Directory integration
+    for Samba, two-factor authentication |'
+  id: totrans-156
+  prefs: []
+  type: TYPE_TB
+  zh: '| 文件服务器 | Samba共享, NFS共享, SSH | 为Samba集成的Active Directory, 双因素身份验证 |'
+- en: '| Application server | Tomcat, WebSphere, others | HTTPS, TLS, certificates
+    |'
+  id: totrans-157
+  prefs: []
+  type: TYPE_TB
+  zh: '| 应用服务器 | Tomcat, WebSphere, 其他 | HTTPS, TLS, 证书 |'
+- en: '| Mail server | SMTP, IMAP, POP-3 protocols | Use secured protocols and mail
+    services |'
+  id: totrans-158
+  prefs: []
+  type: TYPE_TB
+  zh: '| 邮件服务器 | SMTP, IMAP, POP-3 协议 | 使用安全协议和邮件服务 |'
+- en: As you can see in [Table 8-1](#linux_service_security_guidelines), there are
+    certain security features that you should implement on every system regardless
+    of purpose unless there’s some vendor-related reason that you shouldn’t. You should
+    lock down every system and be as restrictive as possible while maintaining functionality
+    and accessibility for your users.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如您在[表 8-1](#linux_service_security_guidelines)中所见，每个系统都应实施某些安全功能，无论其用途如何，除非有某些供应商相关的原因禁止此操作。您应该尽可能地锁定每个系统，并在保持用户功能和可访问性的同时保持严格限制。
+- en: Maintaining User and Group Accounts
+  id: totrans-160
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 维护用户和群组帐户
+- en: 'User account maintenance goes beyond adding and removing accounts. It also
+    includes developing an account naming convention, creating policies that set standards
+    for how long to disable accounts before they’re removed, how long to retain a
+    user’s home directory after they’ve left the group or the company, retiring of
+    group accounts, and the retiring or reusing of user and group IDs. All of these
+    activities prevent user account sprawl. Here are some examples of account sprawl:'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户帐户维护不仅仅是添加和删除帐户。它还包括制定帐户命名约定、创建设定禁用帐户多久后删除的政策、在用户离开组或公司后保留用户主目录的时间标准、群组帐户的撤销以及用户和群组ID的撤销或重复使用。所有这些活动都可以防止用户帐户泛滥。以下是帐户泛滥的一些示例：
+- en: Disabled accounts left on systems past policy limits
+  id: totrans-162
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 系统中超过策略限制而保留的已禁用帐户
+- en: Home directories left on systems past policy limits
+  id: totrans-163
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 系统中超过策略限制而保留的个人目录
+- en: Active, terminated user accounts left on systems
+  id: totrans-164
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 系统中保留的活跃和已终止的用户帐户
+- en: Group accounts with no members
+  id: totrans-165
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 没有成员的群组帐户
+- en: Disabled or removed accounts that remain in */etc/sudoers*
+  id: totrans-166
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在 */etc/sudoers* 中仍存在的已禁用或已删除帐户
+- en: Active temporary accounts left on systems
+  id: totrans-167
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 系统中保留的活跃临时帐户
+- en: Active service accounts with shells or passwords
+  id: totrans-168
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 具有shell或密码的活跃服务帐户
+- en: Setting Up a Naming Convention
+  id: totrans-169
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 设置命名约定
+- en: One of the easiest methods of circumventing account sprawl is to create a user
+    account naming convention. A naming convention prevents sprawl by setting a standard
+    by which you and your team create user accounts. For example, you now have a working
+    system if you set your naming convention as the first initial and the first seven
+    characters of the last name. The exception is when two or more people have the
+    same first and last names. In these cases, you’d opt for using the first initial
+    of the first name, a middle initial, and the first six characters of the last
+    name.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 防止用户账户蔓延的最简单方法之一是创建用户账户命名约定。命名约定通过设定一套标准，使你和你的团队可以创建用户账户。例如，如果你将命名约定设置为姓氏的第一个字母和姓氏的前七个字符，现在你有了一个可用的系统。例外情况是当两个或更多人拥有相同的名字和姓氏时。在这些情况下，你会选择使用名字的第一个字母、中间字母和姓氏的前六个字符。
+- en: '[Table 8-2](#standard_account_naming_convention) shows examples of the standard
+    naming convention.'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表 8-2](#standard_account_naming_convention)展示了标准命名约定的示例。'
+- en: Table 8-2\. Standard account naming convention
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 8-2\. 标准账户命名约定
+- en: '| First name | Last name | Username |'
+  id: totrans-173
+  prefs: []
+  type: TYPE_TB
+  zh: '| 名字 | 姓氏 | 用户名 |'
+- en: '| --- | --- | --- |'
+  id: totrans-174
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| José | Alvarez | `jalvarez` |'
+  id: totrans-175
+  prefs: []
+  type: TYPE_TB
+  zh: '| 何塞 | 阿尔瓦雷斯 | `jalvarez` |'
+- en: '| Paula | Anderson | `panderso` |'
+  id: totrans-176
+  prefs: []
+  type: TYPE_TB
+  zh: '| 保拉 | 安德森 | `panderso` |'
+- en: '| Vivek | Kundra | `vkundra` |'
+  id: totrans-177
+  prefs: []
+  type: TYPE_TB
+  zh: '| 维克 | 库恩德拉 | `vkundra` |'
+- en: '| Sylvia | Goldstein | `sgoldste` |'
+  id: totrans-178
+  prefs: []
+  type: TYPE_TB
+  zh: '| 西尔维亚 | 戈德斯坦 | `sgoldste` |'
+- en: '[Table 8-3](#repeated_name_exceptions) shows examples of repeated name exceptions.'
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表 8-3](#repeated_name_exceptions)展示了重复姓名的例外情况的示例。'
+- en: Table 8-3\. Repeated name exceptions
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 8-3\. 重复姓名的例外情况
+- en: '| First name | Last name | Username |'
+  id: totrans-181
+  prefs: []
+  type: TYPE_TB
+  zh: '| 名字 | 姓氏 | 用户名 |'
+- en: '| --- | --- | --- |'
+  id: totrans-182
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| José | Alvarez | `jalvarez` |'
+  id: totrans-183
+  prefs: []
+  type: TYPE_TB
+  zh: '| 何塞 | 阿尔瓦雷斯 | `jalvarez` |'
+- en: '| José | Alvarez | `jqalvare` |'
+  id: totrans-184
+  prefs: []
+  type: TYPE_TB
+  zh: '| 何塞 | 阿尔瓦雷斯 | `jqalvare` |'
+- en: '| Paula | Anderson | `panderso` |'
+  id: totrans-185
+  prefs: []
+  type: TYPE_TB
+  zh: '| 保拉 | 安德森 | `panderso` |'
+- en: '| Paula | Anderson | `pmanders` |'
+  id: totrans-186
+  prefs: []
+  type: TYPE_TB
+  zh: '| 保拉 | 安德森 | `pmanders` |'
+- en: If your users have no middle names, then you can work backward from the end
+    of the alphabet, as shown in [Table 8-4](#account_name_workarounds_for_users_with).
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你的用户没有中间名字，那么你可以按照字母表的倒序来进行，如[表 8-4](#account_name_workarounds_for_users_with)所示。
+- en: Table 8-4\. Account name workarounds for users without middle names
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 8-4\. 没有中间名的用户的账户名解决方案
+- en: '| First name | Last name | Username |'
+  id: totrans-189
+  prefs: []
+  type: TYPE_TB
+  zh: '| 名字 | 姓氏 | 用户名 |'
+- en: '| --- | --- | --- |'
+  id: totrans-190
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| Paula | Anderson | `panderso` |'
+  id: totrans-191
+  prefs: []
+  type: TYPE_TB
+  zh: '| 保拉 | 安德森 | `panderso` |'
+- en: '| Paula | Anderson | `pzanders` |'
+  id: totrans-192
+  prefs: []
+  type: TYPE_TB
+  zh: '| 保拉 | 安德森 | `pzanders` |'
+- en: '| Paula | Anderson | `pyanders` |'
+  id: totrans-193
+  prefs: []
+  type: TYPE_TB
+  zh: '| 保拉 | 安德森 | `pyanders` |'
+- en: '| Paula | Anderson | `pxanders` |'
+  id: totrans-194
+  prefs: []
+  type: TYPE_TB
+  zh: '| 保拉 | 安德森 | `pxanders` |'
+- en: You can certainly develop your own naming convention, but I’ve seen this one
+    work at other enterprises, so it’s worth a mention here. I’ve also seen other
+    companies use a number system to avoid duplicate usernames. For example, if you
+    have two users named Vivek Kundra, the first one created on a system is created
+    as `vkundra` and the second Vivek Kundra is `vkundra2`.
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当然，你可以制定自己的命名约定，但我已经看到其他企业采用过这种方法，所以在这里值得一提。我还看到其他公司使用数字系统来避免重复的用户名。例如，如果有两个名为Vivek
+    Kundra的用户，那么系统中创建的第一个将被创建为`vkundra`，第二个Vivek Kundra则为`vkundra2`。
+- en: The whole point of a naming convention is to develop a system and then stick
+    to it. Having a naming convention prevents administrators from creating random
+    user accounts that could duplicate other accounts.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命名约定的整个目的是开发一个系统，然后坚持使用它。有了命名约定，管理员就不会随意创建可能重复其他账户的用户账户。
+- en: For example, suppose you create a user account for Sylvia Goldstein as `sgoldste`
+    and another system administrator creates an account as `sylviag`. You now have
+    a security problem because you have a single user with two accounts on the same
+    system, plus the problem of user account sprawl.
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，假设你为Sylvia Goldstein创建了一个用户账户`sgoldste`，另一位系统管理员创建了一个账户`syliag`。现在你面临一个安全问题，因为在同一个系统上有一个用户有两个账户，还有用户账户蔓延的问题。
+- en: User account sprawl is not a minor issue. Suppose Sylvia logs in and uses both
+    accounts to create files, install software, and possibly create dependencies for
+    groups she’s a member of. Now the problem is far more complex than simply moving
+    files from one account to another, changing user and group ownership, and removing
+    the lesser-used account from the system.
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户账户蔓延不是一个小问题。假设Sylvia登录并使用两个账户来创建文件、安装软件，可能为她所属的群组创建依赖关系。现在的问题比简单地将文件从一个账户移动到另一个账户、更改用户和群组所有权、从系统中删除使用较少的账户要复杂得多。
+- en: If the system administrators had a naming convention, the second administrator
+    might not have created the second account. Next, I discuss creating an account
+    retention policy, another method to prevent account sprawl.
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果系统管理员有一个命名规则，第二个管理员可能不会创建第二个账户。接下来，我将讨论创建账户保留政策，这是另一种防止账户扩展的方法。
+- en: Creating Account Retention Policies
+  id: totrans-200
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 创建账户保留政策
+- en: An account retention policy is a good security practice and housekeeping practice.
+    Nothing flags security scans like active accounts that no one has accessed in
+    more than 90 days. Some highly secure environments will force a password change
+    every 45 days, disable accounts after 90 days of inactivity, and remove accounts
+    that remain inactive for six months. This type of aggressive account retention
+    policy won’t fit every environment, but it certainly protects and challenges users
+    of sensitive systems to maintain their accounts or let them go.
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 账户保留政策是一种良好的安全实践和日常管理实践。没有人在超过90天没有访问的活跃账户上悬挂安全扫描。一些高度安全的环境将强制每45天更改一次密码，在账户不活跃90天后禁用账户，并删除保持不活跃超过六个月的账户。这种激进的账户保留政策并不适合每个环境，但确实保护和挑战敏感系统用户维护或放弃他们的账户。
+- en: I’m not suggesting that you adopt a policy as strict as this one. Still, you
+    should have some type of retention policy in place that you provide to your users
+    as part of an overall security and employment education program.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我并不建议您采用如此严格的政策。但是，您应该制定一种保留政策，并将其作为整体安全和雇佣教育计划的一部分提供给您的用户。
+- en: Your account retention policy should be a written policy as well as a system-level
+    policy. A system-level policy means that you must configure system-wide settings
+    for inactive account lockout and removal.
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的账户保留政策应该是一个书面政策，同时也是一个系统级政策。系统级政策意味着您必须配置全系统范围的不活跃账户锁定和删除设置。
+- en: Changing inactive account status
+  id: totrans-204
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 更改不活跃账户状态
+- en: 'To work toward a system solution, audit the default value for the number of
+    days after a password expires that the system disables the account, also known
+    as the `INACTIVE` variable:'
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了朝向系统解决方案迈进，请审计密码过期后系统禁用账户的默认天数，也称为`INACTIVE`变量：
+- en: '[PRE29]'
+  id: totrans-206
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: The `-1` means there’s no default inactive value set.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-1`表示未设置默认的不活跃值。'
+- en: 'Set the inactive value according to your company’s security policy. If you
+    have no security policy addressing this value, set it to `15` days. Some sysadmins
+    set this value to `30`. The purpose of this setting is to disable inactive accounts
+    and protect system security:'
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据公司的安全政策设置无活动值。如果没有涉及此值的安全政策，将其设置为`15`天。有些系统管理员将此值设置为`30`。此设置的目的是禁用不活跃账户并保护系统安全：
+- en: '[PRE30]'
+  id: totrans-209
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'This sets the system-wide default inactive value to `15` days. If users receive
+    the message that they need to update their password, they have 15 days before
+    the system disables the account:'
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将系统范围内的默认不活跃值设置为`15`天。如果用户收到更新密码的消息，则在系统禁用账户之前有15天的时间：
+- en: '[PRE31]'
+  id: totrans-211
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'If a user attempts to log into a system and fails, you can check their account
+    status:'
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果用户尝试登录系统并失败，您可以检查他们的账户状态：
+- en: '[PRE32]'
+  id: totrans-213
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'This user is in good standing. Perhaps they attempted to log into a host other
+    than the one they intended or typed in an incorrect password. However, another
+    user, `asmith`, contacted you complaining that they couldn’t log into the same
+    system:'
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此用户账户状态正常。也许他们尝试登录到一个不是他们打算的主机，或者输入了一个错误的密码。但是，另一位用户`asmith`向您投诉说他无法登录相同的系统：
+- en: '[PRE33]'
+  id: totrans-215
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'User `asmith` is locked out of the system. You will have to unlock their account
+    before they can log in again:'
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户`asmith`被系统锁定。您需要解锁他们的账户，然后他们才能再次登录：
+- en: '[PRE34]'
+  id: totrans-217
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: The user may log in again. Next, I will demonstrate how to take account protection
+    further with the `chage` command.
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户可以再次登录。接下来，我将演示如何使用`chage`命令进一步保护账户。
+- en: Protecting user accounts
+  id: totrans-219
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 保护用户账户
+- en: The `chage` command has several options for further protecting your user accounts
+    by forcing regular password changes, setting a minimum password change duration,
+    and so on. This section shows how to alter those settings to protect your users
+    and systems.
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`chage`命令有几个选项，可进一步保护用户账户，例如强制定期更改密码、设置最小密码更改持续时间等。本节展示如何修改这些设置以保护您的用户和系统。'
+- en: 'There are three parameters that I change for all users on the systems that
+    I manage: `Inactive days`, `Minimum number of days between password changes`,
+    and `Maximum number of days between password changes`. I change them according
+    to company policy, if one exists. Otherwise, I change them to my “defaults”:'
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我在管理的系统上为所有用户更改的三个参数是 `不活跃天数`、`密码更改间隔的最小天数` 和 `密码更改间隔的最大天数`。我根据公司政策进行更改，如果有的话。否则，我会按照我的“默认”进行更改：
+- en: '[PRE35]'
+  id: totrans-222
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: This sets the user’s password to expire every 90 days. If they don’t change
+    it, their account will be disabled 15 days after the change password date. If
+    they change their password when prompted, they won’t be able to change it again
+    until one day later.
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这会使用户的密码每 90 天过期一次。如果他们不更改密码，则在更改密码日期后的 15 天内其账户将被禁用。如果他们在提示时更改密码，则在一天后才能再次更改密码。
+- en: 'You can only change one user at a time using the `chage` command. This can
+    become cumbersome if you have more than a few users on a few servers. A scripted
+    version that covers all users is far more efficient. I’ve provided my script as
+    follows:'
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您只能使用 `chage` 命令逐个更改用户。如果您有多个用户和几台服务器，这可能会变得很麻烦。一个覆盖所有用户的脚本版本要高效得多。我提供了我的脚本如下：
+- en: '[PRE36]'
+  id: totrans-225
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: Retiring Group Accounts
+  id: totrans-226
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 退休组账户
+- en: 'Group accounts that remain on the system once they’re empty and inactive are
+    a common source of account sprawl but easily remedied. The `groupmems` command
+    can save you a lot of time and frustration by answering who, if anyone, is a member
+    of a specific group:'
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦组为空且不活跃，仍保留在系统中的组账户是账户扩展的常见来源，但很容易修复。`groupmems` 命令可以通过回答特定组中的成员是谁来为您节省大量时间和挫折感：
+- en: '[PRE37]'
+  id: totrans-228
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: The `groupmems` command options used in the example are `-g` for the group name
+    and `-l` for list.
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本示例中使用的 `groupmems` 命令选项为 `-g` 表示组名，`-l` 表示列表。
+- en: 'If there are no group members, the command displays no output:'
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果没有组成员，则命令不显示任何输出：
+- en: '[PRE38]'
+  id: totrans-231
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'On this system, the engineering group should be retired (removed from the system
+    because it’s empty). But before removing the group, you must find out if the engineering
+    group left any files they own:'
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此系统上，应该退休工程师组（从系统中移除因为空）。但在移除组之前，您必须弄清楚工程师组是否留下了任何他们拥有的文件：
+- en: '[PRE39]'
+  id: totrans-233
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: 'You should transfer the files to another user or change ownership to root to
+    secure them and then remove the empty group account:'
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您应将文件转移到另一个用户或更改所有权为 root 以确保其安全，然后移除空组账户：
+- en: '[PRE40]'
+  id: totrans-235
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: You have successfully removed the engineering account. You can re-create it
+    in the future if you need to.
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您已成功移除了工程师账户。如果需要，您可以将其来日重建。
+- en: Now that I’ve covered sprawl, I will discuss monitoring your system’s health.
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我已经讨论了扩展问题，接下来将讨论监控系统健康。
+- en: Monitoring System Health
+  id: totrans-238
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 监控系统健康
+- en: System monitoring doesn’t explicitly fall under the sprawl umbrella but is part
+    of maintaining system health. There are dozens of commercial monitoring tools
+    that you can purchase, but `sysstat` is a free one native to Linux. It’s easy
+    to install, and on Red Hat–based systems, it self-configures and begins collecting
+    data immediately. On Debian-based systems, you must enable `sysstat` to collect
+    data manually.
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统监控并不明确属于扩展问题，但是它是维护系统健康的一部分。有数十种商业监控工具可供购买，但 `sysstat` 是 Linux 上的一个免费工具。它易于安装，在基于
+    Red Hat 的系统上，它会自动配置并立即开始收集数据。在基于 Debian 的系统上，您必须手动启用 `sysstat` 来收集数据。
+- en: To enable `sysstat`’s System Activity Report (`sar`) utility to begin collecting
+    data, edit the */etc/default/sysstat* file and change the line that reads `ENABLED="false"`
+    to `ENABLED="true"`.
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要启用 `sysstat` 的系统活动报告（`sar`）工具以开始收集数据，请编辑 */etc/default/sysstat* 文件，并将 `ENABLED="false"`
+    改为 `ENABLED="true"`。
+- en: 'Then restart the `sysstat` service:'
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后重新启动 `sysstat` 服务：
+- en: '[PRE41]'
+  id: totrans-242
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: Give the system some time to begin generating activity reports. You’ll learn
+    how to generate activity reports later in this chapter.
+  id: totrans-243
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 给系统一些时间开始生成活动报告。稍后在本章中您将学习如何生成活动报告。
+- en: The `sysstat` package contains new binaries for checking performance and formatting
+    system statistics information. [Table 8-5](#binaries_in_the_sysstat_package) lists
+    the binaries and their functions. I copied the descriptions of each binary from
+    their respective man pages.
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sysstat` 软件包包含用于检查性能和格式化系统统计信息的新二进制文件。[表 8-5](#binaries_in_the_sysstat_package)
+    列出了这些二进制文件及其功能。我从各自的 man 页面复制了每个二进制文件的描述。'
+- en: Table 8-5\. Binaries in the `sysstat` package
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 8-5\. `sysstat` 软件包中的二进制文件
+- en: '| Binary | Name | Description |'
+  id: totrans-246
+  prefs: []
+  type: TYPE_TB
+  zh: '| 二进制文件 | 名称 | 描述 |'
+- en: '| --- | --- | --- |'
+  id: totrans-247
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| `cifsiostat` | CIFS statistics | The `cifsiostat` command displays statistics
+    about read and write operations on CIFS filesystems. |'
+  id: totrans-248
+  prefs: []
+  type: TYPE_TB
+  zh: '| `cifsiostat` | CIFS统计 | `cifsiostat`命令显示关于CIFS文件系统读取和写入操作的统计信息。'
+- en: '| `iostat` | CPU and device I/O statistics | The `iostat` command is used for
+    monitoring system input/output device loading by observing the time the devices
+    are active in relation to their average transfer rates. |'
+  id: totrans-249
+  prefs: []
+  type: TYPE_TB
+  zh: '| `iostat` | CPU和设备I/O统计 | `iostat`命令用于通过观察设备的活动时间与其平均传输速率的关系来监视系统输入/输出设备负载。'
+- en: '| `mpstat` | Processor-related statistics | The `mpstat` command writes to
+    standard output activities for each available processor, processor 0 being the
+    first one. |'
+  id: totrans-250
+  prefs: []
+  type: TYPE_TB
+  zh: '| `mpstat` | 处理器相关统计 | `mpstat`命令会将每个可用处理器的活动写入标准输出，其中处理器0是第一个。'
+- en: '| `pidstat` | Task statistics | The `pidstat` command monitors individual tasks
+    currently managed by the Linux kernel. |'
+  id: totrans-251
+  prefs: []
+  type: TYPE_TB
+  zh: '| `pidstat` | 任务统计 | `pidstat`命令监视Linux内核当前管理的各个任务。'
+- en: '| `sadf` | `sar` data formatting | The `sadf` command is used for displaying
+    the contents of data files created by the `sar` command. But unlike `sar`, `sadf`
+    can write its data in many different formats (CSV, XML, etc.). |'
+  id: totrans-252
+  prefs: []
+  type: TYPE_TB
+  zh: '| `sadf` | `sar`数据格式化 | `sadf`命令用于显示由`sar`命令创建的数据文件的内容。但与`sar`不同，`sadf`可以将其数据写入许多不同的格式（CSV、XML等）。'
+- en: '| `sar` | System activity reporter | The `sar` command writes to standard output
+    the contents of selected cumulative activity counters in the operating system.
+    |'
+  id: totrans-253
+  prefs: []
+  type: TYPE_TB
+  zh: '| `sar` | 系统活动报告 | `sar`命令会将操作系统中选定的累积活动计数器的内容写入标准输出。'
+- en: '| `tapestat` | Tape statistics | The `tapestat` command is used for monitoring
+    the activity of tape drives connected to a system. |'
+  id: totrans-254
+  prefs: []
+  type: TYPE_TB
+  zh: '| `tapestat` | 磁带统计 | `tapestat`命令用于监视连接到系统的磁带驱动器的活动。'
+- en: 'If you’re familiar with the `vmstat` command, which isn’t part of `sysstat`,
+    you know how the other “stat” commands work. For example, `vmstat`, on every Linux
+    system, requires that you provide a time delay interval between snapshots in seconds
+    and a specific number (count) of snapshots, with `5` being the typical value used:'
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你熟悉`vmstat`命令，它不是`sysstat`的一部分，你就知道其它“stat”命令的工作原理。例如，在每个Linux系统上，`vmstat`要求你提供以秒为间隔的时间延迟快照和一个特定数量（计数），典型值为`5`：
+- en: '[PRE42]'
+  id: totrans-256
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: 'The first run of the `vmstat` command gives averages since the last reboot:'
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`vmstat`命令的第一次运行给出自上次重启以来的平均值：'
+- en: '[PRE43]'
+  id: totrans-258
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: 'This `vmstat` command ran every five seconds with five snapshots. The other
+    “stat” commands work the same way. You provide a delay and a count. The following
+    is an `iostat` command example with two snapshots and a five-second delay:'
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每隔五秒钟运行一次`vmstat`命令，共采集五个快照。其它“stat”命令也是类似的工作方式。你需要提供一个延迟和一个计数。以下是一个包含两个快照和五秒延迟的`iostat`命令示例：
+- en: '[PRE44]'
+  id: totrans-260
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: Gathering System Activity Reports
+  id: totrans-261
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 收集系统活动报告
+- en: The `sar` command is comprehensive and versatile in its collection, reporting,
+    and saving of system activity information. You can use it like the “stat” commands
+    by supplying an interval and a count, issuing an option such as `-b` to display
+    I/O statistics, or combining the two to display your selected performance counter
+    at a specific interval.
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sar`命令在系统活动信息的收集、报告和保存方面既全面又灵活。你可以像“stat”命令那样使用它，提供一个间隔和一个计数，使用选项如`-b`来显示I/O统计信息，或者结合两者在特定间隔内显示所选性能计数器。'
+- en: 'I’ll begin with an example of using `sar` with a switch. Staying with the `-b`
+    example, here is a partial report of I/O statistics:'
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我将以一个带有开关的`sar`使用示例开始。继续使用`-b`示例，以下是部分I/O统计报告：
+- en: '[PRE45]'
+  id: totrans-264
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: 'As you can see from the report, data display begins at midnight, which is why
+    I had to truncate it. The following is an example of I/O statistical data using
+    `-b` with a count of five and a time delay of five seconds:'
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如报告所示，数据显示从午夜开始，这就是我不得不截断它的原因。以下是一个使用`-b`，计数为五，间隔为五秒的I/O统计数据示例：
+- en: '[PRE46]'
+  id: totrans-266
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: 'Finally, you can issue `sar` with a count and an interval:'
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，你可以使用`sar`命令和一个计数以及一个间隔：
+- en: '[PRE47]'
+  id: totrans-268
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: Note
+  id: totrans-269
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The default output from the `sar` command is CPU statistics. To display other
+    statistics, you must use a switch, such as `-b` for I/O data.
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sar`命令的默认输出是CPU统计信息。要显示其他统计信息，你必须使用一个开关，例如用于I/O数据的`-b`。'
+- en: The next section demonstrates how to run system activity reports and save `sar`
+    data into files.
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来的部分展示如何运行系统活动报告并将`sar`数据保存到文件中。
+- en: Formatting System Activity Reports
+  id: totrans-272
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 格式化系统活动报告
+- en: Displaying `sar` data enables you to see snapshots and performance from the
+    last 24 hours, but what if you want to capture that data to a file (the system
+    activity report) in a specific format such as CSV or XML? The `sadf` command is
+    available to you for this purpose.
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示`sar`数据能让您看到过去24小时的快照和性能情况，但如果您想以特定格式（如CSV或XML）将这些数据捕获到文件中（系统活动报告），则可以使用`sadf`命令。
+- en: To help distinguish between the `sadf` and `sar` options, remember that `sadf`
+    options are first in the command, and then `sar` options follow the double hyphen.
+    Refer to the man pages for all available options for both commands.
+  id: totrans-274
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了帮助区分`sadf`和`sar`选项，请记住在命令中首先出现`sadf`选项，然后是`sar`选项跟随双破折号。请参考man手册获取这两个命令的所有可用选项。
+- en: 'My favorite `sadf` command uses the `-d` switch to create a comma-separated
+    file that’s perfect for ingesting into a database:'
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我最喜欢的`sadf`命令使用`-d`开关来创建逗号分隔的文件，非常适合导入数据库：
+- en: '[PRE48]'
+  id: totrans-276
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE48]'
+- en: 'The system activity logs reside in */var/log/sa* and have filenames of “sa”
+    immediately followed by a number representing the day of the month. For a system
+    activity log for the tenth of the month, the datafile is *sa10*. You can specify
+    an activity log datafile from another date:'
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统活动日志位于*/var/log/sa*目录下，并以“sa”后跟当天日期的数字作为文件名。例如，用于当月第10天的系统活动日志数据文件是*sa10*。您可以指定从其他日期的活动日志数据文件：
+- en: '[PRE49]'
+  id: totrans-278
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE49]'
+- en: Note
+  id: totrans-279
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注释
+- en: '`sysstat` logs reside in */var/log/sa* on some Linux distributions, but on
+    others those logs reside in */var/log/sysstat*.'
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在某些Linux发行版中，`sysstat`日志存储在*/var/log/sa*中，但在其他发行版中，这些日志则存储在*/var/log/sysstat*中。
+- en: 'The `--` option tells the `sadf` command that the options that follow it are
+    `sar` command options and not `sadf` options. In the command `sadf -d /var/log/sa/sa10
+    -- -d`, the `-d` option following the `--` will display `sar` device information.
+    Perhaps a less confusing example is to display network information from the `sar`
+    command:'
+  id: totrans-281
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`--`选项告诉`sadf`命令其后跟随的选项是`sar`命令选项，而非`sadf`选项。在命令`sadf -d /var/log/sa/sa10 --
+    -d`中，跟在`--`后的`-d`选项将显示`sar`设备信息。也许一个不那么令人困惑的例子是显示来自`sar`命令的网络信息：'
+- en: '[PRE50]'
+  id: totrans-282
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE50]'
+- en: The `-n` is the `sar` option for network activity. `DEV` means the network device,
+    such as `lo` (loopback), `eth0`, `enp0s3`, and so on.
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-n`是网络活动的`sar`选项。`DEV`表示网络设备，如`lo`（环回）、`eth0`、`enp0s3`等。'
+- en: Summary
+  id: totrans-284
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 摘要
+- en: I’ve only scratched the surface of system health, and this chapter could be
+    an entire book. Health monitoring is extremely vital in maintaining SLAs for your
+    customers. Keeping track of system health is an essential system administrator
+    task that affects capacity and performance, security, and standard system housekeeping.
+    It’s so important that some large enterprises dedicate entire teams to it.
+  id: totrans-285
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我只是初步了解了系统健康的表面，而这一章可能需要写成一本整书。健康监控在维护客户SLA方面非常重要。跟踪系统健康是影响容量和性能、安全性以及标准系统维护的重要系统管理员任务。它如此重要，以至于一些大型企业专门成立了整个团队来处理这一任务。
+- en: In [Chapter 9](ch09.xhtml#monitoring_your_system), I cover nonhealth system
+    monitoring and network inventory systems.
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[第9章](ch09.xhtml#monitoring_your_system)中，我讨论了非健康系统监控和网络库存系统。

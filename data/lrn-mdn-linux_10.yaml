@@ -1,0 +1,602 @@
+- en: Appendix A. Helpful Recipes
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 附录A. 有用的配方
+- en: In this appendix, I’ve compiled a list of recipes for common tasks. This is
+    just a selection of recipes that I’ve gathered over time, tasks that I often carry
+    out and like to have handy as a reference. By no means is this a complete or deep
+    coverage of Linux usage and admin tasks. For a comprehensive collection of recipes,
+    I strongly recommend you check out Carla Schroder’s [*Linux Cookbook*](https://oreil.ly/53Pk9)
+    (O’Reilly), covering a range of recipes in great detail.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本附录中，我汇编了一些常见任务的配方列表。这只是我随时间收集的一些配方的选择，这些任务我经常执行，并且喜欢作为参考保留。这些配方并不是对Linux使用和管理员任务的全面或深入覆盖。对于全面的配方集合，我强烈推荐您查看Carla
+    Schroder的[*Linux Cookbook*](https://oreil.ly/53Pk9)（O'Reilly），详细介绍了各种配方。
+- en: Gathering System Information
+  id: totrans-2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 收集系统信息
+- en: 'To learn about the Linux version, kernel, and other related information, use
+    any of the following commands:'
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要了解Linux版本、内核和其他相关信息，请使用以下任一命令：
+- en: '[PRE0]'
+  id: totrans-4
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'To learn about basic hardware equipment (CPU, RAM, disks), do:'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要了解基本硬件设备（CPU、RAM、磁盘），请执行以下操作：
+- en: '[PRE1]'
+  id: totrans-6
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'To learn more about the hardware of your system, such as about the BIOS, use:'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要了解系统的硬件详细信息，如BIOS等，请使用：
+- en: '[PRE2]'
+  id: totrans-8
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Note for the previous command: other interesting options for `-t` include `system`
+    and `memory`.'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于前一个命令的说明：`-t`的其他有趣选项包括`system`和`memory`。
+- en: 'To query overall main memory and swap usage, do:'
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查询整体主存储器和交换使用情况，执行以下命令：
+- en: '[PRE3]'
+  id: totrans-11
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'To query how many file descriptors a process can have, use:'
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查询进程可以拥有多少文件描述符，请使用：
+- en: '[PRE4]'
+  id: totrans-13
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Working with Users and Processes
+  id: totrans-14
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 处理用户和进程
+- en: You can list logged-in users with either `who` or `w` (more detailed output).
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用`who`或`w`列出已登录用户（更详细的输出）。
+- en: 'To show system metrics (CPU, memory, etc.) on a per-process basis for a specific
+    user, `SOMEUSER`, use the following command:'
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要显示特定用户`SOMEUSER`的每个进程的系统指标（CPU、内存等），请使用以下命令：
+- en: '[PRE5]'
+  id: totrans-17
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'List all processes (for all users) in tree format with details by using:'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用以下命令以树形式详细列出所有用户的所有进程：
+- en: '[PRE6]'
+  id: totrans-19
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'Find a specific process (`python` here):'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找特定进程（此处为`python`）：
+- en: '[PRE7]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'To terminate a process, use its PID if you know it (and add `-9` as a parameter
+    if the process ignores this signal):'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要终止进程，如果知道其PID，请使用它（如果进程忽略此信号，请添加`-9`作为参数）：
+- en: '[PRE8]'
+  id: totrans-23
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: Alternatively, you can terminate a process by name using `killall`.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，您可以使用`killall`按名称终止进程。
+- en: Gathering File Information
+  id: totrans-25
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 收集文件信息
+- en: 'To query file details (including filesystem information such as inodes):'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查询文件详细信息（包括文件系统信息如inode），请使用：
+- en: '[PRE9]'
+  id: totrans-27
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'To learn about a command, how the shell interprets it, and where the executable
+    file is located, use:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要了解命令的工作方式、shell如何解释它以及可执行文件的位置，请使用：
+- en: '[PRE10]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: Working with Files and Directories
+  id: totrans-30
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 处理文件和目录
+- en: 'To display the content of a text file called `afile`:'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要显示名为`afile`的文本文件的内容：
+- en: '[PRE11]'
+  id: totrans-32
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'To list the contents of a directory, use `ls`, and you may wish to further
+    use the output. For example, to count the number of files in a directory, use:'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要列出目录的内容，请使用`ls`，并可能进一步使用输出。例如，要计算目录中文件的数量，请使用：
+- en: '[PRE12]'
+  id: totrans-34
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'Finding files and file content:'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找文件和文件内容：
+- en: '[PRE13]'
+  id: totrans-36
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: '[![1](Images/1.png)](#co_helpful_recipes_CO1-1)'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_helpful_recipes_CO1-1)'
+- en: Find files ending in *.conf* in directory */etc*.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在目录*/etc*中查找以*.conf*结尾的文件。
+- en: '[![2](Images/2.png)](#co_helpful_recipes_CO1-2)'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_helpful_recipes_CO1-2)'
+- en: Find “FINDME” in current directory by executing `grep`.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过执行`grep`在当前目录中查找“FINDME”。
+- en: 'To show the differences in files, use:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要显示文件差异，请使用：
+- en: '[PRE14]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'To replace characters, use `tr` like so:'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要替换字符，请使用`tr`如下所示：
+- en: '[PRE15]'
+  id: totrans-44
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'Another way to replace parts of a string is with `sed` (note that the delimiter
+    doesn’t have to be `/`, which is handy for cases where you replace content in
+    a path or URL):'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 替换字符串的另一种方法是使用`sed`（请注意分隔符不一定是`/`，这对于在路径或URL中替换内容的情况非常方便）：
+- en: '[PRE16]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'To create a file of a specific size (for testing), you can use the `dd` command,
+    as shown here:'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要创建指定大小的文件（用于测试），可以使用`dd`命令，如下所示：
+- en: '[PRE17]'
+  id: totrans-48
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: '[![1](Images/1.png)](#co_helpful_recipes_CO2-1)'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_helpful_recipes_CO2-1)'
+- en: This creates a 1 MB file (1,000 times 1 KB blocks) called *output.dat* that
+    is filled with zeros.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建名为*output.dat*的1 MB文件（由1000个1 KB块组成），其中填充了零。
+- en: Working with Redirection and Pipes
+  id: totrans-51
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用重定向和管道
+- en: In [“Streams”](ch03.xhtml#shell-streams), we discussed file descriptors and
+    streams. Here are a few recipes around this topic.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[“流”](ch03.xhtml#shell-streams)中，我们讨论了文件描述符和流。以下是围绕这个主题的几个配方。
+- en: 'File I/O redirection:'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件I/O重定向：
+- en: '[PRE18]'
+  id: totrans-54
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: '[![1](Images/1.png)](#custom_co_helpful_recipes_CO3-1)'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#custom_co_helpful_recipes_CO3-1)'
+- en: Redirect `stdout` of `*command*` into `*file*`.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将`*command*`的`stdout`重定向到`*file*`。
+- en: '[![2](Images/2.png)](#custom_co_helpful_recipes_CO3-2)'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#custom_co_helpful_recipes_CO3-2)'
+- en: Redirect `stderr` of `*command*` into `*file*`.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 `*command*` 的 `stderr` 重定向到 `*file*`。
+- en: '[![3](Images/3.png)](#custom_co_helpful_recipes_CO3-3)'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#custom_co_helpful_recipes_CO3-3)'
+- en: Redirect both `stdout` and `stderr` of `*command*` into `*file*`.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 `*command*` 的 `stdout` 和 `stderr` 都重定向到 `*file*`。
+- en: '[![4](Images/4.png)](#custom_co_helpful_recipes_CO3-4)'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#custom_co_helpful_recipes_CO3-4)'
+- en: An alternative way to redirect `stdout` and `stderr` of `*command*` into `*file*`.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 `*command*` 的 `stdout` 和 `stderr` 重定向到 `*file*` 的替代方法。
+- en: '[![5](Images/5.png)](#custom_co_helpful_recipes_CO3-5)'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#custom_co_helpful_recipes_CO3-5)'
+- en: Discard output of `*command*` (by redirecting it to */dev/null*).
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 丢弃 `*command*` 的输出（通过将其重定向到 */dev/null*）。
+- en: '[![6](Images/6.png)](#custom_co_helpful_recipes_CO3-6)'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](Images/6.png)](#custom_co_helpful_recipes_CO3-6)'
+- en: Redirect `stdin` (inputs `*file*` to `*command*`).
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 `*file*` 的输入重定向到 `*command*` 的 `stdin`。
+- en: 'To connect `stdout` of one process to `stdin` of another process, use a pipe
+    (`|`):'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要将一个进程的 `stdout` 连接到另一个进程的 `stdin`，请使用管道 (`|`)：
+- en: '[PRE19]'
+  id: totrans-68
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'To show the exit codes of each command in a pipe:'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要显示管道中每个命令的退出代码：
+- en: '[PRE20]'
+  id: totrans-70
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: Working with Time and Dates
+  id: totrans-71
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 处理时间和日期
+- en: 'To query time-related information, such as local and UTC time as well as synchronization
+    status, use:'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查询与时间相关的信息，例如本地时间、UTC 时间以及同步状态，请使用：
+- en: '[PRE21]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: Working with dates, you usually want to either get a date or timestamp for the
+    current time or convert existing timestamps from one format to another.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 处理日期时，通常需要获取当前时间的日期或时间戳，或将现有时间戳从一种格式转换为另一种格式。
+- en: 'To get the date in the format `YYYY-MM-DD`—for example, `2021-10-09`—use the
+    following:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要以 `YYYY-MM-DD` 格式获取日期（例如 `2021-10-09`），请使用以下命令：
+- en: '[PRE22]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'To generate a Unix epoch timestamp (such as `1633787676`), do:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要生成 Unix 时间戳（例如 `1633787676`），请执行：
+- en: '[PRE23]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'To create an ISO 8601 timestamp for UTC (something like `2021-10-09T13:55:47Z`),
+    you can use:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要为 UTC 创建 ISO 8601 时间戳（例如 `2021-10-09T13:55:47Z`），可以使用以下方法：
+- en: '[PRE24]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'Same ISO 8601 timestamp format but for local time:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 同样的 ISO 8601 时间戳格式，但用于本地时间：
+- en: '[PRE25]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: Working with Git
+  id: totrans-83
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用 Git
+- en: 'To clone a Git repo—that is, to make a local copy on your Linux system—use
+    the following:'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要克隆一个 Git 仓库（即在您的 Linux 系统上创建一个本地副本），使用以下命令：
+- en: '[PRE26]'
+  id: totrans-85
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: After the previous `git clone` command is completed, the Git repo will be in
+    the directory *examplerepo*, and you should execute the rest of the following
+    commands in this directory.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在上述 `git clone` 命令完成后，Git 仓库将位于 *examplerepo* 目录中，您应该在此目录中执行接下来的所有命令。
+- en: 'To view local changes in color and show where lines have been added and removed
+    side by side, use:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要以颜色显示本地更改并显示已添加和已删除行，请使用：
+- en: '[PRE27]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'To see what has changed locally (files edited, new files, removed files), do:'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查看本地发生的更改（编辑的文件、新文件、已删除的文件），请执行：
+- en: '[PRE28]'
+  id: totrans-90
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'To add all local changes and commit them:'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 添加所有本地更改并提交它们：
+- en: '[PRE29]'
+  id: totrans-92
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'To find out the commit ID of the current commit, use:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要找出当前提交的提交 ID，请使用：
+- en: '[PRE30]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'To tag a commit with ID `HASH` using the tag `ATAG`, do:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要用标签 `ATAG` 标记 ID 为 `HASH` 的提交，请执行：
+- en: '[PRE31]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'To push the local changes to a remote (upstream) repo with a tag `ATAG`:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将本地更改推送到远程（上游）仓库，并附上标签 `ATAG`：
+- en: '[PRE32]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'To see the commit history use `git log`; specifically, to get a summary, do:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查看提交历史记录，请使用 `git log`；具体来说，要获取摘要，请执行：
+- en: '[PRE33]'
+  id: totrans-100
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: System Performance
+  id: totrans-101
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 系统性能
+- en: Sometimes you need to see how fast a device is or how your Linux system performs
+    under load. Here some ways to generate system load.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有时您需要查看设备的速度或者 Linux 系统在负载下的性能。以下是生成系统负载的一些方法。
+- en: 'Simulate memory load (and also burn some CPU cycles) with the following command:'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 模拟内存负载（同时消耗一些 CPU 循环）使用以下命令：
+- en: '[PRE34]'
+  id: totrans-104
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: In the preceding pipe, `yes` generates an endless supply of `y` characters,
+    each on its own line, and then the `tr` command converts it into a continuous
+    stream of `yx` that the `head` command chops off at 450 million bytes (ca. 450
+    MB). Last but not least, we let `grep` consume the resulting `yx` block for something
+    that doesn’t exist (`z`), and hence we see no output, but it is still generating
+    load.
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在上述管道中，`yes` 生成无限数量的 `y` 字符，每个字符位于自己的一行上，然后 `tr` 命令将其转换为一个连续的 `yx` 流，`head`
+    命令将其截断为大约 450 百万字节（约 450 MB）。最后，我们让 `grep` 消耗结果的 `yx` 块以寻找不存在的内容（`z`），因此我们看不到输出，但它仍在生成负载。
+- en: 'More detailed disk usage for a directory:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更详细的目录磁盘使用情况：
+- en: '[PRE35]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'Listing free disk space (globally, in this case):'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出空闲磁盘空间（全局，本例中）：
+- en: '[PRE36]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'Load test a disk and measure I/O throughput with:'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用以下命令对磁盘进行负载测试并测量 I/O 吞吐量：
+- en: '[PRE37]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'

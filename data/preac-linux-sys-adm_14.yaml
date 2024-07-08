@@ -1,0 +1,372 @@
+- en: Chapter 14\. Continuing Your Education
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第14章 继续你的教育
+- en: It doesn’t matter how technical you are. You must continue learning throughout
+    your career. And if you’re certified, many certifications require some continuing
+    education units (CEUs) per year that you must document and submit to the certifying
+    authority. But continuing your education involves more than just gathering certifications
+    and collecting CEUs yearly to maintain those certifications. Continuing your education
+    means expanding your horizons, learning something new, and enhancing your skills
+    as a technologist.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论你有多么技术性，你都必须在整个职业生涯中继续学习。而且如果你获得了认证，许多认证都要求每年完成一定数量的继续教育单位（CEU），你必须记录并提交给认证机构。但继续教育不仅仅是获取认证和每年收集CEU以维持这些认证。继续教育意味着拓展视野，学习新知识，并提升自己作为技术专家的能力。
+- en: This chapter focuses on educational opportunities, including internal corporate
+    training, certification training, independent study, and community college and
+    university classes.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章重点介绍教育机会，包括内部企业培训、认证培训、独立研究以及社区学院和大学课程。
+- en: Training Internally
+  id: totrans-3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 内部培训
+- en: Often, the least expensive and most accessible training is that which your company
+    produces, conducts, or hosts. I’m not referring to those annual refresher courses
+    we must take to satisfy regulatory requirements. I’m referring to technical résumé-building
+    classes that enhance your skills and knowledge. Internal training is either training
+    that your company develops and delivers to employees or training that your company
+    purchases and delivers on-premises. The delivery method depends on many factors,
+    such as cost, instructor availability, time, and other logistical considerations.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常，最经济且最便捷的培训是公司自主开发、组织或主办的培训。我不是指我们必须参加以满足监管要求的年度复习课程。我指的是增强你技能和知识的技术简历构建课程。内部培训是指你的公司为员工开发并提供的培训，或者你的公司购买并在现场提供的培训。培训的交付方式取决于诸多因素，如成本、讲师可用性、时间和其他后勤考虑。
+- en: There is a downside to internal training, and it’s that the training occurs
+    on-site. Yes, one of the advantages is also a disadvantage. When you train at
+    your local facility, you risk having users, colleagues, or your manager interrupt
+    your training to have you fix something that will “only take a minute.” These
+    disruptions and interruptions, while possibly necessary, are detrimental to your
+    learning. You miss valuable information, demonstrations, and lessons that are
+    often difficult to go back and pick up on your own. Personally, every on-premises
+    class I’ve taken has been interrupted by support calls. My managers always reminded
+    me that “training is a privilege” and “the job comes first” when I requested dedicated
+    time for training. Be prepared for your training to be interrupted or even discontinued
+    due to the requirements of your job.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内部培训也存在一个弊端，那就是培训发生在现场。是的，其中一个优点也是一个缺点。当你在本地设施接受培训时，你可能会面临用户、同事或者你的经理来打断你的培训，让你去“只需要一分钟”的修复某些问题。这些中断和打扰，虽然可能是必要的，但对你的学习是有害的。你会错过宝贵的信息、演示和课程，这些内容往往很难自己回去再补习。就我个人而言，我参加的每一次现场课程都被支持电话打断过。当我请求专门的培训时间时，我的经理总是提醒我“培训是一种特权”和“工作是第一位”的理念。要做好培训可能会被打断甚至中止的准备，原因是你工作的要求。
+- en: Seeking Certification
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 寻求认证
+- en: In the late 1990s and early 2000s, there was an industry-wide effort to get
+    technical people certified. However, many certification classes focused so much
+    on teaching test answers that the learning was thin, and experienced technical
+    folks considered certifications to have little value. Certification gets a bad
+    rap because of this trend. Professionals offended by the number of freshly certified
+    IT people then began to seek “higher level” certifications such as Cisco’s CCNA,
+    CCNE, and others because they were perceived as legitimate, while those from other
+    vendors weren’t.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在1990年代末和2000年代初，全行业开始大力推广技术人员认证。然而，许多认证课程过于关注教授考试答案，导致学习内容肤浅，经验丰富的技术人员认为这些认证几乎没有价值。由于这种趋势，认证因而声名狼藉。对于新获得认证的IT人士感到不满的专业人士开始寻求“更高级别”的认证，如思科的CCNA、CCNE等，因为这些认证被认为更具合法性，而其他供应商的认证则不被如此看待。
+- en: Fast-forward to present day, and IT certifications are still a thing; certain
+    certifications are still considered more legitimate and worthy than others. A
+    good example is the Certified Information Systems Security Professional (CISSP).
+    This high-level certification has become so popular that an entire industry is
+    now built around it. There are courses, study guides, boot camps, exam pass guarantees,
+    cram sessions, hundreds of books, and more. When the industry becomes saturated
+    with this certification, which was once very highly regarded, a new contender
+    for everyone’s attention and money will rise up to replace it as the next big
+    certification to earn.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 快进到现在，IT认证依然很重要；某些认证仍然被认为比其他认证更正统和有价值。一个很好的例子是认证信息系统安全专业人员（CISSP）。这种高级认证变得如此流行，以至于整个行业现在围绕它建立起来。有课程、学习指南、集训营、考试通过保证、突击培训，数以百计的书籍等等。当这种曾经极具声望的认证市场饱和时，一个新的竞争者将会崛起，取代它成为下一个大热门认证。
+- en: Certifications can be valuable, but I have reservations about jumping onto a
+    trend that’s likely to die out as quickly as it appeared. You should seek time-
+    and job-tested certifications that offer value for your current job or the job
+    you want.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 认证可能很有价值，但我对追逐可能会很快消失的潮流有所保留。你应该寻找经过时间和工作检验的认证，这些认证对你当前的工作或你想要的工作有价值。
+- en: Preparing for a Certification Exam
+  id: totrans-10
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 为认证考试做准备
+- en: I’ve heard that “experience is the best teacher,” but experienced professionals
+    can still fail expensive certification exams. Do yourself a favor and prepare
+    for the exam regardless of your level of expertise, experience, or job duties.
+    Exams have a way of wording questions that can confuse or mislead the most experienced
+    professionals. Don’t take the exam lightly, and don’t assume that you already
+    know everything. Certification exams are serious business.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我听说过“经验是最好的老师”，但有经验的专业人士仍然可能在昂贵的认证考试中失败。不论你的专业水平、经验或工作职责如何，都请为考试做好准备。考试往往用措辞方式提问，可能会让最有经验的专业人士感到困惑或误导。不要轻视考试，也不要假设你已经了解一切。认证考试是一项严肃的事务。
+- en: Hundreds of books and other preparation materials are available for free or
+    at a reasonable cost. You should take practice exams to learn how exam question
+    writers phrase scenarios. Most exams are scenario-based. This means that you have
+    to be able to *apply* your knowledge and not just remember facts. Remembering
+    facts will help you with some questions, but you must read a scenario and decide
+    based on your options. And the scenarios and questions are rarely straightforward.
+    My best advice is to use at least two different study sources by different authors
+    to have a range of perspectives and practice questions written by multiple authors.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数以百计的书籍和其他准备材料可以免费或以合理的价格获取。你应该参加练习考试，了解考试题目的场景表述方式。大多数考试都是基于场景的。这意味着你必须能够*应用*你的知识，而不仅仅是记住事实。记住事实会帮助你回答一些问题，但你必须阅读一个场景并根据你的选择做出决定。而场景和问题很少是直接的。我最好的建议是至少使用两种不同作者的不同学习来源，以获得多角度的观点和多作者撰写的练习题目。
+- en: Taking the Exam
+  id: totrans-13
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参加考试
+- en: On the day of your exam, arrive at the testing center a little early so you
+    can sign in, calm down, use the restroom, and get into a test-taking mindset.
+    The test proctor will escort you into the exam room, which is sometimes private
+    but can be a room where multiple people are also taking exams. Before entering
+    the exam room, the proctor will have you empty your pockets, remove your jacket,
+    and surrender your cell phone. Your belongings will be placed in a locker while
+    you take the exam. If you’re allowed to have any scratch paper and a pen, those
+    will be provided to you at exam time. Proctors will advise you of exam rules and
+    conduct during the exam. Once you’re finished with the exam, instructions will
+    appear on the screen to tell you what to do next, typically returning to the main
+    desk to receive your exam results. Most exams are scored when you finish them,
+    so you’ll know whether you passed before leaving the exam facility. The proctor
+    may provide you with your exam results. The proctor will also return your belongings
+    to you from your locker.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在考试当天，早点到达考试中心，这样你可以签到、冷静下来、使用洗手间，并进入考试状态。考试监考员会带领你进入考试房间，有时是私人的，但也可能是多人同时参加考试的房间。在进入考试房间之前，监考员会让你掏空口袋、脱掉外套并交出手机。你的个人物品会被放在储物柜里，你在考试期间将使用提供的草稿纸和笔。监考员会告知你考试规则和考试期间的行为准则。一旦完成考试，屏幕上会显示下一步的指示，通常是返回主桌接收你的考试结果。大多数考试在完成时就会得分，所以你会在离开考试场地之前知道是否通过。监考员可能会提供你的考试结果。监考员还会从储物柜中归还你的个人物品。
+- en: If you fail an exam and want to retake it, resume your studies as soon as possible
+    while the exam questions and subject matter are fresh in your mind. Your exam
+    results will often highlight your strongest and weakest topics so that you can
+    focus on those before you retake the exam. Do retake the exam until you pass.
+    Once you’re certified, no one will care how many times you have to take the exam.
+    Use your new certified designation in your email signature, LinkedIn profile,
+    professional correspondence, and online profiles. The next section covers independent
+    study to enhance your technical skills.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你考试不及格想要重考，尽快恢复学习，考试题和考试内容仍然新鲜在你脑海中。你的考试结果通常会突出你最擅长和最薄弱的主题，这样你可以在重考之前集中精力处理这些问题。确保重考直到通过。一旦你获得认证，没人会在意你考了多少次。在你的电子邮件签名、LinkedIn个人资料、专业通信和在线资料中使用你的新认证名称。下一节将介绍独立学习，以提升你的技术技能。
+- en: Educating Yourself
+  id: totrans-16
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 自我教育
+- en: There’s nothing wrong with earning a certification. No one will ever view it
+    as a negative career move, although it might not impact your current or future
+    job success. If certifications aren’t your thing, try some independent study.
+    At one time, in IT shops, training was almost nonexistent. Companies didn’t want
+    to pay for professional development training; the alternative is to educate yourself
+    at your own expense and time.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 获得认证没有什么错。没人会把它视为负面的职业举动，尽管它可能不会影响你当前或未来的职业成功。如果认证不适合你，可以尝试一些独立学习。曾经，在IT领域，培训几乎不存在。公司不愿意为专业发展培训付费；而你可以自己承担费用和时间来进行教育。
+- en: I have spent thousands of dollars and many, many hours educating myself. I purchased
+    and set up multiple systems in my garage, onto which I installed various operating
+    systems and experimented. I installed operating systems, applications, and automation
+    software. At one time, I had a Hyper-V infrastructure, a vSphere infrastructure,
+    dozens of virtual machines comprising multiple Linux distributions, multiple Microsoft
+    desktop and server systems, and even a few one-offs such as FreeBSD, FreeDOS,
+    and a few others that I can’t recall. I would solve hardware, software, networking,
+    printing, and application problems independently. Expanding my knowledge beyond
+    my day job has kept me gainfully employed in full-time corporate jobs and a healthy
+    freelance career for over 20 years. Part of my independent-study result is what
+    you’re currently reading in this book.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我花费了数千美元和无数个小时来进行自我教育。我购买并在车库里设置了多个系统，安装了各种操作系统并进行了实验。我安装了操作系统、应用程序和自动化软件。曾经，我拥有一个Hyper-V基础架构，一个vSphere基础架构，数十台虚拟机，包括多个Linux发行版、多个微软桌面和服务器系统，甚至还有一些个别的系统，如FreeBSD、FreeDOS和其他一些我记不清的系统。我会独立解决硬件、软件、网络、打印和应用程序问题。在日常工作之外扩展我的知识，让我在全职企业工作和健康的自由职业生涯中保持了超过20年的持续就业。你当前正在阅读的部分，是我独立学习的成果之一。
+- en: Independent study can make you stand out in a crowd. For example, a very old
+    Solaris system in one of our computer labs had experienced a failure. Due to layoffs
+    and attrition, no one knew how to fix the system because the version of Solaris
+    was so old. Unfortunately, the system owners also didn’t know how to fix it, but
+    it had to be fixed because real dependencies were built around it. A company-wide
+    email was issued to find someone who knew how to fix this computer dinosaur. I
+    saw the email but ignored it until one of my colleagues, who knew of my independent
+    study and history of solving weird problems, spoke up and volunteered me for the
+    task. I successfully got the system working again that afternoon. The customer
+    was grateful, and I received a few accolades and a gift card for a nice dinner
+    for my efforts.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 独立学习可以使你在人群中脱颖而出。例如，我们一个计算机实验室中非常老旧的Solaris系统遇到了故障。由于裁员和自然减员，没有人知道如何修复这个系统，因为Solaris的版本太旧了。不幸的是，系统所有者也不知道如何修复它，但必须修复它，因为真正的依赖关系建立在它周围。公司发出了一封全公司邮件，希望能找到知道如何修复这个老古董计算机的人。我看到了这封邮件，但忽略了它，直到我的一位同事，他知道我有独立学习的经历和解决奇怪问题的历史，站出来为我自愿承担了这个任务。那天下午，我成功地让系统重新工作了起来。客户非常感激，我也因此收到了一些表扬和一张用于美好晚餐的礼品卡。
+- en: Independent study doesn’t require a big investment in hardware and software.
+    You can sign up for free or inexpensive virtual infrastructure and explore cloud
+    solutions, N-tier database setups, peer-to-peer networking, software development,
+    and other technologies and solutions that would cost thousands of dollars to build
+    on your own. Through independent discovery and exploration, you can develop skills
+    with technologies you ordinarily wouldn’t have access to. I encourage you to search
+    online to find independent-study opportunities.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 独立学习不需要在硬件和软件上做大投资。你可以免费或廉价地注册虚拟基础设施，探索云解决方案、N层数据库设置、点对点网络、软件开发以及其他成千上万美元才能自己构建的技术和解决方案。通过独立的发现和探索，你可以开发出与通常无法接触到的技术相关的技能。我鼓励你在线搜索以找到独立学习的机会。
+- en: The next section explores a newer aspect of training in traditional colleges
+    and universities.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来的部分探讨了传统学院和大学培训的一个新方面。
+- en: Formalizing Your Education
+  id: totrans-22
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 正式化您的教育
+- en: During my more than 25 years in the IT industry, I’ve found that coworkers who
+    don’t have degrees are about as common as those who do. I’ve had managers who
+    never went to a day of college. I’ve also worked with some people who earned master’s
+    and PhD degrees in fields other than IT. Many of them, like myself, came to IT
+    from other industries as career changers. There are multiple reasons for IT ranks
+    being filled with people with degrees as diverse as psychology, English, and physics.
+    Traditional colleges and universities didn’t support IT training until somewhat
+    recently. Sure, a few colleges and universities offered management information
+    systems (MIS) and computer information systems (CIS) degrees before that time.
+    Still, these programs were light on content and not well-respected in the industry
+    in the early days. These days, full degree programs cover game development, data
+    science, networking, security, and cloud technologies.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我超过25年的IT行业生涯中，我发现没有学位的同事与有学位的同事数量差不多。我有过从未上过一天大学的经理。我也曾与一些在IT以外领域获得硕士和博士学位的人合作过，他们中的许多人，就像我一样，是从其他行业转行而来。IT领域的人才涵盖了心理学、英语和物理学等多种学科背景，原因有很多。直到最近，传统的大学和大学并不支持IT培训。当然，在此之前，一些学院和大学提供了管理信息系统（MIS）和计算机信息系统（CIS）学位。尽管如此，这些项目内容较少，在早期并不受行业尊重。如今，全面的学位课程涵盖了游戏开发、数据科学、网络、安全和云技术。
+- en: One of the best approaches to advanced IT training is that some colleges and
+    universities offer remote, online, and self-paced study, which is optimal for
+    working professionals who want to further their education and skills without the
+    traditional residence requirements. But not all degree programs are created equal.
+    Some programs are not well-received in the industry, and you should research before
+    spending thousands of dollars on a degree that many employers will dismiss as
+    inadequate.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 高级IT培训的最佳方法之一是，一些学院和大学提供远程、在线和自主学习，这对希望进一步教育和提升技能而又不想遵循传统住宿要求的职业人士来说是最理想的。但并非所有学位课程都一样。有些课程在行业中的接受度并不高，因此在花费数千美元获得许多雇主会认为不足够的学位之前，你应该进行调查。
+- en: For example, security is a hot topic right now, and many colleges offer security
+    training and degree programs, some of which also have a certification component.
+    Do your research to find out which of them your employer supports. If your employer
+    has a tuition reimbursement program, ask the coordinator if the college you’re
+    exploring is on the approved list. If it isn’t, keep looking until you find one
+    that is.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，安全问题目前是一个热门话题，许多大学提供安全培训和学位课程，其中一些还有认证组成部分。做好调查，找出你的雇主支持哪些。如果你的雇主有学费补偿计划，请问协调员你所探索的学院是否在批准列表上。如果不在，继续寻找直到找到合适的。
+- en: The next section covers on-the-job training, which means gaining experience
+    and education by doing a job.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来的部分涵盖了在职培训，意味着通过工作获得经验和教育。
+- en: Using Your Job as Education
+  id: totrans-27
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 利用你的工作作为教育的一部分
+- en: Checking job descriptions might lead you to believe that some magical equation
+    translates years on the job to years of education, and you’d be right. The magical
+    ratio is one year of education equals two years of experience. This isn’t my opinion
+    but an accepted industry standard. A [document](https://oreil.ly/SSE3k) provided
+    by Coordinated Care Services, Inc. (CCSI) states it explicitly for a range of
+    education and experience. Education is important, but job experience is the real
+    winner for landing most industry jobs.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查工作描述可能会让你相信，有些神奇的方程式能够将工作年限转化为教育年限，而这是正确的。这个神奇的比率是一年的教育等于两年的经验。这不是我的观点，而是一个公认的行业标准。由协调护理服务公司（CCSI）提供的[文件](https://oreil.ly/SSE3k)明确说明了各种教育和经验的范围。教育很重要，但工作经验是大多数行业工作的真正制胜因素。
+- en: Multiple online sources discuss the struggle between education and experience.
+    Search for yourself using “experience vs. education” and you’ll see. The debate
+    has raged for years. When you have no experience, the requirement for experience
+    is a high barrier to employment.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 多个在线来源讨论了教育与经验之间的斗争。自己搜索“经验与教育”你就能看到。这场辩论已经进行多年。当你没有经验时，经验的要求就成了就业的高门槛。
+- en: To solve the education versus experience dilemma is to gain on-the-job experience
+    to complement your education. But how do you gain experience when you have none?
+    You should explore volunteer opportunities, internships, and student apprenticeships,
+    as well as documenting your work and research.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 解决教育与经验之间的问题是通过工作经验来补充你的教育。但是当你没有经验时该如何获得经验呢？你应该探索志愿机会、实习和学生学徒项目，并记录你的工作和研究。
+- en: Volunteer opportunities don’t always present themselves—you must look for them.
+    You could offer desktop and network support at churches, local theaters, volunteer
+    organizations, schools, and even commercial businesses such as law firms, restaurants,
+    and retail stores. Explain that you want to gain job experience and would like
+    to volunteer your time for desktop support, network support, security, document
+    management, website creation and maintenance, and other computer-related tasks.
+    Many businesses either can’t afford to hire IT support or don’t need someone full-time
+    and will welcome the opportunity to partner with you.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 志愿机会并不是时常自动出现——你必须自己去寻找。你可以在教堂、当地剧院、志愿组织、学校，甚至像律师事务所、餐馆和零售店这样的商业企业提供桌面和网络支持。解释清楚你想积累工作经验，愿意为桌面支持、网络支持、安全、文档管理、网站创建与维护以及其他与计算机相关的任务提供志愿时间。许多企业要么无法负担聘请IT支持，要么不需要全职人员，他们会乐意与你合作。
+- en: Internships and student apprenticeships are excellent ways to gain real job
+    experience. These jobs, often subsidized by the government, colleges, or businesses,
+    offer you employment that often is part of a degree, work-study, or scholarship
+    program. Some internships and apprenticeships are competitive rather than based
+    on need alone. Check with your school counselor, local employment office, or online
+    sources to find out about such programs in your area.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 实习和学生学徒是获得真实工作经验的绝佳途径。这些工作通常由政府、学院或企业资助，经常是学位、工作研究或奖学金计划的一部分。一些实习和学徒项目是竞争性的，而不仅仅是基于需求。咨询你的学校顾问、当地就业办公室或在线来源，了解你所在地区的这类项目。
+- en: You should also document your research and work. For example, if you build computers,
+    install and administer Linux systems, build specialized hardware, or code your
+    own applications, you can document this work and add it to your résumé. Your work
+    has career relevance and value to a potential employer, so write it down.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你还应该记录你的研究和工作。例如，如果你建造计算机，安装和管理Linux系统，制造专用硬件，或编写自己的应用程序，你可以记录这些工作并添加到你的简历中。你的工作对潜在雇主有职业相关性和价值，所以要把它写下来。
+- en: Once employed, try to learn everything you can about the business. Learn its
+    business cycles, profitable areas, weaknesses, vulnerabilities, position in the
+    marketplace, and current outlook.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦就业，尽量了解企业的一切。了解它的业务周期、盈利区域、弱点、脆弱性、市场定位和当前展望。
+- en: Summary
+  id: totrans-35
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 总结
+- en: Education and training are both important to your career arc. You must maintain
+    your technical edge by keeping up with the latest versions, updates, security
+    issues, and improvements in your industry. You must keep your certifications up
+    to date with continuing education units and take the latest exams. Remember to
+    document all software and hardware vendors, versions, and special features with
+    which you work in your job because these items are important résumé builders.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 教育和培训对于你的职业发展都很重要。你必须通过跟上最新版本、更新、安全问题和行业改进来保持你的技术优势。你必须通过继续教育单位和参加最新的考试来保持你的认证更新。记得记录你在工作中使用的所有软件和硬件供应商、版本和特殊功能，因为这些项目对简历建设至关重要。
+- en: It’s important to note that your value increases with everything you learn,
+    whether from a class or on the job. Learn all you can from every possible source,
+    and demonstrate your ability to put your learning into practice at the command
+    line or in the data center.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 需要注意的是，你学到的每一样东西都会增加你的价值，无论是从课堂上还是从工作中学到的。从一切可能的来源学习尽可能多的东西，并展示你能够在命令行或数据中心实践你的学习能力。
+- en: The next and final chapter of this book covers making career moves. In it, I
+    discuss starting your own business, moving into management, and a lot of general
+    information on moving your career forward and avoiding pitfalls along the way.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这本书的下一章也是最后一章涵盖了职业生涯的转变。在其中，我讨论了如何创业、转入管理岗位，以及关于推动职业发展并避免陷阱的大量通用信息。

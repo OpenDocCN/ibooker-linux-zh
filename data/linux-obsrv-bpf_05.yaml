@@ -1,0 +1,1805 @@
+- en: Chapter 4\. Tracing with BPF
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第四章。使用BPF进行跟踪
+- en: In software engineering, tracing is a method to collect data for profiling and
+    debugging. The objective is to provide useful information at runtime for future
+    analysis. The main advantage of using BPF for tracing is that you can access almost
+    any piece of information from the Linux kernel and your applications. BPF adds
+    a minimum amount of overhead to the system’s performance and latency in comparison
+    with other tracing technologies, and it doesn’t require developers to modify their
+    applications for the only purpose of gathering data from them.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在软件工程中，跟踪是一种收集数据以进行性能分析和调试的方法。其目的是在运行时提供有用的信息以供将来分析。使用BPF进行跟踪的主要优势在于，您可以访问来自Linux内核和您的应用程序几乎任何信息。与其他跟踪技术相比，BPF对系统性能和延迟的开销最小，并且不要求开发人员为了从中收集数据而修改其应用程序。
+- en: The Linux kernel provides several instrumentation capabilities that can be used
+    in conjunction with BPF. In this chapter we talk about these different capabilities.
+    We show you how the kernel exposes those capabilities in your operating system
+    so that you know how to find the information available to your BPF programs.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux内核提供了几种可与BPF结合使用的仪器化能力。在本章中，我们讨论这些不同的能力。我们向您展示内核如何在您的操作系统中公开这些能力，以便您知道如何找到您的BPF程序可用的信息。
+- en: Tracing’s end goal is to provide you with a deep understanding of any system
+    by taking all of the available data and presenting it to you in a useful way.
+    We’re going to talk about a few different data representations and how you can
+    use them in different scenarios.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 跟踪的最终目标是通过获取所有可用数据并以有用的方式呈现给您，从而让您对任何系统有深入的理解。我们将讨论几种不同的数据表示以及您如何在不同的场景中使用它们。
+- en: Beginning in this chapter, we’re going to use a powerful toolkit to write BPF
+    programs, the BPF Compiler Collection (BCC). BCC is a set of components that makes
+    building BPF programs more predictable. Even if you master Clang and LLVM, you
+    won’t probably want to spend more time than necessary building the same utilities
+    and ensuring that the BPF verifier doesn’t reject your programs. BCC provides
+    reusable components for common structures, like Perf event maps, and integration
+    with the LLVM backend to provide better debugging options. On top of that, BCC
+    includes bindings for several programming languages; we’re going to use Python
+    in our examples. These bindings allow you to write the user-space part of your
+    BPF programs in a high-level language, which results in more useful programs.
+    We also use BCC in following chapters to make our examples more concise.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从本章开始，我们将使用一个强大的工具包来编写BPF程序，即BPF编译器集合（BCC）。BCC是一组组件，使构建BPF程序更加可预测。即使您精通Clang和LLVM，您也可能不想花费比必要更多的时间来构建相同的实用程序，并确保BPF验证器不会拒绝您的程序。BCC提供了用于常见结构的可重用组件，如Perf事件映射，并与LLVM后端集成，以提供更好的调试选项。此外，BCC还包括对几种编程语言的绑定；我们将在示例中使用Python。这些绑定允许您使用高级语言编写BPF程序的用户空间部分，从而产生更有用的程序。我们还将在接下来的章节中继续使用BCC，以使我们的示例更加简洁。
+- en: The first step to be able to trace programs in the Linux kernel is to identify
+    the extension points that it provides for you to attach BPF programs. Those extension
+    points are commonly called *probes*.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 能够在Linux内核中跟踪程序的第一步是识别它为您提供的用于附加BPF程序的扩展点。这些扩展点通常被称为*探针*。
+- en: Probes
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 探针
+- en: 'One of the definitions in the English dictionary for the word *probe* is as
+    follows:'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 英语词典中“探针”一词的一个定义如下：
+- en: An unmanned exploratory spacecraft designed to transmit information about its
+    environment.
+  id: totrans-8
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: 一个无人探测航天器，设计用于传输有关其环境的信息。
+- en: This definition evokes memories of sci-fi movies and epic NASA missions in our
+    minds, and probably in yours too. When we talk about tracing probes, we can use
+    a very similar definition.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个定义唤起了我们关于科幻电影和史诗般的NASA任务的回忆，也可能唤起了你的回忆。当我们谈论跟踪探针时，我们可以使用非常类似的定义。
+- en: Tracing probes are exploratory programs designed to transmit information about
+    the environment in which they are executed.
+  id: totrans-10
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: 跟踪探针是设计用于传输有关其执行环境信息的探索性程序。
+- en: They collect data in your system and make it available for you to explore and
+    analyze. Traditionally, using probes in Linux involved writing programs that were
+    compiled into kernel modules, which could cause catastrophic problems in production
+    systems. Over the years, they evolved to be safer to execute but still cumbersome
+    to write and test. Tools like SystemTap established new protocols to write probes
+    and paved the way to get much richer information from the Linux kernel and all
+    programs running on user-space.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它们在系统中收集数据，并使其可供您探索和分析。在Linux中传统上使用探测点涉及编写编译成内核模块的程序，这可能会在生产系统中造成严重问题。多年来，它们已经进化为更安全的执行方式，但仍然繁琐地编写和测试。像SystemTap这样的工具建立了新的协议来编写探测点，并为从Linux内核和所有运行在用户空间的程序中获取更丰富信息铺平了道路。
+- en: BPF piggybacks on tracing probes to collect information for debugging and analysis.
+    The safety nature of BPF programs makes them more compelling to use than tools
+    that still rely on recompiling the kernel. Re-compiling the kernel to include
+    external modules can introduce a risk of crashes due to missbehaving code. The
+    BPF verifier eliminates this risk by analyzing the program before loading in the
+    kernel. The BPF developers took advantage of probe definitions, and modified the
+    kernel to execute BPF programs rather than kernel modules when a code execution
+    finds one of those definitions.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF通过跟踪探测点来收集调试和分析信息。BPF程序的安全性质使其比仍依赖于重新编译内核的工具更具吸引力。重新编译内核以包括外部模块可能会由于代码行为不端引入崩溃风险。BPF验证器通过在加载到内核之前分析程序来消除此风险。BPF开发者利用了探测点定义，并修改了内核以执行BPF程序，而不是在代码执行时加载内核模块。
+- en: Understanding the different types of probes that you can define is fundamental
+    to exploring what’s happening within your system. In this section, we classify
+    the different probe definitions, how to discover them in your system, and how
+    to attach BPF programs to them.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 了解您可以定义的不同类型的探测点对于探索系统内部发生的情况至关重要。在本节中，我们分类了不同的探测点定义，如何在您的系统中发现它们，以及如何将BPF程序附加到它们上。
+- en: 'In this chapter, we cover four different types of probes:'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们涵盖了四种不同类型的探测点：
+- en: Kernel probes
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核探测点
+- en: These give you dynamic access to internal components in the kernel.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些点使您可以动态访问内核中的内部组件。
+- en: Tracepoints
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 跟踪点
+- en: These provide static access to internal components in the kernel.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些提供对内核中内部组件的静态访问。
+- en: User-space probes
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户空间探测点
+- en: These give you dynamic access to programs running in user-space.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些点使您可以动态访问运行在用户空间程序中的内容。
+- en: User statically defined tracepoints
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户静态定义的跟踪点
+- en: These allow static access to programs running in user-space.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些允许静态访问运行在用户空间的程序。
+- en: Let’s begin with kernel probes.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们从内核探测点开始。
+- en: Kernel Probes
+  id: totrans-24
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 内核探测点
+- en: Kernel probes allow you to set dynamic flags, or breaks, in almost any kernel
+    instruction with a minimum of overhead. When the kernel reaches one of these flags,
+    it executes the code attached to the probe, and then resumes its usual routine.
+    Kernel probes can give you information about anything happening in your system,
+    such as files opened in your system and binaries being executed. One important
+    thing to keep in mind about kernel probes is that they don’t have a stable application
+    binary interface (ABI), which means that they might change between kernel versions.
+    The same code might stop working if you try to attach the same probe to two systems
+    with two different kernel versions.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核探测点允许您在几乎任何内核指令上设置动态标志或断点，并且开销最小。当内核达到这些标志时，它会执行与探测点附加的代码，然后恢复其通常的例程。内核探测点可以为您提供关于系统中发生的任何事情的信息，例如在系统中打开的文件和正在执行的二进制文件。关于内核探测点需要记住的一件重要事情是它们没有稳定的应用程序二进制接口（ABI），这意味着它们可能会在内核版本之间发生变化。如果尝试将相同的探测点附加到具有两个不同内核版本的系统上，相同的代码可能会停止工作。
+- en: 'Kernel probes are divided into two categories: *kprobes* and *kretprobes*.
+    Their use depends on where in the execution cycle you can insert your BPF program.
+    This section guides you on how to use each one of them to attach BPF programs
+    to those probes and extract information from the kernel.'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核探测点分为两类：*kprobes* 和 *kretprobes*。它们的使用取决于您可以在执行周期中的何处插入您的BPF程序。本节指导您如何使用每一个来将BPF程序附加到这些探测点上，并从内核中提取信息。
+- en: Kprobes
+  id: totrans-27
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: Kprobes
+- en: Kprobes allow you to insert BPF programs before any kernel instruction is executed.
+    You need to know the function signature that you want to break into, and as we
+    mentioned earlier, this is not a stable ABI, so you’ll want to be careful setting
+    these probes if you’re going to run the same program in different kernel versions.
+    When the kernel execution arrives to the instruction where you set your probe,
+    it sidesteps into your code, runs your BPF program, and returns the execution
+    to the original instruction.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Kprobes 允许你在执行任何内核指令之前插入 BPF 程序。你需要知道要中断的函数签名，并且正如前面提到的，这不是一个稳定的 ABI，因此如果要在不同的内核版本中运行相同的程序，设置这些探针时需要格外小心。当内核执行到设置探针的指令时，它会跳转到你的代码中，运行你的
+    BPF 程序，然后返回到原始指令的执行中。
+- en: 'To show you how to use kprobes, we’re going to write a BPF program that prints
+    the name of any binary that’s executed in your system. We’re going to use the
+    Python frontend for the BCC tools in this example, but you can write it with any
+    other BPF tooling:'
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 展示如何使用 kprobes，我们将编写一个 BPF 程序，打印在系统中执行的任何二进制文件的名称。在这个示例中，我们将使用 BCC 工具的 Python
+    前端，但你也可以使用其他 BPF 工具来编写它：
+- en: '[PRE0]'
+  id: totrans-30
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO1-1)'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO1-1)'
+- en: Our BPF program starts. The helper `bpf_get_current_comm` is going to fetch
+    the current command’s name that the kernel is running and store it in our `comm`
+    variable. We’ve defined this as a fixed-length array because the kernel has a
+    16-character limit for command names. After getting the command name, we print
+    it in our debug trace, so the person running the Python script can see all commands
+    captured by BPF.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们的 BPF 程序开始运行。辅助函数 `bpf_get_current_comm` 将获取内核正在运行的当前命令名称，并将其存储在我们的 `comm`
+    变量中。我们将其定义为固定长度数组，因为内核对命令名称有一个 16 字符的限制。在获取命令名称后，我们将其打印在调试跟踪中，以便运行 Python 脚本的人可以看到
+    BPF 捕获的所有命令。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO1-2)'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO1-2)'
+- en: Load the BPF program into the kernel.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 BPF 程序加载到内核中。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO1-3)'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO1-3)'
+- en: Associate the program with the `execve` syscall. The name of this syscall has
+    changed in different kernel versions, and BCC provides a function to retrieve
+    this name without you having to remember which kernel version you’re running.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将程序与 `execve` 系统调用关联起来。这个系统调用的名称在不同的内核版本中可能会有所变化，而 BCC 提供了一个函数，可以获取这个名称，而无需记住你正在运行哪个内核版本。
+- en: '[![4](assets/4.png)](#co_tracing_with_bpf_CO1-4)'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_tracing_with_bpf_CO1-4)'
+- en: The code outputs the trace log, so you can see all of the commands that you’re
+    tracing with this program.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该代码输出跟踪日志，因此你可以看到通过此程序跟踪的所有命令。
+- en: Kretprobes
+  id: totrans-39
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: Kretprobes
+- en: Kretprobes are going to insert your BPF program when a kernel instruction returns
+    a value after being executed. Usually, you’ll want to combine both kprobes and
+    kretprobes into a single BPF program so that you have a full picture of the instruction’s
+    behavior.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Kretprobes 将在内核指令执行后返回一个值时插入你的 BPF 程序。通常，你会希望将 kprobes 和 kretprobes 结合到一个单独的
+    BPF 程序中，以便全面了解指令的行为。
+- en: 'We’re going to use a similar example to the one in the previous section to
+    show you how kretprobes work:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将使用类似于前一节的示例来展示 kretprobes 的工作原理：
+- en: '[PRE1]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO2-1)'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO2-1)'
+- en: Define the function that implements the BPF program. The kernel will execute
+    it immediately after the `execve` syscall finishes. `PT_REGS_RC` is a macro that’s
+    going to read the returned value from BPF register for this specific context.
+    We also use `bpf_trace_printk` to print the command and its returned value in
+    our debug log.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义实现 BPF 程序的函数。内核将在 `execve` 系统调用完成后立即执行它。`PT_REGS_RC` 是一个宏，将从 BPF 寄存器中读取特定上下文的返回值。我们还使用
+    `bpf_trace_printk` 在调试日志中打印命令及其返回值。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO2-2)'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO2-2)'
+- en: Initialize the BPF program and load it in the kernel.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 初始化 BPF 程序并加载到内核中。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO2-3)'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO2-3)'
+- en: Change the attachment function to `attach_kretprobe`.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将附着功能更改为 `attach_kretprobe`。
+- en: Kernel probes are a powerful way to access the kernel. But as we mentioned earlier,
+    they might be unstable because you’re attaching to dynamic points in the kernel’s
+    source that might change or disappear from one version to another. Now you’ll
+    see a different method to attach programs to the kernel that is safer.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核探针是访问内核的强大方式。但正如我们之前提到的，它们可能不稳定，因为你要附加到内核源代码中的动态点，这些点可能会在不同版本之间改变或消失。现在你将看到一种更安全的方法来将程序附加到内核。
+- en: Tracepoints
+  id: totrans-50
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 跟踪点
+- en: Tracepoints are static markers in the kernel’s code that you can use to attach
+    code in a running kernel. The main difference with kprobes is that they are codified
+    by the kernel developers when they implement changes in the kernel; that’s why
+    we refer to them as static. Because they are static, the ABI for tracepoints is
+    more stable; the kernel always guarantees that a tracepoint in an old version
+    is going to exist in new versions. However, given that developers need to add
+    them to the kernel, they might not cover all the subsystems that form the kernel.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 跟踪点是内核代码中的静态标记，你可以用来在运行的内核中附加代码。与kprobes的主要区别在于，当内核开发人员实现内核更改时，它们会为其编码；这就是我们称它们为静态的原因。由于它们是静态的，跟踪点的ABI更稳定；内核始终保证旧版本中的跟踪点会存在于新版本中。然而，由于开发人员需要将它们添加到内核中，它们可能无法覆盖构成内核的所有子系统。
+- en: 'As we mentioned in [Chapter 2](ch02.html#running_your_first_BPF_programs),
+    you can see all of the available tracepoints in your system by listing all the
+    files in */sys/kernel/debug/tracing/events*. For example, you can find all of
+    the tracepoints for BPF itself by listing the events defined in */sys/kernel/debug/tracing/events/bpf*:'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如我们在[第2章](ch02.html#running_your_first_BPF_programs)中提到的，你可以通过列出*/sys/kernel/debug/tracing/events*中的所有文件来查看系统中所有可用的跟踪点。例如，你可以通过列出*/sys/kernel/debug/tracing/events/bpf*中定义的事件来找到BPF本身的所有跟踪点：
+- en: '[PRE2]'
+  id: totrans-53
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: Every subdirectory listed in that output corresponds to a tracepoint that we
+    can attach BPF programs to. But there are two additional files there. The first
+    file, `enable`, allows you to enable and disable all tracepoints for the BPF subsystem.
+    If the content of the file is 0, the tracepoints are disabled; if the content
+    of the file is 1, the tracepoints are enabled. The *filter* file allows you to
+    write expressions that the Trace subsystem in the kernel will use to filter events.
+    BPF doesn’t use this file; read more in the kernel’s [tracing documentation](https://oreil.ly/miNRd).
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个在该输出中列出的子目录对应一个我们可以附加BPF程序的跟踪点。但是这里还有两个额外的文件。第一个文件，`enable`，允许你启用和禁用BPF子系统的所有跟踪点。如果文件的内容为0，则跟踪点被禁用；如果文件的内容为1，则跟踪点被启用。*filter*
+    文件允许你编写表达式，内核中的Trace子系统将使用这些表达式来过滤事件。BPF不使用这个文件；在内核的[跟踪文档](https://oreil.ly/miNRd)中可以了解更多信息。
+- en: 'Writing BPF programs to take advantage of tracepoints is similar to tracing
+    with kprobes. Here’s an example that uses a BPF program to trace all of the applications
+    in your system that load other BPF programs:'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 编写BPF程序以利用跟踪点的方式与使用kprobes进行跟踪相似。下面是一个示例，使用BPF程序跟踪系统中加载其他BPF程序的所有应用程序：
+- en: '[PRE3]'
+  id: totrans-56
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO3-1)'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO3-1)'
+- en: Declare the function that defines the BPF program. This code must look familiar
+    to you already; there are only a few syntactic changes from the first example
+    you saw when we talked about kprobes.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 声明定义BPF程序的函数。这段代码你应该已经很熟悉了；与我们在讨论kprobes时看到的第一个示例相比，只有几个语法上的变化。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO3-2)'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO3-2)'
+- en: 'The main difference in this program: instead of attaching the program to a
+    kprobe, we’re attaching it to a tracepoint. BCC follows a convention to name tracepoints;
+    first you specify the subsystem to trace—`bpf` in this case—followed by a colon,
+    followed by the tracepoint in the subsystem, `pbf_prog_load`. This means that
+    every time the kernel executes the function `bpf_prog_load`, this program will
+    receive the event, and it will print the name of the application that’s executing
+    that `bpf_prog_load` instruction.'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个程序的主要区别在于：我们不是将程序附加到kprobe，而是附加到一个跟踪点。BCC遵循一种命名跟踪点的约定；首先指定要跟踪的子系统——在这种情况下是`bpf`——然后是一个冒号，接着是子系统中的跟踪点，`bpf_prog_load`。这意味着每当内核执行函数`bpf_prog_load`时，该程序将接收该事件，并打印执行该`bpf_prog_load`指令的应用程序的名称。
+- en: Kernel probes and tracepoints are going to give you full access to the kernel.
+    We recommend that you to use tracepoints whenever possible, but don’t feel obligated
+    to stick to tracepoints only because they are safer. Take advantage of the dynamic
+    nature of the kernel probes. In the next section we discuss how to get a similar
+    level of visibility in programs running in user-space.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核探针和跟踪点将为您提供对内核的全面访问。我们建议您尽可能使用跟踪点，但不要因为它们更安全就感到必须遵循跟踪点。利用内核探针的动态特性。在下一节中，我们将讨论如何在运行在用户空间的程序中获得类似的可见性水平。
+- en: User-Space Probes
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 用户空间探针
+- en: User-space probes allow you to set dynamic flags in programs running in user-space.
+    They are the equivalent of kernel-probes for instrumenting programs that run outside
+    the kernel. When you define a uprobe, the kernel creates a trap around the attached
+    instruction. When your application reaches that instruction, the kernel triggers
+    an event that has your probe function as a callback. Uprobes also give you access
+    to any library that your program is linked to, and you can trace those calls if
+    you know the correct name for the instruction.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户空间探针允许您在运行在用户空间的程序中设置动态标志。它们相当于内核外运行的程序的内核探针。当您定义一个 uprobes 时，内核会在附加指令周围创建一个陷阱。当您的应用程序达到该指令时，内核会触发一个事件，该事件具有您的探针函数作为回调。Uprobes
+    还允许您访问任何您的程序链接到的库，并且如果您知道指令的正确名称，还可以跟踪这些调用。
+- en: Much like kernel probes, user-space probes are also divided in two categories,
+    uprobes and uretprobes, depending on where in the execution cycle you can insert
+    your BPF program. Let’s jump right in with some examples.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与内核探针类似，用户空间探针也分为两类，即 uprobes 和 uretprobes，具体取决于您可以在执行周期中的哪个位置插入您的 BPF 程序。让我们直接通过一些示例来了解。
+- en: Uprobes
+  id: totrans-65
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: Uprobes
+- en: 'Generally speaking, uprobes are hooks that the kernel inserts into a program’s
+    instruction set before a specific instruction is executed. You need to be careful
+    when you attach uprobes to different versions of the same program because function
+    signatures might change internally between those versions. The only way to guarantee
+    that a BPF program is going to run in two different versions is to ensure that
+    the signature has not changed. You can use the command `nm` in Linux to list all
+    the symbols included in an ELF object file, which is a good way to check whether
+    the instruction that you’re tracing still exists in your program, for example:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一般而言，uprobes 是内核在特定指令执行之前插入到程序指令集中的钩子。当您将 uprobes 附加到同一程序的不同版本时，需要小心，因为函数签名在这些版本之间可能会在内部更改。确保
+    BPF 程序能够在两个不同版本中运行的唯一方法是确保签名未更改。您可以在 Linux 中使用 `nm` 命令列出包含在 ELF 对象文件中的所有符号，这是检查您正在跟踪的指令是否仍然存在于您的程序中的好方法，例如：
+- en: '[PRE4]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'You can compile this Go program by using `go build -o hello-bpf main.go`. You
+    can use the command `nm` to get information about all the instruction points that
+    the binary file includes. `nm` is a program included in the GNU Development Tools
+    that lists symbols from object files. If you filter the symbols with `main` in
+    their name, you get a list similar to this one:'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过使用 `go build -o hello-bpf main.go` 编译此 Go 程序。您可以使用 `nm` 命令获取关于二进制文件包含的所有指令点的信息。`nm`
+    是 GNU 开发工具中包含的程序，用于列出对象文件中的符号。如果您使用包含 `main` 在其名称中的符号进行过滤，您会得到类似以下列表：
+- en: '[PRE5]'
+  id: totrans-69
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Now that you have a list of symbols, you can trace when they are executed, even
+    between different processes executing the same binary.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您有了符号列表，您可以追踪它们何时被执行，甚至在执行相同二进制文件的不同进程之间。
+- en: 'To trace when the main function in our previous Go example is executed, we’re
+    going to write a BPF program, and we’re going to attach it to a uprobe that will
+    break before any process invokes that instruction:'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要追踪我们之前的 Go 示例中的主函数何时执行，我们将编写一个 BPF 程序，并将其附加到一个 uprobes 上，在任何进程调用该指令之前都会触发：
+- en: '[PRE6]'
+  id: totrans-72
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO4-1)'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO4-1)'
+- en: Use the function `bpf_get_current_pid_tgid` to get the process identifier (PID)
+    for the process that’s running our `hello-bpf` program.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用函数 `bpf_get_current_pid_tgid` 来获取运行我们的 `hello-bpf` 程序的进程标识符（PID）。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO4-2)'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO4-2)'
+- en: Attach this program to a uprobe. This call needs to know that the object we
+    want to trace, `hello-bpf`, is the absolute path to the object file. It also needs
+    the symbol that we’re tracing inside the object, `main.main` in this case, and
+    the BPF program that we want to run. With this, every time someone runs `hello-bpf`
+    in our system, we’ll get a new log in our trace pipe.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将该程序附加到一个uprobe上。此调用需要知道我们要跟踪的对象“hello-bpf”的绝对路径。它还需要我们在对象内部正在跟踪的符号，例如在这种情况下是`main.main`，以及我们想要运行的BPF程序。有了这些，每当有人在我们的系统中运行“hello-bpf”时，我们将在我们的跟踪管道中获得一个新的日志。
+- en: Uretprobes
+  id: totrans-77
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: Uretprobes
+- en: Uretprobes are the parallel probe to kretprobes, but for user-space programs.
+    They attach BPF programs to instructions that return values, and give you access
+    to those returned values by accessing the registers from your BPF code.
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Uretprobes是用户空间程序的并行探针，类似于kretprobes。它们将BPF程序附加到返回值的指令上，并通过从您的BPF代码访问寄存器来访问这些返回值。
+- en: Combining uprobes and uretprobes allows you to write more complex BPF programs.
+    They can give you a more holistic view of applications running in your system.
+    When you can inject tracing code before a function runs and immediately after
+    it completes, you can begin gathering more data and measure application behaviors.
+    A common use case is to measure how long a function takes to execute, without
+    having to change a single line of code in your application.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 结合uprobes和uretprobes允许您编写更复杂的BPF程序。它们可以为您提供系统中正在运行的应用程序的更全面视图。当您可以在函数运行之前和完成之后注入跟踪代码时，您可以开始收集更多数据并测量应用程序的行为。一个常见的用例是测量函数执行所需的时间，而无需更改应用程序中的任何代码。
+- en: 'We’re going to reuse the Go program we wrote in [“Uprobes”](#uprobes-section)
+    to measure how long it takes to execute the main function. This BPF example is
+    longer than the previous examples that you’ve seen, so we’ve divided it into different
+    blocks of code:'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将重用我们在[“Uprobes”](#uprobes-section)中编写的Go程序，以测量执行主函数所需的时间。这个BPF示例比您以前看到的示例更长，因此我们将其分成不同的代码块：
+- en: '[PRE7]'
+  id: totrans-81
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO5-1)'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO5-1)'
+- en: Create a BPF hash map. This table allows us to share data between the uprobe
+    and uretprobe functions. In this case we use the application PID as the table
+    key, and we store the function start time as the value. The two most interesting
+    operations in our uprobe function happen as described next.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个BPF哈希映射表。这个表允许我们在uprobe和uretprobe函数之间共享数据。在本例中，我们使用应用程序的PID作为表键，并将函数开始时间存储为值。我们的uprobe函数中最有趣的两个操作如下所述。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO5-2)'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO5-2)'
+- en: Capture the current time in the system in nanoseconds, as seen by the kernel.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 捕获内核中当前时间的纳秒级时间戳。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO5-3)'
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO5-3)'
+- en: 'Create an entry in our cache with the program PID and the current time. We
+    can assume that this time is the application’s function start time. Let’s declare
+    our uretprobe function now:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们的缓存中创建一个条目，其中包含程序的PID和当前时间。我们可以假设这个时间是应用程序函数的启动时间。现在让我们声明我们的uretprobe函数：
+- en: 'Implement the function to attach when your instruction finishes. This uretprobe
+    function is similar to others that you saw in [“Kretprobes”](#kretprobes):'
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 实现在指令完成时附加的函数。这个uretprobe函数与您在[“Kretprobes”](#kretprobes)中看到的其他函数类似：
+- en: '[PRE8]'
+  id: totrans-89
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO6-1)'
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO6-1)'
+- en: Obtain the PID for our application; we need it to find its starting time. We
+    use the map function `lookup` to fetch that time from the map where we stored
+    it before the function ran.
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 获取我们应用程序的PID；我们需要它来找到其启动时间。我们使用映射函数`lookup`从我们之前存储函数运行前时间的映射中获取该时间。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO6-2)'
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO6-2)'
+- en: Calculate the function duration by subtracting that time from the current time.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过从当前时间减去该时间来计算函数持续时间。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO6-3)'
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO6-3)'
+- en: Print the latency in our trace log so we can display it in the terminal.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将延迟打印到我们的跟踪日志中，以便在终端中显示。
+- en: 'Now, the rest of the program needs to attach these two BPF functions to the
+    right probes:'
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，程序的其余部分需要将这两个BPF函数附加到正确的探针上：
+- en: '[PRE9]'
+  id: totrans-97
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: We’ve added a line to our original uprobe example where we’re attaching our
+    print function to the uretprobe for our application.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们已经在我们原始的uprobe示例中添加了一行，其中我们将我们的打印函数附加到我们应用程序的uretprobe上。
+- en: In this section you saw how to trace operations that happen in user-space with
+    BPF. By combining BPF functions that are executed at different points in your
+    application’s lifecycle, you can begin extracting much richer information from
+    it. However, as we mentioned at the beginning of this section, user-space probes
+    are powerful, but they are also unstable. Our BPF examples can stop working only
+    because someone decides to rename an application’s function. Now let’s look at
+    a more stable way to trace user-space programs.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，您看到了如何使用 BPF 跟踪发生在用户空间中的操作。通过组合在应用程序生命周期的不同点执行的 BPF 函数，您可以开始从中提取更丰富的信息。但是，正如我们在本节开始时提到的，用户空间探针功能强大，但也不稳定。我们的
+    BPF 示例可能会因为有人决定重命名应用程序的函数而停止工作。现在让我们看一看跟踪用户空间程序的更稳定方法。
+- en: User Statically Defined Tracepoints
+  id: totrans-100
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 用户静态定义的跟踪点
+- en: User statically defined tracepoints (USDTs) provide static tracepoints for applications
+    in user-space. This is a convenient way to instrument applications because they
+    give you a low-overhead entry point to the tracing capabilities that BPF offers.
+    You can also use them as a convention to trace applications in production, regardless
+    of the programming language with which these applications are written.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户静态定义的跟踪点（USDT）为用户空间的应用程序提供了静态跟踪点。这是一种方便的方法来为应用程序添加仪器，因为它们为您提供了 BPF 提供的跟踪能力的低开销入口点。您还可以将它们用作一种约定，用于在生产环境中跟踪应用程序，而不管这些应用程序使用哪种编程语言编写。
+- en: USDTs were popularized by DTrace, a tool originally developed at Sun Microsystems
+    for dynamic instrumentation of Unix systems. DTrace was not available in Linux
+    until recently due to licensing issues; however, the Linux kernel developers took
+    a lot of inspiration from the original work in DTrace to implement USDTs.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: USDTs 被 DTrace 推广，DTrace 是最初由 Sun Microsystems 开发的用于动态仪器化 Unix 系统的工具。由于许可问题，DTrace
+    直到最近才在 Linux 中可用；但是 Linux 内核开发人员从 DTrace 的原始工作中汲取了许多灵感来实现 USDT。
+- en: 'Much like the static kernel tracepoints you saw earlier, USDTs require developers
+    to instrument their code with instructions that the kernel will use as traps to
+    execute BPF programs. The Hello World version of USDTs is only a few lines of
+    code:'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就像您之前看到的静态内核跟踪点一样，USDTs 要求开发人员使用内核将用作陷阱以执行 BPF 程序的指令来仪器化其代码。USDTs 的 Hello World
+    版本只有几行代码：
+- en: '[PRE10]'
+  id: totrans-104
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: In this example, we’re using a macro that Linux provides to define our first
+    USDT. You can already see where the kernel takes inspiration from. `DTRACE_PROBE`
+    is going to register the tracepoint that the kernel will use to inject our BPF
+    function callback. The first argument in this macro is the program that’s reporting
+    the trace. The second one is the name of the trace that we’re reporting.
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个例子中，我们使用 Linux 提供的宏来定义我们的第一个 USDT。您已经可以看到内核从哪里得到灵感了。`DTRACE_PROBE` 将注册内核将用于注入我们的
+    BPF 函数回调的跟踪点。此宏的第一个参数是报告跟踪的程序。第二个参数是我们正在报告的跟踪的名称。
+- en: Many applications that you might have installed in your system use this type
+    of probe to give you access to runtime tracing data in a predictable way. The
+    popular database MySQL, for example, exposes all kinds of information using statically
+    defined tracepoints. You can gather information from queries executed in the server
+    as well as from many other user operations. Node.js, the JavaScript runtime built
+    on top of Chrome’s V8 engine, also provides tracepoints that you can use to extract
+    runtime information.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 许多您可能在系统中安装的应用程序使用此类探针，以可预测的方式向您提供运行时跟踪数据访问。例如，流行的数据库 MySQL 使用静态定义的跟踪点公开各种信息。您可以从服务器中执行的查询以及从许多其他用户操作中获取信息。基于
+    Chrome 的 V8 引擎构建的 JavaScript 运行时 Node.js 也提供了您可以使用的跟踪点，以提取运行时信息。
+- en: 'Before showing you how to attach BPF programs to user-defined tracepoint, we
+    need to talk about discoverability. Because these tracepoints are defined in binary
+    format inside the executable files, we need a way to list the probes defined by
+    a program without having to dig through the source code. One way to extract this
+    information is by reading the ELF binary directly. First, we’re going to compile
+    our previous Hello World USDT example; we can use GCC for that:'
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在向您展示如何将 BPF 程序附加到用户定义的跟踪点之前，我们需要讨论可发现性。因为这些跟踪点在可执行文件内以二进制格式定义，所以我们需要一种列出程序定义的探针的方法，而无需深入源代码。提取此信息的一种方法是直接读取
+    ELF 二进制文件。首先，我们将编译我们之前的 Hello World USDT 示例；我们可以使用 GCC 来完成：
+- en: '[PRE11]'
+  id: totrans-108
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'This command is going to generate a binary file called *hello_usdt* that we
+    can use to start playing with several tools to discover the tracepoints that it
+    defines. Linux provides a utility called `readelf` to show you information about
+    ELF files. You can use it with our compiled example:'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此命令将生成一个名为*hello_usdt*的二进制文件，我们可以使用多种工具开始探索其定义的跟踪点。Linux提供了一个名为`readelf`的实用程序，用于显示关于ELF文件的信息。您可以将其与我们编译的示例一起使用：
+- en: '[PRE12]'
+  id: totrans-110
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'You can see the USDT that we defined in the output of this command:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以看到我们在此命令的输出中定义的USDT：
+- en: '[PRE13]'
+  id: totrans-112
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: '`readelf` can give you a lot of information about a binary file; in our small
+    example, it shows only a few lines of information, but its output becomes cumbersome
+    to parse for more complicated binaries.'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`readelf`可以为二进制文件提供大量信息；在我们的小示例中，它仅显示了少量信息行，但对于更复杂的二进制文件，其输出变得难以解析。'
+- en: 'A better option to discover the tracepoints defined in a binary file is to
+    use BCC’s `tplist` tool, which can display both kernel tracepoints and USDTs.
+    The advantage of this tool is the simplicity of its output; it shows you only
+    tracepoint definitions, without any additional information about the executable.
+    Its usage is similar to `readelf`:'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 发现二进制文件中定义的跟踪点的更好选择是使用BCC的`tplist`工具，它可以显示内核跟踪点和USDT。该工具的优点是其输出的简单性；它只显示跟踪点定义，不提供有关可执行文件的任何其他信息。其使用方法类似于`readelf`：
+- en: '[PRE14]'
+  id: totrans-115
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'It lists every tracepoint that you define in individual lines. In our example,
+    it displays only a single line with our `probe-main` definition:'
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它列出您在单独行中定义的每个跟踪点。在我们的示例中，它仅显示了一个包含我们的`probe-main`定义的单行：
+- en: '[PRE15]'
+  id: totrans-117
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'After you know the supported tracepoints in your binary, you can attach BPF
+    programs to them in a similar way to what you’ve seen in previous examples:'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您了解二进制文件中支持的跟踪点之后，您可以以与之前示例中所见相似的方式将BPF程序附加到它们上：
+- en: '[PRE16]'
+  id: totrans-119
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: There is a major change in this example that requires some explanation.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例中有一个重大更改，需要进行一些解释。
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO7-1)'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO7-1)'
+- en: Create a USDT object; we haven’t done this in our previous examples. USDTs are
+    not part of BPF, in the sense that you can use them without having to interact
+    with the BPF VM. Because they are independent of one another, it makes sense that
+    their usage is independent of the BPF code.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个USDT对象；我们在之前的示例中没有这样做过。USDT与BPF不同，您可以在不与BPF虚拟机交互的情况下使用它们。因为它们彼此独立，所以它们的使用与BPF代码的使用是独立的。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO7-2)'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO7-2)'
+- en: Attach the BPF function to trace program executions to the probe in our application.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将BPF函数附加到我们应用程序中的探测点以跟踪程序执行。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO7-3)'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO7-3)'
+- en: Initialize our BPF environment with the tracepoint definition that we just created.
+    This will inform BCC that it needs to generate the code to connect our BPF program
+    with the probe definition in our binary file. When both of them are connected,
+    we can print the traces generated by our BPF program to discover new executions
+    of our binary example.
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 初始化我们的BPF环境，使用刚刚创建的跟踪点定义。这将通知BCC需要生成代码，以连接我们的BPF程序与二进制文件中的探测点定义。当它们连接起来时，我们可以打印由我们的BPF程序生成的跟踪信息，以发现我们的二进制示例的新执行。
+- en: USDTs bindings for other languages
+  id: totrans-127
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 其他语言的USDT绑定
+- en: You can also use USDTs to trace applications written with programming languages
+    besides C. You’ll be able to find bindings for Python, Ruby, Go, Node.js, and
+    many other languages in GitHub. The Ruby bindings are one of our favorites because
+    of their simplicity and interoperability with frameworks such as Rails. Dale Hamel,
+    who currently works at Shopify, wrote an excellent report about the usage of USDTs
+    in his [blog](https://oreil.ly/7pgNO). He also maintains a library called [*ruby-static-tracing*](https://oreil.ly/ge6cu)
+    that makes tracing Ruby and Rails applications even more straightforward.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以使用USDT来跟踪使用除了C语言之外的编程语言编写的应用程序。您可以在GitHub上找到Python、Ruby、Go、Node.js和许多其他语言的绑定。Ruby绑定是我们喜欢的之一，因为它们与诸如Rails之类的框架的简单性和互操作性。目前在Shopify工作的Dale
+    Hamel在他的[博客](https://oreil.ly/7pgNO)中撰写了一篇关于USDT使用的优秀报告。他还维护着一个名为[*ruby-static-tracing*](https://oreil.ly/ge6cu)的库，使得跟踪Ruby和Rails应用程序变得更加简单。
+- en: Hamel’s static tracing library allows you to inject tracing capabilities at
+    the class level without requiring you to add the tracing logic to every method
+    in that class. In complex scenarios, it also gives you convenient methods to register
+    dedicated tracing endpoints yourself.
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Hamel的静态跟踪库允许您在类级别注入跟踪能力，而无需在该类的每个方法中添加跟踪逻辑。在复杂情景中，它还为您提供了方便的方法来注册专用的跟踪端点。
+- en: 'To use `ruby-static-tracing` in your applications, first you need to configure
+    when the tracepoints are going to be enabled. You can turn them on by default
+    when the application starts, but if you want to avoid the overhead of collecting
+    data all the time, you can activate them using a syscall signal. Hamel recommends
+    using `PROF` as this signal:'
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在您的应用程序中使用`ruby-static-tracing`，首先需要配置何时启用跟踪点。您可以在应用程序启动时默认启用它们，但如果您想避免始终收集数据的开销，可以使用系统调用信号来激活它们。Hamel建议使用`PROF`作为此信号：
+- en: '[PRE17]'
+  id: totrans-131
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'With this configuration in place, you can use the `kill` command to enable
+    your application’s static tracepoints on demand. In the next example, we assume
+    that there is only a Ruby process running on our machine, and we can get its process
+    identifier using `pgrep`:'
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了这个配置，您可以使用`kill`命令随需启用您应用程序的静态跟踪点。在下一个示例中，我们假设我们的机器上只有一个Ruby进程正在运行，并且我们可以使用`pgrep`获取其进程标识符：
+- en: '[PRE18]'
+  id: totrans-133
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'Besides configuring when the tracepoints are active, you might want to use
+    some of the built-in tracing mechanisms that *ruby-static-tracing* provides. At
+    the time of writing this, the library incorporates tracepoints to measure latency
+    and to collect stack traces. We really like how a tedious task such as measuring
+    function latency becomes almost trivial by using this built-in module. First,
+    you need to add the latency tracer to your initial configuration:'
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了配置跟踪点何时激活外，您可能还想使用*ruby-static-tracing*提供的一些内置跟踪机制。在撰写本文时，该库整合了跟踪点以测量延迟和收集堆栈跟踪。我们特别喜欢如何通过使用这个内置模块使得诸如测量函数延迟这样的繁琐任务几乎变得微不足道。首先，您需要将延迟跟踪器添加到您的初始配置中：
+- en: '[PRE19]'
+  id: totrans-135
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'After that, every class that includes the latency module generates static tracepoints
+    for each public method defined. When tracing is enabled, you can query those tracepoints
+    to collect timing data. In our next example, `ruby-static-tracing` generates a
+    static tracepoint named `usdt:/proc/X/fd/Y:user_model:find`, following the convention
+    of using the class name as the namespace for the tracepoint and using the method
+    name as the tracepoint name:'
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 之后，每个包含延迟模块的类都会为其定义的每个公共方法生成静态跟踪点。启用跟踪时，您可以查询这些跟踪点以收集时间数据。在我们的下一个示例中，`ruby-static-tracing`生成一个名为`usdt:/proc/X/fd/Y:user_model:find`的静态跟踪点，遵循使用类名作为跟踪点的命名空间并使用方法名作为跟踪点名称的约定：
+- en: '[PRE20]'
+  id: totrans-137
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'Now we can use BCC to extract the latency information for each call to our
+    `find` method. To do that, we use BCC’s built-in functions `bpf_usdt_readarg`
+    and `bpf_usdt_readarg_p`. These functions read the arguments set each time our
+    application’s code is executed. `ruby-static-tracing` always sets the method name
+    as the first argument for the tracepoint, whereas it sets the calculated value
+    as the second argument. The next snippet implements the BPF program that gets
+    the tracepoint information and prints it in the tracing log:'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们可以使用BCC提取每次调用我们的`find`方法时的延迟信息。为此，我们使用了BCC的内置函数`bpf_usdt_readarg`和`bpf_usdt_readarg_p`。这些函数每次我们应用程序的代码被执行时读取设置的参数。`ruby-static-tracing`始终将方法名设置为跟踪点的第一个参数，而将计算出的值设置为第二个参数。下一段代码片段实现了获取跟踪点信息并将其打印到跟踪日志中的BPF程序：
+- en: '[PRE21]'
+  id: totrans-139
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'We also need to load the previous BPF program into the kernel. Because we’re
+    tracing a specific application that’s already running in our machine, we can attach
+    the program to the specific process identifier:'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们还需要将之前的BPF程序加载到内核中。因为我们正在跟踪一个已在本机上运行的特定应用程序，所以可以将程序附加到特定的进程标识符上：
+- en: '[PRE22]'
+  id: totrans-141
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO8-1)'
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO8-1)'
+- en: Specify that PID.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 指定该PID。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO8-2)'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO8-2)'
+- en: Enable the probe, load the program into the kernel, and print the tracing log.
+    (This section is very similar to the one you saw earlier.)
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启用探针，将程序加载到内核中，并打印跟踪日志。（本节与您之前看到的非常相似。）
+- en: In this section, we’ve shown you how to introspect applications that define
+    tracepoints statically. Many well-known libraries and programing languages include
+    these probes to help you debug running applications, gaining more visibility when
+    they run in production environments. This is only the tip of the iceberg; after
+    you have the data, you need to make sense of it. This is what we explore next.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我们展示了如何检查静态定义跟踪点的应用程序。许多知名的库和编程语言都包含这些探针，以帮助您在生产环境中调试正在运行的应用程序，从而获得更多的可见性。这只是冰山一角；在获取数据之后，您需要理解这些数据。这是我们接下来要探讨的内容。
+- en: Visualizing Tracing Data
+  id: totrans-147
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 可视化跟踪数据
+- en: So far, we’ve shown examples that print data in our debug output. This is not
+    very useful in production environments. You want to make sense of that data, but
+    nobody likes to make sense of long and complicated logs. If we want to monitor
+    changes in latency and CPU utilization, it’s easier to do it by looking at graphs
+    over a time period than aggregating numbers from a file stream.
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到目前为止，我们展示了打印数据的示例，这在生产环境中并不是非常有用。您希望理解这些数据，但没有人喜欢理解冗长且复杂的日志。如果我们想要监视延迟和 CPU
+    利用率的变化，通过查看一段时间内的图表比从文件流中聚合数字更容易。
+- en: This section explores different ways to present BPF tracing data. On one hand,
+    we’ll show you how BPF programs can structure information in aggregates for you.
+    On the other hand, you’ll learn how to export that information in a portable representation
+    and use off-the-shelf tools to access a richer representation and share your findings
+    with other people.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本节探讨了展示 BPF 跟踪数据的不同方法。一方面，我们将展示 BPF 程序如何为您结构化信息聚合。另一方面，您将学习如何以便携的表示形式导出这些信息，并使用现成工具访问更丰富的表示，并与他人分享您的发现。
+- en: Flame Graphs
+  id: totrans-150
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 火焰图
+- en: '*Flame graphs* are diagrams that help you visualize how your system is spending
+    time. They can give you a clear representation of which code in an application
+    is executed more often. Brendan Gregg, the creator of flame graphs, maintains
+    a set of scripts to easily generate these visualization formats [on GitHub](https://oreil.ly/3iiZx).
+    We use those scripts to generate flame graphs from data collected with BPF later
+    in this section. You can see what these graphs look like in [Figure 4-1](#flamegraph).'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*火焰图* 是帮助您可视化系统花费时间的图表。它们可以清晰地展示应用程序中哪些代码执行得更频繁。火焰图的创建者布兰登·格雷格在 GitHub 上维护了一组脚本，以便轻松生成这些可视化格式的工具
+    [on GitHub](https://oreil.ly/3iiZx)。我们在本节的后面部分使用这些脚本从使用 BPF 收集的数据生成火焰图。您可以在 [Figure 4-1](#flamegraph)
+    中看到这些图表的样式。'
+- en: '![Flame graph visualization](assets/lbpf_0401.png)'
+  id: totrans-152
+  prefs: []
+  type: TYPE_IMG
+  zh: '![火焰图可视化](assets/lbpf_0401.png)'
+- en: Figure 4-1\. A CPU flame graph
+  id: totrans-153
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 4-1\. 一个 CPU 火焰图
+- en: 'There are two important things to remember about what a flame graph shows:'
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于火焰图展示的两个重要事项：
+- en: The x-axis is ordered alphabetically. The width of each stack represents how
+    often it appears in the collect data, which can be correlated to how often that
+    code path has been visited while the profiler was enabled.
+  id: totrans-155
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: x 轴按字母顺序排序。每个堆栈的宽度表示在收集数据时它出现的频率，这可以与分析器启用时访问代码路径的频率相关联。
+- en: The y-axis shows the stack traces ordered as the profiler reads them, preserving
+    the trace hierarchy.
+  id: totrans-156
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: y 轴显示堆栈跟踪，按照分析器读取它们的顺序排列，保留了跟踪的层次结构。
+- en: The most well-known flame graphs represent the most frequent code consuming
+    CPU in your system; these are called *on-CPU graphs*. Another interesting flame
+    graph visualization is *off-CPU graphs*; they represent the time that a CPU spends
+    on other tasks that are not related to your application. By combining on-CPU and
+    off-CPU graphs, you can get a complete view of what your system is spending CPU
+    cycles on.
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最知名的火焰图代表了系统中消耗 CPU 最频繁的代码；这些称为*on-CPU图*。另一种有趣的火焰图可视化是*off-CPU图*；它们表示 CPU 在与您的应用程序无关的其他任务上花费的时间。通过结合
+    on-CPU 和 off-CPU 图，您可以完整地了解系统在 CPU 周期上的花费情况。
+- en: Both, on-CPU and off-CPU graphs use stack traces to indicate where the system
+    is spending time. Some programming languages, such as Go, always include trace
+    information in their binaries, but others, such as C++ and Java, require some
+    extra work to make stack traces readable. After your application includes stack
+    trace information, BPF programs can use it to aggregate the most frequent code
+    paths as seen by the kernel.
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*on-CPU* 和 *off-CPU* 图都使用堆栈跟踪来指示系统花费时间的位置。某些编程语言（如 Go）始终在其二进制文件中包含跟踪信息，但其他一些（如
+    C++ 和 Java）需要额外的工作来使堆栈跟踪可读。在应用程序包含堆栈跟踪信息后，BPF 程序可以使用它来聚合内核看到的最频繁的代码路径。'
+- en: Note
+  id: totrans-159
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: There are advantages and disadvantages to stack trace aggregation in the kernel.
+    On one hand, it’s an efficient way to count stack trace frequency because it happens
+    in the kernel, avoiding sending every stack information to user-space and reducing
+    the data interchange between the kernel and user-space. On the other hand, the
+    number of events to process for off-CPU graphs can be significantly high, because
+    you’re keeping track of every event that occurs during your application’s context
+    switch. This can create significant overhead in your system if you try to profile
+    it for too long. Keep this in mind when you’re working with flame graphs.
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核中的堆栈跟踪聚合有其优势和劣势。一方面，它是计算堆栈跟踪频率的高效方式，因为它发生在内核中，避免了将每个堆栈信息发送到用户空间，并减少了内核与用户空间之间的数据交换。另一方面，处理离CPU图表的事件数量可能会显著增加，因为你要跟踪在应用程序上下文切换期间发生的每个事件。如果试图对其进行长时间性能分析，这可能会给系统带来显著的开销。在使用火焰图时，请牢记这一点。
+- en: BCC provides several utilities to help you aggregate and visualize stack traces,
+    but the main one is the macro `BPF_STACK_TRACE`. This macro generates a BPF map
+    of type `BPF_MAP_TYPE_STACK_TRACE` to store the stacks that your BPF program accumulates.
+    On top of that, this BPF map is enhanced with methods to extract the stack information
+    from the program’s context and walk the stack traces accumulated when you want
+    to use them after aggregating them.
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BCC 提供了几个实用工具，帮助你聚合和可视化堆栈跟踪，但主要工具是宏 `BPF_STACK_TRACE`。这个宏生成了一个类型为 `BPF_MAP_TYPE_STACK_TRACE`
+    的 BPF Map，用于存储你的 BPF 程序积累的堆栈。此外，这个 BPF Map 还增强了方法，用于从程序上下文中提取堆栈信息，并在聚合后想要使用时遍历积累的堆栈跟踪。
+- en: 'In the next example, we build a simple BPF profiler that prints the stack traces
+    collected from user-space applications. We generate on-CPU flame graphs with the
+    traces that our profiler collects. To test this profiler, we’re going to write
+    a minimal Go program that generates CPU load. This is the code for that minimal
+    application:'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一个示例中，我们构建了一个简单的 BPF 分析器，用于打印从用户空间应用程序收集的堆栈跟踪。我们使用我们的分析器收集的跟踪生成了 on-CPU 火焰图。为了测试这个分析器，我们将编写一个生成
+    CPU 负载的最小化 Go 程序。以下是该最小应用程序的代码：
+- en: '[PRE23]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: If you save this code in a file called *main.go* and run it with `go run main.go`,
+    you’ll see that your system’s CPU utilization increases significantly. You can
+    stop the execution by pressing Ctrl-C on your keyboard, and the CPU utilization
+    will go back to normal.
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你将这段代码保存为 *main.go* 文件，并使用 `go run main.go` 运行它，你会看到系统的 CPU 利用率显著增加。你可以通过在键盘上按下
+    Ctrl-C 来停止执行，CPU 利用率将恢复正常。
+- en: 'The first part of our BPF program is going to initialize the profiler structures:'
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们 BPF 程序的第一部分将初始化分析器结构：
+- en: '[PRE24]'
+  id: totrans-166
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO9-1)'
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO9-1)'
+- en: Initialize a structure that will store the reference identifier for each one
+    of the stack frames that our profiler receives. We use these identifiers later
+    to find out which code path was being executed at that time.
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 初始化一个结构，用于存储我们的分析器接收到的每一个堆栈帧的参考标识符。稍后我们使用这些标识符来查找在该时间点执行的代码路径。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO9-2)'
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO9-2)'
+- en: Initialize a BPF hash map that we use to aggregate how often we see the same
+    strack frame. The flame graph scripts use this aggregated value to determine how
+    frequent the same code is executed.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 初始化一个 BPF 哈希 Map，用于聚合同一堆栈帧的频率。火焰图脚本使用这个聚合值来确定同一代码执行的频率。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO9-3)'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO9-3)'
+- en: Initialize our BPF stack trace map. We’re setting a maximum size for this map,
+    but it can vary depending on how much data you want to process. It would be better
+    to have this value as a variable, but we know that our Go application is not very
+    big, so 10,000 elements is plenty.
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 初始化我们的 BPF 堆栈跟踪 Map。我们为这个 Map 设置了最大大小，但它可以根据你要处理的数据量而变化。最好将这个值作为变量，但我们知道我们的
+    Go 应用程序不是很大，所以 10,000 个元素已经足够。
+- en: 'Next, we implement the function that aggregates stack traces in our profiler:'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们实现了在我们的分析器中聚合堆栈跟踪的函数：
+- en: '[PRE25]'
+  id: totrans-174
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO10-1)'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO10-1)'
+- en: Verify that the process ID for the program in the current BPF context is the
+    one for our Go application; otherwise, we ignore the event. We have not defined
+    the value for `PROGRAM_PID` at the moment. Let’s replace this string in the Python
+    part of the profiler before initializing the BPF program. This is a current limitation
+    in the way BCC initializes BPF program; we cannot pass any variables from user-space,
+    and as a common practice, these strings are replaced in the code before initialization.
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确认当前 BPF 上下文中程序的进程 ID 是否与我们 Go 应用程序的相符；否则，我们将忽略此事件。当前我们尚未定义 `PROGRAM_PID` 的值。在初始化
+    BPF 程序之前，让我们在分析器的 Python 部分替换这个字符串。这是 BCC 初始化 BPF 程序方式的一种限制；我们无法从用户空间传递任何变量，并且通常在初始化代码之前会替换这些字符串。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO10-2)'
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO10-2)'
+- en: Create a trace to aggregate its usage. We fetch the stack ID from the program’s
+    context with the built-in function `get_stackid`. This is one of the helpers that
+    BCC adds to our stack trace map. We use the flag `BPF_F_USER_STACK` to indicate
+    that we want to get the stack ID for the user-space application, and we don’t
+    care about what happens inside the kernel.
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个跟踪以聚合其使用情况。我们从程序上下文中使用内置函数 `get_stackid` 获取堆栈 ID。这是 BCC 添加到我们堆栈跟踪映射中的帮助之一。我们使用标志
+    `BPF_F_USER_STACK` 表示我们要获取用户空间应用程序的堆栈 ID，并且我们不关心内核内部发生的事情。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO10-3)'
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO10-3)'
+- en: Increment the counter for our trace to keep track of how often the same code
+    is being exercised.
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 增加我们的跟踪计数器，以跟踪相同代码被执行的频率。
+- en: 'Next, we’re going to attach our stack trace collector to all Perf events in
+    the kernel:'
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们将把我们的堆栈跟踪收集器附加到内核中所有的 Perf 事件上：
+- en: '[PRE26]'
+  id: totrans-182
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO11-1)'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO11-1)'
+- en: The first argument for our Python program. This is the process identifier for
+    the Go application that we’re profiling.
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们 Python 程序的第一个参数。这是我们正在分析的 Go 应用程序的进程标识符。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO11-2)'
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO11-2)'
+- en: Use Python’s built-in `replace` function to swap the string `PROGRAM_ID` in
+    our BPF source with the argument provided to the profiler.
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 Python 内置的 `replace` 函数，将字符串 `PROGRAM_ID` 在我们的 BPF 源码中替换为分析器提供的参数。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO11-3)'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO11-3)'
+- en: Attach the BPF program to all Software Perf events, this will ignore any other
+    events, like Hardware events. We’re also configuring our BPF program to use the
+    CPU clock as time source so we can measure execution time.
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 BPF 程序附加到所有软件 Perf 事件上，这将忽略其他事件，如硬件事件。我们还配置我们的 BPF 程序使用 CPU 时钟作为时间源，以便测量执行时间。
+- en: 'Finally, we need to implement the code that will dump the stack traces in our
+    standard output when the profiler is interrupted:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，在分析器被中断时，我们需要实现将堆栈跟踪转储到标准输出的代码。
+- en: '[PRE27]'
+  id: totrans-190
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO12-1)'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO12-1)'
+- en: Iterate over all the traces we collected so that we can print them in order.
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 迭代我们收集的所有跟踪，以便按顺序打印它们。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO12-2)'
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO12-2)'
+- en: Validate that we got stack identifiers that we can correlate with specific lines
+    of code later. If we get an invalid value, we’ll use a placeholder in our flame
+    graph.
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 验证我们得到的堆栈标识符，以便稍后可以将其与特定代码行相关联。如果得到无效值，我们将在火焰图中使用占位符。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO12-3)'
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO12-3)'
+- en: Iterate over all the entries in the stack trace in reverse order. We do this
+    because we want to see the first most recently executed code path at the top,
+    like you’d expect in any stack trace.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 逆序迭代堆栈跟踪中的所有条目。我们这样做是因为我们希望看到最近执行的代码路径位于顶部，就像在任何堆栈跟踪中所期望的那样。
+- en: '[![4](assets/4.png)](#co_tracing_with_bpf_CO12-4)'
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_tracing_with_bpf_CO12-4)'
+- en: Use the BCC helper `sym` to translate the memory address for the stack frame
+    into a function name in our source code.
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 BCC 辅助工具 `sym` 将堆栈帧的内存地址转换为我们源代码中的函数名称。
+- en: '[![5](assets/5.png)](#co_tracing_with_bpf_CO12-5)'
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#co_tracing_with_bpf_CO12-5)'
+- en: Format the stack trace line separated by semicolons. This is the format that
+    the flame graph scripts expect later to be able to generate our visualization.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将堆栈跟踪行格式化为分号分隔的格式。这是火焰图脚本后续期望能够生成我们可视化的格式。
+- en: 'With our BPF profiler complete, we can run it as `sudo` to collect stack traces
+    for our busy Go program. We need to pass the Go program’s process ID to our profiler
+    to make sure that we collect only traces for this application; we can find that
+    PID using `pgrep`. This is how you run the profiler if you save it in a file called
+    *profiler.py*:'
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成了我们的BPF分析器后，我们可以以`sudo`权限运行它，收集我们繁忙的Go程序的堆栈跟踪。我们需要将Go程序的进程ID传递给我们的分析器，以确保我们仅收集该应用程序的跟踪；我们可以使用`pgrep`找到该PID。如果将其保存在名为*profiler.py*的文件中，则以下是运行分析器的方法：
+- en: '[PRE28]'
+  id: totrans-202
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: '`pgrep` will search the PID for a process running on your system whose name
+    matches `go`. We send our profiler’s output to a temporary file so that we can
+    generate the flame graph visualization.'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`pgrep`将搜索在您的系统上运行名称匹配`go`的进程的PID。我们将分析器的输出发送到临时文件中，以便我们可以生成火焰图可视化。'
+- en: 'As we mentioned earlier, we’re going to use Brendan Gregg’s FlameGraph scripts
+    to generate an SVG file for our graph; you can find those scripts in his [GitHub
+    repository](https://oreil.ly/orqcb). After you’ve downloaded that repository,
+    you can use `flamegraph.pl` to generate the graph. You can open the graph with
+    your favorite browser; we’re using Firefox in this example:'
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如我们之前提到的，我们将使用Brendan Gregg的FlameGraph脚本来生成我们图表的SVG文件；您可以在他的[GitHub存储库](https://oreil.ly/orqcb)中找到这些脚本。下载了该存储库后，您可以使用`flamegraph.pl`来生成图表。您可以使用您喜欢的浏览器打开图表；我们在这个示例中使用的是Firefox浏览器：
+- en: '[PRE29]'
+  id: totrans-205
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: This kind of profiler is useful for tracing performance issues in your system.
+    BCC already includes a more advanced profiler than the one in our example that
+    you can use in your production environments directly. Besides the profiler, BCC
+    includes tools to help you generate off-CPU flame graphs and many other visualizations
+    to analyze systems.
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种性能分析工具非常有用，可以用于追踪系统中的性能问题。BCC已经包含了一个比我们示例中更高级的分析工具，您可以直接在生产环境中使用它。除了性能分析工具外，BCC还包括帮助您生成CPU闲置火焰图和许多其他可视化工具来分析系统。
+- en: Flame graphs are useful for performance analysis. We use them frequently in
+    our day-to-day work. In many scenarios, besides visualizing hot code paths, you’ll
+    want to measure how often events in your systems occur. We focus on that next.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 火焰图对性能分析非常有用。我们在日常工作中经常使用它们。在许多场景中，除了可视化热点代码路径外，您还希望测量系统中事件发生的频率。接下来我们将重点关注这一点。
+- en: Histograms
+  id: totrans-208
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 直方图
+- en: Histograms are diagrams that show you how frequently several ranges of values
+    occur. The numeric data to represent this is divided into buckets, and each bucket
+    contains the number of occurrences of any data point within the bucket. The frequency
+    that histograms measure is the combination of the height and width of each bucket.
+    If the buckets are divided in equal ranges, this frequency matches the histogram’s
+    height, but if the ranges are not divided equally, you need to multiply each height
+    by each width to find the correct frequency.
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 直方图是显示多个数值范围发生频率的图表。用于表示数值数据的区间分为多个桶，每个桶内包含桶中任何数据点的出现次数。直方图测量的频率是每个桶的高度和宽度的组合。如果桶的范围是相等的，这个频率就匹配直方图的高度，但如果范围不是均匀的，则需要将每个高度乘以每个宽度以找到正确的频率。
+- en: Histograms are a fundamental component to do systems performance analysis. They
+    are a great tool to represent the distribution of measurable events, like instruction
+    latency, because they show you more correct information than you can get with
+    other measurements, like averages.
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 直方图是进行系统性能分析的基本组件。它们是表示可测量事件（如指令延迟）分布的强大工具，因为它们向您展示的信息比其他测量方法（如平均值）更准确。
+- en: BPF programs can create histograms based on many metrics. You can use BPF maps
+    to collect the information, classify it in buckets, and then generate the histogram
+    representation for your data. Implementing this logic is not complicated, but
+    it becomes tedious if you want to print histograms every time you need to analyze
+    a program’s output. BCC includes an implementation out of the box that you can
+    reuse in every program, without having to calculate bucketing and frequency manually
+    every single time. However, the kernel source has a fantastic implementation that
+    we encourage you to check out in the BPF samples.
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF程序可以基于许多指标创建直方图。您可以使用BPF映射收集信息，将其分类到桶中，然后为数据生成直方图表示。实现此逻辑并不复杂，但如果您想要在每次分析程序输出时打印直方图，这将变得很乏味。BCC已经包含了一个开箱即用的实现，您可以在每个程序中重复使用它，而无需手动计算分桶和频率。然而，内核源代码中也有一个出色的实现，我们建议您在BPF示例中查看它。
+- en: As a fun experiment, we’re going to show you how to use BCC’s histograms to
+    visualize the latency introduced by loading BPF programs when an application calls
+    the `bpf_prog_load` instruction. We use kprobes to collect how long it takes for
+    that instruction to complete, and we’ll accumulate the results in a histogram
+    that we’ll visualize later. We’ve divided this example into several parts to make
+    it easier to follow.
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为一个有趣的实验，我们将展示如何使用BCC的直方图来可视化在应用程序调用`bpf_prog_load`指令时加载BPF程序引入的延迟。我们使用kprobes来收集该指令完成所需的时间，并将结果累积在稍后将可视化的直方图中。我们已将此示例分成几个部分，以便更容易跟进。
+- en: 'This first part includes the initial source for our BPF program:'
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一部分包括我们的BPF程序的初始源代码：
+- en: '[PRE30]'
+  id: totrans-214
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO13-1)'
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO13-1)'
+- en: Use a macro to create a BPF hash map to store the initial time when the `bpf_prog_load`
+    instruction is triggered.
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用宏创建一个BPF哈希映射，以存储`bpf_prog_load`指令触发时的初始时间。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO13-2)'
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO13-2)'
+- en: Use a new macro to create a BPF histogram map. This is not a native BPF map;
+    BCC includes this macro to make it easier for you to create these visualizations.
+    Under the hood, this BPF histogram uses array maps to store the information. It
+    also has several helpers to do the bucketing and create the final graph.
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用新的宏创建一个BPF直方图映射。这不是一个原生BPF映射；BCC包含这个宏是为了让您更容易创建这些可视化效果。在底层，这个BPF直方图使用数组映射来存储信息。它还有几个帮助函数来进行桶分配并创建最终的图表。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO13-3)'
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO13-3)'
+- en: Use the programs PID to store when the application triggers the instruction
+    we want to trace. (This function will look familiar to you—we took it from the
+    previous Uprobes example.),
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用程序的PID来存储应用程序触发我们想要跟踪的指令的时间。（这个函数会让您感到熟悉——我们从先前的Uprobes示例中获取了它。）
+- en: Let’s see how we calculate the delta for the latency and store it in our histogram.
+    The initial lines of this new block of code will also look familiar because we’re
+    still following the example we talked about in [“Uprobes”](#uprobes-section).
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看如何计算延迟的时间差并将其存储在我们的直方图中。这个新代码块的初始行也会看起来很熟悉，因为我们仍然在遵循我们在["Uprobes"](#uprobes-section)中讨论的示例。
+- en: '[PRE31]'
+  id: totrans-222
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO14-1)'
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO14-1)'
+- en: Calculate the delta between the time the instruction was invoked and the time
+    it took our program to arrive here; we can assume that it’s also the time the
+    instruction completed.
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 计算指令被调用时与程序到达此处所需的时间差；我们可以假设这也是指令完成时的时间。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO14-2)'
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO14-2)'
+- en: Store that delta in our histogram. We do two operations in this line. First,
+    we use the built-in function `bpf_log2l` to generate the bucket identifier for
+    the value of the delta. This function creates a stable distribution of values
+    over time. Then, we use the `increment` function to add a new item to this bucket.
+    By default, `increment` adds 1 to the value if the bucket existed in the histogram,
+    or it starts a new bucket with the value of 1, so you don’t need to worry about
+    whether the value exists in advance.
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将该时间差存储在我们的直方图中。在这行中，我们进行了两个操作。首先，我们使用内置函数`bpf_log2l`为时间差的值生成桶标识符。该函数会随着时间生成一个稳定的值分布。然后，我们使用`increment`函数向此桶添加一个新项。默认情况下，如果直方图中存在该桶，则`increment`将其值加1；如果不存在，则创建一个初始值为1的新桶，因此您不必担心事先存在的值。
+- en: 'The last piece of code that we need to write attaches these two functions to
+    the valid kprobes and prints the histogram on the screen so that we can see the
+    latency distribution. This section is where we initialize our BPF program and
+    we wait for events to generate the histogram:'
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们需要编写的最后一段代码是将这两个函数附加到有效的kprobes并将直方图打印到屏幕上，以便我们可以查看延迟分布。在这一部分，我们初始化我们的BPF程序并等待事件以生成直方图：
+- en: '[PRE32]'
+  id: totrans-228
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO15-1)'
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO15-1)'
+- en: Initialize BPF and attach our functions to kprobes.
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 初始化BPF并将我们的函数附加到kprobes。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO15-2)'
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO15-2)'
+- en: Make our program wait so that we can gather as many events as we need from our
+    system.
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使我们的程序等待，以便我们可以从系统中收集到足够的事件。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO15-3)'
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO15-3)'
+- en: Print the histogram map in our terminal with the traced distribution of events—this
+    is another BCC macro that allows us to get the histogram map.
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在终端上打印带有跟踪事件分布的直方图映射——这是另一个允许我们获取直方图映射的BCC宏。
+- en: As we mentioned at the beginning of this section, histograms can be useful to
+    observe anomalies in your system. The BCC tools include numerous scripts that
+    make use of histograms to represent data; we highly recommend you take a look
+    at them when you need inspiration to dive into your system.
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如我们在本节开头提到的，直方图可以用来观察系统中的异常情况。BCC工具包括许多使用直方图表示数据的脚本；当您需要启发以深入了解系统时，我们强烈推荐您查看它们。
+- en: Perf Events
+  id: totrans-236
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Perf事件
+- en: We believe that Perf events are probably the most important communication method
+    that you need to master to use BPF tracing successfully. We talked about BPF Perf
+    event array maps in the previous chapter. They allow you to put data in a buffer
+    ring that’s synchronized in real time with user-space programs. This is ideal
+    when you’re collecting a large amount of data in your BPF program and want to
+    offload processing and visualization to a user-space program. That will allow
+    you to have more control over the presentation layer because you’re not restricted
+    by the BPF VM regarding programming capabilities. Most of the BPF tracing programs
+    that you can find use Perf events only for this purpose.
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们认为Perf事件可能是您需要掌握的最重要的通信方法，以成功使用BPF跟踪。我们在前一章讨论了BPF Perf事件数组映射。它们允许您将数据放入一个缓冲环中，实时与用户空间程序同步。当您在BPF程序中收集大量数据并希望将处理和可视化转移到用户空间程序时，这是理想的选择。这将使您能够更好地控制呈现层，因为您不受BPF
+    VM在编程能力上的限制。您可以找到的大多数BPF跟踪程序仅出于此目的使用Perf事件。
+- en: 'Here, we show you how to use them to extract information about binary execution
+    and classify that information to print which binaries are the most executed in
+    your system. We’ve divided this example into two blocks of code so that you can
+    easily follow the example. In the first block, we define our BPF program and attach
+    it to a kprobe, like we did in [“Probes”](#probes-section):'
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里，我们向您展示如何使用它们来提取有关二进制执行的信息，并将该信息分类，以打印出系统中最常执行的二进制文件。我们将此示例分为两个代码块，以便您可以轻松地跟随示例。在第一个代码块中，我们定义了我们的BPF程序，并将其附加到一个kprobe，就像我们在[“探针”](#probes-section)中所做的那样：
+- en: '[PRE33]'
+  id: totrans-239
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: In the first line of this example, we’re importing a library from Python’s standard
+    library. We’re going to use a Python counter to aggregate the events we’re receiving
+    from our BPF program.
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此示例的第一行中，我们从Python标准库导入了一个库。我们将使用Python计数器来聚合我们从BPF程序接收到的事件。
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO16-1)'
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO16-1)'
+- en: Use `BPF_PERF_OUTPUT` to declare a Perf events map. This is a convinient macro
+    that BCC provides to declare this kind of map. We’re naming this map *events*.
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`BPF_PERF_OUTPUT`来声明一个Perf事件映射。这是BCC提供的一个便利宏，用于声明这种类型的映射。我们将此映射命名为*events*。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO16-2)'
+  id: totrans-243
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO16-2)'
+- en: Send it to user-space for aggregation after we have the name of the program
+    that the kernel has executed. We do that with `perf_submit`. This function updates
+    the Perf events map with our new piece of information.
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们获得内核执行的程序名称后，将其发送到用户空间进行聚合。我们使用`perf_submit`来完成这个任务。此函数使用我们的新信息更新Perf事件映射。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO16-3)'
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO16-3)'
+- en: Initialize the BPF program and attach it to the kprobe to be triggered when
+    a new program is executed in our system.
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 初始化BPF程序并将其附加到kprobe，以在系统中执行新程序时触发。
+- en: 'Now that we have written the code to collect all programs that are executed
+    in our system, we need to aggregate them in user-space. There is a lot of information
+    in the next code snippet, so we’re going to walk you through the most important
+    lines:'
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们已经编写了收集系统中所有执行程序的代码，我们需要在用户空间中对它们进行聚合。在下一个代码片段中有很多信息，所以我们将带您浏览最重要的几行：
+- en: '[PRE34]'
+  id: totrans-248
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: '[![1](assets/1.png)](#co_tracing_with_bpf_CO17-1)'
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_tracing_with_bpf_CO17-1)'
+- en: Declare a counter to store our program information. We use the name of the program
+    as the key, and the values will be counters. We use the `aggregate_programs` function
+    to collect the data from the Perf events map. In this example, you can see how
+    we use the BCC macro to access the map and extract the next incoming data event
+    from the top of the stack.
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 声明一个计数器来存储我们的程序信息。我们将程序的名称用作键，值将是计数器。我们使用`aggregate_programs`函数来从Perf事件映射中收集数据。在这个示例中，您可以看到我们如何使用BCC宏来访问映射，并从栈顶提取下一个传入数据事件。
+- en: '[![2](assets/2.png)](#co_tracing_with_bpf_CO17-2)'
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_tracing_with_bpf_CO17-2)'
+- en: Increment the number of times we’ve received an event with the same program
+    name.
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 增加我们接收到具有相同程序名称的事件的次数。
+- en: '[![3](assets/3.png)](#co_tracing_with_bpf_CO17-3)'
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_tracing_with_bpf_CO17-3)'
+- en: Use the function `open_perf_buffer` to tell BCC that it needs to execute the
+    function `aggregate_programs` every time it receives an event from the Perf events
+    map.
+  id: totrans-254
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用函数 `open_perf_buffer` 告诉 BCC 每次从 Perf 事件映射接收事件时都需要执行 `aggregate_programs`
+    函数。
+- en: '[![4](assets/4.png)](#co_tracing_with_bpf_CO17-4)'
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_tracing_with_bpf_CO17-4)'
+- en: BCC polls events after opening the ring buffer until we interrupt this Python
+    program. The longer you wait, the more information you’re going to process. You
+    can see how we use `perf_buffer_poll` for this purpose.
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在打开环形缓冲区后，BCC 会轮询事件，直到我们中断此 Python 程序。您等待的时间越长，处理的信息就越多。您可以看到我们如何使用 `perf_buffer_poll`
+    来实现这一目的。
+- en: '[![5](assets/5.png)](#co_tracing_with_bpf_CO17-5)'
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#co_tracing_with_bpf_CO17-5)'
+- en: Use the `most_common` function to get the list of elements in the counter and
+    loop to print the top executed programs in your system first.
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `most_common` 函数获取计数器中的元素列表，并循环打印系统中首先执行的顶级程序。
+- en: Perf events can open the door to processing all of the data that BPF exposes
+    in novel and unexpected ways. We’ve shown you an example to inspire your imagination
+    when you need to collect some kind of arbitrary data from the kernel; you can
+    find many other examples in the tools that BCC provides for tracing.
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Perf 事件可以打开处理 BPF 提供的所有数据的大门，以新颖和意想不到的方式。我们展示了一个示例，启发您的想象力，当您需要从内核中收集某种任意数据时；您可以在
+    BCC 提供的跟踪工具中找到许多其他示例。
+- en: Conclusion
+  id: totrans-260
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: In this chapter we’ve only scratched the surface of tracing with BPF. The Linux
+    kernel gives you access to information that’s more difficult to obtain with other
+    tools. BPF makes this process more predictable because it provides a common interface
+    to access this data. In later chapters you’ll see more examples that use some
+    of the techniques described here, such as attaching functions to tracepoints.
+    They will help you cement what you’ve learned here.
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一章中，我们只是初步涉及了使用 BPF 进行跟踪的内容。Linux 内核为您提供了一些其他工具难以获取的信息。BPF 通过提供一个通用接口来访问这些数据，使得这个过程更加可预测。在接下来的章节中，您将看到更多使用本章介绍的技术的示例，例如将函数附加到跟踪点。这些示例将帮助您巩固在这里学到的知识。
+- en: We used the BCC framework in this chapter to write most of the examples. You
+    can implement the same examples in C, like we did in previous chapters, but BCC
+    provides several built-in features that make writing tracing programs much more
+    accessible than C. If you’re up for a fun challenge, try rewriting these examples
+    in C.
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们使用了 BCC 框架编写了大部分示例。您可以像在之前的章节中所做的那样，在 C 语言中实现相同的示例，但 BCC 提供了几个内置功能，使编写跟踪程序比
+    C 语言更加容易。如果您愿意接受一个有趣的挑战，请尝试用 C 语言重写这些示例。
+- en: In the next chapter, we show you some tools that the systems community has built
+    on top of BPF to do performance analysis and tracing. Writing your own programs
+    is powerful, but these dedicated tools give you access to much of the information
+    we’ve seen here in packaged format. This way, you don’t need to rewrite tools
+    that already exist.
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一章中，我们会展示一些构建在 BPF 之上的系统社区构建的工具，用于进行性能分析和跟踪。编写自己的程序是强大的，但这些专用工具使您可以以打包的方式访问我们在这里看到的大部分信息。这样，您就无需重写已经存在的工具。

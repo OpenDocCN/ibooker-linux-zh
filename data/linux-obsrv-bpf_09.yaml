@@ -1,0 +1,1042 @@
+- en: Chapter 8\. Linux Kernel Security, Capabilities, and Seccomp
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第8章：Linux内核安全性、权限和Seccomp
+- en: BPF is a powerful way to extend the kernel without compromising stability, safety,
+    and speed. For this reason, kernel developers thought that it would’ve been good
+    to use its versatility to improve process isolation in Seccomp by implementing
+    Seccomp filters backed by BPF programs, also known as Seccomp BPF. In this chapter
+    we examine what Seccomp is and how it is used. Then you learn how to write Seccomp
+    filters using BPF programs. After that you explore the built-in BPF hooks that
+    the kernel has for Linux security modules.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF是一种在不牺牲稳定性、安全性和速度的情况下扩展内核的强大方式。因此，内核开发人员认为，利用其多功能性来通过实现由BPF程序支持的Seccomp过滤器来改进Seccomp中的进程隔离是一个好主意，也被称为Seccomp
+    BPF。在本章中，我们将探讨Seccomp是什么以及如何使用它。然后，您将学习如何使用BPF程序编写Seccomp过滤器。之后，您将探索内核为Linux安全模块提供的内置BPF钩子。
+- en: Linux Security Modules (LSM) is a framework providing a set of functions that
+    can be used to implement different security models in a standardized way. An LSM
+    can be used in the kernel source tree directly, like Apparmor, SELinux, and Tomoyo.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux安全模块（LSM）是一个提供一套函数的框架，可以用标准化的方式实现不同的安全模型。LSM可以直接在内核源代码树中使用，比如Apparmor、SELinux和Tomoyo。
+- en: We begin by discussing Linux capabilities.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们从讨论Linux权限开始。
+- en: Capabilities
+  id: totrans-4
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 权限
+- en: The deal with Linux capabilities is that you need to provide your unprivileged
+    process with permission to do a specific task, but you don’t want to give `suid`
+    privileges to the binary or otherwise make the process privileged, so you reduce
+    the attack surface by just giving the process the specific capability to accomplish
+    the specific tasks. For example, if your application needs to open a privileged
+    port, like 80, instead of starting the process as root, you can just give it the
+    `CAP_NET_BIND_SERVICE` capability.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux权限的处理方式是，你需要为你的非特权进程提供执行特定任务的权限，但又不希望给二进制文件赋予`SUID`权限或以其他方式使进程具备特权，因此通过仅给予进程完成特定任务所需的特定能力来减少攻击面。例如，如果你的应用程序需要打开一个特权端口，比如80端口，你可以只赋予它`CAP_NET_BIND_SERVICE`能力，而不是以root身份启动进程。
+- en: 'Consider the following Go program called *main.go*:'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 考虑以下名为*main.go*的Go程序：
+- en: '[PRE0]'
+  id: totrans-7
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: This program serves an HTTPserver on port 80, a privileged port.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该程序在端口80上提供HTTP服务器，这是一个特权端口。
+- en: 'What we normally would do is to run that program straight after compiling it
+    with the following:'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们通常在编译后直接运行该程序如下：
+- en: '[PRE1]'
+  id: totrans-10
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'However, because we are not giving root privileges, that code will output an
+    error when binding the port:'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然而，由于我们没有给予root权限，当绑定端口时，该代码将输出错误：
+- en: '[PRE2]'
+  id: totrans-12
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: Tip
+  id: totrans-13
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: '`capsh` (capability shell wrapper) is a tool that will start a shell with a
+    specific set of capabilities.'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`capsh`（能力外壳包装器）是一个工具，它将以特定的一组能力启动一个shell。'
+- en: 'In this case, as stated, instead of giving full root permissions, we can just
+    allow the binding of privileged ports by allowing the `cap_net_bind_service` capability
+    along with all the others the program already has. To do that, we can wrap our
+    program run with `capsh`:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这种情况下，正如所述，我们可以通过允许`cap_net_bind_service`权限及程序已有的其他权限，而不是给予完整的root权限，来允许绑定特权端口。为此，我们可以用`capsh`来包装我们的程序运行：
+- en: '[PRE3]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Let’s break down that command a bit:'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们稍微解析一下那个命令：
+- en: '`capsh`'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`capsh`'
+- en: We use `capsh` as wrapper.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们使用`capsh`作为包装器。
+- en: '`--caps=''cap_net_bind_service+eip cap_setpcap,cap_setuid,cap_setgid+ep''`'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`--caps=''cap_net_bind_service+eip cap_setpcap,cap_setuid,cap_setgid+ep''`'
+- en: 'Because we need to change the user (we don’t want to run as root), we need
+    to specify `cap_net_bind_service` and the capabilities to actually do the user
+    ID change from `root` to `nobody`, namely, `cap_setuid` and `cap_setgid`:'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为我们需要更改用户（我们不希望以root身份运行），所以我们需要指定`cap_net_bind_service`以及实际执行用户ID从`root`变为`nobody`所需的能力，即`cap_setuid`和`cap_setgid`：
+- en: '`--keep=1`'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`--keep=1`'
+- en: We want to keep the set capabilities when the switch from root is done.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们希望在从root切换完成后保持已设置的能力。
+- en: '`--user="nobody"`'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`--user="nobody"`'
+- en: The end user running our program will be `nobody`.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行我们程序的最终用户将是`nobody`。
+- en: '`--addamb=cap_net_bind_service`'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`--addamb=cap_net_bind_service`'
+- en: We set ambient capabilities because those are cleared after switching from root.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们设置周围能力，因为这些能力在从root切换后会被清除。
+- en: '`-- -c "./capabilities"`'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-- -c "./capabilities"`'
+- en: After everything, we just run our program.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，我们只需运行我们的程序。
+- en: Note
+  id: totrans-30
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Ambient capabilities are a specific kind of capability that is inherited by
+    the children programs when the current program executes them using `execve()`.
+    Only those capabilities that are permitted in the ambient and are inheritable
+    can be ambient capabilities.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 环境权限是当前程序使用`execve()`执行它们时由子程序继承的一种特定类型的权限。只有在环境中允许且可继承的权限才能成为环境权限。
+- en: 'At this point, you are probably asking yourself what is that `+eip` after the
+    capability in the `--caps` option. Those flags are used to determine whether:'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，您可能会问自己`--caps`选项中的`+eip`是什么。这些标志用于确定：
+- en: The capability needs to be activated (p).
+  id: totrans-33
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 需要激活该功能（p）。
+- en: The capability is usable (e).
+  id: totrans-34
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 该功能可用（e）。
+- en: The capability can be inherited by child processes (i).
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 可以通过子进程继承该功能（i）。
+- en: Because we want to use our `cap_net_bind_service`, we need to make it `e`; then
+    in our command, we started a shell. That then started the `capabilities` binary,
+    and we needed to make it `i`. Finally, we want the capability to be activated
+    (it was not because we changed the UID), using `p`. That ends up being `cap_net_bind_service+eip`.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为我们想要使用我们的`cap_net_bind_service`，我们需要使其为`e`；然后在我们的命令中，我们启动了一个shell。然后启动了`capabilities`二进制文件，我们需要使其为`i`。最后，我们希望激活该能力（因为我们更改了UID，它没有被激活），使用`p`。这最终变成了`cap_net_bind_service+eip`。
+- en: 'You can verify that with `ss`; we’re going to cut the output to make it fit
+    in this page, but it will show the bound port and the user ID that are different
+    than `0`, in this case `65534`:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用`ss`来验证；我们将切断输出以使其适合本页，但它将显示绑定端口和用户ID与`0`不同，在本例中为`65534`：
+- en: '[PRE4]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: We used `capsh` for this example, but you can write the wrapper by using *libcap*;
+    for more info, see `man 3 libcap`.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们在此示例中使用了`capsh`，但您可以通过使用*libcap*编写包装器来获取更多信息，请参阅`man 3 libcap`。
+- en: When writing programs, it’s fairly common that the developer doesn’t really
+    know in advance all the capabilities needed by a program at runtime; moreover,
+    with newer releases, those capabilities might change.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在编写程序时，开发人员通常不能预先知道程序在运行时所需的所有功能；而且，随着新版本的发布，这些功能可能会发生变化。
+- en: 'To better understand the capabilities used by our program, we can use the `capable`
+    tool from BCC that sets up a kprobe on the kernel function `cap_capable`:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要更好地了解程序使用的能力，我们可以使用BCC中的`capable`工具在内核函数`cap_capable`上设置一个kprobe：
+- en: '[PRE5]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'We can accomplish the same using `bpftrace` with a one-liner kprobe on the
+    `cap_capable` kernel function:'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们可以使用`bpftrace`来实现相同的功能，通过一行代码在`cap_capable`内核函数上设置一个kprobe：
+- en: '[PRE6]'
+  id: totrans-44
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'That will output something like the following, if our program `capabilities`
+    is started after the kprobe:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果我们的程序`capabilities`在kprobe之后启动，那么将输出类似以下内容：
+- en: '[PRE7]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'The fifth column is the capability required by the process, and because this
+    output also includes nonaudit events, we see all the nonaudit checks and finally
+    the required capability with the audit flag (the last in the previous output)
+    set to 1\. The capability we are interested in is `CAP_NET_BIND_SERVICE`, which
+    is defined as a constant in the kernel source code at `include/uapi/linux/capability.h`
+    and has ID `10`:'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第五列是进程所需的功能，因为此输出还包括非审计事件，我们可以看到所有的非审计检查，并最终看到具有审计标志（前一个输出的最后一个）设置为1的所需功能。我们感兴趣的功能是`CAP_NET_BIND_SERVICE`，在内核源代码的`include/uapi/linux/capability.h`中定义为常量，其ID为`10`：
+- en: '[PRE8]'
+  id: totrans-48
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Capabilities are often used in container runtimes, like runC or Docker, to
+    make containers unprivileged and allow only the capabilities needed to run the
+    majority of applications. When an application needs particular capabilities, in
+    Docker that can be done with `--cap-add`:'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 容器运行时（如runC或Docker）经常使用权限来使容器无特权，并仅允许运行大多数应用程序所需的权限。当应用程序需要特定的权限时，在Docker中可以通过`--cap-add`完成：
+- en: '[PRE9]'
+  id: totrans-50
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: This command will give the `CAP_NET_ADMIN` capability to that container, allowing
+    it to set up a netlink to add the `dummy0` interface.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此命令将为该容器赋予`CAP_NET_ADMIN`能力，允许它设置一个netlink以添加`dummy0`接口。
+- en: The next section shows how to achieve capabilities such as filtering but by
+    using another technique that will let us programmatically implement our own filters.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一节将展示如何使用另一种技术实现能力，例如过滤，这将使我们能够以编程方式实现自己的过滤器。
+- en: Seccomp
+  id: totrans-53
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Seccomp
+- en: Seccomp stands for Secure Computing, and it is a security layer implemented
+    in the Linux kernel that allows developers to filter specific syscalls. Although
+    Seccomp is comparable to capabilities, its ability to control specific system
+    calls makes it a lot more flexible when compared to capabilities.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Seccomp代表安全计算，是Linux内核中实现的安全层，允许开发人员过滤特定的系统调用。虽然Seccomp与capabilities（能力）类似，但其能够控制特定系统调用的能力使其比capabilities更加灵活。
+- en: Seccomp and capabilites do not exclude each other; they are often used together
+    to bring benefits from both the worlds. For example, you might want to give the
+    `CAP_NET_ADMIN` capability to a process but not allow it to accept connections
+    on a socket by blocking the `accept` and `accept4` syscalls.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Seccomp和capabilities并不互斥；它们通常一起使用，从两个世界中带来好处。例如，你可能想要给一个进程赋予`CAP_NET_ADMIN`权限，但通过阻止`accept`和`accept4`系统调用来防止其在套接字上接受连接。
+- en: The way Seccomp filters is based on BPF filters using the `SECCOMP_MODE_FILTER`
+    mode, and syscalls filtering is done in the same way it is for packets.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Seccomp过滤器的方式基于使用`SECCOMP_MODE_FILTER`模式的BPF过滤器，系统调用的过滤与包过滤一样进行。
+- en: Seccomp filters are loaded using `prctl` via the `PR_SET_SECCOMP` operation;
+    those filters are expressed in the form of a BPF program that is executed on each
+    Seccomp *packet* expressed using the `seccomp_data` struct. That struct contains
+    the reference architecture, the CPU instruction pointer at the time of the syscall,
+    and a maximum of six system call arguments expressed as `uint64`.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Seccomp过滤器使用`prctl`加载，通过`PR_SET_SECCOMP`操作表达为BPF程序形式，在每个使用`seccomp_data`结构表达的Seccomp
+    *packet*上执行。该结构包含参考架构，系统调用时CPU指令指针，以及最多六个系统调用参数作为`uint64`表达。
+- en: 'Here’s how the `seccomp_data` struct looks from the kernel’s source at `linux/seccomp.h`:'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面是来自内核源码`linux/seccomp.h`中`seccomp_data`结构的展示：
+- en: '[PRE10]'
+  id: totrans-59
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: As you can see by reading the struct, we can filter based on the syscall, based
+    on its arguments, or based on a combination of them.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过阅读结构可以看出，我们可以基于系统调用本身、其参数或它们的组合来进行过滤。
+- en: 'After receiving each Seccomp packet, the filter has the duty of doing the processing
+    to make a final decision to tell the kernel what to do next. The final decision
+    is expressed via one of the return values (status codes) it can give, as described
+    here:'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接收每个Seccomp packet后，过滤器负责进行处理以做出最终决策，告诉内核接下来应该做什么。最终决策通过其中一个返回值（状态码）表达，如以下所述：
+- en: '`SECCOMP_RET_KILL_PROCESS`'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SECCOMP_RET_KILL_PROCESS`'
+- en: It will kill the whole process immediately after filtering the syscall, which
+    as a consequence, is not executed.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在过滤系统调用后会立即终止整个进程，因此系统调用不会被执行。
+- en: '`SECCOMP_RET_KILL_THREAD`'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SECCOMP_RET_KILL_THREAD`'
+- en: It will kill the current thread immediately after filtering the syscall, which
+    as a consequence, is not executed.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在过滤系统调用后会立即终止当前线程，因此系统调用不会被执行。
+- en: '`SECCOMP_RET_KILL`'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SECCOMP_RET_KILL`'
+- en: This is an alias to `SECCOMP_RET_KILL_THREAD` left for compatibility.
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是`SECCOMP_RET_KILL_THREAD`的别名，保留以保证兼容性。
+- en: '`SECCOMP_RET_TRAP`'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SECCOMP_RET_TRAP`'
+- en: The syscall is disallowed, and the `SIGSYS` (Bad System Call) signal is sent
+    to the task calling it.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统调用被禁止，并且会向调用该系统调用的任务发送`SIGSYS`（Bad System Call）信号。
+- en: '`SECCOMP_RET_ERRNO`'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SECCOMP_RET_ERRNO`'
+- en: The syscall is not executed, and the `SECCOMP_RET_DATA` part of the filter’s
+    return value is passed to user-space as the `errno` value. Depending on what was
+    the cause of the error, a different `errno` is returned. You can find the list
+    of error numbers in the following section.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统调用不被执行，并且过滤器返回值的`SECCOMP_RET_DATA`部分作为`errno`值传递给用户空间。根据错误的原因不同，会返回不同的`errno`值。你可以在下面的部分找到错误号列表。
+- en: '`SECCOMP_RET_TRACE`'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SECCOMP_RET_TRACE`'
+- en: This is used to notify a `ptrace` tracer using `PTRACE_O_TRACESECCOMP` to intercept
+    when the syscall is called to observe and control the execution of the syscall.
+    In case there’s no tracer attached, an error is returned, `errno` is set to `-ENOSYS`,
+    and the syscall is not executed.
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这用于通过`PTRACE_O_TRACESECCOMP`通知`ptrace`跟踪器截获系统调用的调用，以便观察和控制系统调用的执行。如果没有附加跟踪器，则返回错误，设置`errno`为`-ENOSYS`，并且不执行系统调用。
+- en: '`SECCOMP_RET_LOG`'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SECCOMP_RET_LOG`'
+- en: The syscall is allowed and logged.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许系统调用并记录。
+- en: '`SECCOMP_RET_ALLOW`'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SECCOMP_RET_ALLOW`'
+- en: The syscall is just allowed.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统调用仅仅被允许。
+- en: Note
+  id: totrans-78
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: '`ptrace` is a system call used to implement tracing mechanisms on a process,
+    called the *tracee*, with the effect of being able to observe and control the
+    process’s execution. The tracer program can effectively affect the execution and
+    change the memory registers of the tracee. In the context of Seccomp, `ptrace`
+    is used when triggered by the `SECCOMP_RET_TRACE` status code; therefore, the
+    tracer can prevent the syscall from executing and implement its own logic.'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ptrace` 是一个系统调用，用于在进程（称为 *tracee*）上实现跟踪机制，其效果是能够观察和控制进程的执行。追踪程序可以有效地影响执行并更改
+    tracee 的内存寄存器。在 Seccomp 的上下文中，当由 `SECCOMP_RET_TRACE` 状态码触发时，会使用 `ptrace`，因此追踪程序可以防止系统调用执行并实施自己的逻辑。'
+- en: Seccomp Errors
+  id: totrans-80
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Seccomp 错误
+- en: From time to time, while working with Seccomp you will encounter different errors
+    given by the return value of type `SECCOMP_RET_ERRNO`. To notify that an error
+    happened, the `seccomp` syscall will return `-1` instead of `0`.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在使用 Seccomp 时，您会不时遇到由 `SECCOMP_RET_ERRNO` 类型的返回值给出的不同错误。为了通知发生了错误，`seccomp`
+    系统调用将返回 `-1` 而不是 `0`。
+- en: 'The possible errors are as follows:'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可能的错误如下：
+- en: '`EACCESS`'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`EACCESS`'
+- en: The caller is not allowed to do the syscall—usually this happens because it
+    didn’t have `CAP_SYS_ADMIN` privileges or did not set `no_new_privs` with `prctl`,
+    which we explain later in this chapter.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 调用者不允许执行系统调用 —— 通常是因为它没有 `CAP_SYS_ADMIN` 特权或者没有使用 `prctl` 设置 `no_new_privs`，我们将在本章后面详细解释。
+- en: '`EFAULT`'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`EFAULT`'
+- en: The passed arguments (`args` in the `seccomp_data` struct) did not have a valid
+    address.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传递的参数（`seccomp_data` 结构中的 `args`）没有有效的地址。
+- en: '`EINVAL`'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`EINVAL`'
+- en: 'It can have four meanings:'
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它可以有四种含义：
+- en: The requested operation is not known or supported by this kernel within its
+    current configuration.
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 请求的操作在当前配置的内核中不被知道或支持。
+- en: The specified flags are not valid for the requested operation.
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 指定的标志对于请求的操作无效。
+- en: Operation includes `BPF_ABS`, but there are problems with the specified offset
+    that might exceed the size of the `seccomp_data` structure.
+  id: totrans-91
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 操作包括 `BPF_ABS`，但是指定的偏移量可能超出了 `seccomp_data` 结构的大小。
+- en: The number of instructions passed to the filter exceeds the maximum number of
+    instructions.
+  id: totrans-92
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 传递给过滤器的指令数超过了最大指令数。
+- en: '`ENOMEM`'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ENOMEM`'
+- en: There’s not enough memory to execute the program.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 没有足够的内存来执行程序。
+- en: '`EOPNOTSUPP`'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`EOPNOTSUPP`'
+- en: The operation specified that with `SECCOMP_GET_ACTION_AVAIL`, the action was
+    available, but in reality the kernel has no support for the return action in the
+    arguments.
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 操作指定了 `SECCOMP_GET_ACTION_AVAIL`，该操作是可用的，但实际上内核在参数返回中不支持该返回操作。
+- en: '`ESRCH`'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ESRCH`'
+- en: There was a problem during the synchronization of another thread.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在另一个线程同步期间出现问题。
+- en: '`ENOSYS`'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ENOSYS`'
+- en: There’s no tracer attached to the `SECCOMP_RET_TRACE` action.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SECCOMP_RET_TRACE` 操作中没有追踪程序附加。'
+- en: Note
+  id: totrans-101
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: '`prctl` is a syscall that allows a user-space program to control (set and get)
+    specific aspects of a process, such as endian-ness, thread names, secure computing
+    (Seccomp) mode, privileges, Perf events, and so on.'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`prctl` 是一个系统调用，允许用户空间程序控制（设置和获取）进程的特定方面，如端序、线程名称、安全计算（Seccomp）模式、权限、性能事件等。'
+- en: Seccomp might sound to you like it is a sandboxing mechanism, but that’s not
+    true. Seccomp is a utility that lets its users develop a sandboxing mechanism.
+    Now here’s how to write programs to write the custom interactions using a filter
+    called directly by a Seccomp syscall.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对你来说，Seccomp 可能听起来像是一个沙盒机制，但这并不正确。Seccomp 是一个实用程序，允许其用户开发沙盒机制。现在这里是如何编写程序以直接调用
+    Seccomp 系统调用的过滤器来编写自定义交互。
+- en: Seccomp BPF Filter Example
+  id: totrans-104
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Seccomp BPF 过滤器示例
+- en: 'In this example we show how to put together the two actions described earlier:'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此示例中，我们展示如何组合前述的两个操作：
+- en: Write the Seccomp BPF program to be used as a filter with different return codes
+    based on the decisions it makes.
+  id: totrans-106
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 编写 Seccomp BPF 程序，用作根据其做出的决定返回不同返回码的过滤器。
+- en: Load the filter using `prctl`.
+  id: totrans-107
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用 `prctl` 加载过滤器。
+- en: 'First the example needs some headers from the standard library and the Linux
+    kernel:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，示例需要一些来自标准库和 Linux 内核的头文件：
+- en: '[PRE11]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Before trying to execute this example, we need to make sure that our kernel
+    has been compiled with `CONFIG_SECCOMP` and `CONFIG_SECCOMP_FILTER` set to `y`.
+    In a live machine, that can be checked with the following:'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在尝试执行此示例之前，我们需要确保我们的内核已编译并设置为 `CONFIG_SECCOMP` 和 `CONFIG_SECCOMP_FILTER` 为 `y`。在实时机器上，可以通过以下方式检查：
+- en: '[PRE12]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'The rest of the code is the `install_filter` function, made up of two parts.
+    The first part contains our the list of BPF filtering instructions:'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 代码的其余部分是`install_filter`函数，由两部分组成。第一部分包含我们的BPF过滤指令列表：
+- en: '[PRE13]'
+  id: totrans-113
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: The instructions are set up using the `BPF_STMT` and `BPF_JUMP` macros defined
+    in `linux/filter.h`.
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些指令使用`linux/filter.h`中定义的`BPF_STMT`和`BPF_JUMP`宏设置。
+- en: 'Let’s walk through the instructions:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们逐步执行这些指令：
+- en: '`BPF_STMT(BPF_LD + BPF_W + BPF_ABS (offsetof(struct seccomp_data, arch)))`'
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_STMT(BPF_LD + BPF_W + BPF_ABS (offsetof(struct seccomp_data, arch)))`'
+- en: This loads and accumulates with `BPF_LD` in the form of the word `BPF_W`, and
+    the packet data is contained at the fixed `BPF_ABS` offset.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将加载并累积`BPF_LD`形式的字`BPF_W`，数据包数据包含在固定的`BPF_ABS`偏移量处。
+- en: '`BPF_JUMP(BPF_JMP + BPF_JEQ + BPF_K, arch, 0, 3)`'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_JUMP(BPF_JMP + BPF_JEQ + BPF_K, arch, 0, 3)`'
+- en: This checks with `BPF_JEQ` whether the architecture value in the accumulator
+    constant `BPF_K` is equal to `arch`. If so, it will jump with offset zero to the
+    next instruction; otherwise, it will jump with offset three to give an error,
+    in this case because the arch did not match.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这会使用`BPF_JEQ`检查累加器中的体系结构值是否等于`arch`。如果是，则跳转到下一条指令（偏移量为零）；否则，跳转到偏移量为三的错误处理指令，因为体系结构不匹配。
+- en: '`BPF_STMT(BPF_LD + BPF_W + BPF_ABS (offsetof(struct seccomp_data, nr)))`'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_STMT(BPF_LD + BPF_W + BPF_ABS (offsetof(struct seccomp_data, nr)))`'
+- en: This loads and accumulates with `BPF_LD` in the form of the word `BPF_W`, which
+    is the syscall number data contained at the fixed `BPF_ABS` offset.
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将加载并累积`BPF_LD`形式的字`BPF_W`，它是包含在固定`BPF_ABS`偏移量处的系统调用号数据。
+- en: '`BPF_JUMP(BPF_JMP + BPF_JEQ + BPF_K, nr, 0, 1)`'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_JUMP(BPF_JMP + BPF_JEQ + BPF_K, nr, 0, 1)`'
+- en: This compares the value from the syscall number to the one in the `nr` variable.
+    If they are equal, it will go to the next instruction and disallow the syscall;
+    otherwise, it will allow the syscall with `SECCOMP_RET_ALLOW`.
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将比较系统调用号中的值与`nr`变量中的值。如果它们相等，将转到下一条指令并禁止系统调用；否则，将允许系统调用使用`SECCOMP_RET_ALLOW`。
+- en: '`BPF_STMT(BPF_RET + BPF_K, SECCOMP_RET_ERRNO | (error &` `SECCOMP_RET_DATA))`'
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_STMT(BPF_RET + BPF_K, SECCOMP_RET_ERRNO | (error &` `SECCOMP_RET_DATA))`'
+- en: This terminates the program with `BPF_RET` and gives as a result an error, `SECCOMP_RET_ERRNO`,
+    with the specified error number from the `err` variable.
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这会使用`BPF_RET`终止程序，并返回一个带有从`err`变量中指定的错误号的错误，`SECCOMP_RET_ERRNO`。
+- en: '`BPF_STMT(BPF_RET + BPF_K, SECCOMP_RET_ALLOW)`'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_STMT(BPF_RET + BPF_K, SECCOMP_RET_ALLOW)`'
+- en: This terminates the program with `BPF_RET` and allows the syscall execution
+    using `SECCOMP_RET_ALLOW`.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将使用`BPF_RET`终止程序，并允许使用`SECCOMP_RET_ALLOW`进行系统调用执行。
+- en: 'If you need further assistance in understanding that assembly, you will probably
+    find useful some pseudocode that does the same thing:'
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您需要进一步理解该汇编内容，可能会发现一些做同样事情的伪代码很有用：
+- en: '[PRE14]'
+  id: totrans-129
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'After defining the filter code in the `socket_filter` struct, we need to define
+    a `sock_fprog` containing the filter code and the calculated length of the filter
+    itself. This data structure is needed as an argument for declaring the process
+    operation later:'
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在`socket_filter`结构中定义过滤器代码后，我们需要定义一个`sock_fprog`，其中包含过滤器代码的长度计算结果。此数据结构需要作为声明后续过程操作的参数：
+- en: '[PRE15]'
+  id: totrans-131
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'Now we have only one thing left to do in the `install_filter` function: load
+    the program itself! To do that, we use `prctl` using `PR_SET_SECCOMP` as an option
+    because we want to enter secure computing mode. Then we instruct the mode to load
+    a filter with `SECCOMP_MODE_FILTER` that is contained in our `prog` variable of
+    type `sock_fprog`:'
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，在`install_filter`函数中只剩下一件事要做：加载程序本身！为此，我们使用`prctl`并以`PR_SET_SECCOMP`为选项，因为我们想进入安全计算模式。然后，我们指示模式加载一个带有`sock_fprog`类型的`prog`变量中包含的`SECCOMP_MODE_FILTER`过滤器：
+- en: '[PRE16]'
+  id: totrans-133
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: Finally, we can take advantage of our `install_filter` function, but before
+    using it, we need to use `prctl` to set `PR_SET_NO_NEW_PRIVS` on the current execution
+    to avoid the situation in which child processes can have wider privileges than
+    the parent. This lets us make the following `prctl` calls in the `install_filter`
+    function without root privileges.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，我们可以利用我们的`install_filter`函数，但在使用之前，我们需要使用`prctl`在当前执行中设置`PR_SET_NO_NEW_PRIVS`，以避免子进程具有比父进程更广泛的权限。这使得我们可以在没有根权限的情况下在`install_filter`函数中进行以下`prctl`调用。
+- en: 'We can now call the `install_filter` function. We will block all the `write`
+    syscalls relative to the `X86-64` architecture and will just give permission denied
+    to all the attempts. After the filter installation we just continue the execution
+    by using the first argument:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们可以调用 `install_filter` 函数。我们将阻止所有与 `X86-64` 架构相关的 `write` 系统调用，并只给予所有尝试的权限被拒绝。在过滤器安装后，我们通过使用第一个参数继续执行：
+- en: '[PRE17]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: Let’s try it now!
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们来试试吧！
+- en: 'To compile our program, we can use either `clang` or `gcc`; either way, it’s
+    just a matter of compiling the `main.c` file with no special options:'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要编译我们的程序，我们可以使用 `clang` 或 `gcc`；无论哪种方式，只需编译 `main.c` 文件，没有特殊的选项：
+- en: '[PRE18]'
+  id: totrans-139
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'We said that we blocked all the writes in our program. To test it then, we
+    need a program that does writes; the `ls` program seems like a good candidate,
+    and here is how it behaves normally:'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们说我们在我们的程序中阻止了所有的写入。为了测试它，我们需要一个进行写入操作的程序；`ls` 程序似乎是一个很好的选择，这是它正常行为的样子：
+- en: '[PRE19]'
+  id: totrans-141
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Cool! Here’s what our wrapper program usage looks like; we just pass the program
+    we want to test as first argument:'
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 太棒了！这是我们的包装程序用法的样子；我们只需将要测试的程序作为第一个参数传递：
+- en: '[PRE20]'
+  id: totrans-143
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'After it’s executed, that program gives completely empty output, leaving no
+    output. However, we can use `strace` to see what’s happening:'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 执行后，该程序将完全空白输出，没有任何输出。然而，我们可以使用 `strace` 查看发生了什么：
+- en: '[PRE21]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'The result had been stripped of a lot of noise, and the relevant part of that
+    shows that writes are being blocked with an `EPERM` error, which is the same one
+    we set up. This means the program is silent because it can’t access that syscall
+    now:'
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 结果已经去除了许多噪音，相关部分显示写入操作因 `EPERM` 错误被阻止，这与我们设置的相同。这意味着程序是静默的，因为现在它无法访问该系统调用：
+- en: '[PRE22]'
+  id: totrans-147
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: You now have an understanding of how Seccomp BPF operates and a good sense of
+    what you can do with it. But wouldn’t it be good if there were a way to achieve
+    the same using eBPF instead of cBPF to harness its power?
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经了解了 Seccomp BPF 的运作方式，并且对您可以使用它做什么有了一个良好的认识。但如果有一种方法可以使用 eBPF 来实现相同的功能，而不是使用
+    cBPF 来利用它的强大能力，那不是更好吗？
+- en: When thinking about eBPF programs, most people think that you just write them
+    and load them with root privileges. Although that statement is generally true,
+    the kernel implements a set of mechanisms to protect eBPF objects at various levels;
+    those mechanisms are called BPF LSM *hooks*.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在考虑 eBPF 程序时，大多数人认为您只需编写它们并使用 root 权限加载它们。虽然这种说法通常是正确的，但内核实现了一组机制来在各个层次上保护 eBPF
+    对象；这些机制称为 BPF LSM *钩子*。
+- en: BPF LSM Hooks
+  id: totrans-150
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPF LSM 钩子
+- en: To provide architecture-independent control over system events, LSM implements
+    the concept of hooks. Technically, a hook call is similar to a syscall; however,
+    being system independent and integrated with the LSM framework makes hooks interesting
+    because the layer of abstraction this provides can be convenient and can help
+    avoid the kind of troubles that can occur when working with syscalls on different
+    architectures.
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了在系统事件上提供与架构无关的控制，LSM 实现了钩子的概念。从技术上讲，钩子调用类似于系统调用；然而，由于钩子是系统独立的并且与 LSM 框架集成在一起，使得钩子变得非常有趣，因为提供的抽象层可以很方便地避免在不同架构上处理系统调用时可能出现的问题。
+- en: At the time of writing, the kernel has seven hooks related to BPF programs,
+    and SELinux is the only in-tree LSM implementing them.
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在撰写本文时，内核有七个与 BPF 程序相关的钩子，并且 SELinux 是唯一实现它们的内核 LSM。
+- en: 'You can see this in the kernel source tree in this file: `include/linux/security.h`:'
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在此文件中查看内核源码树中的内容：`include/linux/security.h`：
+- en: '[PRE23]'
+  id: totrans-154
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'Each one of those hooks will be invoked at different stages of the execution:'
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些钩子中的每一个都会在执行的不同阶段被调用：
+- en: '`security_bpf`'
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`security_bpf`'
+- en: Does an initial check on the executed BPF syscalls
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对执行的 BPF 系统调用进行初始检查
+- en: '`security_bpf_map`'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`security_bpf_map`'
+- en: Does a check when the kernel returns a file descriptor for a map
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当内核为映射返回文件描述符时进行检查
+- en: '`security_bpf_prog`'
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`security_bpf_prog`'
+- en: Does a check when the kernel returns a file descriptor for an eBPF program
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当内核为 eBPF 程序返回文件描述符时进行检查
+- en: '`security_bpf_map_alloc`'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`security_bpf_map_alloc`'
+- en: Does the initialization of the security field inside BPF maps
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 初始化 BPF 映射内部的安全字段
+- en: '`security_bpf_map_free`'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`security_bpf_map_free`'
+- en: Does the cleanup of the security field inside BPF maps
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 清理 BPF 映射内部的安全字段
+- en: '`security_bpf_prog_alloc`'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`security_bpf_prog_alloc`'
+- en: Does the initialization of the security field inside BPF programs
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 初始化 BPF 程序内部的安全字段
+- en: '`security_bpf_prog_free`'
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`security_bpf_prog_free`'
+- en: Does the cleanup of the security field inside BPF programs
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 清理 BPF 程序内部的安全字段
+- en: Now that we’ve seen them, it becomes clear that the idea behind the LSM BPF
+    hooks is that they can provide a per-object protection for eBPF objects in order
+    to ensure that only those with the appropriate privileges can do operations on
+    maps and programs.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们已经看到它们，可以明显看出LSM BPF钩子背后的理念是，它们可以为eBPF对象提供逐个对象的保护，以确保只有具有适当权限的用户才能对映射和程序执行操作。
+- en: Conclusion
+  id: totrans-171
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: Security is not something that you can implement in a universal way for everything
+    you want to protect. It is important to be able to secure systems at different
+    layers and in different ways, and, believe it or not, the best way to secure a
+    system is to stack different layers with different perspectives so that a compromised
+    layer does not lead to the ability to access the entire system. The kernel developers
+    did a great job in providing us with a set of different layers and interaction
+    points that we can use; our hope is that we gave you a good understanding of what
+    the layers are and how to use BPF programs to interact with them.
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安全并不是一种可以普遍应用于所有需要保护的东西的东西。能够在不同层面和不同方式上确保系统安全非常重要，不管你相不相信，确保系统安全的最佳方法是通过堆叠具有不同视角的不同层次，以便于被攻破的层次不会导致能够访问整个系统。内核开发人员在提供了一组不同层次和交互点的同时也做得非常出色；我们希望能够让您充分了解这些层次是什么以及如何使用BPF程序与它们交互。

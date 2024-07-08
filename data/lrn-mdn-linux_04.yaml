@@ -1,0 +1,1888 @@
+- en: Chapter 4\. Access Control
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第4章\. 访问控制
+- en: After the wide scope in the previous chapter on all things shell and scripting,
+    we now focus on one specific and crucial security aspect in Linux. In this chapter,
+    we discuss the topic of users and controlling access to resources in general and
+    files in particular.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在前一章关于所有与shell和脚本相关的广泛范围之后，我们现在专注于Linux中一个特定且至关重要的安全方面。在本章中，我们讨论了用户及其对资源（特别是文件）的访问控制的主题。
+- en: One question that immediately comes to mind in such a multiuser setup is ownership.
+    A user may own, for example, a file. They are allowed to read from the file, write
+    to the file, and also, say, delete it. Given that there are other users on the
+    system as well, what are those users allowed to do, and how is this defined and
+    enforced? There are also activities that you might not necessarily associate with
+    files in the first place. For example, a user may (or may not) be allowed to change
+    networking-related settings.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这样一个多用户设置中，一个立即想到的问题是所有权。例如，用户可能拥有一个文件。他们被允许从文件中读取、向文件中写入，还可以删除它。考虑到系统上还有其他用户，那么这些用户被允许做什么，这是如何定义和强制执行的呢？也有一些活动可能并不是您首先会与文件相关联的。例如，用户可能（或者可能不会）被允许更改与网络相关的设置。
+- en: To get a handle on this topic, we’ll first take a look at the fundamental relationship
+    between users, processes, and files, from an access perspective. We’ll also review
+    sandboxing and access control types. Next, we’ll focus on the definition of a
+    Linux user, what users can do, and how to manage users either locally or alternatively
+    from a central place.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了掌握这个主题，我们首先将从访问的角度看一下用户、进程和文件之间的基本关系。我们还将回顾沙盒和访问控制类型。接下来，我们将专注于Linux用户的定义，用户可以做什么，以及如何在本地或者从中心位置管理用户。
+- en: Then, we’ll move on to the topic of permissions, where we’ll look at how to
+    control access to files and how processes are impacted by such restrictions.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们将进入权限的主题，我们将看看如何控制对文件的访问以及这种限制如何影响进程。
+- en: We’ll wrap up this chapter covering a range of advanced Linux features in the
+    access control space, including capabilities, seccomp profiles, and ACLs. To round
+    things off, we’ll provide some security good practices around permissions and
+    access control.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将结束本章，涵盖访问控制领域一系列高级Linux功能，包括能力、seccomp配置文件和ACL。为了完善内容，我们将提供一些关于权限和访问控制的安全良好实践。
+- en: With that, let’s jump right into the topic of users and resource ownership,
+    laying the basis for the rest of the chapter.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了这些基础，让我们直接进入用户和资源所有权的主题，为本章的其余部分打下基础。
+- en: Basics
+  id: totrans-7
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 基础知识
+- en: Before we get into access control mechanisms, let’s step back a little and take
+    a bird’s-eye view on the topic. This will help us to establish some terminology
+    and clarify relationships between the main concepts.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们深入访问控制机制之前，让我们退后一步，从鸟瞰视角来看一下这个主题。这将帮助我们建立一些术语，并澄清主要概念之间的关系。
+- en: Resources and Ownership
+  id: totrans-9
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 资源和所有权
+- en: Linux is a multiuser operating system and as such has inherited the concept
+    of a user (see [“Users”](#users)) from UNIX. Each user account is associated with
+    a user ID that can be given access to executables, files, devices, and other Linux
+    assets. A human user can log in with a user account, and a process can run as
+    a user account. Then, there are resources (which we will simply refer to as *files*),
+    which are any hardware or software components available to the user. In the general
+    case, we will refer to resources as files, unless we explicitly talk about access
+    to other kinds of resources, such as with syscalls. In [Figure 4-1](#fig-users-processes-files)
+    and the passage that follows, you see the high-level relationships between users,
+    processes, and files in Linux.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux是一个多用户操作系统，因此从UNIX继承了用户（见[“Users”](#users)）的概念。每个用户帐户都与一个用户ID相关联，可以访问可执行文件、文件、设备和其他Linux资产。人类用户可以使用用户帐户登录，进程可以作为用户帐户运行。然后，有资源（我们简单地称之为*文件*），这些资源可以是用户可用的任何硬件或软件组件。在一般情况下，我们将资源称为文件，除非我们明确讨论访问其他类型资源的情况，比如系统调用。在[图4-1](#fig-users-processes-files)和随后的段落中，您可以看到Linux中用户、进程和文件之间的高级关系。
+- en: '![lmlx 0401](Images/lmlx_0401.png)'
+  id: totrans-11
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0401](Images/lmlx_0401.png)'
+- en: Figure 4-1\. Users, processes, and files in Linux
+  id: totrans-12
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图4-1\. Linux中的用户、进程和文件
+- en: Users
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户
+- en: Launch processes and own files. A *process* is a program (executable file) that
+    the kernel has loaded into main memory and runs.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动进程并拥有文件。*进程*是内核加载到主存储器并运行的程序（可执行文件）。
+- en: Files
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件
+- en: Have owners; by default, the user who creates the file owns it.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有所有者；默认情况下，创建文件的用户拥有它。
+- en: Processes
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程
+- en: Use files for communication and persistency. Of course, users indirectly also
+    use files, but they need to do so via processes.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用文件进行通信和持久性。当然，用户间接地也会使用文件，但他们需要通过进程来进行。
+- en: This depiction of the relationships between users, processes, and files is of
+    course a very simplistic view, but it allows us to understand the actors and their
+    relationships and will come in handy later on when we discuss the interaction
+    between these different players in greater detail.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种用户、进程和文件之间关系的描述当然是一个非常简化的视角，但它使我们能够理解这些参与者及其关系，并且在我们详细讨论这些不同角色之间的互动时将会派上用场。
+- en: Let’s first look at the execution context of a process, addressing the question
+    of how restricted the process is. A term that we often come across when talking
+    about access to resources is *sandboxing*.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先让我们看一下一个进程的执行上下文，解答进程的受限程度问题。在谈论资源访问时，我们经常会遇到一个术语，即*沙盒化*。
+- en: Sandboxing
+  id: totrans-21
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 沙盒化
+- en: '*Sandboxing* is a vaguely defined term and can refer to a range of different
+    methods, from jails to containers to virtual machines, which can be managed either
+    in the kernel or in user land. Usually there is something that runs in the sandbox—typically
+    some application—and the supervising mechanism enforces a certain degree of isolation
+    between the sandboxed process and the hosting environment. If all of that sounds
+    rather theoretical, I ask you for a little bit of patience. We will see sandboxing
+    in action later in this chapter, in [“seccomp Profiles”](#seccomp), and then again
+    in [Chapter 9](ch09.xhtml#advanced) when we talk about VMs and containers.'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*沙盒化*是一个模糊定义的术语，可以指一系列不同的方法，从监狱到容器再到虚拟机，这些方法可以在内核或用户空间中管理。通常在沙盒中会运行一些应用程序，监管机制会在沙盒化的进程和托管环境之间实施一定程度的隔离。如果这些听起来相当理论化，我请求您稍微耐心等待。我们将在本章后面看到沙盒化的实际操作，在[“seccomp
+    Profiles”](#seccomp)中，以及在第9章中再次讨论虚拟机和容器时在[ch09.xhtml#advanced](Chapter 9)中。'
+- en: With a basic understanding of resources, ownership, and access to said resources
+    in your mind, let’s talk briefly about some conceptual ways to go about access
+    control.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您的脑海中对资源、所有权和对资源的访问有了基本理解后，让我们简要讨论一些概念上的访问控制方法。
+- en: Types of Access Control
+  id: totrans-24
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 访问控制类型
+- en: One aspect of access control is the nature of the access itself. Does a user
+    or process directly access a resource, maybe in an unrestricted manner? Or maybe
+    there is a clear set of rules about what kind of resources (files or syscalls)
+    a process can access, under what circumstances. Or maybe the access itself is
+    even recorded.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 访问控制的一个方面是访问本身的性质。用户或进程是否直接访问资源，可能是无限制的方式？或者可能有一组明确的规则，规定进程在什么情况下可以访问什么样的资源（文件或系统调用）。或者访问本身甚至被记录。
+- en: 'Conceptually, there are different access control types. The two most important
+    and relevant to our discussion in the context of Linux are *discretionary* and
+    *mandatory* access control:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在概念上，有不同的访问控制类型。在Linux环境中，最重要和相关的两种是*自主*访问控制和*强制*访问控制：
+- en: Discretionary access control
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自主访问控制
+- en: With discretionary access control (DAC), the idea is to restrict access to resources
+    based on the identity of the user. It’s discretionary in the sense that a user
+    with certain permissions can pass them on to other users.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用自主访问控制（DAC），其思想是基于用户身份限制对资源的访问。在某种程度上，这是自主的，即某些权限的用户可以将其传递给其他用户。
+- en: Mandatory access control
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 强制访问控制
+- en: Mandatory access control is based on a hierarchical model representing security
+    levels. Users are assigned a clearance level, and resources are assigned a security
+    label. Users can only access resources corresponding to a clearance level equal
+    to (or lower than) their own. In a mandatory access control model, an admin strictly
+    and exclusively controls access, setting all permissions. In other words, users
+    cannot set permissions themselves, even when they own the resource.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 强制访问控制基于表示安全级别的层次模型。用户被分配一个许可级别，资源被分配一个安全标签。用户只能访问其自身许可级别等于或低于的资源。在强制访问控制模型中，管理员严格和独占地控制访问，设置所有权限。换句话说，即使拥有资源的用户也不能自行设置权限。
+- en: 'In addition, Linux traditionally has an all-or-nothing attitude—that is, you
+    are either a superuser who has the power to change everything or you are a normal
+    user with limited access. Initially, there was no easy and flexible way to assign
+    a user or process certain privileges. For example, in the general case, to enable
+    that “process X is allowed to change networking settings,” you had to give it
+    `root` access. This, naturally, has a concrete impact on a system that is breached:
+    an attacker can misuse these wide privileges easily.'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，Linux 传统上采取全有或全无的态度，即您要么是超级用户具有更改所有内容的权限，要么是普通用户权限受限。最初，并没有一种简单灵活的方法来为用户或进程分配某些特权。例如，在一般情况下，要使“进程
+    X 被允许更改网络设置”，您必须给予其`root`访问权限。这自然会对遭受攻击的系统产生具体影响：攻击者可以轻易滥用这些广泛的特权。
+- en: Note
+  id: totrans-32
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'To qualify the “all-or-nothing attitude” in Linux a bit: the defaults in most
+    Linux systems allow read access to almost every file and executable by “others”—that
+    is, all users on the system. For example, with SELinux enabled, mandatory access
+    control restricts access to only those assets that are explicitly given permission.
+    So, for example, a web server can only use ports 80 and 443, only share files
+    and scripts from specific directories, only write logs to specific places, and
+    so on.'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要稍微解释一下 Linux 中的“全有或全无态度”：在大多数 Linux 系统中，默认情况下允许“其他人”（即系统上的所有用户）对几乎所有文件和可执行文件进行读取访问。例如，启用
+    SELinux 后，强制访问控制仅限于明确授予权限的资产。因此，例如，Web 服务器只能使用 80 和 443 端口，只能共享特定目录中的文件和脚本，只能将日志写入特定位置，依此类推。
+- en: We’ll revisit this topic in [“Advanced Permission Management”](#advanced-permissions)
+    and see how modern Linux features can help overcome this binary worldview, allowing
+    for more fine-grained management of privileges.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将在[“高级权限管理”](#advanced-permissions)中重新讨论这个主题，并看看现代 Linux 功能如何帮助克服这种二元世界观，从而实现更精细的权限管理。
+- en: Probably the best-known implementation of mandatory access control for Linux
+    is [SELinux](https://oreil.ly/HAOBS). It was developed to meet the high security
+    requirements of government agencies and is usually used in these environments
+    since the usability suffers from the strict rules. Another option for mandatory
+    access control, included in the Linux kernel since version 2.6.36 and rather popular
+    in the Ubuntu family of Linux distributions, is [AppArmor](https://oreil.ly/rp4Fq).
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 中可能最著名的强制访问控制实现是[SELinux](https://oreil.ly/HAOBS)。它是为了满足政府机构的高安全要求而开发的，并且通常用于这些环境，因为其严格的规则使得可用性受到影响。另一个
+    Linux 内核自版本 2.6.36 起包含的强制访问控制选项，在 Ubuntu 系列 Linux 发行版中相当流行，是[AppArmor](https://oreil.ly/rp4Fq)。
+- en: Let’s now move on to the topic of users and how to manage them in Linux.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们转移到 Linux 中用户及其管理的话题上。
+- en: Users
+  id: totrans-37
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 用户
+- en: 'In Linux we often distinguish between two types of user accounts, from a purpose
+    or intended usage point of view:'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Linux 中，我们通常从用途或预期使用的角度区分两种类型的用户账户：
+- en: So-called system users, or system accounts
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所谓的系统用户或系统账户
+- en: Typically, programs (sometimes called *daemons*) use these types of accounts
+    to run background processes. The services provided by these programs can be part
+    of the operating system, such as networking (`sshd`, for example), or on the application
+    layer (for example, `mysql`, in the case of a popular relational database).
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 典型地，程序（有时被称为*守护进程*）使用这些类型的账户来运行后台进程。这些程序提供的服务可以是操作系统的一部分，比如网络服务（例如，`sshd`），或者是应用层的服务（例如，流行的关系型数据库
+    `mysql`）。
+- en: Regular users
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 普通用户
+- en: For example, a human user that interactively uses Linux via the shell.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，通过 shell 与 Linux 交互使用的人类用户。
+- en: The distinction between system and regular users is less of a technical one
+    and more an organizational construct. To understand that, we first have to introduce
+    the concept of a user ID (UID), a 32-bit numerical value managed by Linux.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统用户和普通用户之间的区别在技术上不那么明显，更多地是一种组织结构。要理解这一点，我们首先要介绍 Linux 中的用户 ID（UID）的概念，这是由
+    Linux 管理的一个 32 位数值。
+- en: Linux identifies users via a UID, with a user belonging to one or more groups
+    identified via a group ID (GID). There is a special kind of user with the UID
+    0, usually called `root`. This “superuser” is allowed to do anything, that is,
+    no restriction apply. Usually, you want to avoid working as the `root` user, because
+    it’s just too much power to have. You can easily destroy a system if you’re not
+    careful (believe me, I’ve done this). We’ll get back to this later in the chapter.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux通过UID标识用户，用户属于一个或多个组，由组ID（GID）标识。有一种特殊的用户，UID为0，通常称为`root`。这位“超级用户”可以做任何事情，没有任何限制。通常情况下，你应该避免以`root`用户身份工作，因为拥有太大的权限可能会轻易毁坏系统（相信我，我曾经这么做过）。我们稍后会在本章节中再次讨论这个问题。
+- en: 'Different Linux distributions have their own ways to decide how to manage the
+    UID range. For example, `systemd`-powered distributions (see [“systemd”](ch06.xhtml#systemd)),
+    have the following [convention](https://oreil.ly/c0DuO) (simplified here):'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不同的Linux发行版有各自的方式来决定如何管理UID范围。例如，由`systemd`支持的发行版（参见[“systemd”](ch06.xhtml#systemd)）在这里简化描述有以下约定：
+- en: UID 0
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UID 0
+- en: Is `root`
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是`root`
+- en: UID 1 to 999
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UID 1到999
+- en: Are reserved for system users
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 保留给系统用户使用
+- en: UID 65534
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UID 65534
+- en: Is user `nobody`—used, for example, for mapping remote users to some well-known
+    ID, as is the case with [“Network File System”](ch07.xhtml#nfs)
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户`nobody`是用来映射远程用户到一些已知ID的例子，比如[“网络文件系统”](ch07.xhtml#nfs)
+- en: UID 1000 to 65533 and 65536 to 4294967294
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UID 1000到65533和65536到4294967294
+- en: Are regular users
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 普通用户
+- en: 'To figure out your own UIDs, you can use the (surprise!) `id` command like
+    so:'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查找自己的UID，可以使用（惊喜！）`id`命令，如下所示：
+- en: '[PRE0]'
+  id: totrans-55
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: Now that you know the basics about Linux users, let’s see how you can manage
+    users.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你已经了解了Linux用户的基础知识，让我们看看如何管理用户。
+- en: Managing Users Locally
+  id: totrans-57
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 本地用户管理
+- en: The first option, and traditionally the only one available, is managing users
+    locally. That is, only information local to the machine is used, and user-related
+    information is not shared across a network of machines.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一个选项，也是传统上唯一可用的选项，是本地管理用户。也就是说，仅使用机器本地的信息，用户相关信息不会在多台机器之间共享。
+- en: For local user management, Linux uses a simple file-based interface with a somewhat
+    confusing naming scheme that is a historic artifact we have to live with, unfortunately.
+    [Table 4-1](#table-local-user-ref) lists the four files that, together, implement
+    user management.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于本地用户管理，Linux使用一个简单的基于文件的接口，其中命名方案有些混乱，这是一个历史遗留问题，我们不得不接受。[表 4-1](#table-local-user-ref)
+    列出了四个文件，共同实现用户管理。
+- en: Table 4-1\. Reference of local user management files
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 4-1\. 本地用户管理文件参考
+- en: '| Purpose | File |'
+  id: totrans-61
+  prefs: []
+  type: TYPE_TB
+  zh: '| 目的 | 文件 |'
+- en: '| --- | --- |'
+  id: totrans-62
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| User database | */etc/passwd* |'
+  id: totrans-63
+  prefs: []
+  type: TYPE_TB
+  zh: '| 用户数据库 | */etc/passwd* |'
+- en: '| Group database | */etc/group* |'
+  id: totrans-64
+  prefs: []
+  type: TYPE_TB
+  zh: '| 组数据库 | */etc/group* |'
+- en: '| User passwords | */etc/shadow* |'
+  id: totrans-65
+  prefs: []
+  type: TYPE_TB
+  zh: '| 用户密码 | */etc/shadow* |'
+- en: '| Group passwords | */etc/gshadow* |'
+  id: totrans-66
+  prefs: []
+  type: TYPE_TB
+  zh: '| 组密码 | */etc/gshadow* |'
+- en: 'Think of */etc/passwd* as a kind of mini user database keeping track of user
+    names, UIDs, group membership, and other data, such as home directory and login
+    shell used, for regular users. Let’s have a look at a concrete example:'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 把 */etc/passwd* 看作是一种迷你用户数据库，用来跟踪用户名称、UID、组成员资格和其他数据，例如常规用户使用的主目录和登录 shell。我们来看一个具体的例子：
+- en: '[PRE1]'
+  id: totrans-68
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: '[![1](Images/1.png)](#co_access_control_CO1-1)'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_access_control_CO1-1)'
+- en: The root user has UID 0.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: root用户的UID为0。
+- en: '[![2](Images/2.png)](#co_access_control_CO1-2)'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_access_control_CO1-2)'
+- en: A system account (the `nologin` gives it away; see more below).
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统账户（`nologin`表明其用途；后文会详细讨论）。
+- en: '[![3](Images/3.png)](#co_access_control_CO1-3)'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_access_control_CO1-3)'
+- en: My user account.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我的用户账户。
+- en: 'Let’s have a closer look at one of the lines in */etc/passwd* to understand
+    the structure of a user entry in detail:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们仔细看一下 */etc/passwd* 中的一行，以详细了解用户条目的结构：
+- en: '[PRE2]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: '[![1](Images/1.png)](#co_access_control_CO2-1)'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_access_control_CO2-1)'
+- en: The login shell to use. To prevent interactive logins, use */sbin/nologin*.
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使用的登录 shell。为了阻止交互式登录，可以使用 */sbin/nologin*。
+- en: '[![2](Images/2.png)](#co_access_control_CO2-2)'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_access_control_CO2-2)'
+- en: The user’s home directory; this defaults to */*.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户的主目录，默认为 */*。
+- en: '[![3](Images/3.png)](#co_access_control_CO2-3)'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_access_control_CO2-3)'
+- en: User information such as full name or contact data like phone number. Often
+    also known as [GECOS](https://oreil.ly/ZWQ0f) field. Note that GECOS formatting
+    is not used, but rather the field itself is used typically for the full name of
+    the person associated with the account.
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户信息，如全名或联系电话等。通常也被称为[GECOS](https://oreil.ly/ZWQ0f)字段。请注意，不使用GECOS格式化，而是通常用于与帐户关联的人的全名。
+- en: '[![4](Images/4.png)](#co_access_control_CO2-4)'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_access_control_CO2-4)'
+- en: The user’s primary group (GID); see also */etc/group*.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户的主要组（GID）；另请参阅*/etc/group*。
+- en: '[![5](Images/5.png)](#co_access_control_CO2-5)'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_access_control_CO2-5)'
+- en: The UID. Note that Linux reserves UIDs below 1000 for system usage.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UID。请注意，Linux为系统使用保留了1000以下的UID。
+- en: '[![6](Images/6.png)](#co_access_control_CO2-6)'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](Images/6.png)](#co_access_control_CO2-6)'
+- en: The user’s password, with the `x` character meaning that the (encrypted) password
+    is stored in */etc/shadow*, which is the default these days.
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户的密码，使用`x`字符意味着（加密的）密码存储在*/etc/shadow*中，默认情况下是这样的。
+- en: '[![7](Images/7.png)](#co_access_control_CO2-7)'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![7](Images/7.png)](#co_access_control_CO2-7)'
+- en: The username, which must be 32 characters or fewer.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户名，必须是32个字符或更少。
+- en: 'One thing we notice is absent in */etc/passwd* is the one thing we would expect
+    to find there, based on its name: the password. Passwords are, for historic reasons,
+    stored in a file called */etc/shadow*. While every user can read */etc/passwd*,
+    you usually need `root` privileges to read for */etc/shadow*.'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们注意到*/etc/passwd*中缺少的一件事情是我们基于其名称期望在那里找到的事情：密码。出于历史原因，密码存储在一个称为*/etc/shadow*的文件中。虽然每个用户都可以读取*/etc/passwd*，但通常需要`root`权限才能读取*/etc/shadow*。
+- en: 'To add a user, you can use the [`adduser`](https://oreil.ly/HQVZK) command
+    as follows:'
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要添加用户，您可以使用[`adduser`](https://oreil.ly/HQVZK)命令如下：
+- en: '[PRE3]'
+  id: totrans-93
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: '[![1](Images/1.png)](#co_access_control_CO3-1)'
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_access_control_CO3-1)'
+- en: The `adduser` command creates a home directory.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`adduser`命令会创建一个主目录。'
+- en: '[![2](Images/2.png)](#co_access_control_CO3-2)'
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_access_control_CO3-2)'
+- en: It also copies a bunch of default config files into the home directory.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它还会复制一堆默认的配置文件到主目录。
+- en: '[![3](Images/3.png)](#co_access_control_CO3-3)'
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_access_control_CO3-3)'
+- en: Need to define a password.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 需要定义一个密码。
+- en: '[![4](Images/4.png)](#co_access_control_CO3-4)'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_access_control_CO3-4)'
+- en: Provide optional GECOS information.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 提供可选的GECOS信息。
+- en: If you want to create a system account, pass in the `-r` option. This will disable
+    the ability to use a login shell and also avoid home directory creation. For configuration
+    details, see also */etc/adduser.conf*, including options such as the UID/GID range
+    to be used.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想创建一个系统账户，请使用`-r`选项。这将禁用使用登录 shell，并且避免创建家目录。有关配置详细信息，还可以参考*/etc/adduser.conf*，包括用于UID/GID范围的选项。
+- en: 'In addition to users, Linux also has the concept of groups, which in a sense
+    is just a collection of one or more users. Any regular user belongs to one default
+    group but can be a member of additional groups. You can find out about groups
+    and mappings via the */etc/group* file:'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了用户外，Linux还有组的概念，从某种意义上说，它只是一个或多个用户的集合。任何常规用户都属于一个默认组，但可以成为其他组的成员。您可以通过*/etc/group*文件了解有关组和映射的信息：
+- en: '[PRE4]'
+  id: totrans-104
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: '[![1](Images/1.png)](#co_access_control_CO4-1)'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_access_control_CO4-1)'
+- en: Display the content of the group mapping file.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示组映射文件的内容。
+- en: '[![2](Images/2.png)](#co_access_control_CO4-2)'
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_access_control_CO4-2)'
+- en: An example group of my user with the GID 1001\. Note that you can add a comma-separated
+    list of user names after the last colon to allow multiple users to have that group
+    permission.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个我的用户组示例，其GID为1001。请注意，您可以在最后一个冒号后添加逗号分隔的用户名列表，以允许多个用户具有该组权限。
+- en: With this basic user concept and management under our belt, we move on to a
+    potentially better way to manage users in a professional setup, allowing for scale.
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们已经掌握了这个基本的用户概念和管理方法，我们可以进一步探讨一种在专业设置中更好地管理用户的可能方式，从而支持扩展。
+- en: Centralized User Management
+  id: totrans-110
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 集中化用户管理
+- en: 'If you have more than one machine or server for which you have to manage users—say,
+    in a professional setup—then managing users locally quickly becomes old. You want
+    a centralized way to manage users that you can apply locally, to one specific
+    machine. There are a few approaches available to you, depending on your requirements
+    and (time) budget:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您有多台或多个服务器需要管理用户——比如在专业设置中——那么快速在本地管理用户很快就会变得老旧。您希望有一种集中式的方式来管理用户，可以将其应用到特定的机器上。根据您的需求和（时间）预算，有几种可供选择的方法：
+- en: Directory based
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基于目录
+- en: '[Lightweight Directory Access Protocol (LDAP)](https://oreil.ly/Ll5AU), a decades-old
+    suite of protocols now formalized by IETF, defines how to access and maintain
+    a distributed directory over Internet Protocol (IP). You can run an LDAP server
+    yourself—for example, using projects like [Keycloak](https://oreil.ly/j6qm2)—or
+    outsource this to a cloud provider, such as Azure Active Directory.'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[轻量目录访问协议 (LDAP)](https://oreil.ly/Ll5AU)，一套几十年历史的协议套件，现在由IETF正式规范化，定义了如何通过Internet
+    Protocol (IP)访问和维护分布式目录。您可以自行运行LDAP服务器，例如使用像[Keycloak](https://oreil.ly/j6qm2)这样的项目，或者将其外包给云提供商，如Azure
+    Active Directory。'
+- en: Via a network
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过网络
+- en: Users can be authenticated in this manner with Kerberos. We’ll look at Kerberos
+    in detail in [“Kerberos”](ch09.xhtml#kerberos).
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户可以使用Kerberos以此方式进行身份验证。我们将在[“Kerberos”](ch09.xhtml#kerberos)中详细讨论Kerberos。
+- en: Using config management systems
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用配置管理系统
+- en: These systems, which include Ansible, Chef, Puppet, or SaltStack, can be used
+    to consistently create users across machines.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些系统，包括Ansible、Chef、Puppet或SaltStack，可用于在多台机器上一致地创建用户。
+- en: The actual implementation is often dictated by the environment. That is, a company
+    might already be using LDAP, and hence the choices might be limited. The details
+    of the different approaches and pros and cons are, however, beyond the scope of
+    this book.
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 实际实现通常受环境限制。也就是说，公司可能已经在使用LDAP，因此选择可能有限。然而，不同方法的细节及其利弊超出了本书的范围。
+- en: Permissions
+  id: totrans-119
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 权限
+- en: In this section, we first go into detail concerning Linux file permissions,
+    which are central to how access control works, and then we look at permissions
+    around processes. That is, we review runtime permissions and how they are derived
+    from file permissions.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我们首先详细介绍Linux文件权限，这对访问控制的工作方式至关重要，然后再看看关于进程权限的权限。也就是说，我们将审查运行时权限以及它们是如何从文件权限中派生的。
+- en: File Permissions
+  id: totrans-121
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 文件权限
+- en: File permissions are core to Linux’s concept of access to resources, since everything
+    is a file in Linux, more or less. Let’s first review some terminology and then
+    discuss the representation of the metadata around file access and permissions
+    in detail.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件权限对于Linux中资源访问的概念至关重要，因为在Linux中，几乎所有东西都可以视为文件。让我们首先回顾一些术语，然后详细讨论围绕文件访问和权限的元数据表示。
+- en: 'There are three types or scopes of permissions, from narrow to wide:'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有三种类型或范围的权限，从狭窄到宽：
+- en: User
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户
+- en: The owner of the file
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件的所有者
+- en: Group
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 组
+- en: Has one or more members
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 具有一个或多个成员
+- en: Other
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其他
+- en: The category for everyone else
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于其他所有人的类别
+- en: 'Further, there are three types of access:'
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，有三种类型的访问方式：
+- en: Read (`r`)
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 读取（`r`）
+- en: For a normal file, this allows a user to view the contents of the file. For
+    a directory, it allows a user to view the names of files in the directory.
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于普通文件，这允许用户查看文件内容。对于目录，这允许用户查看目录中文件的名称。
+- en: Write (`w`)
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 写入（`w`）
+- en: For a normal file, this allows a user to modify and delete the file. For a directory,
+    it allows a user to create, rename, and delete files in the directory.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于普通文件，这允许用户修改和删除文件。对于目录，这允许用户在目录中创建、重命名和删除文件。
+- en: Execute (`x`)
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 执行（`x`）
+- en: For a normal file, this allows a user to execute the file if the user also has
+    read permissions on it. For a directory, it allows a user to access file information
+    in the directory, effectively permitting them to change into it (`cd`) or list
+    its content (`ls`).
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于普通文件，这允许用户在具有读取权限的情况下执行文件。对于目录，这允许用户访问目录中的文件信息，有效地允许他们切换到它（`cd`）或列出其内容（`ls`）。
+- en: 'Let’s see file permissions in action (note that the spaces you see here in
+    the output of the `ls` command have been expanded for better readability):'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看文件权限的实际操作（请注意，这里`ls`命令输出中的空格已经展开以提高可读性）：
+- en: '[PRE5]'
+  id: totrans-138
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: '[![1](Images/1.png)](#co_access_control_CO5-1)'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_access_control_CO5-1)'
+- en: File name
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件名
+- en: '[![2](Images/2.png)](#co_access_control_CO5-2)'
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_access_control_CO5-2)'
+- en: Last modified time stamp
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后修改时间戳
+- en: '[![3](Images/3.png)](#co_access_control_CO5-3)'
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_access_control_CO5-3)'
+- en: File size in bytes
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件大小（以字节为单位）
+- en: '[![4](Images/4.png)](#co_access_control_CO5-4)'
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_access_control_CO5-4)'
+- en: Group the file belongs to
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件所属的组
+- en: '[![5](Images/5.png)](#co_access_control_CO5-5)'
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_access_control_CO5-5)'
+- en: File owner
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件所有者
+- en: '[![6](Images/6.png)](#co_access_control_CO5-6)'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](Images/6.png)](#co_access_control_CO5-6)'
+- en: Number of [hard links](https://oreil.ly/9Gfzu)
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[硬链接](https://oreil.ly/9Gfzu)的数量'
+- en: '[![7](Images/7.png)](#co_access_control_CO5-7)'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![7](Images/7.png)](#co_access_control_CO5-7)'
+- en: File mode
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件模式
+- en: 'When zooming in on the *file mode*—that is, the file type and permissions referred
+    to as [![7](Images/7.png)](#co_access_control_CO5-7) in the preceding snippet—we
+    have fields with the following meaning:'
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当深入查看*文件模式*时——即文件类型和权限，如前面片段中所称的[![7](Images/7.png)](#co_access_control_CO5-7)，我们可以了解到各字段的具体含义：
+- en: '[PRE6]'
+  id: totrans-154
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '[![1](Images/1.png)](#co_access_control_CO6-1)'
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_access_control_CO6-1)'
+- en: Permissions for others
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其他用户的权限
+- en: '[![2](Images/2.png)](#co_access_control_CO6-2)'
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_access_control_CO6-2)'
+- en: Permissions for the group
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 组的权限
+- en: '[![3](Images/3.png)](#co_access_control_CO6-3)'
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_access_control_CO6-3)'
+- en: Permissions for the file owner
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件所有者的权限
+- en: '[![4](Images/4.png)](#co_access_control_CO6-4)'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_access_control_CO6-4)'
+- en: The file type ([Table 4-2](#tab-file-types))
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件类型（参见[表格 4-2](#tab-file-types)）
+- en: The first field in the file mode represents the file type; see [Table 4-2](#tab-file-types)
+    for details. The remainder of the file mode encodes the permissions set for various
+    targets, from owner to everyone, as listed in [Table 4-3](#tab-file-permissions).
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件模式中的第一个字段表示文件类型；详细信息请参见[表格 4-2](#tab-file-types)。文件模式的其余部分编码了针对各种目标（从所有者到每个人）设置的权限，如[表格 4-3](#tab-file-permissions)中所列。
+- en: Table 4-2\. File types used in mode
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表格 4-2\. 文件模式中使用的文件类型
+- en: '| Symbol | Semantics |'
+  id: totrans-165
+  prefs: []
+  type: TYPE_TB
+  zh: '| 符号 | 语义 |'
+- en: '| --- | --- |'
+  id: totrans-166
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| `-` | A regular file (such as when you do `touch abc`) |'
+  id: totrans-167
+  prefs: []
+  type: TYPE_TB
+  zh: '| `-` | 普通文件（例如执行`touch abc`时） |'
+- en: '| `b` | Block special file |'
+  id: totrans-168
+  prefs: []
+  type: TYPE_TB
+  zh: '| `b` | 块特殊文件 |'
+- en: '| `c` | Character special file |'
+  id: totrans-169
+  prefs: []
+  type: TYPE_TB
+  zh: '| `c` | 字符特殊文件 |'
+- en: '| `C` | High-performance (contiguous data) file |'
+  id: totrans-170
+  prefs: []
+  type: TYPE_TB
+  zh: '| `C` | 高性能（连续数据）文件 |'
+- en: '| `d` | A directory |'
+  id: totrans-171
+  prefs: []
+  type: TYPE_TB
+  zh: '| `d` | 目录 |'
+- en: '| `l` | A symbolic link |'
+  id: totrans-172
+  prefs: []
+  type: TYPE_TB
+  zh: '| `l` | 符号链接 |'
+- en: '| `p` | A named pipe (create with `mkfifo`) |'
+  id: totrans-173
+  prefs: []
+  type: TYPE_TB
+  zh: '| `p` | 命名管道（使用`mkfifo`创建） |'
+- en: '| `s` | A socket |'
+  id: totrans-174
+  prefs: []
+  type: TYPE_TB
+  zh: '| `s` | 套接字 |'
+- en: '| `?` | Some other (unknown) file type |'
+  id: totrans-175
+  prefs: []
+  type: TYPE_TB
+  zh: '| `?` | 其他（未知）文件类型 |'
+- en: There are some other (older or obsolete) characters such as `M` or `P` used
+    in the position `0`, which you can by and large ignore. If you’re interested in
+    what they mean, run `info ls -n "What information is listed"`.
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些其他（旧的或过时的）字符，如`M`或`P`，在位置`0`上使用，您大部分可以忽略。如果您对它们的含义感兴趣，请运行`info ls -n "What
+    information is listed"`。
+- en: In combination, these permissions in the file mode define what is allowed for
+    each element of the target set (user, group, everyone else), as shown in [Table 4-3](#tab-file-permissions),
+    checked and enforced through [access](https://oreil.ly/wwLsV).
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些文件模式中的权限结合起来，定义了对目标集合的每个元素（用户、组、其他所有人）所允许的操作，如[表格 4-3](#tab-file-permissions)中所示，通过[access](https://oreil.ly/wwLsV)进行检查和执行。
+- en: Table 4-3\. File permissions
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表格 4-3\. 文件权限
+- en: '| Pattern | Effective permission | Decimal representation |'
+  id: totrans-179
+  prefs: []
+  type: TYPE_TB
+  zh: '| 模式 | 生效权限 | 十进制表示 |'
+- en: '| --- | --- | --- |'
+  id: totrans-180
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| `---` | None | 0 |'
+  id: totrans-181
+  prefs: []
+  type: TYPE_TB
+  zh: '| `---` | 无 | 0 |'
+- en: '| `--x` | Execute | 1 |'
+  id: totrans-182
+  prefs: []
+  type: TYPE_TB
+  zh: '| `--x` | 执行 | 1 |'
+- en: '| `-w-` | Write | 2 |'
+  id: totrans-183
+  prefs: []
+  type: TYPE_TB
+  zh: '| `-w-` | 写 | 2 |'
+- en: '| `-wx` | Write and execute | 3 |'
+  id: totrans-184
+  prefs: []
+  type: TYPE_TB
+  zh: '| `-wx` | 写和执行 | 3 |'
+- en: '| `r--` | Read | 4 |'
+  id: totrans-185
+  prefs: []
+  type: TYPE_TB
+  zh: '| `r--` | 只读 | 4 |'
+- en: '| `r-x` | Read and execute | 5 |'
+  id: totrans-186
+  prefs: []
+  type: TYPE_TB
+  zh: '| `r-x` | 读和执行 | 5 |'
+- en: '| `rw-` | Read and write | 6 |'
+  id: totrans-187
+  prefs: []
+  type: TYPE_TB
+  zh: '| `rw-` | 读和写 | 6 |'
+- en: '| `rwx` | Read, write, execute | 7 |'
+  id: totrans-188
+  prefs: []
+  type: TYPE_TB
+  zh: '| `rwx` | 读、写、执行 | 7 |'
+- en: 'Let’s have a look at a few examples:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看几个示例：
+- en: '`755`'
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`755`'
+- en: Full access for its owner; read and execute for everyone else
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对其所有者完全访问；其他所有人仅读和执行
+- en: '`700`'
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`700`'
+- en: Full access by its owner; none for everyone else
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对其所有者完全访问；其他所有人无权限
+- en: '`664`'
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`664`'
+- en: Read/write access for owner and group; read-only for others
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对所有者和组读写访问；其他人只读
+- en: '`644`'
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`644`'
+- en: Read/write for owner; read-only for everyone else
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对所有者读写；其他人只读
+- en: '`400`'
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`400`'
+- en: Read-only by its owner
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只有所有者可读
+- en: The `664` has a special meaning on my system. When I create a file, that’s the
+    default permission it gets assigned. You can check that with the [`umask` command](https://oreil.ly/H9ksX),
+    which in my case gives me `0002`.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`664`在我的系统上具有特殊含义。当我创建文件时，它被分配为默认权限。您可以通过[`umask`命令](https://oreil.ly/H9ksX)来检查，我的情况下是`0002`。'
+- en: The `setuid` permissions are used to tell the system to run an executable as
+    the owner, with the owner’s permissions. If a file is owned by `root`, that can
+    cause issues.
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`setuid`权限用于告诉系统以所有者身份运行可执行文件，并使用所有者的权限。如果文件由`root`所有，可能会引起问题。'
+- en: You can change the permissions of a file using `chmod`. Either you specify the
+    desired permission settings explicitly (such as `644`) or you use shortcuts (for
+    example, `+x` to make it executable). But how does that look in practice?
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用`chmod`更改文件的权限。您可以显式指定所需的权限设置（如`644`），也可以使用快捷方式（例如，`+x`使其可执行）。但实际上是什么样子呢？
+- en: 'Let’s make a file executable with `chmod`:'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们使用`chmod`使文件可执行：
+- en: '[PRE7]'
+  id: totrans-204
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: '[![1](Images/1.png)](#co_access_control_CO7-1)'
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_access_control_CO7-1)'
+- en: Initially the file permissions are `r/w` for the owner and read-only for everyone
+    else, aka `644`.
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最初，文件权限对于所有者是`r/w`，对于其他人只读，即`644`。
+- en: '[![2](Images/2.png)](#co_access_control_CO7-2)'
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_access_control_CO7-2)'
+- en: Make the file executable.
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使文件可执行。
+- en: '[![3](Images/3.png)](#co_access_control_CO7-3)'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_access_control_CO7-3)'
+- en: Now the file permissions are `r/w/x` for the owner and `r/x` for everyone else,
+    aka `755`.
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，文件权限对于所有者是`r/w/x`，对于其他人是`r/x`，即`755`。
+- en: In [Figure 4-2](#fig-file-perm-example) you see what is going on under the hood.
+    Note that you might not want to give everyone the right to execute the file, so
+    a `chmod 744` might have been better here, giving only the owner the correct permissions
+    while not changing it for the rest. We will discuss this topic further in [“Good
+    Practices”](#sec-good-practices).
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[图4-2](#fig-file-perm-example)中，您可以看到底层发生了什么。请注意，您可能不希望每个人都有执行文件的权利，因此在这里使用`chmod
+    744`可能更好，仅为所有者提供正确的权限，而不会更改其余部分。我们将在[“良好实践”](#sec-good-practices)中进一步讨论这个话题。
+- en: '![lmlx 0402](Images/lmlx_0402.png)'
+  id: totrans-212
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0402](Images/lmlx_0402.png)'
+- en: Figure 4-2\. Making a file executable and how the file permissions change with
+    it
+  id: totrans-213
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图4-2。使文件可执行以及随之更改的文件权限
+- en: 'You can also change the ownership using `chown` (and `chgrp` for the group):'
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你也可以使用`chown`（和`chgrp`用于组）更改所有权：
+- en: '[PRE8]'
+  id: totrans-215
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: '[![1](Images/1.png)](#co_access_control_CO8-1)'
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_access_control_CO8-1)'
+- en: The file *myfile*, which I created and own.
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我创建并拥有的文件*myfile*。
+- en: '[![2](Images/2.png)](#co_access_control_CO8-2)'
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_access_control_CO8-2)'
+- en: After `chown`, `root` owns that file.
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 经过`chown`后，`root`拥有该文件。
+- en: Having discussed basic permission management, let’s take a look at some more
+    advanced techniques in this space.
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在讨论了基本的权限管理之后，让我们看看在这个领域中的一些更高级的技术。
+- en: Process Permissions
+  id: totrans-221
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 进程权限
+- en: 'So far we’ve focused on how human users access files and what the respective
+    permissions in play are. Now we shift the focus to processes. In [“Resources and
+    Ownership”](#resources-ownership), we talked about how users own files as well
+    as how processes use files. This raises the question: what are the relevant permissions,
+    from a process point of view?'
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到目前为止，我们关注的是人类用户如何访问文件以及所涉及的权限。现在我们将重点转向进程。在[“资源和所有权”](#resources-ownership)中，我们谈到了用户如何拥有文件以及进程如何使用文件。这引发了一个问题：从进程角度来看，相关的权限是什么？
+- en: 'As documented on the [`credentials(7)` manual page](https://oreil.ly/o7gf6),
+    there are different user IDs relevant in the context of runtime permissions:'
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如[`credentials(7)`手册页](https://oreil.ly/o7gf6)中所述，在运行时权限的上下文中存在不同的用户ID。
+- en: Real UID
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 实际UID
+- en: The *real* UID is the UID of the user that launched the process. It represents
+    process ownership in terms of human user. The process itself can obtain its real
+    UID via [`getuid(2)`](https://oreil.ly/Efi4H), and you can query it via the shell
+    using `stat -c "%u %g" /proc/$pid/`.
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*实际*UID是启动进程的用户的UID。它表示人类用户在进程所有权方面的所有权。进程本身可以通过[`getuid(2)`](https://oreil.ly/Efi4H)获取其实际UID，并且您可以通过shell使用`stat
+    -c "%u %g" /proc/$pid/`查询它。'
+- en: Effective UID
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有效UID
+- en: The Linux kernel uses the *effective* UID to determine permissions the process
+    has when accessing shared resources such as message queues. On traditional UNIX
+    systems, they are also used for file access. Linux, however, previously used a
+    dedicated filesystem UID (see the following discussion) for file access permissions.
+    This is still supported for compatibility reasons. A process can obtain its effective
+    UID via [`geteuid(2)`](https://oreil.ly/b69OQ).
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux内核使用*有效*UID来确定进程在访问共享资源（如消息队列）时的权限。在传统的UNIX系统中，它们也用于文件访问。但是Linux以前使用专用的文件系统UID（参见下面的讨论）来控制文件访问权限，出于兼容性考虑仍然支持。进程可以通过[`geteuid(2)`](https://oreil.ly/b69OQ)获取其有效UID。
+- en: Saved set-user-ID
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 保存的设置用户ID
+- en: Saved set-user-IDs are used in `suid` cases where a process can assume privileges
+    by switching its effective UID between the real UID and the saved set-user-ID.
+    For example, in order for a process to be allowed to use certain network ports
+    (see [“Ports”](ch07.xhtml#transport-ports)), it needs elevated privileges, such
+    as being run as `root`. A process can get its saved set-user-IDs via [`getresuid(2)`](https://oreil.ly/01QVp).
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在`suid`情况下，保存的设置用户ID用于允许进程通过在实际UID和保存的设置用户ID之间切换其有效UID来获取特权。例如，为了允许进程使用某些网络端口（请参阅[“端口”](ch07.xhtml#transport-ports)），它需要以`root`身份运行。进程可以通过[`getresuid(2)`](https://oreil.ly/01QVp)获取其保存的设置用户ID。
+- en: Filesystem UID
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件系统UID
+- en: These Linux-specific IDs are used to determine permissions for file access.
+    This UID was initially introduced to support use cases where a file server would
+    act on behalf of a regular user while isolating the process from signals by said
+    user. Programs don’t usually directly manipulate this UID. The kernel keeps track
+    of when the effective UID is changed and automatically changes the filesystem
+    UID with it. This means that usually the filesystem UID is the same as the effective
+    UID but can be changed via [`setfsuid(2)`](https://oreil.ly/NhhNr). Note that
+    technically this UID is no longer necessary since kernel v2.0 but is still supported,
+    for compatibility.
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些特定于Linux的ID用于确定文件访问的权限。最初引入这一UID是为了支持文件服务器代表普通用户执行操作，同时将该进程与该用户发出的信号隔离。程序通常不直接操作该UID。内核跟踪有效UID何时更改，并自动将文件系统UID与之同步。这意味着通常文件系统UID与有效UID相同，但可以通过[`setfsuid(2)`](https://oreil.ly/NhhNr)更改。请注意，从技术上讲，自内核v2.0起不再需要此UID，但出于兼容性考虑仍受支持。
+- en: Initially, when a child process is created via `fork(2)`, it inherits copies
+    of its parent’s UIDs, and during an `execve(2)` syscall, the process’s real UID
+    is preserved, whereas the effective UID and saved set-user-ID may change.
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最初，通过`fork(2)`创建子进程时，它会继承父进程的UID副本；而在`execve(2)`系统调用期间，进程的真实UID会保留，但有效UID和已保存的设置用户ID可能会发生变化。
+- en: For example, when you run the `passwd` command, your effective UID is your UID,
+    let’s say 1000\. Now, `passwd` has `suid` set enabled, which means when you run
+    it, your effective UID is 0 (aka `root`). There are also other ways to influence
+    the effective UID—for example, using `chroot` and other sandboxing techniques.
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，当您运行`passwd`命令时，您的有效UID是您的UID，假设为1000。现在，`passwd`启用了`suid`设置，这意味着当您运行它时，您的有效UID是0（即`root`）。还有其他影响有效UID的方式，例如使用`chroot`和其他沙箱技术。
+- en: Note
+  id: totrans-234
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: '[POSIX threads](https://oreil.ly/kJFaJ) require that credentials are shared
+    by all threads in a process. However, at the kernel level, Linux maintains separate
+    user and group credentials for each thread.'
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[POSIX线程](https://oreil.ly/kJFaJ)要求所有线程共享凭证。但在内核级别，Linux为每个线程维护单独的用户和组凭证。'
+- en: 'In addition to file access permissions, the kernel uses process UIDs for other
+    things, including but not limited to the following:'
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了文件访问权限外，内核还使用进程UID来执行其他任务，包括但不限于以下内容：
+- en: Establishing permissions for sending signals—for example, to determine what
+    happens when you do a `kill -9` for a certain process ID. We’ll get back to this
+    in [Chapter 6](ch06.xhtml#running-apps).
+  id: totrans-237
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 建立信号发送权限——例如确定当您对某个进程ID执行`kill -9`时会发生什么。我们将在[第6章](ch06.xhtml#running-apps)回到这个问题。
+- en: Permission handling for scheduling and priorities (for example, `nice`).
+  id: totrans-238
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 用于调度和优先级的权限处理（例如`nice`）。
+- en: Checking resource limits, which we’ll discuss in detail in the context of containers
+    in [Chapter 9](ch09.xhtml#advanced).
+  id: totrans-239
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在容器环境下，我们将详细讨论资源限制检查，参见[第9章](ch09.xhtml#advanced)。
+- en: While it can be straightforward to reason with effective UID in the context
+    of `suid`, once capabilities come into play it can be more challenging.
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在处理`suid`时，理解有效UID可能会很直接，但一旦涉及到能力（capabilities），情况可能会更复杂。
+- en: Advanced Permission Management
+  id: totrans-241
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 高级权限管理
+- en: While so far we’ve focused on widely used mechanisms, the topics in this section
+    are in a sense advanced and not necessarily something you would consider in a
+    casual or hobby setup. For professional usage—that is, production use cases where
+    business critical workloads are deployed—you should definitely be at least aware
+    of the following advanced permission management approaches.
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管我们迄今专注于广泛使用的机制，但本节的主题在某种意义上属于高级内容，并不一定适合休闲或爱好设置。对于专业使用——即部署业务关键工作负载的生产用例——您至少应了解以下高级权限管理方法。
+- en: Capabilities
+  id: totrans-243
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 能力（Capabilities）
+- en: 'In Linux, as is traditionally the case in UNIX systems, the `root` user has
+    no restrictions when running processes. In other words, the kernel only distinguishes
+    between two cases:'
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Linux中，与传统的UNIX系统一样，当`root`用户运行进程时没有任何限制。换句话说，内核只区分两种情况：
+- en: Privileged processes, bypassing the kernel permission checks, with an effective
+    UID of 0 (aka `root`)
+  id: totrans-245
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 特权进程，绕过内核权限检查，其有效UID为0（即`root`）
+- en: Unprivileged processes, with a nonzero effective UID, for which the kernel does
+    permission checks, as discussed in [“Process Permissions”](#process-permissions)
+  id: totrans-246
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 对于非特权进程，其有效UID非零，在内核执行权限检查时，详见[“进程权限”](#process-permissions)
+- en: 'With the introduction of the [capabilities syscall](https://oreil.ly/1Fma7)
+    in kernel v2.2, this binary worldview has changed: the privileges traditionally
+    associated with `root` are now broken down into distinct units that can be independently
+    assigned on a per-thread level.'
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自内核 v2.2 引入 [capabilities syscall](https://oreil.ly/1Fma7) 以来，这种二元世界观已经改变：传统上与
+    `root` 相关联的特权现在被分解为可以独立分配到每个线程级别的不同单元。
+- en: In practice, the idea is that a normal process has zero capabilities, controlled
+    by the permissions discussed in the previous section. You can assign capabilities
+    to executables (binaries and shell scripts) as well as processes to gradually
+    add privileges necessary to carry out a task (see the discussion in [“Good Practices”](#sec-good-practices)).
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在实际应用中，基本思想是普通进程没有任何权限，受到前面讨论的权限控制。你可以为可执行文件（二进制文件和 shell 脚本）以及进程分配权限，逐步增加执行任务所需的特权（详见[“良好实践”](#sec-good-practices)中的讨论）。
+- en: 'Now, a word of caution: capabilities are generally relevant only for system-level
+    tasks. In other words: most of the time you won’t necessarily depend on them.'
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在需要提醒一下：特权通常只与系统级任务相关。换句话说，大多数情况下你不一定需要依赖它们。
+- en: In [Table 4-4](#tab-cap) you can see some of the more widely used capabilities.
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [Table 4-4](#tab-cap) 中，你可以看到一些更广泛使用的特权。
+- en: Table 4-4\. Examples of useful capabilities
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Table 4-4\. 有用特权的示例
+- en: '| Capability | Semantics |'
+  id: totrans-252
+  prefs: []
+  type: TYPE_TB
+  zh: '| 特权 | 语义 |'
+- en: '| --- | --- |'
+  id: totrans-253
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| `CAP_CHOWN` | Allows user to make arbitrary changes to files’ UIDs/GIDs |'
+  id: totrans-254
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CAP_CHOWN` | 允许用户对文件的 UID/GID 进行任意更改 |'
+- en: '| `CAP_KILL` | Allows sending of signals to processes belonging to other users
+    |'
+  id: totrans-255
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CAP_KILL` | 允许向属于其他用户的进程发送信号 |'
+- en: '| `CAP_SETUID` | Allows changing the UID |'
+  id: totrans-256
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CAP_SETUID` | 允许更改 UID |'
+- en: '| `CAP_SETPCAP` | Allows setting the capabilities of a running process |'
+  id: totrans-257
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CAP_SETPCAP` | 允许设置正在运行进程的特权 |'
+- en: '| `CAP_NET_ADMIN` | Allows various network-related actions, such as interface
+    config |'
+  id: totrans-258
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CAP_NET_ADMIN` | 允许执行各种网络相关操作，例如接口配置 |'
+- en: '| `CAP_NET_RAW` | Allows using RAW and PACKET sockets |'
+  id: totrans-259
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CAP_NET_RAW` | 允许使用 RAW 和 PACKET sockets |'
+- en: '| `CAP_SYS_CHROOT` | Allows calling `chroot` |'
+  id: totrans-260
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CAP_SYS_CHROOT` | 允许调用 `chroot` |'
+- en: '| `CAP_SYS_ADMIN` | Allows system admin operations, including mounting filesystems
+    |'
+  id: totrans-261
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CAP_SYS_ADMIN` | 允许系统管理员操作，包括挂载文件系统 |'
+- en: '| `CAP_SYS_PTRACE` | Allows using `strace` to debug processes |'
+  id: totrans-262
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CAP_SYS_PTRACE` | 允许使用 `strace` 调试进程 |'
+- en: '| `CAP_SYS_MODULE` | Allows loading kernel modules |'
+  id: totrans-263
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CAP_SYS_MODULE` | 允许加载内核模块 |'
+- en: 'Let’s now see the capabilities in action. For starters, to view the capabilities,
+    you can use commands as shown in the following (output edited to fit):'
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看特权如何发挥作用。首先，要查看特权，可以使用如下命令（输出已编辑以适应）：
+- en: '[PRE9]'
+  id: totrans-265
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: '[![1](Images/1.png)](#co_access_control_CO9-1)'
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_access_control_CO9-1)'
+- en: Overview of all capabilities on the system
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统上所有特权的概述
+- en: '[![2](Images/2.png)](#co_access_control_CO9-2)'
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_access_control_CO9-2)'
+- en: Capabilities for the current process (the shell)
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当前进程（shell）的特权
+- en: You can manage capabilities in a fine-grained manner—that is, on a per-file
+    basis—with [getcap](https://oreil.ly/03bkF) and [setcap](https://oreil.ly/cuBwc)
+    (the details and good practices are beyond the scope of this chapter).
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以通过 [getcap](https://oreil.ly/03bkF) 和 [setcap](https://oreil.ly/cuBwc) 在文件级别上细粒度管理权限（本章节不涉及详细内容和良好实践）。
+- en: 'Capabilities help to transition from an all-or-nothing approach to finer-grained
+    privileges on a file basis. Let’s now move on to a different advanced access control
+    topic: the sandboxing technique of seccomp.'
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 权限能帮助实现从全有或全无的方式向基于文件更精细的特权过渡。现在让我们转向另一个高级访问控制主题：seccomp 的沙箱技术。
+- en: seccomp Profiles
+  id: totrans-272
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: seccomp 配置文件
+- en: '[Secure computing mode (seccomp)](https://oreil.ly/p5iuR) is a Linux kernel
+    feature available since 2005\. The basic idea behind this sandboxing technique
+    is that, using a dedicated syscall called `seccomp(2)`, you can restrict the syscalls
+    a process can use.'
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[安全计算模式（seccomp）](https://oreil.ly/p5iuR) 是自 2005 年以来可用的 Linux 内核特性。这种沙箱技术的基本思想是，通过一个专用的系统调用
+    `seccomp(2)`，可以限制进程可以使用的系统调用。'
+- en: While you might find it inconvenient to manage seccomp yourself directly, there
+    are ways to use it without too much hassle. For example, in the context of containers
+    (see [“Containers”](ch06.xhtml#containers)), both [Docker](https://oreil.ly/A78pm)
+    and [Kubernetes](https://oreil.ly/oYFsK) support seccomp.
+  id: totrans-274
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然你可能觉得直接管理 seccomp 有些不便，但是有方法可以在不太费力的情况下使用它。例如，在容器环境中（参见[“容器”](ch06.xhtml#containers)），[Docker](https://oreil.ly/A78pm)
+    和 [Kubernetes](https://oreil.ly/oYFsK) 都支持 seccomp。
+- en: Let’s now have a look at an extension of the traditional, granular file permission.
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们来看看传统的、精细的文件权限的扩展。
+- en: Access Control Lists
+  id: totrans-276
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 访问控制列表
+- en: With access control lists (ACLs), we have a flexible permission mechanism in
+    Linux that you can use on top of or in addition to the more “traditional” permissions
+    discussed in [“File Permissions”](#file-permissions). ACLs address a shortcoming
+    of traditional permissions in that they allow you to grant permissions for a user
+    or a group not in the group list of a user.
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用访问控制列表（ACL），我们在 Linux 上有一个灵活的权限机制，可以在传统权限之上或作为补充使用，这些传统权限在[“文件权限”](#file-permissions)中已经讨论过。ACL
+    解决了传统权限的一个缺点，即允许您为不在用户组列表中的用户或组授予权限。
+- en: To check if your distribution supports ACLs, you can use `grep -i acl /boot/config*`
+    where you’d hope to find a `POSIX_ACL=Y` somewhere in the output to confirm it.
+    In order to use ACL for a filesystem, it must be enabled at mount time, using
+    the `acl` option. The docs reference on [acl](https://oreil.ly/Ngr0m) has a lot
+    of useful details.
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要检查您的发行版是否支持 ACL，可以使用`grep -i acl /boot/config*`，希望在输出中的某处找到`POSIX_ACL=Y`以确认。为了在文件系统上使用
+    ACL，必须在挂载时启用`acl`选项。关于[acl](https://oreil.ly/Ngr0m)的文档参考有很多有用的细节。
+- en: We won’t go into greater detail here on ACLs since they’re slightly outside
+    the scope of this book; however, being aware of them and knowing where to start
+    can be beneficial, should you come across them in the wild.
+  id: totrans-279
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们不会在这里详细讨论 ACL，因为它们略微超出了本书的范围；然而，了解它们并知道从哪里开始可能会有好处，如果你在实际中遇到它们的话。
+- en: With that, let’s review some good practices for access control.
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了这些，让我们回顾一些访问控制的良好实践。
+- en: Good Practices
+  id: totrans-281
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 良好实践
+- en: Here are some security “good practices” in the wider context of access control.
+    While some of them might be more applicable in professional environments, everyone
+    should at least be aware of them.
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在访问控制的更广泛背景中，这里有一些安全的“良好实践”。尽管其中一些可能更适用于专业环境，但每个人至少应该意识到它们。
+- en: Least privileges
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最小权限
+- en: 'The least privileges principle says, in a nutshell, that a person or process
+    should only have the necessary permissions to achieve a given task. For example,
+    if an app doesn’t write to a file, then it only needs read access. In the context
+    of access control, you can practice least privileges in two ways:'
+  id: totrans-284
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最小权限原则简言之，一个人或进程只应具有完成特定任务所需的必要权限。例如，如果一个应用程序不写入文件，则它只需要读取访问权限。在访问控制的上下文中，您可以通过两种方式实践最小权限：
+- en: 'In [“File Permissions”](#file-permissions), we saw what happens when using
+    `chmod +x`. In addition to the permissions you intended, it also assigns some
+    additional permissions to other users. Using explicit permissions via the numeral
+    mode is better than symbolic mode. In other words: while the latter is more convenient,
+    it’s less strict.'
+  id: totrans-285
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在[“文件权限”](#file-permissions)中，我们看到使用`chmod +x`时会发生什么。除了您打算的权限外，它还为其他用户分配了一些额外的权限。使用数字模式的显式权限比符号模式更好。换句话说：虽然后者更方便，但不够严格。
+- en: Avoid running as root as much as you can. For example, when you need to install
+    something, you should be using `sudo` rather than logging in as `root`.
+  id: totrans-286
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 尽量避免以 root 身份运行。例如，当您需要安装某些东西时，应该使用`sudo`而不是以`root`登录。
+- en: Note that if you’re writing an application, you can use an SELinux policy to
+    restrict access to only selected files, directories, and other features. In contrast,
+    the default Linux model could potentially give the application access to any files
+    left open on the system.
+  id: totrans-287
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意，如果您正在编写应用程序，可以使用 SELinux 策略限制对仅选定的文件、目录和其他功能的访问。相比之下，默认的 Linux 模型可能会使应用程序能够访问系统上留下的任何打开文件。
+- en: Avoid setuid
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 避免使用 setuid
+- en: Take advantage of capabilities rather than relying on `setuid`, which is like
+    a sledgehammer and offers attackers a great way to take over your system.
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 利用能力而不是依赖于`setuid`，后者像是一把大锤，为攻击者提供了接管系统的绝佳途径。
+- en: Auditing
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 审计
+- en: Auditing is the idea that you record actions (along with who carried them out)
+    in a way that the resulting log can’t be tampered with. You can then use this
+    read-only log to verify who did what, when. We’ll dive into this topic in [Chapter 8](ch08.xhtml#observability).
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 审计是记录行为（以及谁执行了它们）的概念，以一种不可篡改的方式记录。然后，您可以使用这个只读日志来验证谁在什么时候做了什么。我们将在[第 8 章](ch08.xhtml#observability)中深入探讨这个主题。
+- en: Conclusion
+  id: totrans-292
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: Now that you know how Linux manages users, files, and access to resources, you
+    have everything at your disposal to carry out routine tasks safely and securely.
+  id: totrans-293
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你了解了Linux如何管理用户、文件和资源访问，你拥有了一切必要的工具来安全、可靠地执行日常任务。
+- en: For any practical work with Linux, remember the relationship between users,
+    processes, and files. This is crucial, in the context of the multiuser operating
+    system that Linux is, for a safe and secure operation and to avoid damages.
+  id: totrans-294
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于在Linux上进行任何实际工作，请记住用户、进程和文件之间的关系。这在Linux作为多用户操作系统的背景下至关重要，对于安全运行和避免损害都是关键的。
+- en: We reviewed access control types, defined what users in Linux are, what they
+    can do, and how to manage them both locally and centrally. The topic of file permissions
+    and how to manage them can be tricky, and mastering it is mostly a matter of practice.
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们回顾了访问控制类型，定义了Linux中的用户及其能力，并讨论了如何在本地和中心化管理它们。文件权限及其管理可能有些棘手，但掌握它主要是一个实践问题。
+- en: Advanced permissions techniques including capabilities and seccomp profiles
+    are super relevant in the context of containers.
+  id: totrans-296
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在容器环境中，高级权限技术，包括能力和seccomp配置文件，非常相关。
+- en: In the last section, we discussed good practices around access control–related
+    security, especially applying least privileges.
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在最后一节中，我们讨论了关于访问控制相关安全的良好实践，特别是应用最少特权。
+- en: 'If you want to dive deeper into the topics discussed in this chapter, here
+    are some resources:'
+  id: totrans-298
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想深入了解本章讨论的主题，这里有一些资源：
+- en: General
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 概述
+- en: '[“A Survey of Access Control Policies”](https://oreil.ly/0PpnS) by Amanda Crowell'
+  id: totrans-300
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“访问控制策略调查”](https://oreil.ly/0PpnS) 由阿曼达·克劳尔编写'
+- en: '[Lynis](https://oreil.ly/SXSkp), an auditing and compliance testing tool'
+  id: totrans-301
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Lynis](https://oreil.ly/SXSkp)，一款审计和合规性测试工具'
+- en: Capabilities
+  id: totrans-302
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 能力
+- en: '[“Linux Capabilities in Practice”](https://oreil.ly/NIdPu)'
+  id: totrans-303
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“实践中的Linux能力”](https://oreil.ly/NIdPu)'
+- en: '[“Linux Capabilities: Making Them Work”](https://oreil.ly/qsYJN)'
+  id: totrans-304
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 权限管理：让它们发挥作用”](https://oreil.ly/qsYJN)'
+- en: seccomp
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: seccomp
+- en: '[“A seccomp Overview”](https://oreil.ly/2cKGI)'
+  id: totrans-306
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“seccomp 概述”](https://oreil.ly/2cKGI)'
+- en: '[“Sandboxing in Linux with Zero Lines of Code”](https://oreil.ly/U5bYG)'
+  id: totrans-307
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“在 Linux 中使用零行代码进行沙盒化”](https://oreil.ly/U5bYG)'
+- en: Access Control Lists
+  id: totrans-308
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 访问控制列表
+- en: '[“POSIX Access Control Lists on Linux”](https://oreil.ly/gbc4A)'
+  id: totrans-309
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“在Linux上使用POSIX访问控制列表”](https://oreil.ly/gbc4A)'
+- en: '[“Access Control Lists”](https://oreil.ly/owpYE) via ArchLinux'
+  id: totrans-310
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“访问控制列表”](https://oreil.ly/owpYE) 通过ArchLinux'
+- en: '[“An Introduction to Linux Access Control Lists (ACLs)”](https://oreil.ly/WCjpN)
+    via Red Hat'
+  id: totrans-311
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux访问控制列表（ACL）简介”](https://oreil.ly/WCjpN) 由Red Hat提供'
+- en: Remember that security is an ongoing process, so you want to make sure to keep
+    an eye on users and files, something we’ll go into greater detail on in Chapters
+    [8](ch08.xhtml#observability) and [9](ch09.xhtml#advanced), but for now let’s
+    move on to the topic of filesystems.
+  id: totrans-312
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请记住安全是一个持续的过程，因此您需要密切关注用户和文件，我们将在第[8](ch08.xhtml#observability)章和第[9](ch09.xhtml#advanced)章中详细讨论这一点，但现在让我们转向文件系统的话题。

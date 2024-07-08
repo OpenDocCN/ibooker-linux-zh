@@ -1,0 +1,109 @@
+- en: Foreword
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 前言
+- en: As a programmer (and a self-confessed dweeb), I like to stay up to date on the
+    latest additions to various kernels and research in computing. When I first played
+    around with Berkeley Packet Filter (BPF) and Express Data Path (XDP) in Linux,
+    I was in love. These are such nice tools, and I am glad this book is putting BPF
+    and XDP on the center stage so that more people can begin using them in their
+    projects.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为一个程序员（也是一个自称的怪胎），我喜欢跟踪各种内核的最新补充和计算研究。当我第一次在Linux中玩弄伯克利包过滤器（BPF）和Express Data
+    Path（XDP）时，我就爱上了它们。这些工具真是太棒了，我很高兴这本书把BPF和XDP放在中心舞台上，让更多的人能在他们的项目中开始使用它们。
+- en: Let me go into detail about my background and why I fell in love with these
+    kernel interfaces. I was working as a Docker core maintainer, along with David.
+    Docker, if you are not familiar, shells out to `iptables` for a lot of the filtering
+    and routing logic for containers. The first patch I ever made to Docker was to
+    fix a problem in which a version of `iptables` on CentOS didn’t have the same
+    command-line flags, so writing to `iptables` was failing. There were a lot of
+    weird issues like this, and anyone who has ever shelled out to a tool in their
+    software can likely commiserate. Not only that, but having thousands of rules
+    on a host is not what `iptables` was built for and results in performance side
+    effects.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我详细介绍一下我的背景，以及为什么我对这些内核接口情有独钟。我曾担任Docker核心维护者，与David一起工作。如果你不熟悉，Docker对于容器的过滤和路由逻辑大多是通过调用`iptables`实现的。我对Docker的第一个补丁是修复一个问题，即在CentOS上的一个版本中，`iptables`的命令行标志不同，因此写入`iptables`失败了。还有很多类似的奇怪问题，任何在软件中调用工具的人可能都能理解。此外，在主机上有成千上万的规则并不是`iptables`的初衷，这会导致性能副作用。
+- en: Then I heard about BPF and XDP. This was like music to my ears. No longer would
+    my scars from `iptables` bleed with another bug! The kernel community is even
+    working on [replacing `iptables` with BPF](https://oreil.ly/cuqTy)! Hallelujah!
+    [Cilium](https://cilium.io), a tool for container networking, is using BPF and
+    XDP for the internals of its project as well.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 后来我听说了BPF和XDP。这对我来说就像是天籁之音。我的`iptables`伤痕不再因另一个bug而流血了！甚至内核社区正在努力[用BPF取代`iptables`](https://oreil.ly/cuqTy)！哈利路亚！[Cilium](https://cilium.io)，一个用于容器网络的工具，正在其项目的内部使用BPF和XDP。
+- en: But that’s not all! BPF can do so much more than just fulfilling the `iptables`
+    use case. With BPF, you can trace any syscall or kernel function as well as any
+    user-space program. [bpftrace](https://github.com/iovisor/bpftrace) gives users
+    DTrace-like abilities in Linux from their command line. You can trace all the
+    files that are being opened and the process calling the open ones, count the syscalls
+    by the program calling them, trace the OOM killer, and more…the world is your
+    oyster! BPF and XDP are also used in [Cloudflare](https://oreil.ly/OZdmj) and
+    [Facebook’s load balancer](https://oreil.ly/wrM5-) to prevent distributed denial-of-service
+    attacks. I won’t spoil why XDP is so great at dropping packets because you will
+    learn about that in the XDP and networking chapters of this book!
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但这还不是全部！BPF 能做的远不止满足于`iptables`的使用场景。有了BPF，你可以跟踪任何系统调用或内核函数，以及任何用户空间程序。[bpftrace](https://github.com/iovisor/bpftrace)
+    让用户能在Linux命令行中拥有类似DTrace的能力。你可以追踪所有被打开的文件及调用这些打开操作的进程，统计调用它们的程序的系统调用次数，追踪OOM killer等等……世界就在你的掌握中！BPF和XDP还被用于[Cloudflare](https://oreil.ly/OZdmj)
+    和 [Facebook的负载均衡器](https://oreil.ly/wrM5-) 中，以防止分布式拒绝服务攻击。我不会剧透XDP为何如此擅长丢弃数据包，因为你将在本书的XDP和网络章节中了解到！
+- en: I have had the privilege of knowing Lorenzo through the Kubernetes community.
+    His tool, [`kubectl-trace`](https://oreil.ly/Ot7kq), allows users to easily run
+    their custom tracing programs within their Kubernetes clusters.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过Kubernetes社区，我有幸认识了Lorenzo。他的工具[`kubectl-trace`](https://oreil.ly/Ot7kq) 允许用户在其Kubernetes集群中轻松运行自定义跟踪程序。
+- en: Personally, my favorite use case for BPF has been writing custom tracers to
+    prove to other folks that the performance of their software is not up to par or
+    makes a really expensive number of calls to syscalls. Never underestimate the
+    power of proving someone wrong with hard data. Don’t fret, this book will walk
+    you through writing your first tracing program so that you can do the same. The
+    beauty of BPF lies in the fact that before now other tools used lossy queues to
+    send sample sets to user-space for aggregation, whereas BPF is great for production
+    because it allows for constructing histograms and filtering directly at the source
+    of events.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 个人而言，我对BPF的最喜爱用途是编写自定义跟踪器，以证明其他人的软件性能不达标或者系统调用次数过多的情况。永远不要低估用硬数据证明别人错误的力量。不要担心，本书将带领你编写你的第一个跟踪程序，让你也能做到这一点。BPF的美妙之处在于在此之前，其他工具使用丢失队列将样本集发送到用户空间进行聚合，而BPF非常适合生产环境，因为它允许在事件源头直接构建直方图和过滤。
+- en: I have spent half of my career working on tools for developers. The best tools
+    allow autonomy in their interfaces for developers like you to use them for things
+    even the authors never imagined. To quote Richard Feynman, “I learned very early
+    the difference between knowing the name of something and knowing something.” Until
+    now you might have only known the name BPF and that it might be useful to you.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我职业生涯的一半时间都在为开发者工具工作。最好的工具允许开发者像你一样在其接口中自主使用，用于作者甚至未曾想象的事物。引用理查德·费曼的话，“我很早就学会了知道某事物的名字与真正了解它之间的区别。”直到现在，你可能只知道BPF这个名字，以及它可能对你有用。
+- en: What I love about this book is that it gives you the knowledge you need to be
+    able to create all new tools using BPF. After reading and following the exercises,
+    you will be empowered to use BPF like a super power. You can keep it in your toolkit
+    to use on demand when it’s most needed and most useful. You won’t just learn BPF;
+    you will understand it. This book is a path to open your mind to the possibilities
+    of what you can build with BPF.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我喜欢这本书的原因是它为你提供了创建所有新工具的知识，使用BPF。阅读并完成练习后，你将有能力像使用超能力一样使用BPF。你可以将其放在工具箱中，在最需要和最有用时使用。你不仅会学会BPF；你会理解它。这本书是打开你头脑，看到用BPF可以构建的可能性的路径。
+- en: This developing ecosystem is very exciting! I hope it will grow even larger
+    as more people begin wielding BPF’s power. I am excited to learn about what the
+    readers of this book end up building, whether it’s a script to track down a crazy
+    software bug or a custom firewall or even [infrared decoding](https://lwn.net/Articles/759188).
+    Be sure to let us all know what you build!
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个发展中的生态系统非常令人兴奋！我希望随着更多人开始发挥BPF的力量，它会变得更加庞大。我很期待了解本书读者最终构建的东西，无论是追踪疯狂软件错误的脚本，还是自定义防火墙，甚至是[红外解码](https://lwn.net/Articles/759188)。请务必告诉我们你构建了什么！
+- en: Jessie Frazelle
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Jessie Frazelle

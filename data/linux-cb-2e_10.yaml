@@ -1,0 +1,1417 @@
+- en: Chapter 10\. Getting Detailed Information About Your Computer Hardware
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第10章。获取计算机硬件的详细信息
+- en: Linux comes with several good utilities for getting detailed information on
+    the hardware components in your computer. You can sit down at a machine and in
+    minutes have an inventory of its components and their specifications, without
+    opening the case.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 自带了几个好用的工具，用于获取计算机中各个硬件组件的详细信息。您可以坐在计算机旁，几分钟内就能了解其组件及其规格，而无需打开机箱。
+- en: These utilities are useful for providing detailed information for technical
+    support, finding the correct drivers for a device, and finding out if it is supported
+    in Linux at all. You can’t count on manufacturers to provide timely accurate information
+    about their own products. For example, they will often change their chipsets without
+    changing model numbers, which may turn a device that worked fine on Linux into
+    a device that does not work on Linux. Fortunately, in these modern times Linux
+    support is much less of a hassle than it used to be.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些实用程序用于提供技术支持的详细信息，查找设备的正确驱动程序以及了解它是否完全在 Linux 中受支持。您不能指望制造商及时提供其产品的准确信息。例如，他们经常更改芯片组而不更改型号号码，这可能会将在
+    Linux 上正常工作的设备变成在 Linux 上不起作用的设备。幸运的是，在现代这些时代，Linux 支持要比过去少得多的麻烦。
+- en: Ideally, you will also have your computer documentation, or at least the motherboard
+    manual. Motherboard manuals are usually full of photos, diagrams, and useful information,
+    and you should be able to find them online.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 理想情况下，您还应该有您的计算机文档，或至少是主板手册。主板手册通常充满了照片，图表和有用的信息，您应该能够在线找到它们。
+- en: In this chapter you will learn about the *lshw* (list hardware), *lspci* (list
+    PCI), *hwinfo* (hardware information), *lsusb* (list USB), *lscpu* (list CPU),
+    and *lsblk* (list block devices) commands.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您将了解 *lshw*（列出硬件）、*lspci*（列出 PCI）、*hwinfo*（硬件信息）、*lsusb*（列出 USB）、*lscpu*（列出
+    CPU）和 *lsblk*（列出块设备）命令。
+- en: '*lshw* and *hwinfo* provide the most complete information.'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lshw* 和 *hwinfo* 提供了最完整的信息。'
+- en: '*lshw* reports memory configuration, firmware versions, mainboard configuration,
+    CPU version and speed, cache configuration, bus speed, hardware paths, attached
+    devices, partitions, and filesystems.'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lshw* 报告内存配置，固件版本，主板配置，CPU 版本和速度，缓存配置，总线速度，硬件路径，附加设备，分区和文件系统。'
+- en: '*hwinfo* reports computer monitor information, RAID arrays, memory configuration,
+    CPU information, firmware, mainboard configuration, caches, bus speeds, attached
+    devices, partitions, and filesystems.'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*hwinfo* 报告计算机显示器信息，RAID 数组，内存配置，CPU 信息，固件，主板配置，缓存，总线速度，附加设备，分区和文件系统。'
+- en: '*lsusb* probes USB buses and the devices attached to them.'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lsusb* 探测 USB 总线及其连接的设备。'
+- en: '*lspci* probes PCI buses and the devices attached to them.'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lspci* 探测 PCI 总线及其连接的设备。'
+- en: '*lsblk* lists physical drives, partitions, and filesystems.'
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lsblk* 列出物理驱动器，分区和文件系统。'
+- en: '*lscpu* lists information about your CPU.'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lscpu* 列出有关您的 CPU 的信息。'
+- en: 10.1 Collecting Hardware Information with lshw
+  id: totrans-12
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.1 使用 lshw 收集硬件信息
+- en: Problem
+  id: totrans-13
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want an inventory of the hardware on your system and details about each
+    item.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要系统上硬件的清单以及有关每个项目的详细信息。
+- en: Solution
+  id: totrans-15
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Try the *lshw* (Hardware Lister) command with no options, and store the output
+    in a text file:'
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尝试使用没有选项的 *lshw*（硬件列表）命令，并将输出存储在文本文件中：
+- en: '[PRE0]'
+  id: totrans-17
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: You’ll get several hundred lines of output that include firmware, drivers, capabilities,
+    serial numbers, version numbers, and bus information. *lshw* will not probe any
+    device attached via a wireless network interface, such as a wireless printer,
+    or a smartphone attached via Bluetooth, but it will report wireless and Bluetooth
+    interfaces.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将获得数百行输出，其中包括固件，驱动程序，功能，序列号，版本号和总线信息。 *lshw* 不会探测通过无线网络接口连接的任何设备，例如无线打印机或通过蓝牙连接的智能手机，但它会报告无线和蓝牙接口。
+- en: 'You may prefer a summary in a hardware path tree view:'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能更喜欢以硬件路径树视图的摘要形式：
+- en: '[PRE1]'
+  id: totrans-20
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Or try the summary bus view, rather than the hardware path view:'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者尝试摘要总线视图，而不是硬件路径视图：
+- en: '[PRE2]'
+  id: totrans-22
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: '*lshw* has a graphical interface, which you open with *sudo lshw -X*. This
+    is often a separate package, for example, *lshw-gtk* on Ubuntu and *lshw-gui*
+    on openSUSE and Fedora.'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lshw* 有一个图形界面，您可以用 *sudo lshw -X* 打开。这通常是一个单独的软件包，例如在 Ubuntu 上是 *lshw-gtk*，在
+    openSUSE 和 Fedora 上是 *lshw-gui*。'
+- en: Discussion
+  id: totrans-24
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*lshw* packs a lot of information into its output. Visit [Hardware Lister (lshw)](https://oreil.ly/XRGx1)
+    to learn what everything means.'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lshw* 将大量信息打包到其输出中。访问 [Hardware Lister (lshw)](https://oreil.ly/XRGx1) 了解所有内容的含义。'
+- en: '*lshw* does not detect FireWire interfaces or computer monitors.'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lshw* 无法检测到FireWire接口或计算机显示器。'
+- en: The example says “system To Be Filled By O.E.M.” because it is a homebrew machine.
+    A branded computer, such as Lenovo or Dell, should have the brand name and model.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例中说“系统待填充”，因为它是一台自制机器。例如联想或戴尔等品牌计算机应该有品牌名称和型号。
+- en: The *H/W path* column contains hardware paths, which are analogous to filepaths.
+    /0 is */system/bus*, which means computer and motherboard. Then all the following
+    entries are in a tree view, similar to a file tree. As you can see in the example
+    output, /0/0 is */system/bus/BIOS memory*, /0/b is the first populated RAM slot,
+    and /0/b/1 is the second populated RAM slot. These paths correspond to physical
+    connections on your motherboard and are commonly called *slots*, even though most
+    of them are soldered to the motherboard and do not have physical slots that you
+    can plug expansion cards into.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*H/W路径*列包含硬件路径，类似于文件路径。/0 是 */system/bus*，表示计算机和主板。然后所有后续条目都以树形视图显示，类似于文件树。正如您在示例输出中看到的那样，/0/0
+    是 */system/bus/BIOS memory*，/0/b 是第一个已填充的RAM插槽，/0/b/1 是第二个已填充的RAM插槽。这些路径对应于主板上的物理连接点，通常被称为*插槽*，尽管大多数都已焊接到主板上，没有物理插槽可插入扩展卡。'
+- en: See Also
+  id: totrans-29
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Hardware Lister (lshw)](https://oreil.ly/axiyL)'
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[硬件列表 (lshw)](https://oreil.ly/axiyL)'
+- en: '*man 1 lshw*'
+  id: totrans-31
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 lshw*'
+- en: 10.2 Filtering lshw Output
+  id: totrans-32
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.2 过滤 lshw 输出
+- en: Problem
+  id: totrans-33
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: '*lshw* sure does dump a lot of information, and you want to limit the output
+    to what you want to see.'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lshw* 确实会输出大量信息，您希望限制输出到您想要查看的内容。'
+- en: Solution
+  id: totrans-35
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Run *sudo lshw -short* or *sudo lshw -businfo* to see a list of device classes,
+    then name one or more device classes that you want to see:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行 *sudo lshw -short* 或 *sudo lshw -businfo* 查看设备类别列表，然后命名一个或多个您想要查看的设备类别：
+- en: '[PRE3]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Omit the *-short* option to see detailed information.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 删除 *-short* 选项以查看详细信息。
+- en: 'Format the long output as HTML, XML, or JSON, and store it in a file so you
+    can use your favorite scripting hacks to parse the output:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将长输出格式化为HTML、XML或JSON，并将其存储在文件中，以便您可以使用您喜爱的脚本技巧解析输出：
+- en: '[PRE4]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Remove sensitive information with the *-sanitize* option, such as IP addresses
+    and serial numbers, to make it safer to share with technical support:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *-sanitize* 选项移除敏感信息（例如IP地址和序列号），使其更安全地与技术支持共享：
+- en: '[PRE5]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Discussion
+  id: totrans-43
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The *tee* command displays output on the screen and stores it in a text file.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*tee* 命令在屏幕上显示输出并将其存储在文本文件中。'
+- en: See Also
+  id: totrans-45
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Hardware Lister (lshw)](https://oreil.ly/qCioO)'
+  id: totrans-46
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[硬件列表 (lshw)](https://oreil.ly/qCioO)'
+- en: '*man 1 lshw*'
+  id: totrans-47
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 lshw*'
+- en: 10.3 Detecting Hardware, Including Displays and RAID Devices, with hwinfo
+  id: totrans-48
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.3 使用 hwinfo 检测硬件，包括显示器和RAID设备
+- en: Problem
+  id: totrans-49
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to get information on your computer monitor and RAID devices, as well
+    as other devices on your system.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望获取有关计算机显示器和RAID设备以及系统上其他设备的信息。
+- en: Solution
+  id: totrans-51
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The *hwinfo* command provides a detailed hardware inventory, including monitors
+    and RAID devices on your system. The following example probes your monitor:'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*hwinfo*命令提供详细的硬件清单，包括系统中的监视器和RAID设备。以下示例探测您的显示器：'
+- en: '[PRE6]'
+  id: totrans-53
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: The complete output is quite a bit longer than this example, and it includes
+    all supported screen resolutions, date of manufacture, synchronization ranges,
+    type of monitor, and refresh frequencies.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完整输出比本示例要长得多，包括所有支持的屏幕分辨率、制造日期、同步范围、显示器类型和刷新频率。
+- en: 'Another nice feature is detecting RAID devices. It does not detect them by
+    default, so use the *--listmd* option:'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个很好的功能是检测RAID设备。它默认不会检测到它们，因此请使用 *--listmd* 选项：
+- en: '[PRE7]'
+  id: totrans-56
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: If it returns nothing, there are no RAID devices on your system. If there are,
+    it prints a lot of information.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果没有返回任何内容，则系统上没有RAID设备。如果有，它会打印大量信息。
+- en: 'Create a summary of your hardware:'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建硬件摘要：
+- en: '[PRE8]'
+  id: totrans-59
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Get detailed information on one or more hardware components:'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 获取一个或多个硬件组件的详细信息：
+- en: '[PRE9]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Consult *man 8 hwinfo* for a list of device names, or run *hwinfo --help*:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参阅 *man 8 hwinfo* 获取设备名称列表，或运行 *hwinfo --help*：
+- en: '[PRE10]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: Discussion
+  id: totrans-64
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*hwinfo* prints useful and complete information. For example, for network interfaces
+    it shows their */sys* paths, drivers, link status, and MAC addresses. CD-ROM output
+    includes the model name, revision number, drivers, device files, drive speed,
+    a features list, and whether there is a disk in the drive. *hwinfo* often tells
+    you more than the manufacturer’s product information.'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*hwinfo* 提供有用且完整的信息。例如，对于网络接口，它显示它们的 */sys* 路径、驱动程序、链路状态和 MAC 地址。CD-ROM 输出包括型号名称、版本号、驱动程序、设备文件、驱动速度、功能列表以及驱动器中是否有磁盘。*hwinfo*
+    通常比制造商的产品信息提供更多信息。'
+- en: See Also
+  id: totrans-66
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 hwinfo*'
+  id: totrans-67
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 hwinfo*'
+- en: '[hwinfo on GitHub](https://oreil.ly/BsDAT)'
+  id: totrans-68
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[hwinfo 在 GitHub 上的链接](https://oreil.ly/BsDAT)'
+- en: 10.4 Detecting PCI Hardware with lspci
+  id: totrans-69
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.4 使用 lspci 检测 PCI 硬件
+- en: Problem
+  id: totrans-70
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to list devices attached to the PCI bus on your computer with vendor
+    and version information.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想列出连接到计算机 PCI 总线上的设备及其供应商和版本信息。
+- en: Solution
+  id: totrans-72
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Run the *lspci* (list PCI) command. The following example prints a summary
+    list of all PCI devices:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行 *lspci*（列出 PCI）命令。以下示例打印所有 PCI 设备的摘要列表：
+- en: '[PRE11]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Increase verbosity to see more details:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 增加详细信息以查看更多细节：
+- en: '[PRE12]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: When you see “access denied” messages, try *sudo lspci* to see what you’re missing.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你看到“拒绝访问”消息时，尝试使用 *sudo lspci* 查看你错过了什么。
+- en: Discussion
+  id: totrans-78
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*lspci* reads information from the PCI bus, which includes onboard components
+    on your motherboard as well as expansion cards plugged into PCI slots.'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lspci* 从 PCI 总线读取信息，包括主板上的内置组件以及插入 PCI 插槽的扩展卡。'
+- en: '*lspci* displays additional information from its own database of hardware IDs,
+    such as vendors, devices, and classes and subclasses. This information is stored
+    in a text file in various locations, depending on your Linux distribution. Ubuntu
+    puts it in */usr/share/misc/pci.ids*, Fedora uses */usr/share/hwdata/pci.ids*,
+    and openSUSE uses */usr/share/pci.ids*. The man page for your Linux should tell
+    you where it is, or search for the *pci.ids* file (*locate pci.ids*).'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lspci* 从其硬件 ID 数据库中显示额外信息，如供应商、设备、类别和子类信息。此信息存储在文本文件中，具体位置因 Linux 发行版而异。Ubuntu
+    存放在 */usr/share/misc/pci.ids*，Fedora 使用 */usr/share/hwdata/pci.ids*，openSUSE 使用
+    */usr/share/pci.ids*。你的 Linux 的 man 手册应该告诉你具体位置，或者搜索 *pci.ids* 文件（*locate pci.ids*）。'
+- en: The *lspci* maintainers welcome submissions of updated information; read your
+    *pci.ids* file for instructions. Run the *sudo update-pciids* command periodically
+    to update your PCI IDs database.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lspci* 的维护者欢迎提交更新信息；阅读你的 *pci.ids* 文件获取说明。定期运行 *sudo update-pciids* 命令更新 PCI
+    ID 数据库。'
+- en: 'PCI is short for Peripheral Component Interconnect. PCI is a local hardware
+    bus; that is, a means for the various hardware devices in your computer to communicate
+    with the Linux kernel. *lspci* primarily detects controllers, buses, and some
+    individual devices, including:'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: PCI 是外围组件互连的缩写。PCI 是一种本地硬件总线，用于计算机中各种硬件设备与 Linux 内核的通信。*lspci* 主要检测控制器、总线和部分个别设备，包括：
+- en: SATA controllers
+  id: totrans-83
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: SATA 控制器
+- en: Audio controllers and devices
+  id: totrans-84
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 音频控制器和设备
+- en: Video controllers and devices
+  id: totrans-85
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 视频控制器和设备
+- en: Ethernet controllers
+  id: totrans-86
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 以太网控制器
+- en: USB controllers
+  id: totrans-87
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: USB 控制器
+- en: Communication controllers
+  id: totrans-88
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 通信控制器
+- en: Ethernet controllers
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 以太网控制器
+- en: RAID controllers
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: RAID 控制器
+- en: Integrated SD/MMC card readers
+  id: totrans-91
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 集成的 SD/MMC 卡阅读器
+- en: PCI FireWire controllers
+  id: totrans-92
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: PCI FireWire 控制器
+- en: There have been several PCI protocols over the years. The current standard is
+    PCIe, PCI Express, introduced in 2003\. It is backward compatible with all legacy
+    PCI protocols, and it replaces PCI, PCI-X, and AGP. Remember AGP, the Accelerated
+    Graphics Port protocol? AGP video cards were faster than PCI video cards because
+    AGP provided a dedicated link for video processing.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 多年来出现了几个 PCI 协议。当前标准是 PCIe，即 PCI Express，于 2003 年推出。它与所有传统 PCI 协议向后兼容，取代了 PCI、PCI-X
+    和 AGP。还记得 AGP，加速图形端口协议吗？AGP 显卡比 PCI 显卡快，因为 AGP 为视频处理提供了专用链路。
+- en: PCIe is substantially different from the earlier protocols because, just like
+    AGP, each device gets it own dedicated link. The older protocols used a shared
+    parallel bus, which was considerably slower.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: PCIe 与早期协议有显著区别，与 AGP 类似，每个设备都有专用链路。旧协议使用共享并行总线，速度较慢。
+- en: See Also
+  id: totrans-95
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 lspci*'
+  id: totrans-96
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 lspci*'
+- en: '*man 8 update-pciids*'
+  id: totrans-97
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 update-pciids*'
+- en: 10.5 Understanding lspci Output
+  id: totrans-98
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.5 理解 lspci 输出
+- en: Problem
+  id: totrans-99
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: 'Most of the output of *lspci* makes sense because it is device specifications.
+    But you want to know what the numbers at the beginning of each device line are
+    for, like this example:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lspci* 的大多数输出都是有意义的，因为它是设备规格。但您想知道每个设备行开头的数字是什么，就像这个例子：'
+- en: '[PRE13]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Solution
+  id: totrans-102
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*00:1f.2* is the device’s BDF number, *bus:device.function*. Bus number 00,
+    device number 1f, and function number 2\. A function number of 2 means the device
+    has two functions, and each one gets its own PCI address.'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*00:1f.2* 是设备的 BDF 号，*总线：设备.功能*。总线号为 00，设备号为 1f，功能号为 2。功能号为 2 表示设备有两个功能，每个功能都有自己的
+    PCI 地址。'
+- en: 'Use the tree view to see the relationship between the PCI bus and the devices:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用树状视图查看 PCI 总线与设备之间的关系：
+- en: '[PRE14]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: PCs almost always have a single PCI bus, which is always 00.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 PC 通常只有一个 PCI 总线，总是为 00。
+- en: Discussion
+  id: totrans-107
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'The zeroes enclosed in brackets at the root of the tree, [0000:00], identify
+    the *domain* and *bus*. The first four zeroes are the domain number, and the two
+    zeroes after the colon are the bus number. The domain is the host bridge. The
+    PCI host bridge connects the PCI controller to the CPU. *Domain* is a Linux-specific
+    term, and it is more commonly called the *segment group*. You can also see this
+    with the *-D* option:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在树的根部被括号括起来的零，[0000:00]，标识了*域*和*总线*。前四个零是域号，冒号后的两个零是总线号。域是主机桥。PCI 主机桥将 PCI 控制器连接到
+    CPU。*域*是 Linux 特有的术语，更常被称为*段组*。您也可以使用*-D*选项查看这一点：
+- en: '[PRE15]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: You will see multiple host bridges on servers with multiple physical CPUs, and
+    sometimes multiple buses on a single domain.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在具有多个物理 CPU 的服务器上，您将看到多个主机桥，有时在单个域上有多个总线。
+- en: See Also
+  id: totrans-111
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 lspci*'
+  id: totrans-112
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 lspci*'
+- en: 10.6 Filtering lspci Output
+  id: totrans-113
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.6 过滤 lspci 输出
+- en: Problem
+  id: totrans-114
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: '*lspci* outputs a lot of information, and you want to filter it to see just
+    what you want to see.'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lspci* 输出了大量信息，您希望筛选出您想要看到的内容。'
+- en: Solution
+  id: totrans-116
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *awk* command to cut out the clutter. The following example finds only
+    entries pertaining to USB:'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*awk*命令来削减杂乱。以下示例只找到与 USB 相关的条目：
+- en: '[PRE16]'
+  id: totrans-118
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'You must use the classes (Audio, Ethernet, USB, etc.) as they appear in the
+    output from *lspci*, and pay attention to case, because using *awk* to run a case-insensitive
+    search is complicated. This example shows the audio controller and device:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您必须使用从*lspci*输出中显示的类（音频、以太网、USB 等），并注意大小写，因为使用*awk*进行大小写不敏感搜索比较复杂。此示例显示音频控制器和设备：
+- en: '[PRE17]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: Adjust the verbosity level as needed.
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据需要调整详细程度。
+- en: 'You may also select items by vendor, device, or class number. Find these numbers
+    with the *-nn* option. In this example, `0300` (enclosed in square braces) is
+    the class number, `8086` is the vendor number, and `0412` is the device number:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以根据供应商、设备或类号选择项目。使用*-nn*选项找到这些数字。在这个例子中，`0300`（用方括号括起来）是类号，`8086` 是供应商号，`0412`
+    是设备号：
+- en: '[PRE18]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'The following examples filter by class, vendor, and device, respectively:'
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例分别通过类、供应商和设备进行过滤：
+- en: '[PRE19]'
+  id: totrans-125
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: Another way to find these numbers is to look them up at [the PCI ID Repository](https://oreil.ly/f2EKi).
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找这些数字的另一种方法是在[PCI ID 仓库](https://oreil.ly/f2EKi)中查找它们。
+- en: Discussion
+  id: totrans-127
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*awk* is a marvelous power tool for extracting specific text strings from command
+    output or documents. The caret, *^*, is a regular expression anchor that matches
+    the start of a string, and *$* matches the end, so in this example, */^$/* looks
+    for the line breaks, the empty spaces at the beginning and end of the text blocks.
+    This is a great trick for extracting text blocks from sources that have spaces
+    between sections.'
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*awk* 是从命令输出或文档中提取特定文本字符串的神奇工具。插入符号*^*是一个正则表达式锚点，匹配字符串的开头，而*$*匹配结尾，所以在这个例子中，*/^$/*查找换行符，文本块开头和结尾的空白。这是从具有在段落之间有空格的源中提取文本块的一个很棒的技巧。'
+- en: See Also
+  id: totrans-129
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 grep*'
+  id: totrans-130
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 grep*'
+- en: '*man 8 lspci*'
+  id: totrans-131
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 lspci*'
+- en: '[the PCI ID Repository](https://oreil.ly/f2EKi)'
+  id: totrans-132
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[PCI ID 仓库](https://oreil.ly/f2EKi)'
+- en: 10.7 Using lspci to Identify Kernel Modules
+  id: totrans-133
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.7 使用 lspci 识别内核模块
+- en: Problem
+  id: totrans-134
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know which kernel modules your PCI devices are using, and which
+    ones are available on your system.
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想知道您的 PCI 设备正在使用哪些内核模块，以及系统上有哪些可用。
+- en: Solution
+  id: totrans-136
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *-k* option. The following example queries only the Ethernet controller:'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*-k*选项。以下示例仅查询以太网控制器：
+- en: '[PRE20]'
+  id: totrans-138
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'You may also use *awk*, like this example for your graphics controller:'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您也可以像这个例子一样使用*awk*来查找您的显卡控制器：
+- en: '[PRE21]'
+  id: totrans-140
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: Discussion
+  id: totrans-141
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The *-k* option shows the kernel modules in use, and all of the available kernel
+    modules for each device. Usually the in-use and available entries are the same,
+    but sometimes there are multiple modules available.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-k* 选项显示正在使用的内核模块以及每个设备的所有可用内核模块。通常，正在使用的和可用的条目是相同的，但有时会有多个可用模块。'
+- en: When you use *awk* remember to add some verbosity, or you may not see the information
+    you want. See the Discussion in [Recipe 10.6](#rec-filter-lspci) to learn about
+    the *awk* options.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *awk* 时记得添加一些详细信息，否则可能看不到所需的信息。参见 [第10.6节](#rec-filter-lspci) 的讨论了解 *awk*
+    的选项。
+- en: See Also
+  id: totrans-144
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 awk*'
+  id: totrans-145
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 awk*'
+- en: '*man 8 lspci*'
+  id: totrans-146
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 lspci*'
+- en: 10.8 Using lsusb to List USB Devices
+  id: totrans-147
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.8 使用 lsusb 列出USB设备
+- en: Problem
+  id: totrans-148
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want a quick, easy tool for listing USB devices on your system.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要一个快速简便的工具来列出系统上的USB设备。
+- en: Solution
+  id: totrans-150
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*lsusb* lists USB buses and connected USB devices, including mice, keyboards,
+    USB sticks, printers, smartphones, and other connected peripherals. The following
+    two examples show two different views of the same devices.'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lsusb* 列出USB总线和连接的USB设备，包括鼠标、键盘、USB闪存驱动器、打印机、智能手机和其他连接的外设。以下两个示例展示了相同设备的两种不同视图。'
+- en: 'Run *lsusb* with no options to see a summary of USB devices on your system.
+    In the next example, three external USB devices are connected: a keyboard, mouse,
+    and wireless network interface:'
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不带任何选项运行 *lsusb* 可以查看系统上USB设备的摘要信息。在下一个示例中，连接了三个外部USB设备：键盘、鼠标和无线网络接口：
+- en: '[PRE22]'
+  id: totrans-153
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'This example shows the same thing, with more details in a USB bus hierarchy
+    format, including kernel drivers, device codes and vendor numbers, and port numbers:'
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例显示了相同内容，以USB总线层次结构格式呈现更详细信息，包括内核驱动程序、设备代码和供应商编号以及端口号：
+- en: '[PRE23]'
+  id: totrans-155
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'The following examples show what it looks like when you plug in an external
+    USB hub with a Bluetooth interface and a Samsung smartphone attached to the hub:'
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例展示了插入带有蓝牙接口和连接三星智能手机的外部USB集线器时的情况：
+- en: '[PRE24]'
+  id: totrans-157
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: Discussion
+  id: totrans-158
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The bus and port numbers are always the same. The dev number changes every time
+    you plug in a device.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 总线和端口号始终相同。每次插入设备时，设备号都会更改。
+- en: The ID numbers, for example, `0a12:0001`, are the vendor and device codes. Manufacturers
+    must apply to [*https://usb.org*](https://usb.org) for new codes. You can find
+    the list of current USB IDs at [linux-usb.org](https://oreil.ly/bHLo6) and to
+    contribute updated information.
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，ID号码 `0a12:0001` 是供应商和设备代码。制造商必须向 [*https://usb.org*](https://usb.org) 申请新代码。您可以在
+    [linux-usb.org](https://oreil.ly/bHLo6) 找到当前USB ID列表并贡献更新信息。
+- en: The class codes are also managed by [*https://usb.org*](https://usb.org); see
+    [USB class codes](https://oreil.ly/vNCgT). I find it interesting that Dev 57,
+    which is a Samsung Android phone, is classed as an imaging device. However, it
+    makes sense because most Linux distributions use the Media Transfer Protocol (MTP)
+    to transfer files from an Android phone.
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 类代码也由 [*https://usb.org*](https://usb.org) 管理；参见 [USB类代码](https://oreil.ly/vNCgT)。我觉得有趣的是，Dev
+    57，即三星安卓手机，被归类为影像设备。然而，这是有道理的，因为大多数Linux发行版使用媒体传输协议（MTP）从安卓手机传输文件。
+- en: The examples in this section are from a PC that has both USB 2.0 and USB 3.1
+    ports. The *lsusb* output shows the negotiated speeds the devices are using, so
+    when you see something like `usbhid, 1.5M`, instead of `480M` or `5000M`, that
+    is all right because that is a keyboard, which does not need the full speed of
+    the USB link. You should see higher speeds for storage devices, such as USB sticks
+    and external hard drives.
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本节示例来自具有USB 2.0和USB 3.1端口的PC。*lsusb* 输出显示设备正在使用的协商速度，因此当您看到类似 `usbhid, 1.5M`
+    而不是 `480M` 或 `5000M` 时，那是正常的，因为那是键盘，不需要USB连接的全部速度。对于存储设备（如USB闪存驱动器和外部硬盘），您应该看到更高的速度。
+- en: See Also
+  id: totrans-163
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 lsusb*'
+  id: totrans-164
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 lsusb*'
+- en: '[*https://usb.org*](https://usb.org)'
+  id: totrans-165
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://usb.org*](https://usb.org)'
+- en: '[*https://oreil.ly/js1oj*](https://oreil.ly/js1oj)'
+  id: totrans-166
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://oreil.ly/js1oj*](https://oreil.ly/js1oj)'
+- en: 10.9 Listing Partitions and Hard Disks with lsblk
+  id: totrans-167
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.9 使用 lsblk 列出分区和硬盘
+- en: Problem
+  id: totrans-168
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need a quick way to list all of your attached storage drives, and their
+    partitions.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要一种快速的方法来列出所有连接的存储驱动器及其分区。
+- en: Solution
+  id: totrans-170
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *lsblk* (list block devices) command. Run it with no options to generate
+    a list of all block devices on your computer:'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *lsblk* （列出块设备）命令。不带任何选项运行它，以生成计算机上所有块设备的列表：
+- en: '[PRE25]'
+  id: totrans-172
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'Show the filesystem labels and UUIDs on the selected device:'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示所选设备上的文件系统标签和UUID：
+- en: '[PRE26]'
+  id: totrans-174
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'List only SCSI devices and their types:'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 仅列出SCSI设备及其类型：
+- en: '[PRE27]'
+  id: totrans-176
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: Discussion
+  id: totrans-177
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*sda* and *sdb* are SATA hard disks, and *sdc* is a USB flash drive. On Linux,
+    mass storage devices such as SATA hard disks and flash media use the SCSI driver.
+    *sr0*, *rom*, and *ATAPI* all identify a CD/DVD player.'
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*sda*和*sdb*是SATA硬盘，*sdc*是USB闪存驱动器。在Linux上，如SATA硬盘和闪存介质等大容量存储设备使用SCSI驱动器。*sr0*、*rom*和*ATAPI*标识光盘/DVD播放器。'
+- en: Defining the term *block devices* without starting arguments is rather difficult
+    because it’s a programming term that does not translate well to a concise userland
+    concept. In my experience it is most useful to think of block devices as mass
+    storage devices and the partitions on storage devices.
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义术语*块设备*而不引发争论，相当困难，因为它是一个编程术语，不易转换为简明的用户界面概念。依我看来，将块设备视为大容量存储设备及其分区最为实用。
+- en: '`MAJ:MIN` are the major and minor numbers. The major number identifies the
+    category, for example, 8 is for *sd* devices, and the minor number labels each
+    device in sequence. (Run **`lsblk -l`** to see this in a tree structure.)'
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`MAJ:MIN`是主设备号和次设备号。主设备号标识类别，例如8用于*sd*设备，次设备号按顺序标识每个设备。（运行**`lsblk -l`**以树形结构查看。）'
+- en: '`RM` tells if it a removable drive or not, with 1 indicating a removable drive.'
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`RM`显示是否为可移动驱动器，1表示可移动驱动器。'
+- en: '`SIZE` is the size of the block device.'
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SIZE`是块设备的大小。'
+- en: '`RO = 0` means the device is not read-only, and 1 is read-only. *sr0*, the
+    CD/DVD drive, is a read-write drive, but *lsblk* cannot tell you if the disk in
+    *sr0* is writeable.'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`RO = 0`表示设备不是只读的，1表示只读。*sr0*，即CD/DVD驱动器，是可读写驱动器，但*lsblk*无法告诉您*sr0*中的光盘是否可写。'
+- en: '`TYPE` identifies the disk type.'
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`TYPE`标识磁盘类型。'
+- en: '`MOUNTPOINT` shows the paths, if the device is mounted.'
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`MOUNTPOINT`显示路径，如果设备已挂载。'
+- en: See Also
+  id: totrans-186
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 lsblk*'
+  id: totrans-187
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 lsblk*'
+- en: 10.10 Getting CPU Information
+  id: totrans-188
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.10 获取CPU信息
+- en: Problem
+  id: totrans-189
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know what CPU or CPUs are on your system, and their specifications.
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想知道系统上有哪些CPU及其规格。
+- en: Solution
+  id: totrans-191
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Run the *lscpu* (list CPU) command with no options:'
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用无选项运行*lscpu*（列出CPU）命令：
+- en: '[PRE28]'
+  id: totrans-193
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: This spits out a large amount of information; you will also see a large number
+    of flags, which list capabilities, and L cache information.
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这会输出大量信息；您还会看到许多标志，列出功能，并列出L缓存信息。
+- en: Discussion
+  id: totrans-195
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'There are three types of CPU caches: L1, L2, and L3\. These are small memory
+    caches on the CPU. They are very fast, many times faster than system RAM, and
+    store the data that the CPU is most likely to need for its next operations. L1
+    is the fastest and most expensive, so it is usually the smallest. L2 is the next
+    fastest and less expensive, and is usually larger than L1\. L3 is the slowest
+    and least expensive, and usually the largest.'
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CPU缓存有三种类型：L1、L2和L3。这些是CPU上的小型内存缓存。它们非常快，比系统RAM快许多倍，并且存储CPU下次操作最可能需要的数据。L1最快且最昂贵，通常最小。L2其次，成本较低，通常比L1大。L3最慢且成本最低，通常最大。
+- en: 'The CPU in the preceding example has four caches. Use the *-C* option to see
+    more detailed cache information:'
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在上述示例中的CPU有四个缓存。使用*-C*选项查看更详细的缓存信息：
+- en: '[PRE29]'
+  id: totrans-198
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: This shows four caches, shared among the four physical CPU cores. L1i caches
+    store CPU instructions, and L1d caches store data. L2 and L3 store data.
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这显示了四个缓存，这些缓存由四个物理CPU核心共享。L1i缓存存储CPU指令，L1d缓存存储数据。L2和L3存储数据。
+- en: 'The number of CPU cores can be a little confusing. `CPU(s): 8` does not mean
+    8 physical cores in this example; instead, that is how many cores the Linux kernel
+    sees. The following lines tell the full story:'
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 'CPU核心数量有点令人困惑。在这个示例中，`CPU(s): 8`并不意味着有8个物理核心；相反，这是Linux内核看到的核心数。以下几行讲述了全貌：'
+- en: '[PRE30]'
+  id: totrans-201
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: This is a single processor with four physical cores and two threads per core,
+    for a total of eight logical CPUs.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是一个单处理器，有四个物理核心和每个核心两个线程，总共八个逻辑CPU。
+- en: See Also
+  id: totrans-203
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 lscpu*'
+  id: totrans-204
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 lscpu*'
+- en: 10.11 Identifying Your Hardware Architecture
+  id: totrans-205
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 10.11 识别您的硬件架构
+- en: Problem
+  id: totrans-206
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You’re not sure what the hardware architecture is on a machine; you think it
+    is either x86-64 or ARM, and you need to know which it is.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不确定机器的硬件架构是什么；可能是x86-64或ARM，您需要确定其具体类型。
+- en: Solution
+  id: totrans-208
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *uname* command. This example is on an x86-64 machine:'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*uname*命令。此示例在x86-64机器上运行：
+- en: '[PRE31]'
+  id: totrans-210
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'The following list contains some of the more common results you might see:'
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下列表包含您可能看到的一些常见结果：
+- en: arm
+  id: totrans-212
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: arm
+- en: aarch64
+  id: totrans-213
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: aarch64
+- en: armv7* (arm7 and below are 32-bit)
+  id: totrans-214
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: armv7* (arm7及以下为32位)
+- en: armv8* (arm8 and up is 64-bit)
+  id: totrans-215
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: armv8* (arm8及以上为64位)
+- en: ia64
+  id: totrans-216
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: ia64
+- en: ppc
+  id: totrans-217
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: ppc
+- en: ppc64
+  id: totrans-218
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: ppc64
+- en: s390x
+  id: totrans-219
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: s390x
+- en: sparc
+  id: totrans-220
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: sparc
+- en: sparc64
+  id: totrans-221
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: sparc64
+- en: i386
+  id: totrans-222
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: i386
+- en: i686
+  id: totrans-223
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: i686
+- en: x86_64
+  id: totrans-224
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: x86_64
+- en: If the machine is not running Linux, try booting it with a SystemRescue USB
+    stick, and then run *uname -m*.
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果设备未运行Linux，请尝试使用SystemRescue USB启动盘引导，然后运行*uname -m*。
+- en: You can install Linux on a Chromebook. Chromebooks use both Intel and ARM processors.
+    One way to see what yours has is to open the web browser to *chrome://system*.
+    This shows all the system information, probably more than you want.
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在Chromebook上安装Linux。Chromebook使用Intel和ARM处理器。查看你的设备信息的一种方法是打开网页浏览器到*chrome://system*。这会显示所有系统信息，可能比你想要的还要多。
+- en: A friendlier tool is [Cog System Info Viewer](https://oreil.ly/Yeirk), which
+    displays hardware and network information on Chromebooks.
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更友好的工具是[Cog系统信息查看器](https://oreil.ly/Yeirk)，它可以在Chromebook上显示硬件和网络信息。
+- en: Discussion
+  id: totrans-228
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Linux supports more hardware architectures than any other operating system,
+    from tiny embedded systems and systems on a chip (SoCs), to mainframes and supercomputers
+    and everything in between. Whatever obscure computing hardware you might have,
+    chances are that some flavor of Linux will run on it.
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux支持比任何其他操作系统更多的硬件架构，从微小的嵌入式系统和SoC（系统芯片）到大型机和超级计算机，应有尽有。无论你拥有多么冷门的计算硬件，都很有可能有某种Linux版本可以运行在上面。
+- en: See Also
+  id: totrans-230
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 uname*'
+  id: totrans-231
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 uname*'

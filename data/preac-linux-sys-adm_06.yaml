@@ -1,0 +1,901 @@
+- en: Chapter 6\. Installing and Uninstalling Software
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第 6 章：安装和卸载软件
+- en: Installing and uninstalling software are basic system administrator tasks. You
+    might not perform them daily, but these are regular tasks for you and your team
+    to complete. Most often, you’ll install updates, which can be automated. Any new
+    software you install should be accompanied by a business justification, a change
+    control record, and a written understanding of security implications, if any,
+    from the requesting party. Installing software with known vulnerabilities is an
+    easy pathway for malicious actors to compromise your systems.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装和卸载软件是基本的系统管理员任务。你可能不会每天执行这些任务，但这些是你和你的团队需要完成的常规任务。通常情况下，你会安装更新，这可以自动化进行。任何新安装的软件都应附有业务正当性、变更控制记录，并且从请求方获取的安全影响的书面理解（如果有的话）。安装已知存在漏洞的软件是恶意行为者侵入系统的一条简单路径。
+- en: Uninstalling software also requires a change control record because of the potential
+    danger of removing a package, directory, or library required by some other critical
+    system or service function.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 卸载软件同样需要变更控制记录，因为移除某些其他关键系统或服务功能所需的包、目录或库可能会造成潜在危险。
+- en: 'There are three software installation methods: installing from repositories
+    using a package manager, installing individual packages downloaded to the local
+    filesystem, and compiling source code. This chapter covers all three methods.
+    There are two standard methods of uninstalling software: using the package management
+    tool and, in the case of compiled software, using an uninstall process. A third,
+    nonstandard uninstall method is manually uninstalling software by removing directories,
+    libraries, and binaries.'
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有三种软件安装方法：使用包管理器从软件仓库安装、下载到本地文件系统的单独软件包安装，以及编译源代码。本章涵盖了这三种方法。卸载软件有两种标准方法：使用包管理工具和在编译软件情况下使用卸载过程。第三种非标准的卸载方法是通过移除目录、库和二进制文件手动卸载软件。
+- en: Manual software removal is a tedious task that only senior-level sysadmins should
+    perform. The sections in this chapter teach you how to install software by a particular
+    method and then uninstall software by that same method.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 手动卸载软件是只有高级系统管理员才能执行的繁琐任务。本章的各节将教会你如何通过特定方法安装软件，然后使用相同方法卸载软件。
+- en: Before I discuss installing and uninstalling software, I’ll show you how to
+    update your system. Because updating is so important, it’s worth discussing first,
+    and you should update before performing other tasks because of the high value
+    of updating your system. You should always update your system when troubleshooting
+    to check whether a simple update resolves your issues. A quick system update might
+    alleviate the need to remove or install new software to solve a problem.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在讨论安装和卸载软件之前，我将向你展示如何更新你的系统。因为更新如此重要，值得优先讨论，并且你应在执行其他任务之前更新系统，因为更新系统的价值很高。在排查问题时，应始终更新系统，以检查简单的更新是否解决了你的问题。快速的系统更新可能会减轻需移除或安装新软件来解决问题的需求。
+- en: Note
+  id: totrans-6
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: All demonstrations and examples in this chapter use CentOS 8.3 (`server1`) and
+    Ubuntu Server 20.04 LTS (`server2`). I perform all tasks on `server1` first and
+    then on `server2`, noting any differences between the two systems. The software
+    package used in the examples is Lynx, a lightweight text-based browser.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章中的所有演示和示例均使用 CentOS 8.3（`server1`）和 Ubuntu Server 20.04 LTS（`server2`）。我首先在
+    `server1` 上执行所有任务，然后在 `server2` 上执行，并注意两个系统之间的任何差异。示例中使用的软件包是 Lynx，一个轻量级的基于文本的浏览器。
+- en: Updating Your System
+  id: totrans-8
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 更新你的系统
+- en: I’ve mentioned keeping your system updated multiple times in this book. It’s
+    an important task to remember. It should be one of your top priorities. Updates
+    are a part of standard maintenance. Many system administrators apply updates weekly,
+    which is good practice. But don’t hesitate to apply patches, updates, and upgrades
+    as needed to mitigate vulnerabilities. Security is your top priority. The following
+    two sections illustrate how to apply updates to your systems.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我在本书中多次提到保持系统更新。这是一个重要的任务要记住。这应该是你的首要任务之一。更新是标准维护的一部分。许多系统管理员每周应用更新，这是一个良好的做法。但在需要时不要犹豫去应用补丁、更新和升级，以减轻漏洞的影响。安全是你的首要任务。接下来的两节说明了如何向你的系统应用更新。
+- en: Applying Red Hat Enterprise Linux–Based System Updates
+  id: totrans-10
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 应用基于 Red Hat Enterprise Linux 的系统更新
+- en: 'Red Hat Enterprise Linux–based systems use the YUM/DNF utility to maintain
+    updates and software installation from repositories. From the [official Red Hat
+    documentation](https://oreil.ly/R2Mca):'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基于 Red Hat Enterprise Linux 的系统使用 YUM/DNF 实用程序来维护来自仓库的更新和软件安装。来自[官方 Red Hat
+    文档](https://oreil.ly/R2Mca)：
+- en: YUM/DNF (yum/dnf) is the primary tool for getting, installing, deleting, querying,
+    and managing Red Hat Enterprise Linux RPM software packages from official Red
+    Hat software repositories, as well as other third-party repositories. YUM/DNF
+    is used in Red Hat Enterprise Linux versions five and newer.
+  id: totrans-12
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: YUM/DNF（yum/dnf）是获取、安装、删除、查询和管理来自官方 Red Hat 软件仓库以及其他第三方仓库的 Red Hat Enterprise
+    Linux RPM 软件包的主要工具。YUM/DNF 用于 Red Hat Enterprise Linux 5 及更新版本。
+- en: 'DNF is the latest incarnation of the utility, so I’ve combined the two. According
+    to the documentation, DNF is YUM version 4 and is the tool to use from Red Hat
+    Enterprise Linux version 8 onward. To begin an update, issue the `yum` or `dnf`
+    command:'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: DNF 是这个实用程序的最新版本，所以我已将两者结合起来。根据文档，DNF 是 YUM 的第四版，是从 Red Hat Enterprise Linux
+    版本 8 开始使用的工具。要开始更新，请发出`yum`或`dnf`命令：
+- en: '[PRE0]'
+  id: totrans-14
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'Agree to the installation here to have your target packages upgraded to the
+    latest stable versions. To automate subsequent updates, use the `-y` option to
+    answer “yes” to any prompts. The following demonstrates using the `-y` option
+    with the `dnf` command:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 同意在此安装，以便将您的目标软件包升级到最新的稳定版本。为了自动化后续更新，使用`-y`选项来回答任何提示时选择“是”。以下演示了如何在`dnf`命令中使用`-y`选项：
+- en: '[PRE1]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: This automatically accepts the installation and does not prompt you interactively.
+    This is a great option for use in scripts. The next section provides you with
+    the equivalent update action on Debian-based systems.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将自动接受安装而不会与您进行交互。这是在脚本中使用的一个很好的选择。接下来的部分将为您提供在基于 Debian 的系统上进行等效更新操作的方法。
+- en: Applying Debian-Based System Updates
+  id: totrans-18
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 应用基于 Debian 的系统更新
+- en: You apply updates to Debian-based systems with a command analogous to the DNF
+    one you used for Red Hat Enterprise Linux–based systems, using the Debian `apt`
+    utility, as shown here. You’ll also receive a similar response if your system
+    requires updates.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于基于 Debian 的系统，您可以使用类似于 Red Hat Enterprise Linux 系统中使用的 DNF 命令的命令来应用更新，使用 Debian
+    的`apt`实用程序，如下所示。如果您的系统需要更新，您也将收到类似的响应。
+- en: '[PRE2]'
+  id: totrans-20
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'If your system doesn’t require updates, `apt`’s response will look similar
+    to the following:'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的系统不需要更新，`apt`的响应将类似于以下内容：
+- en: '[PRE3]'
+  id: totrans-22
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: There are no special update commands for patches, security updates, or application
+    version upgrades; this single command takes care of all updates regardless of
+    type or priority on both systems. Your system checks for updates from all configured
+    repositories and applies them when available. It’s a good practice to check weekly
+    or more frequently for updates and apply them during a scheduled maintenance window
+    or as necessary for critical security updates.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于补丁、安全更新或应用程序版本升级没有特别的更新命令；此单一命令将处理所有类型或优先级的更新。您的系统将从所有配置的仓库检查更新，并在可用时应用它们。定期每周或更频繁地检查更新，并在计划的维护时间窗口内应用更新或根据关键的安全更新需要进行应用，是一种良好的做法。
+- en: The rest of this chapter focuses on installing software as on-demand service
+    requests from your users, your management, or other sources.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章的其余部分侧重于根据您的用户、管理或其他来源的按需服务请求安装软件。
+- en: Installing Software from Repositories
+  id: totrans-25
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 从仓库安装软件
+- en: Installing software from a repository is the easiest method of installing software
+    on a Linux system. The reason that it’s the easiest method is because the repository
+    automatically meets your dependencies without you having to do anything except
+    request an installation. For example, if you want to install the Apache HTTP Server
+    on a system, there are several dependencies that you must satisfy before it installs.
+    The repository contains all of your dependent packages, gathers, and installs
+    them as they’re called for in support of your primary package. I use the text-based
+    Lynx browser for the following installation demonstrations.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从仓库安装软件是在 Linux 系统上安装软件的最简单方法。之所以它是最简单的方法，是因为仓库会自动满足您的依赖关系，您无需做任何事情，只需请求安装。例如，如果您想在系统上安装
+    Apache HTTP 服务器，则需要满足几个依赖项才能安装。仓库包含所有依赖包，根据需要调用并安装它们以支持您的主要软件包。我将使用基于文本的 Lynx
+    浏览器进行以下安装演示。
+- en: Installing an Application
+  id: totrans-27
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 安装一个应用程序
+- en: 'On a CentOS system, enter the following command:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 CentOS 系统中，输入以下命令：
+- en: '[PRE4]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'If you receive this error, it means that the package, `lynx`, in this case,
+    doesn’t exist by that name. You’ll have to search for the package name or repository
+    that contains the package you want. For example, I had to perform the following
+    steps to install `lynx`:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你收到此错误，意味着该软件包，比如`lynx`在这种情况下，不以该名称存在。你需要搜索软件包名称或包含你所需软件包的存储库。例如，我必须执行以下步骤来安装`lynx`：
+- en: '[PRE5]'
+  id: totrans-31
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'This installs three packages: `dnf-plugins-core`, `python3-dnf-plugins-core`,
+    and `yum-utils`. Then, use the following command to enable the PowerTools repository
+    where `lynx` resides:'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这安装了三个软件包：`dnf-plugins-core`、`python3-dnf-plugins-core`和`yum-utils`。然后，使用以下命令来启用
+    PowerTools 存储库，其中包含`lynx`：
+- en: '[PRE6]'
+  id: totrans-33
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'Now, proceed with the installation of `lynx` and its dependencies:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，继续安装`lynx`及其依赖项：
+- en: '[PRE7]'
+  id: totrans-35
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'Agree to the installation to continue:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 同意安装以继续：
+- en: '[PRE8]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: This process installed the Lynx application and its dependency, `centos-indexhtml`.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个过程安装了 Lynx 应用程序及其依赖项`centos-indexhtml`。
+- en: 'On an Ubuntu system, enter the following command:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Ubuntu 系统上，输入以下命令：
+- en: '[PRE9]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Note the two dependencies: *libidn11* and *lynx-common*. The system installs
+    the dependencies before the target package. Continue by responding yes (`y`) to
+    the prompt:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意两个依赖项：*libidn11* 和 *lynx-common*。系统会先安装这些依赖项，然后再安装目标软件包。继续回答提示时输入是 (`y`) ：
+- en: '[PRE10]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: The `apt` package manager installed the `lynx` package and its dependencies.
+    That’s all there is to install from a repository. Use the package installer and
+    name the application packages you want to install, and the package manager takes
+    care of everything for you. In the next section, you learn how to uninstall a
+    software package.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`apt`软件包管理器安装了`lynx`软件包及其依赖项。这就是从存储库安装的全部内容。使用软件包安装程序命名你想要安装的应用程序软件包，软件包管理器会为你处理一切。在下一节中，你将学习如何卸载软件包。'
+- en: Uninstalling an Application
+  id: totrans-44
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 卸载应用程序
+- en: 'The following simple process uninstalls a target package using a package manager
+    on Red Hat Enterprise Linux–based systems. The Red Hat Package Manager, `rpm`,
+    installs, uninstalls, and queries individual packages and their dependencies.
+    The `-e` option erases (removes) target packages from the system. As you’ll see
+    next, when there are no errors from removing a package, the system gives no response.
+    The `autoremove` step automatically removes unused dependencies. Your system might
+    have more than one unused dependency. It’s generally safe to remove them:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下是在基于 Red Hat Enterprise Linux 系统上使用软件包管理器卸载目标软件包的简单过程。Red Hat 包管理器`rpm`用于安装、卸载和查询各个软件包及其依赖关系。选项`-e`用于从系统中擦除（移除）目标软件包。接下来你将看到，当移除软件包时没有错误时，系统不会给出任何响应。`autoremove`步骤会自动删除未使用的依赖项。你的系统可能有多个未使用的依赖项。通常情况下可以安全地移除它们。
+- en: '[PRE11]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: This process removed the `lynx` package and its dependency, `centos-indexhtml`.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个过程移除了`lynx`软件包及其依赖项`centos-indexhtml`。
+- en: 'The following process uses Ubuntu’s `apt` with the `purge` option:'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下过程使用 Ubuntu 的`apt`和`purge`选项：
+- en: '[PRE12]'
+  id: totrans-49
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: The `purge` option removes the `lynx` package but not the dependencies. As shown
+    in the preceding output, you must run `sudo apt autoremove` to erase those files
+    from the system. If you use the `remove` option, then `apt` only removes the binaries
+    from the system, which leaves configurations and other files intact. In the next
+    section, you learn how to install and remove individual packages using a system’s
+    package manager.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`purge`选项会移除`lynx`软件包但不会移除依赖项。如前所示的输出，你必须运行`sudo apt autoremove`来从系统中擦除这些文件。如果你使用`remove`选项，那么`apt`仅会从系统中移除二进制文件，而保留配置文件和其他文件不变。在下一节中，你将学习如何使用系统的软件包管理器安装和卸载单个软件包。'
+- en: Installing and Uninstalling Individual Software Packages
+  id: totrans-51
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 安装和卸载单个软件包
+- en: You need software packages from other sources, such as vendor websites, GitHub,
+    and SourceForge that aren’t part of any repository. You must install these individual
+    packages manually at the command line. Rather than using repository commands to
+    install these packages, you use the local package manager utilities such as `rpm`
+    and `dpkg`.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要从其他来源获取软件包，如供应商网站、GitHub 和 SourceForge，这些软件包不属于任何存储库。你必须在命令行手动安装这些单独的软件包。而不是使用存储库命令来安装这些软件包，你可以使用本地软件包管理器工具，如`rpm`和`dpkg`。
+- en: Tip
+  id: totrans-53
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: Be sure to read any documentation that accompanies your target package before
+    attempting to install it. Check for dependencies, configurations, and any security
+    warnings. You’ll need to satisfy dependencies before installing the target package.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在尝试安装目标软件包之前，请确保阅读任何附带的文档。检查依赖项、配置以及任何安全警告。您需要先满足依赖关系，然后再安装目标软件包。
+- en: Installing an Individual Software Package Manually
+  id: totrans-55
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 手动安装单个软件包
+- en: The examples in this section use the `downloadonly` option to download without
+    installing packages from repositories to simplify locating a package for this
+    demonstration. It doesn’t matter what the source is for packages, only that you
+    have them downloaded to your system and install them manually at the command line.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本节中的示例使用 `downloadonly` 选项从仓库下载而不安装软件包，以简化演示中软件包的定位。软件包的来源无关紧要，只要您已将它们下载到系统并在命令行手动安装即可。
+- en: 'On a CentOS system, enter the following command:'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 CentOS 系统上，输入以下命令：
+- en: '[PRE13]'
+  id: totrans-58
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'When you download packages using this method, they’re stored in a subdirectory
+    of the */var/cache/dnf* directory. The subdirectory to which packages download
+    depends on the repository that the packages originate from. For example, packages
+    can download to any of the following on my CentOS system:'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用此方法下载软件包时，它们存储在 */var/cache/dnf* 目录的子目录中。软件包下载到的子目录取决于软件包的来源仓库。例如，在我的 CentOS
+    系统中，软件包可以下载到以下任何一个位置：
+- en: '[PRE14]'
+  id: totrans-60
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: In this example, the `lynx` package downloaded to */var/cache/dnf/powertools-⁠25a6a2b3​31e53e98/packages*
+    and `centos-indexhtml` downloaded to */var/cache/dnf/⁠baseos-​929b586ef1f72f69/packages*.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此示例中，`lynx` 包下载到 */var/cache/dnf/powertools-⁠25a6a2b3​31e53e98/packages*，而
+    `centos-indexhtml` 下载到 */var/cache/dnf/⁠baseos-​929b586ef1f72f69/packages*。
+- en: 'I will attempt to install the `lynx` package first, which will fail because
+    of its dependency on the `centos-indexhtml` package:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我将首先尝试安装 `lynx` 包，但会因为依赖于 `centos-indexhtml` 包而失败：
+- en: '[PRE15]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Note
+  id: totrans-64
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Since CentOS is a Red Hat Enterprise Linux binary-compatible distribution, our
+    `centos-indexhtml` package is equivalent to the `redhat-indexhtml` package. It
+    will work because the package names are analogous.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于 CentOS 是与 Red Hat Enterprise Linux 兼容的二进制分发，我们的 `centos-indexhtml` 包相当于 `redhat-indexhtml`
+    包。它将正常工作，因为包名称是类似的。
+- en: 'Heeding the preceding error, install the `centos-indexhtml` package first and
+    then proceed to install the `lynx` package:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据前面的错误提示，首先安装 `centos-indexhtml` 包，然后再安装 `lynx` 包：
+- en: '[PRE16]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'The package installs without error:'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该软件包安装时没有错误：
+- en: '[PRE17]'
+  id: totrans-69
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: The `lynx` package was installed successfully. The `rpm` switch (`-i`) means
+    *install*.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lynx` 包已成功安装。`rpm` 开关 (`-i`) 的意思是 *install*。'
+- en: 'For Ubuntu systems, the manual download and install process proceeds as follows:'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于 Ubuntu 系统，手动下载和安装过程如下：
+- en: '[PRE18]'
+  id: totrans-72
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'On Debian-based systems such as Ubuntu, files downloaded this way reside in
+    */var/cache/apt/archives* as *.deb* packages, and you can install them from that
+    location. Note that the `apt` utility dialog stated that the packages “will be
+    installed” but the final message, “Download complete and in download only mode”
+    means that the packages downloaded but didn’t install. In the following example,
+    I attempt to install `lynx` and ignore the dependencies that downloaded with it:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Ubuntu 等基于 Debian 的系统上，通过这种方式下载的文件存储在 */var/cache/apt/archives* 中，格式为 *.deb*
+    包，您可以从该位置安装它们。请注意，`apt` 实用程序对话框显示软件包将被安装，但最终消息“Download complete and in download
+    only mode”表示软件包已下载但未安装。在以下示例中，我尝试安装 `lynx` 并忽略与其一同下载的依赖项：
+- en: '[PRE19]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'The system won’t allow you to install without the dependencies that downloaded
+    into the same directory with `lynx`:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统不允许您在没有与 `lynx` 同一目录中下载的依赖项的情况下安装：
+- en: '[PRE20]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'Install the dependencies first, and then install `lynx`:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先安装依赖项，然后再安装 `lynx`：
+- en: '[PRE21]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: The `-i` switch for the `dpkg` command means install, just as it does for the
+    `rpm` utility. Next, we will uninstall the same packages manually.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`dpkg` 命令的 `-i` 开关表示安装，就像 `rpm` 实用程序一样。接下来，我们将手动卸载相同的软件包。'
+- en: Uninstalling Individual Software Packages
+  id: totrans-80
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 卸载单个软件包
+- en: To uninstall a manually installed package, you have to reverse the process.
+    This means you uninstall in the opposite order, beginning with the last installed
+    package. In other words, you must uninstall all dependencies before uninstalling
+    the package itself. If there are dependencies, the system will instruct you which
+    ones they are.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要卸载手动安装的软件包，您必须反向进行。这意味着您需要按照安装顺序的相反顺序进行卸载，即首先卸载所有依赖项，然后再卸载软件包本身。如果存在依赖项，系统会指示您它们是哪些。
+- en: 'On a CentOS system, enter the following command:'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 CentOS 系统上，输入以下命令：
+- en: '[PRE22]'
+  id: totrans-83
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: You have successfully uninstalled `lynx` and its dependency, `centos-indexhtml`.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您已成功卸载 `lynx` 及其依赖项 `centos-indexhtml`。
+- en: 'On an Ubuntu system, you’ll notice that when you attempt an uninstall of a
+    package that you manually installed, there are no warnings about dependencies.
+    To uninstall Lynx on Ubuntu, there are three packages, `lynx`, and its two dependencies:
+    `libidn11` and `lynx-common`.'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Ubuntu 系统上，当您尝试卸载手动安装的软件包时，不会有关于依赖关系的警告。要在 Ubuntu 上卸载 Lynx，有三个软件包，`lynx` 和其两个依赖项：`libidn11`
+    和 `lynx-common`。
+- en: 'Look at the differences when attempting to uninstall `lynx` and its dependencies
+    individually from an Ubuntu system. These are three separate commands to demonstrate
+    how packages and dependencies are or are not removed, depending on which command
+    you use. I’ve answered no (`n`) to each for this demonstration:'
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看在尝试从 Ubuntu 系统中分别卸载 `lynx` 及其依赖项时的差异。这里展示了三个分开的命令，演示了使用不同命令时如何移除或不移除软件包和依赖项。我在这个演示中对每个命令都选择了否
+    (`n`)：
+- en: '[PRE23]'
+  id: totrans-87
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: And, if you remove only `lynx` from the system, `lynx_common` and `libidn11`
+    are left behind. Issuing the command `sudo apt autoremove` won’t remove the unused
+    dependencies as it did when you installed Lynx from a repository. The following
+    section describes how to find dependencies for a specific software package.
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果只移除系统上的 `lynx`，`lynx_common` 和 `libidn11` 将被保留。执行命令 `sudo apt autoremove`
+    不会像在从仓库安装 Lynx 时那样移除未使用的依赖项。接下来的部分描述了如何查找特定软件包的依赖关系。
+- en: Finding Package Dependencies
+  id: totrans-89
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 查找软件包依赖关系
+- en: 'It helps to know a package’s dependencies before you install it. This is how
+    you find them on a Red Hat Enterprise Linux–based system:'
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在安装之前了解软件包的依赖关系很有帮助。以下是在基于 Red Hat Enterprise Linux 的系统上查找它们的方法：
+- en: '[PRE24]'
+  id: totrans-91
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: As mentioned earlier in this chapter, the system has already installed most
+    of the required dependencies. The required one, `centos-indexhtml`, doesn’t stand
+    out in any particular way. The only way I know of to isolate any dependencies
+    that your system requires is to attempt an installation of the target package.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如本章前面提到的，系统已安装了大多数所需的依赖项。所需的 `centos-indexhtml` 并没有特别突出。我知道的唯一方法是尝试安装目标软件包以隔离系统所需的任何依赖项。
+- en: 'The following listing shows you the same dependency list query on an Ubuntu
+    system:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下清单展示了在 Ubuntu 系统上执行相同依赖列表查询的过程：
+- en: '[PRE25]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: If you’re a Linux purist and like to compile your software so that you have
+    maximum control, the next section demonstrates installing a software package from
+    source code.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您是 Linux 纯粹主义者，并且喜欢编译软件以便拥有最大的控制权，下一节演示了如何从源代码安装软件包。
+- en: Installing Software from Source Code
+  id: totrans-96
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 从源代码安装软件
+- en: Some system administrators prefer to install all software from source code (also
+    referred to as “source”) because it is the most flexible software installation
+    method. Installing from source allows you to customize the installation for your
+    specific needs. You can change installation paths, enable features, disable features,
+    and make minute adjustments to every possible configuration option available for
+    an application.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些系统管理员喜欢从源代码安装所有软件（也称为“源码”），因为这是最灵活的软件安装方法。从源代码安装允许您为特定需求自定义安装。您可以更改安装路径、启用功能、禁用功能，并对应用程序的每个可能的配置选项进行微调。
+- en: There are some downsides to installing from source code. The major downside
+    is that you must satisfy dependencies for the software you install. This can be
+    frustrating, time-consuming, and tedious. I have personally chased recursive dependencies
+    to the point where I’ve forgotten the name of the original application I needed
+    to install. Another downside is that you must install a full complement of development
+    tools onto your systems, which consumes considerable disk space. Another downside
+    is that upgrading to a newer version of the software installed from source code
+    is just as difficult and time-consuming as installing the original version. And
+    if a previous version isn’t fully overwritten or removed, you can experience version
+    conflicts that can be quite difficult to resolve.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从源代码安装存在一些缺点。主要的缺点是您必须满足所安装软件的依赖关系。这可能是令人沮丧、耗时和乏味的。我个人曾追踪递归依赖性，直到忘记原本需要安装的应用程序名称为止。另一个缺点是必须在系统上安装一整套开发工具，这将消耗大量磁盘空间。还有一个缺点是，从源代码安装的软件升级到新版本与安装原始版本一样困难和耗时。如果之前的版本没有完全被覆盖或删除，则可能会遇到相当难以解决的版本冲突。
+- en: 'Satisfying Prerequisites: Building a Development Environment'
+  id: totrans-99
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 满足前提条件：构建开发环境
+- en: Before installing any application from source code, you’ll need to set up a
+    development environment by installing a code compiler and supporting software.
+    The easiest method is to install a group of software packages from your Linux
+    vendor’s repositories.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在从源代码安装任何应用程序之前，您需要通过安装代码编译器和支持软件来设置开发环境。最简单的方法是从您的 Linux 供应商的存储库安装一组软件包。
+- en: 'For Red Hat Enterprise Linux–based systems, using the `groupinstall` option
+    and identifying `"Development Tools"` as the installation target group is the
+    best choice. Unfortunately, this group selection installs many unnecessary and
+    potentially nonsecure packages for compiling source code at the command line,
+    such as a list of graphical tools. For this reason, it’s often desirable to set
+    up a specific system dedicated to software development. To create a software development
+    system, use the following command:'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于基于红帽企业 Linux 的系统，使用`groupinstall`选项并将`"Development Tools"`标识为安装目标组是最佳选择。不幸的是，此组选择会安装许多不必要且潜在非安全的软件包，用于在命令行编译源代码，例如一系列图形工具。因此，通常希望设置一个专门用于软件开发的特定系统。要创建软件开发系统，请使用以下命令：
+- en: '[PRE26]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'On Ubuntu systems, the equivalent installation uses the option `build-essential`
+    to install all the necessary development tools on your system:'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Ubuntu 系统上，等效安装使用`build-essential`选项在您的系统上安装所有必要的开发工具：
+- en: '[PRE27]'
+  id: totrans-104
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: Confirm the installation and continue. Installing groups of packages can take
+    several minutes. Once your development environment is set up, you’ll need to download
+    the source code for Lynx. The instructions for installing from source are the
+    same for any Linux distribution; however, I will perform this installation on
+    both the CentOS and the Ubuntu systems and note any differences and errors in
+    the text. Users may download, compile, and make the binaries, but only the root
+    user can install binaries to the system directories.
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确认安装并继续。安装软件包组可能需要几分钟时间。一旦设置好开发环境，您将需要为 Lynx 下载源代码。从源代码安装的指令对任何 Linux 发行版都是相同的；但是，我将在
+    CentOS 和 Ubuntu 系统上执行此安装，并注意文本中的任何差异和错误。用户可以下载、编译和制作二进制文件，但只有 root 用户可以将二进制文件安装到系统目录。
+- en: Download, Extract, Compile, and Install Your Software
+  id: totrans-106
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 下载、解压、编译和安装您的软件
+- en: 'Download your compressed source code using a utility such as `wget`:'
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用诸如`wget`之类的实用程序下载您的压缩源代码：
+- en: '[PRE28]'
+  id: totrans-108
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'Extract the source code from the compressed archive:'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从压缩存档中提取源代码：
+- en: '[PRE29]'
+  id: totrans-110
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'Change the directory into the `lynx` source tree created by the extraction
+    process:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 切换到由提取过程创建的`lynx`源代码树目录中：
+- en: '[PRE30]'
+  id: totrans-112
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'Before running `configure`, take a few minutes to look for and read the *README*
+    file that often exists in source code trees. This file has valuable instructions
+    and information about the source code and installation instructions. The *README*
+    file usually refers to the *INSTALLATION* file describing installation options.
+    I accept all the defaults for demonstration purposes and simply run the configure
+    script. If all dependencies are met, the configuration checks will go without
+    error, create the makefile, and then drop you back at your shell prompt. This
+    process can take a few minutes to complete:'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在运行 `configure` 之前，请花几分钟查找并阅读通常存在于源代码树中的 *README* 文件。这个文件包含有关源代码和安装说明的有价值的指导和信息。*README*
+    文件通常引用描述安装选项的 *INSTALLATION* 文件。出于演示目的，我接受所有默认设置，并简单地运行了配置脚本。如果所有依赖项都满足，配置检查将顺利进行，创建
+    makefile，然后将您退回到您的 shell 提示符。这个过程可能需要几分钟来完成：
+- en: '[PRE31]'
+  id: totrans-114
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'Both configure scripts failed with the following error:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 两个配置脚本都因以下错误而失败：
+- en: '[PRE32]'
+  id: totrans-116
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: When you encounter errors, the configure script (configure) stops but keeps
+    its place so that you may continue where you left off as you satisfy dependencies
+    by running the script again. To satisfy the current dependency, I installed the
+    `ncurses-devel` package (`sudo dnf -y install ncurses-devel`) on the CentOS system.
+    The configure script completed successfully. For the Ubuntu system, I installed
+    the `lib32ncurses-dev` package (`sudo apt install lib32ncurses-dev`), and the
+    configure script completed successfully.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你遇到错误时，配置脚本（configure）会停止，但会保留其位置，这样你可以通过再次运行脚本来满足依赖项并继续之前的工作。为了满足当前的依赖关系，我在
+    CentOS 系统上安装了 `ncurses-devel` 包（`sudo dnf -y install ncurses-devel`）。配置脚本成功完成。对于
+    Ubuntu 系统，我安装了 `lib32ncurses-dev` 包（`sudo apt install lib32ncurses-dev`），配置脚本也成功完成。
+- en: 'According to the *INSTALLATION* file, you now must run the `make` command to
+    compile the sources. This process will take a few minutes to complete:'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据 *INSTALLATION* 文件，现在您必须运行 `make` 命令来编译源代码。这个过程将需要几分钟的时间来完成：
+- en: '[PRE33]'
+  id: totrans-119
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'After satisfying the failed dependencies in the configure script, both compilations
+    successfully completed. To install Lynx to its proper location and set the correct
+    permissions, run `sudo make install`:'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在满足配置脚本中的失败依赖项后，两个编译过程都成功完成。要将 Lynx 安装到正确的位置并设置正确的权限，请运行 `sudo make install`：
+- en: '[PRE34]'
+  id: totrans-121
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'At this point, most instructions advise you to run `make clean` to remove all
+    of the object code and other temporary files from your system:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一点上，大多数指令建议您运行 `make clean` 来从系统中删除所有的对象代码和其他临时文件：
+- en: '[PRE35]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: It’s a matter of preference to run this command. If you need to remove compiled
+    software from your system, the next section steps you through the process of doing
+    so.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行这个命令是个人喜好问题。如果您需要从系统中删除编译的软件，下一节将引导您完成此过程。
+- en: Uninstalling a Source-Installed Software Package
+  id: totrans-125
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 卸载源码安装的软件包
+- en: 'If your source trees exist with your original makefile intact, you can uninstall
+    a package quite easily, but you must have the makefile to do so. If you don’t
+    want to keep all your source trees on your system for every compiled program,
+    make a backup of the makefile, such as copying it to a backup directory with the
+    name *makefile.lynx289r1* or similar. The makefile must be in your current directory
+    when uninstalling:'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你的源代码树中还存在原始的 makefile，你可以相当轻松地卸载一个软件包，但你必须有 makefile 才能这样做。如果你不想为每个编译的程序保留所有的源代码树在你的系统上，那么请备份
+    makefile，例如将其复制到一个名为 *makefile.lynx289r1* 或类似的备份目录中。在卸载时，makefile 必须位于你当前的目录中：
+- en: '[PRE36]'
+  id: totrans-127
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'If you don’t have your makefile or it isn’t in your current directory, you
+    receive the following error:'
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你没有你的 makefile 或它不在你当前的目录中，你会收到以下错误：
+- en: '[PRE37]'
+  id: totrans-129
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: You can re-create the makefile if you extract the same version of the source
+    tree that you previously used and can remember your configure options. Otherwise,
+    you can use the preceding uninstall results to guide you in uninstalling manually.
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果要重新创建 makefile，请提取与之前使用的相同版本的源代码树，并记住你的配置选项。否则，你可以使用前面卸载的结果来指导手动卸载。
+- en: Summary
+  id: totrans-131
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 摘要
+- en: 'This chapter walked you through installing software from different sources:
+    repositories, local package files, and source code. You’ll find that installing
+    software is easy enough with a little practice. Please remember that the responsibility
+    of keeping your systems running smoothly and securely rests with you. Just because
+    installing software is quick and easy doesn’t mean that you should ignore its
+    impact on system performance, security, and disk usage.'
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章指导你如何从不同来源（仓库、本地软件包文件和源代码）安装软件。你会发现，通过一些练习，安装软件是相当容易的。请记住，保持系统平稳运行和安全的责任在于你。仅仅因为安装软件快捷简单，并不意味着你应该忽视它对系统性能、安全性和磁盘使用的影响。
+- en: The next chapter teaches you how to add disk space to your systems.
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一章将教你如何向系统添加磁盘空间。

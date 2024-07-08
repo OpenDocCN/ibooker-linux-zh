@@ -1,0 +1,1073 @@
+- en: Chapter 9\. Managing Partitions and Filesystems with GParted
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第9章 管理分区和文件系统与GParted
+- en: GParted, the GNOME Partition Manager, is one of my favorite tools on Linux.
+    GParted is a nice graphical front-end to the *parted* partition manager command
+    and all of the filesystem management commands. You can create, delete, move, copy,
+    and resize partitions and filesystems, and create new partition tables with just
+    a few clicks. Other features are data rescue and managing labels and UUIDs.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GParted，GNOME分区管理器，是我在Linux上最喜欢的工具之一。GParted是*parted*分区管理器命令及所有文件系统管理命令的一个优秀图形前端。你可以通过几个点击操作来创建、删除、移动、复制和调整分区和文件系统，并创建新的分区表。其他功能包括数据恢复、管理标签和UUID。
+- en: Labels on partitions and filesystems are useful for identifying partitions and
+    filesystems in a friendly way, and to give filesystems short, easy names. Without
+    a label, a filesystem is identified by its long UUID. For example, when you plug
+    in a USB stick without filesystem labels, it appears as something like */media/username/1d742b2d-a621-4454-b4d3-469216a6f01e*.
+    Give it a nice short label like *mystuff*, and then it mounts as */media/username/mystuff*.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 分区和文件系统上的标签对于以友好的方式识别分区和文件系统，以及为文件系统提供简短易记的名称非常有用。如果没有标签，文件系统将通过其长UUID进行识别。例如，当你插入一个没有文件系统标签的USB闪存时，它显示为类似*/media/username/1d742b2d-a621-4454-b4d3-469216a6f01e*。给它一个好记的短标签，比如*mystuff*，然后它会挂载为*/media/username/mystuff*。
+- en: After an operation in GParted is complete, the status window offers you the
+    option to save a logfile of what it did. Save this information and study it because
+    it shows you the commands it used.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在GParted完成操作后，状态窗口会提供保存操作日志的选项。保存这些信息并仔细研究，因为它显示了所使用的命令。
+- en: Changing Your Running System
+  id: totrans-4
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 更改正在运行的系统
+- en: For some operations, such as copying, checking and repair, and setting labels
+    and UUIDs, it is required to unmount the filesystems first. You cannot unmount
+    the filesystems that are required for your running system. In this case, use a
+    bootable SystemRescue CD/USB ([Chapter 19](Images/ch19.html#cha-rescue-recovery)).
+    If you are running a multiboot system with more than one Linux distribution installed,
+    boot to a different Linux and run GParted from there (see [Chapter 1](ch01.xhtml#cha-install-linux)).
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于某些操作，例如复制、检查和修复、设置标签和UUID，需要先卸载文件系统。不能卸载运行系统所需的文件系统。在这种情况下，请使用可引导的SystemRescue
+    CD/USB（[第19章](Images/ch19.html#cha-rescue-recovery)）。如果你运行的是安装了多个Linux发行版的多引导系统，请启动到另一个Linux，并从那里运行GParted（参见[第1章](ch01.xhtml#cha-install-linux)）。
+- en: GParted requires root privileges. When you launch GParted, a dialog for entering
+    your sudo or root password will open ([Figure 9-1](#fig-gparted-8)).
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GParted需要root权限。当你启动GParted时，会打开一个对话框要求输入你的sudo或root密码（[图9-1](#fig-gparted-8)）。
+- en: '![The application launchers asks for a password](Images/lcb2_0901.png)'
+  id: totrans-7
+  prefs: []
+  type: TYPE_IMG
+  zh: '![应用程序启动器要求输入密码](Images/lcb2_0901.png)'
+- en: Figure 9-1\. The application launcher asks for a password
+  id: totrans-8
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图9-1. 应用程序启动器要求输入密码
+- en: It is common to call all storage media *disks*, even solid-state media like
+    SSDs, USB drives, SD (Secure Digital), NVMe (Non-Volatile Memory Express), and
+    CompactFlash. GParted manages any of these disks physically attached to your system,
+    internal and external.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常将所有存储介质称为“磁盘”，即使是固态介质如SSD、USB驱动器、SD（安全数字）、NVMe（非易失性内存表达）和CompactFlash。GParted可以管理任何物理连接到您系统的这些磁盘，无论是内部还是外部。
+- en: If you are not familiar with the basics of partitioning and managing filesystems,
+    the introduction to [Chapter 8](ch08.xhtml#cha-partitioning-parted) provides a
+    detailed overview.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您对分区和管理文件系统的基础不熟悉，[第8章](ch08.xhtml#cha-partitioning-parted)的介绍提供了详细的概述。
+- en: Be Careful!
+  id: totrans-11
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 小心！
+- en: Before you try any of the recipes in this chapter, have current backups and
+    be very certain that you are operating on the correct disks and partitions.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在尝试本章中的任何操作之前，请确保有当前的备份，并非常确定你正在操作正确的磁盘和分区。
+- en: Creating a new partition table wipes out your entire disk.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建新的分区表会清除整个磁盘上的所有数据。
+- en: Deleting or otherwise damaging a partition loses all the data on that partition.
+    It is possible to recover it, but not guaranteed.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 删除或损坏分区会丢失该分区上的所有数据。虽然有可能恢复数据，但不保证成功。
+- en: USB sticks are great for practice and testing.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: USB闪存驱动器非常适合用于实践和测试。
+- en: 9.1 Viewing Partitions, Filesystems, and Free Space
+  id: totrans-16
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 9.1 查看分区、文件系统和空闲空间
+- en: Problem
+  id: totrans-17
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to see all the partitions, filesystems, and free space on all attached
+    disks.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望查看所有连接到系统的磁盘上的所有分区、文件系统和空闲空间。
+- en: Solution
+  id: totrans-19
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Launch GParted, and use the drop-down menu on the upper right to see all attached
+    disks ([Figure 9-2](#fig-gparted-2)). Click View → Device Information to open
+    the panel on the left to see disk information, such as the model, serial number,
+    size, and partition table type.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动 GParted，并使用右上角的下拉菜单查看所有已连接的磁盘（[图 9-2](#fig-gparted-2)）。点击“查看” → “设备信息”以打开左侧面板查看磁盘信息，如型号、序列号、大小和分区表类型。
+- en: '![Viewing disks on GParted](Images/lcb2_0902.png)'
+  id: totrans-21
+  prefs: []
+  type: TYPE_IMG
+  zh: '![在 GParted 上查看磁盘](Images/lcb2_0902.png)'
+- en: Figure 9-2\. Viewing disks on GParted
+  id: totrans-22
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-2\. 在 GParted 上查看磁盘
+- en: 'You will see a lot of information: device names, mountpoints, filesystems,
+    labels, partition type and sizes, used and total space, and free space. Right-click
+    on any partition to open the operations menu, and click the Information button
+    at the bottom of the menu to see more information on that partition ([Figure 9-3](#fig-gparted-3)).'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将看到大量信息：设备名称、挂载点、文件系统、标签、分区类型和大小、已用空间和总空间以及空闲空间。右键单击任何分区以打开操作菜单，并在菜单底部点击“信息”按钮以查看有关该分区的更多信息（[图 9-3](#fig-gparted-3)）。
+- en: '![Viewing partition information](Images/lcb2_0903.png)'
+  id: totrans-24
+  prefs: []
+  type: TYPE_IMG
+  zh: '![查看分区信息](Images/lcb2_0903.png)'
+- en: Figure 9-3\. Viewing partition information on GParted
+  id: totrans-25
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-3\. 在 GParted 上查看分区信息
+- en: Discussion
+  id: totrans-26
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: GParted does not apply changes until you click the green checkmark in the top
+    toolbar, so it is safe to poke around and explore. If you accidentally click a
+    command, click the little curvy yellow arrow next to the checkmark to undo.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GParted 在您点击顶部工具栏中的绿色对号之前不会应用更改，因此可以放心探索和浏览。如果您不小心点击了某个命令，请点击对号旁边的小弯曲黄色箭头来撤销。
+- en: When you open the right-click operations menu, some commands are grayed out,
+    because they can be used only on unmounted filesystems. Click the Unmount command,
+    and then these commands will become available. Note that any filesystems that
+    are necessary for your running system cannot be unmounted; in this case, use a
+    SystemRescue CD/USB ([Chapter 19](Images/ch19.html#cha-rescue-recovery)).
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您打开右键操作菜单时，一些命令会显示为灰色，因为它们仅适用于未挂载的文件系统。点击“卸载”命令，然后这些命令将变为可用。请注意，任何对运行系统必需的文件系统都无法卸载；在这种情况下，请使用
+    SystemRescue CD/USB（[第 19 章](Images/ch19.html#cha-rescue-recovery)）。
+- en: See Also
+  id: totrans-29
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNOME Partition Editor](https://gparted.org)'
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNOME Partition Editor](https://gparted.org)'
+- en: 9.2 Creating a New Partition Table
+  id: totrans-31
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 9.2 创建新分区表
+- en: Problem
+  id: totrans-32
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to reformat a disk with a new GPT partition table. Your existing partition
+    table is MS-DOS, and you want to replace it with GPT, or it is a used disk with
+    old installations on it, and you want to start over with a clean disk.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要使用新的 GPT 分区表重新格式化磁盘。您现有的分区表是 MS-DOS，您希望用 GPT 替换它，或者这是一个带有旧安装的已用磁盘，您希望用一个干净的磁盘重新开始。
+- en: Solution
+  id: totrans-34
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: First, be very sure which disk you want to create the new partition table on,
+    because this will erase all data on the disk. This is one operation that GParted
+    applies immediately, after just one warning, and there is no Undo, so be careful.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，非常确定您要在哪个磁盘上创建新的分区表，因为这将擦除磁盘上的所有数据。这是 GParted 立即执行的一个操作，在仅有一个警告后，且没有撤销功能，因此请小心操作。
+- en: Select your disk in the top-right dropdown menu, then click Device → Create
+    Partition Table ([Figure 9-4](#fig-gparted-4)).
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在顶部右侧下拉菜单中选择您的磁盘，然后点击“设备” → “创建分区表”（[图 9-4](#fig-gparted-4)）。
+- en: '![Creating a new partition table](Images/lcb2_0904.png)'
+  id: totrans-37
+  prefs: []
+  type: TYPE_IMG
+  zh: '![创建新分区表](Images/lcb2_0904.png)'
+- en: Figure 9-4\. Creating a new partition table
+  id: totrans-38
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-4\. 创建新分区表
+- en: Select the GPT partition table type and click Apply ([Figure 9-5](#fig-gparted-7))
+    .
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选择 GPT 分区表类型并点击应用（[图 9-5](#fig-gparted-7)）。
+- en: It doesn’t take very long, and then you will have a new, clean, empty disk,
+    all ready to partition and format with new filesystems.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这不会花费很长时间，然后您将拥有一个新的、干净的、空白的磁盘，可以准备分区并格式化为新的文件系统。
+- en: '![Selecting the new partition table type](Images/lcb2_0905.png)'
+  id: totrans-41
+  prefs: []
+  type: TYPE_IMG
+  zh: '![选择新的分区表类型](Images/lcb2_0905.png)'
+- en: Figure 9-5\. Select the partition table type
+  id: totrans-42
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-5\. 选择分区表类型
+- en: Discussion
+  id: totrans-43
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Always create a GPT partition table, unless you have a reason to use something
+    else. GParted supports several partition table types, including MS-DOS, BSD, Amiga,
+    and AIX. GPT and MS-DOS are the most commonly used on the x86 platform. GPT is
+    for modern large hard disks and is easier to manage and more resilient than the
+    old MS-DOS partition table. See the introduction to [Chapter 8](ch08.xhtml#cha-partitioning-parted)
+    for detailed information on partition tables.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除非您有使用其他分区表的理由，否则始终创建 GPT 分区表。GParted 支持多种分区表类型，包括 MS-DOS、BSD、Amiga 和 AIX。在
+    x86 平台上，GPT 和 MS-DOS 最常用。GPT 适用于现代大容量硬盘，比旧的 MS-DOS 分区表更易管理和更具弹性。详细了解分区表，请参阅[第
+    8 章](ch08.xhtml#cha-partitioning-parted)的介绍。
+- en: See Also
+  id: totrans-45
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNOME Partition Editor](https://gparted.org)'
+  id: totrans-46
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNOME 分区编辑器](https://gparted.org)'
+- en: '[Chapter 8](ch08.xhtml#cha-partitioning-parted)'
+  id: totrans-47
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 8 章](ch08.xhtml#cha-partitioning-parted)'
+- en: 9.3 Deleting a Partition
+  id: totrans-48
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 9.3 删除分区
+- en: Problem
+  id: totrans-49
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to delete one or more partitions.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要删除一个或多个分区。
+- en: Solution
+  id: totrans-51
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Select the partition you want to delete, and right-click to open the operations
+    menu. If it has a mounted filesystem on it, you must first unmount it, which you
+    can do by clicking Unmount in the menu. Then click Delete, click the green checkmark,
+    and it is gone ([Figure 9-6](#fig-gparted-5)).
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选择要删除的分区，右键单击以打开操作菜单。如果它上面有挂载的文件系统，您必须先卸载它，方法是点击菜单中的卸载。然后点击删除，点击绿色复选标记，分区就删除了（[图 9-6](#fig-gparted-5)）。
+- en: '![Deleting a partition](Images/lcb2_0906.png)'
+  id: totrans-53
+  prefs: []
+  type: TYPE_IMG
+  zh: '![删除分区](Images/lcb2_0906.png)'
+- en: Figure 9-6\. Deleting a partition
+  id: totrans-54
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-6\. 删除分区
+- en: You will see a status message when the delete has finished.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 删除完成后，您将看到状态消息。
+- en: Discussion
+  id: totrans-56
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Deleting the partition deletes everything inside the partition, so if you have
+    a filesystem and data on the partition, be very sure you want to delete it.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 删除分区会删除分区内的所有内容，因此如果分区上有文件系统和数据，请务必确定您要删除它。
+- en: See Also
+  id: totrans-58
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNOME Partition Editor](https://gparted.org)'
+  id: totrans-59
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNOME 分区编辑器](https://gparted.org)'
+- en: '[Recipe 8.6](ch08.xhtml#rec-parted-delete-partition)'
+  id: totrans-60
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 8.6](ch08.xhtml#rec-parted-delete-partition)'
+- en: 9.4 Creating a New Partition
+  id: totrans-61
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 9.4 创建新分区
+- en: Problem
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create new partitions.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望创建新分区。
+- en: Solution
+  id: totrans-64
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: All you need is empty space on a disk. The following example creates a new 400
+    GB partition and formats it with an Ext4 filesystem ([Figure 9-7](#fig-gparted-6)).
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只需磁盘上有空闲空间。以下示例创建一个新的 400 GB 分区，并使用 Ext4 文件系统格式化它（[图 9-7](#fig-gparted-6)）。
+- en: '![Creating a new partition](Images/lcb2_0907.png)'
+  id: totrans-66
+  prefs: []
+  type: TYPE_IMG
+  zh: '![创建新分区](Images/lcb2_0907.png)'
+- en: Figure 9-7\. Creating a new partition
+  id: totrans-67
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-7\. 创建新分区
+- en: Click Partition → New in the top menu. This opens a new window, where you enter
+    your partition size, select your filesystem, and create partition and filesystem
+    labels. Use either the slider or the New Size (MiB) field to set your filesystem
+    size. The values in the New Size field are in mibibytes, so 400,000 is 400 GiB.
+    Then click Add, then the green checkmark.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 点击分区 → 新建在顶部菜单。这将打开一个新窗口，在此窗口中，您输入分区大小，选择文件系统，并创建分区和文件系统标签。使用滑块或“新大小（MiB）”字段设置文件系统大小。新大小字段中的值以
+    Mibibytes 为单位，因此 400,000 是 400 GiB。然后点击添加，再点击绿色复选标记。
+- en: When finished, see [Chapter 6](ch06.xhtml#cha-files-directories) to learn how
+    to set correct ownership and permissions on your new filesystem.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成后，请参阅[第 6 章](ch06.xhtml#cha-files-directories)，了解如何在新文件系统上设置正确的所有权和权限。
+- en: Discussion
+  id: totrans-70
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: With a GPT partition table, you will always create only primary filesystems.
+    The other two options, logical partition and extended partition, are only for
+    MS-DOS partition tables. If you’re not sure which one your disk is using, click
+    View → Device Information. This opens a pane on the left with information about
+    your disk, including the partition table type.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 GPT 分区表，您只会创建主文件系统。另外两个选项，逻辑分区和扩展分区，仅适用于 MS-DOS 分区表。如果不确定您的磁盘使用哪种分区表，请点击查看
+    → 设备信息。这将在左侧打开一个面板，显示关于您的磁盘的信息，包括分区表类型。
+- en: In the filesystem selector you also have the option to create an empty partition
+    without a filesystem. This is way down at the bottom, Unformatted. Next to Unformatted
+    is Clear, which deletes an existing filesystem and preserves the partition.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在文件系统选择器中，您还可以选择创建一个没有文件系统的空分区。这在最底部，“未格式化”旁边是“清除”，清除现有文件系统并保留分区。
+- en: GParted combines creating a partition and putting a filesystem on it into a
+    single, fast operation. This is faster than using *parted*, which only creates
+    partitions and rquires you to create your filesystem separately.
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GParted 将创建分区和在其上创建文件系统合并为一个单一且快速的操作。这比只创建分区的 *parted* 更快，后者需要您单独创建文件系统。
+- en: See Also
+  id: totrans-74
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNOME Partition Editor](https://gparted.org)'
+  id: totrans-75
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNOME 分区编辑器](https://gparted.org)'
+- en: '[Chapter 8](ch08.xhtml#cha-partitioning-parted)'
+  id: totrans-76
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 8 章](ch08.xhtml#cha-partitioning-parted)'
+- en: '[Chapter 11](ch11.xhtml#cha-create-filesystems)'
+  id: totrans-77
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 11 章](ch11.xhtml#cha-create-filesystems)'
+- en: 9.5 Deleting a Filesystem Without Deleting the Partition
+  id: totrans-78
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 9.5 删除文件系统而不删除分区
+- en: Problem
+  id: totrans-79
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to remove a filesystem without deleting its underlying partition because
+    you want to format the partition with a different filesystem, or the existing
+    filesystem is corrupt and you need to reformat it and then copy your files back
+    into it ([Figure 9-8](#fig-gparted-11)).
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望删除文件系统而不删除其底层分区，因为您想要使用不同的文件系统格式化分区，或者现有的文件系统损坏，需要重新格式化然后将文件复制回去（[图 9-8](#fig-gparted-11)）。
+- en: '![Deleting a filesystem](Images/lcb2_0908.png)'
+  id: totrans-81
+  prefs: []
+  type: TYPE_IMG
+  zh: '![删除文件系统](Images/lcb2_0908.png)'
+- en: Figure 9-8\. Deleting a filesystem without deleting the partition
+  id: totrans-82
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-8\. 删除文件系统而不删除分区
+- en: Solution
+  id: totrans-83
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The filesystem must first be unmounted. Right-click on the partition to open
+    the operations menu, then click Unmount. When that is completed, click Format
+    To. Scroll to the bottom of the list and click Cleared. This deletes the filesystem
+    without deleting the partition.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 必须先卸载文件系统。右键单击分区以打开操作菜单，然后点击卸载。完成后，点击格式化为。滚动到列表底部，点击清除。这将删除文件系统但不会删除分区。
+- en: See Also
+  id: totrans-85
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNOME Partition Editor](https://gparted.org)'
+  id: totrans-86
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNOME 分区编辑器](https://gparted.org)'
+- en: 9.6 Recovering a Deleted Partition
+  id: totrans-87
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 9.6 恢复已删除的分区
+- en: Problem
+  id: totrans-88
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You deleted a partition, and now you wish you hadn’t, and you want to get it
+    back.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您删除了一个分区，现在希望还原它。
+- en: Solution
+  id: totrans-90
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: If you accidentally deleted a new empty partition, don’t bother trying to recover
+    it, just create it again. If your partition had a filesystem and data on it, then
+    your best chance is to try an immediate recovery. Click Delete → Attempt Data
+    Rescue.
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果意外删除了一个新的空分区，请不要试图恢复它，只需重新创建。如果您的分区上有文件系统和数据，则最好立即尝试恢复。点击删除 → 尝试数据救援。
+- en: This could take a long time, and there is no guarantee of success. *parted*
+    seems to do this faster; see [Recipe 8.7](Images/ch08.html#rec-parted-recover-deleted-partition).
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这可能需要很长时间，且无法保证成功。*parted* 似乎更快完成此操作；参见 [Recipe 8.7](Images/ch08.html#rec-parted-recover-deleted-partition)。
+- en: Discussion
+  id: totrans-93
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: It is usually faster to create a new partition and filesystem, and then replace
+    your files from backup. But it does not hurt to try recovery first.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常更快地创建一个新分区和文件系统，然后从备份中替换文件。但首先尝试恢复也无妨。
+- en: See Also
+  id: totrans-95
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNOME Partition Editor](https://gparted.org)'
+  id: totrans-96
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNOME 分区编辑器](https://gparted.org)'
+- en: '[Recipe 8.7](Images/ch08.html#rec-parted-recover-deleted-partition)'
+  id: totrans-97
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 8.7](Images/ch08.html#rec-parted-recover-deleted-partition)'
+- en: 9.7 Resizing Partitions
+  id: totrans-98
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 9.7 调整分区大小
+- en: Problem
+  id: totrans-99
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to make a partition larger or smaller.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望调整分区的大小。
+- en: Solution
+  id: totrans-101
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: With GParted, this takes just a few clicks. When a partition is resized, the
+    filesystem on it must also be resized. GParted does this in a single operation.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 GParted，这只需几次点击即可完成。调整分区大小时，必须同时调整其上的文件系统大小。GParted 可以一次完成这一操作。
+- en: To enlarge a partition, there must be free space at the end of it. Ext4, Btrfs,
+    and XFS can be enlarged online. FAT16/32 must be unmounted first.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要扩大分区，必须在其末尾有空闲空间。Ext4、Btrfs 和 XFS 可以在线扩展。FAT16/32 必须先卸载。
+- en: Always Have Backups!
+  id: totrans-104
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 始终要备份！
+- en: Remember, always have current backups!
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 记住，始终要有当前的备份！
+- en: '[Figure 9-9](#fig-gparted-16) shows a FAT32 filesystem with plenty of free
+    space to grow into.'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图 9-9](#fig-gparted-16) 显示一个有足够的空闲空间可以扩展的 FAT32 文件系统。'
+- en: '![Selecting a partition to resize](Images/lcb2_0909.png)'
+  id: totrans-107
+  prefs: []
+  type: TYPE_IMG
+  zh: '![选择要调整大小的分区](Images/lcb2_0909.png)'
+- en: Figure 9-9\. Selecting a partition to resize
+  id: totrans-108
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-9\. 选择要调整大小的分区
+- en: Right-click on the selected partition to open the menu, then click Resize/Move.
+    This opens a dialog where you set the new size, either by dragging the slider
+    or by typing the value, in mibibytes, in the New Size field ([Figure 9-10](#fig-gparted-10)).
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 右键单击所选分区以打开菜单，然后点击调整/移动。这将打开一个对话框，在“新大小”字段中设置新大小，可以通过拖动滑块或输入值（以 Mibibytes 为单位）进行设置（[图
+    9-10](#fig-gparted-10)）。
+- en: Click Resize/Move, then click the green checkmark. Enlarging a partition takes
+    just a minute or two, and you will see a status message when it is finished.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 单击调整大小/移动，然后单击绿色复选标记。扩展分区只需一两分钟，完成时会显示状态消息。
+- en: Use the same procedure for shrinking a partition, except this does not require
+    any free space at the end. Your new partition size should be at least 10% larger
+    than the space used by your files. Even if you do not plan to add any new files
+    to this filesystem, you must leave a certain amount of unused capacity, because
+    if the filesystem fills up completely, you may not be able to access it. Shrinking
+    a partition takes longer than enlarging it.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于缩小分区的过程相同，但不需要任何结束时的空闲空间。您的新分区大小应至少比文件使用的空间大10%。即使您不打算向此文件系统添加任何新文件，也必须保留一定量的未使用容量，因为如果文件系统完全填满，您可能无法访问它。缩小分区比扩展分区需要更长的时间。
+- en: '![Configuring the new size.](Images/lcb2_0910.png)'
+  id: totrans-112
+  prefs: []
+  type: TYPE_IMG
+  zh: '![配置新大小。](Images/lcb2_0910.png)'
+- en: Figure 9-10\. Configuring the new partition size
+  id: totrans-113
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-10\. 配置新分区大小
+- en: Discussion
+  id: totrans-114
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The Ext4 filesystem reserves a small amount of space for the root user. If the
+    filesystem fills up, then root can still access the filesystem and remove files.
+    FAT16/32, Btrfs, and XFS do not have reserved blocks.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ext4 文件系统为根用户保留了一小部分空间。如果文件系统填满了，那么根用户仍然可以访问文件系统并删除文件。FAT16/32、Btrfs 和 XFS 没有预留块。
+- en: Ext4 and Btrfs can be shrunk online. XFS can only be enlarged, it cannot be
+    shrunk. It is safer to unmount them before resizing.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ext4 和 Btrfs 可以在线收缩。XFS 只能扩展，不能收缩。在调整大小之前卸载它们是更安全的。
+- en: See Also
+  id: totrans-117
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNOME Partition Editor](https://gparted.org)'
+  id: totrans-118
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNOME 分区编辑器](https://gparted.org)'
+- en: '[Recipe 8.8](ch08.xhtml#rec-resize-partition-fs)'
+  id: totrans-119
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[食谱 8.8](ch08.xhtml#rec-resize-partition-fs)'
+- en: '[Recipe 8.9](ch08.xhtml#rec-shrink-partition)'
+  id: totrans-120
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[食谱 8.9](ch08.xhtml#rec-shrink-partition)'
+- en: 9.8 Moving a Partition
+  id: totrans-121
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 9.8 移动分区
+- en: Problem
+  id: totrans-122
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have a bit of free space between partitions, for example, between */dev/sda1*
+    and */dev/sda2*. You want to move */dev/sda2* into the free space so there is
+    no gap between them. Or, you wish to enlarge */dev/sda1*, but there is no free
+    space following it, so you have to move */dev/sda2* to make room.
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您在分区之间有一些空闲空间，例如在 */dev/sda1* 和 */dev/sda2* 之间。您希望将 */dev/sda2* 移入空闲空间中，以便它们之间没有间隙。或者，您希望扩展
+    */dev/sda1*，但其后没有空闲空间，因此您必须移动 */dev/sda2* 以腾出空间。
+- en: Solution
+  id: totrans-124
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Right-click the partition you want to move to open the operations menu, then
+    click Resize/Move ([Figure 9-11](#fig-gparted-12)).
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 右键单击要移动的分区以打开操作菜单，然后单击调整大小/移动（[图 9-11](#fig-gparted-12)）。
+- en: '![Selecting a partition to move](Images/lcb2_0911.png)'
+  id: totrans-126
+  prefs: []
+  type: TYPE_IMG
+  zh: '![选择要移动的分区](Images/lcb2_0911.png)'
+- en: Figure 9-11\. Selecting a partition
+  id: totrans-127
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-11\. 选择分区
+- en: In the Resize/Move dialog, you can drag the slider to the left, or enter 0 in
+    the Free Space Preceding (MiB) field. Then click Resize/Move ([Figure 9-12](#fig-gparted-13)).
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在调整大小/移动对话框中，您可以向左拖动滑块，或在“前置空闲空间（MiB）”字段中输入 0。然后单击调整大小/移动（[图 9-12](#fig-gparted-13)）。
+- en: '![Moving a partition](Images/lcb2_0912.png)'
+  id: totrans-129
+  prefs: []
+  type: TYPE_IMG
+  zh: '![移动分区](Images/lcb2_0912.png)'
+- en: Figure 9-12\. Moving a partition
+  id: totrans-130
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-12\. 移动分区
+- en: This will take some time, as much as several hours, depending on how much data
+    is on the partition.
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将需要一些时间，取决于分区上有多少数据，可能需要几个小时。
+- en: Discussion
+  id: totrans-132
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Moving a partition is more complicated than resizing a partition. When you resize
+    a partition, you are moving only its endpoint, but moving a partition requires
+    also changing its starting point, which, to the operating system, is a big change.
+    GParted usually manages this reliably, but it is risky, so always have good backups.
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 移动分区比调整分区更复杂。调整分区时，仅移动其端点，但移动分区还需要更改其起始点，这对操作系统而言是一个重大变化。GParted通常可以可靠地处理此操作，但是存在风险，因此始终要有良好的备份。
+- en: See Also
+  id: totrans-134
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNOME Partition Editor](https://gparted.org)'
+  id: totrans-135
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNOME 分区编辑器](https://gparted.org)'
+- en: '[Chapter 19](Images/ch19.html#cha-rescue-recovery)'
+  id: totrans-136
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 19 章](Images/ch19.html#cha-rescue-recovery)'
+- en: 9.9 Copying a Partition
+  id: totrans-137
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 9.9 复制分区
+- en: Problem
+  id: totrans-138
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to make a clone of a partition, or several partitions, as backups or
+    to move data to a new hard disk.
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想克隆分区或几个分区，作为备份或将数据移动到新硬盘。
+- en: Solution
+  id: totrans-140
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use GParted’s Copy command. For example, you want to copy */dev/sdb2* to a USB
+    hard drive attached to your system. Copy it to free space equal to or larger than
+    the partition you are copying.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用GParted的复制命令。例如，您希望将 */dev/sdb2* 复制到连接到系统的USB硬盘驱动器中。将其复制到与要复制的分区大小相等或更大的空闲空间。
+- en: Right-click on the partition you want to copy ([Figure 9-13](#fig-gparted-14)).
+    Unmount it if it is mounted, then click Copy.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 右键单击要复制的分区（参见 [图 9-13](#fig-gparted-14)）。如果已挂载，请先卸载，然后点击复制。
+- en: '![Copying a partition](Images/lcb2_0913.png)'
+  id: totrans-143
+  prefs: []
+  type: TYPE_IMG
+  zh: '![复制分区](Images/lcb2_0913.png)'
+- en: Figure 9-13\. Copying a partition
+  id: totrans-144
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-13\. 复制分区
+- en: Change to the disk you want to copy it to and click Paste. This opens the configuration
+    dialog, with options to increase the size and change the location of the new partition
+    ([Figure 9-14](#fig-gparted-15)). When you are satisfied with the settings, click
+    Paste.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 切换到要复制到的磁盘，并点击粘贴。这将打开配置对话框，提供增加大小和更改新分区位置的选项（参见 [图 9-14](#fig-gparted-15)）。当设置满意后，点击粘贴。
+- en: The final step is to click the green checkmark to start the copy. If you change
+    your mind, click Undo. The copy operation will take a little time, depending on
+    how much data needs to be copied.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后一步是点击绿色复选标记开始复制。如果改变主意，点击撤销。复制操作将根据需要复制的数据量而耗费一些时间。
+- en: '![Settings for the new partition](Images/lcb2_0914.png)'
+  id: totrans-147
+  prefs: []
+  type: TYPE_IMG
+  zh: '![新分区的设置](Images/lcb2_0914.png)'
+- en: Figure 9-14\. Settings for the new partition
+  id: totrans-148
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-14\. 新分区的设置
+- en: Discussion
+  id: totrans-149
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The copied partition must go into a new partition of equal or greater size.
+    Copying a partition into free space saves the hassle of creating the destination
+    partition.
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 复制的分区必须放入大小相等或更大的新分区中。将分区复制到空闲空间可以省去创建目标分区的麻烦。
+- en: Copying partitions, in my experience, has limited usefulness. The partition
+    and filesystem UUIDs remain the same, so you cannot use the copied partition on
+    the same system as the original without changing the UUIDs. (Which you can do
+    in GParted in the right-click operations menu.) If you change UUIDs for filesystems
+    listed in */etc/fstab*, their entries must be updated. I think it is better, in
+    most cases, to create new partitions and filesystems, and then copy your files
+    into them.
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据我的经验，复制分区的实用性有限。分区和文件系统的 UUID 保持不变，因此您无法在与原始系统相同的系统上使用复制的分区而不更改 UUID。 （您可以在
+    GParted 的右键操作菜单中更改 UUID。）如果更改 */etc/fstab* 中列出的文件系统的 UUID，则必须更新它们的条目。我认为，在大多数情况下，最好创建新的分区和文件系统，然后将文件复制到其中。
+- en: See Also
+  id: totrans-152
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNOME Partition Editor](https://gparted.org)'
+  id: totrans-153
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNOME 分区编辑器](https://gparted.org)'
+- en: '[Chapter 11](ch11.xhtml#cha-create-filesystems)'
+  id: totrans-154
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 11 章](ch11.xhtml#cha-create-filesystems)'
+- en: '[Recipe 11.6](ch11.xhtml#rec-automatic-fs-mount)'
+  id: totrans-155
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 11.6](ch11.xhtml#rec-automatic-fs-mount)'
+- en: '[Chapter 19](Images/ch19.html#cha-rescue-recovery)'
+  id: totrans-156
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 19 章](Images/ch19.html#cha-rescue-recovery)'
+- en: 9.10 Managing Filesystems with GParted
+  id: totrans-157
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 9.10 使用 GParted 管理文件系统
+- en: Problem
+  id: totrans-158
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want a nice graphical tool for creating new filesystems.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要一个用于创建新文件系统的良好图形工具。
+- en: Solution
+  id: totrans-160
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use GParted, which manages partitions and filesystems. Find the partition you
+    want to format with a new filesystem, right-click, and select the filesystem you
+    want to use (see [Figure 9-15](#fig-gparted-create-filesystem)).
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 GParted 管理分区和文件系统。找到要格式化为新文件系统的分区，右键单击，选择要使用的文件系统（参见 [图 9-15](#fig-gparted-create-filesystem)）。
+- en: '![GParted creates filesystems](Images/lcb2_0915.png)'
+  id: totrans-162
+  prefs: []
+  type: TYPE_IMG
+  zh: '![GParted 创建文件系统](Images/lcb2_0915.png)'
+- en: Figure 9-15\. GParted displays filesystem types
+  id: totrans-163
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-15\. GParted 显示文件系统类型
+- en: Click the green checkmark in the toolbar to create the new filesystem. Creating
+    a new filesystem destroys everything on the existing filesystem, so be sure you
+    are in the right place.
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 点击工具栏中的绿色复选标记来创建新文件系统。创建新文件系统会销毁现有文件系统上的所有内容，因此请确保您操作的位置正确。
+- en: Discussion
+  id: totrans-165
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: GParted is one of the best graphical applications in any category. It is a well-organized
+    frontend to a number of command-line tools for managing partitions and filesystems,
+    and it makes complicated tasks simple and fast.
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GParted 是任何类别中最好的图形应用程序之一。它是一款良好组织的前端工具，用于管理分区和文件系统，使复杂的任务变得简单和快速。
+- en: GParted shows the filesystem types on mounted and unmounted volumes, displaying
+    one disk at a time (see [Figure 9-16](#fig-gparted-filesys)). Click the drop-down
+    menu on the top right to view other disks.
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GParted 显示挂载和未挂载卷的文件系统类型，一次显示一个磁盘（参见 [图 9-16](#fig-gparted-filesys)）。点击右上角的下拉菜单可以查看其他磁盘。
+- en: '![GParted shows the filesystem types](Images/lcb2_0916.png)'
+  id: totrans-168
+  prefs: []
+  type: TYPE_IMG
+  zh: '![GParted 显示文件系统类型](Images/lcb2_0916.png)'
+- en: Figure 9-16\. GParted displays filesystem types
+  id: totrans-169
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-16\. GParted 显示文件系统类型

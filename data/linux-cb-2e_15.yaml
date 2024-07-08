@@ -1,0 +1,1608 @@
+- en: Chapter 15\. Printing on Linux
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第 15 章：Linux 上的打印
+- en: Linux relies on CUPS, the Common Unix Printing System, to manage printers. In
+    this chapter you will learn how to install and manage printers, and how to share
+    them over your network. You will learn about the *driverless* future of Linux
+    printing, in which printers will be available to client devices without having
+    to install drivers.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 依赖于 CUPS（通用 Unix 打印系统）来管理打印机。在本章中，你将学习如何安装和管理打印机，以及如何通过网络共享它们。你将了解到 Linux
+    打印的 *无驱动* 未来，其中打印机将可以在客户端设备上使用，而无需安装驱动程序。
+- en: Overview
+  id: totrans-2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 概述
+- en: The key to happy printing on Linux is to select good-quality printers and multifunction
+    devices (printer, scanner, copier, fax) that are well supported on Linux. Which,
+    thankfully, is a lot easier than in olden times. When you select a well supported
+    device, the drivers are included in CUPS, and you do not have to hassle with hunting
+    down and downloading manufacturer drivers.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Linux 上愉快打印的关键是选择在 Linux 上得到良好支持的高质量打印机和多功能设备（打印机、扫描仪、复印机、传真机）。值得庆幸的是，现在选择受支持设备比过去要容易得多。当你选择一个受支持良好的设备时，驱动程序已经包含在
+    CUPS 中，你不必费力去寻找和下载制造商的驱动程序。
+- en: The next-best option is buying machines that have manufacturer-supplied Linux
+    drivers. This is not my favorite option, as the drivers are often old and not
+    maintained, and you must manually install them. This is more common with multifunction
+    devices (MFDs). For one example, the Brother MFC-J5945DW is my personal machine,
+    and it does not have native CUPS drivers, though it does support driverless printing.
+    It was a good deal and inks are cheap, though in hindsight I really should have
+    bought a machine with native Linux support. Native support is more reliable because
+    once a device is supported in CUPS it is always supported, and you won’t be at
+    the mercy of manufacturers who don’t maintain their drivers or who discontinue
+    their driver downloads.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一个最佳选择是购买具有供应商提供的 Linux 驱动程序的机器。这不是我喜欢的选项，因为这些驱动程序通常都很老旧且不再维护，你必须手动安装它们。这在多功能设备（MFDs）中更为常见。例如，我的个人机器是
+    Brother MFC-J5945DW，它没有原生的 CUPS 驱动程序，尽管支持无驱动打印。它是一笔不错的交易，墨盒便宜，尽管事后我真的应该购买一个有原生
+    Linux 支持的机器。原生支持更可靠，因为一旦设备在 CUPS 中受支持，就始终受支持，你不会受到那些不维护驱动程序或停止驱动下载的制造商的影响。
+- en: The least favorable option is to buy without doing your homework and hope it
+    works. In this case you might be able to use macOS drivers (PPD files) for printers
+    not supported in Linux, though it can take some work if the Macintosh PPD has
+    macOC-specific entries, such as calling macOS executables, libraries, or filters.
+    These must be replaced with the equivalents for Linux, if they exist. See [cupsFilter](https://oreil.ly/w3Oqd)
+    for some useful information if you want to try this.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最不理想的选择是在没有做足功课的情况下购买并希望它能正常工作。在这种情况下，你可能可以使用 macOS 驱动程序（PPD 文件）来驱动 Linux 不支持的打印机，尽管如果
+    Macintosh 的 PPD 文件包含 macOS 特定条目（例如调用 macOS 可执行文件、库或过滤器），你可能需要进行一些工作来替换为 Linux
+    的等效物。如果你想尝试这种方法，可以参考 [cupsFilter](https://oreil.ly/w3Oqd) 获取一些有用的信息。
+- en: If you want a shared device, the least troublesome approach is to get one that
+    has networking built in, and that has built-in controls for copying, setting up
+    networking, viewing ink levels, cleaning print heads, and other setup and maintenance
+    tasks. These are easier and more pleasant to use than devices that require setup
+    and control from a computer.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你需要一个共享设备，最少麻烦的方法是选择一个具有网络功能和内置控制功能的设备，可以进行复印、设置网络、查看墨水量、清洁打印头以及其他设置和维护任务。这些设备比需要从计算机设置和控制的设备更易于使用和更愉快。
+- en: Finding Supported Printers and Scanners
+  id: totrans-7
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 查找受支持的打印机和扫描仪
+- en: Hewlett-Packard (HP) printers and multifunction devices have excellent Linux
+    support via the *hplip*, *hplip-hpijs*, *hplip-sane*, and *hplip-scan-utils* packages.
+    Of course every Linux is special and has different package names, such as *hpijs-ppds*,
+    *hplip-data*, *printer-driver-hpcups*, *hplip-common*, and *libsane-hpaio*. Searching
+    for *hplip* should find them.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 惠普（HP）打印机和多功能设备通过 *hplip*、*hplip-hpijs*、*hplip-sane* 和 *hplip-scan-utils* 软件包拥有优秀的
+    Linux 支持。当然，每个 Linux 版本都有特别的名称，例如 *hpijs-ppds*、*hplip-data*、*printer-driver-hpcups*、*hplip-common*
+    和 *libsane-hpaio*。搜索 *hplip* 应该能找到它们。
+- en: Not all HP printers and MFDs are supported in Linux; see the link below for
+    HP’s Linux support database.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并非所有 HP 打印机和多功能设备都在 Linux 上得到支持；请查看下面的链接获取 HP 的 Linux 支持数据库。
+- en: Brother has good machines, decent customer support, and good prices on inks.
+    They have both machines with native Linux support and some that require the Brother
+    drivers.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Brother 有良好的设备、体面的客户支持和良好的墨水价格。他们既有原生 Linux 支持的机器，也有需要 Brother 驱动程序的机器。
+- en: 'Canon, Epson, Honeywell, Fujitsu, IBM, Lexmark, Kodak, Tektronix, Samsung,
+    Sharp, Xerox, Toshiba, and many other brands have some level of Linux support.
+    It can be difficult to learn which models are supported. Some vendors tell you
+    in their product specs. There are several websites to check, though they are usually
+    not complete nor up-to-date, but they’re good places to start:'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 佳能、爱普生、霍尼韦尔、富士通、IBM、雷克萨姆、柯达、德科尼克斯、三星、夏普、施乐、东芝等许多品牌都在某种程度上支持 Linux。了解哪些型号得到支持可能很困难。一些供应商在其产品规格中告知您。有几个网站可供查询，尽管它们通常不完整也不时效，但它们是一个很好的起点：
+- en: '[Supported HP printers](https://oreil.ly/y9z4J)'
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[支持的 HP 打印机](https://oreil.ly/y9z4J)'
+- en: '[OpenPrinting.org printer listings](https://oreil.ly/7JbPH)'
+  id: totrans-13
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenPrinting.org 打印机列表](https://oreil.ly/7JbPH)'
+- en: '[H-node printers and MFDs](https://oreil.ly/Hwy0w)'
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[H-node 打印机和多功能设备](https://oreil.ly/Hwy0w)'
+- en: '[ThinkPenguin store](https://oreil.ly/54H5F)'
+  id: totrans-15
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[ThinkPenguin 商店](https://oreil.ly/54H5F)'
+- en: '[Ubuntu page for supported printers](https://oreil.ly/03SV3)'
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Ubuntu 支持的打印机页面](https://oreil.ly/03SV3)'
+- en: '[IPP Everywhere Printers](https://oreil.ly/l7pFz)'
+  id: totrans-17
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[IPP Everywhere 打印机](https://oreil.ly/l7pFz)'
+- en: CUPS Printer Drivers
+  id: totrans-18
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: CUPS 打印机驱动
+- en: Linux printer drivers are provided by CUPS, the Common Unix Printing System.
+    CUPS has been the standard printing subsystem for Linux since around 2000\. Apple
+    started using CUPS around 2002, then hired CUPS creator Michael Sweet and bought
+    the source code in 2007. Sweet left Apple in 2019, and Apple’s involvement stalled—see
+    [apple/cups on GitHub](https://oreil.ly/HgUX8). Mr. Sweet has not been idle; rather,
+    he has been hard at work on the OpenPrinting.org’s CUPS fork at [OpenPrinting/cups](https://oreil.ly/uP0CJ)
+    on GitHub.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 打印机驱动由 CUPS（通用 Unix 打印系统）提供。自大约 2000 年以来，CUPS 一直是 Linux 的标准打印子系统。苹果在大约
+    2002 年开始使用 CUPS，然后雇用了 CUPS 的创始人 Michael Sweet，并在 2007 年购买了源代码。Sweet 在 2019 年离开了苹果，苹果的参与因此停滞不前，详情请见
+    [apple/cups on GitHub](https://oreil.ly/HgUX8)。Sweet 先生并没有闲着，而是在 OpenPrinting.org
+    的 CUPS 分支 [OpenPrinting/cups](https://oreil.ly/uP0CJ) 上努力工作。
+- en: There is a lot more to CUPS than writing code. Michael Sweet, Till Kamppeter,
+    and others invested a lot of work into getting manufacturers on board and developing
+    common printing standards and APIs. The centers of CUPS and printing standards
+    development are [The Printer Working Group](https://oreil.ly/yEMad) and [OpenPrinting](https://oreil.ly/caH6b).
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CUPS 中的打印机驱动程序由一个或多个特定于打印机的过滤器组成，这些过滤器封装在 PPD（PostScript 打印机描述）文件中。即使是非 PostScript
+    打印机，在 CUPS 中也需要一个 PPD。PPD 包含有关打印机、打印机命令和过滤器的描述。
+- en: Printer drivers in CUPS consist of one or more filters specific to a printer,
+    which are packaged in PPD (PostScript Printer Description) files. All printers
+    in CUPS, even non-PostScript printers, need a PPD. The PPDs contain descriptions
+    about the printers, printer commands, and filters.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[打印机工作组](https://oreil.ly/yEMad) 和 [OpenPrinting](https://oreil.ly/caH6b) 是
+    CUPS 和打印标准开发的中心。'
+- en: Filters translate print jobs to formats the printer can understand, such as
+    PDF, HP-PCL, raster, and image files, and they pass in commands for operations
+    such as page selection, paper size, colors, contrast, and media type. PPDs are
+    plain-text files, and the PPDs for all supported printers are in */usr/share/cups/model/*.
+    Installed printers have PPDs in */etc/cups/ppd/*.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 过滤器将打印作业转换为打印机可以理解的格式，如 PDF、HP-PCL、光栅和图像文件，并传递命令以执行操作，如页面选择、纸张大小、颜色、对比度和媒体类型。PPD
+    是纯文本文件，所有支持的打印机的 PPD 都在 */usr/share/cups/model/* 中。安装的打印机在 */etc/cups/ppd/* 中有
+    PPD。
+- en: PPDs Are Doomed
+  id: totrans-23
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: PPDs Are Doomed
+- en: CUPS has relied on PPDs from its inception, and they have worked well. However,
+    there is new approach in development called *driverless* printing. Instead of
+    using static PPD files, the printer advertises its capabilities and does not require
+    driver installation on client machines. The idea is to make connecting to a new
+    printer as easy as connecting to a new network with NetworkManager, which automatically
+    finds available networks and does not require you to install drivers or to manually
+    configure every new network. This is especially advantageous for mobile devices
+    like phones and tablets, which have limited storage space and limited screen size
+    for hassling with driver installation.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CUPS 从创建开始就依赖于 PPD 文件，并且它们运行良好。然而，现在正在开发一种新的方法称为 *无驱动* 打印。打印机不再使用静态的 PPD 文件，而是广播其能力，客户端机器无需安装驱动程序。这个想法就像使用
+    NetworkManager 连接新网络一样简单，它自动查找可用网络，并且不需要您安装驱动程序或手动配置每个新网络。对于手机和平板电脑等存储空间有限、屏幕尺寸有限的移动设备来说，这尤为有利。
+- en: 'Driverless was introduced in CUPS 2.2.0\. You should have at least CUPS 2.2.4
+    (released in June 2017) for reliable performance. You can learn more at the following
+    resources:'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无驱动在 CUPS 2.2.0 中引入。为了可靠性能，您应该至少使用 CUPS 2.2.4（2017 年 6 月发布）。您可以在以下资源中了解更多：
+- en: '[Printer Applications: A New Way to Print in Linux](https://oreil.ly/clNC3)'
+  id: totrans-26
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Linux 中打印应用程序：打印的新方式](https://oreil.ly/clNC3)'
+- en: '[CUPS Driverless Printing](https://oreil.ly/yaj5q)'
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS 无驱动打印](https://oreil.ly/yaj5q)'
+- en: 15.1 Using the CUPS Web Interface
+  id: totrans-28
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.1 使用 CUPS Web 界面
+- en: Problem
+  id: totrans-29
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to find the CUPS administration tool.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要找到 CUPS 管理工具。
+- en: Solution
+  id: totrans-31
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Open the CUPS web interface in your web browser at [*http://localhost:631/*](http://localhost:631/)
+    ([Figure 15-1](#fig-printscan-2)).
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您的网络浏览器中打开 CUPS Web 界面[*http://localhost:631/*](http://localhost:631/)（[图 15-1](#fig-printscan-2)）。
+- en: '![The CUPS web control panel](Images/lcb2_1501.png)'
+  id: totrans-33
+  prefs: []
+  type: TYPE_IMG
+  zh: '![CUPS Web 控制面板](Images/lcb2_1501.png)'
+- en: Figure 15-1\. The CUPS web control panel
+  id: totrans-34
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-1\. CUPS Web 控制面板
+- en: Discussion
+  id: totrans-35
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: There are numerous graphical tools for managing printers, such as *system-config-printer*
+    and the YaST printer module in openSUSE. The CUPS web administration page provides
+    the most complete management options and is the same on all Linux distributions.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有许多图形工具可用于管理打印机，例如 *system-config-printer* 和 openSUSE 中的 YaST 打印机模块。CUPS Web
+    管理页面提供了最完整的管理选项，在所有 Linux 发行版上保持一致。
+- en: See Also
+  id: totrans-37
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-38
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS 文档](https://oreil.ly/OlCzV)'
+- en: 15.2 Installing a Locally Attached Printer
+  id: totrans-39
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.2 安装本地连接的打印机
+- en: Problem
+  id: totrans-40
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to install a new printer which is connected to your PC. You have wisely
+    chosen a printer with native CUPS support.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要安装一个连接到您的 PC 的新打印机。您明智地选择了一个原生支持 CUPS 的打印机。
+- en: Solution
+  id: totrans-42
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use the CUPS web control panel. Your printer should be connected and powered
+    on. The following examples are on a Linux Mint system.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 CUPS Web 控制面板。您的打印机应该已连接并开机。以下示例基于 Linux Mint 系统。
+- en: Go to the Administration tab and click Add Printer. It will ask you for your
+    login ([Figure 15-2](#fig-printscan-3a)). (If your login does not work, and only
+    the root login succeeds, see [Recipe 15.7](#rec-cups-forbidden) to learn how to
+    configure CUPS to accept nonroot logins.) Check “Save debugging information for
+    troubleshooting,” and check “Share printers connected to this system” to share
+    printers directly attached to your computer. This only enables sharing, and then
+    you must enable sharing on each printer you want to share.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 转到管理选项卡，然后点击添加打印机。它会要求您登录（[图 15-2](#fig-printscan-3a)）。（如果您的登录不起作用，只有 root 登录成功，请参阅
+    [Recipe 15.7](#rec-cups-forbidden) 了解如何配置 CUPS 接受非 root 登录。）选中“保存调试信息以进行故障排除”，并选中“共享直接连接到此计算机的打印机”以直接共享连接到您计算机的打印机。这仅启用共享功能，然后您必须在每台要共享的打印机上启用共享。
+- en: '![Adding a printer](Images/lcb2_1502.png)'
+  id: totrans-45
+  prefs: []
+  type: TYPE_IMG
+  zh: '![添加打印机](Images/lcb2_1502.png)'
+- en: Figure 15-2\. Adding a printer
+  id: totrans-46
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-2\. 添加打印机
+- en: On the next screen, CUPS discovers and lists your printer in the Local Printers
+    section ([Figure 15-3](#fig-printscan-4)). Select your printer and click Continue.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接下来的屏幕上，CUPS 在本地打印机部分发现并列出您的打印机（[图 15-3](#fig-printscan-4)）。选择您的打印机并点击继续。
+- en: Now you should see a screen like [Figure 15-4](#fig-printscan-5), with Name,
+    Description, and Location fields. The Name and Description fields are automatically
+    filled, and you may change these to whatever you want. The Name field appears
+    in the printer dialogs when you print a document.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您应该看到一个屏幕，类似于[图 15-4](#fig-printscan-5)，具有名称、描述和位置字段。名称和描述字段已自动填写，您可以更改为您想要的内容。名称字段在您打印文档时出现在打印机对话框中。
+- en: '![CUPS finds your local printer](Images/lcb2_1503.png)'
+  id: totrans-49
+  prefs: []
+  type: TYPE_IMG
+  zh: '![CUPS找到您的本地打印机](Images/lcb2_1503.png)'
+- en: Figure 15-3\. CUPS finds your local printer
+  id: totrans-50
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-3\. CUPS找到您的本地打印机
+- en: '![Configuring the Name, Description, and Location.](Images/lcb2_1504.png)'
+  id: totrans-51
+  prefs: []
+  type: TYPE_IMG
+  zh: '![配置名称、描述和位置。](Images/lcb2_1504.png)'
+- en: Figure 15-4\. Specifying the name, description, and location
+  id: totrans-52
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-4\. 指定名称、描述和位置
+- en: Select your printer driver. CUPS displays a giant list for you to choose from.
+    Find the driver for your printer model. In [Figure 15-5](#fig-printscan-6) the
+    drivers come from the *epson-inkjet-printer-escpr* package (*printer-driver-escpr*
+    on Ubuntu), for Seiko Epson color ink jet printers.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选择您的打印机驱动程序。CUPS会显示一个巨大的列表供您选择。在[图 15-5](#fig-printscan-6)中，驱动程序来自*epson-inkjet-printer-escpr*包（在Ubuntu上是*printer-driver-escpr*），适用于精工爱普生彩色喷墨打印机。
+- en: '![Select the printer driver](Images/lcb2_1505.png)'
+  id: totrans-54
+  prefs: []
+  type: TYPE_IMG
+  zh: '![选择打印机驱动程序](Images/lcb2_1505.png)'
+- en: Figure 15-5\. Select the printer driver
+  id: totrans-55
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-5\. 选择打印机驱动程序
+- en: The final configuration screen is for setting default options, such as paper
+    type, paper size, color or black and white, print quality, and other options according
+    to what your printer and printer driver support. When you are finished, click
+    Set Default Options ([Figure 15-6](#fig-printscan-7)).
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最终配置屏幕用于设置默认选项，例如纸张类型、纸张尺寸、彩色或黑白、打印质量以及其他根据打印机和打印机驱动程序支持的选项。完成后，点击设置默认选项（[图 15-6](#fig-printscan-7)）。
+- en: '![Set default printer options](Images/lcb2_1506.png)'
+  id: totrans-57
+  prefs: []
+  type: TYPE_IMG
+  zh: '![设置默认打印机选项](Images/lcb2_1506.png)'
+- en: Figure 15-6\. Set default printer options
+  id: totrans-58
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-6\. 设置默认打印机选项
+- en: When you are finished, you see the Printers page, listing all of your installed
+    printers ([Figure 15-7](#fig-printscan-8)).
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成后，您将看到打印机页面，列出了所有安装的打印机（[图 15-7](#fig-printscan-8)）。
+- en: '![All installed printers](Images/lcb2_1507.png)'
+  id: totrans-60
+  prefs: []
+  type: TYPE_IMG
+  zh: '![所有安装的打印机](Images/lcb2_1507.png)'
+- en: Figure 15-7\. All installed printers
+  id: totrans-61
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-7\. 所有安装的打印机
+- en: Click on your new printer, and print a test page from the Maintenance drop-down
+    menu. When it prints correctly, you are done.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 点击您的新打印机，并从维护下拉菜单中打印一张测试页。当它正确打印时，您就完成了。
+- en: Discussion
+  id: totrans-63
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: In [Figure 15-2](#fig-printscan-3a) you see two buttons, Add Printer and Find
+    New Printers. These are pretty much the same thing, with the discovered printer
+    listings organized differently.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[图 15-2](#fig-printscan-3a)中，您会看到两个按钮，添加打印机和查找新打印机。它们基本上是一样的，只是已发现的打印机列表组织方式不同。
+- en: You will probably have more than one printer driver to choose from; for example,
+    it is common to see both CUPS+Gutenprint and Foomatic drivers for the same printer.
+    Gutenprint used to be the better choice for color printers; try both to see which
+    you prefer. CUPS+Gutenprint Simplified drivers contain fewer features and options
+    than the full versions.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能有多个打印机驱动程序可供选择；例如，对于同一台打印机，常见的是同时看到CUPS+Gutenprint和Foomatic驱动程序。以前Gutenprint是彩色打印机的更好选择；请尝试两种看您喜欢哪种。CUPS+Gutenprint简化版驱动程序比完整版功能和选项较少。
+- en: See Also
+  id: totrans-66
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-67
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS文档](https://oreil.ly/OlCzV)'
+- en: 15.3 Giving Printers Useful Names
+  id: totrans-68
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.3 给打印机起有用的名称
+- en: Problem
+  id: totrans-69
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: When you open the printer dialog in a document, you have several printers to
+    choose from, including some that look similar, and you aren’t sure which one to
+    use.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您在文档中打开打印机对话框时，有几台打印机可供选择，其中一些看起来相似，您不确定应该使用哪一个。
+- en: Solution
+  id: totrans-71
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: When you install a printer, enter a descriptive name in the Name field ([Figure 15-8](#fig-printscan-18)).
+    You have to do this at installation because you cannot change the name after installation.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装打印机时，在名称字段中输入一个描述性名称（[图 15-8](#fig-printscan-18)）。您必须在安装时执行此操作，因为安装后无法更改名称。
+- en: '![Use the printer name to identify your printers.](Images/lcb2_1508.png)'
+  id: totrans-73
+  prefs: []
+  type: TYPE_IMG
+  zh: '![使用打印机名称识别您的打印机。](Images/lcb2_1508.png)'
+- en: Figure 15-8\. Use the printer name to identify your printers
+  id: totrans-74
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-8\. 使用打印机名称识别您的打印机
+- en: Discussion
+  id: totrans-75
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: When you first install a printer using the CUPS web control panel, there are
+    Description and Location fields that you can use, and these show up in the CUPS
+    web control panel. But many apps that you print from do not read these fields
+    and only read the Name field. Some exceptions are the Evolution mail client and
+    the Firefox and Chromium web browsers, which display the name, location, and status.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您首次使用CUPS Web控制面板安装打印机时，有描述和位置字段可供使用，并且这些字段显示在CUPS Web控制面板中。但许多打印应用程序不读取这些字段，只读取名称字段。一些例外包括Evolution邮件客户端以及Firefox和Chromium网络浏览器，它们会显示名称、位置和状态。
+- en: See Also
+  id: totrans-77
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-78
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS文档](https://oreil.ly/OlCzV)'
+- en: 15.4 Installing a Network Printer
+  id: totrans-79
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.4 安装网络打印机
+- en: Problem
+  id: totrans-80
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: There is a shared network printer on your network, and you want to install it
+    on your computer.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您的网络上有一个共享网络打印机，并且您想在您的计算机上安装它。
+- en: Solution
+  id: totrans-82
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The procedure is the same as installing a locally attached USB printer ([Recipe
+    15.2](#rec-install-localprinter)), except you select a discovered network printer.
+    The printer must be powered on and on the same network segment as your computer.
+    You will see it listed under Discovered Network Printers ([Figure 15-9](#fig-printscan-19)).
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此过程与安装本地连接的USB打印机相同（[配方 15.2](#rec-install-localprinter)），只是您选择了发现的网络打印机。打印机必须开启并且与您的计算机处于同一网络段下。您会在Discovered
+    Network Printers下看到它列出（[图 15-9](#fig-printscan-19)）。
+- en: '![Installing a shared network printer.](Images/lcb2_1509.png)'
+  id: totrans-84
+  prefs: []
+  type: TYPE_IMG
+  zh: '![安装共享网络打印机。](Images/lcb2_1509.png)'
+- en: Figure 15-9\. Installing a shared network printer
+  id: totrans-85
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-9. 安装共享网络打印机
+- en: You need TCP port 631 open in the firewalls on all clients.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要在所有客户端的防火墙中打开TCP端口631。
+- en: Discussion
+  id: totrans-87
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: What if CUPS does not discover your printer? See [Recipe 15.11](#rec-printer-troubleshooting)
+    for some troubleshooting help. If CUPS does not see your printer, you cannot install
+    it.
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果CUPS无法发现您的打印机怎么办？请参阅[配方 15.11](#rec-printer-troubleshooting)获取一些故障排除帮助。如果CUPS无法看到您的打印机，则无法安装它。
+- en: See Also
+  id: totrans-89
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS文档](https://oreil.ly/OlCzV)'
+- en: 15.5 Using Driverless Printing
+  id: totrans-91
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.5 使用无驱动打印
+- en: Problem
+  id: totrans-92
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your printer is not supported in CUPS, and you want to try the driverless printing
+    option. Or, you want to connect your Android or iOS devices to your printer.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的打印机在CUPS中不受支持，您想尝试无驱动打印选项。或者，您想将Android或iOS设备连接到打印机。
+- en: Solution
+  id: totrans-94
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: You may have already seen driverless options in the CUPS printer driver selector.
+    The following example is for my Brother MFC-J5945DW, which does not have native
+    CUPS support.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能已经在CUPS打印机驱动程序选择器中看到了无驱动选项。以下示例适用于我的Brother MFC-J5945DW，它没有本机CUPS支持。
+- en: Go to Administration → Add Printer in the CUPS web control panel. CUPS sees
+    my Brother machine in Discovered Network Printers ([Figure 15-10](#fig-printscan-9)).
+    There is a *driverless* option, and that is the correct one to choose.
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在CUPS Web控制面板中，转到管理 → 添加打印机。CUPS在发现的网络打印机中看到我的Brother设备（[图 15-10](#fig-printscan-9)）。有一个*driverless*选项，那是正确的选择。
+- en: '![CUPS sees my unsupported network printer](Images/lcb2_1510.png)'
+  id: totrans-97
+  prefs: []
+  type: TYPE_IMG
+  zh: '![CUPS看到我的不受支持的网络打印机](Images/lcb2_1510.png)'
+- en: Figure 15-10\. CUPS sees my unsupported network printer
+  id: totrans-98
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-10. CUPS看到我的不受支持的网络打印机
+- en: Continue the installation, and select the correct driver, which in [Figure 15-11](#fig-printscan-20)
+    is the “Brother MFC-J5945DW, driverless, cups-filters 1.25.0 (en).”
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 继续安装，并选择正确的驱动程序，在[图 15-11](#fig-printscan-20)中是“Brother MFC-J5945DW, driverless,
+    cups-filters 1.25.0 (en)”。
+- en: Print a test page, and if it looks right, the installation is completed.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 打印测试页，如果显示正确，安装就完成了。
+- en: '![Select the driverless printer driver](Images/lcb2_1511.png)'
+  id: totrans-101
+  prefs: []
+  type: TYPE_IMG
+  zh: '![选择无驱动打印机驱动程序](Images/lcb2_1511.png)'
+- en: Figure 15-11\. Select the driverless printer driver
+  id: totrans-102
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-11. 选择无驱动打印机驱动程序
+- en: Discussion
+  id: totrans-103
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Strictly speaking, this isn’t driverless, because CUPS creates PPD files in
+    */etc/cups/ppd* for your “driverless” printer. However, you don’t have to maintain
+    directories full of OpenPrinting.org and Gutenprint PPDs.
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 严格来说，这并不是无驱动，因为CUPS会为您的“无驱动”打印机在*/etc/cups/ppd*中创建PPD文件。然而，您无需维护充满OpenPrinting.org和Gutenprint
+    PPD的目录。
+- en: 'Your printer must support driverless printing, which means it must support
+    the Mopria, AirPrint, IPP Everywhere, or WiFi Direct Print standard. These are
+    all similar: the printer advertises itself, its network address, and basic functionality
+    via the Avahi daemon. Avahi provides service discovery on your local network,
+    using the mDNS/DNS-SD protocol suite. (Apple calls this service Bonjour and Zeroconf.)'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的打印机必须支持无驱动打印，这意味着它必须支持 Mopria、AirPrint、IPP Everywhere 或 WiFi Direct Print
+    标准。这些标准都类似：打印机通过 Avahi 守护进程广播自己、其网络地址和基本功能。Avahi 在你的本地网络上提供服务发现，使用 mDNS/DNS-SD
+    协议套件。（苹果称此服务为 Bonjour 和 Zeroconf。）
+- en: 'Driverless printing in CUPS works great for Android and iOS devices. You only
+    need to install a printer app. If your printer is driverless enabled, and especially
+    if it is Mopria certified, then your mobile devices will have no trouble finding
+    it. Mopria certification means your printer supports wireless printing sent from
+    mobile devices. If your printer documentation does not tell you if it is Mopria
+    certified, run the following command, which shows that the printer is Mopria certified:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CUPS 中的无驱动打印适用于 Android 和 iOS 设备。你只需要安装一个打印机应用程序。如果你的打印机启用了无驱动功能，特别是如果它是 Mopria
+    认证的，那么你的移动设备将可以轻松找到它。Mopria 认证意味着你的打印机支持从移动设备发送的无线打印。如果你的打印机文档没有告诉你它是否是 Mopria
+    认证的，运行以下命令来检查：
+- en: '[PRE0]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: See Also
+  id: totrans-108
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Debian Wiki, Driverless Printing](https://oreil.ly/d2Qw8)'
+  id: totrans-109
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Debian Wiki，无驱动打印](https://oreil.ly/d2Qw8)'
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-110
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS 文档](https://oreil.ly/OlCzV)'
+- en: 15.6 Sharing Nonnetworked Printers
+  id: totrans-111
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.6 共享非网络打印机
+- en: Problem
+  id: totrans-112
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to share a printer that does not have built-in networking.
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要共享一个没有内置网络连接的打印机。
+- en: Solution
+  id: totrans-114
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: CUPS shares printers that do not have networking, but are connected to a PC
+    on your network. First, you must have your name services working so that all your
+    LAN hosts can ping each other.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CUPS 共享那些没有网络连接但连接到网络上的 PC 的打印机。首先，你必须使你的名称服务正常工作，以便你的 LAN 主机可以互相 ping 到彼此。
+- en: Make sure that printer sharing is enabled on the Administration screen by checking
+    “Share printers connected to this system.” Then enable sharing on the printer
+    you want to share ([Figure 15-12](#fig-printscan-23)).
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确保在 Administration 屏幕上通过“Share printers connected to this system”选项启用打印机共享。然后在你想要共享的打印机上启用共享（[图
+    15-12](#fig-printscan-23)）。
+- en: '![Enable printer sharing](Images/lcb2_1512.png)'
+  id: totrans-117
+  prefs: []
+  type: TYPE_IMG
+  zh: '![启用打印机共享](Images/lcb2_1512.png)'
+- en: Figure 15-12\. Enable printer sharing
+  id: totrans-118
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-12\. 启用打印机共享
+- en: CUPS will advertise the printer to your network. Any Linux client on your network
+    who wants to use this printer must install it the same way as installing a network
+    or locally attached printer; start at Administration → Add Printer, then go through
+    the normal installation process.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CUPS 将会在你的网络上广播打印机。任何网络上的 Linux 客户端想要使用这台打印机，都必须像安装网络或本地连接的打印机一样进行安装；从 Administration
+    → Add Printer 开始，然后按照正常的安装过程进行操作。
+- en: You may also share with Windows and macOS clients. macOS has native support
+    for discovery via DNS-SD/mDNS and IPP. DNS-SD/mDNS is provided by Avahi on Linux
+    and is called Bonjour on the Macintosh. Use the Macintosh control panel to find
+    and install shared CUPS printers.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你也可以与 Windows 和 macOS 客户端共享。macOS 通过 DNS-SD/mDNS 和 IPP 本地支持发现。Linux 上由 Avahi
+    提供 DNS-SD/mDNS，Macintosh 称为 Bonjour。使用 Macintosh 控制面板找到并安装共享的 CUPS 打印机。
+- en: Windows 10 natively supports DNS-SD/mDNS. Older Windows releases support sharing
+    via the Internet Printing Protocol (IPP). Use the Windows printer control panel
+    to find and install shared CUPS printers.
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Windows 10 本地支持 DNS-SD/mDNS。旧版本的 Windows 支持通过 Internet 打印协议（IPP）进行共享。使用 Windows
+    打印机控制面板找到并安装共享的 CUPS 打印机。
+- en: Discussion
+  id: totrans-122
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: In olden times, before network-enabled printers were common and inexpensive,
+    admins used dedicated printer servers. These were old PCs, old laptops, small
+    single-board computers, or commercial printer server devices. You can still buy
+    small printer server gadgets, and they cost a lot less than in the old days.
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在过去，网络打印机尚不普及且价格昂贵之前，管理员使用专用的打印机服务器。这些可以是旧 PC、旧笔记本电脑、小型单板计算机或商用打印机服务器设备。现在你仍然可以购买小型打印机服务器设备，而且价格比过去便宜得多。
+- en: Nowadays most printers have networking built in and are simpler to manage.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在大多数打印机都内置了网络功能，管理起来更简单。
+- en: See Also
+  id: totrans-125
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-126
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS 文档](https://oreil.ly/OlCzV)'
+- en: 15.7 Correcting the “Forbidden” Error Message
+  id: totrans-127
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.7 修正“Forbidden”错误信息
+- en: Problem
+  id: totrans-128
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: 'When you try to perform any administrative task in the CUPS web control panel,
+    for example, adding a new printer, your login fails and there is a “Add Printer
+    Error Unable to add printer: Forbidden” message.'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您尝试在 CUPS Web 控制面板中执行任何管理任务时（例如添加新打印机），您的登录失败并显示“添加打印机错误 无法添加打印机：Forbidden”消息。
+- en: Solution
+  id: totrans-130
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'On some Linux distributions, such as openSUSE, the default configuration allows
+    only the root user to do CUPS administration tasks. Edit */etc/cups/cups-files.conf*
+    to allow nonroot users to do CUPS administration tasks. Look for these lines:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在一些 Linux 发行版（如 openSUSE）中，默认配置只允许 root 用户执行 CUPS 管理任务。编辑 */etc/cups/cups-files.conf*
+    以允许非 root 用户执行 CUPS 管理任务。查找以下行：
+- en: '[PRE1]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'This is why only the root login works. You can add your own private user group,
+    like our example user Duchess, whose private group is *duchess*:'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这就是为什么只有 root 登录有效的原因。您可以添加您自己的私有用户组，例如我们的示例用户 Duchess，其私有组是 *duchess*：
+- en: '[PRE2]'
+  id: totrans-134
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'After saving changes to */etc/cups/cups-files.conf*, restart the CUPS service:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在保存对 */etc/cups/cups-files.conf* 的更改后，重新启动 CUPS 服务：
+- en: '[PRE3]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Now Duchess can do CUPS administration tasks.
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在 Duchess 可以执行 CUPS 管理任务。
+- en: 'Another approach is to use a system group created for this purpose. On Ubuntu
+    Linux distributions, this is the *lpadmin* group, and Fedora uses the *sys* and
+    *wheel* groups. You may create your own group for CUPS administration, like the
+    following example that creates a *cupsadmin* group, and adds the user Mad Max
+    to this group:'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种方法是使用专门为此目的创建的系统组。在 Ubuntu Linux 发行版中，这是 *lpadmin* 组，而 Fedora 使用 *sys* 和
+    *wheel* 组。您可以创建自己的用于 CUPS 管理的组，例如创建 *cupsadmin* 组，并将用户 Mad Max 添加到该组中：
+- en: '[PRE4]'
+  id: totrans-139
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Mad Max must log out, then log back in to activate the new group membership.
+    Add the *cupsadmin* group to *SystemGroup* in */etc/cups/cups-files.conf*:'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Mad Max 必须注销，然后重新登录以激活新的组成员资格。将 *cupsadmin* 组添加到 */etc/cups/cups-files.conf*
+    中的 *SystemGroup*：
+- en: '[PRE5]'
+  id: totrans-141
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Restart CUPS, and Mad Max can go to work.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动 CUPS，Mad Max 就可以开始工作了。
+- en: Discussion
+  id: totrans-143
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'There should also be a section like this in */etc/cups/cups-files.conf*:'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/cups/cups-files.conf* 中应该还有这样一个部分：'
+- en: '[PRE6]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: None of the groups listed for *SystemGroup* can match *Group*. If you try to
+    use *lp*, as in the preceding example, CUPS will not start, and you will see error
+    messages in */var/log/cups/error_log* or the syslog, depending how yours is configured
+    in */etc/cups/cups-files.conf*.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*SystemGroup* 中列出的任何组都无法与 *Group* 匹配。如果尝试使用前面的示例中的 *lp*，CUPS 将无法启动，并且您会在 */var/log/cups/error_log*
+    或系统日志中看到错误消息，具体取决于 */etc/cups/cups-files.conf* 中的配置方式。'
+- en: 'If your Linux uses SysV init instead of systemctl, restart it with this command:'
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的 Linux 使用 SysV init 而不是 systemctl，请使用以下命令重新启动：
+- en: '[PRE7]'
+  id: totrans-148
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: See Also
+  id: totrans-149
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-150
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS 文档](https://oreil.ly/OlCzV)'
+- en: '[Chapter 4](ch04.xhtml#cha-systemd)'
+  id: totrans-151
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 4 章](ch04.xhtml#cha-systemd)'
+- en: 15.8 Installing Printer Drivers
+  id: totrans-152
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.8 安装打印机驱动程序
+- en: Problem
+  id: totrans-153
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to know if installing CUPS also installs a complete set of printer
+    drivers, or if there are more that you might want that are not included with CUPS.
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要知道安装 CUPS 是否也安装了完整的打印机驱动程序集，或者是否还有更多您可能想要但未包含在 CUPS 中的驱动程序。
+- en: Solution
+  id: totrans-155
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Most Linuxes install a subset of all available printing options. Every Linux
+    distribution varies in which printer drivers are available, which ones are included
+    in a default installation, and which specific names are used for packages, especially
+    between Ubuntu and everyone else.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Linux 发行版仅安装了所有可用打印选项的子集。每个 Linux 发行版在可用的打印机驱动程序、默认安装的驱动程序以及包名称的具体使用上都有所不同，特别是在
+    Ubuntu 与其他发行版之间。
+- en: 'The following list comprises a basic set of CUPS packages and printer drivers:'
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的列表包括一组基本的 CUPS 软件包和打印机驱动程序：
+- en: '*cups* (server and client)'
+  id: totrans-158
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*cups*（服务器和客户端）'
+- en: '*cups-filters* (OpenPrinting CUPS filters and backends)'
+  id: totrans-159
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*cups-filters*（OpenPrinting CUPS 过滤器和后端）'
+- en: '*gutenprint* (Gutenprint printer drivers)'
+  id: totrans-160
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*gutenprint*（Gutenprint 打印机驱动程序）'
+- en: '*foomatic* (Foomatic printer drivers)'
+  id: totrans-161
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*foomatic*（Foomatic 打印机驱动程序）'
+- en: 'OpenPrinting.org PPDs; for example, OpenSUSE provides:'
+  id: totrans-162
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: OpenPrinting.org PPDs；例如，OpenSUSE 提供：
+- en: '*OpenPrintingPPDs*'
+  id: totrans-163
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*OpenPrintingPPDs*'
+- en: '*OpenPrintingPPDs-ghostscript* (interpreter of printer drivers written in the
+    PostScript language)'
+  id: totrans-164
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*OpenPrintingPPDs-ghostscript*（用 PostScript 语言编写的打印机驱动程序解释器）'
+- en: '*OpenPrintingPPDs-hpijs* (HP printers)'
+  id: totrans-165
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*OpenPrintingPPDs-hpijs*（HP 打印机）'
+- en: '*OpenPrintingPPDs-postscript*'
+  id: totrans-166
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*OpenPrintingPPDs-postscript*'
+- en: '*cups-client* (command-line utilities for setting up and managing printers)'
+  id: totrans-167
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*cups-client*（用于设置和管理打印机的命令行实用程序）'
+- en: OpenPrinting.org includes Foomatic. Fedora and Ubuntu ship *foomatic* packages,
+    while OpenSUSE includes *OpenPrinting* packages. The names change, but the functionality
+    is the same.
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenPrinting.org 包括 Foomatic。Fedora 和 Ubuntu 发行 *foomatic* 软件包，而 OpenSUSE 包括
+    *OpenPrinting* 软件包。名称可能会变，但功能是相同的。
+- en: 'These packages may provide everything you need. The following are additional
+    printer packages you might find useful:'
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些软件包可能提供您所需的一切。以下是您可能会发现有用的其他打印机软件包：
+- en: '*gimp-gutenprint* (provides a more featureful printer dialog for GIMP, the
+    GNU Image Manipulation Program)'
+  id: totrans-170
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*gimp-gutenprint*（为 GIMP 提供更丰富的打印机对话框，GNU 图像处理程序）'
+- en: '*bluez-cups* (connect Bluetooth printers)'
+  id: totrans-171
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*bluez-cups*（连接蓝牙打印机）'
+- en: '*cups-airprint* (share printers with iOS devices)'
+  id: totrans-172
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*cups-airprint*（与 iOS 设备共享打印机）'
+- en: '*ptouch-driver* (Brother P-touch label printers)'
+  id: totrans-173
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*ptouch-driver*（Brother P-touch 标签打印机）'
+- en: '*rasterview* (view Apple raster images such as GIF, JPEG, and PNG, see [MSweet.org/rasterview](https://oreil.ly/zZZAp)'
+  id: totrans-174
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*rasterview*（查看 Apple 光栅图像，如 GIF、JPEG 和 PNG，请参见 [MSweet.org/rasterview](https://oreil.ly/zZZAp)）'
+- en: '*c2esp* (some Kodak all-in-one printers)'
+  id: totrans-175
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*c2esp*（某些柯达多功能打印机）'
+- en: 'Ubuntu packages the largest assortment of printer drivers. Many, but not all,
+    of the package names start with *printer-driver*:'
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ubuntu 打包了最大的打印机驱动程序集合。许多但不是所有软件包名称以 *printer-driver* 开头：
+- en: '*openprinting-ppds* (OpenPrinting printer support, PostScript PPD files)'
+  id: totrans-177
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*openprinting-ppds*（OpenPrinting 打印机支持，PostScript PPD 文件）'
+- en: '*printer-driver-all* (printer drivers metapackage)'
+  id: totrans-178
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-all*（打印机驱动程序元包）'
+- en: '*printer-driver-brlaser* (some Brother laser printers)'
+  id: totrans-179
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-brlaser*（某些 Brother 激光打印机）'
+- en: '*printer-driver-c2050* (Lexmark 2050 Color Jetprinter)'
+  id: totrans-180
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-c2050*（Lexmark 2050 Color Jetprinter）'
+- en: '*printer-driver-foo2zjs* (ZjStream-based printers)'
+  id: totrans-181
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-foo2zjs*（基于ZjStream的打印机）'
+- en: '*printer-driver-c2esp* (Kodak ESP AiO color inkjet series)'
+  id: totrans-182
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-c2esp*（柯达 ESP AiO 彩色喷墨系列）'
+- en: '*printer-driver-cjet* (Canon LBP laser printers)'
+  id: totrans-183
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-cjet*（佳能 LBP 激光打印机）'
+- en: '*printer-driver-cups-pdf* (PDF writing via CUPS)'
+  id: totrans-184
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-cups-pdf*（通过 CUPS 编写 PDF）'
+- en: '*printer-driver-dymo* (DYMO label printers)'
+  id: totrans-185
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-dymo*（DYMO 标签打印机）'
+- en: '*printer-driver-escpr* (Epson Inkjets that use ESC/P-R)'
+  id: totrans-186
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-escpr*（使用ESC/P-R的爱普生喷墨打印机）'
+- en: '*printer-driver-foo2zjs* (ZjStream-based printers)'
+  id: totrans-187
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-foo2zjs*（基于 ZjStream 的打印机）'
+- en: '*printer-driver-fujixerox* (Fuji Xerox printers)'
+  id: totrans-188
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-fujixerox*（富士施乐打印机）'
+- en: '*printer-driver-gutenprint* (printer drivers for CUPS)'
+  id: totrans-189
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-gutenprint*（CUPS 打印机驱动程序）'
+- en: '*printer-driver-hpcups* (HP Linux Printing and Imaging, CUPS Raster driver
+    (hpcups))'
+  id: totrans-190
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-hpcups*（HP Linux 打印与影像，CUPS 栅格驱动程序（hpcups））'
+- en: '*printer-driver-hpijs* (HP Linux Printing and Imaging, printer driver (hpijs))'
+  id: totrans-191
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-hpijs*（HP Linux 打印与影像，打印机驱动程序（hpijs））'
+- en: '*printer-driver-indexbraille* (CUPS printing to Index Braille printers)'
+  id: totrans-192
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-indexbraille*（用于 Index Braille 打印机的 CUPS 打印）'
+- en: '*printer-driver-m2300w* (Minolta magicolor 2300W/2400W color laser printers)'
+  id: totrans-193
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-m2300w*（Minolta magicolor 2300W/2400W 彩色激光打印机）'
+- en: '*printer-driver-min12xxw* (KonicaMinolta PagePro 1[234]xxW)'
+  id: totrans-194
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-min12xxw*（KonicaMinolta PagePro 1[234]xxW）'
+- en: '*printer-driver-oki* (OKI Data printers)'
+  id: totrans-195
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-oki*（OKI Data 打印机）'
+- en: '*printer-driver-pnm2ppa* (HP-GDI printers)'
+  id: totrans-196
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-pnm2ppa*（HP-GDI 打印机）'
+- en: '*printer-driver-postscript-hp* (HP Printers PostScript Descriptions)'
+  id: totrans-197
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-postscript-hp*（HP 打印机 PostScript 描述）'
+- en: '*printer-driver-ptouch* (printer driver for Brother P-touch label printers)'
+  id: totrans-198
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-ptouch*（Brother P-touch 标签打印机驱动程序）'
+- en: '*printer-driver-pxljr* (HP Color LaserJet 35xx/36xx)'
+  id: totrans-199
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-pxljr*（HP Color LaserJet 35xx/36xx）'
+- en: '*printer-driver-sag-gdi* (Ricoh Aficio SP 1000s/SP 1100s)'
+  id: totrans-200
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-sag-gdi*（理光 Aficio SP 1000s/SP 1100s）'
+- en: '*printer-driver-splix* (Samsung and Xerox SPL2 and SPLc la)'
+  id: totrans-201
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*printer-driver-splix*（三星和施乐 SPL2 和 SPLc）'
+- en: Discussion
+  id: totrans-202
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you don’t see your printer listed in the driver selector in the CUPS web
+    interface, try searching for the brand name of your printer in your package manager.
+    This may all seem rather messy, but setting up printers is untidy on all computing
+    platforms (not just on Linux).
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您在 CUPS 网页界面的驱动程序选择器中找不到您的打印机，请尝试在软件包管理器中搜索您的打印机品牌名称。这可能看起来有些混乱，但在所有计算平台上（不仅仅是在
+    Linux 上），设置打印机都是一团糟。
+- en: See Also
+  id: totrans-204
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-205
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS 文档](https://oreil.ly/OlCzV)'
+- en: '[Ghostscript documentation](https://oreil.ly/CHZpP)'
+  id: totrans-206
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Ghostscript 文档](https://oreil.ly/CHZpP)'
+- en: '[OpenPrinting](https://oreil.ly/jpYIW)'
+  id: totrans-207
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenPrinting](https://oreil.ly/jpYIW)'
+- en: '[The Printer Working Group](https://oreil.ly/Q5BUh)'
+  id: totrans-208
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[打印机工作组](https://oreil.ly/Q5BUh)'
+- en: 15.9 Modifying an Installed Printer
+  id: totrans-209
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.9 修改已安装的打印机
+- en: Problem
+  id: totrans-210
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to change the configuration of a printer that is already installed.
+    For example, you want to share it.
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要更改已安装的打印机的配置。例如，您想要共享它。
+- en: Solution
+  id: totrans-212
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Open the printer in the CUPS web control panel, then click Administration →
+    Modify Printer. This is similar to installing a new printer, except it displays
+    the printer’s current settings. [Figure 15-13](#fig-printscan-21) enables sharing
+    the printer. (Note that sharing must first be enabled on the Administration →
+    Advanced page.)
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 CUPS Web 控制面板中打开打印机，然后点击管理 → 修改打印机。这与安装新打印机类似，不同之处在于它显示当前打印机的设置。[图 15-13](#fig-printscan-21)
+    可以启用打印机共享。（请注意，首先必须在管理 → 高级页面上启用共享。）
+- en: '![Modifying an installed printer](Images/lcb2_1513.png)'
+  id: totrans-214
+  prefs: []
+  type: TYPE_IMG
+  zh: '![修改已安装的打印机](Images/lcb2_1513.png)'
+- en: Figure 15-13\. Modifying an installed printer
+  id: totrans-215
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-13\. 修改已安装的打印机
+- en: Discussion
+  id: totrans-216
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You can change everything except the printer name.
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了打印机名称外，您可以更改一切。
+- en: See Also
+  id: totrans-218
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-219
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS 文档](https://oreil.ly/OlCzV)'
+- en: 15.10 Saving Documents by Printing to a PDF File
+  id: totrans-220
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.10 通过打印保存文档为 PDF 文件
+- en: Problem
+  id: totrans-221
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to save a web page, or any document, to a PDF file instead of sending
+    it to a printer.
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想将网页或任何文档保存为 PDF 文件，而不是发送到打印机。
+- en: Solution
+  id: totrans-223
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Look at the File → Print dialog in any application, and you will see an option
+    to print to a PDF file ([Figure 15-14](#fig-printofile)).
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看任何应用程序中的文件 → 打印对话框，您将看到打印到 PDF 文件的选项（[图 15-14](#fig-printofile)）。
+- en: '![Printing to a PDF file.](Images/lcb2_1514.png)'
+  id: totrans-225
+  prefs: []
+  type: TYPE_IMG
+  zh: '![打印到 PDF 文件。](Images/lcb2_1514.png)'
+- en: Figure 15-14\. Printing to a PDF file
+  id: totrans-226
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 15-14\. 打印到 PDF 文件
+- en: You have all the usual options, such as filename and location, margins, print
+    quality, color or monochrome, and page orientation. The printer dialogs look different
+    in different apps; for example, the Firefox web browser printer dialog includes
+    a document preview. In other apps the preview is usually a separate button.
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以更改常规选项，如文件名和位置、页边距、打印质量、彩色或单色以及页面方向。打印对话框在不同的应用程序中看起来不同；例如，Firefox Web 浏览器的打印对话框包括文档预览。在其他应用程序中，预览通常是单独的按钮。
+- en: Discussion
+  id: totrans-228
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Print to file is great for saving web confirmation forms and receipts, and creating
+    PDFs from any type of documents.
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 打印到文件对于保存网页确认表单和收据，并从任何类型的文档创建 PDF 非常有用。
+- en: See Also
+  id: totrans-230
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-231
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS 文档](https://oreil.ly/OlCzV)'
+- en: 15.11 Troubleshooting
+  id: totrans-232
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 15.11 故障排除
+- en: Problem
+  id: totrans-233
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Printing doesn’t work! How do you fix it?
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 打印不工作！如何解决？
+- en: Solution
+  id: totrans-235
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'These are the most common issues with printers on Linux:'
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些是 Linux 上打印机最常见的问题：
+- en: For shared printers, make sure that your networking is set up correctly and
+    your firewall allows TCP port 631\. If you have more than one network, verify
+    that the printer is on the same network as your computer.
+  id: totrans-237
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 对于共享打印机，请确保正确设置了网络并且防火墙允许 TCP 端口 631\. 如果您有多个网络，请验证打印机是否与计算机处于同一网络中。
+- en: For USB-connected printers, try a different USB port or a different cable.
+  id: totrans-238
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 对于连接 USB 的打印机，请尝试更换不同的 USB 端口或使用不同的电缆。
+- en: Verify you are using the correct printer drivers, or try driverless.
+  id: totrans-239
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 确保您正在使用正确的打印机驱动程序，或尝试无驱动。
+- en: 'The CUPS daemon is managed by systemd. Try restarting the daemon:'
+  id: totrans-240
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: CUPS 守护进程由 systemd 管理。尝试重新启动守护进程：
+- en: '[PRE8]'
+  id: totrans-241
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: Or reboot, and also power-cycle your printer.
+  id: totrans-242
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 或重新启动，并同时对打印机进行电源循环。
+- en: Check your log files on the CUPS web administration page; you can view both
+    the error log and the access log. Turn the logging level up to Debug to get the
+    most information. (Click Edit Configuration File, then set *LogLevel debug*.)
+  id: totrans-243
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在 CUPS Web 管理页面上检查日志文件；您可以查看错误日志和访问日志。将日志级别提升至 Debug 以获取更多信息。（点击编辑配置文件，然后设置
+    *LogLevel debug*。）
+- en: Discussion
+  id: totrans-244
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The most important factor is using printers with good Linux support. This prevents
+    most problems.
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最重要的因素是使用支持良好的 Linux 打印机。这可以避免大多数问题。
+- en: See Also
+  id: totrans-246
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[CUPS documentation](https://oreil.ly/OlCzV)'
+  id: totrans-247
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[CUPS 文档](https://oreil.ly/OlCzV)'

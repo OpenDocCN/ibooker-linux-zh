@@ -1,0 +1,542 @@
+- en: Chapter 10\. Scripting and Automation
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第10章 脚本编写与自动化
+- en: Sysadmins automate what they can. But you can’t automate everything. Automation
+    is a good thing but has its limitations. In this chapter, I discuss both the pros
+    and cons of automation. Some tasks are difficult to automate because they involve
+    too many variables. And automation does come with some security risks because
+    automating tasks that require elevated privileges creates security holes that
+    can lead to system compromise. Other obstacles to automation include timing and
+    time drift, system failure, script error conditions, and human interactions.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统管理员尽力自动化他们所能自动化的任务。但并非所有事情都可以自动化。自动化是好事，但也有其局限性。在本章中，我讨论了自动化的利与弊。有些任务难以自动化，因为涉及太多变量。自动化也带来一些安全风险，因为自动化需要提升特权的任务会产生安全漏洞，这可能导致系统被入侵。其他妨碍自动化的因素包括时间同步和时间漂移、系统故障、脚本错误条件和人类交互。
+- en: Creating scripts and automating tasks is challenging and fun. Watching a series
+    of scripts and schedules work as planned to mimic human keystrokes, decisions,
+    and activities is rewarding. Every sysadmin must know how to create basic shell
+    scripts and should automate every possible nonprivileged, repetitive task. This
+    chapter covers the concepts of scripting and automation but not the low-level
+    mechanics of scripting (loops, file I/O, etc.), which are well-documented on the
+    web.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建脚本并自动化任务既具有挑战性又有趣。观察一系列脚本和计划按计划运行，模仿人类的击键、决策和活动，是令人满足的。每个系统管理员都必须掌握如何创建基本的Shell脚本，并应自动化所有可能的非特权、重复性任务。本章介绍了脚本编写与自动化的概念，但不涉及脚本的低级机制（循环、文件I/O等），这些内容在网络上有详细的文档。
+- en: 'Answering the Question: Why Automate?'
+  id: totrans-3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 回答这个问题：为什么要自动化？
+- en: 'I’ve had a few sysadmins ask me why they should automate anything. The answer
+    is simple: so you can focus on higher-level tasks while your computer systems
+    handle the mundane, daily jobs that you must perform but that a CPU and some memory
+    can address without making mistakes. Do you want your day filled with the drudgery
+    of manually creating backups, copying backups to an archive location, checking
+    capacity on every system, installing updates, checking log files for errors, and
+    checking uptimes, or would you rather focus on system security, testing new software,
+    and sharpening your scripting skills?'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我曾有几位系统管理员问我，为什么要自动化任何事情。答案很简单：这样你就可以专注于更高级别的任务，而你的计算机系统可以处理日常繁琐的工作，这些工作你必须完成，但CPU和一些内存可以在没有错误的情况下处理。你想让你的一天充满手动创建备份、将备份复制到存档位置、检查每个系统的容量、安装更新、检查日志文件是否有错误以及检查运行时间，还是更愿意专注于系统安全、测试新软件和提高脚本技能？
+- en: You have only a limited number of hours to perform the work that must be done.
+    And you probably have an almost inexhaustible supply of computing power at your
+    fingertips. Use it. The tasks that require hours of your time can be handed off
+    to systems that complete those repetitive tasks flawlessly, without getting tired
+    or frustrated, and with almost no overhead. And those are the reasons to automate
+    every task that you possibly can.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你只有有限的时间来完成必须做的工作。而你手边可能有几乎不计其数的计算能力。利用它吧。那些需要你花费几个小时的任务可以交给系统，这些系统可以无误地完成这些重复性任务，而且不会感到疲倦或沮丧，并且几乎没有额外开销。这就是你应该自动化每一个可能的任务的原因。
+- en: Automating Yourself Out of a Job
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 自动化将你自动化出职业
+- en: 'Spoiler alert: you’re never going to automate yourself out of a job, but you
+    should try. Seriously, you can automate every repetitive, mundane task you face,
+    but you’ll never succeed in losing your job because you’ve automated it. Too many
+    variables and things can go wrong with the hardware, software, networks, and,
+    most of all, users to end your employment because you’ve successfully automated
+    too much.'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 剧透警告：你永远不可能通过自动化失去工作，但你应该尝试。说真的，你可以自动化你面对的每一个重复乏味的任务，但你永远不会因为自动化而失业。硬件、软件、网络，尤其是用户，有太多变量和可能出错的地方，无法因为你成功自动化了太多而终结你的就业。
+- en: 'Here are answers to five common questions about automation that I’m confident
+    will clear things up for you:'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面是我相信能为你解惑的五个关于自动化的常见问题的答案：
+- en: Which tasks should I automate?
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 应该自动化哪些任务？
+- en: Anything that can be scripted reliably, even if it requires user input.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任何可以可靠地脚本化的任务，即使需要用户输入。
+- en: Are there tasks that cannot be automated?
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有哪些任务是无法自动化的？
+- en: Yes, plenty of them. Most things requiring a complex, multistep decision can’t
+    be automated (although some can). You can use various techniques to automate them,
+    including `expect`, shell scripts, Perl, PHP, and other scripting and compiled
+    languages.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是的，有很多这样的任务。大多数需要复杂、多步决策的事情不能被自动化（尽管有些可以）。你可以使用各种技术来自动化它们，包括`expect`、shell脚本、Perl、PHP和其他脚本语言和编译语言。
+- en: Are there tasks that should never be automated?
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有哪些任务是不应该自动化的？
+- en: Yes. You should not automate tasks such as those that require you to store an
+    unencrypted password in a text file. There are multiple methods of automating
+    tasks where you can use encrypted passwords, key files, limited `sudo`, or nonprivileged
+    accounts.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是的。你不应该自动化那些需要你在文本文件中存储未加密密码的任务。有多种方法可以自动化任务，你可以使用加密密码、密钥文件、限制的`sudo`或非特权账户。
+- en: Which task should I automate first?
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我应该首先自动化哪些任务？
+- en: Backups. For example, create a backup of your */etc* directory and use secure
+    copy (SCP) to archive it onto another system.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 备份。例如，创建*/etc*目录的备份，并使用安全复制（SCP）将其归档到另一个系统上。
+- en: Should I purchase a commercial automation solution?
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我应该购买商业自动化解决方案吗？
+- en: You can, but you should begin by using your own scripts and exhausting your
+    options before spending money on something you can do just as efficiently and
+    free of charge. But certainly, purchase a commercial solution if the number of
+    hosts makes it reasonable.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以，但在花钱购买之前，应该先使用自己的脚本并耗尽你的选择。但是，如果主机数量使之合理，当然可以购买商业解决方案。
+- en: Basic automation is easy to do, it saves money and time, and it prevents mistakes
+    made by human hands.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基本的自动化很容易做到，它节省时间和金钱，避免了人为错误。
+- en: There is also a psychological aspect of automation—sysadmins who automate experience
+    less burnout than those who perform every task manually. Think about the repetitive
+    nature of making backups, transferring them to an archive location, checking backups,
+    and removing old archives. If you manage more than a handful of systems, it will
+    take a significant portion of your day (or evening) to type every command manually.
+    This kind of labor wears on a person’s psyche and causes burnout and job dissatisfaction.
+    Multiple studies show that automation does increase job satisfaction. Alex Edelstein’s
+    blog post [“89% of Your Employees Could Benefit with This One Change”](https://oreil.ly/5-iR9)
+    explains this concept further.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自动化还涉及心理因素——自动化的系统管理员比手动执行每个任务的人经历更少的倦怠感。想想备份的重复性质，将其转移到归档位置，检查备份，删除旧的归档。如果你管理的系统超过少数几个，手动输入每个命令将占据你一天（或晚上）的大部分时间。这种工作方式对人的心理影响很大，导致倦怠和工作不满意。多项研究表明，自动化确实提高了工作满意度。Alex
+    Edelstein的博客文章[“你的员工中89%可以从这一变化中受益”](https://oreil.ly/5-iR9)进一步解释了这个概念。
+- en: Creating Scripts
+  id: totrans-21
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 创建脚本
+- en: If you need a script to perform a particular task, chances are excellent that
+    you can find one with a simple online search. You don’t have to write one from
+    scratch. Adapt scripts to your needs and use them without guilt. Other system
+    administrators place their scripts online for you to use. You should, however,
+    learn the basics of scripting, such as reading from a file, writing to a file,
+    grepping, piping, redirecting, looping, and calling other scripts from within
+    a script. You don’t have to become a scripting expert but learning the basics
+    helps you find what you need and allows you to adapt what you find to your circumstances.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你需要一个脚本来执行特定的任务，那么很有可能可以通过简单的在线搜索找到一个。你不必从头开始编写一个。根据你的需求调整脚本并使用它们而无需内疚。其他系统管理员会将他们的脚本放在网上供你使用。然而，你应该学习脚本编写的基础知识，比如从文件中读取，写入文件，grep，管道，重定向，循环和在脚本内调用其他脚本。你不必成为脚本编写专家，但学习这些基础知识有助于你找到你需要的东西，并允许你根据你的情况进行调整。
+- en: Writing backup scripts is a good place to start. Backups are required, and you’ll
+    be a hero in case of a failure or human error, which could be your own. I’ve known
+    sysadmins with more than ten years of experience who have removed entire */etc*
+    directories by accident, so a good backup is essential to a happy life as a sysadmin.
+    The following sections teach you scriptwriting concepts. The most important of
+    these is outlining your script.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 编写备份脚本是一个很好的起点。备份是必需的，在故障或人为错误（可能是你自己的）时你将成为英雄。我知道一些有超过十年经验的系统管理员曾经意外删除了整个*/etc*目录，因此良好的备份对于作为系统管理员的愉快生活至关重要。以下部分将教你脚本编写的概念。其中最重要的是概述你的脚本。
+- en: Outlining Your Scripts
+  id: totrans-24
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 概述你的脚本
+- en: 'Before you write a script, outline what you want the script to do. No, you
+    don’t have to create a flowchart, but you should list the steps that you want
+    to occur during the script’s run. Here’s an example of a script that I’ll call
+    *backup_server1.sh*:'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在编写脚本之前，请先概述脚本的功能。不，你不必创建流程图，但应列出希望在脚本运行期间发生的步骤。这里有一个示例脚本，我称之为*backup_server1.sh*：
+- en: Create a `tar` file of the */etc* directory.
+  id: totrans-26
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 创建*/etc*目录的`tar`文件。
+- en: Compress the `tar` file.
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 压缩`tar`文件。
+- en: Transfer the file to server *archive1*.
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将文件传输到服务器*archive1*。
+- en: That’s simple enough. The script is a simple, top-down procedure with no decision
+    tree or branching.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这很简单。该脚本是一个简单的自上而下的过程，没有决策树或分支。
+- en: Writing a Script from an Outline
+  id: totrans-30
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 从概述编写脚本
+- en: And now that you have your script outline, you also have the documentation for
+    your script. You must document your scripts because, in six months or a year,
+    you might not remember the script’s purpose or even that you wrote it.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您有了脚本概述，也有了脚本的文档。您必须记录脚本，因为在六个月或一年后，您可能不会记得脚本的目的，甚至不记得您编写过它。
+- en: 'The contents of *backup_server1.sh* are as follows:'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*backup_server1.sh*的内容如下：'
+- en: '[PRE0]'
+  id: totrans-33
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: Save the file, give it execute permission, and it’s ready to use. The */server1/backups*
+    directory on the *archive1* system should be executable and writeable by the user
+    placing the backups into it. For better security, you should designate a backup
+    user and create backup directories with permissions restricted to that user.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 保存文件，赋予执行权限，然后就可以使用了。*archive1*系统上*/server1/backups*目录应由将备份放入其中的用户可执行和可写。为了更好的安全性，您应指定一个备份用户，并创建仅该用户具有权限的备份目录。
+- en: 'Create a Backup and Restore (`bur`) user on all systems and set up passwordless
+    SSH key files for the `bur` user. Set up `cron` jobs for backups as the `bur`
+    user on all systems:'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在所有系统上创建一个名为Backup and Restore (`bur`)的用户，并为`bur`用户设置无密码SSH密钥文件。为所有系统上的`bur`用户设置`cron`作业：
+- en: '[PRE1]'
+  id: totrans-36
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Here is the `crontab` for the `bur` user on *server1*:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是*server1*上`bur`用户的`crontab`：
+- en: '[PRE2]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: The `bur` user’s `crontab` will back up *server1*’s */etc* directory every day
+    at 2 a.m. The backups will transfer to *archive1* into the */server1/backup* directory.
+    You need to set up this scenario on every system. The backup for *archive1* should
+    be sent to a different system.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bur`用户的`crontab`将在每天凌晨2点备份*server1*的*/etc*目录。备份将传输到*archive1*中的*/server1/backup*目录。您需要在每个系统上设置这种情况。*archive1*的备份应发送到另一个系统。'
+- en: The */etc* directory isn’t the only directory you need to back up. This is just
+    an example. You might need to back up */home*, */var/www/html*, */opt*, and others
+    to restore a system to its previous state before a security incident or failure.
+    The `crontab` (scheduled task) will be explained in detail in the next section.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc*目录不是您需要备份的唯一目录。这只是一个例子。在安全事件或故障之前恢复系统可能需要备份*/home*、*/var/www/html*、*/opt*等目录。`crontab`（定时任务）将在下一节详细解释。'
+- en: Scheduling Tasks
+  id: totrans-41
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 定时任务
+- en: The `cron` utility schedules commands to run at a specific time. It helps to
+    automate repetitive tasks that must be performed at a specific time, multiple
+    times, or at inconvenient times for humans.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cron`实用程序安排命令在特定时间运行。它有助于自动执行必须在特定时间、多次或人类难以方便执行的重复任务。'
+- en: Over the years, developers have attempted to replace the `cron` utility with
+    little success. `cron` is difficult to replace because it works well and is versatile
+    enough to handle most scheduled activities. `cron` is reliable because it uses
+    the computer’s system clock to act on scheduled activities. The one flaw with
+    `cron`, if you can call it that, is that you will encounter problems if your automated
+    tasks involve multiple systems and their times drift out of sync. The solution
+    is to reference a central time server. I will cover the network time protocol
+    later in this section.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 多年来，开发人员尝试替换`cron`实用程序，但成功甚少。`cron`难以替换，因为它工作良好，并且足够灵活，可以处理大多数计划活动。`cron`可靠，因为它使用计算机的系统时钟执行计划活动。如果您的自动化任务涉及多个系统并且它们的时间偏移超出同步，则会遇到问题。解决方法是引用中央时间服务器。我将在本节后面介绍网络时间协议。
+- en: Using cron to Schedule Tasks
+  id: totrans-44
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用cron调度任务
+- en: 'The `cron` utility is available on all Linux systems, and it just works. There’s
+    no tweaking or configuration required. It’s a time-tested application built to
+    do one job: run commands at a specific time—and it does that job very well. The
+    best way to learn `cron` is by example because the syntax isn’t necessarily intuitive.'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cron`实用程序在所有Linux系统上都可用，并且它可以正常工作。无需调整或配置。它是一个经过时间考验的应用程序，专门用于在特定时间运行命令，并且它执行得非常好。学习`cron`的最佳方式是通过示例，因为其语法不一定直观。'
+- en: '`cron` has a simple “syntax” or format:'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cron`具有简单的“语法”或格式：'
+- en: '[PRE3]'
+  id: totrans-47
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'What isn’t shown here is that you can run scripts or commands multiple times
+    using only one schedule or `cron` “job.” For example, you need to run a script
+    that checks for the existence of a file every 5 minutes every day. The format
+    for that entry is as follows:'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里没有显示的是，您可以仅使用一个计划或`cron`“作业”多次运行脚本或命令。例如，您需要运行一个检查文件存在性的脚本，每天每5分钟运行一次。该条目的格式如下：
+- en: '[PRE4]'
+  id: totrans-49
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'If you want a script to run every Monday, Wednesday, and Friday at 2:00 p.m.,
+    the `cron` schedule takes the following form:'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您希望脚本在每周一、三和五下午2点运行，`cron`调度的格式如下：
+- en: '[PRE5]'
+  id: totrans-51
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'If you want your script to run at 6 a.m. on the 15th of every month:'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您希望您的脚本在每个月的15日上午6点运行：
+- en: '[PRE6]'
+  id: totrans-53
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: You have a full range of possibilities with `cron` schedules.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您在`cron`调度中有很多可能性。
+- en: Warning
+  id: totrans-55
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Do not set a schedule in `cron` for ** * * * * /path/to/script.sh* unless you
+    want your script to run every minute of every day. For most monitoring scenarios,
+    once every five minutes is sufficient to catch any process, error, or file you’re
+    trying to capture or track.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不要为** * * * * /path/to/script.sh*在`cron`中设置一个计划，除非您希望您的脚本每天每分钟运行一次。对于大多数监视场景，每五分钟运行一次足以捕获您试图捕获或跟踪的任何进程、错误或文件。
+- en: Preventing Time Drift with the Network Time Protocol
+  id: totrans-57
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用网络时间协议防止时间漂移
+- en: One of the problems with writing scripts that operate on multiple systems is
+    synchronizing system time among them. For example, imagine you have a script that
+    gathers files from *Server A* and copies them to *Server B*, and once those files
+    are copied, *Server B* checks for them and then creates a tarball and copies them
+    onto NAS for archiving. If this needs to happen multiple times per day and in
+    a timed sequence, you can see how synchronized time among server systems is essential.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 编写操作多个系统的脚本时的一个问题是同步它们之间的系统时间。例如，想象一下，您有一个从*服务器A*收集文件并将其复制到*服务器B*的脚本，一旦这些文件被复制，*服务器B*会检查它们，然后创建一个tar包并将它们复制到NAS进行归档。如果这需要每天多次发生并按时序列进行，您可以看到在服务器系统之间同步时间的重要性。
+- en: The way to keep time synced among all your systems is to reference an internet
+    time server plus a time server inside your network (in case you experience an
+    internet connectivity outage).
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 保持所有系统时间同步的方法是参考一个互联网时间服务器和网络内部的时间服务器（以防止遇到互联网连接故障）。
+- en: 'Install `ntp` or `chrony` to allow your systems to synchronize with an external
+    (internet) time server. Installing `chrony` is easy and requires no configuration
+    as a client. Here, I demonstrate how to install and configure `chrony`. It works
+    similarly on Debian distributions except that your `chrony` configuration file
+    is located in */etc/chrony/* rather than simply in */etc*:'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装`ntp`或`chrony`以允许您的系统与外部（互联网）时间服务器同步。安装`chrony`很简单，并且作为客户端不需要配置。在这里，我演示了如何安装和配置`chrony`。在Debian发行版上，它的工作方式类似，只是您的`chrony`配置文件位于*/etc/chrony/*而不仅仅是*/etc*：
+- en: '[PRE7]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'The `chrony` package provides you with the `chrony` daemon, `chronyd`, and
+    a command-line interface utility that has dozens of options, which you can find
+    in its man page. To perform a quick check, use the following command:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`chrony`包提供了`chrony`守护程序`chronyd`以及一个命令行界面实用程序，具有数十个选项，您可以在其手册页中找到。要执行快速检查，请使用以下命令：'
+- en: '[PRE8]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'You can also configure `chrony` as a time server for your local network. To
+    do so, uncomment the following two lines in the */etc/chrony.conf* file on the
+    system you wish to set up as the time server:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以将`chrony`配置为您本地网络的时间服务器。要这样做，请取消注释系统中*/etc/chrony.conf*文件中的以下两行：
+- en: '[PRE9]'
+  id: totrans-65
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Change the `Allow` line to cover your subnet(s) and restart the `chronyd`:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改`Allow`行以涵盖您的子网，并重新启动`chronyd`：
+- en: '[PRE10]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'To set up other Linux systems to use your `chrony` server, enter the following
+    line into your */etc/chrony.conf* file:'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要设置其他Linux系统使用您的`chrony`服务器，请将以下行输入到您的*/etc/chrony.conf*文件中：
+- en: '[PRE11]'
+  id: totrans-69
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'The `prefer` designation tells `chrony` that this local system should be consulted
+    first for the correct time. Restart the `chronyd` to accept the new setting and
+    check your `chronyd` sources with the following command:'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`prefer` 指定告诉 `chrony` 应首先查询本地系统以获取正确的时间。重新启动 `chronyd` 以接受新设置，并使用以下命令检查您的
+    `chronyd` 源：'
+- en: '[PRE12]'
+  id: totrans-71
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: You could also configure all your client systems to use only the local server
+    by commenting out the “pool” line(s) in */etc/chrony.conf*. You may also edit
+    the *chrony.conf* file to set up more specific settings. What I’ve shown here
+    is a minimal but working configuration.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以通过注释 */etc/chrony.conf* 中的“pool”行来配置所有客户端系统仅使用本地服务器。您还可以编辑 *chrony.conf*
+    文件以设置更具体的设置。我展示的是一个最小但可工作的配置。
+- en: Warning
+  id: totrans-73
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Although `cron` and `chrony` sound similar, deal with timing, and work together,
+    they are quite different. The `cron` utility schedules jobs to be executed at
+    a specific day and time, whereas `chrony` synchronizes the system clock with an
+    external time server. `chrony` keeps system time stable so that `cron` jobs run
+    at the correct time, which is especially important when timing jobs across multiple
+    systems.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然 `cron` 和 `chrony` 听起来相似，都处理时间安排，并共同工作，但它们实际上是不同的。`cron` 实用程序安排在特定日期和时间执行作业，而
+    `chrony` 与外部时间服务器同步系统时钟。`chrony` 保持系统时间稳定，以便 `cron` 作业在正确的时间运行，尤其是在跨多个系统定时作业时尤为重要。
+- en: Summary
+  id: totrans-75
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 摘要
+- en: '*Timing is everything.* Scheduling jobs, synchronizing time among local systems,
+    timing automated scripts among systems, and synchronizing time with an external
+    “source of truth” is essential. Automation is but one reason to keep your systems’
+    times synchronized. Security is another. Consider the scenario where you’re attempting
+    to isolate a security incident, and your systems are not time synchronized. It
+    would be difficult to pinpoint a timeframe for the incident to determine when
+    it occurred and its length.'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*时机是关键。* 调度作业、同步本地系统的时间、在系统之间定时自动化脚本以及与外部“真实源”同步时间是至关重要的。自动化只是保持系统时间同步的原因之一。安全性是另一个原因。考虑这样的情况：您正试图隔离安全事件，而您的系统时间未同步。要确定事件发生的时间和持续时间将变得困难。'
+- en: Automation is an important part of your work as a system administrator. There
+    aren’t enough hours available to manually complete every required task. You must
+    hand off your repetitive, mundane tasks to your systems. They won’t complain,
+    tire, or mistype a command. Automation is a good thing, and you should embrace
+    it. Try to automate yourself out of a job.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自动化是作为系统管理员工作的重要部分。没有足够的时间手动完成每个必需的任务。您必须将重复的琐碎任务交给系统。它们不会抱怨、疲倦或输入错误命令。自动化是一件好事，您应该接受它。尽量自动化以解脱出手工作业的困境。

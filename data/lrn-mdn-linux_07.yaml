@@ -1,0 +1,3458 @@
+- en: Chapter 7\. Networking
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第 7 章：网络
+- en: In this chapter, we go into detail about Linux networking. In modern environments,
+    the network stack that Linux provides is an essential component. Without it, few
+    things are possible. Whether you want to access an instance in your cloud provider,
+    browse the web, or install a new app, you need connectivity, and you need a way
+    to interact with it.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们详细介绍了 Linux 网络。在现代环境中，Linux 提供的网络堆栈是一个重要的组成部分。没有它，几乎无法完成任何事情。无论您是想访问云提供商中的实例、浏览网页还是安装新应用程序，您都需要连接性，并且需要一种与之交互的方式。
+- en: We’ll first have a look at common network terms, from the hardware level all
+    the way up to user-facing components such as HTTP and SSH. We’ll also discuss
+    the network stack, protocols, and interfaces. Specifically, we’ll spend time on
+    the naming center piece of the web and the wider internet, the so-called Domain
+    Name System (DNS). Interestingly, this system is found not only in wide-area deployments
+    but is also a central component used for service discovery in container environments
+    such as Kubernetes.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们首先来看看常见的网络术语，从硬件级别一直到用户界面组件，例如 HTTP 和 SSH。我们还将讨论网络堆栈、协议和接口。具体来说，我们将花时间讨论网络和更广泛的互联网的命名核心组成部分，即所谓的域名系统（DNS）。有趣的是，这个系统不仅在广域部署中发挥作用，而且还是诸如
+    Kubernetes 等容器环境中用于服务发现的中心组件。
+- en: Next, we’ll look at application layer network protocols and tooling. This includes
+    file sharing, the web, networked filesystems, and other methods to share data
+    over the network.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们将看看应用层网络协议和工具。这包括文件共享、网络文件系统以及其他通过网络共享数据的方法。
+- en: In the last part of the chapter, we’ll review some advanced network topics,
+    from geomapping to managing time over the network.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章的最后部分，我们将回顾一些高级网络主题，从地图制图到网络时间管理。
+- en: 'To set the expectations for the content in this chapter: you can spend a lot
+    of time with the topic of Linux networking; in fact, entire books are dedicated
+    to the topic. We’ll take a pragmatic stance here, jumping into hands-on topics
+    from an end-user point of view. Admin topics around networking, such as configuration
+    and setup of network devices, are by and large out of scope here.'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要设定本章内容的期望：您可以花费大量时间研究 Linux 网络；事实上，有整本书专门讲述这个主题。在这里，我们将采取一种务实的立场，从最终用户的角度进入实际操作的主题。关于网络的管理员主题，例如网络设备的配置和设置，大部分都超出了本章的范围。
+- en: Now, let’s turn our attention to the networking basics.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，让我们把注意力转向网络基础知识。
+- en: Basics
+  id: totrans-7
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Basics
+- en: Let’s first discuss why networking is relevant for a number of use cases and
+    define some common network terminology.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们首先讨论为何网络对多个用例至关重要，并定义一些常见的网络术语。
+- en: In modern environments, networking plays a central role. This ranges from tasks
+    such as installing apps, browsing the web, and viewing mail or social media to
+    working with remote machines (from the embedded system you’re connecting to over
+    a local network to servers that run in data centers of your cloud providers).
+    Given a network’s many moving parts and layers, it can be difficult to figure
+    out if a problem is hardware-related or originates in the software stack.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在现代环境中，网络在其中起着核心作用。这涵盖了诸如安装应用程序、浏览网页、查看邮件或社交媒体，以及与远程机器工作（从您连接到的嵌入式系统到云提供商数据中心中运行的服务器）。鉴于网络有许多移动部件和层次，要确定问题是硬件相关还是软件堆栈中的原因可能会很困难。
+- en: 'Another challenge Linux networking addresses comes from abstractions: many
+    of the things we’ll cover in this chapter provide a high-level user interface,
+    making it appear that files or applications that in reality run on a remote machine
+    are accessible or can be manipulated on your local machine. While providing an
+    abstraction that makes remote resources seem to be local is a useful feature,
+    we should not forget that at the end of the day, all of this boils down to bits
+    traveling over the wire and through the air. Keep this in mind when troubleshooting
+    or testing.'
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 网络面临的另一个挑战来自于抽象化：本章涵盖的许多内容提供了一个高级用户界面，使得实际上在远程机器上运行的文件或应用程序似乎可以在本地机器上访问或操作。虽然提供使远程资源看起来像本地可访问的抽象是一个有用的特性，但我们不应忘记，归根结底，所有这些都归结为通过电线和空气传输的比特流。在故障排除或测试时请记住这一点。
+- en: '[Figure 7-1](#fig-net-overview) shows how, on a high level, networking works
+    in Linux. There is some kind of networking hardware, such as Ethernet or wireless
+    cards; then a number of kernel-level components, such as the TCP/IP stack; and
+    finally, in the user space, a range of tools to configure, query, and use networking.'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图 7-1](#fig-net-overview)展示了在高层次上，Linux 中网络是如何工作的。有各种网络硬件，如以太网或无线网卡；然后是一些内核级组件，如
+    TCP/IP 协议栈；最后，在用户空间中，有一系列工具用于配置、查询和使用网络。'
+- en: '![lmlx 0701](Images/lmlx_0701.png)'
+  id: totrans-12
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0701](Images/lmlx_0701.png)'
+- en: Figure 7-1\. An overview of Linux networking
+  id: totrans-13
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 7-1\. Linux 网络概述
+- en: Let’s now dive into the TCP/IP stack, the core of networking in Linux.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们深入了解 TCP/IP 协议栈，这是 Linux 网络的核心。
+- en: Tip
+  id: totrans-15
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: Unlike in other areas of Linux, where you need to either consult the source
+    code or hope for properly documented design assumptions behind interfaces and
+    protocols, in the networking space, almost every protocol and interface is based
+    on publicly available specifications. The Internet Engineering Task Force (IETF)
+    makes all of those requests for comments (RFCs) freely available via [*data​tracker.ietf.org*](https://datatracker.ietf.org).
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与 Linux 的其他领域不同，在网络空间，你需要查阅源代码或者希望接口和协议背后有正确的文档化设计假设。几乎每个协议和接口都是基于公开的规范。互联网工程任务组（IETF）通过
+    [*data​tracker.ietf.org*](https://datatracker.ietf.org) 免费提供所有这些请求评论（RFC）。
+- en: Make a habit out of simply reading these RFCs before you get into the details
+    of implementations. Those RFCs are written by practitioners for practitioners
+    and document good practices and how to implement stuff. Don’t be afraid of working
+    through them; you’ll gain a much better understanding about the motivation, use
+    cases, and reasons why things are the way they are.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 养成在深入实现细节之前简单阅读这些 RFC 的习惯。这些 RFC 是由实践者为实践者撰写的，并记录了良好的实践方法以及如何实现相关内容。不要害怕逐步阅读它们；你会对动机、用例以及事物为何成为现状有更好的理解。
+- en: The TCP/IP Stack
+  id: totrans-18
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: TCP/IP 协议栈
+- en: The TCP/IP stack, shown in [Figure 7-2](#fig-tcpip-stack), is a layered network
+    model made of a number of protocols and tools, mostly defined by IETF specs. Each
+    layer must be aware of and able to communicate with only the layers right above
+    and below itself. The data is encapsulated in packets, and each layer typically
+    wraps the data in a header that contains information relevant for its function.
+    So, if an app wants to send data, it would interact directly with the highest
+    layer that would add a header and so on down the stack (the send path). Conversely,
+    if an app wants to receive data, it would arrive at the lowest layer, and each
+    layer in turn would process it based on the header information it finds and pass
+    the payload on to the layer above (the receive path).
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: TCP/IP 协议栈，如 [图 7-2](#fig-tcpip-stack) 所示，是一个由多个协议和工具组成的分层网络模型，主要由 IETF 规范定义。每一层必须意识到并能够与其上下相邻的层通信。数据封装在数据包中，每一层通常在数据上添加包含其功能相关信息的头部。因此，如果应用程序想要发送数据，它会直接与最高层交互，逐层添加头部（发送路径）。相反，如果应用程序想要接收数据，数据会到达最低层，然后每一层依次处理并根据找到的头部信息将有效载荷传递到上一层（接收路径）。
+- en: '![lmlx 0702](Images/lmlx_0702.png)'
+  id: totrans-20
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0702](Images/lmlx_0702.png)'
+- en: Figure 7-2\. The TCP/IP layers working together to enable communication
+  id: totrans-21
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 7-2\. TCP/IP 层共同工作以实现通信
+- en: 'Starting at the bottom of the stack, the four layers of the TCP/IP stack are
+    the following:'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从协议栈的底部开始，TCP/IP 协议栈的四层如下：
+- en: The link layer
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 链路层
+- en: Lowest in the stack, this layer covers the hardware (Ethernet, WiFi) and kernel
+    drivers and focuses on how packets are sent between physical devices. See [“The
+    Link Layer”](#tcp-link) for details.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在协议栈的最低层，该层涵盖硬件（以太网、WiFi）和内核驱动程序，重点是如何在物理设备之间发送数据包。详见 [“链路层”](#tcp-link)。
+- en: The internet layer
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 互联网层
+- en: With the Internet Protocol (IP), this layer focuses on routing; that is, it
+    supports sending packets between machines across networks. We’ll discuss it in
+    [“The Internet Layer”](#tcp-internet).
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用互联网协议（IP），该层侧重于路由；即它支持在网络间的机器之间发送数据包。我们将在 [“互联网层”](#tcp-internet) 中讨论它。
+- en: The transport layer
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传输层
+- en: This layer controls end-to-end communications between (virtual or physical)
+    hosts, with the Transmission Control Protocol (TCP) for session-based, reliable
+    communication and User Datagram Protocol (UDP) for connection-less communication.
+    It mainly deals with how packets are transmitted, including addressing individual
+    services on a machine via ports as well as data integrity. Further, Linux supports
+    sockets as communication endpoints. See [“The Transport Layer”](#tcp-transport).
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这一层控制（虚拟或物理）主机之间的端到端通信，使用传输控制协议（TCP）进行基于会话的可靠通信和用户数据报协议（UDP）进行无连接通信。它主要处理数据包如何传输，包括通过端口寻址机器上的各个服务以及数据完整性。此外，Linux支持套接字作为通信端点。请参阅[“传输层”](#tcp-transport)。
+- en: The application layer
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 应用层
+- en: This layer deals with user-facing tooling and apps, such as the web, SSH, and
+    mail. We’ll discuss it in [“DNS”](#dns) and [“Application Layer Networking”](#app-layer-net).
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该层处理用户面向的工具和应用程序，如Web、SSH和邮件。我们将在[“DNS”](#dns)和[“应用层网络”](#app-layer-net)中讨论它。
+- en: The layering means that the header and the payload of a layer make up the payload
+    for the next layer. For example, looking at [Figure 7-2](#fig-tcpip-stack), the
+    payload in the internet layer is the transport layer header H[T] and its payload.
+    In other words, the internet layer takes the packet it gets from the transport
+    layer, treats it as an opaque chunk of bytes, and can focus on its function, the
+    routing of the packet to the target machine.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 分层意味着每一层的头部和有效负载构成下一层的有效负载。例如，看一下[图7-2](#fig-tcpip-stack)，互联网层中的有效负载是传输层头部H[T]及其有效负载。换句话说，互联网层接收来自传输层的数据包，将其视为不透明的字节块，并可以专注于其功能，即将数据包路由到目标机器。
+- en: Let’s now work our way up the TCP/IP stack, starting with the lowest layer,
+    the link layer.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们从TCP/IP协议栈的最低层开始工作，即链路层。
+- en: The Link Layer
+  id: totrans-33
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 链路层
+- en: 'In the link layer of the TCP/IP stack, it’s all about hardware or near-hardware
+    stuff, such as bytes, wires, electromagnetic waves, device drivers, and network
+    interfaces. You’ll come across the following terms in this context:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在TCP/IP协议栈的链路层中，所有内容都涉及硬件或接近硬件的内容，如字节、电线、电磁波、设备驱动程序和网络接口。在这个上下文中，您会遇到以下术语：
+- en: Ethernet
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以太网
+- en: A family of networking technologies using wires to connect machines; often used
+    in local area networks (LANs).
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一系列使用电线连接机器的网络技术；通常用于局域网（LAN）中。
+- en: Wireless
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无线
+- en: Also known as WiFi, a class of communication protocols and methods that, rather
+    than using wires, uses some electromagnetic waves to transport data.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 也被称为WiFi，一类通信协议和方法，不使用电线，而是使用电磁波来传输数据。
+- en: MAC addresses
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: MAC地址
+- en: Short for *media access control*, MAC is a unique 48-bit identifier for hardware,
+    used to identify your machine (to be precise, the network interface; see the following
+    term). The MAC address encodes the manufacturer (of the interface) via the organizationally
+    unique identifier (OUI), usually occupying the first 24 bits.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 缩写为*媒体访问控制*，MAC是硬件的唯一48位标识符，用于识别您的机器（确切地说是网络接口；请参阅以下术语）。MAC地址通过组织唯一标识符（OUI）编码制造商（接口的制造商），通常占据前24位。
+- en: Interface
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接口
+- en: A network connection. It can be a physical interface (see [“Network interface
+    controller”](#nic) for details) or a virtual (software) interface, like the loopback
+    interface `lo`.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 网络连接。它可以是物理接口（有关详细信息，请参阅[“网络接口控制器”](#nic)）或虚拟（软件）接口，如环回接口`lo`。
+- en: Equipped with these basics, let’s have a closer look at the link layer.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 了解了这些基础知识，我们来更深入地了解链路层。
+- en: Network interface controller
+  id: totrans-44
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 网络接口控制器
+- en: One essential piece of hardware equipment is the [*network interface controller*
+    (NIC)](https://oreil.ly/fZeVJ), sometimes also called the *network interface card*.
+    The NIC provides the physical connectivity to a network through either a wired
+    standard—for example, the [IEEE 802.3-2018 standard for Ethernet](https://oreil.ly/9g4Mu)—or
+    one of the many wireless standards from the [IEEE 802.11 family](https://oreil.ly/V5NiL).
+    Once part of a network, the NIC turns the digital representation of the bytes
+    you want to send into electrical or electromagnetic signals. The reverse is true
+    for the receive path, where the NIC turns whatever physical signals it receives
+    into bits and bytes that the software can deal with.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个必要的硬件设备是[*网络接口控制器* (NIC)](https://oreil.ly/fZeVJ)，有时也称为*网络接口卡*。NIC通过有线标准（例如，[以太网的IEEE
+    802.3-2018标准](https://oreil.ly/9g4Mu)）或来自[IEEE 802.11家族的众多无线标准](https://oreil.ly/V5NiL)，提供与网络的物理连接。一旦连接到网络，NIC将要发送的字节的数字表示转换为电气或电磁信号。对于接收路径，NIC将接收到的物理信号转换为软件可以处理的位和字节。
+- en: 'Let’s have a look at NICs in action. Traditionally, one would use the (now
+    widely considered deprecated) [`ifconfig` command](https://oreil.ly/QwgOc) to
+    query information on the NICs available on the system (we show it here first for
+    educational purposes; in practice, it’s better to use `ip`, as shown in the next
+    example):'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看NIC的操作。传统上，人们会使用（现在广泛被视为已废弃的）[`ifconfig`命令](https://oreil.ly/QwgOc)查询系统上可用的NIC的信息（我们在此首先展示出来是为了教育目的；实际上，最好使用`ip`，如下一个示例所示）：
+- en: '[PRE0]'
+  id: totrans-47
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: '[![1](Images/1.png)](#co_networking_CO1-1)'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO1-1)'
+- en: The first interface here is `lo`, the loopback interface with the IP address
+    `127.0.0.1` (see [“IPv4”](#ipv4)). The maximum transmission unit (MTU) is the
+    packet size, here 65,536 bytes (with larger sizes meaning higher throughput);
+    for historical reasons, the default for Ethernet was 1,500 bytes, but you can
+    use [jumbo frames](https://oreil.ly/NjpnF) that are 9,000 bytes in size.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里的第一个接口是`lo`，具有IP地址`127.0.0.1`（参见[“IPv4”](#ipv4)）。最大传输单元（MTU）是数据包大小，这里为65,536字节（较大的尺寸意味着更高的吞吐量）；出于历史原因，以太网的默认值为1,500字节，但您可以使用[巨型帧](https://oreil.ly/NjpnF)，大小为9,000字节。
+- en: '[![2](Images/2.png)](#co_networking_CO1-2)'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO1-2)'
+- en: The second interface reported is `wlp1s0`, with an IPv4 address of `192.168.178.40`
+    assigned. This interface is an NIC and has a MAC address (`ether` is `38:de:ad:37:32:0f`).
+    When looking at the flags (`<UP,BROADCAST,RUNNING,MULTICAST>`), it seems to be
+    operational.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 报告的第二个接口是`wlp1s0`，分配了IPv4地址`192.168.178.40`。此接口是一个NIC，并且具有MAC地址（`ether`为`38:de:ad:37:32:0f`）。查看标志（`<UP,BROADCAST,RUNNING,MULTICAST>`），看起来它是可操作的。
+- en: 'For a more modern approach of doing the same thing (querying interfaces and
+    checking on their status), use the [`ip` command](https://oreil.ly/pruUF). We’ll
+    use this approach most often in this chapter (output edited to fit):'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于以相同方式（查询接口并检查其状态）更现代的方法，请使用[`ip`命令](https://oreil.ly/pruUF)。在本章中，我们将经常使用这种方法（已编辑输出以适应）：
+- en: '[PRE1]'
+  id: totrans-53
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: '[![1](Images/1.png)](#custom_co_networking_CO2-1)'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#custom_co_networking_CO2-1)'
+- en: The loopback interface.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 环回接口。
+- en: '[![2](Images/2.png)](#custom_co_networking_CO2-2)'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#custom_co_networking_CO2-2)'
+- en: 'My NIC, with a MAC address of `38:de:ad:37:32:0f`. Note that the name (`wlp1s0`)
+    here tells you something about the interface: it’s a wireless interface (`wl`)
+    in PCI bus 1 (`p1`) and slot 0 (`s0`). This naming makes the interface names more
+    predictable. In other words, if you had two old-style interfaces (say, `eth0`
+    and `eth1`), there was no guarantee that a reboot or adding a new card wouldn’t
+    cause Linux to rename those interfaces.'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我的NIC，MAC地址为`38:de:ad:37:32:0f`。请注意，此处的名称（`wlp1s0`）告诉您有关接口的一些信息：它是PCI总线1中的无线接口（`wl`），插槽0（`s0`）。这种命名使接口名称更加可预测。换句话说，如果您有两个旧式接口（比如`eth0`和`eth1`），重启或添加新卡可能会导致Linux重新命名这些接口。
+- en: For both `ifconfig` and `ip link`, you might be interested in the meaning of
+    flags such as `LOWER_IP` or `MULTICAST`; these are documented in the [netdevice
+    man pages](https://oreil.ly/OTB7R).
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于`ifconfig`和`ip link`，您可能对标志（如`LOWER_UP`或`MULTICAST`）的含义感兴趣；这些内容在[netdevice手册页](https://oreil.ly/OTB7R)中有详细记录。
+- en: Address Resolution Protocol
+  id: totrans-59
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 地址解析协议
+- en: The Address Resolution Protocol (ARP) maps MAC addresses to IP addresses. In
+    a sense, it bridges the link layer with the layer above it, the internet layer.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 地址解析协议（ARP）将MAC地址映射到IP地址。在某种意义上，它将链路层与其上层，即互联网层，桥接起来。
+- en: 'Let’s see it in action:'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看它的实际操作：
+- en: '[PRE2]'
+  id: totrans-62
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: '[![1](Images/1.png)](#co_networking_CO2-1)'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO2-1)'
+- en: Use the `arp` command to show the cache of mapping MAC addresses to hostnames
+    or IP addresses. Note that you can use `arp -n` to prevent hostname resolution
+    and show IP addresses instead of DNS names.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`arp`命令显示将MAC地址映射到主机名或IP地址的缓存。请注意，您可以使用`arp -n`来阻止主机名解析，并显示IP地址而不是DNS名称。
+- en: 'Or, using a more modern approach with `ip`:'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，使用更现代的方法，使用`ip`：
+- en: '[PRE3]'
+  id: totrans-66
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: '[![1](Images/1.png)](#co_networking_CO3-1)'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO3-1)'
+- en: Use the `ip` command to show the cache of mapping MAC addresses to IP addresses.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`ip`命令显示将MAC地址映射到IP地址的缓存。
+- en: 'To display, configure, and troubleshoot wireless devices, you want to use the
+    [`iw` command](https://oreil.ly/fyR0y). For example, I know that my wireless NIC
+    is called `wlp1s0`, so I can query it:'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要显示、配置和排除无线设备问题，您可以使用[`iw`命令](https://oreil.ly/fyR0y)。例如，我知道我的无线网卡叫做`wlp1s0`，因此我可以查询它：
+- en: '[PRE4]'
+  id: totrans-70
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: '[![1](Images/1.png)](#co_networking_CO4-1)'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO4-1)'
+- en: Show base information about wireless interface `wlp1s0`.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示有关无线接口`wlp1s0`的基本信息。
+- en: '[![2](Images/2.png)](#co_networking_CO4-2)'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO4-2)'
+- en: The router the interface is connected to (see also the next example).
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该接口连接的路由器（也请参阅下一个示例）。
+- en: '[![3](Images/3.png)](#co_networking_CO4-3)'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO4-3)'
+- en: The WiFi frequency band the interface is using.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该接口使用的WiFi频段。
+- en: 'Further, I can gather router- and traffic-related information like so:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，我可以这样收集与路由器和流量相关的信息：
+- en: '[PRE5]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: '[![1](Images/1.png)](#co_networking_CO5-1)'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO5-1)'
+- en: Show connection information about wireless interface `wlp1s0`.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示有关无线接口`wlp1s0`的连接信息。
+- en: '[![2](Images/2.png)](#co_networking_CO5-2)'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO5-2)'
+- en: This and the next line send (`TX` stands for “transmit”) and receive (`RX`)
+    statistics—that is, bytes and packets sent and received via this interface.
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这和下一行发送（`TX`表示“发送”）和接收（`RX`）的统计信息——即通过此接口发送和接收的字节和数据包。
+- en: Now that we have a good handle on what’s going on in the lowest layer of the
+    TCP/IP stack, the (data) link layer, let’s move up the stack.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们对TCP/IP堆栈的最低层，即数据链路层，有了很好的掌握，让我们向上移动堆栈。
+- en: The Internet Layer
+  id: totrans-84
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 互联网层
+- en: The second-lowest layer of the TCP/IP stack, the internet layer, is concerned
+    with routing packets from one machine on the network to another. The design of
+    the internet layer assumes that the available network infrastructure is unreliable
+    and that the participants (such as nodes in the network or the connections between
+    them) change frequently.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: TCP/IP堆栈的第二低层，即互联网层，负责从网络上的一台机器路由数据包到另一台机器。互联网层的设计假定可用的网络基础设施是不可靠的，并且参与者（例如网络中的节点或它们之间的连接）频繁变化。
+- en: The internet layer provides best-effort delivery (that is, no guarantees concerning
+    performance) and treats every packet as independent. As a consequence, higher
+    layers, typically the transport layer, take care of addressing reliability issues,
+    including packet order, retries, or delivery guarantees.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 互联网层提供尽力而为的传输（即，不保证性能），并将每个数据包视为独立的。因此，更高层次的传输层通常负责处理地址和可靠性问题，包括数据包顺序、重试或传输保证。
+- en: In this layer, the dominating protocol for logically identifying machines uniquely,
+    worldwide, is the Internet Protocol (IP), which comes in two flavors, IP version
+    4 (IPv4) and IP version 6 (IPv6).
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一层中，用于在全球范围内唯一逻辑标识机器的主导协议是互联网协议（IP），它有两种版本，即IP版本4（IPv4）和IP版本6（IPv6）。
+- en: IPv4
+  id: totrans-88
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: IPv4
+- en: IPv4 defines unique 32-bit numbers identifying a host or process acting as an
+    endpoint in a TCP/IP communication.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: IPv4定义了唯一的32位数字，用于标识在TCP/IP通信中作为端点的主机或进程。
+- en: 'One way to write IPv4 addresses is to split up the 32-bit into four 8-bit segments
+    separated by a period, each segment in the 0 to 255 range, called an *octet* (hinting
+    at that the segment covers 8 bits). Let’s have a look at a concrete example:'
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 写IPv4地址的一种方式是将32位数分为四个由句点分隔的8位段，每个段在0到255范围内，称为*八位字节*（提示该段覆盖了8位）。让我们看一个具体的例子：
+- en: '[PRE6]'
+  id: totrans-91
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '[![1](Images/1.png)](#co_networking_CO6-4)'
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO6-4)'
+- en: 'First octet in binary form: `00111111`'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一个八位字节的二进制形式：`00111111`
+- en: '[![2](Images/2.png)](#co_networking_CO6-3)'
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO6-3)'
+- en: 'Second octet in binary form: `00100000`'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第二个八位字节的二进制形式：`00100000`
+- en: '[![3](Images/3.png)](#co_networking_CO6-2)'
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO6-2)'
+- en: 'Third octet in binary form: `01101010`'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第三个八位字节的二进制形式：`01101010`
+- en: '[![4](Images/4.png)](#co_networking_CO6-1)'
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_networking_CO6-1)'
+- en: 'Fourth octet in binary form: `10010101`'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第四个八位字节的二进制形式：`10010101`
+- en: 'The IP header ([Figure 7-3](#fig-ip-header)), as defined in [RFC 791](https://oreil.ly/7u93r)
+    and related IETF specs, has a number of fields, but the following are the most
+    important ones that you should be aware of:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: IP 头部（[图 7-3](#fig-ip-header)）如 [RFC 791](https://oreil.ly/7u93r) 和相关的 IETF
+    规范所定义，有若干字段，但以下是你应该了解的最重要的几个：
+- en: Source address (32 bits)
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 源地址（32 位）
+- en: The IP address of the sender
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 发送方的 IP 地址
+- en: Destination address (32 bits)
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目的地地址（32 位）
+- en: The IP address of the receiver
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接收方的 IP 地址
+- en: Protocol (8 bits)
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 协议（8 位）
+- en: The payload type (next-higher layer type), as per [RFC 790](https://oreil.ly/Y8PPz)—for
+    example, TCP, UDP, or ICMP
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 负载类型（下一高层类型），根据 [RFC 790](https://oreil.ly/Y8PPz)，例如 TCP、UDP 或 ICMP
+- en: Time to live, aka TTL (8 bits)
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 存活时间，又称 TTL（8 位）
+- en: The maximal time the packet is allowed to exist
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数据包允许存在的最大时间
+- en: Type of service (8 bits)
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 服务类型（8 位）
+- en: Can be used for quality of service (QoS) purposes
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可用于服务质量（QoS）目的
+- en: '![lmlx 0703](Images/lmlx_0703.png)'
+  id: totrans-111
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0703](Images/lmlx_0703.png)'
+- en: Figure 7-3\. The IP header format as per RFC 791
+  id: totrans-112
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 7-3\. 根据 RFC 791 的 IP 头部格式
+- en: Given that the internet is a network of networks, it seems natural to distinguish
+    between networks and single machines (hosts) in the networks. IP address ranges
+    are assigned to networks and within those networks to individual hosts.
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 鉴于互联网是一个网络的网络，将网络和网络中的单个机器（主机）区分开来似乎是很自然的。IP 地址范围分配给网络，而在这些网络中又分配给个别主机。
+- en: 'Today, the [Classless Inter-Domain Routing (CIDR)](https://oreil.ly/VDVuy)
+    is the only relevant method for assigning IP addresses. The CIDR format consists
+    of two parts:'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如今，[无类域间路由（CIDR）](https://oreil.ly/VDVuy) 是分配 IP 地址的唯一相关方法。CIDR 格式由两部分组成：
+- en: The first part represents the network address. This looks like a normal IP address—for
+    example, `10.0.0.0`.
+  id: totrans-115
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 第一部分表示网络地址。这看起来像一个普通的 IP 地址，例如 `10.0.0.0`。
+- en: The second part defines how many bits (and with that, IP addresses) fall within
+    the address range—for example, `/24`.
+  id: totrans-116
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 第二部分定义了地址范围内有多少位（及相应的 IP 地址）—例如 `/24`。
+- en: 'So, a complete CIDR range example looks like the following:'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因此，一个完整的 CIDR 范围示例如下所示：
+- en: '[PRE7]'
+  id: totrans-118
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: In the preceding example, the first 24 bits (or three octets) represent the
+    network, and the last 8 bits (32 bits overall minus the 24 bits for the network)
+    are the IP addresses available for the 256 hosts (2⁸). The first IP address in
+    this CIDR range is `10.0.0.0`, and the last IP address is `10.0.0.255`. Strictly
+    speaking, only the addresses `10.0.0.1` to `10.0.0.254` can be assigned to hosts
+    since the `.0` and `.255` addresses are reserved for special purposes. In addition,
+    we can say that the netmask is `255.255.255.0` since that’s the first 24 bits
+    representing the network.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在上面的示例中，前 24 位（或三个八位字节）表示网络，剩余的 8 位（总共 32 位减去用于网络的 24 位）是为 256 个主机（2⁸）提供的 IP
+    地址。此 CIDR 范围内的第一个 IP 地址是 `10.0.0.0`，最后一个 IP 地址是 `10.0.0.255`。严格来说，只有地址 `10.0.0.1`
+    到 `10.0.0.254` 可以分配给主机，因为 `.0` 和 `.255` 地址被保留用于特殊目的。此外，我们可以说子网掩码是 `255.255.255.0`，因为这是代表网络的前
+    24 位。
+- en: 'In practice, you don’t need to remember all the math here. If you’re dealing
+    with CIDR ranges on a daily basis, then you just know, and if you’re a casual
+    user, you may want to use some tooling. If you want to do CIDR range calculations,
+    such as determining how many IPs are in a range, the following are available:'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 实际上，你不需要记住这里的所有数学。如果你每天都处理 CIDR 范围，那么你只需了解，如果你是个偶尔使用者，你可能希望使用一些工具。如果你想进行 CIDR
+    范围计算，比如确定一个范围内有多少个 IP 地址，下面是可以使用的：
+- en: Online tools such as those at [*https://cidr.xyz*](https://cidr.xyz) and [*https://ipaddressguide.com/cidr*](https://ipaddressguide.com/cidr)
+  id: totrans-121
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在 [*https://cidr.xyz*](https://cidr.xyz) 和 [*https://ipaddressguide.com/cidr*](https://ipaddressguide.com/cidr)
+    等在线工具中
+- en: Command-line tools like [mapcidr](https://oreil.ly/2uTwU) and [cidrchk (by yours
+    truly)](https://oreil.ly/g88Yk)
+  id: totrans-122
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 像 [mapcidr](https://oreil.ly/2uTwU) 和 [cidrchk（由本人开发）](https://oreil.ly/g88Yk)
+    这样的命令行工具
+- en: 'There are also some notable [reserved IPv4 addresses](https://oreil.ly/97Tp7)
+    you should know:'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有一些显著的 [保留的 IPv4 地址](https://oreil.ly/97Tp7) 你应该知道：
+- en: '`127.0.0.0`'
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`127.0.0.0`'
+- en: This subnet is reserved for local addresses, with the most prominent one being
+    the loopback address `127.0.0.1`.
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此子网保留用于本地地址，最突出的是环回地址 `127.0.0.1`。
+- en: '`169.254.0.0/16` (`169.254.0.0` to `169.254.255.255`)'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`169.254.0.0/16`（`169.254.0.0` 到 `169.254.255.255`）'
+- en: These are link local addresses, meaning packets sent there should not be forwarded
+    to other parts of the network. Some cloud providers such as Amazon Web Services
+    use this for special services (metadata).
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些是本地链路地址，意味着发送到这里的数据包不应该被转发到网络的其他部分。一些云服务提供商如亚马逊网络服务使用这种地址来提供特殊服务（元数据）。
+- en: '`224.0.0.0/24` (`224.0.0.0` to `239.255.255.255`)'
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`224.0.0.0/24` (`224.0.0.0` 到 `239.255.255.255`)'
+- en: This range is reserved for multicast.
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个范围是保留用于多播。
+- en: '[RFC 1918](https://oreil.ly/2Ijxk) defines private IP ranges. A private IP
+    range means that the IP addresses in it are not routable on the public internet;
+    hence, it is safe to assign them internally (for example, in the context of your
+    company):'
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[RFC 1918](https://oreil.ly/2Ijxk) 定义了私有IP范围。私有IP范围意味着其中的IP地址在公共互联网上不可路由，因此在内部分配这些地址是安全的（例如，在公司的上下文中）。'
+- en: '`10.0.0.0` to `10.255.255.255` (the `10/8` prefix)'
+  id: totrans-131
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`10.0.0.0` 到 `10.255.255.255` (`10/8` 前缀)'
+- en: '`172.16.0.0` to `172.31.255.255` (`172.16/12` prefix)'
+  id: totrans-132
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`172.16.0.0` 到 `172.31.255.255` (`172.16/12` 前缀)'
+- en: '`192.168.0.0` to `192.168.255.255` (`192.168/16` prefix)'
+  id: totrans-133
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`192.168.0.0` 到 `192.168.255.255` (`192.168/16` 前缀)'
+- en: Another interesting IPv4 address is `0.0.0.0`. It is a nonroutable address that
+    has different use cases and different meanings depending on the context, but the
+    most important one, from a server perspective, is that `0.0.0.0` refers to all
+    IPv4 addresses present in the machine. That’s a great way to say “listen on all
+    available IP addresses” as a source until it turns into a known IP.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个有趣的IPv4地址是`0.0.0.0`。这是一个非路由地址，根据上下文有不同的用例和意义，但从服务器的角度来看，最重要的是`0.0.0.0`指代机器上所有IPv4地址的意思。这是一个很好的方式来表达“在所有可用IP地址上监听”。
+- en: 'That was a lot of dry theory; let’s see it in action. We’ll start by querying
+    the machine for IP-related things (output edited):'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 那是很多干巴巴的理论；让我们看看它如何运行。我们将从查询与IP相关的机器开始（输出已编辑）：
+- en: '[PRE8]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: '[![1](Images/1.png)](#co_networking_CO7-1)'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO7-1)'
+- en: List addresses of all interfaces.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出所有接口的地址。
+- en: '[![2](Images/2.png)](#co_networking_CO7-2)'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO7-2)'
+- en: The IP address of the loopback interface (`127.0.0.1`, as expected).
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 回环接口的IP地址 (`127.0.0.1`，如预期所示)。
+- en: '[![3](Images/3.png)](#co_networking_CO7-3)'
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO7-3)'
+- en: The (private) IP address of the wireless NIC. Note that this is the LAN-local
+    IP address of the machine, which isn’t publicly routable since it falls in the
+    `192.168/16` range.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无线网卡的（私有）IP地址。请注意，这是机器的局域网本地IP地址，不可公开路由，因为它属于`192.168/16`范围。
+- en: The IPv4 address space is already exhausted, and given that there are many more
+    endpoints today than the internet designers thought there would be (for example,
+    due to mobile devices and IoT), a sustainable solution is needed.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: IPv4地址空间已经枯竭，考虑到今天的端点比互联网设计者预想的多得多（例如移动设备和物联网设备），我们需要一个可持续的解决方案。
+- en: Luckily, with IPv6 there is a solution for the address-exhaustion issue. Unfortunately,
+    at this time of writing, the ecosystem at large has still not made the move to
+    IPv6, partly for infrastructure reasons but also due to a lack of tooling that
+    supports IPv6\. This means that for the time being you’ll still have to deal with
+    IPv4 and its limitations and [workarounds](https://oreil.ly/XSiTu).
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: IPv6解决了地址耗尽问题，这是一大利好。遗憾的是，截至目前，由于基础设施问题以及缺乏支持IPv6的工具，整体生态系统仍未全面过渡到IPv6。这意味着在当前时期，你仍需处理IPv4及其限制和[解决方案](https://oreil.ly/XSiTu)。
+- en: 'Let’s have a look at the (hopefully not-to-distant) future: IPv6.'
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们来看看（希望不会太遥远的）未来：IPv6。
+- en: IPv6
+  id: totrans-146
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: IPv6
+- en: '[Internet Protocol version 6 (IPv6)](https://oreil.ly/T0ISm) is a 128-bit number
+    identifying an endpoint in a TCP/IP communication. This means that with IPv6 we
+    can assign on the order of 10^(38) individual machines (devices). In contrast
+    to IPv4, IPv6 uses a hexadecimal representation, eight groups of 16 bits each,
+    separating the groups by a colon (`:`).'
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[IPv6互联网协议版本6](https://oreil.ly/T0ISm) 是一种128位数，用于标识TCP/IP通信中的端点。这意味着使用IPv6，我们可以分配大约10^(38)个独立的机器（设备）。与IPv4不同，IPv6使用十六进制表示，每组16位，用冒号(`:`)分隔。'
+- en: There are a few rules for shortening IPv6 addresses, such as removing leading
+    zeros or compressing consecutive sections of zeros by replacing them with two
+    colons (`::`). For example, the IPv6 [loopback address](https://oreil.ly/mGfiU)
+    can be written abbreviated as `::1` (the IPv4 variant would be `127.0.0.1`).
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: IPv6地址有几条缩写规则，例如去掉前导零或者用两个冒号(`::`)替换连续的零段。例如，IPv6的[回环地址](https://oreil.ly/mGfiU)可以简写为`::1`（IPv4的变体是`127.0.0.1`）。
+- en: Just like IPv4, IPv6 has a number of special and reserved addresses; see APNIC’s
+    listing of [IPv6 address types](https://oreil.ly/isoL1) for examples.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就像IPv4一样，IPv6有许多特殊和保留地址；请参见APNIC的[IPv6地址类型列表](https://oreil.ly/isoL1)以获取示例。
+- en: It’s important to note that IPv4 and IPv6 are not compatible. This means that
+    IPv6 support needs to be built into each and every network participant, from edge
+    devices (like your phone) to routers to server software. This IPv6 support has,
+    at least in the context of Linux, already shown to be pretty wide. For example,
+    the `ip addr` command we saw in the section [“IPv4”](#ipv4) would already by default
+    show us the IPv6 addresses.
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 需要注意的是IPv4和IPv6不兼容。这意味着IPv6支持需要内置到每个网络参与者中，从边缘设备（如您的手机）到路由器到服务器软件。至少在Linux的背景下，IPv6支持已经非常广泛。例如，我们在[“IPv4”](#ipv4)部分看到的`ip
+    addr`命令已经默认显示了IPv6地址。
+- en: Internet Control Message Protocol
+  id: totrans-151
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: Internet Control Message Protocol
+- en: The [RFC 792](https://oreil.ly/6Nphe) defines the Internet Control Message Protocol
+    (ICMP), which is used for lower-level components to send error messages and operational
+    information like availability.
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[RFC 792](https://oreil.ly/6Nphe) 定义了Internet Control Message Protocol（ICMP），用于低级组件发送错误消息和操作信息，例如可用性。'
+- en: 'Let’s see ICMP in action by testing the reachability of a website with `ping`:'
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们通过使用`ping`测试网站的可达性来看ICMP如何工作：
+- en: '[PRE9]'
+  id: totrans-154
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Alternatively, you can use [`gping`](https://oreil.ly/1Y5qv), which can ping
+    multiple targets at the same time and plot a graph on the command line (see [Figure 7-4](#fig-gping)).
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，您可以使用[`gping`](https://oreil.ly/1Y5qv)，它可以同时对多个目标进行ping测试，并在命令行上绘制图表（参见[图7-4](#fig-gping)）。
+- en: '![lmlx 0704](Images/lmlx_0704.png)'
+  id: totrans-156
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0704](Images/lmlx_0704.png)'
+- en: Figure 7-4\. Pinging two websites with `gping`
+  id: totrans-157
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图7-4. 使用`gping`对两个网站进行ping测试
+- en: 'Note that an equivalent tool is available for IPv6: the aptly named [`ping6`](https://oreil.ly/F6q6B).'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，IPv6也有一个等效的工具：恰如其名的[`ping6`](https://oreil.ly/F6q6B)。
+- en: Routing
+  id: totrans-159
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 路由
+- en: Part of the network stack in Linux is concerned with routing—that is, deciding
+    on a per-packet basis where to send a packet. The destination could be a process
+    on the same machine, or it could be an IP address on a different machine.
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux的一部分网络堆栈涉及路由，即决定每个数据包发送到哪里。目的地可以是同一台机器上的一个进程，也可以是不同机器上的IP地址。
+- en: 'While the exact implementation details of routing are beyond the scope of this
+    chapter, we’ll provide a high-level overview: [iptables](https://oreil.ly/roRsv),
+    a widely used tool that allows you to manipulate the routing tables—for example,
+    to reroute packets on certain conditions or implement a firewall—uses [netfilter](https://www.netfilter.org)
+    to intercept and manipulate packets.'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管路由的确切实现细节超出了本章的范围，我们将提供一个高层次的概述：[iptables](https://oreil.ly/roRsv)，这是一个广泛使用的工具，允许您操纵路由表，例如根据条件重新路由数据包或实施防火墙，它使用[netfilter](https://www.netfilter.org)来拦截和操纵数据包。
+- en: 'What you should know is how to query and display routing information, as follows:'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您应该知道如何查询和显示路由信息，如下所示：
+- en: '[PRE10]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: '[![1](Images/1.png)](#co_networking_CO8-1)'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO8-1)'
+- en: Use the `route` command with `-n`, forcing numerical IP addresses.
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`route`命令并使用`-n`，强制使用数值IP地址。
+- en: 'The detailed meaning of the tabular output in the previous `route` command
+    is as follows:'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 前一个`route`命令中表格输出的详细含义如下：
+- en: '`Destination`'
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`目的地`'
+- en: The IP address of the destination; `0.0.0.0` means it’s unspecified or unknown,
+    potentially sending it to the gateway.
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目的地的IP地址；`0.0.0.0`表示未指定或未知，可能会将其发送到网关。
+- en: '`Gateway`'
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`网关`'
+- en: For packets not on the same network, the gateway address.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于不在同一网络上的数据包，网关地址。
+- en: '`Genmask`'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`Genmask`'
+- en: The subnet mask used.
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用的子网掩码。
+- en: '`Flags`'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`标志`'
+- en: '`UG` means the network is up and is a gateway.'
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`UG` 意味着网络已连接并且是一个网关。'
+- en: '`Iface`'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`接口`'
+- en: The network interface the packet is going to use.
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数据包要使用的网络接口。
+- en: 'A modern way is using `ip` like so:'
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个现代的方法是使用`ip`，像这样：
+- en: '[PRE11]'
+  id: totrans-178
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Is it down? We can check connectivity as follows:'
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它是下线了吗？我们可以检查连接性如下：
+- en: '[PRE12]'
+  id: totrans-180
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: Note that we will discuss a number of TCP/IP-related troubleshooting and performance
+    tools in [“Monitoring”](ch08.xhtml#monitoring).
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，我们将在[“监控”](ch08.xhtml#monitoring)中讨论许多与TCP/IP相关的故障排除和性能工具。
+- en: To round things off, I’ll also briefly mention the [Border Gateway Protocol
+    (BGP)](https://oreil.ly/QMc1v) as defined in [RFC 4271](https://oreil.ly/iwRNE)
+    and other IETF specs. While it’s unlikely that you’ll interact directly with BGP
+    (unless you work at a network provider or admin a network), it’s crucial to be
+    aware of its existence and understand at a high level what it does.
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，我也会简要提到[边界网关协议（BGP）](https://oreil.ly/QMc1v)，如[RFC 4271](https://oreil.ly/iwRNE)所定义以及其他
+    IETF 规范。虽然您不太可能直接与 BGP 交互（除非您在网络提供商工作或管理网络），但了解其存在并高层次理解其作用至关重要。
+- en: We said earlier on that the internet really is a network of networks. In BGP
+    terminology, a network is called an *autonomous system* (AS). For IP routing to
+    work, these ASs need to share their routing and reachability data, announcing
+    routes to deliver packets across the internet.
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们之前说过，互联网实际上是一个网络的网络。在 BGP 术语中，网络称为*自治系统*（AS）。为了使 IP 路由工作，这些 AS 需要共享它们的路由和可达性数据，宣布路由以跨互联网传递数据包。
+- en: Now that you know the fundamental workings of the internet layer—how addresses
+    and routing work—let’s move up the stack.
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经了解了互联网层的基本工作原理——地址和路由如何工作——让我们上升到堆栈的更高层。
+- en: The Transport Layer
+  id: totrans-185
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 传输层
+- en: In this layer, it’s all about the nature of the communication between endpoints.
+    There are connection-oriented protocols and connection-less ones. Reliability,
+    QoS, and in-order delivery may be a concern.
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一层，重点在于端点之间通信的性质。有连接导向的协议和无连接的协议。可靠性、QoS 和顺序传递可能是一个问题。
+- en: Note
+  id: totrans-187
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: There are attempts in modern protocol design—[HTTP/3](https://oreil.ly/ecuPK)
+    is an example—to combine functionality, such as moving parts of TCP into higher-level
+    protocols.
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在现代协议设计中，有一些尝试——例如，[HTTP/3](https://oreil.ly/ecuPK)——结合功能，例如将 TCP 的某些部分移到更高级别的协议中。
+- en: Ports
+  id: totrans-189
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 端口
+- en: 'One core concept in this layer is that of ports. No matter which protocol is
+    used in this layer, each requires ports. A *port* is a unique 16-bit number identifying
+    a service available at an IP address. Think of it this way: a single (virtual)
+    machine may have a number of services (see [“Application Layer Networking”](#app-layer-net))
+    running, and you need to be able to identify each in the context of the machine’s
+    IP.'
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这一层的一个核心概念是端口。无论在这一层使用哪种协议，每个协议都需要端口。*端口*是一个唯一的 16 位数，用于标识 IP 地址上可用的服务。可以这样理解：单个（虚拟）机器可能运行多个服务（参见[“应用层网络”](#app-layer-net)），您需要能够在机器的
+    IP 上识别每个服务。
+- en: 'We differentiate between the following:'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们区分以下内容：
+- en: Well-known ports (from 0 to 1023)
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 熟知端口（从 0 到 1023）
+- en: These are for daemons such as an SSH server or a web server. Using (binding
+    to) one of them requires elevated privileges (`root` or `CAP_NET_BIND_SERVICE`
+    capability, as discussed in [“Capabilities”](ch04.xhtml#capabilities)).
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些是用于守护进程（如 SSH 服务器或 Web 服务器）的端口。使用（绑定到）其中一个端口需要提升的权限（`root` 或 `CAP_NET_BIND_SERVICE`
+    能力，如在[“能力”](ch04.xhtml#capabilities)讨论）。
+- en: Registered ports (from 1024 to 49151)
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注册端口（从 1024 到 49151）
+- en: These are managed by Internet Assigned Numbers Authority (IANA) through a publicly
+    documented process.
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些由互联网分配号码管理局（IANA）通过公开文档化的过程管理。
+- en: Ephemeral ports (from 49152 to 65535)
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 临时端口（从 49152 到 65535）
+- en: These cannot be registered. They can be used for automatically allocating a
+    temporary port (for example, if your app connects to a web server, it needs a
+    port itself, as the other endpoint of the communication) as well as for private
+    (say, company-internal) services.
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些无法注册。它们可以用于自动分配临时端口（例如，如果您的应用连接到 Web 服务器，它本身需要一个端口，作为通信的另一端点），以及用于私有（例如，公司内部）服务。
+- en: You can see the ports and mapping in */etc/services*, and further, there is
+    a comprehensive list of [TCP and UDP port numbers](https://oreil.ly/VBp7N) you
+    might want to consult if you’re unsure.
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在 */etc/services* 中看到端口和映射，并且还有一个详尽的[TCP 和 UDP 端口号](https://oreil.ly/VBp7N)列表供您参考，如果您不确定的话。
+- en: 'If you want to see what’s in use on your local machine (*do not* do this on
+    someone else’s machine/against a nonlocal IP):'
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想查看本地机器上正在使用的内容（*请勿*在他人的机器上/对非本地 IP 执行此操作）：
+- en: '[PRE13]'
+  id: totrans-200
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: '[![1](Images/1.png)](#co_networking_CO9-1)'
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO9-1)'
+- en: Scan ports on local machine.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 扫描本地机器上的端口。
+- en: '[![2](Images/2.png)](#co_networking_CO9-2)'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO9-2)'
+- en: Found one open port, 631, which is the Internet Printing Protocol (IPP).
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 发现一个开放的端口，631，即互联网打印协议（IPP）。
+- en: With the general idea of ports explained, let’s now have a look how these ports
+    are used in different transport layer protocols.
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 介绍了端口的一般概念后，让我们看看这些端口在不同的传输层协议中是如何使用的。
+- en: Transmission Control Protocol
+  id: totrans-206
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 传输控制协议
+- en: The *Transmission Control Protocol* (TCP) is a connection-oriented transport
+    layer protocol that is used by a number of higher-level protocols, including HTTP
+    and SSH (see [“Application Layer Networking”](#app-layer-net)). It is a session-based
+    protocol that guarantees delivery of the packets in order and supports retransmission
+    in case of errors.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*传输控制协议*（TCP）是一个面向连接的传输层协议，被许多高层协议使用，包括HTTP和SSH（见[“应用层网络”](#app-layer-net)）。它是一个基于会话的协议，保证数据包的有序传输并支持错误重传。'
+- en: 'The TCP header ([Figure 7-5](#fig-tcp-header)), as defined in [RFC 793](https://oreil.ly/4BY3T)
+    and related IETF specs, has these most important fields:'
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: TCP头部（如[图7-5](#fig-tcp-header)所示），定义在[RFC 793](https://oreil.ly/4BY3T)和相关的IETF规范中，其最重要的字段包括：
+- en: Source port (16 bits)
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 源端口（16位）
+- en: The port used by the sender.
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 发送方使用的端口。
+- en: Destination port (16 bits)
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目标端口（16位）
+- en: The port used by the receiver.
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接收方使用的端口。
+- en: Sequence number (32 bits)
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 序列号（32位）
+- en: Used to manage in-order delivery.
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于管理有序传输。
+- en: Acknowledgment number (32 bits)
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确认号（32位）
+- en: This number and the `SYN` and `ACK` flags are the core of the so-called [*TCP/IP
+    three-way handshake*](https://oreil.ly/Icea3).
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此号码和`SYN`和`ACK`标志是所谓的[*TCP/IP三次握手*](https://oreil.ly/Icea3)的核心。
+- en: Flags (9 bits)
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 标志位（9位）
+- en: Most important, the `SYN` (synchronize) and the `ACK` (acknowledgement) bits.
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最重要的是`SYN`（同步）和`ACK`（确认）位。
+- en: Window (16 bits)
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 窗口（16位）
+- en: The receive window size.
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接收窗口大小
+- en: Checksum (16 bits)
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 校验和（16位）
+- en: A checksum of the TCP-header, used for error checking.
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: TCP头部的校验和，用于错误检查。
+- en: Data
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数据
+- en: The payload to transport.
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 待传输的有效负载。
+- en: '![lmlx 0705](Images/lmlx_0705.png)'
+  id: totrans-225
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0705](Images/lmlx_0705.png)'
+- en: Figure 7-5\. The TCP header format as per RFC 793
+  id: totrans-226
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图7-5。根据RFC 793定义的TCP头部格式
+- en: TCP tracks the state of the connection from establishment to termination, with
+    both the sender and the receiver having to negotiate certain things, from how
+    much data to send (TCP window size) to QoS.
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: TCP从建立到终止跟踪连接的状态，发送方和接收方都必须协商某些事项，从发送多少数据（TCP窗口大小）到QoS。
+- en: From a security perspective, TCP is without any defense mechanisms. In other
+    words, the payload is sent in plain text, and anyone between the sender and the
+    receiver (and there are by design many hops) can inspect the packet; see [“Wireshark
+    and tshark”](#network-traffic-inspection) for details on using Wireshark and `tshark`
+    to inspect the payload. To enable encryption of the message, you need to use the
+    Transport Layer Security (TLS) protocol, ideally in version 1.3 as per [RFC 8446](https://oreil.ly/6dTwf).
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从安全的角度来看，TCP没有任何防御机制。换句话说，负载以明文形式发送，发送方和接收方之间的任何人（设计上有很多跳）都可以检查数据包；详见[“Wireshark和tshark”](#network-traffic-inspection)，了解如何使用Wireshark和`tshark`检查数据包的详细信息。要启用消息的加密，您需要使用传输层安全性（TLS）协议，理想情况下是第1.3版，根据[RFC
+    8446](https://oreil.ly/6dTwf)。
+- en: 'With that, let’s move on to the most important stateless transport layer protocol:
+    UDP.'
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，让我们转向最重要的无状态传输层协议：UDP。
+- en: User Datagram Protocol
+  id: totrans-230
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 用户数据报协议
+- en: '*User Datagram Protocol* (UDP) is a connection-less transport layer protocol
+    allowing you to send messages, called *datagrams* in UDP, without communication
+    setups (such as TCP does with the handshake). It does, however, support datagram
+    checksums to ensure integrity. There are a number of application-level protocols,
+    such as NTP and DHCP (see [“Application Layer Networking”](#app-layer-net)) as
+    well as DNS (see [“DNS”](#dns)), that use UDP.'
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*用户数据报协议*（UDP）是一种无连接的传输层协议，允许您发送称为*数据报*的消息，无需像TCP那样进行通信设置（如握手）。然而，它支持数据报的校验和以确保完整性。有许多应用层协议，如NTP和DHCP（见[“应用层网络”](#app-layer-net)），以及DNS（见[“DNS”](#dns)），使用UDP。'
+- en: 'The [RFC 768](https://oreil.ly/dysc4) defines the UDP header format as shown
+    in [Figure 7-6](#fig-udp-header). Its most important fields are the following:'
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[RFC 768](https://oreil.ly/dysc4)定义了UDP头部的格式，如[图7-6](#fig-udp-header)所示。其最重要的字段如下：'
+- en: Source port (16 bits)
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 源端口（16位）
+- en: The port used by the sender; optional, and if not, use 0
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 发送方使用的端口；可选，如果不使用，则使用0
+- en: Destination port (16 bits)
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目标端口（16位）
+- en: The port used by the receiver
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接收方使用的端口
+- en: Length (16 bits)
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 长度（16位）
+- en: The total length of the UDP header and data
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UDP头部和数据的总长度
+- en: Checksum (16 bits)
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 校验和（16位）
+- en: Can optionally be used for error checking
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可以选择用于错误检查
+- en: Data
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数据
+- en: The payload of the datagram
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数据包的有效载荷
+- en: '![lmlx 0706](Images/lmlx_0706.png)'
+  id: totrans-243
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0706](Images/lmlx_0706.png)'
+- en: Figure 7-6\. The UDP header format as per RFC 768
+  id: totrans-244
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图7-6。根据RFC 768的UDP头格式
+- en: UDP is a very simple protocol and requires the higher-level protocol that works
+    on top of it to take care of many of the things that TCP would handle itself.
+    On the other hand, UDP has very little overhead and can achieve high throughput.
+    It’s very simple to use; see also the [UDP manual page](https://oreil.ly/NJiAQ).
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UDP是一个非常简单的协议，并且需要在其之上运行的更高级别协议来处理许多TCP本身会处理的事情。另一方面，UDP的开销非常小，可以实现很高的吞吐量。使用起来非常简单；另请参阅[UDP手册页面](https://oreil.ly/NJiAQ)。
+- en: Sockets
+  id: totrans-246
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 套接字
+- en: 'A high-level communication interface that Linux provides are [*sockets*](https://oreil.ly/C7gQA).
+    Think of them as endpoints in a communication, with their distinct identity: a
+    tuple made up of the TCP or UDP port and the IP address.'
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux提供的高级通信接口是[*套接字*](https://oreil.ly/C7gQA)。将它们视为通信中的端点，具有它们自己的独特身份：由TCP或UDP端口和IP地址组成的元组。
+- en: It’s likely that you’ll only use sockets if you want to develop network-related
+    tooling or apps, but you should at least be aware of how to query them. For example,
+    in the context of the [Docker daemon](https://oreil.ly/OUD5V), you at least need
+    to know about the required permissions for the socket.
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想要开发与网络相关的工具或应用程序，很可能只会使用套接字，但至少应该知道如何查询它们。例如，在[Docker守护程序](https://oreil.ly/OUD5V)的上下文中，您至少需要了解套接字所需的权限。
+- en: Let’s have a look at how to use the [`ss` command](https://oreil.ly/qtCkK) to
+    display socket-related information.
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看如何使用[`ss`命令](https://oreil.ly/qtCkK)显示与套接字相关的信息。
+- en: 'Let’s assume we want to get an overview of the TCP sockets in use on the system:'
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设我们想要系统上正在使用的TCP套接字的概述：
+- en: '[PRE14]'
+  id: totrans-251
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: '[![1](Images/1.png)](#co_networking_CO10-1)'
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO10-1)'
+- en: Use the `ss` command to query ports (with `-s`, we ask for a summary).
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`ss`命令查询端口（使用`-s`，我们请求一个摘要）。
+- en: '[![2](Images/2.png)](#co_networking_CO10-2)'
+  id: totrans-254
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO10-2)'
+- en: The summary for TCP; overall, 10 sockets in use.
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: TCP的总结；总共使用了10个套接字。
+- en: '[![3](Images/3.png)](#co_networking_CO10-3)'
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO10-3)'
+- en: A more detailed overview, breaking down by type and IP version.
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更详细的概述，按类型和IP版本分解。
+- en: 'Now, what about UDP? Can we get this information, maybe with some more details,
+    such as endpoint IP addresses? Turns out this is also possible with `ss` (output
+    edited):'
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，UDP怎么样？我们可以获取这些信息吗，也许还有一些更详细的信息，例如端点IP地址？事实证明，这也可以通过`ss`实现（输出已编辑）：
+- en: '[PRE15]'
+  id: totrans-259
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: '[![1](Images/1.png)](#co_networking_CO11-1)'
+  id: totrans-260
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO11-1)'
+- en: 'Use `ss`: the `-u` parameter restricts to UDP sockets, `-l` is for selecting
+    listening sockets, and `-p` also shows the process information (none in our case).'
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`ss`：`-u`参数限制为UDP套接字，`-l`用于选择监听套接字，`-p`还显示进程信息（在我们的情况下没有）。
+- en: 'Another tool you might find handy in this context (sockets and processes) is
+    [`lsof`](https://oreil.ly/YBhMB). For example, let’s see what UDP sockets Chrome
+    uses on my machine (output edited):'
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这种情况下，您可能会发现另一个有用的工具（套接字和进程）是[`lsof`](https://oreil.ly/YBhMB)。例如，让我们看看我的机器上Chrome使用了哪些UDP套接字（输出已编辑）：
+- en: '[PRE16]'
+  id: totrans-263
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: '[![1](Images/1.png)](#co_networking_CO12-1)'
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO12-1)'
+- en: Use `lsof` with `-c` to specifically select a process by name as well as limit
+    to UDP with `-i`. Note that the overall output would be many dozens of lines;
+    that’s why I cut it down to five with the `head -5` command in the pipe.
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`lsof`与`-c`来具体选择一个进程的名称，同时限制为使用`-i`的UDP。请注意，总体输出可能有几十行；这就是为什么我用管道中的`head -5`命令将其减少到五行。
+- en: 'With that we’ve covered the three lower layers of the TCP/IP stack. Since the
+    application layer has so much going on, I’ve dedicated two sections to it: first,
+    we’re looking into the global-scale naming system, and then we’ll look into a
+    number of application layer (or layer 7) protocols and applications, such as the
+    web.'
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过这样，我们已经涵盖了TCP/IP协议栈的三个较低层次。由于应用层有很多工作要做，我专门划分了两个部分来处理它：首先，我们将研究全球范围的命名系统，然后我们将研究一些应用层（或第7层）协议和应用程序，比如Web。
+- en: DNS
+  id: totrans-267
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: DNS
+- en: 'We learned that the internet layer of the TCP/IP stack defines so-called IP
+    addresses whose main function it is to identify machines, virtual or physical
+    alike. In the context of [“Containers”](ch06.xhtml#containers), we go so far as
+    to assign IP addresses to individual containers. There are two challenges with
+    numerical IP addresses, no matter if IPv4 or IPv6:'
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们了解到TCP/IP协议栈的Internet层定义了所谓的IP地址，其主要功能是标识机器，无论是虚拟的还是物理的。在["容器"](ch06.xhtml#containers)的背景下，我们甚至为每个容器分配IP地址。无论是IPv4还是IPv6，数字IP地址都面临两个挑战：
+- en: As humans, we generally remember names better than we do (long) numbers. For
+    example, if you want to share a website with a friend, you can just say it’s [*ietf.org*](https://ietf.org)
+    they should check out rather than `4.31.198.44`.
+  id: totrans-269
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 作为人类，我们通常比起（长）数字更容易记住名称。例如，如果你想与朋友分享一个网站，你只需说这是[*ietf.org*](https://ietf.org)，而不是`4.31.198.44`。
+- en: Due to the way the internet and its applications are built, IP addresses often
+    change. You might get a new server with a new IP address in a more traditional
+    setup. Or, in the context of containers, you may be rescheduled onto a different
+    host, in which case the container automatically gets a new IP address assigned.
+  id: totrans-270
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 由于互联网及其应用程序的构建方式，IP地址经常会发生变化。在传统设置中，您可能会得到一个新的服务器和新的IP地址。或者在容器的上下文中，您可能会被重新调度到不同的主机，此时容器将自动分配一个新的IP地址。
+- en: So, in a nutshell, IP addresses are hard to remember and can change, while a
+    name (for a server or a service) remains the same. This challenge has existed
+    since the beginning of the internet and since UNIX supported the TCP/IP stack.
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简而言之，IP地址难以记住且可能会改变，而名称（用于服务器或服务）保持不变。这个挑战自互联网初期以来就存在，并且自UNIX支持TCP/IP协议栈以来也是如此。
+- en: The way to address this was to locally (in the context of a single machine)
+    maintain a mapping between names and IP addresses via */etc/hosts*. The Network
+    Information Center (NIC) would share a single file called *HOSTS.TXT* via FTP
+    with all participating hosts.
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 解决这个问题的方式是在本地（在单台机器的上下文中）通过*/etc/hosts*维护名称和IP地址之间的映射。网络信息中心（NIC）通过FTP与所有参与的主机共享一个称为*HOSTS.TXT*的单一文件。
+- en: Very soon it became clear that this centralized approach could not keep up with
+    the growing internet, and in the early 1980s, a distributed system was designed.
+    Paul Mockapetris was the lead architect.
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 很快就清楚，这种集中式方法无法跟上不断增长的互联网发展步伐，在20世纪80年代初设计了分布式系统。保罗·莫卡佩特里斯是首席架构师。
+- en: The DNS is a worldwide, hierarchical naming system for hosts and services on
+    the internet. While there are many related RFCs, the original one, [RFC 1034](https://oreil.ly/rbQNY),
+    and its implementation guidance via [RFC 1035](https://oreil.ly/c1eYB) are still
+    valid, and I strongly recommend you read them if you want to learn more about
+    the motivation and design.
+  id: totrans-274
+  prefs: []
+  type: TYPE_NORMAL
+  zh: DNS是互联网上主机和服务的全球分层命名系统。虽然有许多相关的RFC文档，但最初的[RFC 1034](https://oreil.ly/rbQNY)及其通过[RFC
+    1035](https://oreil.ly/c1eYB)的实施指南仍然有效，如果您想了解更多动机和设计，请务必阅读它们。
+- en: 'The DNS uses a number of terms, but the following are the main concepts:'
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: DNS使用许多术语，但以下是主要概念：
+- en: Domain name space
+  id: totrans-276
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 域名空间
+- en: A tree structure with `.` as the root and each tree node and leaf containing
+    information about a certain space. The labels (63 bytes maximum length) along
+    the path from a leaf to the root is what we call a *fully qualified domain name*
+    (FQDN). For example, *demo.mhausenblas.info.* is an FQDN with the so-called top-level
+    domain *.info*. Note that the right-most dot, the root, is often left off.
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一棵以`.`为根的树状结构，每个树节点和叶子都包含关于特定空间的信息。从叶子到根的路径上的标签（最大长度为63个字节）称为*完全限定域名*（FQDN）。例如，*demo.mhausenblas.info.*
+    是一个带有所谓顶级域名*.info*的FQDN。请注意，右边的点，即根，通常被省略。
+- en: Resource records
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 资源记录
+- en: The payload in the nodes or leaves of the domain name space (see [“DNS Records”](#dns-records)).
+  id: totrans-279
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 域名空间的节点或叶子中的有效负载（请参见["DNS记录"](#dns-records)）。
+- en: Name servers
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 名称服务器
+- en: Server programs that hold information about the domain tree’s structure. If
+    a name server has the complete information about a space, it’s called an *authoritative
+    name server*. Authoritative information is organized into zones.
+  id: totrans-281
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 保存有关域树结构信息的服务器程序。如果一个名字服务器拥有完整的空间信息，它被称为*权威名字服务器*。权威信息被组织成区域。
+- en: Resolvers
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 解析器
+- en: Programs that extract information from name servers in response to client requests.
+    They are machine local, and no explicit protocol is defined for the interaction
+    between a resolver and a client. Often there are library calls supported for resolving
+    the DNS.
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 响应客户端请求从名称服务器中提取信息的程序。它们是机器本地的，没有为解析器和客户端之间的交互定义明确的协议。通常支持用于解析DNS的库调用。
+- en: '[Figure 7-7](#fig-dns-example) shows a complete setup of a DNS system, including
+    user program, resolver, and name server(s), as described in RFC 1035\. In the
+    query process, the resolver would iteratively query authoritative name servers
+    (NS) starting from the root or, if supported, using a recursive query where an
+    NS queries others on behalf of a resolver.'
+  id: totrans-284
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图 7-7](#fig-dns-example)显示了DNS系统的完整设置，包括用户程序、解析器和名称服务器，如RFC 1035所述。在查询过程中，解析器将从根开始迭代查询权威名称服务器（NS），或者如果支持的话，使用递归查询，其中一个NS代表解析器查询其他NS。'
+- en: '![lmlx 0707](Images/lmlx_0707.png)'
+  id: totrans-285
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0707](Images/lmlx_0707.png)'
+- en: Figure 7-7\. A complete DNS example setup
+  id: totrans-286
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 7-7。一个完整的DNS示例设置
+- en: Note
+  id: totrans-287
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Although they’re still around, we usually don’t use the DNS [resolver configuration](https://oreil.ly/2plq1)
+    in */etc/resolv.conf* in modern systems, especially when DHCP (see [“Dynamic Host
+    Configuration Protocol”](#dhcp)) is deployed.
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管它们仍然存在，但我们通常不在现代系统中使用DNS [解析器配置](https://oreil.ly/2plq1) */etc/resolv.conf*，特别是在部署DHCP（见[“动态主机配置协议”](#dhcp)）时。
+- en: 'The DNS is a hierarchical naming system, and at its root sit 13 [root servers](https://oreil.ly/hNppq)
+    that manage the records for the top-level domains. Directly beneath the root are
+    the [top-level domains (TLD)](https://oreil.ly/secgy):'
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: DNS是一个层次命名系统，在其根部署着管理顶级域记录的13个[根服务器](https://oreil.ly/hNppq)。根之下直接是[顶级域名（TLD）](https://oreil.ly/secgy)：
+- en: Infrastructure top-level domain
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基础设施顶级域
+- en: Managed by IANA on behalf of the IETF and including, for example, *example*
+    and *localhost*
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由IANA代表IETF管理，包括例如*example*和*localhost*
+- en: Generic top-level domains (gTLD)
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通用顶级域名（gTLD）
+- en: Generic domains having three or more characters, such as *.org* or *.com*
+  id: totrans-293
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 三个或更多字符的通用域名，例如*.org*或*.com*
+- en: Country-code top-level domains (ccTLD)
+  id: totrans-294
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 国家代码顶级域（ccTLD）
+- en: For countries or territories assigned [two-letter ISO country codes](https://oreil.ly/lBWjD)
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 适用于分配了[两字母ISO国家代码](https://oreil.ly/lBWjD)的国家或地区。
+- en: Sponsored top-level domains (sTLD)
+  id: totrans-296
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 赞助的顶级域名（sTLD）
+- en: For private agencies or organizations that establish and enforce rules restricting
+    the eligibility to use the TLD—for example, *.aero* and *.gov*
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为私人机构或组织建立和执行限制使用TLD资格的规则，例如*.aero*和*.gov*
+- en: Let’s have a closer look at some moving parts of the DNS and how to use it in
+    practice.
+  id: totrans-298
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们更仔细地看一些DNS的移动部件及其在实践中的使用方法。
+- en: DNS Records
+  id: totrans-299
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: DNS记录
+- en: A name server manages records that capture the type, the payload, and other
+    fields, including things like the time to live (TTL), the time period after which
+    the record is supposed to be discarded. You can think of the FQDN as the address
+    of the node and the resource record (RR) as the payload, the data in the node.
+  id: totrans-300
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 名称服务器管理记录，捕获类型、有效载荷和其他字段，包括生存时间（TTL）、记录应该被丢弃的时间段。您可以将FQDN视为节点的地址，将资源记录（RR）视为有效载荷，节点中的数据。
+- en: 'DNS has a number of [record types](https://oreil.ly/5QTJ9), including the following
+    most important ones (in alphabetical order):'
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: DNS具有许多[记录类型](https://oreil.ly/5QTJ9)，包括以下最重要的（按字母顺序）：
+- en: '`A` records (RFC 1035) and `AAAA` records (RFC 3596)'
+  id: totrans-302
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`A`记录（RFC 1035）和`AAAA`记录（RFC 3596）'
+- en: IPv4 and IPv6 address records, respectively; usually used to map hostnames to
+    an IP address of the host.
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 分别是IPv4和IPv6地址记录，通常用于将主机名映射到主机的IP地址。
+- en: '`CNAME` records (RFC 1035)'
+  id: totrans-304
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`CNAME`记录（RFC 1035）'
+- en: Canonical name records providing an alias of one name to another.
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 提供一个名称的规范名称记录到另一个名称的别名。
+- en: '`NS` records (RFC 1035)'
+  id: totrans-306
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`NS`记录（RFC 1035）'
+- en: Name server records delegating a DNS zone to use the authoritative name servers.
+  id: totrans-307
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将DNS区域委托给权威名称服务器使用的名称服务器记录。
+- en: '`PTR` records (RFC 1035)'
+  id: totrans-308
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`PTR`记录（RFC 1035）'
+- en: Pointer records used for performing reverse DNS lookups; the opposite of `A`
+    records.
+  id: totrans-309
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于执行反向DNS查找的指针记录；与`A`记录相反。
+- en: '`SRV` records (RFC 2782)'
+  id: totrans-310
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SRV`记录（RFC 2782）'
+- en: Service locator records. They are a generalized discovery mechanism, rather
+    than hardcoded (as traditionally was the case with the `MX` record type for mail
+    exchange).
+  id: totrans-311
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 服务定位器记录。它们是通用的发现机制，而不是像传统上硬编码的（例如邮件交换的`MX`记录类型）。
+- en: '`TXT` records (RFC 1035)'
+  id: totrans-312
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`TXT`记录（RFC 1035）'
+- en: Text records. These were originally meant for arbitrary human-readable text
+    but over time found a new use case. Today, these records often have machine-readable
+    data in the context of security-related DNS extensions.
+  id: totrans-313
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文本记录。这些最初用于任意人类可读文本，但随着时间的推移发现了新的用途。今天，在安全相关DNS扩展的背景下，这些记录通常包含机器可读的数据。
+- en: There are also [wildcard records](https://oreil.ly/yL039) starting with the
+    asterisk label (`*`)—for example, **.mhausenblas.info*—as a catch-all to match
+    requests for nonexistent names.
+  id: totrans-314
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 也有以星号标签（`*`）开头的[通配符记录](https://oreil.ly/yL039)—例如，**.mhausenblas.info*—用作匹配不存在名称的请求的通配符。
+- en: 'Let’s see how these records look in practice. The DNS records are represented
+    in a textual form in a [zone file](https://oreil.ly/4Ngai) that a name server—such
+    as [bind](https://oreil.ly/095v2)—reads in and makes part of its database:'
+  id: totrans-315
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看这些记录在实践中是什么样子的。DNS记录以文本形式在[区域文件](https://oreil.ly/4Ngai)中表示，这些文件由像[bind](https://oreil.ly/095v2)这样的名字服务器读取并作为其数据库的一部分。
+- en: '[PRE17]'
+  id: totrans-316
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: '[![1](Images/1.png)](#co_networking_CO13-1)'
+  id: totrans-317
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO13-1)'
+- en: The start of this zone file in the namespace.
+  id: totrans-318
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在命名空间中这个区域文件的开始。
+- en: '[![2](Images/2.png)](#co_networking_CO13-2)'
+  id: totrans-319
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO13-2)'
+- en: Default expiration time in seconds of all RRs that don’t define their own TTL.
+  id: totrans-320
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有未定义自己TTL的资源记录的默认过期时间（以秒为单位）。
+- en: '[![3](Images/3.png)](#co_networking_CO13-3)'
+  id: totrans-321
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO13-3)'
+- en: The nameserver for this domain.
+  id: totrans-322
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此域的名称服务器。
+- en: '[![4](Images/4.png)](#co_networking_CO13-4)'
+  id: totrans-323
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_networking_CO13-4)'
+- en: The mailserver for this domain.
+  id: totrans-324
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此域的邮件服务器。
+- en: '[![5](Images/5.png)](#co_networking_CO13-5)'
+  id: totrans-325
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_networking_CO13-5)'
+- en: The IPv4 address for this domain.
+  id: totrans-326
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此域名的IPv4地址。
+- en: '[![6](Images/6.png)](#co_networking_CO13-6)'
+  id: totrans-327
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](Images/6.png)](#co_networking_CO13-6)'
+- en: The IPv4 address for the nameserver.
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 名字服务器的IPv4地址。
+- en: '[![7](Images/7.png)](#co_networking_CO13-7)'
+  id: totrans-329
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![7](Images/7.png)](#co_networking_CO13-7)'
+- en: Make *www.example.com* an alias for this domain—that is, *example.com*.
+  id: totrans-330
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将*www.example.com*设置为该域的别名，即*example.com*。
+- en: '[![8](Images/8.png)](#co_networking_CO13-8)'
+  id: totrans-331
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![8](Images/8.png)](#co_networking_CO13-8)'
+- en: The IPv4 address for the mail server.
+  id: totrans-332
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 邮件服务器的IPv4地址。
+- en: 'Putting all the concepts discussed together, we can now understand the example
+    shown in [Figure 7-8](#fig-dns-space-example). This shows a part of the global
+    domain name space and a concrete example FQDN, *demo.mhausenblas.info*:'
+  id: totrans-333
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将所有讨论的概念整合在一起，我们现在可以理解图示中显示的例子，见[Figure 7-8](#fig-dns-space-example)。这显示了全球域名空间的一部分和一个具体的FQDN示例，*demo.mhausenblas.info*：
+- en: '*.info*'
+  id: totrans-334
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*.info*'
+- en: A generic TLD managed by a company called [Afilias](https://www.afilias.info).
+  id: totrans-335
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由名为[Afilias](https://www.afilias.info)的公司管理的通用顶级域。
+- en: '*mhausenblas.info*'
+  id: totrans-336
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*mhausenblas.info*'
+- en: A domain I bought. Within this zone I can assign subdomains as I please.
+  id: totrans-337
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我购买的一个域名。在此区域内，我可以任意分配子域。
+- en: '*demo.mhausenblas.info*'
+  id: totrans-338
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*demo.mhausenblas.info*'
+- en: The subdomain I assigned for demo purposes.
+  id: totrans-339
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我为演示目的分配的子域。
+- en: '![lmlx 0708](Images/lmlx_0708.png)'
+  id: totrans-340
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0708](Images/lmlx_0708.png)'
+- en: Figure 7-8\. The domain name space and an example path (FQDN)
+  id: totrans-341
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图7-8\. 域名空间及示例路径（FQDN）
+- en: Consider how in the previous example each entity (Afilias or me) only looks
+    after its part, and no coordination is required. For example, to create the *demo*
+    subdomain, I only had to change my DNS settings for the zone, without asking anyone
+    at Afilias for support or permissions. This seemingly simple fact is the core
+    of the decentralized nature of DNS and is what makes it so scalable.
+  id: totrans-342
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 考虑到在前面的示例中，每个实体（Afilias或我）只需照看自己的部分，无需协调。例如，要创建*demo*子域，我只需更改我的区域的DNS设置，无需请求Afilias的支持或权限。这看似简单的事实正是DNS去中心化性质的核心，也是其可扩展性的原因。
+- en: Now that we know how the domain name space is structured and the information
+    in the nodes is represented, let’s see how you can query them.
+  id: totrans-343
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们知道域名空间的结构及其节点中的信息是如何表示的，让我们看看如何查询它们。
+- en: DNS Lookups
+  id: totrans-344
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: DNS查找
+- en: With all the infrastructure in place, mainly nameservers and resolvers, we now
+    look at performing DNS queries. There is a lot of logic in the evaluation and
+    construction of the resolution (mostly covered in RFC 1034 and 1035), but this
+    is beyond the scope of the book. Let’s have a look at how you can do the query
+    without having to understand the internals.
+  id: totrans-345
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了所有基础设施的支持，主要是名字服务器和解析器，我们现在看看如何执行DNS查询。在解析（主要涵盖在RFC 1034和1035中）的评估和构建中有很多逻辑，但这超出了本书的范围。让我们看看如何在不必理解内部工作的情况下进行查询。
+- en: 'You can use the `host` command to query local (and global) names to resolve
+    them to IP addresses and the other way around:'
+  id: totrans-346
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用`host`命令查询本地（和全球）名称以将其解析为IP地址，反之亦然：
+- en: '[PRE18]'
+  id: totrans-347
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: '[![1](Images/1.png)](#co_networking_CO14-1)'
+  id: totrans-348
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO14-1)'
+- en: Look up local IP addresses.
+  id: totrans-349
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找本地 IP 地址。
+- en: '[![2](Images/2.png)](#co_networking_CO14-2)'
+  id: totrans-350
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO14-2)'
+- en: Look up FQDN.
+  id: totrans-351
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找 FQDN。
+- en: '[![3](Images/3.png)](#co_networking_CO14-3)'
+  id: totrans-352
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO14-3)'
+- en: Reverse lookup of IP address to find an FQDN; looks like the GitHub CDN.
+  id: totrans-353
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 反向查找 IP 地址以找到 FQDN；看起来像是 GitHub CDN。
+- en: 'A more powerful way to look up the DNS records is using the `dig` command:'
+  id: totrans-354
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`dig`命令查找 DNS 记录的更强大方法：
+- en: '[PRE19]'
+  id: totrans-355
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: '[![1](Images/1.png)](#co_networking_CO15-1)'
+  id: totrans-356
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO15-1)'
+- en: Using `dig`, look up the DNS records of the FQDN *mhausenblas.info*.
+  id: totrans-357
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`dig`，查找 FQDN *mhausenblas.info* 的 DNS 记录。
+- en: '[![2](Images/2.png)](#co_networking_CO15-2)'
+  id: totrans-358
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO15-2)'
+- en: The DNS A records.
+  id: totrans-359
+  prefs: []
+  type: TYPE_NORMAL
+  zh: DNS A 记录。
+- en: '[![3](Images/3.png)](#co_networking_CO15-3)'
+  id: totrans-360
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO15-3)'
+- en: The authoritative nameserver.
+  id: totrans-361
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 权威名称服务器。
+- en: There are alternatives to the `dig` command available, notably `dog` and `nslookup`;
+    see [Appendix B](app02.xhtml#appendix-modern).
+  id: totrans-362
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`dig`命令有可用的替代方法，特别是`dog`和`nslookup`；参见[附录 B](app02.xhtml#appendix-modern)。'
+- en: Tip
+  id: totrans-363
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: 'One saying you will come across often is: “It’s always DNS.” But what does
+    this mean? It’s about troubleshooting and understanding that DNS is a distributed
+    database with many moving parts. When debugging DNS-related issues, consider the
+    TTL of records and that there are many caches, from local ones in your app to
+    resolver, to anything between you and the nameservers.'
+  id: totrans-364
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你经常会听到一句话：“问题总在 DNS 上。” 但这是什么意思呢？它涉及故障排除和理解 DNS 是一个具有许多移动部分的分布式数据库。在调试与 DNS
+    相关的问题时，请考虑记录的 TTL 和在你的应用程序到解析器之间的所有缓存。
+- en: In [“DNS Records”](#dns-records), we mentioned the `SRV` record type and that
+    it serves as a generic discovery mechanism. So, rather than defining a new record
+    type for a new service in an RFC, the community came up with a generic way to
+    address any upcoming service type. This mechanism, described in [RFC 2782](https://oreil.ly/DIKbI),
+    explains how `SRV` records can be used to communicate the IP address and port
+    of a service via DNS.
+  id: totrans-365
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[“DNS 记录”](#dns-records)中，我们提到了`SRV`记录类型及其作为通用发现机制的功能。因此，与其在 RFC 中定义一个新的服务记录类型，社区想出了一种通用方法来应对任何即将到来的服务类型。本机制在[RFC
+    2782](https://oreil.ly/DIKbI)中描述，解释了如何通过 DNS 传递`SRV`记录以通信服务的 IP 地址和端口。
+- en: 'Let’s see that in practice. Say we want to know what chat services—more specifically,
+    [Extensible Messaging and Presence Protocol (XMPP)](https://oreil.ly/rDmcx) services—if
+    any, are available:'
+  id: totrans-366
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们来看看实际操作。比如说，我们想知道有哪些聊天服务——更具体地说，[可扩展消息传递与状态协议（XMPP）](https://oreil.ly/rDmcx)服务——是可用的：
+- en: '[PRE20]'
+  id: totrans-367
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: '[![1](Images/1.png)](#custom_co_networking_CO16-1)'
+  id: totrans-368
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#custom_co_networking_CO16-1)'
+- en: Use the `dig` command with the `+short` option to display only the relevant
+    answer section. The *_xmpp-client._tcp* part is the format RFC 2782 prescribes,
+    and the `SRV` at the end of this command specifies what record type we’re interested
+    in.
+  id: totrans-369
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`dig`命令和`+short`选项仅显示相关的回答部分。*_xmpp-client._tcp*部分是RFC 2782规定的格式，而命令末尾的`SRV`指定了我们感兴趣的记录类型。
+- en: '[![2](Images/2.png)](#custom_co_networking_CO16-2)'
+  id: totrans-370
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#custom_co_networking_CO16-2)'
+- en: Overall there are five answers. An example service instance is available at
+    *xmpp.l.google.com:5222* with a TTL of 5 seconds. If you have an XMPP such as
+    Jabber, you could use this address for configuration input.
+  id: totrans-371
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 总共有五个回答。例如，一个服务实例可在*xmpp.l.google.com:5222*找到，TTL 为 5 秒。如果你有像 Jabber 这样的 XMPP
+    服务，可以使用这个地址进行配置输入。
+- en: With this, we’ve reached the end of the DNS section. Now we’ll have a look at
+    other application layer protocols and tooling.
+  id: totrans-372
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到这里，我们已经结束了 DNS 部分。现在让我们来看看其他应用层协议和工具。
+- en: Application Layer Networking
+  id: totrans-373
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 应用层网络
+- en: In this section, we focus on user space or application layer network protocols,
+    tooling, and apps. As an end user, you’ll likely spend most of your time here,
+    using things such as web browsers or mail clients for your daily tasks.
+  id: totrans-374
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我们专注于用户空间或应用层网络协议、工具和应用程序。作为最终用户，你可能会在这里花费大部分时间，使用诸如网页浏览器或邮件客户端之类的工具完成日常任务。
+- en: The Web
+  id: totrans-375
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 网络
+- en: 'The web, originally developed by Sir Tim Berners-Lee in the early 1990s, has
+    three core components:'
+  id: totrans-376
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Web 最初由 Tim Berners-Lee 爵士在 1990 年代初开发，有三个核心组件：
+- en: Uniform Resource Locators (URL)
+  id: totrans-377
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 统一资源定位符（URL）
+- en: As per [RFC 1738](https://oreil.ly/EfgPm) originally and a number of updates
+    and related RFCs. A URL defines both the identity and the location of a resource
+    on the web. A resource could be a static page or a process that generates content
+    dynamically.
+  id: totrans-378
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据[RFC 1738](https://oreil.ly/EfgPm)以及一些更新和相关的RFC，URL定义了Web上资源的标识和位置。资源可以是静态页面或动态生成内容的进程。
+- en: Hypertext Transfer Protocol (HTTP)
+  id: totrans-379
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 超文本传输协议（HTTP）
+- en: 'HTTP defines an application layer protocol and how to interact with content
+    available via URLs. As per [RFC 2616](https://oreil.ly/hGr3E) for v1.1, but there
+    are also more modern versions, such as HTTP/2, defined in [RFC 7540](https://oreil.ly/1Z6pn),
+    and the [HTTP/3 draft](https://oreil.ly/XRkMf) (which at the time of this writing
+    was still in the works). Core HTTP concepts are:'
+  id: totrans-380
+  prefs: []
+  type: TYPE_NORMAL
+  zh: HTTP定义了应用层协议以及如何通过URL与可用内容交互。根据[RFC 2616](https://oreil.ly/hGr3E)的v1.1版本，但也有更现代的版本，例如在本文撰写时正在制定的HTTP/2，由[RFC
+    7540](https://oreil.ly/1Z6pn)定义，以及[HTTP/3草案](https://oreil.ly/XRkMf)。核心HTTP概念包括：
+- en: '[HTTP methods](https://oreil.ly/FFWuP)'
+  id: totrans-381
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[HTTP方法](https://oreil.ly/FFWuP)'
+- en: Including `GET` for read operations and, among others, `POST` for write operations,
+    these define a CRUD-like interface.
+  id: totrans-382
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包括`GET`用于读操作，以及`POST`等其他操作，这些定义了类似CRUD的接口。
+- en: '[Resource naming](https://oreil.ly/ttnOq)'
+  id: totrans-383
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[资源命名](https://oreil.ly/ttnOq)'
+- en: This dictates how to form URLs.
+  id: totrans-384
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这决定了如何形成URL。
+- en: '[HTTP status codes](https://oreil.ly/LppmX)'
+  id: totrans-385
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[HTTP状态码](https://oreil.ly/LppmX)'
+- en: With the `2xx` range for success, `3xx` for redirects, `4xx` for client errors,
+    and `5xx` for server errors.
+  id: totrans-386
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 成功的`2xx`范围，重定向的`3xx`，客户端错误的`4xx`，服务器错误的`5xx`。
+- en: Hyper Text Markup Language (HTML)
+  id: totrans-387
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 超文本标记语言（HTML）
+- en: Initially a W3C specification, HTML is now a living standard available via [WHATWG](https://oreil.ly/lUcHo).
+    A hypertext markup allows you to define page elements such as headers or inputs.
+  id: totrans-388
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最初是W3C规范，HTML现在是通过[WHATWG](https://oreil.ly/lUcHo)提供的一个活动标准。超文本标记语言允许您定义页面元素，如标题或输入。
+- en: 'Let’s have a closer look at how URIs (the generic version of URLs) are constructed
+    (as per RFC 3986) and how that maps to HTTP URLs:'
+  id: totrans-389
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们更仔细地看看如何构建URI（URL的通用版本）（根据RFC 3986），以及它如何映射到HTTP URL：
+- en: '[PRE21]'
+  id: totrans-390
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'The components are as follows:'
+  id: totrans-391
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些组件如下：
+- en: '`user` and `password` (both optional)'
+  id: totrans-392
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`user`和`password`（两者都是可选的）'
+- en: Initially used for basic authentication, these components should not be used
+    anymore. Instead, for HTTP, you should be using a proper [authentication mechanism](https://oreil.ly/EHNfN)
+    together with [HTTPS](https://oreil.ly/Dvuh4) for encryption on the wire.
+  id: totrans-393
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最初用于基本身份验证，这些组件不应再使用。相反，对于HTTP，您应该使用适当的[身份验证机制](https://oreil.ly/EHNfN)，以及用于传输中的[HTTPS](https://oreil.ly/Dvuh4)进行加密。
+- en: '`scheme`'
+  id: totrans-394
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`scheme`'
+- en: Refers to the [URL scheme](https://oreil.ly/R9QeW), an IETF specification defining
+    its meaning. For HTTP, that scheme is called `http`, which really is a family
+    of HTTP specifications, such as RFC 2616.
+  id: totrans-395
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参考[URL方案](https://oreil.ly/R9QeW)，这是一个IETF规范，定义了其含义。对于HTTP来说，该方案称为`http`，实际上是一组HTTP规范，例如RFC
+    2616。
+- en: '`authority`'
+  id: totrans-396
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`authority`'
+- en: 'The hierarchical naming part. For HTTP, this is:'
+  id: totrans-397
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 分层命名部分。对于HTTP来说，这是：
+- en: Hostname
+  id: totrans-398
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 主机名
+- en: Either as a DNS FQDN or an IP address.
+  id: totrans-399
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可作为DNS FQDN或IP地址。
+- en: Port
+  id: totrans-400
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 端口
+- en: With a default of 80 (so *example.com:80* and *example.com* are the same).
+  id: totrans-401
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认为80（因此*example.com:80*和*example.com*是相同的）。
+- en: '`path`'
+  id: totrans-402
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`path`'
+- en: A scheme-specific part for further resource details.
+  id: totrans-403
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于进一步资源细节的方案特定部分。
+- en: '`query` and `fragment` (both optional)'
+  id: totrans-404
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`query`和`fragment`（两者都是可选的）'
+- en: The former appears after the `?` for nonhierarchical data (for example, to express
+    tags or form data), and the latter appears after the `#` for secondary resources
+    (in the context of HTML, that could be a section).
+  id: totrans-405
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在非层次数据后出现（例如，用于表示标签或表单数据），后者在`#`后出现（在HTML的上下文中，这可能是一个部分）。
+- en: Today, the web has advanced far beyond its humble 1990s roots, with a number
+    of technologies such as [JavaScript/ECMAScript](https://oreil.ly/b8kFe) and [Cascading
+    Style Sheets (CSS)](https://oreil.ly/rSlYl) considered core. Those additions,
+    JavaScript for dynamic client-side content and CSS for styling, have eventually
+    led to [single-page web apps](https://oreil.ly/E1SJu). While this topic is beyond
+    the scope of the book, it’s important to remember that knowing the basics (URL,
+    HTTP, and HTML) well goes a long way in terms of understanding how things work
+    and troubleshooting issues you may have.
+  id: totrans-406
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 今天，Web已远远超出其谦逊的1990年代根基，许多技术，如[JavaScript/ECMAScript](https://oreil.ly/b8kFe)和[Cascading
+    Style Sheets (CSS)](https://oreil.ly/rSlYl)，被视为核心。这些新增内容，JavaScript用于动态客户端内容，CSS用于样式设计，最终导致了[单页Web应用程序](https://oreil.ly/E1SJu)的诞生。虽然这个话题超出了本书的范围，但重要的是要记住，熟练掌握基础知识（URL、HTTP和HTML）对于理解工作原理和解决可能出现的问题至关重要。
+- en: Let’s now see web specifications in action by simulating the flow end to end,
+    starting at the HTTP server end.
+  id: totrans-407
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们通过模拟端到端流程来看Web规范的实际运作，从HTTP服务器端开始。
+- en: 'You can rather easily run a simple HTTP server that only serves the content
+    of a directory in two ways: by using [Python](https://oreil.ly/clti0) or by using
+    [netcat (`nc`)](https://oreil.ly/AaCJG).'
+  id: totrans-408
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过两种方式相当容易地运行一个简单的HTTP服务器，它只提供目录内容：使用[Python](https://oreil.ly/clti0)或者使用[netcat
+    (`nc`)](https://oreil.ly/AaCJG)。
+- en: 'With Python, to serve the content of a directory, you would do the following:'
+  id: totrans-409
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用Python，要提供目录内容，您需要执行以下操作：
+- en: '[PRE22]'
+  id: totrans-410
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: '[![1](Images/1.png)](#co_networking_CO16-1)'
+  id: totrans-411
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO16-1)'
+- en: Use the built-in Python module `http.server` to serve the content of the current
+    directory (that is, the directory from which you launched this command).
+  id: totrans-412
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用内置的Python模块`http.server`来提供当前目录的内容（即您启动此命令的目录）。
+- en: '[![2](Images/2.png)](#co_networking_CO16-2)'
+  id: totrans-413
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO16-2)'
+- en: It confirms that it’s ready to serve via port 8000\. This means that you could
+    enter *[*http://localhost:8000*](http://localhost:8000)* into your browser and
+    you would see the content of your directory there.
+  id: totrans-414
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它确认准备通过端口8000提供服务。这意味着您可以在浏览器中输入[*http://localhost:8000*](http://localhost:8000)，然后在那里看到您目录的内容。
+- en: '[![3](Images/3.png)](#co_networking_CO16-3)'
+  id: totrans-415
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO16-3)'
+- en: This shows that an HTTP request against the root (*/*) has been issued and served
+    successfully (the 200 HTTP response code).
+  id: totrans-416
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这表明根路径（*/*）发出了HTTP请求并成功提供服务（200 HTTP响应代码）。
+- en: Tip
+  id: totrans-417
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: 'If you want to do more advanced stuff, beyond serving a static directory, consider
+    using a proper web server such as [NGINX](https://docs.nginx.com). You could,
+    for example, run NGINX using Docker (see [“Docker”](ch06.xhtml#docker)) with the
+    following command:'
+  id: totrans-418
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您希望执行更高级的操作，超出了提供静态目录内容的范围，请考虑使用像[NGINX](https://docs.nginx.com)这样的合适的Web服务器。例如，您可以使用以下命令在Docker中运行NGINX（参见[“Docker”](ch06.xhtml#docker)）：
+- en: '[PRE23]'
+  id: totrans-419
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: '[![1](Images/1.png)](#co_networking_CO17-1)'
+  id: totrans-420
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO17-1)'
+- en: Call the running container `mywebserver`; you should see that when you issue
+    a `docker ps` command to list running containers.
+  id: totrans-421
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将运行的容器称为`mywebserver`；当您发出`docker ps`命令列出运行的容器时，您应该看到它。
+- en: '[![2](Images/2.png)](#co_networking_CO17-2)'
+  id: totrans-422
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO17-2)'
+- en: The `--rm` removes the container on exit, and the `-d` turns it into a daemon
+    (detach from terminal, run in background).
+  id: totrans-423
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`--rm`参数会在退出时删除容器，而`-d`会将其变成守护进程（从终端分离，后台运行）。'
+- en: '[![3](Images/3.png)](#co_networking_CO17-3)'
+  id: totrans-424
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO17-3)'
+- en: Mounts the current directory (`$PWD`) into the container as the NGINX source
+    content directory. Note that `$PWD` is a bash way to address the current directory.
+    In Fish you would use `(pwd)` instead.
+  id: totrans-425
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将当前目录（`$PWD`）挂载到容器中作为NGINX源内容目录。请注意，`$PWD`是bash中指代当前目录的方法。在Fish中，您应该使用`(pwd)`。
+- en: '[![4](Images/4.png)](#co_networking_CO17-4)'
+  id: totrans-426
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_networking_CO17-4)'
+- en: Makes the container-internal port 80 available on the host via 8042. That means
+    you would be able to access the web server via *[*http://localhost:8042*](http://localhost:8042)*
+    on your machine.
+  id: totrans-427
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使容器内部端口80通过8042在主机上可用。这意味着您可以在您的机器上通过[*http://localhost:8042*](http://localhost:8042)访问Web服务器。
+- en: '[![5](Images/5.png)](#co_networking_CO17-5)'
+  id: totrans-428
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_networking_CO17-5)'
+- en: The container image to use (`nginx:1.21`), and implicitly using Docker Hub since
+    we didn’t specify the registry part.
+  id: totrans-429
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使用的容器映像是`nginx:1.21`，隐含地使用了Docker Hub，因为我们没有指定注册表部分。
+- en: 'Now let’s see how we can use [`curl`](https://curl.se), a powerful and popular
+    tool to interact with any kind of URLs, to get the content of the web server we
+    launched in the previous example (make sure it’s still running, or launch it again
+    in a separate session if you terminated it already):'
+  id: totrans-430
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看如何使用[`curl`](https://curl.se)，这是一个强大且流行的工具，可与任何类型的URL交互，以获取我们在前面示例中启动的Web服务器的内容（确保它仍在运行，或者如果您已经终止了它，则在单独的会话中再次启动它）：
+- en: '[PRE24]'
+  id: totrans-431
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: In [Table 7-1](#tab-curl-usage) you see some common options for `curl` that
+    you may find useful. The selection is based on my usage history for a range of
+    tasks, from developing to system administration.
+  id: totrans-432
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[表格 7-1](#tab-curl-usage)中，您可以看到一些对`curl`有用的常见选项。选择基于我在开发和系统管理任务中的使用历史。
+- en: Table 7-1\. Useful options for `curl`
+  id: totrans-433
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表格 7-1\. `curl`的有用选项
+- en: '| Option | Long-form option | Description and use case |'
+  id: totrans-434
+  prefs: []
+  type: TYPE_TB
+  zh: '| 选项 | 长选项 | 描述和使用案例 |'
+- en: '| --- | --- | --- |'
+  id: totrans-435
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| `-v` | `--verbose` | For verbose output, use for debugging. |'
+  id: totrans-436
+  prefs: []
+  type: TYPE_TB
+  zh: '| `-v` | `--verbose` | 用于调试的详细输出。 |'
+- en: '| `-s` | `--silent` | Silence `curl`: do not show the progress meter or error
+    messages. |'
+  id: totrans-437
+  prefs: []
+  type: TYPE_TB
+  zh: '| `-s` | `--silent` | 静默模式：不显示进度表或错误消息。 |'
+- en: '| `-L` | `--location` | Follow page redirects (`3XX` HTTP response codes).
+    |'
+  id: totrans-438
+  prefs: []
+  type: TYPE_TB
+  zh: '| `-L` | `--location` | 跟随页面重定向（`3XX` HTTP响应代码）。 |'
+- en: '| `-o` | `--output` | By default, the content goes to `stdout`; if you want
+    to directly store it in a file, specify it via this option. |'
+  id: totrans-439
+  prefs: []
+  type: TYPE_TB
+  zh: '| `-o` | `--output` | 默认情况下，内容输出到`stdout`；如果要直接将其存储在文件中，请通过此选项指定。 |'
+- en: '| `-m` | `--max-time` | Maximum time (in seconds) you are willing to wait for
+    the operation to take. |'
+  id: totrans-440
+  prefs: []
+  type: TYPE_TB
+  zh: '| `-m` | `--max-time` | 最大允许等待时间（以秒为单位）。'
+- en: '| `-I` | `--head` | Fetch the headers only (careful: not every HTTP server
+    supports the `HEAD` method for a path). |'
+  id: totrans-441
+  prefs: []
+  type: TYPE_TB
+  zh: '| `-I` | `--head` | 仅获取头部信息（注意：并非所有HTTP服务器都支持路径的`HEAD`方法）。 |'
+- en: '| `-k` | `--insecure` | By default, HTTPS calls are verified. Use this option
+    to ignore the errors for cases where that’s not possible. |'
+  id: totrans-442
+  prefs: []
+  type: TYPE_TB
+  zh: '| `-k` | `--insecure` | 默认情况下，HTTPS调用是经过验证的。使用此选项可忽略无法进行验证的错误情况。 |'
+- en: If `curl` is not available, you can fall back to [`wget`](https://oreil.ly/0jYJj),
+    which is more limited but sufficient for simple HTTP-related interactions.
+  id: totrans-443
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果`curl`不可用，您可以退回到[`wget`](https://oreil.ly/0jYJj)，它的功能更为有限，但对于简单的HTTP相关交互已经足够。
+- en: Secure Shell
+  id: totrans-444
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 安全外壳
+- en: '[Secure Shell (SSH)](https://oreil.ly/dNVgt) is a cryptographic network protocol
+    for securely offering network services on an unsecured network. For example, as
+    a replacement for `telnet`, you can use `ssh` to log into a remote machine and
+    also move data securely between (virtual) machines.'
+  id: totrans-445
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[安全外壳（SSH）](https://oreil.ly/dNVgt)是一种用于在不安全网络上安全提供网络服务的加密网络协议。例如，作为`telnet`的替代，您可以使用`ssh`登录远程机器，并且还可以在（虚拟）机器之间安全传输数据。'
+- en: 'Let’s see SSH in action. I’ve provisioned a virtual machine in the cloud with
+    an IP address of `63.32.106.149`, and the user name provided by default is `ec2-user`.
+    To log into the machine, I can do the following (note that the output is edited
+    and assumes that you or someone else created credentials in *~/.ssh/lml.pem* beforehand):'
+  id: totrans-446
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看SSH如何运作。我在云中预置了一个虚拟机，其IP地址为`63.32.106.149`，默认提供的用户名是`ec2-user`。要登录到这台机器，我可以执行以下操作（请注意，输出已编辑，假定您或其他人已经在*~/.ssh/lml.pem*中创建了凭据）：
+- en: '[PRE25]'
+  id: totrans-447
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: '[![1](Images/1.png)](#co_networking_CO18-1)'
+  id: totrans-448
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO18-1)'
+- en: Use the `ssh` command to log into a remote machine.
+  id: totrans-449
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`ssh`命令登录远程机器。
+- en: '[![2](Images/2.png)](#co_networking_CO18-2)'
+  id: totrans-450
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO18-2)'
+- en: Use the identity file *~/.ssh/lml.pem* rather than a password. Explicitly providing
+    that file is a good practice but in our case would strictly speaking not be necessary
+    as it resides in the default location *~/.ssh*.
+  id: totrans-451
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用身份文件*~/.ssh/lml.pem*而不是密码。在我们的情况下，明确提供该文件是一种良好的做法，但严格来说并不是必需的，因为它位于默认位置*~/.ssh*中。
+- en: '[![3](Images/3.png)](#co_networking_CO18-3)'
+  id: totrans-452
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO18-3)'
+- en: The SSH target machine in the format `username@host`.
+  id: totrans-453
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SSH目标机器的格式为`username@host`。
+- en: '[![4](Images/4.png)](#co_networking_CO18-4)'
+  id: totrans-454
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_networking_CO18-4)'
+- en: Once the login process is completed, I can tell from the prompt that I’m on
+    the target machine and can use it just as if it were local.
+  id: totrans-455
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 登录过程完成后，我可以从提示符中看出我已经进入了目标机器，并且可以像在本地一样使用它。
+- en: 'Some general SSH usage tips:'
+  id: totrans-456
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些通用的SSH使用技巧：
+- en: If you run an SSH server, that is, allow others to `ssh` into your machine,
+    then you absolutely should [disable password authentication](https://oreil.ly/Jz5tA).
+    This forces users to create a key pair and share the public key with you that
+    you then add to *~/.ssh/authorized_keys* and allow to log in via this mechanism.
+  id: totrans-457
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果运行SSH服务器，即允许其他人`ssh`到您的机器，则绝对应[禁用密码认证](https://oreil.ly/Jz5tA)。这将强制用户创建密钥对，并与您共享公钥，然后您将其添加到*~/.ssh/authorized_keys*以允许通过此机制登录。
+- en: Use `ssh -tt` to force pseudo-tty allocation.
+  id: totrans-458
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用`ssh -tt`强制伪终端分配。
+- en: Do `export TERM=xterm` when you `ssh` into a machine, in case you are having
+    display issues.
+  id: totrans-459
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 当您通过`ssh`登录到机器时，执行`export TERM=xterm`，以防出现显示问题。
+- en: Configure timeouts for `ssh` sessions in your client. On a per-user basis, this
+    is usually via *~/.ssh/config*, where you can set `ServerAliveInterval` and `Server​Ali⁠veCountMax`
+    options to keep your connections alive.
+  id: totrans-460
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在客户端为`ssh`会话配置超时。通常情况下，可以通过*~/.ssh/config*在每个用户的基础上设置`ServerAliveInterval`和`Server​Ali⁠veCountMax`选项以保持连接活动。
+- en: If you’re having issues, and you’ve excluded local permission issues with the
+    key(s), then you can try launching `ssh` with the `-v` option, giving you details
+    about what’s going on under the hood (also, try multiple instances of `v`, like
+    `-vvv` for finer-grained debug info).
+  id: totrans-461
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果您遇到问题，并且您已经排除了与密钥相关的本地权限问题，则可以尝试使用`ssh -v`选项启动`ssh`，以获取关于底层操作的详细信息（还可以尝试多个`v`实例，例如`-vvv`以获取更精细的调试信息）。
+- en: SSH is not only used directly by humans, but it is also used as a building block
+    under the hood—for example, in file-transfer tooling.
+  id: totrans-462
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SSH不仅直接由人类使用，而且还作为底层构建模块使用——例如，在文件传输工具中。
+- en: File Transfer
+  id: totrans-463
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 文件传输
+- en: One very common task involving the network is transferring files. You can do
+    this from your local machine to a server in the cloud or from another machine
+    in the local network.
+  id: totrans-464
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 网络中非常常见的一个任务是文件传输。您可以从本地机器到云中的服务器进行传输，或者从本地网络中的另一台机器进行传输。
+- en: To copy to and from remote systems, you can use one basic tool. [`scp` (short
+    for “secure copy”)](https://oreil.ly/RKbEu) works on top of SSH. Given that `scp`
+    defaults to `ssh`, we need to make sure that we have the password (or even better,
+    key-based authentication) in place for it to work.
+  id: totrans-465
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要从远程系统复制和复制，可以使用一个基本工具。[`scp`（简称“安全复制”）](https://oreil.ly/RKbEu)建立在SSH之上。由于`scp`默认使用`ssh`，因此我们需要确保已经设置了密码（或者更好的是基于密钥的认证）。
+- en: 'Let’s assume we have a remote machine with the IPv4 address `63.32.106.149`,
+    and we want to copy a file there from our local machine:'
+  id: totrans-466
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设我们有一个具有IPv4地址`63.32.106.149`的远程机器，并且我们想从本地机器将文件复制到那里：
+- en: '[PRE26]'
+  id: totrans-467
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: '[![1](Images/1.png)](#co_networking_CO19-1)'
+  id: totrans-468
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO19-1)'
+- en: Source is the file *copyme* in the current directory.
+  id: totrans-469
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 源文件是当前目录中的文件*copyme*。
+- en: '[![2](Images/2.png)](#co_networking_CO19-2)'
+  id: totrans-470
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO19-2)'
+- en: Destination is the */home/ec2-user/* directory on machine `63.32.106.149`.
+  id: totrans-471
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目标是位于机器`63.32.106.149`上的*/home/ec2-user/*目录。
+- en: Synchronizing files with [`rsync`](https://oreil.ly/eC6Kz) is much more convenient
+    and faster than `scp`. Under the hood, `rsync` uses SSH by default.
+  id: totrans-472
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用[`rsync`](https://oreil.ly/eC6Kz)同步文件比`scp`更方便且更快。在底层，默认情况下`rsync`使用SSH。
+- en: 'Let’s now see how we can use `rsync` to transfer files from the *~/data/* from
+    the local machine to the host at `63.32.106.149`:'
+  id: totrans-473
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看如何使用`rsync`从本地机器的*~/data/*目录传输文件到主机`63.32.106.149`：
+- en: '[PRE27]'
+  id: totrans-474
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: '[![1](Images/1.png)](#co_networking_CO20-1)'
+  id: totrans-475
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO20-1)'
+- en: Options meaning `-a` for archive (incremental, preserve), `-v` for verbose so
+    that we see something, and `-z` for using compression.
+  id: totrans-476
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选项意味着`-a`用于存档（增量，保留），`-v`用于详细显示以便看到某些内容，`-z`用于使用压缩。
+- en: '[![2](Images/2.png)](#co_networking_CO20-2)'
+  id: totrans-477
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO20-2)'
+- en: Source directories (since `-a` includes `-r` which is recursive).
+  id: totrans-478
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 源目录（因为`-a`包含递归的`-r`）。
+- en: '[![3](Images/3.png)](#co_networking_CO20-3)'
+  id: totrans-479
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO20-3)'
+- en: Destination in `user@host` format.
+  id: totrans-480
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目标使用`user@host`格式。
+- en: '[![4](Images/4.png)](#co_networking_CO20-4)'
+  id: totrans-481
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_networking_CO20-4)'
+- en: Verify if the data has arrived by executing an `ls` on the remote machine. The
+    next line shows that it indeed worked—the data arrived in good order.
+  id: totrans-482
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过在远程机器上执行`ls`来验证数据是否已到达。下一行显示确实成功了——数据按顺序到达。
+- en: If you’re unsure what `rsync` will do, use the `--dry-run` option in addition
+    to the other ones. It will essentially tell you what it will do without actually
+    carrying out the operation, so it’s safe.
+  id: totrans-483
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您不确定`rsync`会执行什么操作，请在其他选项之外使用`--dry-run`选项。它基本上会告诉您它会执行的操作，而不实际执行操作，因此很安全。
+- en: '`rsync` is also a great tool to perform directory backups because it can be
+    set to copy only files that have been added or changed.'
+  id: totrans-484
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`rsync`也是一个非常好的工具，用于执行目录备份，因为它可以设置为仅复制已添加或更改的文件。'
+- en: Warning
+  id: totrans-485
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Don’t forget the `:` after the host! Without it, `rsync` will happily go ahead
+    and interpret the source or destination as a local directory. That is, the command
+    will work fine, but rather than copying the files to the remote machine, it will
+    end up on your local machine. For example, *user@example.com* as the destination
+    would be a subdirectory of the current directory called *user@example.com/*.
+  id: totrans-486
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不要忘记主机后面的`:`！如果没有这个符号，`rsync`将会愉快地将源或目标解释为本地目录。也就是说，命令会正常工作，但是文件不会复制到远程机器上，而是会放在您的本地机器上。例如，*user@example.com*作为目标将会成为当前目录的一个子目录，名为*user@example.com/*。
+- en: 'Last but not least, one use case you often come across is when someone provides
+    files in an Amazon S3 bucket. To download those files, you can use the [AWS CLI](https://oreil.ly/mqQcr)
+    with the `s3` subcommand as follows. We’re using a dataset from the [Open Data
+    registry](https://oreil.ly/cbYMH) in a public S3 bucket (output edited to fit):'
+  id: totrans-487
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后但并非最不重要的是，您经常遇到的一个用例是某人在Amazon S3存储桶中提供文件。要下载这些文件，您可以使用[AWS CLI](https://oreil.ly/mqQcr)的`s3`子命令如下所示。我们正在使用来自[开放数据注册表](https://oreil.ly/cbYMH)中的公共S3存储桶的数据集（输出编辑以适应）：
+- en: '[PRE28]'
+  id: totrans-488
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: '[![1](Images/1.png)](#co_networking_CO21-1)'
+  id: totrans-489
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO21-1)'
+- en: Use the AWS S3 command to synchronize files from a public bucket.
+  id: totrans-490
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用AWS S3命令从公共存储桶同步文件。
+- en: '[![2](Images/2.png)](#co_networking_CO21-2)'
+  id: totrans-491
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO21-2)'
+- en: 'This is the source bucket, *s3://commoncrawl*, and the exact path of the source
+    we want to sync. Warning: there are more than 8 GB of data in that directory,
+    so try this only if you don’t mind the bandwidth.'
+  id: totrans-492
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是源存储桶，*s3://commoncrawl*，以及我们想要同步的源的确切路径。警告：该目录中有超过8GB的数据，所以只有在您不介意带宽的情况下才尝试这样做。
+- en: '[![3](Images/3.png)](#co_networking_CO21-3)'
+  id: totrans-493
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_networking_CO21-3)'
+- en: The destination is the current directory, signaled by a single period (`.`).
+  id: totrans-494
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目标是当前目录，由单个句点（`.`）表示。
+- en: '[![4](Images/4.png)](#co_networking_CO21-4)'
+  id: totrans-495
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_networking_CO21-4)'
+- en: Ignore/skip authentication since this is a publicly available bucket (and thus
+    the data in it).
+  id: totrans-496
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 忽略/跳过身份验证，因为这是一个公开可用的存储桶（因此其中的数据）。
+- en: The File Transfer Protocol (FTP) as per [RFC 959](https://oreil.ly/Okegf) is
+    still in use, but we don’t recommend using it anymore. Not only are these insecure,
+    but there are also many better alternatives, such as the ones we discussed in
+    this section. So, there’s no actual need for FTP anymore.
+  id: totrans-497
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件传输协议（FTP），根据[RFC 959](https://oreil.ly/Okegf)，仍然在使用中，但我们不建议再使用它。这些不仅不安全，而且还有许多更好的替代方案，例如我们在本节中讨论的那些。因此，实际上不再需要FTP。
+- en: Network File System
+  id: totrans-498
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 网络文件系统
+- en: A widely supported and used way to share files from a central location over
+    the network is via network file system (NFS), originally developed by Sun Microsystems
+    in the early 1980s. It saw multiple iterations as per [RFC 7530](https://oreil.ly/Uy4CZ)
+    and other related IETF specs and is very stable.
+  id: totrans-499
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过网络文件系统（NFS），一种在网络上从中央位置共享文件的广泛支持和使用的方式，最早由Sun Microsystems在1980年代初开发。根据[RFC
+    7530](https://oreil.ly/Uy4CZ)和其他相关的IETF规范，它经历了多次迭代，并且非常稳定。
+- en: 'You would usually have an NFS server maintained by a cloud provider or central
+    IT in a professional setup. All you would need to do is install the client (usually
+    through a package called `nfs-common`). Then, you can mount a source directory
+    from the NFS server as follows:'
+  id: totrans-500
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在专业设置中，通常会有一个由云提供商或中央IT维护的NFS服务器。您只需要安装客户端（通常通过一个名为`nfs-common`的软件包）。然后，您可以按如下方式挂载NFS服务器上的源目录：
+- en: '[PRE29]'
+  id: totrans-501
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: Many cloud providers, such as AWS and Azure, now offer NFS as a service. It’s
+    a nice way to provide your storage-hungry application with a lot of space in a
+    way that looks and feels almost like local attached storage. For media applications,
+    however, a [network-attached storage (NAS) setup](https://oreil.ly/JrQ8m) is likely
+    the better choice.
+  id: totrans-502
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 许多云提供商，如AWS和Azure，现在提供NFS作为一种服务。这是为您的存储密集型应用程序提供大量空间的一种不错方式，几乎像本地附加存储一样使用和感觉。但是，对于媒体应用程序来说，[网络附加存储（NAS）设置](https://oreil.ly/JrQ8m)可能是更好的选择。
+- en: Sharing with Windows
+  id: totrans-503
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 与Windows共享
+- en: If you have Windows machines in your local network and want to share it, you
+    can use the [Server Message Block (SMB)](https://oreil.ly/mTAMe), a protocol initially
+    developed at IBM in the 1980s, or its Microsoft-owned successor, [Common Internet
+    File System (CIFS)](https://oreil.ly/qMEjj).
+  id: totrans-504
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的本地网络中有Windows计算机并希望进行共享，您可以使用[Server Message Block（SMB）](https://oreil.ly/mTAMe)，这是20世纪80年代IBM最初开发的协议，或其Microsoft拥有的继任者[公共Internet文件系统（CIFS）](https://oreil.ly/qMEjj)。
+- en: You would typically use [Samba](https://www.samba.org), the standard Windows
+    interoperability suite of programs for Linux, to achieve the file sharing.
+  id: totrans-505
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常，您会使用[Samba](https://www.samba.org)，这是Linux的标准Windows互操作套件，用于实现文件共享。
+- en: Advanced Network Topics
+  id: totrans-506
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 高级网络主题
+- en: In this section, we discuss some advanced network protocols and tooling across
+    the TCP/IP stack. Their usage is normally beyond the scope of a casual user. However,
+    if you’re a developer or sys admin, you probably will want to be at least aware
+    of them.
+  id: totrans-507
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我们讨论了一些跨TCP/IP协议栈的高级网络协议和工具。它们的使用通常超出了普通用户的范围。但是，如果您是开发人员或系统管理员，您可能至少需要了解它们。
+- en: whois
+  id: totrans-508
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: whois
+- en: '[`whois`](https://oreil.ly/3m97l) is a client for the whois directory service
+    that you can use to look up registration and user information. For example, if
+    I want to find out who is behind the *ietf.org* domain (note that you can pay
+    your domain registrar to keep that information private), I would do the following:'
+  id: totrans-509
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`whois`](https://oreil.ly/3m97l)是用于查找注册和用户信息的whois目录服务的客户端。例如，如果我想找出谁在*ietf.org*域名背后（请注意，您可以向域名注册商支付费用以保护这些信息的私密性），我会执行以下操作：'
+- en: '[PRE30]'
+  id: totrans-510
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: '[![1](Images/1.png)](#co_networking_CO22-1)'
+  id: totrans-511
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO22-1)'
+- en: Use `whois` to look up registration information about domain.
+  id: totrans-512
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`whois`查找域的注册信息。
+- en: Dynamic Host Configuration Protocol
+  id: totrans-513
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 动态主机配置协议
+- en: The [Dynamic Host Configuration Protocol (DHCP)](https://oreil.ly/C8vOE) is
+    a network protocol that enables automatic assignment of an IP address to a host.
+    It’s a cli⁠ent​/server setup that removes the need for manually configuring network
+    devices.
+  id: totrans-514
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[动态主机配置协议（DHCP）](https://oreil.ly/C8vOE)是一种网络协议，用于自动为主机分配IP地址。这是一种客户端/服务器设置，可消除手动配置网络设备的需求。'
+- en: 'Setting up and managing a DHCP server is outside our scope, but you can use
+    [`dhcpdump`](https://oreil.ly/uPvGn) to scan for DHCP packets. For this, a device
+    in your local network needs to join, trying to acquire an IP address, so you may
+    need to be a bit patient to see something here (output shortened):'
+  id: totrans-515
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置和管理DHCP服务器超出了我们的范围，但您可以使用[`dhcpdump`](https://oreil.ly/uPvGn)扫描DHCP数据包。为此，您本地网络中的设备需要加入，试图获取IP地址，因此您可能需要耐心等待看到某些内容（输出已缩短）：
+- en: '[PRE31]'
+  id: totrans-516
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: '[![1](Images/1.png)](#co_networking_CO23-1)'
+  id: totrans-517
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO23-1)'
+- en: Using `dhcpdump`, sniff DHCP packets on interface `wlp1s0`.
+  id: totrans-518
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`dhcpdump`，嗅探接口`wlp1s0`上的DHCP数据包。
+- en: Network Time Protocol
+  id: totrans-519
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 网络时间协议
+- en: 'The [Network Time Protocol (NTP)](http://www.ntp.org) is for synchronizing
+    clocks of computers over a network. For example, using the [`ntpq` command](https://oreil.ly/0JxbJ),
+    a standard NTP query program, you could make an explicit time server query like
+    so:'
+  id: totrans-520
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[网络时间协议（NTP）](http://www.ntp.org)用于在网络上同步计算机的时钟。例如，使用[`ntpq`命令](https://oreil.ly/0JxbJ)，一个标准的NTP查询程序，您可以像这样进行明确的时间服务器查询：'
+- en: '[PRE32]'
+  id: totrans-521
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: '[![1](Images/1.png)](#co_networking_CO24-1)'
+  id: totrans-522
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO24-1)'
+- en: With the `-p` option, show a list of peers known to the machine, including their
+    state.
+  id: totrans-523
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`-p`选项显示已知于该机器的对等体列表，包括其状态。
+- en: Usually, NTP works in the background, managed by `systemd` and other daemons,
+    so you are unlikely to need to manually query it.
+  id: totrans-524
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常情况下，NTP在后台运行，由`systemd`和其他守护程序管理，因此您不太可能需要手动查询它。
+- en: Wireshark and tshark
+  id: totrans-525
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Wireshark和tshark
+- en: If you want to do low-level network traffic analysis—that is, you want to see
+    exactly the packets across the stack—you can use either the command-line tool
+    [`tshark`](https://oreil.ly/n7Urm) or its GUI-based version, [`wireshark`](https://oreil.ly/YQrSa).
+  id: totrans-526
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想进行低级网络流量分析——也就是说，您想精确查看整个协议栈上的数据包——您可以使用命令行工具[`tshark`](https://oreil.ly/n7Urm)或其基于GUI的版本[`wireshark`](https://oreil.ly/YQrSa)。
+- en: 'For example, after finding out via `ip link` that I have a network interface
+    called `wlp1s0`, I capture traffic there (output edited to fit):'
+  id: totrans-527
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，通过`ip link`命令发现我有一个名为`wlp1s0`的网络接口后，我在那里捕获流量（编辑输出以适应）：
+- en: '[PRE33]'
+  id: totrans-528
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: '[![1](Images/1.png)](#co_networking_CO25-1)'
+  id: totrans-529
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_networking_CO25-1)'
+- en: Use `tshark` to capture network traffic on network interface `wlp1s0` and only
+    look at TCP traffic.
+  id: totrans-530
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`tshark`在网络接口`wlp1s0`上捕获网络流量，并仅查看TCP流量。
+- en: '[![2](Images/2.png)](#co_networking_CO25-2)'
+  id: totrans-531
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_networking_CO25-2)'
+- en: In another session, I issued a `curl` command to trigger an HTTP session, in
+    which application layer interaction starts. You could also use the less powerful
+    but on the other hand more widely available [`tcpdump`](http://www.tcpdump.org)
+    for this task.
+  id: totrans-532
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在另一个会话中，我发出了一个`curl`命令来触发一个HTTP会话，在这个应用层交互开始。您还可以使用功能较弱但更广泛可用的[`tcpdump`](http://www.tcpdump.org)来完成此任务。
+- en: Other Advanced Tooling
+  id: totrans-533
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 其他高级工具
+- en: 'There are a number of advanced network-related tools out there you may find
+    useful, including but not limited to the following:'
+  id: totrans-534
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有许多高级网络相关工具可供选择，您可能会发现它们很有用，包括但不限于以下内容：
+- en: '[`socat`](https://oreil.ly/R4Upv)'
+  id: totrans-535
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`socat`](https://oreil.ly/R4Upv)'
+- en: Establishes two bidirectional byte streams and enables the transferring of data
+    between the endpoint.
+  id: totrans-536
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 建立了两个双向字节流，并启用了端点之间数据传输。
+- en: '[`geoiplookup`](https://oreil.ly/huZpl)'
+  id: totrans-537
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`geoiplookup`](https://oreil.ly/huZpl)'
+- en: Allows you to map an IP to a geographic region.
+  id: totrans-538
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您将IP映射到地理区域。
+- en: Tunnels
+  id: totrans-539
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 隧道
+- en: An easy-to-use alternative to VPNs and other site-to-site networking solutions.
+    Enabled by such tools as [inlets](https://docs.inlets.dev).
+  id: totrans-540
+  prefs: []
+  type: TYPE_NORMAL
+  zh: VPN和其他站点到站点网络解决方案的易于使用的替代方案。通过[inlets](https://docs.inlets.dev)等工具启用。
+- en: BitTorrent
+  id: totrans-541
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BitTorrent
+- en: A peer-to-peer system that groups files into a package called a *torrent*. Check
+    out [some clients](https://oreil.ly/Z4rak) to decide if this is something for
+    your toolbox.
+  id: totrans-542
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个点对点系统，将文件分组成一个称为*torrent*的包。查看[一些客户端](https://oreil.ly/Z4rak)，看看这是否适合你的工具箱。
+- en: Conclusion
+  id: totrans-543
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: In this chapter, we defined common network terms, from the hardware level, such
+    as NICs, to the TCP/IP stack, to application-layer, user-facing components, such
+    as HTTP.
+  id: totrans-544
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们定义了从硬件层面（如NIC）到TCP/IP协议栈再到应用层用户界面组件（如HTTP）的常见网络术语。
+- en: Linux provides a powerful, standards-based implementation of the TCP/IP stack
+    that you can use programmatically (for example, sockets) and in the context of
+    setting up and querying (usually with the `ip` command).
+  id: totrans-545
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux提供了一个强大的、基于标准的TCP/IP协议栈实现，您可以在编程中使用（例如套接字）以及在设置和查询（通常使用`ip`命令）的上下文中使用。
+- en: We further discussed application-layer protocols and interfaces that make up
+    most of the daily (network-related) flows. Your command-line friends here include
+    `curl` for transfer and `dig` for DNS lookups.
+  id: totrans-546
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们进一步讨论了组成大多数日常（与网络相关的）流量的应用层协议和接口。在这里，您的命令行朋友包括用于传输的`curl`和用于DNS查找的`dig`。
+- en: 'If you want to dive deeper into networking topics, check out the following
+    resources:'
+  id: totrans-547
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想深入研究网络主题，请查看以下资源：
+- en: The TCP/IP stack
+  id: totrans-548
+  prefs: []
+  type: TYPE_NORMAL
+  zh: TCP/IP协议栈
+- en: '[*Understanding Linux Network Internals*](https://oreil.ly/pXRxW) by Christian
+    Benvenuti (O’Reilly)'
+  id: totrans-549
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*理解Linux网络内部*](https://oreil.ly/pXRxW) 作者：克里斯蒂安·贝文努蒂（O''Reilly）'
+- en: '[“A Protocol for Packet Network Intercommunication”](https://oreil.ly/wRxdI)'
+  id: totrans-550
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“分组网络互联的协议”](https://oreil.ly/wRxdI)'
+- en: '[DHCP server setup webpage](https://oreil.ly/S6ZFJ)'
+  id: totrans-551
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[DHCP服务器设置网页](https://oreil.ly/S6ZFJ)'
+- en: '[“Hello IPv6: A Minimal Tutorial for IPv4 Users”](https://oreil.ly/DPgZc)'
+  id: totrans-552
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Hello IPv6：IPv4用户的极简教程”](https://oreil.ly/DPgZc)'
+- en: '[“Understanding IPv6—7 Part Series”](https://oreil.ly/91jkO)'
+  id: totrans-553
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“理解IPv6—7部分系列”](https://oreil.ly/91jkO)'
+- en: '[Collection of IPv6 articles by Johannes Weber](https://oreil.ly/MUcxG)'
+  id: totrans-554
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[约翰内斯·韦伯的IPv6文章集](https://oreil.ly/MUcxG)'
+- en: Iljitsch van Beijnum’s [BGP Expert website](https://oreil.ly/K47dS)
+  id: totrans-555
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 伊尔吉奇·范·贝伊纳姆的[BGP专家网站](https://oreil.ly/K47dS)
+- en: '[“Everything You Ever Wanted to Know About UDP Sockets but Were Afraid to Ask”](https://oreil.ly/CCrfA)'
+  id: totrans-556
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“你想知道的UDP套接字的一切，但害怕问”](https://oreil.ly/CCrfA)'
+- en: DNS
+  id: totrans-557
+  prefs: []
+  type: TYPE_NORMAL
+  zh: DNS
+- en: '[“An Introduction to DNS Terminology, Components, and Concepts”](https://oreil.ly/K31GM)'
+  id: totrans-558
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“DNS术语、组件和概念简介”](https://oreil.ly/K31GM)'
+- en: '[“How to Install and Configure DNS Server in Linux”](https://oreil.ly/eKdtK)'
+  id: totrans-559
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“如何在Linux中安装和配置DNS服务器”](https://oreil.ly/eKdtK)'
+- en: '[“Anatomy of a Linux DNS Lookup”](https://oreil.ly/KkVSf)'
+  id: totrans-560
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux DNS查找解析的解剖”](https://oreil.ly/KkVSf)'
+- en: '[“TLDs—Putting the *.fun* in the Top of the DNS”](https://oreil.ly/qwRTx)'
+  id: totrans-561
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“TLDs——在DNS的顶端放置*.fun*”](https://oreil.ly/qwRTx)'
+- en: Application layer and advanced networking
+  id: totrans-562
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 应用层和高级网络
+- en: '[“SSH Tunneling Explained”](https://oreil.ly/3yhlV)'
+  id: totrans-563
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“SSH隧道解析”](https://oreil.ly/3yhlV)'
+- en: '[*Everything curl*](https://oreil.ly/OzB6P)'
+  id: totrans-564
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*Everything curl*](https://oreil.ly/OzB6P)'
+- en: '[“What Is DHCP and How to Configure DHCP Server in Linux”](https://oreil.ly/hrLpo)'
+  id: totrans-565
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“什么是DHCP及如何在Linux中配置DHCP服务器”](https://oreil.ly/hrLpo)'
+- en: '[“How to Install and Configure Linux NTP Server and Client”](https://oreil.ly/kHZhw)'
+  id: totrans-566
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“如何在Linux中安装和配置NTP服务器和客户端”](https://oreil.ly/kHZhw)'
+- en: '[NFS wiki](https://oreil.ly/IOS4b)'
+  id: totrans-567
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[NFS维基](https://oreil.ly/IOS4b)'
+- en: '[“Use Wireshark at the Linux Command Line with TShark”](https://oreil.ly/1ttt0)'
+  id: totrans-568
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“在Linux命令行上使用TShark使用Wireshark”](https://oreil.ly/1ttt0)'
+- en: '[“Getting Started with socat”](https://oreil.ly/LWXCj)'
+  id: totrans-569
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“socat 入门指南”](https://oreil.ly/LWXCj)'
+- en: '[“Geomapping Network Traffic”](https://oreil.ly/TAd0b)'
+  id: totrans-570
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“地图绘制网络流量”](https://oreil.ly/TAd0b)'
+- en: 'With that, we’re ready to move on to the next topic in the book: using observability
+    to avoid flying blind.'
+  id: totrans-571
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了这些，我们准备好进入书中的下一个主题：利用可观测性避免盲目行动。

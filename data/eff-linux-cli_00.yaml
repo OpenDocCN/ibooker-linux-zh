@@ -1,0 +1,571 @@
+- en: Preface
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 前言
+- en: This book will take your Linux command-line skills to the next level so you
+    can work faster, smarter, and more efficiently.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这本书将带领你的Linux命令行技能迈向一个新的高度，让你能够更快、更智能、更高效地工作。
+- en: If you’re like most Linux users, you learned your early command-line skills
+    on the job, or by reading an intro book, or by installing Linux at home and just
+    trying things out. I’ve written this book to help you take the next step—to build
+    intermediate to advanced skills at the Linux command line. It’s filled with techniques
+    and concepts that I hope will transform how you interact with Linux and boost
+    your productivity. Think of it as a second book on Linux use that takes you beyond
+    the basics.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你和大多数Linux用户一样，在工作中学习了你早期的命令行技能，或者通过阅读一本介绍书，或者在家里安装Linux然后试试各种东西。我写这本书是为了帮助你迈出下一步——在Linux命令行上建立中级到高级的技能。它充满了我希望能够改变你与Linux交互方式并提升你的生产力的技术和概念。把它看作是一本关于Linux使用的第二本书，让你超越基础知识。
+- en: A command line is the simplest of interfaces, yet also the most challenging.
+    It’s simple because you’re presented with nothing but a prompt, which waits for
+    you to run any command you may know:^([1](preface01.xhtml#idm46586656866000))
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令行是最简单的界面，但也是最具挑战性的。它简单是因为你只看到一个提示符，等待你运行任何你可能知道的命令：^([1](preface01.xhtml#idm46586656866000))
+- en: '[PRE0]'
+  id: totrans-4
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'It’s challenging because everything beyond the prompt is your responsibility.
+    There are no friendly icons, buttons, or menus to guide you. Instead, every command
+    you type is a creative act. This is true for basic commands, like listing your
+    files:'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它具有挑战性，因为提示符之外的一切都取决于你。没有友好的图标、按钮或菜单来指导你。相反，你输入的每个命令都是一种创造性的行为。这对基本命令如列出你的文件也是如此：
+- en: '[PRE1]'
+  id: totrans-6
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'and more elaborate commands like this one:'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有像这样复杂命令：
+- en: '[PRE2]'
+  id: totrans-8
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: If you’re staring at the preceding command and thinking, “What the heck is *that*?”
+    or “I would never need such a complex command,” then this book is for you.^([2](preface01.xhtml#idm46586656684352))
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你正盯着上述命令想，“那是什么*？”或者“我永远不需要这样一个复杂的命令”，那么这本书适合你。^([2](preface01.xhtml#idm46586656684352))
+- en: What You’ll Learn
+  id: totrans-10
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 你将学到什么
+- en: 'This book will make you faster and more effective at three essential skills:'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这本书将让你在三个关键技能上更快更有效：
+- en: Choosing or constructing commands to solve a business problem at hand
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 选择或构建命令来解决手头的业务问题
+- en: Running those commands efficiently
+  id: totrans-13
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 运行这些命令的高效性
+- en: Navigating the Linux filesystem with ease
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 轻松导航Linux文件系统
+- en: 'By the end, you’ll understand what happens behind the scenes when you run a
+    command, so you can better predict the results (and not develop superstitions).
+    You’ll see a dozen different methods for launching commands and learn when to
+    use each one for best advantage. You’ll also learn practical tips and tricks to
+    make you more productive, such as:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最终，你将了解在运行命令时发生的背后情况，这样你就能更好地预测结果（而不是养成迷信）。你将看到十几种不同的启动命令的方法，并学会何时使用每种方法以取得最佳效果。你还将学到一些实用的技巧和窍门，让你的工作更加高效，例如：
+- en: Building complex commands out of simpler ones, step-by-step, to solve real-world
+    problems, such as managing passwords or generating ten thousand test files
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 逐步从更简单的命令构建复杂的命令，以解决实际问题，如管理密码或生成一万个测试文件
+- en: Saving time by organizing your home directory intelligently so you don’t have
+    to hunt for files
+  id: totrans-17
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 通过智能组织你的主目录来节省时间，这样你就不必寻找文件
+- en: Transforming text files and querying them like databases to achieve business
+    goals
+  id: totrans-18
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 转换文本文件并像数据库一样查询它们以实现业务目标
+- en: Controlling point-and-click features of Linux from the command line, such as
+    copying and pasting with the clipboard, and retrieving and processing web data,
+    without lifting your hands from the keyboard
+  id: totrans-19
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 控制Linux命令行的点和点击功能，如使用剪贴板进行复制和粘贴，以及检索和处理Web数据，而无需从键盘上抬起你的手
+- en: Most of all, you’ll learn general best practices so no matter which commands
+    you run, you can become more successful in everyday Linux use and more competitive
+    on the job market. This is the book I wish I had when I learned Linux.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最重要的是，你将学到通用的最佳实践，无论你运行哪些命令，你都可以在日常Linux使用中取得更多成功，并在职场上更有竞争力。这本书就是我学习Linux时希望拥有的书籍。
+- en: What This Book Is Not
+  id: totrans-21
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 这本书不是什么
+- en: This book won’t optimize your Linux computer to make it run more efficiently.
+    It makes *you* more efficient at interacting with Linux.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这本书不会优化你的Linux计算机以使其更有效地运行。它会让*你*在与Linux的交互中更加高效。
+- en: This book is also not a comprehensive reference for the command line—there are
+    hundreds of commands and features that I don’t mention. This book is about expertise.
+    It teaches a carefully selected set of command-line knowledge in a practical order
+    to build your skills. For a reference-style guide, try my previous book, [*Linux
+    Pocket Guide*](https://oreil.ly/46N1v) (O’Reilly).
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书也不是命令行的全面参考资料——有数百个命令和功能我没有提到。本书侧重于专业技能。它按照实用顺序精选了一组命令行知识。要获取参考式指南，请尝试我的早前著作
+    [*Linux Pocket Guide*](https://oreil.ly/46N1v)（O’Reilly）。
+- en: Audience and Prerequisites
+  id: totrans-24
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 受众和先决条件
+- en: This book assumes you have Linux experience; *it’s not an introduction*. It’s
+    for users who want to improve their command-line skills, such as students, system
+    administrators, software developers, site reliability engineers, test engineers,
+    and general Linux enthusiasts. Advanced Linux users may find some useful material
+    as well, especially if they learned to run commands by trial and error and want
+    to strengthen their conceptual understanding.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书假设您具有 Linux 使用经验；*这不是入门指南*。适合希望提升命令行技能的用户，比如学生、系统管理员、软件开发人员、站点可靠性工程师、测试工程师和
+    Linux 爱好者。高级 Linux 用户也许也能从中找到一些有用的资料，特别是那些希望通过实践运行命令来加深概念理解的用户。
+- en: 'To benefit most from this book, you should already be comfortable with the
+    following topics (if you’re not, see [Appendix A](app01.xhtml#appendix_linux)
+    for a quick refresher):'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要从本书中获得最大的收益，您应该已经对以下主题感到熟悉（如果不熟悉，请参见[附录 A](app01.xhtml#appendix_linux) 进行快速复习）：
+- en: Creating and editing text files with a text editor such as `vim` (`vi`), `emacs`,
+    `nano`, or `pico`
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用文本编辑器（如`vim`（`vi`）、`emacs`、`nano`或`pico`）创建和编辑文本文件
+- en: Basic file-handling commands such as `cp` (copy), `mv` (move or rename), `rm`
+    (remove or delete), and `chmod` (change file permissions)
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 基本的文件处理命令，比如`cp`（复制）、`mv`（移动或重命名）、`rm`（删除）、`chmod`（修改文件权限）
+- en: Basic file-viewing commands such as `cat` (view an entire file) and `less` (view
+    one page at a time)
+  id: totrans-29
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 基本的文件查看命令，比如`cat`（查看整个文件）和`less`（逐页查看）
+- en: Basic directory commands such as `cd` (change directory), `ls` (list files in
+    a directory), `mkdir` (create directory), `rmdir` (remove directory), and `pwd`
+    (display your current directory name)
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 基本的目录命令，比如`cd`（切换目录）、`ls`（列出目录中的文件）、`mkdir`（创建目录）、`rmdir`（删除目录）和`pwd`（显示当前目录名称）
+- en: 'The basics of shell scripts: storing Linux commands in a file, making the file
+    executable (with `chmod 755` or `chmod +x`), and running the file'
+  id: totrans-31
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Shell 脚本的基础知识：将 Linux 命令存储在文件中，使文件可执行（使用`chmod 755`或`chmod +x`），然后运行该文件
+- en: 'Viewing Linux’s built-in documentation, known as manpages, with the `man` command
+    (example: `man cat` displays documentation on the `cat` command)'
+  id: totrans-32
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用`man`命令查看 Linux 内置文档（称为 man 页面）（例如：`man cat` 显示关于 `cat` 命令的文档）
+- en: 'Becoming the superuser with the `sudo` command for full access to your Linux
+    system (example: `sudo nano /etc/hosts` edits the system file */etc/hosts*, which
+    is protected from ordinary users)'
+  id: totrans-33
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用`sudo`命令成为超级用户，以完全访问您的 Linux 系统（例如：`sudo nano /etc/hosts` 编辑系统文件 */etc/hosts*，普通用户无法访问）
+- en: If you also know common command-line features such as pattern matching for filenames
+    (with the `*` and `?` symbols), input/output redirection (`<` and `>`), and pipes
+    (`|`), you are off to a good start.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您还熟悉常见的命令行功能，比如用于文件名的模式匹配（使用`*`和`?`符号）、输入/输出重定向（`<`和`>`）和管道（`|`），您已经迈出了良好的开端。
+- en: Your Shell
+  id: totrans-35
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 您的 Shell
+- en: I assume your Linux shell is `bash`, which is the default shell for most Linux
+    distributions. Whenever I write “the shell,” I mean `bash`. Most of the ideas
+    I present apply to other shells too, such as `zsh` or `dash`; see [Appendix B](app02.xhtml#appendix_shells)
+    to help translate this book’s examples for other shells. Much of the material
+    will work unchanged on the Apple Mac Terminal as well, which runs `zsh` by default
+    but can also run `bash`.^([3](preface01.xhtml#idm46586653212752))
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我假设您的 Linux Shell 是`bash`，这是大多数 Linux 发行版的默认 Shell。每当我提到“shell”时，我指的是`bash`。本书中提到的大多数概念也适用于其他
+    shell，比如`zsh`或`dash`；参见[附录 B](app02.xhtml#appendix_shells) 来帮助将本书的示例翻译成其他 shell
+    的语法。很多内容在苹果 Mac 终端上也能无需修改地运行，苹果 Mac 终端默认运行`zsh`，也可以运行`bash`。^([3](preface01.xhtml#idm46586653212752))
+- en: Conventions Used in This Book
+  id: totrans-37
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 本书使用的约定
+- en: 'The following typographical conventions are used in this book:'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书中使用以下排版约定：
+- en: '*Italic*'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*斜体*'
+- en: Indicates new terms, URLs, email addresses, filenames, and file extensions.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 指示新术语、URL、电子邮件地址、文件名和文件扩展名。
+- en: '`Constant width`'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`等宽字体`'
+- en: Used for program listings, as well as within paragraphs to refer to program
+    elements such as variable or function names, databases, data types, environment
+    variables, statements, and keywords.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于程序列表，以及在段落内引用程序元素，例如变量或函数名、数据库、数据类型、环境变量、语句和关键字。
+- en: '**`Constant width bold`**'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '**`Constant width bold`**'
+- en: Shows commands or other text that should be typed literally by the user. Also
+    used occasionally in command output to highlight text of interest.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示用户应按字面意思键入的命令或其他文本。也偶尔在命令输出中用于突出显示感兴趣的文本。
+- en: '*`Constant width italic`*'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*`Constant width italic`*'
+- en: Shows text that should be replaced with user-supplied values or by values determined
+    by context. Also used for brief notes on the right side of code listings.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示应由用户提供值或由上下文确定值替换的文本。也用于代码列表右侧的简要注释。
+- en: '`Constant width highlighted`'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`Constant width highlighted`'
+- en: Used in complex program listings to call attention to specific text.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于复杂程序列表中以引起特定文本注意的标记。
+- en: Tip
+  id: totrans-49
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: Tip
+- en: This element signifies a tip or suggestion.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个元素表示提示或建议。
+- en: Note
+  id: totrans-51
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: Note
+- en: This element signifies a general note.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个元素表示一般注释。
+- en: Warning
+  id: totrans-53
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: Warning
+- en: This element indicates a warning or caution.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个元素表示警告或注意事项。
+- en: Using Code Examples
+  id: totrans-55
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用代码示例
+- en: Supplemental material (code examples, exercises, etc.) is available for download
+    at [*https://efficientlinux.com/examples*](https://efficientlinux.com/examples).
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 补充材料（代码示例、练习等）可在[*https://efficientlinux.com/examples*](https://efficientlinux.com/examples)下载。
+- en: If you have a technical question or a problem using the code examples, please
+    send email to [*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com).
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你有技术问题或者在使用代码示例时遇到问题，请发送电子邮件至[*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com)。
+- en: This book is here to help you get your job done. In general, if example code
+    is offered with this book, you may use it in your programs and documentation.
+    You do not need to contact us for permission unless you’re reproducing a significant
+    portion of the code. For example, writing a program that uses several chunks of
+    code from this book does not require permission. Selling or distributing examples
+    from O’Reilly books does require permission. Answering a question by citing this
+    book and quoting example code does not require permission. Incorporating a significant
+    amount of example code from this book into your product’s documentation does require
+    permission.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书旨在帮助您完成工作。一般情况下，如果本书提供示例代码，则可以在您的程序和文档中使用它。除非您复制了代码的大部分内容，否则您无需联系我们以获取权限。例如，编写一个使用本书中几个代码块的程序不需要权限。销售或分发来自O’Reilly图书的示例代码则需要权限。通过引用本书并引用示例代码回答问题不需要权限。将本书中大量示例代码整合到产品文档中则需要权限。
+- en: 'We appreciate, but generally do not require, attribution. An attribution usually
+    includes the title, author, publisher, and ISBN. For example: “*Efficient Linux
+    at the Command Line* by Daniel J. Barrett (O’Reilly). Copyright 2022 Daniel Barrett,
+    978-1-098-11340-7.”'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们欣赏，但通常不需要署名。署名通常包括标题、作者、出版商和ISBN。例如：“*Efficient Linux at the Command Line*
+    by Daniel J. Barrett (O’Reilly)。版权所有 2022 Daniel Barrett, 978-1-098-11340-7。”
+- en: If you feel your use of code examples falls outside fair use or the permission
+    given above, feel free to contact us at [*permissions@oreilly.com*](mailto:permissions@oreilly.com).
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您认为您使用的代码示例超出了合理使用范围或以上述许可证给出的权限，请随时通过[*permissions@oreilly.com*](mailto:permissions@oreilly.com)联系我们。
+- en: O’Reilly Online Learning
+  id: totrans-61
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: O’Reilly Online Learning
+- en: Note
+  id: totrans-62
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: Note
+- en: For more than 40 years, [*O’Reilly Media*](https://oreilly.com) has provided
+    technology and business training, knowledge, and insight to help companies succeed.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 超过40年来，[*O’Reilly Media*](https://oreilly.com) 提供技术和商业培训、知识和洞见，帮助公司取得成功。
+- en: Our unique network of experts and innovators share their knowledge and expertise
+    through books, articles, and our online learning platform. O’Reilly’s online learning
+    platform gives you on-demand access to live training courses, in-depth learning
+    paths, interactive coding environments, and a vast collection of text and video
+    from O’Reilly and 200+ other publishers. For more information, visit [*https://oreilly.com*](https://oreilly.com).
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们独特的专家和创新者网络通过书籍、文章和我们的在线学习平台分享他们的知识和专长。O’Reilly的在线学习平台为您提供按需访问的实时培训课程、深度学习路径、交互式编码环境以及来自O’Reilly和其他200多家出版商的大量文本和视频。更多信息，请访问[*https://oreilly.com*](https://oreilly.com)。
+- en: How to Contact Us
+  id: totrans-65
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 如何联系我们
+- en: 'Please address comments and questions concerning this book to the publisher:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请将关于本书的评论和问题发送至出版社：
+- en: O’Reilly Media, Inc.
+  id: totrans-67
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: O’Reilly Media, Inc.
+- en: 1005 Gravenstein Highway North
+  id: totrans-68
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1005 Gravenstein Highway North
+- en: Sebastopol, CA 95472
+  id: totrans-69
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Sebastopol, CA 95472
+- en: 800-998-9938 (in the United States or Canada)
+  id: totrans-70
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 800-998-9938（美国或加拿大境内）
+- en: 707-829-0515 (international or local)
+  id: totrans-71
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 707-829-0515（国际或本地）
+- en: 707-829-0104 (fax)
+  id: totrans-72
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 707-829-0104（传真）
+- en: We have a web page for this book, where we list errata, examples, and any additional
+    information. You can access this page at [*https://oreil.ly/efficient-linux*](https://oreil.ly/efficient-linux).
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们有这本书的网页，列出勘误、示例和任何其他信息。您可以访问[*https://oreil.ly/efficient-linux*](https://oreil.ly/efficient-linux)。
+- en: Email [*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com) to comment
+    or ask technical questions about this book.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请发送电子邮件至[*bookquestions@oreilly.com*](mailto:bookquestions@oreilly.com)，就本书的评论或技术问题发表意见。
+- en: For news and information about our books and courses, visit [*https://oreilly.com*](https://oreilly.com).
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于我们的书籍和课程的新闻和信息，请访问[*https://oreilly.com*](https://oreilly.com)。
+- en: 'Find us on Facebook: [*https://facebook.com/oreilly*](https://facebook.com/oreilly)'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Facebook上找到我们：[*https://facebook.com/oreilly*](https://facebook.com/oreilly)
+- en: 'Follow us on Twitter: [*https://twitter.com/oreillymedia*](https://twitter.com/oreillymedia)'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Twitter上关注我们：[*https://twitter.com/oreillymedia*](https://twitter.com/oreillymedia)
+- en: 'Watch us on YouTube: [*https://www.youtube.com/oreillymedia*](https://www.youtube.com/oreillymedia)'
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在YouTube上观看我们：[*https://www.youtube.com/oreillymedia*](https://www.youtube.com/oreillymedia)
+- en: Acknowledgments
+  id: totrans-79
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 致谢
+- en: This book was a joy to write. Thanks to the amazing folks at O’Reilly, especially
+    editors Virginia Wilson and John Devins, production editors Caitlin Ghegan and
+    Gregory Hyman, content manager Kristen Brown, copyeditor Kim Wimpsett, index editor
+    Sue Klefstad, and the ever-helpful tools team. I’m also very grateful to the book’s
+    technical reviewers, Paul Bayer, John Bonesio, Dan Ritter, and Carla Schroder,
+    for many insightful comments and criticisms. Thanks also to the Boston Linux Users
+    Group for title suggestions. Special thanks to Maggie Johnson at Google for her
+    kind permission to write the book.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 书写这本书是一种快乐。感谢O'Reilly的出色团队，特别是编辑Virginia Wilson和John Devins，制作编辑Caitlin Ghegan和Gregory
+    Hyman，内容经理Kristen Brown，副本编辑Kim Wimpsett，索引编辑Sue Klefstad，以及永远乐于助人的工具团队。我也非常感谢本书的技术审阅者Paul
+    Bayer、John Bonesio、Dan Ritter和Carla Schroder，他们提供了许多有见地的评论和批评。还要感谢波士顿Linux用户组提供的书名建议。特别感谢Google的Maggie
+    Johnson，她慷慨允许我撰写这本书。
+- en: I’d like to offer my deepest thanks to Chip Andrews, Matthew Diaz, and Robert
+    Strandh, who were fellow students at The Johns Hopkins University 35 years ago.
+    They noticed my new and growing interest in Unix and, to my utter surprise, recommended
+    that the Computer Science Department hire me as their next system administrator.
+    Their small act of faith changed the trajectory of my life. (Robert also gets
+    credit for the tip on touch-typing in [Chapter 3](ch03.xhtml#ch_history).) Thanks
+    also to the creators and maintainers of Linux, GNU Emacs, Git, AsciiDoc, and many
+    other open source tools—without these smart and generous people, my career would
+    have been very different indeed.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我要深深感谢35年前在约翰斯·霍普金斯大学的同学Chip Andrews、Matthew Diaz和Robert Strandh。他们注意到我对Unix的新兴兴趣，并且出乎我的意料，推荐计算机科学系聘请我作为下一任系统管理员。他们这一小小的信任举动改变了我生活的轨迹。（Robert还因在[第3章](ch03.xhtml#ch_history)中关于打字速度提示而获得赞誉。）也感谢Linux、GNU
+    Emacs、Git、AsciiDoc以及许多其他开源工具的创造者和维护者们——如果没有这些聪明和慷慨的人们，我的职业生涯将会截然不同。
+- en: As always, thank you to my wonderful family, Lisa and Sophia, for their love
+    and patience.
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一如既往，感谢我美好的家人Lisa和Sophia，他们的爱和耐心。
+- en: ^([1](preface01.xhtml#idm46586656866000-marker)) This book displays the Linux
+    prompt as a dollar sign. Your prompt may be different.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([1](preface01.xhtml#idm46586656866000-marker)) 本书将Linux提示符显示为一个美元符号。你的提示符可能有所不同。
+- en: ^([2](preface01.xhtml#idm46586656684352-marker)) You’ll learn this mystery command’s
+    purpose in [Chapter 8](ch08.xhtml#ch_one_liner).
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([2](preface01.xhtml#idm46586656684352-marker)) 你将在[第8章](ch08.xhtml#ch_one_liner)中了解这个神秘命令的用途。
+- en: ^([3](preface01.xhtml#idm46586653212752-marker)) The version of `bash` on macOS
+    is ancient and missing important features. To upgrade `bash`, see the article
+    [“Upgrading Bash on macOS”](https://oreil.ly/35jux) by Daniel Weibel.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([3](preface01.xhtml#idm46586653212752-marker)) macOS上的`bash`版本古老且缺少重要功能。要升级`bash`，请参阅Daniel
+    Weibel的文章[“Upgrading Bash on macOS”](https://oreil.ly/35jux)。

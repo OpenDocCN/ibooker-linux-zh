@@ -1,0 +1,1658 @@
+- en: Chapter 3\. BPF Maps
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第三章 BPF 地图
+- en: Message passing to invoke behavior in a program is a widely used technique in
+    software engineering. A program can modify another program’s behavior by sending
+    messages; this also allows the exchange of information between those programs.
+    One of the most fascinating aspects about BPF, is that the code running on the
+    kernel and the program that loaded said code can communicate with each other at
+    runtime using message passing.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过消息传递来调用程序中的行为是软件工程中广泛使用的技术。程序可以通过发送消息来修改另一个程序的行为；这也允许这些程序之间交换信息。关于 BPF 最迷人的一个方面是，运行在内核上的代码和加载了该代码的程序可以在运行时使用消息传递来彼此通信。
+- en: In this chapter we cover how BPF programs and user-space programs can talk to
+    one another. We describe the different channels of communication between the kernel
+    and user-space, and how they store information. We also show you use cases for
+    those channels and how to make the data in those channels persistent between programs
+    initialization.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们介绍了 BPF 程序和用户空间程序如何进行交互。我们描述了内核与用户空间之间的不同通信渠道，以及它们如何存储信息。我们还展示了这些通道的用例以及如何使这些通道中的数据在程序初始化之间保持持久性。
+- en: BPF maps are key/value stores that reside in the kernel. They can be accessed
+    by any BPF program that knows about them. Programs that run in user-space can
+    also access these maps by using file descriptors. You can store any kind of data
+    in a map, as long as you specify the data size correctly beforehand. The kernel
+    treats keys and values as binary blobs, and it doesn’t care about what you keep
+    in a map.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF 地图是驻留在内核中的键/值存储。任何了解它们的 BPF 程序都可以访问这些地图。运行在用户空间的程序也可以使用文件描述符访问这些地图。您可以在地图中存储任何类型的数据，只要您事先正确指定数据大小。内核将键和值视为二进制数据块，并不关心您在地图中保存了什么。
+- en: The BPF verifier includes several safeguards to ensure that the way you create
+    and access maps is safe. We talk about these guarantees when we explain how to
+    access data in these maps.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF 验证器包含多个保障措施，以确保您创建和访问地图的方式是安全的。当我们解释如何访问这些地图中的数据时，我们将讨论这些保障措施。
+- en: Creating BPF Maps
+  id: totrans-5
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 创建 BPF 地图
+- en: 'The most direct way to create a BPF map is by using the `bpf` syscall. When
+    the first argument in the call is `BPF_MAP_CREATE`, you’re telling the kernel
+    that you want to create a new map. This call will return the file descriptor identifier
+    associated with the map you just created. The second argument in the syscall is
+    the configuration for this map:'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建 BPF 地图的最直接方法是使用 `bpf` 系统调用。当调用中的第一个参数是 `BPF_MAP_CREATE` 时，您告诉内核您要创建一个新的地图。此调用将返回与您刚刚创建的地图关联的文件描述符标识符。系统调用中的第二个参数是此地图的配置：
+- en: '[PRE0]'
+  id: totrans-7
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: The third argument in the syscall is the size of this configuration attribute.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统调用中的第三个参数是此配置属性的大小。
+- en: 'For example, you can create a hash-table map to store unsigned integers as
+    keys and values as follows:'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，您可以创建一个哈希表地图，以以下方式存储无符号整数作为键和值：
+- en: '[PRE1]'
+  id: totrans-10
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: If the call fails, the kernel returns a value of `-1`. There might be three
+    reasons why it fails. If one of the attributes is invalid, the kernel sets the
+    `errno` variable to `EINVAL`. If the user executing the operation doesn’t have
+    enough privileges, the kernel sets the `errno` variable to `EPERM`. Finally, if
+    there is not enough memory to store the map, the kernel sets the `errno` variable
+    to `ENOMEM`.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果调用失败，内核将返回值 `-1`。它失败的原因可能有三种。如果其中一个属性无效，内核将将 `errno` 变量设置为 `EINVAL`。如果执行操作的用户权限不足，内核将将
+    `errno` 变量设置为 `EPERM`。最后，如果没有足够的内存来存储地图，内核将将 `errno` 变量设置为 `ENOMEM`。
+- en: In the following sections, we guide you through different examples to show you
+    how to perform more advanced operations with BPF maps; let’s begin with a more
+    direct way to create any type of map.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接下来的几节中，我们将引导您通过不同的示例，展示如何使用 BPF 地图执行更高级的操作；让我们从创建任何类型的地图的更直接方式开始。
+- en: ELF Conventions to Create BPF Maps
+  id: totrans-13
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: ELF 约定创建 BPF 地图
+- en: The kernel includes several conventions and helpers to generate and work with
+    BPF maps. You’ll probably find these conventions more frequently presented than
+    direct syscall executions because they are more readable and easier to follow.
+    Keep in mind that these conventions still use the `bpf` syscall to create the
+    maps, even when run directly in the kernel, and you’ll find using the syscall
+    directly more useful if you don’t know which kind of maps you’re going to need
+    beforehand.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核包含了几个约定和帮助函数，用于生成和使用BPF地图。你可能会发现这些约定比直接的系统调用执行更常见，因为它们更易读、更易于跟随。请记住，即使在内核中直接运行时，这些约定仍然使用`bpf`系统调用来创建地图，如果你事先不知道需要哪种地图，直接使用系统调用会更有用。
+- en: 'The helper function `bpf_map_create` wraps the code you just saw to make it
+    easier to initialize maps on demand. We can use it to create the previous map
+    with only one line of code:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 辅助函数`bpf_map_create`包装了你刚才看到的代码，使得按需初始化地图变得更容易。我们可以用一行代码创建之前的地图：
+- en: '[PRE2]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'If you know which kind of map you’re going to need in your program, you can
+    also predefine it. This is helpful to get more visibility in the maps your program
+    is using beforehand:'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你知道程序中需要哪种地图，你也可以预定义它。这对于提前了解程序使用的地图更有帮助：
+- en: '[PRE3]'
+  id: totrans-18
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: When you define a map in this way, you’re using what’s called a *section attribute*,
+    in this case `SEC("maps")`. This macro tells the kernel that this structure is
+    a BPF map and it should be created accordingly.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你以这种方式定义地图时，你正在使用所谓的*节属性*，在这种情况下是`SEC("maps")`。这个宏告诉内核这个结构是一个BPF地图，并且应该相应地创建它。
+- en: 'You might have noticed that we don’t have the file descriptor identifier associated
+    with the map in this new example. In this case, the kernel uses a global variable
+    called `map_data` to store information about the maps in your program. This variable
+    is an array of structures, and it’s ordered by how you specified each map in your
+    code. For example, if the previous map was the first one specified in your code,
+    you’d get the file descriptor identifier from the first element in the array:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能注意到，在这个新例子中我们没有与地图关联的文件描述符标识符。在这种情况下，内核使用一个叫做`map_data`的全局变量来存储程序中地图的信息。这个变量是一个结构体数组，按照你在代码中指定的每个地图的顺序排列。例如，如果前一个地图是你代码中指定的第一个地图，你可以从数组的第一个元素中获取文件描述符标识符：
+- en: '[PRE4]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: You can also access the map’s name and its definition from this structure; this
+    information is sometimes useful for debugging and tracing purposes.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你也可以通过这个结构访问地图的名称及其定义；这些信息有时对调试和跟踪非常有用。
+- en: After you have initialized the map, you can begin sending messages between the
+    kernel and user-space with them. Let’s see now how to work with the data that
+    these maps store.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 初始化地图后，你可以开始在内核和用户空间之间发送消息。现在让我们看看如何处理这些地图存储的数据。
+- en: Working with BFP Maps
+  id: totrans-24
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 与BPF地图的工作
+- en: Communication between the kernel and user-space is going to be a fundamental
+    piece in every BPF program you write. The APIs to access maps differ when you’re
+    writing the code for the kernel than when you’re writing the code for the user-space
+    program. This section introduces the semantics and specific details of each implementation.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核和用户空间之间的通信将是你编写的每个BPF程序的一个基本组成部分。访问地图的API在编写内核代码和编写用户空间程序代码时有所不同。本节介绍了每种实现的语义和具体细节。
+- en: Updating Elements in a BPF Map
+  id: totrans-26
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 更新BPF地图中的元素
+- en: After creating any map, you’ll probably want to populate it with information.
+    The kernel helpers provide the function `bpf_map_update_elem` for this purpose.
+    This function’s signature is different if you load it from *bpf/bpf_helpers.h*,
+    within the program running on the kernel, than if you load it from *tools/lib/bpf/bpf.h*,
+    within the program running in user-space. This is because you can access maps
+    directly when you’re working in the kernel, but you reference them with file descriptors
+    when you’re working in user-space. Its behavior is also slightly different; the
+    code running on the kernel can access the map in memory directly, and it will
+    be able to update elements atomically in place. However, the code running in user-space
+    has to send the message to the kernel, which copies the value supplied before
+    updating the map; this makes the update operation not atomic. This function returns
+    0 when the operation succeeds, and it returns a negative number when it fails.
+    In case of failure, the global variable `errno` is populated with the failure
+    cause. We list failure cases later in this chapter with more context.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在创建任何映射之后，您可能希望用信息填充它。内核助手为此目的提供了函数`bpf_map_update_elem`。如果您从内核中运行的程序加载它，该函数的签名与如果您从用户空间中运行的程序加载它时稍有不同，因为当您在内核中工作时，您可以直接访问映射，但是当您在用户空间工作时，您将使用文件描述符引用它们。其行为也略有不同。在内核中运行的代码可以直接访问内存中的映射，并且可以原子地就地更新元素。然而，在用户空间运行的代码必须向内核发送消息，然后再更新映射之前复制提供的值，这使得更新操作不是原子的。当操作成功时，该函数返回`0`，当操作失败时返回负数。在失败的情况下，全局变量`errno`将填充失败的原因。我们稍后在本章中列出更多与上下文相关的失败案例。
+- en: 'The `bpf_map_update_elem` function within the kernel takes four arguments.
+    The first one is the pointer to the map we’ve already defined. The second one
+    is a pointer to the key we want to update. Because the kernel doesn’t know the
+    type of key we’re updating, this method is defined as an opaque pointer to `void`,
+    which means we can pass any data. The third argument is the value we want to insert.
+    This argument uses the same semantics as the key argument. We show some advanced
+    examples of how to take advantage of opaque pointers throughout this book. You
+    can use the fourth argument in this function to change the way the map is updated.
+    This argument can take three values:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核中的`bpf_map_update_elem`函数接受四个参数。第一个是我们已经定义的映射的指针。第二个是指向我们想要更新的键的指针。因为内核不知道我们正在更新的键的类型，所以此方法被定义为对`void`的不透明指针，这意味着我们可以传递任何数据。第三个参数是我们想要插入的值。该参数使用与键参数相同的语义。我们在本书中展示了如何利用不透明指针的一些高级示例。您可以使用此函数的第四个参数来更改更新映射的方式。此参数可以取三个值：
+- en: If you pass `0`, you’re telling the kernel that you want to update the element
+    if it exists or that it should create the element in the map if it doesn’t exist.
+  id: totrans-29
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果你传递`0`，你告诉内核你希望更新元素（如果存在），或者如果元素不存在则创建该元素。
+- en: If you pass `1`, you’re telling the kernel to create the element only when it
+    doesn’t exist.
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果你传递`1`，你告诉内核仅在元素不存在时创建该元素。
+- en: If you pass `2`, the kernel will update the element only when it exists.
+  id: totrans-31
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果你传递`2`，内核将仅在元素存在时更新该元素。
+- en: These values are defined as constants that you can also use, instead of having
+    to remember the integer semantics. The values are `BPF_ANY` for `0`, `BPF_NOEXIST`
+    for `1`, and `BPF_EXIST` for `2`.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些值被定义为常量，你也可以使用它们，而不必记住整数语义。这些值分别是`BPF_ANY`代表`0`，`BPF_NOEXIST`代表`1`，以及`BPF_EXIST`代表`2`。
+- en: 'Let’s use the map we defined in the previous section to write some examples.
+    In our first example, we add a new value to the map. Because the map is empty,
+    we can assume that any update behavior is good for us:'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们使用在前一节中定义的映射来写一些示例。在我们的第一个示例中，我们向映射中添加一个新值。因为映射是空的，我们可以假设任何更新行为对我们都是有利的。
+- en: '[PRE5]'
+  id: totrans-34
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: In this example we’re using `strerror` to describe the error set in the `errno`
+    variable. You can learn more about this function on the manual pages using `man
+    strerror`.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个例子中，我们使用`strerror`来描述`errno`变量中设置的错误。你可以在手册页面上使用`man strerror`了解更多关于这个函数的信息。
+- en: 'Now let’s see which result we get when we try to create an element with the
+    same key:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看当我们尝试使用相同的键创建一个元素时我们会得到什么结果。
+- en: '[PRE6]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'Because we have already created an element with key `1` in our map, the result
+    from calling `bpf_map_update_elem` will be `-1`, and the `errno` value will be
+    `EEXIST`. This program will print the following on the screen:'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为我们在映射中已经创建了键为`1`的元素，调用`bpf_map_update_elem`的结果将是`-1`，而`errno`值将是`EEXIST`。这个程序会在屏幕上打印以下内容：
+- en: '`Failed to update map with new value: -1 (File exists)`'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`Failed to update map with new value: -1 (File exists)`'
+- en: 'Similarly, let’s change this program to try to update an element that doesn’t
+    exist yet:'
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 类似地，让我们修改这个程序，尝试更新一个尚不存在的元素：
+- en: '[PRE7]'
+  id: totrans-41
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'With the flag `BPF_EXIST`, the result of this operation is going to be `-1`
+    again. The kernel will set the `errno` variable to `ENOENT`, and the program will
+    print the following:'
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`BPF_EXIST`标志，这个操作的结果将再次是`-1`。内核将会将`errno`变量设置为`ENOENT`，程序会打印以下内容：
+- en: '`Failed to update map with new value: -1 (No such file or directory)`'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`Failed to update map with new value: -1 (No such file or directory)`'
+- en: 'These examples show how you can update maps from within the kernel program.
+    You can also update maps from within user-space programs. The helpers to do this
+    are similar to the ones we just saw; the only difference is that they use the
+    file descriptor to access the map, rather than using the pointer to the map directly.
+    As you remember, user-space programs always access maps using file descriptors.
+    So in our examples, we’d replace the argument `my_map` with the global file descriptor
+    identifier `map_data[0].fd`. Here is what the original code looks like in this
+    case:'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些示例展示了如何从内核程序内更新映射。您也可以从用户空间程序内更新映射。执行此操作的助手函数与我们刚刚看到的类似；唯一的区别在于它们使用文件描述符来访问映射，而不是直接使用指向映射的指针。正如您记得的那样，用户空间程序总是使用文件描述符访问映射。因此，在我们的示例中，我们将参数`my_map`替换为全局文件描述符标识符`map_data[0].fd`。在这种情况下，原始代码看起来是这样的：
+- en: '[PRE8]'
+  id: totrans-45
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: Although the type of information that you can store in a map is directly related
+    to the type of map that you’re working with, the method to populate the information
+    will remain the same, as you saw in this previous example. We discuss the types
+    of keys and values accepted for each type of map later; let’s first see how to
+    manipulate the store data.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管您可以在映射中存储的信息类型与您正在使用的映射类型直接相关，但用于填充信息的方法将保持不变，就像您在前面的示例中看到的那样。我们稍后将讨论每种映射类型接受的键和值类型；首先让我们看看如何操作存储数据。
+- en: Reading Elements from a BPF Map
+  id: totrans-47
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 从BPF映射中读取元素
+- en: Now that we’ve populated our map with new elements, we can begin reading them
+    from other points in our code. The reading API will look familiar after learning
+    about `bpf_map_update_element`.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们已经使用新元素填充了我们的映射，我们可以从我们代码的其他点开始读取它们。在学习了`bpf_map_update_element`之后，阅读API会变得很熟悉。
+- en: BPF also provides two different helpers to read from a map depending on where
+    your code is running. Both helpers are called `bpf_map_lookup_elem`. Like the
+    update helpers, they differ in their first argument; the kernel method takes a
+    reference to the map, whereas the user-space helper takes the map’s file descriptor
+    identifier as its first argument. Both methods return an integer to represent
+    whether the operation failed or succeeded, just like the update helpers. The third
+    argument in these helpers is a pointer to the variable in your code that’s going
+    to store the value read from the map. We present two examples based on the code
+    you saw in the previous section.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF还提供了两种不同的助手函数来从映射中读取，具体取决于您的代码运行在哪里。这两个助手函数都称为`bpf_map_lookup_elem`。与更新助手函数类似，它们在第一个参数上有所不同；内核方法接受映射的引用，而用户空间助手函数则以映射的文件描述符标识符作为其第一个参数。这两种方法都返回一个整数，表示操作成功或失败，就像更新助手函数一样。这些助手函数的第三个参数是指向您代码中将要存储从映射中读取的值的变量的指针。我们基于您在前一节中看到的代码提供了两个示例。
+- en: 'The first example reads the value inserted in the map when the BPF program
+    is running on the kernel:'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一个例子读取了在BPF程序在内核上运行时插入映射中的值：
+- en: '[PRE9]'
+  id: totrans-51
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: If the key we were trying to read, `bpf_map_lookup_elem`, returned a negative
+    number, it would set the error in the `errno` variable. For example, if we had
+    not inserted the value before trying to read it, the kernel would have returned
+    the “not found” error `ENOENT`.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果我们试图读取的键，`bpf_map_lookup_elem`，返回了一个负数，它将会在`errno`变量中设置错误。例如，如果我们在尝试读取之前没有插入该值，内核将会返回“未找到”错误`ENOENT`。
+- en: 'This second example is similar to the one you just saw, but this time we’re
+    reading the map from the program running in user-space:'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个第二个例子与你刚刚看到的例子类似，但这次我们是从在用户空间运行的程序中读取映射：
+- en: '[PRE10]'
+  id: totrans-54
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: As you can see, we’ve replaced the first argument in `bpf_map_lookup_elem` with
+    the map’s file descriptor identifier. The helper behavior is the same as the previous
+    example.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如你所见，我们已将`bpf_map_lookup_elem`中的第一个参数替换为映射的文件描述符标识符。助手的行为与前面的示例相同。
+- en: That’s all we need to be able to access information within a BPF map. We examine
+    how this has been streamlined by different toolkits to make accessing data even
+    simpler in later chapters. Let’s talk about deleting data from maps next.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这就是我们需要访问BPF映射中信息的全部内容。我们将在后面的章节中详细讨论不同工具包如何简化数据访问，使其更加简单。
+- en: Removing an Element from a BPF Map
+  id: totrans-57
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 从BPF映射中移除元素
+- en: The third operation we can execute on maps is to remove elements. Like with
+    writing and reading elements, BPF gives us two different helpers to remove elements,
+    both called `bpf_map_delete_element`. Like in the previous examples, these helpers
+    use the direct reference to the map when you use them in the program running on
+    the kernel, and they use the map’s file descriptor identifier when you use them
+    in the program running on user-space.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们可以在映射上执行的第三个操作是删除元素。与写入和读取元素一样，BPF为我们提供了两个不同的帮助程序来删除元素，均称为`bpf_map_delete_element`。与之前的示例一样，当您在运行于内核的程序中使用它们时，这些助手使用映射的直接引用，而在运行于用户空间的程序中使用它们时，则使用映射的文件描述符标识符。
+- en: 'The first example deletes the value inserted in the map when the BPF program
+    is running on the kernel:'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一个示例在内核运行BPF程序时删除了映射中插入的值：
+- en: '[PRE11]'
+  id: totrans-60
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: If the element that you’re trying to delete doesn’t exist, the kernel returns
+    a negative number. In that case, it also populates the `errno` variable with the
+    “not found” error `ENOENT`.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您试图删除的元素不存在，内核将返回一个负数。在这种情况下，它还会将`errno`变量填充为“未找到”错误`ENOENT`。
+- en: 'This second example deletes the value when the BPF program is running on user-space:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个第二个示例在用户空间运行BPF程序时删除了该值：
+- en: '[PRE12]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: You can see that we’ve changed the first argument again to use the file descriptor
+    identifier. Its behavior is going to be consistent with the kernel’s helper.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以看到，我们再次更改了第一个参数，使用了文件描述符标识符。其行为将与内核的助手保持一致。
+- en: This concludes what could be considered the create/read/update/delete (CRUD)
+    operations of the BPF map. The kernel exposes some additional functions to help
+    you with other common operations; we’ll talk about some of them in the next two
+    sections.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这结束了可以称为BPF映射的创建/读取/更新/删除（CRUD）操作的部分。内核公开了一些额外的函数来帮助您进行其他常见操作；我们将在接下来的两个部分中讨论其中的一些。
+- en: Iterating Over Elements in a BPF Map
+  id: totrans-66
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 在BPF映射中遍历元素
+- en: The final operation we look at in this section can help you to find arbitrary
+    elements in a BPF program. There will be occasions when you don’t know exactly
+    the key for the element you’re looking for or you just want to see what’s inside
+    a map. BPF provides an instruction for this called `bpf_map_get_next_key`. Unlike
+    the helpers you’ve seen up to now, this instruction is available only for programs
+    running on user-space.
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中我们查看的最后一个操作可以帮助您在BPF程序中找到任意元素。有时您可能不知道要查找的元素的确切键，或者只是想查看映射中的内容。BPF为此提供了一个称为`bpf_map_get_next_key`的指令。与您目前看到的帮助程序不同，此指令仅适用于运行在用户空间的程序。
+- en: This helper gives you a deterministic way to iterate over the elements on a
+    map, but its behavior is less intuitive than iterators in most programming languages.
+    It takes three arguments. The first one is the map’s file descriptor identifier,
+    like the other user-space helpers you’ve already seen. The next two arguments
+    are where it becomes tricky. According to the official documentation, the second
+    argument, `key`, is the identifier you’re looking for, and the third one, `next_key`,
+    is the next key in the map. We prefer to call the first argument `lookup_key`—it’s
+    going to become apparent why in a second. When you call this helper, BPF tries
+    to find the element in this map with the key that you’re passing as the lookup
+    key; then, it sets the `next_key` argument with the adjacent key in the map. So
+    if you want to know which key comes after key `1`, you need to set `1` as your
+    lookup key, and if the map has an adjacent key to this one, BPF will set it as
+    the value for the `next_key` argument.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个助手为您提供了一种确定性的方法来迭代映射中的元素，但其行为比大多数编程语言中的迭代器更不直观。它接受三个参数。第一个是映射的文件描述符标识符，就像您已经看到的其他用户空间助手一样。接下来的两个参数是它变得棘手的地方。根据官方文档，第二个参数
+    `key` 是您要查找的标识符，第三个参数 `next_key` 是映射中的下一个键。我们更喜欢将第一个参数称为 `lookup_key` —— 几秒钟之后，你就会明白为什么。当您调用此助手时，BPF
+    会尝试查找具有您传递的查找键的映射中的元素；然后，它将邻接的键设置为 `next_key` 参数的值。因此，如果您想知道在键 `1` 之后出现哪个键，您需要将
+    `1` 设置为您的查找键；如果映射有一个与此键相邻的键，BPF 将其设置为 `next_key` 参数的值。
+- en: 'Before seeing how `bpf_map_get_next_key` works in an example, let’s add a few
+    more elements to our map:'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在看例子中 `bpf_map_get_next_key` 如何工作之前，让我们向我们的映射中添加几个元素：
+- en: '[PRE13]'
+  id: totrans-70
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'If you want to print all of the values in the map, you can use `bpf_map_get_next_key`
+    with a lookup key that doesn’t exist in the map. This forces BPF to start from
+    the beginning of the map:'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想打印映射中的所有值，可以使用一个在映射中不存在的查找键调用 `bpf_map_get_next_key`。这会强制 BPF 从映射的开头开始：
+- en: '[PRE14]'
+  id: totrans-72
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'This code prints something like this:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这段代码打印出像这样的东西：
+- en: '[PRE15]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: You can see that we’re assigning the next key to `lookup_key` at the end of
+    the loop; that way, we continue iterating over the map until we reach the end.
+    When `bpf_map_get_next_key` arrives at the end of the map, the value returned
+    is a negative number, and the `errno` variable is set to `ENOENT`. This will abort
+    the loop execution.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以看到，我们将下一个键分配给 `lookup_key`，这样我们就可以继续迭代映射，直到达到结尾。当 `bpf_map_get_next_key`
+    到达映射的末尾时，返回的值是一个负数，并且设置了 `errno` 变量为 `ENOENT`。这将中止循环的执行。
+- en: As you can imagine, `bpf_map_get_next_key` can look up keys starting at any
+    point in the map; you don’t need to start at the beginning of the map if you want
+    only the next key for another specific key.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您可以想象的那样，`bpf_map_get_next_key` 可以查找从映射的任意点开始的键；如果您只想获取另一个特定键的下一个键，您不需要从映射的开头开始。
+- en: 'The tricks that `bpf_map_get_next_key` can play on you don’t end here; there
+    is another behavior that you need to be aware of. Many programming languages copy
+    the values in a map before iterating over its elements. This prevents unknown
+    behaviors if some other code in your program decides to mutate the map. This is
+    especially dangerous if that code deletes elements from the map. BPF doesn’t copy
+    the values in a map before looping over them with `bpf_map_get_next_key`. If another
+    part of your program deletes an element from the map while you’re looping over
+    the values, `bpf_map_get_next_key` will start over when it tries to find the next
+    value for the element’s key that was removed. Let’s see this with an example:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bpf_map_get_next_key` 可以对您施加的技巧并不止于此；还有另一种行为您需要注意。许多编程语言在迭代元素之前复制映射中的值。如果您的程序中的其他代码决定变更映射，这可以防止未知行为。如果该代码从映射中删除元素，这尤其危险。在使用
+    `bpf_map_get_next_key` 遍历值时，BPF 不会复制映射中的值。如果程序的其他部分在您循环遍历值时从映射中删除元素，则 `bpf_map_get_next_key`
+    在尝试查找已删除元素的键的下一个值时将重新开始。让我们通过一个例子来看看这个情况：'
+- en: '[PRE16]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'This program prints the next output:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此程序打印出下一个输出：
+- en: '[PRE17]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: This behavior is not very intuitive, so keep it in mind when you use `bpf_map_get_next_key`.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您使用 `bpf_map_get_next_key` 时，请记住这种行为并不是很直观。
+- en: Because most of the map types that we cover in this chapter behave like arrays,
+    iterating over them is going to be a key operation when you want to access the
+    information that they store. However, there are additional functions to access
+    data, as you’ll see next.
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为我们在本章中涵盖的大多数映射类型表现得像数组一样，当您想访问它们存储的信息时，迭代它们将是一个关键操作。但是，在你下面将看到的时候，还有其他访问数据的函数。
+- en: Looking Up and Deleting Elements
+  id: totrans-83
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 查找并删除元素
+- en: 'Another interesting function that the kernel exposes to work with maps is `bpf_map_lookup_and_delete_elem`.
+    This function searches for a given key in the map and deletes the element from
+    it. At the same time, it writes the value of the element in a variable for your
+    program to use. This function comes in handy when you use queue and stack maps,
+    which we describe in the next section. However, it’s not restricted for use only
+    with those types of maps. Let’s see an example of how to use it with the map we’ve
+    been using in our previous examples:'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核提供的另一个有趣函数用于处理映射的是`bpf_map_lookup_and_delete_elem`。此函数在映射中查找给定键并删除该元素。同时，它将元素的值写入变量以供程序使用。当您使用队列和堆栈映射时，这个函数非常方便，我们将在下一节中描述这些映射。但是，并不限于仅在这些类型的映射中使用。让我们看一个如何在我们先前示例中使用该函数的例子：
+- en: '[PRE18]'
+  id: totrans-85
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: In this example, we try to fetch the same element from the map twice. In the
+    first iteration, this code will print the value of the element in the map. However,
+    because we’re using `bpf_map_lookup_and_delete_element`, this first iteration
+    will also delete the element from the map. The second time the loop tries to fetch
+    the element, this code will fail, and it will populate the `errno` variable with
+    the “not found” error `ENOENT`.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个例子中，我们尝试两次从映射中获取相同的元素。在第一次迭代中，此代码将打印映射中元素的值。然而，由于我们使用了`bpf_map_lookup_and_delete_element`，这第一次迭代还将从映射中删除该元素。当循环第二次尝试获取元素时，此代码将失败，并将“未找到”错误`ENOENT`填入`errno`变量中。
+- en: Until now, we haven’t paid much attention to what happens when concurrent operations
+    try to access the same piece of information within a BPF map. Let’s talk about
+    this next.
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 直到现在，我们并没有过多关注当并发操作尝试访问BPF映射中的同一信息时会发生什么。接下来我们来谈谈这个问题。
+- en: Concurrent Access to Map Elements
+  id: totrans-88
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 并发访问映射元素
+- en: One of the challenges of working with BPF maps is that many programs can access
+    the same maps concurrently. This can introduce race conditions in our BPF programs,
+    and make accessing resources in maps unpredictable. To prevent race conditions,
+    BPF introduced the concept of BPF spin locks, which allow you to lock access to
+    a map’s element while you’re operating on it. Spin locks work only on array, hash,
+    and cgroup storage maps.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 处理BPF映射的一个挑战是许多程序可以并发访问同一映射。这可能会在我们的BPF程序中引入竞争条件，并使映射中资源的访问变得不可预测。为了防止竞争条件，BPF引入了BPF自旋锁的概念，允许您在操作映射元素时锁定对其的访问。自旋锁仅适用于数组、哈希和cgroup存储映射。
+- en: 'There are two BPF helper functions to work with spin locks: `bpf_spin_lock`
+    locks an element, and `bpf_spin_unlock` unlocks that element. These helpers work
+    with a structure that acts as a semaphone to access an element that includes this
+    semaphore. When the semaphore is locked, other programs cannot access the element’s
+    value, and they wait until the semaphore is unlocked. At the same time, BPF spin
+    locks introduce a new flag that user-space programs can use to change the state
+    of that lock; that flag is called `BPF_F_LOCK`.'
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有两个BPF辅助函数用于处理自旋锁：`bpf_spin_lock`锁定一个元素，`bpf_spin_unlock`解锁该元素。这些辅助函数与一个结构体一起工作，该结构体充当访问该元素的信号量。当信号量被锁定时，其他程序无法访问元素的值，并且它们会等待信号量被解锁。同时，BPF自旋锁引入了一个新标志，用户空间程序可以用来改变该锁的状态；该标志称为`BPF_F_LOCK`。
+- en: 'The first thing we need to do to work with spin locks is create the element
+    that we want to lock access to and then add our semaphore:'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 处理自旋锁的第一步是创建我们要锁定访问的元素，然后添加我们的信号量：
+- en: '[PRE19]'
+  id: totrans-92
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'We’ll store this structure in our BPF map, and we’ll use the semaphore within
+    the element to prevent undesired access to it. Now, we can declare the map that’s
+    going to hold these elements. This map must be annotated with BPF Type Format
+    (BTF) so the verifier knows how to intepret the structure. The type format gives
+    the kernel and other tools a much richer understanding of BPF data structures
+    by adding debug information to binary objects. Because this code will run within
+    the kernel, we can use the kernel macros that `libbpf` provides to annotate this
+    concurrent map:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将在我们的BPF映射中存储此结构，并使用元素内的信号量来防止对其的不良访问。现在，我们可以声明将保存这些元素的映射。此映射必须使用BPF类型格式（BTF）进行注释，以便验证器知道如何解释结构。类型格式通过向二进制对象添加调试信息，使内核和其他工具对BPF数据结构有了更丰富的理解。因为这段代码将在内核中运行，我们可以使用`libbpf`提供的内核宏来注释此并发映射：
+- en: '[PRE20]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'Within a BPF program we can use the two locking helpers to protect from race
+    conditions on those elements. Even though the semaphore is locked, our program
+    is guaranteed to be able to modify the element’s value safely:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 BPF 程序中，我们可以使用两个锁定辅助函数来保护这些元素，防止竞争条件。即使信号量被锁定，我们的程序也能够安全地修改元素的值：
+- en: '[PRE21]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: This example initializes our concurrent map with a new entry that can lock access
+    to its value. Then, it fetches that value from the map and locks its semaphore
+    so that it can hold the count value, preventing data races. When it’s done using
+    the value, it releases the lock so other maps can access the element safely.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例使用一个新条目初始化我们的并发映射，该条目可以锁定其值的访问。然后，它从映射中获取该值并锁定其信号量，以便它可以保持计数值，防止数据竞争。在使用完值后，它释放锁，以便其他映射可以安全地访问该元素。
+- en: From user-space, we can hold the reference to an element in our concurrent map
+    by using the flag `BPF_F_LOCK`. You can use this flag with the `bpf_map_update_elem`
+    and `bpf_map_lookup_elem_flags` helper functions. This flag allows you to update
+    elements in place without having to worry about data races.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从用户空间，我们可以通过使用标志 `BPF_F_LOCK` 在并发映射中持有元素的引用。您可以将此标志与 `bpf_map_update_elem` 和
+    `bpf_map_lookup_elem_flags` 辅助函数一起使用。这个标志允许您原地更新元素，而不必担心数据竞争。
+- en: Note
+  id: totrans-99
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: '`BPF_F_LOCK` has a slightly different behavior when updating hash map and updating
+    array and cgroup storage maps. With the latter two, the updates happen in place,
+    and the elements that you’re updating must exist in the map before executing the
+    update. In the case of hash maps, if the element doesn’t exist already, the program
+    locks the bucket in the map for the element and inserts a new element.'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当更新散列映射和更新数组和 cgroup 存储映射时，`BPF_F_LOCK` 的行为稍有不同。对于后两者，更新发生在原地，并且在执行更新之前，要更新的元素必须已经存在于映射中。在散列映射的情况下，如果元素尚不存在，则程序会锁定映射中元素的桶，并插入一个新元素。
+- en: Spin locks are not always necessary. You don’t need them if you’re only aggregating
+    values in a map. However, they are useful if you want to ensure that concurrent
+    programs don’t change elements in a map when you’re performing several operations
+    on them, preserving atomicity.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自旋锁并不总是必需的。如果您只是在映射中聚合值，那么您不需要它们。但是，如果您希望在执行多个操作时确保并发程序不会更改映射中的元素，从而保持原子性，它们将非常有用。
+- en: In this section you’ve seen the possible operations you can do with BPF maps;
+    however, we’ve worked with only one type of map so far. BPF includes many more
+    map types that you can use in different situations. We explain all types of maps
+    that BPF defines and show you specific examples on how to use them for different
+    situations.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，您已经看到了可以使用 BPF 映射执行的可能操作；但是，到目前为止，我们只使用了一种类型的映射。BPF 包含许多其他映射类型，您可以在不同情况下使用它们。我们将解释
+    BPF 定义的所有映射类型，并向您展示如何在不同情况下使用它们的具体示例。
+- en: Types of BPF Maps
+  id: totrans-103
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPF 映射的类型
+- en: The [Linux documentation](https://oreil.ly/XfoqK) defines maps as generic data
+    structures where you can store different types of data. Over the years, the kernel
+    developers have added many specialized data structures that are more efficient
+    in specific use cases. This section explores each type of map and how you can
+    use them.
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Linux 文档](https://oreil.ly/XfoqK) 将映射定义为通用数据结构，您可以在其中存储不同类型的数据。多年来，内核开发人员添加了许多专门的数据结构，这些数据结构在特定用例中更有效。本节探讨了每种映射类型及其用法。'
+- en: Hash-Table Maps
+  id: totrans-105
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 散列表映射
+- en: Hash-table maps were the first generic map added to BPF. They are defined with
+    the type `BPF_MAP_TYPE_HASH`. Their implementation and usage are similar to other
+    hash tables you might be familiar with. You can use keys and values of any size;
+    the kernel takes care of allocating and freeing them for you as needed. When you
+    use `bpf_map_update_elem` on a hash-table map, the kernel replaces the elements
+    atomically.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 散列表映射是添加到 BPF 的第一个通用映射。它们的定义是 `BPF_MAP_TYPE_HASH` 类型。它们的实现和使用与您可能熟悉的其他散列表类似。您可以使用任意大小的键和值；内核会根据需要为您分配和释放它们。当您在散列表映射上使用
+    `bpf_map_update_elem` 时，内核会原子地替换元素。
+- en: 'Hash-table maps are optimized to be very fast at lookup; they are useful for
+    keeping structured data that’s read frequently. Let’s see an example program that
+    uses them to keep track of network IPs and their rate limits:'
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 散列表映射在查找时被优化得非常快速；它们对于存储频繁读取的结构化数据非常有用。让我们看一个使用它们来跟踪网络 IP 地址及其速率限制的示例程序：
+- en: '[PRE22]'
+  id: totrans-108
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: In this code we’ve declared a structured key, and we’re going to use it to keep
+    information about IP addresses. We define the map that our program will use to
+    keep track of rate limits. You can see that we’re using the IP addresses as keys
+    in this map. The values are going to be the number of times that our BPF program
+    receives a network packet from a specific IP address.
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这段代码中，我们声明了一个结构化键，并将其用于保存关于IP地址的信息。我们定义了我们的程序将用来跟踪速率限制的映射。你可以看到，我们在这个映射中使用IP地址作为键。值将是我们的BPF程序从特定IP地址接收网络数据包的次数。
+- en: 'Let’s write a small code snippet that updates those counters in the kernel:'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们编写一个小代码片段，在内核中更新这些计数器：
+- en: '[PRE23]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: This function takes an IP address extracted from a network packet and performs
+    the map lookup with the compound key that we’re declaring. In this case, we’re
+    assuming that we’ve previously initialized the counter with a zero value; otherwise,
+    the `bpf_map_lookup_elem` call would return a negative number.
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个函数接收从网络数据包中提取的IP地址，并使用我们声明的复合键进行映射查找。在这种情况下，我们假设之前已经用零值初始化了计数器；否则，`bpf_map_lookup_elem`
+    调用会返回一个负数。
+- en: Array Maps
+  id: totrans-113
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 数组映射
+- en: Array maps were the second type of BPF map added to the kernel. They are defined
+    with the type `BPF_MAP_TYPE_ARRAY`. When you initialize an array map, all of its
+    elements are preallocated in memory and set to their zero value. Because these
+    maps are backed by a slice of elements, the keys are indexes in the array, and
+    their size must be exactly four bytes.
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数组映射是内核添加的第二种BPF映射类型。它们使用类型 `BPF_MAP_TYPE_ARRAY` 来定义。当你初始化一个数组映射时，它的所有元素都预先分配在内存中，并设置为它们的零值。因为这些映射由元素切片支持，所以键是数组中的索引，其大小必须正好是四个字节。
+- en: A disadvantage of using array maps is that the elements in the map cannot be
+    removed and you cannot make the array smaller than it is. If you try to use `map_delete_elem`
+    on an array map, the call will fail, and you’ll get an error `EINVAL` as a result.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用数组映射的一个缺点是，映射中的元素不能被删除，也不能使数组比它的大小更小。如果尝试在数组映射上使用 `map_delete_elem`，调用将失败，并且你会得到一个
+    `EINVAL` 错误作为结果。
+- en: Array maps are commonly used to store information that can change in value,
+    but it’s usually fixed in behavior. People use them to store global variables
+    with a predefined assignment rule. Because you cannot remove elements, you can
+    assume that the element in a specific position always represents the same element.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 数组映射通常用于存储可以更改值的信息，但通常在行为上是固定的。人们使用它们来存储具有预定义分配规则的全局变量。由于你不能删除元素，可以假定特定位置的元素始终表示相同的元素。
+- en: Something else to keep in mind is that `map_update_elem` is not atomic, like
+    you saw with hash-table maps. The same program can read different values from
+    the same position at the same time if there is an update in process. If you’re
+    storing counters in an array map, you can use the kernel’s built-in function `__sync_fetch_and_add`
+    to perform atomic operations on the map’s values.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一件需要记住的事情是，`map_update_elem` 不像你在哈希表映射中看到的那样是原子的。如果有更新正在进行，同一个程序可以同时从相同位置读取不同的值。如果你在数组映射中存储计数器，可以使用内核的内置函数
+    `__sync_fetch_and_add` 对映射的值执行原子操作。
+- en: Program Array Maps
+  id: totrans-118
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 程序数组映射
+- en: Program array maps were the first specialized map added to the kernel. They
+    are defined with the type `BPF_MAP_TYPE_PROG_ARRAY`. You can use this type of
+    map to store references to BPF programs using their file descriptor identifiers.
+    In conjunction with the helper `bpf_tail_call`, this map allows you to jump between
+    programs, bypassing the maximum instruction limit of single BPF programs and reducing
+    implementation complexity.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 程序数组映射是内核添加的第一个专门映射。它们使用类型 `BPF_MAP_TYPE_PROG_ARRAY` 来定义。你可以使用这种类型的映射来存储对BPF程序的引用，使用它们的文件描述符标识符。结合辅助函数
+    `bpf_tail_call` 使用这个映射，可以让你在程序之间跳转，绕过单个BPF程序的最大指令限制，并减少实现复杂性。
+- en: There are a few things you need to consider when you use this specialized map.
+    The first aspect to remember is that both key and value sizes must be four bytes.
+    The second aspect to remember is that when you jump to a new program, the new
+    program will reuse the same memory stack, so your program doesn’t consume all
+    the available memory. Finally, if you try to jump to a program that doesn’t exist
+    in the map, the tail call will fail, and the current program will continue its
+    execution.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你使用这种专用映射时，有几点需要考虑。首先要记住的是，键和值的大小都必须是四字节。第二点要记住的是，当你跳转到一个新程序时，新程序将重用同一内存堆栈，因此你的程序不会消耗所有可用内存。最后，如果尝试跳转到一个不存在于映射中的程序，尾调用将失败，当前程序将继续执行。
+- en: 'Let’s dive into a detailed example to understand how to use this type of map
+    better:'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们深入一个详细的例子，以更好地理解如何使用这种类型的映射：
+- en: '[PRE24]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'First, we need to declare our new program map (as we mentioned earlier, the
+    key and value sizes are always four bytes):'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我们需要声明我们的新程序映射（正如我们前面提到的，键和值的大小始终为四字节）。
+- en: '[PRE25]'
+  id: totrans-124
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: We need to declare the program that we’re going to jump to. In this case, we’re
+    writing a BPF program, and its only purpose is to return 0\. We use `bpf_prog_load`
+    to load it in the kernel, and then we add its file descriptor identifier to our
+    program map.
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们需要声明要跳转到的程序。在本例中，我们编写了一个BPF程序，其唯一目的是返回0。我们使用`bpf_prog_load`将其加载到内核中，然后将其文件描述符标识符添加到我们的程序映射中。
+- en: 'Now that we have that program stored, we can write another BPF program that
+    will jump to it. BPF programs can jump to other programs only if they are of the
+    same type; in this case, we’re attaching the program to a kprobe trace, like we
+    saw in [Chapter 2](ch02.html#running_your_first_BPF_programs):'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们已经将该程序存储起来，我们可以编写另一个BPF程序来跳转到它。BPF程序只能跳转到同类型的其他程序；在本例中，我们将程序附加到一个kprobe跟踪中，就像我们在[第2章](ch02.html#running_your_first_BPF_programs)中看到的那样。
+- en: '[PRE26]'
+  id: totrans-127
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: With `bpf_tail_call` and `BPF_MAP_TYPE_PROG_ARRAY`, you can chain up to 32 nested
+    calls. This is an explicit limit to prevent infinite loops and memory exhaustion.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`bpf_tail_call`和`BPF_MAP_TYPE_PROG_ARRAY`，你可以链式调用高达32个嵌套调用。这是一个显式的限制，以防止无限循环和内存耗尽。
+- en: Perf Events Array Maps
+  id: totrans-129
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 性能事件数组映射
+- en: These types of maps store `perf_events` data in a buffer ring that communicates
+    between BPF programs and user-space programs in real time. They are defined with
+    the type `BPF_MAP_TYPE_PERF_EVENT_ARRAY`. They are designed to forward events
+    that the kernel’s tracing tools emit to user-space programs for further processing.
+    This is one of the most interesting types of maps and is the base for many observability
+    tools that we’ll talk about in the next chapters. The user-space program acts
+    as a listener that waits for events coming from the kernel, so you need to make
+    sure that your code starts listening before the BPF program in the kernel is initialized.
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些类型的映射将`perf_events`数据存储在一个缓冲环中，实时地在BPF程序和用户空间程序之间进行通信。它们被定义为`BPF_MAP_TYPE_PERF_EVENT_ARRAY`类型。它们旨在将内核的跟踪工具发出的事件转发到用户空间程序进行进一步处理。这是最有趣的映射类型之一，也是许多可观察性工具的基础，我们将在接下来的章节中讨论。
+- en: 'Let’s see an example of how we can trace all the programs that our computer
+    executes. Before jumping into the BPF program code, we need to declare the event
+    structure that we’re going to send from the kernel to user-space:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看一个例子，说明我们如何追踪计算机执行的所有程序。在跳入BPF程序代码之前，我们需要声明从内核发送到用户空间的事件结构：
+- en: '[PRE27]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'Now, we need to create the map that’s going to send the events to user-space:'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，我们需要创建发送事件到用户空间的映射：
+- en: '[PRE28]'
+  id: totrans-134
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'After we have our data type and map declared, we can create the BPF program
+    that captures the data and sends it to user-space:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在声明了数据类型和映射之后，我们可以创建捕获数据并将其发送到用户空间的BPF程序：
+- en: '[PRE29]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: In this snippet, we’re using `bpf_perf_event_output` to append the data to the
+    map. Because this is a real-time buffer, you don’t need worry about keys for the
+    elements in the map; the kernel takes care of adding the new element to the map
+    and flushing it after the user-space program processes it.
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个片段中，我们使用`bpf_perf_event_output`将数据追加到映射中。因为这是一个实时缓冲区，你不需要担心映射中元素的键；内核会负责将新元素添加到映射中，并在用户空间程序处理后刷新它。
+- en: In [Chapter 4](ch04.html#tracing_with_bpf) we talk about more advanced usages
+    for these types of maps, and we present examples of processing programs in user-space.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[第4章](ch04.html#tracing_with_bpf)中，我们讨论了这些类型映射的更高级用法，并展示了在用户空间处理程序的示例。
+- en: Per-CPU Hash Maps
+  id: totrans-139
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 每 CPU 哈希地图
+- en: This type of map is a refined version of `BPF_MAP_TYPE_HASH`. These maps are
+    defined with the type `BPF_MAP_TYPE_PERCPU_HASH`. When you allocate one of these
+    maps, each CPU sees its own isolated version of the map, which makes it much more
+    efficient for high-performant lookups and aggregations. This type of map is useful
+    if your BPF program collects metrics and aggregates them in hash-table maps.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种类型的地图是 `BPF_MAP_TYPE_HASH` 的优化版本。这些地图使用类型 `BPF_MAP_TYPE_PERCPU_HASH` 进行定义。当您分配其中一个地图时，每个
+    CPU 看到自己的地图的隔离版本，这使得高性能的查找和聚合更加高效。如果您的 BPF 程序收集指标并在哈希表地图中进行聚合，则此类型的地图非常有用。
+- en: Per-CPU Array Maps
+  id: totrans-141
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 每 CPU 数组地图
+- en: This type of map is also a refined version of `BPF_MAP_TYPE_ARRAY`. They are
+    defined with the type `BPF_MAP_TYPE_PERCPU_ARRAY`. Just like the previous map,
+    when you allocate one of these maps, each CPU sees its own isolated version of
+    the map, which makes it much more efficient for high-performant lookups and aggregations.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种类型的地图也是 `BPF_MAP_TYPE_ARRAY` 的优化版本。它们使用类型 `BPF_MAP_TYPE_PERCPU_ARRAY` 进行定义。就像前面的地图一样，当您分配其中一个地图时，每个
+    CPU 看到自己的地图的隔离版本，这使得高性能的查找和聚合更加高效。
+- en: Stack Trace Maps
+  id: totrans-143
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 堆栈跟踪地图
+- en: This type of map stores stack traces from the running process. They are defined
+    with the type `BPF_MAP_TYPE_STACK_TRACE`. Along with this map, the kernel developers
+    already added the helper `bpf_get_stackid` to help you populate this map with
+    stack traces. This helper takes the map as an argument and a series of flags so
+    that you can specify whether you want traces only from the kernel, only from user-space,
+    or both. The helper returns the key associated with the element added to the map.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种类型的地图存储了运行过程中的堆栈跟踪。它们使用类型 `BPF_MAP_TYPE_STACK_TRACE` 进行定义。除了这个地图之外，内核开发者还添加了助手
+    `bpf_get_stackid` 来帮助您填充这个地图的堆栈跟踪。这个助手接受地图作为参数，以及一系列标志，这样您就可以指定是否只想要来自内核、用户空间或两者的跟踪。该助手返回与添加到地图的元素关联的键。
+- en: Cgroup Array Maps
+  id: totrans-145
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Cgroup 数组地图
+- en: This type of map stores references to cgroups. Cgroup array maps are defined
+    with the type `BPF_MAP_TYPE_CGROUP_ARRAY`. In essence, their behavior is similar
+    to `BPF_MAP_TYPE_PROG_ARRAY`, but they store file descriptor identifiers that
+    point to cgroups.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种类型的地图存储到 cgroup 的引用。Cgroup 数组地图使用类型 `BPF_MAP_TYPE_CGROUP_ARRAY` 进行定义。从本质上讲，它们的行为类似于
+    `BPF_MAP_TYPE_PROG_ARRAY`，但它们存储指向 cgroup 的文件描述符标识符。
+- en: 'This map is useful when you want to share cgroup references between BPF maps
+    for controlling traffic, debugging, and testing. Let’s see an example of how to
+    populate this map. We start with the map definition:'
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您希望在控制流量、调试和测试时在 BPF 地图之间共享 cgroup 引用时，这个地图非常有用。让我们看一个如何填充这个地图的示例。我们从地图的定义开始：
+- en: '[PRE30]'
+  id: totrans-148
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'We can retrieve a cgroup’s file descriptor by opening the file containing its
+    information. We’re going to open the cgroup that controls the base CPU shares
+    for Docker containers and store that cgroup in our map:'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们可以通过打开包含其信息的文件来检索 cgroup 的文件描述符。我们将打开控制 Docker 容器的基本 CPU 分享的 cgroup，并将该 cgroup
+    存储在我们的地图中：
+- en: '[PRE31]'
+  id: totrans-150
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: LRU Hash and Per-CPU Hash Maps
+  id: totrans-151
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: LRU 哈希和每 CPU 哈希地图
+- en: These two types of map are hash-table maps, like the ones you saw earlier, but
+    they also implement an internal LRU cache. LRU stands for least recently used,
+    which means that if the map is full, these maps will erase elements that are not
+    used frequently to make room for new elements in the map. Therefore, you can use
+    these maps to insert elements beyond the maximum limit, as long as you don’t mind
+    loosing elements that have not been used recently. They are defined with the types
+    `BPF_MAP_TYPE_LRU_HASH` and `BPF_MAP_TYPE_LRU_PERCPU_HASH`.
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这两种类型的地图是哈希表地图，就像您之前看到的那些，但它们还实现了内部 LRU 缓存。LRU 是最近最少使用的缩写，这意味着如果地图已满，这些地图将删除不经常使用的元素，以便为地图中的新元素腾出空间。因此，只要您不介意丢失最近未使用的元素，您可以使用这些地图来插入超出最大限制的元素。它们的类型分别是
+    `BPF_MAP_TYPE_LRU_HASH` 和 `BPF_MAP_TYPE_LRU_PERCPU_HASH`。
+- en: The `per cpu` version of this map is slightly different than the other `per
+    cpu` maps you saw earlier. This map keeps only one hash table to store all the
+    elements in the map, and it uses different LRU caches per CPU, that way, it ensures
+    that the most used elements in each CPU remain in the map.
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种地图的 `per cpu` 版本与您之前看到的其他 `per cpu` 地图略有不同。这个地图只保留一个哈希表来存储地图中的所有元素，并且每个 CPU
+    使用不同的 LRU 缓存，以确保每个 CPU 中使用最频繁的元素仍然保留在地图中。
+- en: LPM Trie Maps
+  id: totrans-154
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: LPM Trie 地图
+- en: LPM trie maps are types of map that use longest prefix match (LPM) to look up
+    elements in the map. LPM is an algorithm that selects the element in a tree that
+    matches with the longest lookup key from any other match in the tree. This algorithm
+    is used in routers and other devices that keep traffic forwarding tables to match
+    IP addresses with specific routes. These maps are defined with the type `BPF_MAP_TYPE_LPM_TRIE`.
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: LPM 前缀树地图是一种使用最长前缀匹配（LPM）查找地图中元素的地图类型。LPM 是一种算法，它从树中选择与任何其他匹配中最长查找键匹配的元素。此算法用于路由器和其他设备中，这些设备保持流量转发表以将
+    IP 地址与特定路由匹配。这些地图使用类型 `BPF_MAP_TYPE_LPM_TRIE` 定义。
+- en: These maps require their key sizes to be multiples of eight and in a range from
+    8 to 2,048\. If you don’t want to implement your own key, the kernel provides
+    a struct that you can use for these keys called `bpf_lpm_trie_key`.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些地图要求其键大小为八的倍数，并且在 8 到 2048 的范围内。如果您不想实现自己的键，内核提供了一个名为 `bpf_lpm_trie_key` 的结构体，您可以用来创建这些键。
+- en: 'In this next example, we add two forwarding routes to the map and try to match
+    an IP address to the correct route. First we need to create the map:'
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一个示例中，我们向地图添加两条转发路由，并尝试将 IP 地址与正确的路由匹配。首先，我们需要创建地图：
+- en: '[PRE32]'
+  id: totrans-158
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'We’re going to populate this map with three forwarding routes: `192.168.0.0/16`,
+    `192.168.0.0/24`, and `192.168.1.0/24`:'
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将使用三条转发路由来填充这个地图：`192.168.0.0/16`、`192.168.0.0/24` 和 `192.168.1.0/24`：
+- en: '[PRE33]'
+  id: totrans-160
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'Now, we use the same key structure to look up the correct match for the IP
+    `192.168.1.1/32`:'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，我们使用相同的关键结构来查找 IP `192.168.1.1/32` 的正确匹配：
+- en: '[PRE34]'
+  id: totrans-162
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: In this example, both `192.168.0.0/24` and `192.168.1.0/24` could match the
+    lookup IP because it’s within both ranges. However, because this map uses the
+    LPM algorithm, the result will be populated with the value for the key `192.168.1.0/24`.
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本例中，`192.168.0.0/24` 和 `192.168.1.0/24` 都可以匹配查找 IP，因为它们都在这两个范围内。但是，由于此地图使用
+    LPM 算法，结果将填充键 `192.168.1.0/24` 的值。
+- en: Array of Maps and Hash of Maps
+  id: totrans-164
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 地图数组和地图哈希
+- en: '`BPF_MAP_TYPE_ARRAY_OF_MAPS` and `BPF_MAP_TYPE_HASH_OF_MAPS` are two types
+    of maps that store references to other maps. They support only one level of indirection,
+    so you cannot use them to store maps of maps of maps, and so on. This ensures
+    that you don’t consume all of the memory by accidentally storing infinite chained
+    maps.'
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_MAP_TYPE_ARRAY_OF_MAPS` 和 `BPF_MAP_TYPE_HASH_OF_MAPS` 是两种存储对其他地图的引用的地图类型。它们仅支持一级间接，因此您不能使用它们来存储地图的地图，以此类推。这确保您不会通过意外存储无限链接地图而消耗所有内存。'
+- en: These types of maps are useful when you want to be able to replace entire maps
+    at runtime. You can create full-state snapshots if all of your maps are children
+    of a global map. The kernel ensures that any update operation in the parent map
+    waits until all the references to old children maps are dropped before completing
+    the operation.
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您希望能够在运行时替换整个地图时，这些地图类型非常有用。如果您的所有地图都是全局地图的子级，您可以创建完整状态的快照。内核确保在父地图的任何更新操作等待所有对旧子地图的引用被丢弃之前完成该操作。
+- en: Device Map Maps
+  id: totrans-167
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 设备地图映射
+- en: This specialized type of map stores references to network devices. These maps
+    are defined with the type `BPF_MAP_TYPE_DEVMAP`. They are useful for network applications
+    that want to manipulate traffic at the kernel level. You can build a virtual map
+    of ports that point to specific network devices and then redirect packets by using
+    the helper `bpf_redirect_map`.
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种专门的地图类型存储对网络设备的引用。这些地图使用类型 `BPF_MAP_TYPE_DEVMAP` 定义。它们对于希望在内核级别操作流量的网络应用程序非常有用。您可以建立一个虚拟的端口地图，指向特定的网络设备，然后通过使用辅助
+    `bpf_redirect_map` 来重定向数据包。
+- en: CPU Map Maps
+  id: totrans-169
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: CPU 地图映射
+- en: '`BPF_MAP_TYPE_CPUMAP` is another type of map that allows you to forward network
+    traffic. In this case, the map stores references to different CPUs in your host.
+    Like the previous type of map, you can use it with the `bpf_redirect_map` helper
+    to redirect packets. However, this map sends packets to a different CPU. This
+    allows you to assign specific CPUs to network stacks for scalability and isolation
+    purposes.'
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_MAP_TYPE_CPUMAP` 是另一种允许您转发网络流量的地图类型。在这种情况下，地图存储了主机中不同 CPU 的引用。与前一种地图类型类似，您可以使用
+    `bpf_redirect_map` 辅助程序来重定向数据包。然而，这种地图将数据包发送到不同的 CPU。这允许您为可伸缩性和隔离目的分配特定的 CPU 给网络堆栈。'
+- en: Open Socket Maps
+  id: totrans-171
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 打开套接字地图
+- en: '`BPF_MAP_TYPE_XSKMAP` is a type of map that stores references to open sockets.
+    Like the previous maps, these maps are useful for forwarding packets, between
+    sockets in this case.'
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_MAP_TYPE_XSKMAP` 是一种存储对打开套接字的引用的地图类型。与前述地图类似，这些地图对于在套接字之间转发数据包非常有用。'
+- en: Socket Array and Hash Maps
+  id: totrans-173
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 套接字数组和哈希地图
+- en: '`BPF_MAP_TYPE_SOCKMAP` and `BPF_MAP_TYPE_SOCKHASH` are two specialized maps
+    that store references to open sockets in the kernel. Like the previous maps, this
+    type of maps is used in conjunction with the helper `bpf_redirect_map` to forward
+    socket buffers from the current XDP program to a different socket.'
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_MAP_TYPE_SOCKMAP`和`BPF_MAP_TYPE_SOCKHASH`是两种存储内核中打开套接字引用的专用地图。与之前的地图一样，这种类型的地图与助手`bpf_redirect_map`一起使用，将当前XDP程序的套接字缓冲区重定向到不同的套接字。'
+- en: Their main difference is that one of them uses an array to store the sockets
+    and the other one uses a hash table. The advantage of using a hash table is that
+    you can access a socket directly by its key without the need to traverse the full
+    map to find it. Each socket in the kernel is identified by a five-tuple key. These
+    five tuples include the necessary information to establish bidirectional network
+    connections. You can use this key as the lookup key in your map when you use the
+    hash-table version of this map.
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它们的主要区别在于其中一个使用数组来存储套接字，另一个使用哈希表。使用哈希表的优势在于你可以直接通过其键访问套接字，而无需遍历整个地图来查找。内核中的每个套接字由一个五元组键标识。这些五元组包括建立双向网络连接所需的必要信息。当你使用这种地图的哈希表版本时，可以将此键作为查找键在你的地图中使用。
+- en: Cgroup Storage and Per-CPU Storage Maps
+  id: totrans-176
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Cgroup存储和每CPU存储地图
+- en: These two types of maps were introduced to help developers work with BPF programs
+    attached to cgroups. As you saw in [Chapter 2](ch02.html#running_your_first_BPF_programs),
+    you can attach and detach BPF programs from control groups and isolate their runtime
+    to specific cgroups with `BPF_PROG_TYPE_CGROUP_SKB`. These two maps are defined
+    with the types `BPF_MAP_TYPE_CGROUP_STORAGE` and `BPF_MAP_TYPE_PERCPU_CGROUP_STORAGE`.
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这两种类型的地图被引入以帮助开发人员处理附加到cgroup的BPF程序。正如你在[第二章](ch02.html#running_your_first_BPF_programs)中看到的，你可以附加和分离BPF程序到控制组，并通过`BPF_PROG_TYPE_CGROUP_SKB`将它们的运行时隔离到特定的cgroup中。这两个地图被定义为类型`BPF_MAP_TYPE_CGROUP_STORAGE`和`BPF_MAP_TYPE_PERCPU_CGROUP_STORAGE`。
+- en: These types of maps are similar to hash-table maps from the developer point
+    of view. The kernel provides a structure helper to generate keys for this map,
+    `bpf_cgroup_storage_key`, which includes information about the cgroup node identifier
+    and the attachment type. You can add any value you want to this map; its access
+    will be restricted to the BPF program inside the attached cgroup.
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些类型的地图从开发者的角度来看类似于哈希表地图。内核提供了一个结构助手来为这个地图生成键，`bpf_cgroup_storage_key`，其中包含关于cgroup节点标识符和附加类型的信息。你可以向这个地图添加任何你想要的值；其访问将被限制在附加cgroup内部的BPF程序中。
+- en: There are two limitations with these maps. The first is that you cannot create
+    new elements in the map from user-space. The BPF program in the kernel can create
+    elements with `bpf_map_update_elem`, but if you use this method from user-space
+    and the key doesn’t exist already, `bpf_map_update_elem` will fail, and `errno`
+    will be set to `ENOENT`. The second limitation is that you cannot remove elements
+    from this map. `bpf_map_delete_elem` always fails and sets `errno` to `EINVAL`.
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些地图存在两个限制。第一个是你不能从用户空间创建地图中的新元素。内核中的BPF程序可以使用`bpf_map_update_elem`创建元素，但如果从用户空间使用此方法且键不存在，`bpf_map_update_elem`将失败，并设置`errno`为`ENOENT`。第二个限制是你不能从此地图中删除元素。`bpf_map_delete_elem`始终失败，并将`errno`设置为`EINVAL`。
+- en: The main difference between these two types of maps, as you saw with other similar
+    maps earlier, is that `BPF_MAP_TYPE_PERCPU_CGROUP_STORAGE` keeps a different hash
+    table per CPU.
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如你之前看到的其他类似地图一样，这两种地图的主要区别在于`BPF_MAP_TYPE_PERCPU_CGROUP_STORAGE`为每个CPU保留了一个不同的哈希表。
+- en: Reuseport Socket Maps
+  id: totrans-181
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 重用端口套接字地图
+- en: This specialized type of map stores references to sockets that can be reused
+    by an open port in the system. They are defined with the type `BPF_MAP_TYPE_REUSEPORT_SOCKARRAY`.
+    These maps are mainly used with `BPF_PROG_TYPE_SK_REUSEPORT` program types. Combined,
+    they give you control to decide how to filter and serve incoming packets from
+    the network device. For example, you can decide which packets go to which socket,
+    even though both sockets are attached to the same port.
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种特殊类型的地图存储可以被系统中打开端口的重用的套接字的引用。它们被定义为类型`BPF_MAP_TYPE_REUSEPORT_SOCKARRAY`。这些地图主要与`BPF_PROG_TYPE_SK_REUSEPORT`程序类型一起使用。结合使用，它们让你可以决定如何过滤和处理来自网络设备的传入数据包。例如，你可以决定哪些数据包发送到哪个套接字，即使这两个套接字都附加到同一个端口。
+- en: Queue Maps
+  id: totrans-183
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 队列地图
+- en: Queue maps use a first-in, first-out (FIFO) storage to keep the elements in
+    the map. They are defined with the type `BPF_MAP_TYPE_QUEUE`. FIFO means that
+    when you fetch an element from the map, the result is going to be the element
+    that has been in the map for the longest time.
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 队列映射使用先进先出（FIFO）的存储方式来保持映射中的元素。它们的类型定义为`BPF_MAP_TYPE_QUEUE`。FIFO意味着当您从映射中获取元素时，结果将是在映射中存在时间最长的元素。
+- en: The `bpf` map helpers work in a predictable way for this data structure. When
+    you use `bpf_map_lookup_elem`, this map always looks for the oldest element in
+    the map. When you use `bpf_map_update_elem`, this map always appends the element
+    to the end of the queue, so you’ll need to read the rest elements in the map before
+    being able to fetch this element. You can also use the helper `bpf_map_lookup_and_delete`
+    to fetch the older element and remove it from the map in an atomic way. This map
+    doesn’t support the helpers `bpf_map_delete_elem` and `bpf_map_get_next_key`.
+    If you try to use them, they will fail and set the `errno` variable to `EINVAL`
+    as a result.
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bpf`映射助手在这种数据结构中也是以可预测的方式工作的。当您使用`bpf_map_lookup_elem`时，该映射总是查找映射中最旧的元素。当您使用`bpf_map_update_elem`时，该映射总是将元素追加到队列的末尾，因此您需要在获取此元素之前读取映射中的其余元素。您还可以使用助手`bpf_map_lookup_and_delete`以原子方式获取并从映射中删除较旧的元素。该映射不支持助手`bpf_map_delete_elem`和`bpf_map_get_next_key`。如果尝试使用它们，它们将失败并将`errno`变量设置为`EINVAL`。'
+- en: Something else that you need to keep in mind about these types of map is that
+    they don’t use the map keys for lookups, and the key size must always be 0 when
+    you initialize these maps. When you push elements to these maps, the key must
+    be a null value.
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还需要记住关于这些类型映射的一些事情，它们不使用映射键进行查找，并且在初始化这些映射时，键大小必须始终为0。当您将元素推送到这些映射时，键必须是空值。
+- en: 'Let’s see an example of how to use this type of map:'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看一个如何使用这种类型映射的例子：
+- en: '[PRE35]'
+  id: totrans-188
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'Let’s insert several elements in this map and retrieve them in the same order
+    in which we inserted them:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们在这个映射中插入几个元素，并以插入它们的相同顺序检索它们：
+- en: '[PRE36]'
+  id: totrans-190
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'This program prints the following:'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该程序打印如下内容：
+- en: '[PRE37]'
+  id: totrans-192
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: If we try to pop a new element from the map, `bpf_map_lookup_and_delete` will
+    return a negative number, and the `errno` variable will be set to `ENOENT`.
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果我们尝试从映射中弹出一个新元素，`bpf_map_lookup_and_delete`将返回一个负数，并且`errno`变量将被设置为`ENOENT`。
+- en: Stack Maps
+  id: totrans-194
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 栈映射
+- en: Stack maps use a last-in, first-out (LIFO) storage to keep the elements in the
+    map. They are defined with the type `BPF_MAP_TYPE_STACK`. LIFO means that when
+    you fetch an element from the map, the result is going to be the element that
+    was added to the map most recently.
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 栈映射使用后进先出（LIFO）的存储方式来保持映射中的元素。它们的类型定义为`BPF_MAP_TYPE_STACK`。LIFO意味着当您从映射中获取元素时，结果将是最近添加到映射中的元素。
+- en: The `bpf` map helpers also work in a predictable way for this data structure.
+    When you use `bpf_map_lookup_elem`, this map always looks for the newest element
+    in the map. When you use `bpf_map_update_elem`, this map always appends the element
+    to the top of the stack, so it’s the first one to fetch. You can also use the
+    helper `bpf_map_lookup_and_delete` to fetch the newest element and remove it from
+    the map in an atomic way. This map doesn’t support the helpers `bpf_map_delete_elem`
+    and `bpf_map_get_next_key`. If you try to use them, they will always fail and
+    set the `errno` variable to `EINVAL` as a result.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bpf`映射助手在这种数据结构中也是以可预测的方式工作的。当您使用`bpf_map_lookup_elem`时，该映射总是查找映射中最新的元素。当您使用`bpf_map_update_elem`时，该映射总是将元素追加到栈的顶部，因此它是第一个要获取的元素。您还可以使用助手`bpf_map_lookup_and_delete`以原子方式获取并从映射中删除最新的元素。该映射不支持助手`bpf_map_delete_elem`和`bpf_map_get_next_key`。如果尝试使用它们，它们将始终失败，并将`errno`变量设置为`EINVAL`。'
+- en: 'Let’s see an example of how to use this map:'
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看一个如何使用这个映射的例子：
+- en: '[PRE38]'
+  id: totrans-198
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'Let’s insert several elements in this map and retrieve them in the same order
+    in which we inserted them:'
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们在这个映射中插入几个元素，并以插入它们的相同顺序检索它们：
+- en: '[PRE39]'
+  id: totrans-200
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: 'This program prints the following:'
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该程序打印如下内容：
+- en: '[PRE40]'
+  id: totrans-202
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: If we try to pop a new element from the map, `bpf_map_lookup_and_delete` will
+    return a negative number, and the `errno` variable will be set to `ENOENT`.
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果我们尝试从映射中弹出一个新元素，`bpf_map_lookup_and_delete`将返回一个负数，并且`errno`变量将被设置为`ENOENT`。
+- en: These are all the map types that you can use in a BPF program. You’ll find some
+    of them more useful than others; it will depend on the kind of program that you’re
+    writing. We’ll see more usage examples throughout the book that will help you
+    cement the fundamentals that you just saw.
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些都是您可以在BPF程序中使用的所有映射类型。您会发现其中一些比其他更有用；这取决于您正在编写的程序类型。在本书中，我们将看到更多的使用示例，这将帮助您巩固刚刚学到的基础知识。
+- en: As we mentioned earlier, BPF maps are stored as regular files in your operating
+    system. We have not talked about the specific characteristics of the filesystem
+    that the kernel uses to save maps and programs. The next section guides you through
+    the BPF filesystem, and the type of persistence that you can expect from it.
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如我们之前提到的，BPF映射作为操作系统中的常规文件存储。我们还没有讨论内核用于保存映射和程序的文件系统的具体特性。下一节将指导您了解BPF文件系统及其提供的持久性类型。
+- en: The BPF Virtual Filesystem
+  id: totrans-206
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPF虚拟文件系统
+- en: A fundamental characteristic of BPF maps is that being based on file descriptors
+    means that when a descriptor is closed, the map and all the information it holds
+    disappear. The original implementation of BPF maps was focused on short-lived
+    isolated programs that didn’t share any information among one another. Erasing
+    all data when the file descriptor was closed made a lot of sense in those scenarios.
+    However, with the introduction of more complex maps and integrations within the
+    kernel, its developers realized that they needed a way to save the information
+    that maps held, even after a program terminated and closed the map’s file descriptor.
+    Version 4.4 of the Linux kernel introduced two new syscalls to allow pinning and
+    fetching maps and BPF programs from a virtual filesystem. Maps and BPF programs
+    pinned to this filesystem will remain in memory after the program that created
+    them terminates. In this section we explain how to work with this virtual filesystem.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF maps的一个基本特征是，它们基于文件描述符，这意味着当描述符关闭时，该映射及其所保存的所有信息都会消失。最初的BPF映射实现专注于短暂的孤立程序，这些程序之间不共享任何信息。在这些情况下，关闭文件描述符时清除所有数据是有意义的。然而，随着内核中更复杂映射和集成的引入，其开发者意识到需要一种方法来保存映射所持有的信息，即使程序终止并关闭映射的文件描述符。Linux内核版本4.4引入了两个新的系统调用，允许从虚拟文件系统中固定和获取映射和BPF程序。固定到该文件系统的映射和BPF程序将在创建它们的程序终止后仍保留在内存中。本节介绍如何使用这个虚拟文件系统。
+- en: 'The default directory where BPF expects to find this virtual filesystem is
+    */sys/fs/bpf*. Some Linux distributions don’t mount this filesystem by default
+    because they don’t assume that the kernel supports BPF. You can mount it yourself
+    by using the `mount` command:'
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF期望找到这个虚拟文件系统的默认目录是*/sys/fs/bpf*。一些Linux发行版默认情况下不会挂载此文件系统，因为它们不假设内核支持BPF。您可以使用`mount`命令自行挂载它：
+- en: '[PRE41]'
+  id: totrans-209
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: 'Like any other file hierarchy, persistent BPF objects in the filesystem are
+    identified by paths. You can organize these paths in any way that makes sense
+    for your programs. For example, if you want to share a specific map with IP information
+    between programs, you might want to store it in */sys/fs/bpf/shared/ips*. As we
+    mentioned earlier, there are two types of objects that you can save in this filesystem:
+    BPF maps and full BPF programs. Both of these are identified by file descriptors,
+    so the interface to work with them is the same. These objects can be manipulated
+    only by the `bpf` syscall. Although the kernel provides high-level helpers to
+    assist you in interacting with them, you cannot do things like trying to open
+    these files with the `open` syscall.'
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与任何其他文件层次结构一样，文件系统中的持久性BPF对象由路径标识。您可以以任何对程序有意义的方式组织这些路径。例如，如果您希望在程序之间共享包含IP信息的特定映射，则可能希望将其存储在*/sys/fs/bpf/shared/ips*中。正如我们之前提到的，您可以在此文件系统中保存两种类型的对象：BPF映射和完整的BPF程序。这两者都由文件描述符标识，因此与它们交互的接口是相同的。这些对象只能通过`bpf`系统调用进行操作。尽管内核提供了高级别的辅助功能来帮助您与它们交互，但您不能像尝试使用`open`系统调用打开这些文件那样操作它们。
+- en: '`BPF_PIN_FD` is the command to save BPF objects in this filesystem. When the
+    command succeeds, the object will be visible in the filesystem in the path that
+    you specified. If the command fails, it returns a negative number, and the global
+    `errno` variable is set with the error code.'
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_PIN_FD`是将BPF对象保存在此文件系统中的命令。命令成功后，对象将在文件系统中以您指定的路径可见。如果命令失败，则返回一个负数，并设置全局的`errno`变量以表示错误代码。'
+- en: '`BPF_OBJ_GET` is the command to fetch BPF objects that have been pinned to
+    the filesystem. This command uses the path you assigned the object to to load
+    it. When this command succeeds, it returns the file descriptor identifier associated
+    to the object. If it fails, it returns a negative number, and the global `errno`
+    variable is set with the specific error code.'
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_OBJ_GET` 是用于获取已固定到文件系统的BPF对象的命令。此命令使用您分配给对象的路径来加载它。当此命令成功时，它返回与对象关联的文件描述符标识符。如果失败，则返回负数，并且全局的
+    `errno` 变量设置为特定的错误代码。'
+- en: Let’s see an example of how to take advantage of these two commands in different
+    programs using the helper functions that the kernel provides.
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看一个示例，展示如何利用内核提供的辅助函数在不同的程序中使用这两个命令。
+- en: 'First, we’re going to write a program that creates a map, populates it with
+    several elements, and saves it in the filesystem:'
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我们将编写一个程序，创建一个映射，用多个元素填充它，并将其保存在文件系统中：
+- en: '[PRE42]'
+  id: totrans-215
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: '[![1](assets/1.png)](#co_bpf_maps_CO1-1)'
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_bpf_maps_CO1-1)'
+- en: This section of code should already look familiar to you from our previous examples.
+    First, we create a hash-table map with a fixed size of one element. Then we update
+    the map to add only that element. If we tried to add more elements, `bpf_map_update_elem`
+    would fail because we would be overflowing the map.
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这段代码的内容应该已经很熟悉了，因为它来自我们之前的示例。首先，我们创建了一个具有一个固定大小元素的哈希表映射。然后我们更新映射以添加该元素。如果尝试添加更多元素，`bpf_map_update_elem`
+    将会失败，因为这会导致映射溢出。
+- en: 'We use the helper function `pbf_obj_pin` to save the map in the filesystem.
+    You can actually check that you have a new file under that path in your machine
+    after the program has terminated:'
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们使用辅助函数 `pbf_obj_pin` 将地图保存在文件系统中。在程序终止后，您可以检查您的机器上该路径下是否有新文件：
+- en: '[PRE43]'
+  id: totrans-219
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: 'Now we can write a similar program that loads that map from the file system
+    and prints the elements we inserted. That way we can verify that we saved the
+    map correctly:'
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，我们可以编写一个类似的程序，从文件系统加载该映射并打印我们插入的元素。通过这种方式，我们可以验证我们正确保存了映射：
+- en: '[PRE44]'
+  id: totrans-221
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: Being able to save BPF objects in the filesystem opens the door to more interesting
+    applications. Your data and programs are no longer tied to a single execution
+    thread. Information can be shared by different applications, and BPF programs
+    can run even after the application that created them terminates. This gives them
+    an extra level or availability that would have not been possible without the BPF
+    filesystem.
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 能够将BPF对象保存在文件系统中为更有趣的应用打开了大门。您的数据和程序不再绑定于单个执行线程。信息可以被不同的应用程序共享，并且BPF程序甚至可以在创建它们的应用程序终止后继续运行。这为它们提供了一种额外的可用性级别，这是在没有BPF文件系统的情况下无法实现的。
+- en: Conclusion
+  id: totrans-223
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: Establishing communication channels between the kernel and user-space is fundamental
+    to take full advantage of any BPF program. In this chapter you learned how to
+    create BPF maps to establish that communication and how to work with them. We’ve
+    also described the types of maps that you can use in your programs. As you progress
+    in the book, you’ll see more specific map examples. Finally, you learned how to
+    pin entire maps to the system to make them and the information they hold durable
+    to crashes and interruptions.
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在内核和用户空间之间建立通信渠道对于充分利用任何BPF程序至关重要。在本章中，您学习了如何创建BPF映射以建立通信，并学习了如何操作它们。我们还描述了您可以在程序中使用的映射类型。随着您在本书中的进展，您将看到更多具体的映射示例。最后，您学会了如何将整个映射固定到系统中，使它们及其包含的信息在崩溃和中断时依然可用。
+- en: BPF maps are the central bus of communication between the kernel and user-space.
+    In this chapter, we established the fundamental concepts that you need to know
+    to understand them. In the next chapter we make more extensive use of these data
+    structures to share data. We also introduce you to additional tools that will
+    make working with BPF maps more efficient.
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF映射是内核和用户空间之间通信的核心总线。在本章中，我们建立了您理解它们所需的基本概念。在下一章中，我们将更广泛地使用这些数据结构来共享数据。我们还将向您介绍更多使与BPF映射更高效的附加工具。
+- en: In the next chapter you’ll see how BPF programs and maps work together to give
+    you tracing capabilities on your systems from the kernel point of view. We explore
+    different ways to attach programs to different entry points in the kernel. Finally,
+    we cover how to represent multiple data points in a way that makes your applications
+    easier to debug and observe.
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接下来的章节中，你将看到BPF程序和映射如何共同工作，从内核的视角为你提供跟踪能力。我们探讨了将程序附加到内核不同入口点的不同方法。最后，我们讨论了如何以一种使应用程序更易于调试和观察的方式表示多个数据点。

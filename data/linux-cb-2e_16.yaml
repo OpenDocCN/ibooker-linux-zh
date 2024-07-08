@@ -1,0 +1,1974 @@
+- en: Chapter 16\. Managing Local Name Services with Dnsmasq and the hosts File
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第16章。使用Dnsmasq和hosts文件管理本地名称服务
+- en: '[Dnsmasq](https://oreil.ly/MUa4U) is an excellent server for LAN name services,
+    both Domain Name System (DNS) and Dynamic Host Discovery Protocol (DHCP). Dnsmasq
+    also provides BOOTP, PXE, and TFTP, which are for network booting and installing
+    operating systems from a network server. Dnsmasq supports IPv4 and IPv6, provides
+    local DNS caching, and acts as a stub resolver.'
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Dnsmasq](https://oreil.ly/MUa4U)是LAN名称服务的优秀服务器，包括域名系统（DNS）和动态主机配置协议（DHCP）。Dnsmasq还提供BOOTP、PXE和TFTP，用于从网络服务器引导和安装操作系统。Dnsmasq支持IPv4和IPv6，提供本地DNS缓存，并充当存根解析器。'
+- en: This chapter covers setting up local DNS and DHCP using Dnsmasq and the */etc/hosts*
+    file together. */etc/hosts* is the very old way of setting up DNS, mapping hostnames
+    to IP addresses in a static file. */etc/hosts* by itself is sufficient for very
+    small networks.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章介绍如何使用Dnsmasq和*/etc/hosts*文件设置本地DNS和DHCP。*/etc/hosts*是设置DNS的非常古老的方式，它在静态文件中将主机名映射到IP地址。对于非常小的网络来说，*/etc/hosts*本身已经足够了。
+- en: Dnsmasq is designed for LAN name services. It is lightweight and simple to configure,
+    especially in comparison to BIND, the dominant DNS server, which is heavyweight
+    and has a rather steep learning curve.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Dnsmasq专为LAN名称服务而设计。它轻巧且配置简单，特别是与权威DNS服务器BIND相比，后者功能强大且学习曲线较陡。
+- en: Dnsmasq and */etc/hosts* work great together. Dnsmasq reads the entries in */etc/hosts*
+    into DNS.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Dnsmasq和*/etc/hosts*很好地配合在一起。Dnsmasq会将*/etc/hosts*中的条目读入DNS中。
+- en: The DHCP server in Dnsmasq automatically integrates with DNS. All you need for
+    Dnsmasq to create DNS entries for your DHCP clients is to configure your DHCP
+    clients to send their hostnames to the DHCP server, which is the default in most
+    Linux distributions.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Dnsmasq中的DHCP服务器会自动与DNS集成。您只需配置DHCP客户端将其主机名发送到DHCP服务器即可，这在大多数Linux发行版中是默认设置。
+- en: 'There are four types of DNS servers: recursive resolvers, root name servers,
+    top-level domain (TLD) name servers, and authoritative name servers.'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有四种类型的DNS服务器：递归解析器、根名称服务器、顶级域（TLD）名称服务器和权威名称服务器。
+- en: Recursive resolvers answer DNS requests. A stub resolver, like Dnsmasq and systemd-resolved,
+    forwards any requests it cannot answer from its cache to an upstream resolver.
+    When you visit a website a recursive resolver finds the site’s DNS information
+    by querying the other three types of DNS servers. Recursive resolvers cache this
+    information to make it available more quickly. Your ISP’s name servers, and services
+    like [OpenDNS](https://oreil.ly/oCRsV), [Cloudflare](https://oreil.ly/9Fgqc),
+    and [Google Public DNS](https://oreil.ly/lc9ep) are all recursive resolvers.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 递归解析器响应DNS请求。像Dnsmasq和systemd-resolved这样的存根解析器会将其无法从缓存中回答的任何请求转发到上游解析器。当您访问一个网站时，递归解析器通过查询其他三种类型的DNS服务器来查找该站点的DNS信息。递归解析器会缓存这些信息以加快访问速度。您的ISP的名称服务器以及像[OpenDNS](https://oreil.ly/oCRsV)，[Cloudflare](https://oreil.ly/9Fgqc)，和[Google
+    Public DNS](https://oreil.ly/lc9ep)这样的服务都是递归解析器。
+- en: 'There are 13 types of root name servers, spread all over the planet, and there
+    are currently several hundred root name servers. A root server accepts a query
+    from a recursive resolver, then the root server directs the request to the appropriate
+    TLD server according to the top-level domain: .com, .net, .org, .me, .biz, .int,
+    .biz, .gov, .edu, and so on. The Internet Corporation for Assigned Names and Numbers—[ICANN](https://icann.org)—oversees
+    all of these servers and domains.'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有13种类型的根名称服务器，分布在全球各地，目前有数百个根名称服务器。根服务器接受来自递归解析器的查询，然后根据顶级域名（.com，.net，.org，.me，.biz，.int，.biz，.gov，.edu等）将请求转发给适当的顶级域服务器。互联网名称与数字地址分配机构（[ICANN](https://icann.org)）监管所有这些服务器和域名。
+- en: Authoritative name servers are the source records for a domain and are controlled
+    by the owner of the domain. Dnsmasq can serve as your authoritative name server,
+    though I recommend using BIND. See the Authoritative Configuration section of
+    *man 8 dnsmasq* to learn more.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 权威名称服务器是域的源记录，由域所有者控制。虽然Dnsmasq可以作为您的权威名称服务器，但我建议使用BIND。请参阅*man 8 dnsmasq*中的权威配置部分以了解更多信息。
+- en: Too Many Name Service Utilities
+  id: totrans-10
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 太多的名称服务工具。
+- en: Linux distributions are still transitioning to NetworkManager and *systemd-resolved*
+    from the legacy *resolvconf*, which has long been the default DNS resolver on
+    Linux systems. This presents a bit of a tangle for Linux users, with continual
+    changes and the various distros making the transition at different rates. Pay
+    close attention to the documentation, forums, and release notes for your particular
+    Linux.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux发行版仍在从传统的*resolvconf*转向NetworkManager和*systemd-resolved*，后者长期以来一直是Linux系统上的默认DNS解析器。这对Linux用户来说有些混乱，各个发行版的过渡速度不同。请密切关注您特定Linux版本的文档、论坛和发行说明。
+- en: It should be possible to use Dnsmasq as the DNS backend for NetworkManager,
+    because NetworkManager has a plug-in for this. But on some Linux distributions,
+    this does not yet work correctly ([Recipe 16.5](#rec-play-nice)).
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可以使用Dnsmasq作为NetworkManager的DNS后端，因为NetworkManager有一个针对此功能的插件。但在某些Linux发行版上，这还不能正常工作（[配方 16.5](#rec-play-nice)）。
+- en: You don’t need systemd-resolved running on your Dnsmasq server because it will
+    contend with Dnsmasq for control of the system’s stub DNS resolver.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不需要在您的Dnsmasq服务器上运行systemd-resolved，因为它会与Dnsmasq竞争系统的stub DNS解析器的控制权。
+- en: By the time you read this, all of this may be different, but for now the recipes
+    aim to be reliable rather than cutting edge.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您阅读此文时，所有这些可能已经不同，但目前这些配方旨在可靠而非尖端。
+- en: 16.1 Simple Name Resolution with /etc/hosts
+  id: totrans-15
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.1 使用*/etc/hosts*进行简单名称解析
+- en: Problem
+  id: totrans-16
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want a simple, fast way to set up name resolution without having to run
+    a DNS server.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望有一种简单快捷的方式设置名称解析，而无需运行DNS服务器。
+- en: Solution
+  id: totrans-18
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'This is what the */etc/hosts* file is made for. Your LAN computers must have
+    static IP addresses. The following is an example for three computers:'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这就是*/etc/hosts*文件的用途。您的LAN计算机必须具有静态IP地址。以下是三台计算机的示例：
+- en: '[PRE0]'
+  id: totrans-20
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'Copy these entries to all three hosts, then try pinging each other by hostnames,
+    like this example for pinging *host2* from *host3*:'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将这些条目复制到所有三个主机，然后尝试通过主机名进行ping，例如从*host3*ping *host2*的示例：
+- en: '[PRE1]'
+  id: totrans-22
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: '*/etc/hosts* also manages domain names, so you can give your LAN a cool domain.
+    In the following examples, that is *sqr3l.nut*. First enter the IP address, then
+    the fully qualified domain name (FQDN), then the hostname:'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/hosts* 还管理域名，因此您可以为您的LAN提供一个酷炫的域名。在以下示例中，这是*sqr3l.nut*。首先输入IP地址，然后是完全限定域名（FQDN），然后是主机名：'
+- en: '[PRE2]'
+  id: totrans-24
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: Now your hosts can connect to each other with their hostnames, like *host1*,
+    or their FQDNs, like *host1.sqr3l.nut*.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您的主机可以使用它们的主机名连接到彼此，例如*host1*，或者它们的FQDN，例如*host1.sqr3l.nut*。
+- en: Shared and Individual Hosts Entries
+  id: totrans-26
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 共享和个体主机条目
+- en: You can have both shared and private entries in */etc/hosts*. Anything you want
+    shared must be copied to all the relevant hosts. Anything else in your hosts file
+    that is not copied to other hosts will work only for you. See [Recipe 16.2](#rec-hosts-blocking)
+    to learn more.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在*/etc/hosts*中同时拥有共享和私有条目。您希望共享的内容必须复制到所有相关的主机。否则，您主机文件中的其他内容仅对您有效。参见[配方 16.2](#rec-hosts-blocking)以了解更多信息。
+- en: Discussion
+  id: totrans-28
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*127.0.0.1 localhost* and *::1 localhost ip6-localhost ip6-loopback* are required.
+    Yours might look a little different, but however they are written, do not delete
+    them. They are assigned to the loopback device, a special virtual network interface
+    that your Linux system uses to communicate with itself.'
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*127.0.0.1 localhost* 和 *::1 localhost ip6-localhost ip6-loopback* 是必需的。您的可能看起来略有不同，但无论如何，请不要删除它们。它们分配给回环设备，这是您的Linux系统用于与自身通信的特殊虚拟网络接口。'
+- en: You can ping them and use them to connect to local servers. For example, when
+    you use the CUPS web administration page, you are using the loopback device. Enter
+    *127.0.0.1:631* or *localhost:631* to open it ([Figure 16-1](#fig-dnsmasq-2)).
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过ping它们并使用它们连接到本地服务器。例如，当您使用CUPS Web管理页面时，您正在使用回环设备。输入*127.0.0.1:631*或*localhost:631*来打开它（[图 16-1](#fig-dnsmasq-2)）。
+- en: '![Opening a local web page with the loopback device](Images/lcb2_1601.png)'
+  id: totrans-31
+  prefs: []
+  type: TYPE_IMG
+  zh: '![使用回环设备打开本地网页](Images/lcb2_1601.png)'
+- en: Figure 16-1\. Opening a local web page with the loopback device
+  id: totrans-32
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 16-1\. 使用回环设备打开本地网页
+- en: 'The virtual network interface for the loopback device is *lo*. Use the *ip*
+    command to see it:'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 回环设备的虚拟网络接口是*lo*。使用*ip*命令查看它：
+- en: '[PRE3]'
+  id: totrans-34
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Your system does not need a physical network interface for the loopback device
+    to work.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的系统不需要回环设备的物理网络接口才能工作。
+- en: 'Use the *hostname* command to confirm that your configuration is correct. Check
+    the hostname of your computer:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*hostname*命令确认您的配置是否正确。检查计算机的主机名：
+- en: '[PRE4]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Check the FQDN:'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查完全限定域名：
+- en: '[PRE5]'
+  id: totrans-39
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Check the domain name:'
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查域名：
+- en: '[PRE6]'
+  id: totrans-41
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '*/etc/hosts* does not scale well, but for small networks it may be all you
+    ever need for your local DNS.'
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/hosts* 不适合大规模使用，但对于小型网络可能是您的本地DNS所需的一切。'
+- en: See Also
+  id: totrans-43
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 hosts*'
+  id: totrans-44
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 hosts*'
+- en: '*man 8 ping*'
+  id: totrans-45
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 ping*'
+- en: '[Recipe 16.2](#rec-hosts-blocking)'
+  id: totrans-46
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 16.2](#rec-hosts-blocking)'
+- en: 16.2 Using /etc/hosts for Testing and Blocking Annoyances
+  id: totrans-47
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.2 使用*/etc/hosts*进行测试和阻止烦人的事物
+- en: Problem
+  id: totrans-48
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You are working on development servers, and you want to manage their DNS without
+    hassles. Or, you want a simple way to block annoying sites.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您正在处理开发服务器，并且希望轻松管理它们的DNS。或者，您希望通过简单的方式阻止烦人的网站。
+- en: Solution
+  id: totrans-50
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Suppose the name of a dev server you are working on is *dev.stashcat.com*.
+    Make an entry for it your */etc/hosts* file:'
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设您正在使用的开发服务器的名称是*dev.stashcat.com*。在您的*/etc/hosts*文件中为它添加一个条目：
+- en: '[PRE7]'
+  id: totrans-52
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: You don’t have to bother your network admin or mess with your DNS server, but
+    can create and remove entries in */etc/hosts* as you need.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不必打扰网络管理员或修改DNS服务器，只需根据需要在*/etc/hosts*中创建和删除条目。
+- en: 'Another fun trick is to map annoying websites to bogus IP addresses:'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个有趣的技巧是将烦人的网站映射到虚假的IP地址：
+- en: '[PRE8]'
+  id: totrans-55
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: This makes the site unreachable from your computer. Most how-tos use the loopback
+    address, 127.0.0.1, and it works, but I prefer to keep the annoying sites separate.
+    You can use the same fake IP address for multiple annoying sites.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这使得从您的计算机无法访问该站点。大多数操作指南使用回环地址127.0.0.1，它可以工作，但我更喜欢将烦人的站点保持单独。您可以为多个烦人的站点使用相同的虚假IP地址。
+- en: If your web browser still reaches the site after adding it to */etc/hosts*,
+    clear your browser cache and try again.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果将其添加到*/etc/hosts*后，您的Web浏览器仍然能访问该站点，请清除浏览器缓存并重试。
+- en: Discussion
+  id: totrans-58
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: When you run a LAN Dnsmasq server, keep in mind that all entries in */etc/hosts*
+    on the Dnsmasq server will be applied to all Dnsmasq clients, so don’t put your
+    name server on your development computer.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在运行LAN Dnsmasq服务器时，请记住Dnsmasq服务器上*/etc/hosts*中的所有条目将应用于所有Dnsmasq客户端，因此不要在开发计算机上放置您的名称服务器。
+- en: 'Linux has a number of DNS managers, and */etc/hosts* is read first. The order
+    is set in the */etc/nsswitch.conf* file on the *hosts* line. The following example
+    is from Ubuntu 20.04:'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux有多个DNS管理器，*/etc/hosts*首先读取。顺序在*/etc/nsswitch.conf*文件的*hosts*行中设置。以下示例来自Ubuntu
+    20.04：
+- en: '[PRE9]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: '*files* is */etc/hosts*.'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*files* 是*/etc/hosts*。'
+- en: '*mdns4_minimal* uses the Avahi autodiscovery service to locate network services.'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*mdns4_minimal* 使用Avahi自动发现服务来定位网络服务。'
+- en: '*[NOTFOUND=return]* means that if *mdns4_minimal* is working but the requested
+    host is not found, the DNS lookup should stop and return an error. If the *mdns4_minimal*
+    service is not found, continue the lookup.'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*[NOTFOUND=return]* 表示如果*mdns4_minimal*正在工作但未找到请求的主机，则DNS查找应停止并返回错误。如果未找到*mdns4_minimal*服务，则继续查找。'
+- en: '*dns* uses any available DNS server.'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*dns* 使用任何可用的DNS服务器。'
+- en: '*mymachines* refers to the *systemd-machined* service, which tracks local virtual
+    machines and containers.'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*mymachines* 指的是*systemd-machined*服务，用于跟踪本地虚拟机和容器。'
+- en: You should put *files dns* first on your Dnsmasq server.
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您应该在您的Dnsmasq服务器上首先放置*files dns*。
+- en: See Also
+  id: totrans-68
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 hosts*'
+  id: totrans-69
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 hosts*'
+- en: '*man 5 nsswitch.conf*'
+  id: totrans-70
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 nsswitch.conf*'
+- en: '*man 8 systemd-machined.service*'
+  id: totrans-71
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 systemd-machined.service*'
+- en: 16.3 Finding All DNS and DHCP Servers on Your Network
+  id: totrans-72
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.3 查找您网络上的所有DNS和DHCP服务器
+- en: Problem
+  id: totrans-73
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know if there are any DNS and DHCP servers on your LAN, other than
+    your Dnsmasq server.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想知道您的LAN上是否有任何DNS和DHCP服务器，除了您的Dnsmasq服务器。
+- en: Solution
+  id: totrans-75
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Probe your LAN with *nmap*. The following example searches the local network
+    for all open TCP ports and finds an open TCP port 53, which is used by DNS. This
+    is indicated by “53/tcp open domain”:'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*nmap*探测您的LAN。以下示例在本地网络中搜索所有开放的TCP端口，并找到一个开放的TCP端口53，这是DNS使用的端口。这由“53/tcp
+    open domain”指示：
+- en: '[PRE10]'
+  id: totrans-77
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'By default, *nmap* only looks for TCP ports. DNS servers listen to TCP and
+    UDP 53, and DHCP listens on UDP 67\. The following example looks only for ports
+    UDP 53 and 67:'
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认情况下，*nmap* 只查找TCP端口。DNS服务器监听TCP和UDP 53端口，而DHCP监听UDP 67端口。以下示例仅查找UDP 53和67端口：
+- en: '[PRE11]'
+  id: totrans-79
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: '*nmap* found one DNS/DHCP server, on dns-server.sqr3l.nut.'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*nmap* 发现了一个DNS/DHCP服务器，位于dns-server.sqr3l.nut上。'
+- en: 'The following command searches for all open TCP and UDP ports on the network:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下命令在网络上搜索所有开放的TCP和UDP端口：
+- en: '[PRE12]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: This takes several minutes to complete, and then you have a list of the active
+    services on all up hosts in your network, including any services running on nonstandard
+    ports.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这需要几分钟的时间来完成，然后您将得到网络中所有活动主机的活动服务列表，包括在非标准端口上运行的任何服务。
+- en: Discussion
+  id: totrans-84
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Be very careful with port scanning, and use it only on networks that you have
+    permission for. Port scanning other networks is often treated as a hostile act,
+    like you are probing for vulnerabilities to exploit.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在进行端口扫描时要非常小心，并且只在你有权限的网络上使用。在其他网络上进行端口扫描通常被视为敌对行为，就像你在探测漏洞以利用一样。
+- en: Multiple name servers can cause conflicts, and in any case it is good to know
+    if your users are running any servers.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 多个名称服务器可能会导致冲突，在任何情况下，了解用户是否运行任何服务器都是很好的。
+- en: On most Linux systems, the package to install is *nmap*.
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在大多数Linux系统上，安装包是*nmap*。
+- en: See also
+  id: totrans-88
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 1 nmap*'
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 nmap*'
+- en: 16.4 Installing Dnsmasq
+  id: totrans-90
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.4 安装Dnsmasq
+- en: Problem
+  id: totrans-91
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to install Dnsmasq and take care of any prerequisites.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你希望安装Dnsmasq并处理任何先决条件。
+- en: Solution
+  id: totrans-93
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Install the *dnsmasq* package. In this recipe the Dnsmasq server is named *dns-server*.
+    You will use both Dnsmasq and the */etc/hosts* file to configure your DNS server.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装*dnsmasq*包。在本示例中，Dnsmasq服务器命名为*dns-server*。你将同时使用Dnsmasq和*/etc/hosts*文件配置你的DNS服务器。
+- en: 'After installation, stop Dnsmasq if it is running:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装后，如果运行了Dnsmasq，请停止它：
+- en: '[PRE13]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Give your Dnsmasq server a static IP address, if it does not already have one.
+    Do this with NetworkManager’s graphical control panel (*nm-connection-editor*),
+    or with the *nmcli* command.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你的Dnsmasq服务器还没有静态IP地址，请给它分配一个。可以使用NetworkManager的图形控制面板（*nm-connection-editor*）或*nmcli*命令来完成。
+- en: 'The following example uses *nmcli* to find your active connections:'
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例使用*nmcli*来查找你的活动连接：
+- en: '[PRE14]'
+  id: totrans-99
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'Then assign the static IP address you want your DNS server to use, using the
+    NAME to identify the correct connection:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后使用名称来分配你希望你的DNS服务器使用的静态IP地址，使用NAME来识别正确的连接：
+- en: '[PRE15]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'Then restart NetworkManager:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后重新启动NetworkManager：
+- en: '[PRE16]'
+  id: totrans-103
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Next, check if your Linux is running *systemd-resolved.service*:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，检查你的Linux是否运行*systemd-resolved.service*：
+- en: '[PRE17]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: If it is, see [Recipe 16.5](#rec-play-nice) before configuring Dnsmasq, and
+    also to learn how to configure NetworkManager on your Dnsmasq server.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果是这样，请在配置Dnsmasq之前查看[Recipe 16.5](#rec-play-nice)，还要了解如何在你的Dnsmasq服务器上配置NetworkManager。
+- en: Discussion
+  id: totrans-107
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: systemd is implemented differently amongst the various Linuxes. For example,
+    openSUSE Leap 15.2 does not use the *systemd-resolved.service*, so you should
+    not have to make any systemd changes to enable Dnsmasq to control your LAN DNS.
+    Fedora 33 and up, and Ubuntu 17.04 and up, run *systemd-resolved.service*, and
+    it should be disabled on your Dnsmasq server.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd在各种Linux发行版中实现方式不同。例如，openSUSE Leap 15.2不使用*systemd-resolved.service*，因此不需要对systemd进行任何更改来启用Dnsmasq以控制你的LAN
+    DNS。Fedora 33及更高版本，以及Ubuntu 17.04及更高版本，运行*systemd-resolved.service*，你应该在Dnsmasq服务器上禁用它。
+- en: See Also
+  id: totrans-109
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[Recipe 16.5](#rec-play-nice)'
+  id: totrans-110
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 16.5](#rec-play-nice)（玩得和谐）'
+- en: '[Dnsmasq](https://oreil.ly/vvfHg)'
+  id: totrans-111
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Dnsmasq](https://oreil.ly/vvfHg)'
+- en: 16.5 Making systemd-resolved and NetworkManager Play Nice with Dnsmasq
+  id: totrans-112
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.5 让systemd-resolved和NetworkManager与Dnsmasq协调工作
+- en: Problem
+  id: totrans-113
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: '*systemd-resolved* and NetworkManager are conflicting with Dnsmasq, and you
+    want them out of the way.'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*systemd-resolved*和NetworkManager与Dnsmasq冲突，你希望它们不再干扰。'
+- en: Solution
+  id: totrans-115
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Check if the *systemd-resolved.service* is running:'
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查是否运行*systemd-resolved.service*：
+- en: '[PRE18]'
+  id: totrans-117
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'That shows that it is running. *systemd-resolved.service* is fine for providing
+    a stub DNS resolver for client machines, but not DNS servers. Disable it:'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这表明它正在运行。*systemd-resolved.service*非常适合为客户机提供桩DNS解析器，但不适合DNS服务器。禁用它：
+- en: '[PRE19]'
+  id: totrans-119
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Then look at */etc/resolv.conf*, which should be a symlink:'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后查看*/etc/resolv.conf*，它应该是一个符号链接：
+- en: '[PRE20]'
+  id: totrans-121
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'When it is a symlink, it is managed by *systemd-resolved.service*. To remove
+    control from *systemd-resolved.service*, delete the symlink and create a plain-text
+    file with the same name:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当它是一个符号链接时，它由*systemd-resolved.service*管理。要从*systemd-resolved.service*中删除控制权，请删除符号链接，并创建一个同名的纯文本文件：
+- en: '[PRE21]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Now that */etc/resolv.conf* is a file and not a symlink, it is managed by NetworkManager.
+    Open your NetworkManager configuration file and look for the *[main]* section,
+    then add or change the *dns=* value to *none*:'
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在*/etc/resolv.conf*是一个文件而不是一个符号链接，由NetworkManager管理。打开你的NetworkManager配置文件，查找*[main]*部分，然后添加或更改*dns=*值为*none*：
+- en: '[PRE22]'
+  id: totrans-125
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'Enter your Dnsmasq server’s IPv4 and IPv6 localhost addresses in */etc/resolv.conf*
+    and your local domain, if you have one:'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在*/etc/resolv.conf*中输入你的Dnsmasq服务器的IPv4和IPv6本地主机地址，以及你的本地域（如果有）：
+- en: '[PRE23]'
+  id: totrans-127
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: Then reboot and configure your new Dnsmasq installation.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后重新启动并配置你的新Dnsmasq安装。
+- en: Discussion
+  id: totrans-129
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: NetworkManager and *systemd-resolved* are wonderful on client machines. On your
+    Dnsmasq server, you must have control of */etc/resolv.conf*, and Dnsmasq should
+    be the only stub resolver.
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: NetworkManager 和 *systemd-resolved* 在客户端机器上很棒。在您的 Dnsmasq 服务器上，您必须控制 */etc/resolv.conf*，并且
+    Dnsmasq 应该是唯一的存根解析器。
+- en: See Also
+  id: totrans-131
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 systemd-resolved.service*'
+  id: totrans-132
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 systemd-resolved.service*'
+- en: '*man 8 networkmanager*'
+  id: totrans-133
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 networkmanager*'
+- en: 16.6 Configuring Dnsmasq for LAN DNS
+  id: totrans-134
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.6 配置 LAN DNS 的 Dnsmasq
+- en: Problem
+  id: totrans-135
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set up Dnmasq as your LAN DNS server.
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望将 Dnsmasq 设置为 LAN DNS 服务器。
+- en: Solution
+  id: totrans-137
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Any hosts that you enter in */etc/hosts* need static IP addresses, and Dnsmasq
+    will automatically enter them into DNS. At a minimum, enter your Dnsmasq server.
+    The following example includes the Dnsmasq server, a backup server, and an internal
+    web server:'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您在 */etc/hosts* 中输入的任何主机都需要静态 IP 地址，Dnsmasq 将自动将它们输入到 DNS 中。至少输入您的 Dnsmasq 服务器。以下示例包括
+    Dnsmasq 服务器、备用服务器和内部 Web 服务器：
+- en: '[PRE24]'
+  id: totrans-139
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: Configure Static Hosts from DHCP
+  id: totrans-140
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 从 DHCP 配置静态主机
+- en: See [Recipe 16.12](#rec-static-dnsmasq) to learn how to manage static IP address
+    assignments from DHCP, instead of */etc/hosts*.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见 [Recipe 16.12](#rec-static-dnsmasq) 以了解如何从 DHCP 管理静态 IP 地址分配，而不是 */etc/hosts*。
+- en: 'Now it is time to configure Dnsmasq. Rename the default configuration file
+    so you can start with a new empty file, and use the original as a reference:'
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在是配置 Dnsmasq 的时候了。重命名默认配置文件，这样您可以从新的空文件开始，并将原始文件用作参考：
+- en: '[PRE25]'
+  id: totrans-143
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'Copy the following configuration, replacing the second *listen-address* with
+    your own server’s IP address, and use your own domain name. The upstream name
+    servers are OpenDNS, and you may use whatever upstream name servers you wish.
+    Dnsmasq looks for */etc/resolv.conf* by default, but it doesn’t hurt to be explicit:'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 复制以下配置，用您自己服务器的 IP 地址替换第二个 *listen-address*，并使用您自己的域名。上游名称服务器是 OpenDNS，您可以使用任何上游名称服务器。Dnsmasq
+    默认查找 */etc/resolv.conf*，但明确指定也无妨：
+- en: '[PRE26]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'Run Dnsmasq’s syntax checker:'
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行 Dnsmasq 的语法检查器：
+- en: '[PRE27]'
+  id: totrans-147
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'The syntax checker won’t find configuration errors, but only typos. Start up
+    Dnsmasq, and if there are errors it will not start. The following example shows
+    a successful start:'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 语法检查器不会找到配置错误，但只会找到打字错误。启动 Dnsmasq，如果有错误它将无法启动。以下示例显示了一个成功启动的情况：
+- en: '[PRE28]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'Run some tests on your Dnsmasq server with *nslookup* using your server’s hostname
+    and FQDN:'
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您的 Dnsmasq 服务器上使用 *nslookup* 运行一些测试，使用您服务器的主机名和 FQDN：
+- en: '[PRE29]'
+  id: totrans-151
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'Use the *ss* command to verify the listening ports. In the following example,
+    the Recv-Q, Send-Q, and Peer Address:Port columns have been removed for clarity:'
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *ss* 命令验证监听端口。在以下示例中，为了清晰起见，已删除了 Recv-Q、Send-Q 和 Peer Address:Port 列：
+- en: '[PRE30]'
+  id: totrans-153
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: You should see your server address, localhost address, and only *dnsmasq* in
+    the Process column. Add the *-r* option to see hostnames instead of IP addresses.
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您应该看到您的服务器地址、本地主机地址，并且在进程列中只有 *dnsmasq*。添加 *-r* 选项以查看主机名而不是 IP 地址。
+- en: When all of these commands succeed, your configuration is correct.
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当所有这些命令成功执行时，您的配置就是正确的。
+- en: Discussion
+  id: totrans-156
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If Dnsmasq fails to start, run *journalctl -ru dnsmasq* to see why. (If your
+    Dnsmasq logs are sent somewhere else, then look there; see [Recipe 16.14](#rec-dnsmasq-logging).)
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果 Dnsmasq 启动失败，请运行 *journalctl -ru dnsmasq* 查看原因。（如果您的 Dnsmasq 日志发送到其他地方，请查看那里；参见
+    [Recipe 16.14](#rec-dnsmasq-logging)。）
+- en: '*nslookup* is in the *bindutils* package.'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*nslookup* 包含在 *bindutils* 包中。'
+- en: '*ss*, socket statistics, is in the *iproute2* package.'
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*ss*，套接字统计，包含在 *iproute2* 包中。'
+- en: If your *nslookup* commands fail, try restarting networking, and then restarting
+    Dnsmasq. If they still fail, reboot. If this doesn’t fix it, recheck all your
+    configurations.
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的 *nslookup* 命令失败，请尝试重新启动网络，然后重新启动 Dnsmasq。如果它们仍然失败，请重启。如果这不能解决问题，请重新检查所有配置。
+- en: '*domain-needed* prevents Dnsmasq from forwarding queries for your plain hostnames
+    to upstream nameservers. If the name is not known from */etc/hosts* or DHCP, then
+    a “not found” answer is returned. This keeps requests for your LAN addresses from
+    leaking out into the world and possibly being answered incorrectly if your LAN
+    domain is the same as a public domain name.'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*domain-needed* 防止 Dnsmasq 转发对您的纯主机名的查询到上游名称服务器。如果名称在 */etc/hosts* 或 DHCP 中未知，则返回“未找到”答案。这可以防止您
+    LAN 地址的请求泄漏到全球，并且如果您的 LAN 域名与公共域名相同，可能会被错误地回答。'
+- en: '*bogus-priv* blocks bogus private reverse lookups. All reverse lookups for
+    private IP ranges which are not found in */etc/hosts* or the DHCP leases file
+    are answered with “no such domain” rather than being forwarded upstream.'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*bogus-priv* 阻止虚假的私有反向查找。对于未在 */etc/hosts* 或 DHCP 租约文件中找到的私有 IP 范围的所有反向查找，都将返回“无此域”而不是转发到上游。'
+- en: '*expand-hosts* automatically adds your private domain name to the plain hostnames
+    in */etc/hosts*.'
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*expand-hosts* 自动将您的私有域名添加到*/etc/hosts* 中的纯主机名。'
+- en: '*domain=* is your local domain name.'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*domain=* 是您的本地域名。'
+- en: '*local=/[domain]/* tells Dnsmasq to resolve queries for the local domain directly,
+    and not forward them upstream.'
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*local=/[domain]/* 告诉 Dnsmasq 直接解析本地域的查询，而不将其转发到上游。'
+- en: See Also
+  id: totrans-166
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 5 hosts*'
+  id: totrans-167
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 hosts*'
+- en: '[Dnsmasq](https://oreil.ly/vvfHg)'
+  id: totrans-168
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Dnsmasq](https://oreil.ly/vvfHg)'
+- en: 16.7 Configuring firewalld to Allow DNS and DHCP
+  id: totrans-169
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.7 配置 firewalld 允许 DNS 和 DHCP
+- en: Problem
+  id: totrans-170
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to open your Dnsmasq server’s firewall to allow your LAN clients access
+    to it.
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要打开您的 Dnsmasq 服务器防火墙，以允许您的 LAN 客户端访问它。
+- en: Solution
+  id: totrans-172
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Open TCP and UDP ports 53 for DNS, and UDP 67 for DHCP. If you are running
+    *firewalld*, use this command:'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 开放 TCP 和 UDP 端口 53 用于 DNS，以及 UDP 端口 67 用于 DHCP。如果您正在运行*firewalld*，请使用以下命令：
+- en: '[PRE31]'
+  id: totrans-174
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: Discussion
+  id: totrans-175
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: One of the first things to check, when you have connectivity problems, is firewall
+    settings.
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您遇到连接问题时，首先要检查的是防火墙设置。
+- en: See Also
+  id: totrans-177
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[Chapter 14](ch14.xhtml#cha-firewalld)'
+  id: totrans-178
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 14 章](ch14.xhtml#cha-firewalld)'
+- en: 16.8 Testing Your Dnsmasq Server from a Client Machine
+  id: totrans-179
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.8 从客户端机器测试您的 Dnsmasq 服务器
+- en: Problem
+  id: totrans-180
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to test your nice new Dnsmasq DNS server from a client computer.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望从客户端计算机测试您全新的 Dnsmasq DNS 服务器。
+- en: Solution
+  id: totrans-182
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *dig* command from any host on your network to query any website, via
+    the IP address for your Dnsmasq server:'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*dig* 命令从网络中的任何主机查询任何网站，通过您的 Dnsmasq 服务器的 IP 地址：
+- en: '[PRE32]'
+  id: totrans-184
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'That is a successful test, confirmed by “status: NOERROR” and the SERVER line
+    showing the IP address of your Dnsmasq server.'
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '这是一次成功的测试，确认为“status: NOERROR”，并显示了您的 Dnsmasq 服务器的 IP 地址的 SERVER 行。'
+- en: Discussion
+  id: totrans-186
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'You can also test using your server’s hostname and fully qualified domain name
+    (FQDN):'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以使用您服务器的主机名和完全限定域名（FQDN）进行测试：
+- en: '[PRE33]'
+  id: totrans-188
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: See Also
+  id: totrans-189
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 1 dig*'
+  id: totrans-190
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 dig*'
+- en: 16.9 Managing DHCP with Dnsmasq
+  id: totrans-191
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.9 使用 Dnsmasq 管理 DHCP
+- en: Problem
+  id: totrans-192
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your DNS is working, and now you want to set up DHCP.
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的 DNS 已经工作正常，现在您想设置 DHCP。
+- en: Solution
+  id: totrans-194
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'No problem. Add these lines to your */etc/dnsmasq.conf* file to define a single
+    pool of addresses, substituting your own desired addressing:'
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 没问题。将以下行添加到您的*/etc/dnsmasq.conf* 文件中，定义一个地址池，替换为您自己想要的地址：
+- en: '[PRE34]'
+  id: totrans-196
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'Restart Dnsmasq:'
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动 Dnsmasq：
+- en: '[PRE35]'
+  id: totrans-198
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'Try getting an address on a LAN computer. First, make sure it is configured
+    to get its IP address via DHCP:'
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尝试在 LAN 计算机上获取地址。首先确保它配置为通过 DHCP 获取其 IP 地址：
+- en: '[PRE36]'
+  id: totrans-200
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: '*auto* confirms it is a DHCP client. (If it says *manual* then it is not.)
+    Bring the interface down, then back up again:'
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*auto* 确认它是一个 DHCP 客户端。（如果显示*manual* 则不是。）将接口关闭然后再次打开：'
+- en: '[PRE37]'
+  id: totrans-202
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'Check your Dnsmasq server logs:'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查您的 Dnsmasq 服务器日志：
+- en: '[PRE38]'
+  id: totrans-204
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: That shows a successful IP address assignment from *dns-server* to *client2*.
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这显示了从*dns-server* 成功向*client2* 分配 IP 地址。
+- en: Discussion
+  id: totrans-206
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You can use the NetworkManager panel applet instead of *nmcli*, or run the *nm-connection-editor*
+    command to open NetworkManager’s graphical configurator, then disconnect and connect
+    with a mouse click ([Figure 16-2](#fig-dnsmasq-4)).
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用 NetworkManager 面板小程序而不是*nmcli*，或运行*nm-connection-editor* 命令打开 NetworkManager
+    的图形配置程序，然后通过鼠标点击断开连接并重新连接（[图 16-2](#fig-dnsmasq-4)）。
+- en: 'Most Linux distributions use NetworkManager to control client DHCP. If yours
+    does not, it probably uses *dhclient*. Look for a *dhclient.conf* configuration
+    file, if this exists, then request a new lease with the *dhclient* command:'
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Linux 发行版使用 NetworkManager 控制客户端的 DHCP。如果您的发行版没有使用，可能使用*dhclient*。查找一个*dhclient.conf*
+    配置文件，如果存在，则使用*dhclient* 命令请求一个新的租约：
+- en: '[PRE39]'
+  id: totrans-209
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: You can send, over DHCP, some of the information your client machines need to
+    access network services. See [Recipe 16.10](#rec-advertise) to learn more.
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过 DHCP 发送一些客户机器需要的信息以访问网络服务。参见[食谱 16.10](#rec-advertise) 了解更多信息。
+- en: '![Managing network connections with nm-connection-editor](Images/lcb2_1602.png)'
+  id: totrans-211
+  prefs: []
+  type: TYPE_IMG
+  zh: '![使用 nm-connection-editor 管理网络连接](Images/lcb2_1602.png)'
+- en: Figure 16-2\. Managing network connections with nm-connection-editor
+  id: totrans-212
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 16-2\. 使用 nm-connection-editor 管理网络连接
+- en: '*dhcp-range=192.168.1.25,192.168.10.75,24h* defines a range of 50 available
+    address leases, with a lease time of 24 hours. This range must not include your
+    Dnsmasq server, nor any hosts with static IP addresses. Define the lease time
+    in seconds, minutes, or hours. The default is one hour, and the minimum is two
+    minutes. If you want leases that never expire, don’t specify a lease time.'
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*dhcp-range=192.168.1.25,192.168.10.75,24h* 定义了一个包含 50 个可用地址租约的范围，租约时间为 24
+    小时。此范围不得包括您的 Dnsmasq 服务器或任何具有静态 IP 地址的主机。定义租约时间的单位可以是秒、分钟或小时。默认为一小时，最小为两分钟。如果希望租约永不过期，请不要指定租约时间。'
+- en: '*dhcp-lease-max=25* defines how many leases can be active at one time. You
+    can have a large address pool available, and then limit the number of active leases.'
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*dhcp-lease-max=25*定义同时活动的租约数量。您可以拥有一个大的地址池，并限制活动租约的数量。'
+- en: See Also
+  id: totrans-215
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 16.10](#rec-advertise)'
+  id: totrans-216
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 16.10](#rec-advertise)'
+- en: '[Dnsmasq](https://oreil.ly/vvfHg)'
+  id: totrans-217
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Dnsmasq](https://oreil.ly/vvfHg)'
+- en: '*man 8 dhclient*'
+  id: totrans-218
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 dhclient*'
+- en: 16.10 Advertising Important Services over DHCP
+  id: totrans-219
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.10 在 DHCP 上宣传重要服务
+- en: Problem
+  id: totrans-220
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to advertise various servers to your LAN clients over DHCP.
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望向 LAN 客户端通过 DHCP 宣传各种服务器。
+- en: Solution
+  id: totrans-222
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Some services, like the default route to your internet gateway, DNS server,
+    and NTP server, can be advertised to your LAN clients so that they automatically
+    use them. The following examples show how to configure */etc/dnsmasq.conf* to
+    advertise some services.
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些服务（如默认的网关、DNS 服务器和 NTP 服务器）可以向您的 LAN 客户自动宣传，使其自动使用它们。以下示例显示如何配置*/etc/dnsmasq.conf*以宣传一些服务。
+- en: 'Set the default router:'
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置默认路由器：
+- en: '[PRE40]'
+  id: totrans-225
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: 'Advertise your DNS server:'
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 宣传您的 DNS 服务器：
+- en: '[PRE41]'
+  id: totrans-227
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: 'This example points the way to your local NTP server:'
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例指向您的本地 NTP 服务器的方法：
+- en: '[PRE42]'
+  id: totrans-229
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: 'How do you know which numbers to use? Use this command to list all of them:'
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您如何知道要使用哪些数字？使用此命令列出所有这些数字：
+- en: '[PRE43]'
+  id: totrans-231
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: Discussion
+  id: totrans-232
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*dnsmasq --help dhcp* displays the known DHCPv4 configuration options. See
+    the Discussion in [Recipe 16.11](#rec-dhcp-zones) for more information on the
+    DHCPv4 configuration options.'
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*dnsmasq --help dhcp* 显示已知的 DHCPv4 配置选项。有关 DHCPv4 配置选项的更多信息，请参见 [Recipe 16.11](#rec-dhcp-zones)
+    中的讨论。'
+- en: See Also
+  id: totrans-234
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Dnsmasq](https://oreil.ly/vvfHg)'
+  id: totrans-235
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Dnsmasq](https://oreil.ly/vvfHg)'
+- en: 16.11 Creating DHCP Zones for Subnets
+  id: totrans-236
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.11 为子网创建 DHCP 区域
+- en: Problem
+  id: totrans-237
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have two subnets, and you want to configure Dnsmasq to apply different options
+    to them, such as different default routers and servers.
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您有两个子网，希望配置 Dnsmasq 为它们应用不同的选项，如不同的默认路由器和服务器。
+- en: Solution
+  id: totrans-239
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Define your zones with whatever names you want to give them, like *zone1* and
+    *zone2*, and set their address ranges:'
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义您想要给它们的任何名称的区域，比如 *zone1* 和 *zone2*，并设置它们的地址范围：
+- en: '[PRE44]'
+  id: totrans-241
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: 'The two zones have different routers:'
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 两个区域有不同的路由器：
+- en: '[PRE45]'
+  id: totrans-243
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: 'They use the same DNS server:'
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 他们使用相同的 DNS 服务器：
+- en: '[PRE46]'
+  id: totrans-245
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: '*zone2* gets an NTP server:'
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*zone2* 获取一个 NTP 服务器：'
+- en: '[PRE47]'
+  id: totrans-247
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: Discussion
+  id: totrans-248
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Only a few of the DHCP options are useful. They are very old, and some are
+    mysterious, for example:'
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只有少数 DHCP 选项是有用的。它们非常古老，有些神秘，例如：
+- en: option default-url string;
+  id: totrans-250
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: 选项 default-url string;
+- en: ''
+  id: totrans-251
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: The format and meaning of this option is not described in any standards document,
+    but is claimed to be in use by Apple Computer. It is not known what clients may
+    reasonably do if supplied with this option. Use at your own risk.
+  id: totrans-252
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: 此选项的格式和含义未在任何标准文档中描述，但据称被苹果电脑使用。不知道客户端如果提供此选项可能会做出什么合理的反应。使用需谨慎。
+- en: ''
+  id: totrans-253
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: man 5 DHCP options
+  id: totrans-254
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: man 5 DHCP 选项
+- en: Client support is inconsistent for many of them. The only ones I use are NTP,
+    routers, and DNS servers.
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对许多客户端支持不一致。我只使用 NTP、路由器和 DNS 服务器。
+- en: See Also
+  id: totrans-256
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 dhcp*'
+  id: totrans-257
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 dhcp*'
+- en: '[Dnsmasq](https://oreil.ly/vvfHg)'
+  id: totrans-258
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Dnsmasq](https://oreil.ly/vvfHg)'
+- en: 16.12 Assigning Static IP Addresses from DHCP
+  id: totrans-259
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.12 从 DHCP 分配静态 IP 地址
+- en: Problem
+  id: totrans-260
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to centralize IP addressing as much as possible, including assigning
+    static IP addresses.
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望尽可能集中 IP 地址分配，包括分配静态 IP 地址。
+- en: Solution
+  id: totrans-262
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *dhcp-host* option in */etc/dnsmasq.conf*. Identify the client machine
+    by its hostname, and assign an unused address from your LAN’s address block. (It
+    is not necessary to use the DHCP address range you defined with the *_dhcp-range=**
+    option in */etc/dnsmasq.conf* for static addresses.) The following example assigns
+    an address to *server2* in the 192.168.3.0/24 network:'
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 */etc/dnsmasq.conf* 中使用 *dhcp-host* 选项。通过主机名标识客户机，并从您的 LAN 地址块中分配一个未使用的地址。（对于静态地址，不必使用您在
+    */etc/dnsmasq.conf* 中使用 *_dhcp-range=* 选项定义的 DHCP 地址范围。）以下示例将一个地址分配给位于192.168.3.0/24网络中的*server2*：
+- en: '[PRE48]'
+  id: totrans-264
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE48]'
+- en: Restart Dnsmasq, then the next time *server2* requests an address it will receive
+    the address specified by the *dhcp-host=* option.
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动 Dnsmasq，那么下次*server2*请求地址时，将收到*dhcp-host=*选项指定的地址。
+- en: Use multiple *dhcp-host=* lines to configure multiple clients, one per line.
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用多个 *dhcp-host=* 行来配置多个客户端，每行一个。
+- en: You may use the client’s MAC address in place of the hostname.
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用客户端的 MAC 地址代替主机名。
+- en: Discussion
+  id: totrans-268
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: In general, centralizing administration chores saves time and headaches.
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一般来说，集中管理行政事务可以节省时间和麻烦。
+- en: See Also
+  id: totrans-270
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Dnsmasq](https://oreil.ly/vvfHg)'
+  id: totrans-271
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Dnsmasq](https://oreil.ly/vvfHg)'
+- en: 16.13 Configuring DHCP Clients for Automatic DNS Entries
+  id: totrans-272
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.13配置DHCP客户端以自动输入DNS条目
+- en: Problem
+  id: totrans-273
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want your DHCP clients to be entered into DNS automatically by Dnsmasq.
+  id: totrans-274
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望您的DHCP客户端由Dnsmasq自动输入DNS。
+- en: Solution
+  id: totrans-275
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The only thing the clients have to do is send their hostnames to Dnsmasq’s DHCP
+    server, which is the default in most Linuxes.
+  id: totrans-276
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 客户端唯一需要做的事情是将其主机名发送到Dnsmasq的DHCP服务器，这在大多数Linux系统中是默认的。
+- en: Suppose a DHCP client on the local *sqr3l.nut* domain has the host name *client4*.
+    *client4* starts up, and receives its IP address and other network information
+    from Dnsmasq. Dnsmasq receives *client4*’s hostname and enters it into DNS. Now
+    other hosts on the network can access *client4* and *client4.sqr3l.nut*.
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设本地*sqr3l.nut*域上的DHCP客户端使用主机名*client4*。*client4*启动，并从Dnsmasq接收其IP地址和其他网络信息。Dnsmasq接收*client4*的主机名并将其输入DNS。现在网络上的其他主机可以访问*client4*和*client4.sqr3l.nut*。
+- en: There must not be any duplicate entries for *client4* in */etc/hosts*.
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/hosts*中不能有*client4*的重复条目。'
+- en: 'There are three different ways to check your DHCP client configuration: in
+    *dhclient.conf*, NetworkManager’s graphical configuration tool (*nm-connection-editor*),
+    and with the *nmcli* command.'
+  id: totrans-279
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有三种不同的方法可以检查您的DHCP客户端配置：在*dhclient.conf*中，使用NetworkManager的图形配置工具*nm-connection-editor*，以及使用*nmcli*命令。
+- en: 'First check *dhclient*, which has been the default DHCP client on Linux for
+    years. On most Linux systems its configuration file is */etc/dhcp/dhclient.conf*.
+    Look for this line, which automatically finds the system’s hostname and sends
+    it to the DHCP server:'
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先检查*dhclient*，它多年来一直是Linux上的默认DHCP客户端。在大多数Linux系统中，其配置文件位于*/etc/dhcp/dhclient.conf*。查找此行，自动找到系统的主机名并将其发送到DHCP服务器：
+- en: '[PRE49]'
+  id: totrans-281
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE49]'
+- en: 'Or a line like this, specifying the system’s hostname:'
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 'Or a line like this, specifying the system’s hostname:'
+- en: '[PRE50]'
+  id: totrans-283
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE50]'
+- en: If there is no *dhclient.conf* file, then NetworkManager is your DHCP client
+    manager. You can check this in your graphical *nm-connection-editor* ([Figure 16-3](#fig-dnsmasq-3)).
+  id: totrans-284
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果没有*dhclient.conf*文件，那么NetworkManager是您的DHCP客户端管理器。您可以在图形的*nm-connection-editor*中检查此设置（[图16-3](#fig-dnsmasq-3)）。
+- en: '![NetworkManager sends client hostname to DHCP server](Images/lcb2_1603.png)'
+  id: totrans-285
+  prefs: []
+  type: TYPE_IMG
+  zh: '![NetworkManager将客户端主机名发送到DHCP服务器](Images/lcb2_1603.png)'
+- en: Figure 16-3\. NetworkManager sends client hostname to DHCP server
+  id: totrans-286
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图16-3\. NetworkManager将客户端主机名发送到DHCP服务器
+- en: When the connection method is “Automatic (DHCP),” NetworkManager sends the hostname
+    to the DHCP server. “Automatic (addresses only)” does not send the hostname to
+    the DHCP server, but only provides DNS to the client.
+  id: totrans-287
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当连接方式为“自动（DHCP）”时，NetworkManager会将主机名发送到DHCP服务器。“仅自动（仅地址）”不会将主机名发送到DHCP服务器，但仅为客户端提供DNS。
+- en: 'You may also use the *nmcli* command. First, find your active network connection:'
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您也可以使用*nmcli*命令。首先找到您的活动网络连接：
+- en: '[PRE51]'
+  id: totrans-289
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE51]'
+- en: 'Then verify that it sends the hostname to your DHCP server. The following example
+    confirms that it does:'
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后验证它是否将主机名发送到您的DHCP服务器。以下示例确认它确实这样做：
+- en: '[PRE52]'
+  id: totrans-291
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE52]'
+- en: 'If it says *no*, run the following commands to set it to *yes*. After that,
+    reload the configuration:'
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果它显示*no*，则运行以下命令将其设置为*yes*。之后重新加载配置：
+- en: '[PRE53]'
+  id: totrans-293
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE53]'
+- en: Discussion
+  id: totrans-294
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you prefer a graphical tool to manage NetworkManager, it’s best to use NetworkManager’s
+    graphical configuration utility, *nm-connection-editor*, rather than a different
+    graphical tool, such as the network module in the GNOME control panel. The *nm-connection-editor*
+    offers the most complete configuration options, and it is the same on all Linux
+    distros.
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您更喜欢使用NetworkManager的图形工具来管理NetworkManager，则最好使用NetworkManager的图形配置实用程序*nm-connection-editor*，而不是其他图形工具，例如GNOME控制面板中的网络模块。*nm-connection-editor*提供了最完整的配置选项，并且在所有Linux发行版上都是相同的。
+- en: See Also
+  id: totrans-296
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 nmcli*'
+  id: totrans-297
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 nmcli*'
+- en: '*man 1 nmcli-examples*'
+  id: totrans-298
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 nmcli-examples*'
+- en: '*man 5 nm-settings*'
+  id: totrans-299
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 nm-settings*'
+- en: 16.14 Managing Dnsmasq Logging
+  id: totrans-300
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.14管理Dnsmasq日志记录
+- en: Problem
+  id: totrans-301
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Dnsmasq has the option to send its messages to a file of your choice using the
+    legacy *syslog* daemon, rather than to *journalctl*, and you want to know which
+    is the best option.
+  id: totrans-302
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Dnsmasq有选项使用传统的*syslog*守护程序将其消息发送到您选择的文件，而不是*journalctl*，您想知道哪种是最佳选项。
+- en: Solution
+  id: totrans-303
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'It does not matter which one you use: the same information is logged either
+    way. The default behavior is to log to the systemd journal.'
+  id: totrans-304
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论您使用哪种方法，都会记录相同的信息。默认行为是记录到systemd日志中。
+- en: It can be convenient to isolate Dnsmasq logs in their own directory, such as
+    */var/log/dnsmasq/dnsmasq.log*. Use the *log-facility=* option in */etc/dnsmasq.conf*
+    to specify the log file you want to use, then restart Dnsmasq. The file must already
+    exist or Dnsmasq will not start.
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 Dnsmasq 的日志独立放在自己的目录中会更方便，比如 */var/log/dnsmasq/dnsmasq.log*。在 */etc/dnsmasq.conf*
+    中使用 *log-facility=* 选项指定你想要使用的日志文件，然后重新启动 Dnsmasq。文件必须已经存在，否则 Dnsmasq 将无法启动。
+- en: 'Your logfile will grow very large unless you set up log rotation. The following
+    example configuration, */etc/logrotate.d/dnsmasq*, sets up a simple weekly rotation:'
+  id: totrans-306
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果不设置日志轮换，你的日志文件会变得非常大。下面是一个简单的每周轮换的例子配置，*/etc/logrotate.d/dnsmasq*：
+- en: '[PRE54]'
+  id: totrans-307
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE54]'
+- en: 'Test it with the *logrotate* command:'
+  id: totrans-308
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *logrotate* 命令进行测试：
+- en: '[PRE55]'
+  id: totrans-309
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE55]'
+- en: This shows no errors and it is working correctly.
+  id: totrans-310
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 没有显示错误，一切正常工作。
+- en: Discussion
+  id: totrans-311
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: systemd supports both *journalctl* and the *syslog* daemon. They will probably
+    exist together for a long time, so you can set up logging in whatever way you
+    prefer.
+  id: totrans-312
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd 同时支持 *journalctl* 和 *syslog* 守护程序。它们可能长期共存，因此你可以按照你喜欢的方式设置日志记录。
+- en: See Also
+  id: totrans-313
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 rsyslog*'
+  id: totrans-314
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 rsyslog*'
+- en: '[Dnsmasq](https://oreil.ly/vvfHg)'
+  id: totrans-315
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Dnsmasq](https://oreil.ly/vvfHg)'
+- en: '*man 1 journalctl*'
+  id: totrans-316
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 journalctl*'
+- en: '[Chapter 20](ch20.xhtml#cha-trouble)'
+  id: totrans-317
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 20 章](ch20.xhtml#cha-trouble)'
+- en: 16.15 Configuring Wildcard Domains
+  id: totrans-318
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 16.15 配置通配符域名
+- en: Problem
+  id: totrans-319
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create a wildcard domain in Dnsmasq, so that requests for the domain’s
+    subdomains resolve without manually adding the subdomains to your DNS.
+  id: totrans-320
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想在 Dnsmasq 中创建一个通配符域名，这样请求该域的子域将无需手动添加即可解析到你的 DNS。
+- en: Solution
+  id: totrans-321
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *address* option in */etc/dnsmasq.conf* to create the top-level domain
+    (TLD):'
+  id: totrans-322
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 */etc/dnsmasq.conf* 中使用 *address* 选项创建顶级域名（TLD）：
+- en: '[PRE56]'
+  id: totrans-323
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE56]'
+- en: 'Restart Dnsmasq, then run *nslookup* to test:'
+  id: totrans-324
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动 Dnsmasq，然后运行 *nslookup* 进行测试：
+- en: '[PRE57]'
+  id: totrans-325
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE57]'
+- en: '*foo.wildcard.net* resolves, showing that it works.'
+  id: totrans-326
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*foo.wildcard.net* 被解析，证明工作正常。'
+- en: Discussion
+  id: totrans-327
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Use DNS wildcards carefully. Wildcards are useful when you’re doing development
+    work on complex services such as Kubernetes. Make sure to use address ranges that
+    are different from the ranges on your LAN’s name server, and are available only
+    to LAN clients.
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 谨慎使用 DNS 通配符。在处理像 Kubernetes 这样复杂服务的开发工作时，通配符非常有用。确保使用的地址范围不同于你 LAN 上的名称服务器范围，并且仅对
+    LAN 客户端可用。
+- en: See Also
+  id: totrans-329
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Dnsmasq](https://oreil.ly/vvfHg)'
+  id: totrans-330
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Dnsmasq](https://oreil.ly/vvfHg)'

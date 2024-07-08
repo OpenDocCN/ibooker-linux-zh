@@ -1,0 +1,382 @@
+- en: Chapter 9\. Real-World Use Cases
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第9章 实际应用案例
+- en: 'The most important question to ask yourself when implementing a new technology
+    is: “What are the use cases for this out there?” That’s why we decided to interview
+    the creators of some of the most exciting BPF projects out there to share their
+    ideas.'
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在实施新技术时，最重要的问题是：“在实际应用中这有什么用途？”这就是为什么我们决定采访一些最激动人心的BPF项目的创建者来分享他们的想法的原因。
+- en: Sysdig eBPF God Mode
+  id: totrans-2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Sysdig eBPF的神模式
+- en: Sysdig, the company that makes the eponymous open source Linux troubleshooting
+    tool, started playing with eBPF in 2017 under kernel 4.11.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Sysdig，这家制造同名开源Linux故障排除工具的公司，从2017年开始在内核4.11下开始尝试eBPF。
+- en: 'It has been historically using a kernel module to extract and do all the kernel-side
+    work, but as the user base increased and when more and more companies started
+    experimenting, the company acknowledged that it is a limitation for the majority
+    of external actors, in many ways:'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 历史上它一直在使用一个内核模块来提取和执行所有内核端的工作，但随着用户基数的增加以及越来越多的公司开始进行实验，公司认识到这对于大多数外部参与者来说是一个限制，有很多方面：
+- en: There’s an increasing number of users who can’t load kernel modules on their
+    machines. Cloud-native platforms are becoming more and more restrictive against
+    what runtime programs can do.
+  id: totrans-5
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 越来越多的用户无法在其计算机上加载内核模块。云原生平台越来越严格限制运行时程序可以做什么。
+- en: New contributors (and even old) don’t understand the architecture of a kernel
+    module. That decreases the overall number of contributors and is a limiting factor
+    for the growth of the project itself.
+  id: totrans-6
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 新的贡献者（甚至老的）不理解内核模块的架构。这降低了贡献者的总体数量，也是项目自身增长的一个限制因素。
+- en: Kernel modules maintenance is difficult, not just because of writing the code,
+    but also because of the effort needed to keep it safe and well organized.
+  id: totrans-7
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 内核模块的维护很困难，不仅因为编写代码的原因，还因为需要保证其安全性和良好组织性所需的工作量。
+- en: For those motivations, Sysdig decided to try the approach of writing the same
+    set of features it has in the module but using an eBPF program instead. Another
+    benefit that automatically comes from adopting eBPF is the possibility for Sysdig
+    to further take advantage of other nice eBPF tracing features. For example, it’s
+    relatively easy to attach eBPF programs to particular execution points in a user-space
+    application using user probes, as described in [“User-Space Probes”](ch04.html#uprobes).
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 出于这些动机，Sysdig决定尝试采用使用eBPF程序而不是模块的方式来编写相同功能集的方法。从采用eBPF自动获取的另一个好处是Sysdig进一步利用其他出色的eBPF跟踪功能的可能性。例如，可以相对容易地使用用户探针将eBPF程序附加到用户空间应用程序中的特定执行点，如
+    [“用户空间探针”](ch04.html#uprobes) 中所述。
+- en: In addition, the project can now use native helper capabilities in eBPF programs
+    to capture stack traces of running processes to augment the typical system call
+    event stream. This gives users even more troubleshooting information.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，该项目现在可以利用eBPF程序中的本地辅助功能来捕获运行进程的堆栈跟踪，以增强典型的系统调用事件流。这为用户提供了更多的故障排除信息。
+- en: 'Although it’s all bells and whistles now, Sysdig initially faced some challenges
+    due to the limitations of the eBPF virtual machine when getting started, so the
+    chief architect of the project, Gianluca Borello, decided to improve it by contributing
+    upstream patches to the kernel itself, including:'
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管现在一切都很顺利，但Sysdig最初在开始时面临了一些挑战，原因是eBPF虚拟机的一些限制，因此项目的首席架构师Gianluca Borello决定通过向内核贡献上游补丁来改进它，包括：
+- en: The ability to deal with strings in eBPF programs [natively](https://oreil.ly/ZJ09y)
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 能够在eBPF程序中原生地处理字符串 [natively](https://oreil.ly/ZJ09y)
+- en: Multiple patches to improve the arguments semantic in eBPF programs [1](https://oreil.ly/lPcGT),
+    [2](https://oreil.ly/5S_tR), and [3](https://oreil.ly/HLrEu)
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 多个补丁以改进eBPF程序中参数的语义 [1](https://oreil.ly/lPcGT), [2](https://oreil.ly/5S_tR),
+    和 [3](https://oreil.ly/HLrEu)
+- en: The latter was particularly essential to dealing with system call arguments,
+    probably the most important data source available in the tool.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 后者对处理系统调用参数特别重要，可能是工具中最重要的数据源。
+- en: '[Figure 9-1](#sysdig-ebpf) shows the architecture of the eBPF mode in Sysdig.'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图9-1](#sysdig-ebpf) 展示了Sysdig中eBPF模式的架构。'
+- en: '![A diagram showing the architecture of the eBPF mode in Sysdig.](assets/lbpf_0901.png)'
+  id: totrans-15
+  prefs: []
+  type: TYPE_IMG
+  zh: '![显示Sysdig中eBPF模式架构的图表。](assets/lbpf_0901.png)'
+- en: Figure 9-1\. Sysdig’s eBPF architecture
+  id: totrans-16
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图9-1 Sysdig的eBPF架构
+- en: The core of the implementation is a collection of custom eBPF programs responsible
+    for the instrumentation. These programs are written in a subset of the C programming
+    language. They are compiled using recent versions of Clang and LLVM, which translate
+    the high-level C code into the eBPF bytecode.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 实现的核心是一组定制的 eBPF 程序，负责仪器化。这些程序是用 C 语言的一个子集编写的。它们使用最近版本的 Clang 和 LLVM 进行编译，将高级
+    C 代码转换为 eBPF 字节码。
+- en: 'There is one eBPF program for every different execution point where Sysdig
+    instruments the kernel. Currently, eBPF programs are attached to the following
+    static tracepoints:'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于 Sysdig 仪器化内核的每个不同执行点，都有一个 eBPF 程序。目前，eBPF 程序附加到以下静态跟踪点：
+- en: System call entry path
+  id: totrans-19
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 系统调用进入路径
+- en: System call exit path
+  id: totrans-20
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 系统调用退出路径
+- en: Process context switch
+  id: totrans-21
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 进程上下文切换
+- en: Process termination
+  id: totrans-22
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 进程终止
+- en: Minor and major page faults
+  id: totrans-23
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 小页错误和大页错误
+- en: Process signal delivery
+  id: totrans-24
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 进程信号传递
+- en: Each program takes in the execution point data (e.g., for system calls, arguments
+    passed by the calling process) and starts processing them. The processing depends
+    on the type of system call. For simple system calls, the arguments are just copied
+    verbatim into an eBPF map used for temporary storage until the entire event frame
+    is formed. For other, more complicated calls, the eBPF programs include the logic
+    to translate or augment the arguments. This enables the Sysdig application in
+    user-space to fully leverage the data.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个程序接收执行点数据（例如对于系统调用，调用进程传递的参数），并开始处理它们。处理取决于系统调用的类型。对于简单的系统调用，参数仅直接复制到用于临时存储的
+    eBPF 映射中，直到整个事件帧形成。对于其他更复杂的调用，eBPF 程序包括转换或增强参数的逻辑。这使得用户空间中的 Sysdig 应用程序能够充分利用数据。
+- en: 'Some of the additional data includes the following:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些附加数据包括以下内容：
+- en: Data associated to a network connection (TCP/UDP IPv4/IPv6 tuple, UNIX socket
+    names, etc.)
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 与网络连接相关的数据（TCP/UDP IPv4/IPv6 元组，UNIX 套接字名称等）
+- en: Highly granular metrics about the process (memory counters, page faults, socket
+    queue length, etc.)
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 关于进程的高度粒度度量（内存计数器，页错误，套接字队列长度等）
+- en: Container-specific data, such as the cgroups the process issuing the syscall
+    belongs to, as well as the namespaces in which process lives
+  id: totrans-29
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 特定于容器的数据，例如发出系统调用的进程所属的 cgroups，以及进程所在的命名空间
+- en: As shown in [Figure 9-1](#sysdig-ebpf), after an eBPF program captures all the
+    needed data for a specific system call, it uses a special native BPF function
+    to push the data to a set of per-CPU ring buffers that the user-space application
+    can read at a very high throughput. This is where the usage of eBPF in Sysdig
+    differs from the typical paradigm of using eBPF maps to share “small data” produced
+    in kernel-space with user-space. To learn more about maps and how to communicate
+    between user- and kernel-space, refer to [Chapter 3](ch03.html#bpf_maps).
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如[图 9-1](#sysdig-ebpf)所示，在 eBPF 程序捕获特定系统调用的所有所需数据后，它使用特殊的本机 BPF 函数将数据推送到一组每
+    CPU 环形缓冲区，用户空间应用程序可以以非常高的吞吐量读取。这是 Sysdig 中使用 eBPF 的使用方式与使用 eBPF 映射在内核空间与用户空间之间共享“小数据”的典型范例不同的地方。要了解有关映射及如何在用户空间和内核空间之间进行通信的更多信息，请参阅[第 3 章](ch03.html#bpf_maps)。
+- en: From a performance point of view, the results are good! In [Figure 9-2](#sysdig-ebpf-performance)
+    you can see how the instrumentation overhead of the eBPF instrumentation of Sysdig
+    is only marginally greater than the “classic” kernel module instrumentation.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从性能角度来看，结果很好！在[图 9-2](#sysdig-ebpf-performance)中，您可以看到 Sysdig 的 eBPF 工具的仪器化开销仅比“经典”内核模块仪器化略高。
+- en: '![Performance comparison diagram between the Sysdig eBPF and kernel module
+    implementation](assets/lbpf_0902.png)'
+  id: totrans-32
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Sysdig eBPF 和内核模块实现之间性能比较图](assets/lbpf_0902.png)'
+- en: Figure 9-2\. Sysdig eBPF performance comparison
+  id: totrans-33
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 9-2\. Sysdig eBPF 性能比较
+- en: You can play with Sysdig and its eBPF support by following the [usage instructions](https://oreil.ly/luHKp),
+    but also make sure to also look at the [code of the BPF driver](https://oreil.ly/AJddM).
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以按照[使用说明](https://oreil.ly/luHKp)玩转 Sysdig 及其 eBPF 支持，但同时也要查看[BPF 驱动程序的代码](https://oreil.ly/AJddM)。
+- en: Flowmill
+  id: totrans-35
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Flowmill
+- en: 'Flowmill, an observability startup, emerged from an academic research project
+    called [Flowtune](https://oreil.ly/e9heR) by its founder, Jonathan Perry. Flowtune
+    examined how to efficiently schedule individual packets in congested datacenter
+    networks. One of the core pieces of technology required for this work was a means
+    of gathering network telemetry with extremely low overhead. Flowmill ultimately
+    adapted this technology to observe, aggregate, and analyze connections between
+    every component in a distributed application to do the following:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Flowmill 是一家可观察性初创公司，起源于创始人 Jonathan Perry 的学术研究项目 [Flowtune](https://oreil.ly/e9heR)。Flowtune
+    研究了如何在拥塞的数据中心网络中高效调度单个数据包。在这项工作中所需的核心技术之一是一种以极低开销收集网络遥测数据的方法。最终，Flowmill 将这项技术调整为观察、聚合和分析分布式应用程序中每个组件之间的连接。
+- en: Provide an accurate view of how services interact in a distributed system
+  id: totrans-37
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 提供一个准确的视图，展示分布式系统中服务之间的交互方式。
+- en: Identify areas where statistically significant changes have occurred in traffic
+    rates, errors, or latency
+  id: totrans-38
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 识别在流量速率、错误或延迟方面发生了统计显著变化的区域。
+- en: 'Flowmill uses eBPF kernel probes to trace every open socket and capture operating
+    systems metrics on them periodically. This is complex for a number of reasons:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Flowmill 使用 eBPF 内核探针周期性地跟踪每个打开的套接字，并捕获它们的操作系统指标。由于多种原因，这是一项复杂的任务：
+- en: It’s necessary to instrument both new connections and existing connections already
+    open at the time the eBPF probes are established. Additionally, it must account
+    for both TCP and UDP as well as IPv4 and IPv6 code paths through the kernel.
+  id: totrans-40
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 必须同时仪表化新连接和已经打开的现有连接，这些连接在 eBPF 探针建立时已经存在。此外，还必须考虑通过内核的 TCP 和 UDP 以及 IPv4 和
+    IPv6 代码路径。
+- en: For container-based systems, each socket must be attributed to the appropriate
+    cgroup and joined with orchestrator metadata from a platform like Kubernetes or
+    Docker.
+  id: totrans-41
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 对于基于容器的系统，每个套接字必须归属于适当的 cgroup，并且与来自平台（如 Kubernetes 或 Docker）的编排器元数据相结合。
+- en: Network address translation performed via conntrack must be instrumented to
+    establish the mapping between sockets and their externally visible IP addresses.
+    For example, in Docker, a common networking model uses source NAT to masquerade
+    containers behind a host IP address and in Kubernetes, and a service virtual IP
+    address is used to represent a set of containers.
+  id: totrans-42
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 通过 conntrack 执行的网络地址转换必须进行仪表化，以建立套接字与其外部可见 IP 地址之间的映射。例如，在 Docker 中，一种常见的网络模型使用源地址转换（Source
+    NAT）来伪装位于主机 IP 地址后面的容器；而在 Kubernetes 中，服务虚拟 IP 地址用于表示一组容器。
+- en: Data collected by eBPF programs must be post-processed to provide aggregates
+    by service and to match data collected on two sides of a connection.
+  id: totrans-43
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: eBPF 程序收集的数据必须进行后处理，以提供按服务聚合的数据，并且匹配连接两端收集的数据。
+- en: However, adding eBPF kernel probes provides a far more efficient and robust
+    way of gathering this data. It completely eliminates the risk of missing connections
+    and can be done with low overhead on every socket on a subsecond interval. Flowmill’s
+    approach relies on an agent, which combines a set of eBPF kprobes and user-space
+    metrics collection as well as off-box aggregation and post processing. The implementation
+    makes heavy use of Perf rings to pass metrics collected on each socket to userspace
+    for further processing. Additionally, it uses a hash map to keep track of open
+    TCP and UDP sockets.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然而，添加 eBPF 内核探针提供了一种更加高效和健壮的方式来收集这些数据。它完全消除了漏掉连接的风险，并且可以在亚秒级间隔内对每个套接字进行低开销的操作。Flowmill
+    的方法依赖于一个代理，结合了一组 eBPF kprobes 和用户空间指标收集，以及离线聚合和后处理。该实现大量使用 Perf 环来将每个套接字收集的指标传递给用户空间进行进一步处理。此外，它使用哈希映射来跟踪打开的
+    TCP 和 UDP 套接字。
+- en: 'Flowmill found there are generally two strategies to designing eBPF instrumentation.
+    The “easy” approach finds the one to two kernel functions that are called on every
+    instrumented event, but requires BPF code to maintain more state and to do more
+    work per call, on an instrumentation point called very frequently. To alleviate
+    concerns about instrumentation impacting production workloads, Flowmill followed
+    the other strategy: instrument more specific functions that are called less frequently
+    and signify an important event. This has significantly lower overhead, but requires
+    more effort in covering all important code paths, especially across kernel versions
+    as kernel code evolves.'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Flowmill 发现通常有两种设计 eBPF 仪器的策略。"简易" 方法找到每个仪器化事件上调用的一到两个内核函数，但要求 BPF 代码维护更多状态并在每次调用时执行更多工作，这个仪器化点经常被调用。为了缓解对仪器化对生产工作负载的影响的担忧，Flowmill
+    采用了另一种策略：仪器更具体的功能，这些功能调用较少，并且表示重要事件。这种方法的开销明显较低，但在覆盖所有重要代码路径方面需要更多的工作，特别是在内核版本演变时。
+- en: For example, `tcp_v4_do_rcv` captures all established TCP RX traffic and has
+    access to the `struct sock`, but has extremely high call volume. Instead, users
+    can instrument functions dealing with ACKs, out-of-order packet handling, RTT
+    estimation, and more that allow handling specific events that influence known
+    metrics.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，`tcp_v4_do_rcv` 捕获所有已建立的 TCP RX 流量，并访问 `struct sock`，但调用量极高。用户可以改用处理 ACK、无序数据包处理、RTT
+    估算等功能的仪表化函数，以处理影响已知度量标准的特定事件。
+- en: With this approach across TCP, UDP, processes, containers, conntrack, and other
+    subsystems, the system achieves extremely good performance of the system with
+    overhead low enough that is difficult to measure in most systems. CPU overhead
+    is generally 0.1% to 0.25% per core including eBPF and user-space components and
+    is dependent primarily on the rate at which new sockets are created.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过跨 TCP、UDP、进程、容器、连接跟踪和其他子系统的这种方法，系统在几乎不可测量的低开销下实现了极好的性能。CPU 开销通常为每核心 0.1% 到
+    0.25%，包括 eBPF 和用户空间组件，主要取决于新套接字创建速率。
+- en: There is more about Flowmill and Flowtune on [their website](https://www.flowmill.com).
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于 Flowmill 和 Flowtune 的更多信息，请访问它们的[网站](https://www.flowmill.com)。
+- en: Sysdig and Flowmill are pioneers in the use of BPF to build monitoring and observability
+    tools, but they are not the only ones. Throughout the book, we’ve mentioned other
+    companies like Cillium and Facebook that have adopted BPF as their framework of
+    choice to deliver highly secure and performant networking infrastructure. We’re
+    very excited for the future ahead of BPF and its community, and we cannot wait
+    to see what you built with it.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Sysdig 和 Flowmill 是使用 BPF 构建监控和可观测性工具的先驱，但并非唯一。在本书中，我们提到了其他像 Cillium 和 Facebook
+    这样的公司，它们采用 BPF 作为首选框架来提供高度安全和高性能的网络基础设施。我们对 BPF 及其社区未来充满期待，并迫不及待地想看看你们用它建立了什么。

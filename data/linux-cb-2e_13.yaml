@@ -1,0 +1,1912 @@
+- en: Chapter 13\. Secure Remote Access with OpenVPN
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第 13 章 安全远程访问与 OpenVPN
+- en: Open Virtual Private Network (OpenVPN) creates a TLS/SSL encrypted connection
+    between two different networks at separate physical locations, like a branch office
+    linked to a main office, or a remote worker logging in to the company network
+    from home. This connection is called an encrypted *tunnel*, a secure transport
+    protecting your connection from the big bad internet. OpenVPN is dependent on
+    OpenSSL, so having OpenSSL knowledge is helpful.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Open Virtual Private Network（OpenVPN）在不同物理位置的两个不同网络之间创建 TLS/SSL 加密连接，例如将分支办公室连接到总部，或远程工作者从家中登录公司网络。这种连接称为加密
+    *隧道*，是一种安全的传输方式，保护您免受互联网的威胁。OpenVPN 依赖于 OpenSSL，因此具备 OpenSSL 知识将会有所帮助。
+- en: Note
+  id: totrans-2
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: If you are already familiar with OpenVPN, you can probably skip ahead to Recipes
+    [13.5](#rec-create-pki), [13.6](#rec-customize-rsa), and [13.7](#rec-vpn-configs)
+    to review creating your encryption certificates and client and server configuration.
+    If you are new to VPNs, try each recipe in sequence. Take your time; VPNs are
+    complicated and finicky. Do a lot of testing before deploying to production systems.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您已经熟悉 OpenVPN，可以直接跳到配方 [13.5](#rec-create-pki)、[13.6](#rec-customize-rsa)
+    和 [13.7](#rec-vpn-configs) 查看如何创建您的加密证书以及客户端和服务器配置。如果您对 VPN 还不熟悉，请按顺序尝试每个配方。耐心点，VPN
+    很复杂也很挑剔。在投入生产系统之前进行大量测试。
+- en: OpenVPN Overview
+  id: totrans-4
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: OpenVPN 概述
+- en: A VPN is a secure extension of your network that makes all the same services
+    available to remote workers that local users have, so the remote users’ experience
+    is the same as for users physically present at your location. They can access
+    your local web servers, email, file shares, chat servers, video conferencing apps,
+    internal wikis, everything that you have walled off from the outside world and
+    is available only to users inside your network. A VPN is not like SSH, which connects
+    individual computers. A VPN links etworks and individual hosts to networks.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: VPN 是网络的安全扩展，使远程工作者可以访问与本地用户相同的所有服务，因此远程用户的体验与实际位于您位置的用户相同。他们可以访问您的本地 Web 服务器、电子邮件、文件共享、聊天服务器、视频会议应用程序、内部维基等所有对外界隔离的服务，这些服务仅供内部网络用户使用。VPN
+    不同于连接个人计算机的 SSH。VPN 连接的是网络和个别主机。
+- en: 'In this chapter you will learn how to set up an OpenVPN server, configure clients,
+    and create and manage a proper public key infrastructure (PKI) for authentication
+    and encryption. Your server will authenticate and protect all manner of clients:
+    Linux, macOS, Windows PCs, Android, and iOS devices.'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您将学习如何设置 OpenVPN 服务器，配置客户端，并创建和管理适当的公钥基础设施（PKI）进行身份验证和加密。您的服务器将验证和保护各种客户端：Linux、macOS、Windows
+    PC、Android 和 iOS 设备。
+- en: OpenVPN is an open source project, with both free downloads and commercial options.
+    The free-of-cost server and client is the *openvpn* package, which is available
+    on all Linux distros and downloads at [OpenVPN Community Downloads](https://oreil.ly/vwEAs).
+    Commercial options include OpenVPN Access Server, which is a premises server with
+    additional management tools and cloud options. Hosted personal plans require installing
+    only the client and provide access to a global network of OpenVPN servers.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenVPN 是一个开源项目，提供免费下载和商业选项。免费的服务器和客户端是 *openvpn* 软件包，适用于所有 Linux 发行版，并可以从 [OpenVPN
+    社区下载](https://oreil.ly/vwEAs)。商业选项包括 OpenVPN Access Server，这是一个带有额外管理工具和云选项的本地服务器。托管的个人计划只需安装客户端，即可访问全球的
+    OpenVPN 服务器网络。
+- en: A true VPN is strong because it trusts no one and requires authenticated endpoints,
+    where server and client authenticate to each other. Most commercial TLS/SSL VPNs
+    do not do this, but instead trust all clients, like shopping sites do. This is
+    more flexible and allows users to log in from anywhere, using any device. It is
+    convenient not to have to install and configure client software and copy encryption
+    keys. But for your internal network that is shortsighted—the last thing you need
+    is users logging in from random PCs or smartphones infected with keyloggers and
+    spyware, and then given a warm welcome into your LAN.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 真正的 VPN 很强大，因为它不信任任何人，并要求经过身份验证的端点，在这里服务器和客户端相互验证。大多数商业 TLS/SSL VPN 并不这样做，而是信任所有客户端，就像购物网站一样。这样做更加灵活，允许用户从任何地方使用任何设备登录。这样做省去了安装和配置客户端软件以及复制加密密钥的麻烦。但是对于您的内部网络来说，这种做法是短视的——最后一件您需要的事情是用户从带有键盘记录器和间谍软件的随机
+    PC 或智能手机登录，然后被热情地欢迎进入您的局域网。
+- en: Certificate Authority
+  id: totrans-9
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 证书颁发机构
+- en: A certificate authority (CA) is the most important part of running an OpenVPN
+    server. A CA issues digital certificates and certifies ownership of public keys.
+    Click the little padlock in a web browser to see the public certificate for a
+    website, and which CA signed it. A CA is a trusted authority, and that is why
+    so many sites use commercial CAs. Self-signed certificates, like the ones we are
+    creating in this chapter, are fine to use inside your organization. Customer-facing
+    sites should use commercial CAs. Using a CA saves you from the hassle of keeping
+    copies of client certificates on your OpenVPN server; all the server needs to
+    know is that the client certificate is authenticated by your CA.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 证书颁发机构（CA）是运行OpenVPN服务器的最重要部分。CA颁发数字证书并认证公钥的所有权。在网页浏览器中点击小锁图标可以查看网站的公共证书及其由哪个CA签署。CA是一个受信任的机构，这就是为什么很多网站使用商业CA的原因。像我们在本章创建的自签名证书可以在你的组织内部使用。面向客户的站点应使用商业CA。使用CA可以避免在OpenVPN服务器上保存客户端证书的麻烦；服务器只需知道客户端证书由你的CA认证即可。
+- en: SSL Versus TLS
+  id: totrans-11
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: SSL与TLS
+- en: Secure Sockets Layer (SSL) and Transport Layer Security (TLS) are cryptographic
+    protocols. TLS evolved from SSL. All versions of SSL are deprecated, as are TLS
+    1.0 and TLS 1.1\. Use TLS 1.2 or 1.3, and disable all the others ([Recipe 13.10](#rec-harden-vpn)).
+    Older versions are deprecated because of security flaws, so don’t let anyone talk
+    you into supporting deprecated versions.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安全套接字层（SSL）和传输层安全性（TLS）是加密协议。TLS是从SSL进化而来的。所有版本的SSL都已被弃用，包括TLS 1.0和TLS 1.1。请使用TLS
+    1.2或1.3，并禁用所有其他版本（[配方 13.10](#rec-harden-vpn)）。由于安全漏洞，旧版本已被弃用，请不要让任何人说服你支持弃用的版本。
+- en: TUN/TAP
+  id: totrans-13
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: TUN/TAP
+- en: The *TUN* and *TAP* devices are virtual network interfaces. These are built
+    into the Linux kernel, and you should not have to do anything to make them available.
+    The *TUN* device is for routed networks, and the *TAP* device is for bridged networks.
+    Your server and client configuration files specify which one to use.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*TUN*和*TAP*设备是虚拟网络接口。这些已经集成到Linux内核中，你无需进行任何操作即可使用。*TUN*设备用于路由网络，*TAP*设备用于桥接网络。你的服务器和客户端配置文件会指定使用哪种设备。'
+- en: Good Security Takes Work
+  id: totrans-15
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 好的安全措施需要工作。
+- en: Good security requires ongoing study and maintenance. This chapter aims to show
+    you how to set up a strong VPN that is reasonably user-friendly. There are many
+    additional methods for making your VPN even stronger, such as client certificates
+    with short lifetimes, additional authentications, hardware devices, SELinux, chroot
+    jails, short password timeouts, and many more. If you require super-high security,
+    please consult expert professionals.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 良好的安全性需要持续学习和维护。本章旨在向你展示如何设置一个强大且相对用户友好的VPN。还有许多其他方法可以使你的VPN更加安全，如使用短寿命的客户端证书、额外的认证、硬件设备、SELinux、chroot监狱、短密码超时等等。如果你需要超高安全性，请咨询专业的专家。
+- en: 13.1 Installing OpenVPN, Server and Client
+  id: totrans-17
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.1 安装OpenVPN，服务器和客户端
+- en: Problem
+  id: totrans-18
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to know how to install openVPN.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要知道如何安装openVPN。
+- en: Solution
+  id: totrans-20
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The [OpenVPN website](https://openvpn.net) supplies both the community open
+    source OpenVPN and the commercial OpenVPN Access Server. The community OpenVPN
+    is free of cost and open source. This chapter covers the community OpenVPN.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[OpenVPN网站](https://openvpn.net)提供了社区开源的OpenVPN和商业OpenVPN Access Server。社区版OpenVPN免费且开源。本章介绍了社区版OpenVPN。'
+- en: On Linux, install the *openvpn* package. (As always, verify the package name
+    on your particular Linux.) Get the most current version you can, from 2.4.5 and
+    up. This provides both server and client. Source tarballs and Windows installers
+    are available from [OpenVPN Community Downloads](https://oreil.ly/vwEAs).
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Linux上安装*openvpn*软件包。（像往常一样，请验证你特定Linux发行版上的软件包名称。）尽可能获取最新版本，从2.4.5版本开始。这提供了服务器和客户端。源代码tarball和Windows安装程序可以从[OpenVPN社区下载](https://oreil.ly/vwEAs)获取。
+- en: For your clients, you could try the free [OpenVPN Access Clients](https://oreil.ly/vQugl),
+    which are available for Linux, macOS, Android, iOS, and Windows. These are designed
+    for the commercial OpenVPN Access Server and also work with the community OpenVPN
+    server.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于你的客户端，你可以尝试免费的[OpenVPN Access Clients](https://oreil.ly/vQugl)，适用于Linux、macOS、Android、iOS和Windows。这些客户端设计用于商业OpenVPN
+    Access Server，也与社区版OpenVPN服务器兼容。
+- en: You can also find the community OpenVPN client for Android in the Google Play
+    Store.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你也可以在Google Play商店找到安卓的OpenVPN社区客户端。
+- en: See [Recipe 13.9](#rec.ovpn) to learn how to use the *.ovpn* inline file format
+    for easier client configuration.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见 [Recipe 13.9](#rec.ovpn) 了解如何使用 *.ovpn* 内联文件格式来更轻松地配置客户端。
+- en: Discussion
+  id: totrans-26
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: On Linux, OpenVPN must be installed on your OpenVPN server and on all clients.
+    The OpenVPN package provides both client and server functionality.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Linux 上，OpenVPN 必须安装在您的 OpenVPN 服务器和所有客户端上。OpenVPN 软件包提供客户端和服务器功能。
+- en: Ubuntu, Fedora, and openSUSE include additional packages that provide integration
+    with NetworkManager, which makes managing, connecting, and disconnecting to VPNs
+    nice and easy.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ubuntu、Fedora 和 openSUSE 包含额外的软件包，提供与 NetworkManager 的集成，这使得管理、连接和断开 VPN 变得非常简便。
+- en: '*NetworkManager-openvpn* (Fedora, openSUSE) and *network-manager-openvpn* (Ubuntu)
+    integrate OpenVPN with Network Manager. If you are using the GNOME environment
+    (such as GNOME, Xfce, Cinnamon, or Mate), you also need *NetworkManager-openvpn-gnome*
+    (openSUSE, Fedora), or *network-manager-openvpn* (Ubuntu).'
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*NetworkManager-openvpn* (Fedora、openSUSE) 和 *network-manager-openvpn* (Ubuntu)
+    将 OpenVPN 与 Network Manager 集成。如果您使用 GNOME 环境（如 GNOME、Xfce、Cinnamon 或 Mate），您还需要
+    *NetworkManager-openvpn-gnome* (openSUSE、Fedora)，或者 *network-manager-openvpn*
+    (Ubuntu)。'
+- en: OpenVPN Access Server is a free download, and you may connect up to two clients
+    at the same time without purchasing a license. It comes with additional features,
+    such as a web administration interface and automatic configurations with the free
+    OpenVPN Access Client. If you start with the community OpenVPN and then decide
+    to migrate to OpenVPN Access Server, everything you learned for the community
+    OpenVPN server applies to Access Server as well.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenVPN Access Server 是免费下载的，您可以同时连接最多两个客户端而无需购买许可证。它带有额外的功能，如 Web 管理界面和与免费
+    OpenVPN Access Client 的自动配置。如果您从社区版 OpenVPN 开始，然后决定迁移到 OpenVPN Access Server，那么您在社区版
+    OpenVPN 服务器上学到的所有内容也适用于 Access Server。
+- en: See Also
+  id: totrans-31
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[EasyRSA](https://oreil.ly/eKbsg)'
+  id: totrans-32
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[EasyRSA](https://oreil.ly/eKbsg)'
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-33
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN 文档](https://oreil.ly/Ah124)'
+- en: '*man 8 openvpn*'
+  id: totrans-34
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'
+- en: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+- en: 13.2 Setting Up a Simple Connection Test
+  id: totrans-36
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.2 设置一个简单的连接测试
+- en: Problem
+  id: totrans-37
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to run the simplest OpenVPN connection test to get an idea of how it
+    works and to verify connectivity.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望运行最简单的 OpenVPN 连接测试，以了解其工作原理并验证连接性。
+- en: Solution
+  id: totrans-39
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The following simple test creates an unencrypted tunnel between two Linux computers
+    that are on the same network. OpenVPN must be installed on both of them. First
+    verify that the OpenVPN daemon is not running on either host, and if it is, stop
+    it:'
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下简单测试创建了两台位于同一网络上的 Linux 计算机之间的未加密隧道。这两台计算机都必须安装 OpenVPN。首先确保 OpenVPN 守护进程在任一主机上都没有运行，如果运行了，请停止它：
+- en: '[PRE0]'
+  id: totrans-41
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: Use a Different Subnet for Your VPN
+  id: totrans-42
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用不同的子网用于您的 VPN
+- en: Use a different subnet for your OpenVPN tunnel; for example, *host1* and *host2*
+    are on 192.168.43.0/24, so the example uses the 10.0.0.0/24 private address space
+    for the VPN tunnel.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用不同的子网用于您的 OpenVPN 隧道；例如，*host1* 和 *host2* 在 192.168.43.0/24 上，因此示例使用 10.0.0.0/24
+    私有地址空间作为 VPN 隧道。
+- en: 'In the following example, the two computers are named *host1* and *host2*.
+    The first example creates a VPN tunnel from *host1* to *host2*:'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在以下示例中，两台计算机分别命名为 *host1* 和 *host2*。第一个示例创建了从 *host1* 到 *host2* 的 VPN 隧道：
+- en: '[PRE1]'
+  id: totrans-45
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'This example creates a link from *host2* to *host1*:'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个示例创建了从 *host2* 到 *host1* 的链接：
+- en: '[PRE2]'
+  id: totrans-47
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'You have a successful connection when both hosts show the “Initialization Sequence
+    Completed” message. Test your connections by pinging through the *tun0* interface
+    on both hosts:'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当两台主机显示“Initialization Sequence Completed”消息时，您就建立了成功的连接。通过在两台主机上的 *tun0* 接口进行
+    ping 测试您的连接：
+- en: '[PRE3]'
+  id: totrans-49
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Press Ctrl-C on each host to stop ping, and again to close the tunnels.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在每台主机上按 Ctrl-C 停止 ping，并再次关闭隧道。
+- en: Discussion
+  id: totrans-51
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'This simple test illustrates how OpenVPN works. It creates a virtual network
+    interface, *tun0* on both hosts, then routes network traffic through this interface.
+    This simple test does not create an encrypted connection, as you can see from
+    the “******* WARNING *******: All encryption and authentication features disabled”
+    message in your command output.'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '这个简单测试展示了 OpenVPN 的工作原理。它在两台主机上创建了虚拟网络接口 *tun0*，然后通过该接口路由网络流量。这个简单测试不会创建加密连接，您可以从命令输出中的“*******
+    警告 *******: 所有加密和认证功能已禁用”消息中看到。'
+- en: See Also
+  id: totrans-53
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[EasyRSA](https://oreil.ly/eKbsg)'
+  id: totrans-54
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[EasyRSA](https://oreil.ly/eKbsg)'
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-55
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN 文档](https://oreil.ly/Ah124)'
+- en: '[systemd.unit](https://oreil.ly/2AAEe)'
+  id: totrans-56
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[systemd.unit](https://oreil.ly/2AAEe)'
+- en: '*man 8 openvpn*'
+  id: totrans-57
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'
+- en: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+  id: totrans-58
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+- en: 13.3 Setting Up Easy Encryption with Static Keys
+  id: totrans-59
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.3 设置Easy Encryption with Static Keys
+- en: Problem
+  id: totrans-60
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want an easy way to create and manage encryption for OpenVPN.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望为OpenVPN创建和管理加密的简便方法。
+- en: Solution
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The easiest method is to use shared static keys. Shared static keys are useful
+    for testing, but they are not adequate for production systems. (See the Discussion
+    to learn about their shortcomings.) In this recipe you will learn how to create
+    and share static keys, and how to create simple server and client configuration
+    files.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最简单的方法是使用共享的静态密钥。共享的静态密钥对于测试很有用，但不适合生产系统。（有关它们的缺点，请参阅讨论。）在这个示例中，您将学习如何创建和共享静态密钥，以及如何创建简单的服务器和客户端配置文件。
+- en: 'Follow these steps:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按照以下步骤操作：
+- en: Create and distribute a shared static key between two hosts.
+  id: totrans-65
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 创建并在两台主机之间分发共享的静态密钥。
+- en: Create server and client configuration files.
+  id: totrans-66
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 创建服务器和客户端配置文件。
+- en: Start OpenVPN on both hosts, referencing their configuration files.
+  id: totrans-67
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在两台主机上启动OpenVPN，引用其配置文件。
+- en: In the following examples, the OpenVPN server is on *server1*, the client is
+    *client1*, and the new key is *myvpn.key*. You may name your keys whatever you
+    want.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在以下示例中，OpenVPN服务器在*server1*上，客户端在*client1*上，新密钥为*myvpn.key*。您可以按照自己的喜好命名您的密钥。
+- en: 'Create a new directory on the OpenVPN server to store keys, then create a new
+    static key:'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在OpenVPN服务器上创建一个新目录来存储密钥，然后创建一个新的静态密钥：
+- en: '[PRE4]'
+  id: totrans-70
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Copy the key to the client machine:'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将密钥复制到客户端机器：
+- en: '[PRE5]'
+  id: totrans-72
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Create the server configuration file. The example is */etc/openvpn/server1.conf*,
+    and you can call yours anything you like. Use a different subnet for your OpenVPN
+    tunnel; for example, *server1* and *client1* are on 192.168.43.0/24, so the example
+    uses the 10.0.0.0/24 private address space for the VPN tunnel. The server’s *tun*
+    address is 10.0.0.1:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建服务器配置文件。示例为*/etc/openvpn/server1.conf*，您可以根据需要命名。为您的OpenVPN隧道使用不同的子网；例如，*server1*和*client1*使用192.168.43.0/24，因此示例使用10.0.0.0/24私有地址空间用于VPN隧道。服务器的*tun*地址为10.0.0.1：
+- en: '[PRE6]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '*local* is the LAN IP address of the server.'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*local*是服务器的局域网IP地址。'
+- en: 'Create the client configuration file on the client machine. The client’s *tun*
+    address is 10.0.0.2:'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在客户端机器上创建客户端配置文件。客户端的*tun*地址为10.0.0.2：
+- en: '[PRE7]'
+  id: totrans-77
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'Make sure the OpenVPN daemon is not running on the server or client:'
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确保OpenVPN守护程序在服务器或客户端上未运行：
+- en: '[PRE8]'
+  id: totrans-79
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Start OpenVPN on the server and client:'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在服务器和客户端上启动OpenVPN：
+- en: '[PRE9]'
+  id: totrans-81
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: '[PRE10]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'When you see “Initialization Sequence Completed” on both hosts, you have established
+    a connection. Ping each host over the *tun* virtual network interface:'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您在两台主机上看到“Initialization Sequence Completed”时，表示已建立连接。通过*tun*虚拟网络接口对每个主机进行ping测试：
+- en: '[PRE11]'
+  id: totrans-84
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: Press Ctrl-C on both hosts to close the connection.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在两台主机上按Ctrl-C关闭连接。
+- en: Discussion
+  id: totrans-86
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'If you see “WARNING: INSECURE cipher with block size less than 128 bit (64
+    bit). This allows attacks like SWEET32\. Mitigate by using a cipher with a larger
+    block size (e.g. AES-256-CBC)” in your command output, correct it with the following
+    entry in both the server and client configuration files:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '如果您在命令输出中看到“WARNING: INSECURE cipher with block size less than 128 bit (64
+    bit). This allows attacks like SWEET32\. Mitigate by using a cipher with a larger
+    block size (e.g. AES-256-CBC)”，请在服务器和客户端配置文件中进行以下条目更正：'
+- en: '[PRE12]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: The biggest problem with using static keys is that you lose perfect forward
+    secrecy because your static key never changes. If an attacker found a way to sniff
+    and capture your network traffic, and then captured and cracked your encryption
+    key, the attacker could then decrypt everything they capture, past and future.
+    OpenVPN’s PKI uses a complex process that generates session keys, which are not
+    persistent but change regularly. So, at best, a successful attacker can decrypt
+    one session’s worth of traffic at a time, and then has to start over.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用静态密钥的最大问题是您失去了完美的前向保密性，因为您的静态密钥从不更改。如果攻击者找到方法来嗅探和捕获您的网络流量，然后捕获并破解您的加密密钥，攻击者可以解密他们捕获的所有内容，包括过去和未来的内容。OpenVPN的PKI使用复杂的过程生成会话密钥，这些密钥不是持久的，而是定期更改。因此，最多，成功的攻击者一次只能解密一个会话的流量，然后必须重新开始。
+- en: Another drawback is you need a different key for each client, and a copy of
+    each client key on the server. Managing multiple clients is less work and more
+    secure with a proper PKI.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个缺点是每个客户端需要不同的密钥，并在服务器上复制每个客户端的密钥。通过正确的PKI，管理多个客户端的工作量更少且更安全。
+- en: See Also
+  id: totrans-91
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[EasyRSA](https://oreil.ly/eKbsg)'
+  id: totrans-92
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[EasyRSA](https://oreil.ly/eKbsg)'
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-93
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN文档](https://oreil.ly/Ah124)'
+- en: '[systemd.unit](https://oreil.ly/2AAEe)'
+  id: totrans-94
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[systemd.unit](https://oreil.ly/2AAEe)'
+- en: '*man 8 openvpn*'
+  id: totrans-95
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'
+- en: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+  id: totrans-96
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+- en: 13.4 Installing EasyRSA to Manage Your PKI
+  id: totrans-97
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.4 安装 EasyRSA 来管理你的 PKI
+- en: Problem
+  id: totrans-98
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You are going to use EasyRSA to create and manage your public key infrastructure
+    (PKI), and you want to install and set it up correctly.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你将使用 EasyRSA 来创建和管理你的公钥基础设施（PKI），并希望正确安装和设置它。
+- en: Solution
+  id: totrans-100
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Your PKI can be anywhere, it does not have to be on the OpenVPN server. You
+    will create server and client certificates on the PKI, then copy them to their
+    respective hosts.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的 PKI 可以放在任何地方，不一定要在 OpenVPN 服务器上。你将在 PKI 上创建服务器和客户端证书，然后将它们复制到各自的主机上。
+- en: You can install the *easy-rsa* package or fetch the freshest release from [EasyRSA
+    Releases](https://oreil.ly/LtAKu) on GitHub.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以安装 *easy-rsa* 软件包，或者从 [EasyRSA 发布页面](https://oreil.ly/LtAKu) 获取最新版本。
+- en: 'Fedora and Ubuntu stuff all the EasyRSA files into */usr/share/*. This is not
+    a good working directory, and it is overwritten by system updates. Create a new
+    directory that you control and does not need root permissions, like our fine example
+    user Duchess who creates */home/duchess/mypki*:'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Fedora 和 Ubuntu 将所有 EasyRSA 文件都放在 */usr/share/*。这不是一个好的工作目录，并且会被系统更新覆盖。创建一个你控制且不需要
+    root 权限的新目录，比如我们优秀的示例用户 Duchess 创建的 */home/duchess/mypki*：
+- en: '[PRE13]'
+  id: totrans-104
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'On Fedora and Ubuntu Linux, copy the */usr/share/easy-rsa* directory to your
+    new directory:'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Fedora 和 Ubuntu Linux 上，复制 */usr/share/easy-rsa* 目录到你的新目录：
+- en: '[PRE14]'
+  id: totrans-106
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: This creates *mypki/easyrsa*. Check your permissions; you should be the owner
+    and group owner of everything in your directory.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将创建 *mypki/easyrsa*。检查你的权限；你应该是目录中所有内容的所有者和组所有者。
+- en: openSUSE does a proper installation with configuration files in */etc/easy-rsa*,
+    the *easyrsa* command in */usr/bin*, and the documentation and license files in
+    */usr/share/*. You don’t have to move anything or worry about permissions.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: openSUSE 通过在 */etc/easy-rsa* 中放置配置文件，将 *easyrsa* 命令放在 */usr/bin*，并在 */usr/share/*
+    中放置文档和许可文件来进行适当的安装。你无需移动任何文件或担心权限问题。
+- en: Discussion
+  id: totrans-109
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You should not need root permissions to create and manage your PKI. You may
+    put it wherever you want, and it should be separate from your OpenVPN configuration,
+    either in a separate directory or on a separate machine. The good OpenVPN people
+    recommend putting it on a well-protected machine that is not exposed to the internet.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建和管理你的 PKI 不需要 root 权限。你可以把它放在任何你想要的地方，应与你的 OpenVPN 配置分开，可以是在单独的目录或另一台机器上。OpenVPN
+    的开发者建议将其放在一个不会暴露于互联网的、受保护良好的机器上。
+- en: See Also
+  id: totrans-111
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[EasyRSA](https://oreil.ly/eKbsg)'
+  id: totrans-112
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[EasyRSA](https://oreil.ly/eKbsg)'
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-113
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN 文档](https://oreil.ly/Ah124)'
+- en: '[systemd.unit](https://oreil.ly/2AAEe)'
+  id: totrans-114
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[systemd.unit](https://oreil.ly/2AAEe)'
+- en: '*man 8 openvpn*'
+  id: totrans-115
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'
+- en: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+  id: totrans-116
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+- en: 13.5 Creating a PKI
+  id: totrans-117
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.5 创建 PKI
+- en: Problem
+  id: totrans-118
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You installed EasyRSA ([Recipe 13.4](#rec-install-easyrsa)), and now you want
+    to know how to set up a proper public key infrastructure (PKI).
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经安装了 EasyRSA（[13.4 节](#rec-install-easyrsa)），现在你想知道如何设置一个合适的公钥基础设施（PKI）。
+- en: Solution
+  id: totrans-120
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'A proper PKI is essential to running an OpenVPN server safely. In this recipe
+    we will use EasyRSA to create a PKI, which simplifies the process considerably
+    over using the *openssl* command. Creating a PKI involves these steps:'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在安全地运行 OpenVPN 服务器时，一个合适的 PKI 至关重要。在这个示例中，我们将使用 EasyRSA 来创建 PKI，相比使用 *openssl*
+    命令，这大大简化了整个过程。创建 PKI 包括以下步骤：
+- en: Create your own Certificate Authority (CA) certificate to sign server and client
+    certificates. This should be in a separate directory from your OpenVPN server
+    configuration, or on a separate machine.
+  id: totrans-122
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 创建你自己的证书颁发机构（CA）证书来签署服务器和客户端证书。这应该放在与你的 OpenVPN 服务器配置分开的目录中，或者在另一台机器上。
+- en: Create and sign an OpenVPN server certificate.
+  id: totrans-123
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 创建并签署 OpenVPN 服务器证书。
+- en: Create and sign client certificates.
+  id: totrans-124
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 创建并签署客户端证书。
+- en: Copy the server certificates and the client certificates to */etc/openvpn/keys*
+    on their respective machines. (You may create a different directory than *keys*.)
+  id: totrans-125
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将服务器证书和客户端证书复制到各自机器上的 */etc/openvpn/keys* 目录。（你可以创建一个不同于 *keys* 的目录。）
+- en: In the following examples, all the commands are run from the */home/duchess/mypki/*
+    directory.
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在以下示例中，所有命令均从 */home/duchess/mypki/* 目录运行。
+- en: 'Change to your PKI directory and run the command to initiate a new PKI:'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 切换到你的 PKI 目录，并运行命令来初始化一个新的 PKI：
+- en: '[PRE15]'
+  id: totrans-128
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'This creates an empty structure for your new PKI. Next, build your new CA.
+    The CA creates and signs server and client certificates. Protect it with a strong
+    passphrase, and create the Common Name you want for your new CA:'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将为您的新 PKI 创建一个空结构。接下来，构建您的新 CA。CA 创建并签署服务器和客户端证书。用强密码保护它，并创建您想要的新 CA 的通用名称：
+- en: '[PRE16]'
+  id: totrans-130
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: Tip
+  id: totrans-131
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: If you see a “RAND_load_file:Cannot open file:crypto/rand/randfile.c:98:Filename=/mypki/pki/.rnd”
+    message, ignore it, as it is meaningless. You can make it go away by finding *openssl-easyrsa.cnf*
+    and commenting out the *RANDFILE* line at the beginning.
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您看到“RAND_load_file:Cannot open file:crypto/rand/randfile.c:98:Filename=/mypki/pki/.rnd”消息，请忽略它，因为它毫无意义。您可以通过找到
+    *openssl-easyrsa.cnf* 并在开头注释掉 *RANDFILE* 行来解决这个问题。
+- en: 'Generate a keypair and certificate signing request for your OpenVPN server.
+    It is customary to not put a passphrase on the server’s private key. You may protect
+    yours with a passphrase if you wish by omitting the *nopass* option. A passphrase
+    provides strong protection, but it means entering the passphrase every time you
+    restart your server:'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为您的 OpenVPN 服务器生成密钥对和证书签名请求。习惯上，不在服务器的私钥上设置密码。如果您希望可以省略 *nopass* 选项来保护您的服务器，请用密码保护。密码提供了强大的保护，但这意味着每次重启服务器时都需要输入密码：
+- en: '[PRE17]'
+  id: totrans-134
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'Generate a keypair and certificate signing request for a client. Client private
+    keys should have passwords, especially on mobile clients:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为客户端生成密钥对和证书签名请求。尤其是移动客户端的客户端私钥应该有密码保护：
+- en: '[PRE18]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'Sign the requests, using their Common Names. Use only their names; if you enter
+    their paths it will cause an error:'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用它们的通用名称签署请求。仅使用它们的名称；如果输入它们的路径会导致错误：
+- en: '[PRE19]'
+  id: totrans-138
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Generate the Diffie-Hellman parameters for the server; this takes a minute
+    or two. This command must be run on your OpenVPN server:'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为服务器生成 Diffie-Hellman 参数；这需要一到两分钟。此命令必须在您的 OpenVPN 服务器上运行：
+- en: '[PRE20]'
+  id: totrans-140
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'Create a Hash-based Message Authentication Code (HMAC) key, also on your server:'
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您的服务器上也创建一个基于哈希的消息认证码（HMAC）密钥：
+- en: '[PRE21]'
+  id: totrans-142
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: Copy *vpnclient1.key*, *vpnclient1.crt*, *ca.crt*, and *ta.key* to */etc/openvpn/keys*
+    on *client1*.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 *vpnclient1.key*、*vpnclient1.crt*、*ca.crt* 和 *ta.key* 复制到 *client1* 上的 */etc/openvpn/keys*。
+- en: Copy *vpnserver1.key*, *vpnserver1.crt*, *ca.crt*, *dh.pem*, and *ta.key* to
+    */etc/openvpn/keys* on *server1*.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 *vpnserver1.key*、*vpnserver1.crt*、*ca.crt*、*dh.pem* 和 *ta.key* 复制到 *server1*
+    上的 */etc/openvpn/keys*。
+- en: You may delete all of the **.req* files after you have signed the certificate
+    signing requests.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您签署了证书签名请求后，您可以删除所有的 **.req* 文件。
+- en: '[Table 13-1](#table13-xx) should help you remember which files go where.'
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表 13-1](#table13-xx) 应该帮助您记住文件的存放位置。'
+- en: Table 13-1\. Server and client key location
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 13-1\. 服务器和客户端密钥位置
+- en: '| Name | Location | Public | Private |'
+  id: totrans-148
+  prefs: []
+  type: TYPE_TB
+  zh: '| 名称 | 位置 | 公共 | 私有 |'
+- en: '| --- | --- | --- | --- |'
+  id: totrans-149
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- | --- |'
+- en: '| ca.crt | server & clients | X |  |'
+  id: totrans-150
+  prefs: []
+  type: TYPE_TB
+  zh: '| ca.crt | 服务器和客户端 | X |  |'
+- en: '| ca.key | PKI machine |  | X |'
+  id: totrans-151
+  prefs: []
+  type: TYPE_TB
+  zh: '| ca.key | PKI 机器 |  | X |'
+- en: '| ta.key | server & clients |  | X |'
+  id: totrans-152
+  prefs: []
+  type: TYPE_TB
+  zh: '| ta.key | 服务器和客户端 |  | X |'
+- en: '| dh.pem | server | X |  |'
+  id: totrans-153
+  prefs: []
+  type: TYPE_TB
+  zh: '| dh.pem | 服务器 | X |  |'
+- en: '| server.crt | server | X |  |'
+  id: totrans-154
+  prefs: []
+  type: TYPE_TB
+  zh: '| server.crt | server | X |  |'
+- en: '| server.key | server |  | X |'
+  id: totrans-155
+  prefs: []
+  type: TYPE_TB
+  zh: '| server.key | server |  | X |'
+- en: '| client1.crt | client1 | X |  |'
+  id: totrans-156
+  prefs: []
+  type: TYPE_TB
+  zh: '| client1.crt | client1 | X |  |'
+- en: '| client1.key | client1 |  | X |'
+  id: totrans-157
+  prefs: []
+  type: TYPE_TB
+  zh: '| client1.key | client1 |  | X |'
+- en: '| client2.crt | client2 | X |  |'
+  id: totrans-158
+  prefs: []
+  type: TYPE_TB
+  zh: '| client2.crt | client2 | X |  |'
+- en: '| client2.key | client2 |  | X |'
+  id: totrans-159
+  prefs: []
+  type: TYPE_TB
+  zh: '| client2.key | client2 |  | X |'
+- en: Discussion
+  id: totrans-160
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: What’s this Diffie-Hellman stuff? It is the encryption mechanism that allows
+    two hosts to create and share a secret key. Once the OpenVPN client and server
+    authenticate to each other, additional send and receive keys are generated to
+    encrypt the session.
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 什么是 Diffie-Hellman ？它是一种加密机制，允许两台主机创建和共享一个秘密密钥。一旦 OpenVPN 客户端和服务器相互验证，将生成额外的发送和接收密钥以加密会话。
+- en: HMAC calculates a message authentication code. HMAC verifies the integrity and
+    authenticity of a message.
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: HMAC 计算消息认证码。HMAC 验证消息的完整性和真实性。
+- en: '*easyrsa init-pki* creates a new PKI, and you may also run it to cleanly remove
+    and rebuild an existing PKI.'
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*easyrsa init-pki* 创建一个新的 PKI，您还可以使用它来干净地删除和重建现有的 PKI。'
+- en: 'You may set up your PKI anywhere, and the good OpenVPN people recommend putting
+    it on a machine that is not exposed to the internet and is well-protected from
+    anyone who should not be messing with your PKI. If your CA is compromised, it
+    is easy for an attacker to infiltrate your network. Obviously, you must have a
+    secure method of distributing these files: USB stick, the *scp* command, an encrypted
+    tarball downloaded from a secure server or emailed to your users.'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在任何地方设置您的 PKI，而 OpenVPN 的专家建议将其放在不直接连接到互联网且受到良好保护的机器上，防止任何不应该操作您的 PKI 的人员进行入侵。如果您的
+    CA 受到攻击，攻击者可以轻松渗透到您的网络中。显然，您必须有一种安全的方法来分发这些文件：USB 棒、*scp* 命令、从安全服务器下载的加密压缩包或通过电子邮件发送给用户。
+- en: Take a look in your PKI directory to see how all these items are organized.
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看您的 PKI 目录，了解所有这些项目的组织方式。
+- en: '[PRE22]'
+  id: totrans-166
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: Signing requests have a *.req* file extension, public keys *.crt*, and private
+    keys *.key*. Keys always come in pairs, public and private.
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 签名请求文件扩展名为 *.req*，公钥为 *.crt*，私钥为 *.key*。密钥始终成对出现，公钥和私钥。
+- en: Public Keys Encrypt, Private Keys Decrypt
+  id: totrans-168
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 公钥加密，私钥解密
+- en: Public keys encrypt, private keys decrypt. Private keys must be protected and
+    never shared. Public keys are meant to be shared.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 公钥加密，私钥解密。私钥必须受到保护，绝不能共享。公钥则是供共享使用。
+- en: 'Click on any signed certificate in your file manager to see something like
+    [Figure 13-1](#fig-vpn-1). This provides a wealth of information: the CA that
+    signed it, expiration date, serial number, fingerprint, signature, and lots more.'
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 单击文件管理器中的任何签名证书，以查看类似 [Figure 13-1](#fig-vpn-1) 的内容。这提供了大量信息：签署它的 CA、到期日期、序列号、指纹、签名等。
+- en: '![Viewing a signed certificate](Images/lcb2_1301.png)'
+  id: totrans-171
+  prefs: []
+  type: TYPE_IMG
+  zh: '![查看签名证书](Images/lcb2_1301.png)'
+- en: Figure 13-1\. Viewing a signed certificate
+  id: totrans-172
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 13-1\. 查看签名证书
+- en: 'Or use the *openssl* command to read it:'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或使用 *openssl* 命令读取它：
+- en: '[PRE23]'
+  id: totrans-174
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: A certificate is a request signed by a CA, and it contains the public key and
+    the CA’s digital signature. A request contains a public key and the digital signature
+    from the corresponding private key. You can see all of this by comparing them.
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 证书是由 CA 签署的请求，其中包含公钥和 CA 的数字签名。请求包含公钥和对应私钥的数字签名。通过比较它们，您可以看到所有这些内容。
+- en: EasyRSA was originally part of OpenVPN and then spun off as a separate project.
+    If you are used to managing PKIs with OpenSSL, you will appreciate how EasyRSA
+    has streamlined the process.
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: EasyRSA 最初是 OpenVPN 的一部分，后来作为独立项目分离出来。如果您习惯使用 OpenSSL 管理 PKI，您会欣赏 EasyRSA 如何简化该过程。
+- en: See Also
+  id: totrans-177
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[EasyRSA](https://oreil.ly/eKbsg)'
+  id: totrans-178
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[EasyRSA](https://oreil.ly/eKbsg)'
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-179
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN 文档](https://oreil.ly/Ah124)'
+- en: '*man 8 openvpn*'
+  id: totrans-180
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'
+- en: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+  id: totrans-181
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+- en: 13.6 Customizing EasyRSA Default Options
+  id: totrans-182
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.6 自定义 EasyRSA 默认选项
+- en: Problem
+  id: totrans-183
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: The default settings for EasyRSA are not what you want, and you want to know
+    how to change them.
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: EasyRSA 的默认设置并非您想要的，您想知道如何更改它们。
+- en: Solution
+  id: totrans-185
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Look for your *vars.example* file, which is part of EasyRSA. Save a copy of
+    this file as *vars* in your PKI directory, which in the examples in this chapter
+    is */home/duchess/mypki/pki/*. The *vars* file defines your default settings for
+    creating and signing certificates.
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找您的 *vars.example* 文件，这是 EasyRSA 的一部分。将此文件的副本另存为 *vars*，保存在本章示例中的 PKI 目录中（*/home/duchess/mypki/pki/*）。*vars*
+    文件定义了创建和签署证书的默认设置。
+- en: This file is well commented. Make your edits below the `# DO YOUR EDITS BELOW
+    THIS POINT` line. Everything prefaced with *set_var* is editable. Uncomment everything
+    you change.
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该文件有很好的注释。在 `# DO YOUR EDITS BELOW THIS POINT` 行下进行编辑。所有以 *set_var* 开头的内容均可编辑。取消注释对您更改的所有内容。
+- en: 'For example, the default configuration uses just the Common Name, and not a
+    full *org* configuration. The following example creates a traditional *org* configuration:'
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，默认配置仅使用通用名称，而不是完整的 *org* 配置。以下示例创建了传统的 *org* 配置：
+- en: '[PRE24]'
+  id: totrans-189
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'When you use the *org* configuration, remember to enter your Common Name when
+    you run *easyrsa build-ca*, or you will be stuck with the default *Easy-RSA CA*:'
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您使用 *org* 配置时，请记住在运行 *easyrsa build-ca* 时输入您的通用名称，否则您将被困在默认的 *Easy-RSA CA*
+    中。
+- en: '[PRE25]'
+  id: totrans-191
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: Discussion
+  id: totrans-192
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Use *cn* or *org* according to your own policies and preferences; it makes no
+    difference to your server operations.
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据您自己的政策和偏好使用 *cn* 或 *org*；这对服务器操作没有影响。
+- en: See [Recipe 13.10](#rec-harden-vpn) to learn how to harden your server.
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看 [Recipe 13.10](#rec-harden-vpn) 了解如何加固您的服务器。
+- en: See Also
+  id: totrans-195
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[EasyRSA](https://oreil.ly/eKbsg)'
+  id: totrans-196
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[EasyRSA](https://oreil.ly/eKbsg)'
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-197
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN 文档](https://oreil.ly/Ah124)'
+- en: '*man 8 openvpn*'
+  id: totrans-198
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'
+- en: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+  id: totrans-199
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+- en: 13.7 Creating and Testing Server and Client Configurations
+  id: totrans-200
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.7 创建和测试服务器和客户端配置
+- en: Problem
+  id: totrans-201
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Now that you have a nice stout PKI, you want to know how to configure your OpenVPN
+    server and clients.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经有了一个完整的 PKI，您想知道如何配置您的 OpenVPN 服务器和客户端。
+- en: Solution
+  id: totrans-203
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: In this recipe we will set up a simple test instance between two hosts on the
+    same subnet, *server1* and *client1*. This is a good simple way to test your server
+    configuration without having to hassle with routing and getting past your internet
+    gateway.
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个示例中，我们将在同一子网上的两台主机 *server1* 和 *client1* 上设置一个简单的测试实例。这是测试服务器配置的一个简单方法，而不必处理路由和越过互联网网关的麻烦。
+- en: 'The following example is a simple OpenVPN server configuration. Note that you
+    can store your server keys anywhere on the server, as long you reference them
+    correctly in your configuration file:'
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例是一个简单的 OpenVPN 服务器配置。请注意，只要在配置文件中正确引用，您可以将服务器密钥存储在服务器的任何位置：
+- en: '[PRE26]'
+  id: totrans-206
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'An example client configuration:'
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个客户端配置示例：
+- en: '[PRE27]'
+  id: totrans-208
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'Stop your OpenVPN server if it is running:'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果服务器正在运行，请停止您的 OpenVPN 服务器：
+- en: '[PRE28]'
+  id: totrans-210
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'Start OpenVPN on both hosts with the *openvpn* command:'
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *openvpn* 命令在两台主机上启动 OpenVPN：
+- en: '[PRE29]'
+  id: totrans-212
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: '[PRE30]'
+  id: totrans-213
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: And there you have it, both configurations are correct and you have a successful
+    connection. Press Ctrl-C on both hosts to stop.
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以上配置都是正确的，您已经成功建立了连接。在两台主机上按下 Ctrl-C 停止连接。
+- en: Discussion
+  id: totrans-215
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: OpenVPN installs with a batch of example configurations in */usr/share/doc/openvpn/*.
+    These are abundantly commented and are excellent references. There are dozens
+    of options, but in real life you will use just a few of them. In the examples
+    in this recipe, there are a few items of note.
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenVPN 安装时会附带一批示例配置文件，存放在 */usr/share/doc/openvpn/* 目录下。这些配置文件有详细注释，是很好的参考资料。虽然有数十个选项可供选择，但在实际应用中只会用到其中几个。在本文的示例中，有几点需要注意。
+- en: '`port 1194` is the default port, and `proto udp` is preferred over `proto tcp`.
+    UDP is more secure, providing some protection from port scanning and denial-of-service
+    attacks, and provides higher throughput and lower latency. TCP is useful when
+    a remote user uses public networks with restrictive firewalls, such as hotels
+    and coffee shops.'
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`port 1194` 是默认端口，`proto udp` 优先于 `proto tcp`。UDP 更安全，可以一定程度上防止端口扫描和拒绝服务攻击，同时提供更高的吞吐量和更低的延迟。TCP
+    在远程用户使用像酒店和咖啡店这样有限制的公共网络时很有用。'
+- en: '*tls-auth /etc/openvpn/keys/ta.key* must always have the 0 value on the server,
+    and 1 on the clients. *tls-auth* enforces TLS-only connections.'
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*tls-auth /etc/openvpn/keys/ta.key* 在服务器上必须始终为 0，在客户端上必须为 1。*tls-auth* 强制使用
+    TLS 连接。'
+- en: '*verb 4* is the logging level. 1 is the lowest, 9 is the most verbose. Keep
+    it at 4–6 until you are confident everything is set up correctly. When you start
+    OpenVPN from the command line, you will see a lot of messages.'
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*verb 4* 是日志记录级别。1 是最低级别，9 是最详细的。在确认一切设置正确之前，请将其保持在 4-6。当您从命令行启动 OpenVPN 时，将会看到大量消息。'
+- en: There are a lot of stale how-tos that recommend the *comp_lzo* option to enable
+    compression. Don’t bother, as it does not provide much benefit. Most traffic is
+    not compressible since it is either already compressed or is encrypted and cannot
+    be compressed. There is at least one vulnerability enabled by compression, VORACLE.
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有很多过时的指南建议使用 *comp_lzo* 选项来启用压缩。不必费心，因为它并没有提供太多好处。大多数流量要么已经被压缩，要么已经加密且无法被压缩。压缩还存在至少一种由于压缩引起的漏洞，VORACLE。
+- en: See Also
+  id: totrans-221
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: The example configuration files in your installation
+  id: totrans-222
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 安装中的示例配置文件
+- en: '[EasyRSA](https://oreil.ly/eKbsg)'
+  id: totrans-223
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[EasyRSA](https://oreil.ly/eKbsg)'
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-224
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN 文档](https://oreil.ly/Ah124)'
+- en: '*man 8 openvpn*'
+  id: totrans-225
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'
+- en: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+  id: totrans-226
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+- en: 13.8 Controlling OpenVPN with systemctl
+  id: totrans-227
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.8 使用 systemctl 控制 OpenVPN
+- en: Problem
+  id: totrans-228
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to manage the OpenVPN daemon like any other daemon, with *systemctl*,
+    but you don’t see an OpenVPN unit file. Or, you see an odd-looking unit file like
+    *openvpn-server@.service*, and when you try to start it, it throws error messages.
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望像管理其他守护程序一样管理 OpenVPN 守护程序，使用 *systemctl*，但您看不到 OpenVPN 单元文件。或者，您看到一个看起来奇怪的单元文件，如
+    *openvpn-server@.service*，当您尝试启动它时，它会抛出错误消息。
+- en: Solution
+  id: totrans-230
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The ampersand, @, creates a *parameterized* unit file. This means you can easily
+    create multiple unit files for the same service by calling different configuration
+    files. For example, suppose your server configuration file is */etc/openvpn/austin.conf*.
+    Your unit file is *openvpn@austin.service*, created with *systemctl*:'
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 双引号符@创建了*参数化*单元文件。这意味着您可以通过调用不同的配置文件轻松创建同一服务的多个单元文件。例如，假设您的服务器配置文件是*/etc/openvpn/austin.conf*。您的单元文件是*openvpn@austin.service*，使用*systemctl*创建：
+- en: '[PRE31]'
+  id: totrans-232
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: Note that you do not type the file extension of your OpenVPN *.conf* file. Now
+    you can control your OpenVPN daemon with *systemctl*, just like any other service.
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，不要在OpenVPN *.conf*文件的文件扩展名中输入文件扩展名。现在您可以像任何其他服务一样使用*systemctl*来控制您的OpenVPN守护程序。
+- en: Discussion
+  id: totrans-234
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: This is a rather ingenious method that gives you the flexibility to create multiple
+    configurations without having to write multiple unit files. You can “parameterize”
+    any systemd unit file.
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是一种相当巧妙的方法，使您能够在无需编写多个单元文件的情况下创建多个配置。您可以“参数化”任何systemd单元文件。
+- en: You can have multiple tunnels running at the same time on the same machine.
+    Each configuration requires a different *tun* device, for example *tun0*, *tun1*,
+    *tun2*, a different subnet for each tunnel, and a different UDP port. Control
+    all of these tunnels with different configuration files and their corresponding
+    parameterized unit files.
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在同一台计算机上同时运行多个隧道。每个配置需要一个不同的*tun*设备，例如*tun0*、*tun1*、*tun2*，每个隧道需要一个不同的子网和一个不同的UDP端口。使用不同的配置文件及其对应的参数化单元文件控制所有这些隧道。
+- en: See Also
+  id: totrans-237
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[EasyRSA](https://oreil.ly/eKbsg)'
+  id: totrans-238
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[EasyRSA](https://oreil.ly/eKbsg)'
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-239
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN文档](https://oreil.ly/Ah124)'
+- en: '[systemd.unit](https://oreil.ly/2AAEe)'
+  id: totrans-240
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[systemd.unit](https://oreil.ly/2AAEe)'
+- en: '*man 8 openvpn*'
+  id: totrans-241
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'
+- en: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+  id: totrans-242
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+- en: 13.9 Distributing Client Configurations More Easily with .ovpn Files
+  id: totrans-243
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.9 通过.ovpn文件更轻松地分发客户端配置
+- en: Problem
+  id: totrans-244
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Setting up clients is a fair bit of work, and you want to know if there is a
+    faster way, one that your users can do themselves without a lot of help.
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置客户端需要相当多的工作，您想知道是否有更快的方法，使用户可以自行完成而无需太多帮助。
+- en: Solution
+  id: totrans-246
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Bundle your client configurations and keys into single files with the *.ovpn*
+    extension. All clients, Linux, Windows, macOS, iOS, and Android, can import these.
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将客户端配置和密钥捆绑到扩展名为.ovpn的单个文件中。所有客户端，包括Linux、Windows、macOS、iOS和Android，都可以导入这些文件。
+- en: 'First create the users’ certificates, then follow this template to create their
+    *.ovpn* files. This example builds on the example in [Recipe 13.7](#rec-vpn-configs).
+    Instead of linking to all their certificates, copy them into this file. All certificates
+    are in plain text, so all you do is copy the BEGIN/END portions into the *.ovpn*
+    file:'
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先创建用户的证书，然后按照此模板创建他们的.ovpn文件。此示例基于[Recipe 13.7](#rec-vpn-configs)中的示例。而不是链接到所有他们的证书，请将它们复制到此文件中。所有证书都是明文的，因此您只需将BEGIN/END部分复制到.ovpn文件中：
+- en: '[PRE32]'
+  id: totrans-249
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: Now you have only one file to distribute to your clients. (See [Recipe 13.1](#rec-install-openvpn)
+    to learn what to install for Linux, macOS, Windows, iOS, and Android clients.)
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您只需要向客户分发一个文件。 （请参阅[Recipe 13.1](#rec-install-openvpn)了解如何为Linux、macOS、Windows、iOS和Android客户端安装所需内容。）
+- en: The easy way to import a new *.ovpn* file in Linux is using NetworkManager.
+    Open “VPN Connections” → “Add a VPN connection.” This opens “Choose a VPN Connection
+    Type.” Select “Import a Saved VPN Connection,” click Create, and find your *.ovpn*
+    file in the file selector. Review the settings on the General and VPN tabs.
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Linux中导入新的*.ovpn*文件的简便方法是使用NetworkManager。打开“VPN Connections” → “Add a VPN
+    connection”。这将打开“选择VPN连接类型”。选择“导入保存的VPN连接”，点击“创建”，然后在文件选择器中找到您的*.ovpn*文件。在“通用”和“VPN”选项卡上查看设置。
+- en: On the General tab, make sure that “All users may connect to this network” is
+    not checked. This is a simple but important security measure that requires every
+    user to have their own individual OpenVPN configuration.
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在“通用”选项卡上，请确保未选中“所有用户都可以连接到此网络”。这是一个简单但重要的安全措施，要求每个用户都有自己的独立OpenVPN配置。
+- en: On the VPN tab, note that NetworkManager converts the inline certificates to
+    *.pem* files ([Figure 13-2](#fig-vpn-2)). This is normal and not a mistake. You
+    can compare these to the originals; click on the little file folder icon to the
+    right to see where the converted files are stored.
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在VPN选项卡上，请注意NetworkManager将内联证书转换为.pem文件（[Figure 13-2](#fig-vpn-2)）。这是正常的，不是错误。您可以将这些与原始文件进行比较；单击右侧的小文件夹图标即可查看转换后的文件存储位置。
+- en: '![Importing .ovpn client configuration file into NetworkManager](Images/lcb2_1302.png)'
+  id: totrans-254
+  prefs: []
+  type: TYPE_IMG
+  zh: '![将 .ovpn 客户端配置文件导入 NetworkManager](Images/lcb2_1302.png)'
+- en: Figure 13-2\. Importing the *.ovpn* client configuration file into NetworkManager
+  id: totrans-255
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 13-2\. 将 *.ovpn* 客户端配置文件导入 NetworkManager
+- en: For all other clients, the procedure is similar. Follow their instructions,
+    and if all goes well, your clients will be up and running in a couple of minutes.
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于所有其他客户端，该过程类似。按照他们的说明操作，如果一切顺利，您的客户端将在几分钟内运行起来。
+- en: The NetworkManager import function also works with client configuration files
+    that are not inline, like in [Recipe 13.7](#rec-vpn-configs). In this case the
+    certificates are not converted, and they retain their original filenames.
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: NetworkManager 导入功能也适用于不是内联的客户端配置文件，例如[第 13.7 节](#rec-vpn-configs)。在这种情况下，证书不会被转换，它们保留其原始文件名。
+- en: An inline file may have the *.conf* extension if you have only Linux clients.
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果只有 Linux 客户端，则内联文件可能具有 *.conf* 扩展名。
+- en: See Also
+  id: totrans-259
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[EasyRSA](https://oreil.ly/eKbsg)'
+  id: totrans-260
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[EasyRSA](https://oreil.ly/eKbsg)'
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-261
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN 文档](https://oreil.ly/Ah124)'
+- en: '*man 8 openvpn*'
+  id: totrans-262
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'
+- en: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+  id: totrans-263
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+- en: 13.10 Hardening Your OpenVPN Server
+  id: totrans-264
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.10 加固您的 OpenVPN 服务器
+- en: Problem
+  id: totrans-265
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know some options for making your OpenVPN more secure.
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想了解一些使您的 OpenVPN 更安全的选项。
+- en: Solution
+  id: totrans-267
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The OpenVPN default settings are pretty good, but they’re designed for broader
+    compatibility. There are some changes you can make that will make your server
+    stronger.
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenVPN 的默认设置相当不错，但它们设计用于更广泛的兼容性。您可以做一些改动，使您的服务器更强大。
+- en: 'The following examples go in both server and client configuration files. These
+    options maximize the effectiveness of TLS. All SSL and TLS protocols older than
+    TLS 1.2 are deprecated and should not be allowed. Accept only TLS 1.2 or higher:'
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例适用于服务器和客户端配置文件。这些选项最大化了 TLS 的效果。所有低于 TLS 1.2 的 SSL 和 TLS 协议均已废弃，不应允许。仅接受
+    TLS 1.2 或更高版本：
+- en: '[PRE33]'
+  id: totrans-270
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'Use a stronger data channel cipher, and enforce its use by disabling cipher
+    negotiation:'
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用更强大的数据通道密码，并通过禁用密码协商来强制使用它：
+- en: '[PRE34]'
+  id: totrans-272
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'There are many changes in TLS 1.3, so you need two different configurations
+    for TLS 1.2 and 1.3\. These are all stronger and more efficient encryption ciphers:'
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: TLS 1.3 有许多变化，因此您需要为 TLS 1.2 和 1.3 配置两种不同的配置文件。这些都是更强大和更高效的加密密码：
+- en: '[PRE35]'
+  id: totrans-274
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'Use Elliptic Curve Diffie-Hellman Ephemeral (ECDHE) in place of our old Diffie-Hellman
+    static keys. You do not have to create a *ta.key*, as you do in [Recipe 13.5](#rec-create-pki):'
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用椭圆曲线 Diffie-Hellman 瞬态（ECDHE）代替旧的静态 Diffie-Hellman 密钥。您不必像在[第 13.5 节](#rec-create-pki)中创建
+    *ta.key* 那样操作：
+- en: '[PRE36]'
+  id: totrans-276
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: Add the *float* option, in the server configuration only, to allow clients to
+    roam on different networks without losing connection, as long they pass all other
+    authentication tests.
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在服务器配置中添加 *float* 选项，允许客户端在不丢失连接的情况下漫游到不同的网络，只要它们通过所有其他身份验证测试。
+- en: The *opt-verify* option, in the server configuration only, checks for compatibility
+    between server and client settings, and disconnects clients that do not match.
+    *opt-verify* checks *dev-type, link-mtu, tun-mtu, proto, ifconfig, comp-lzo, fragment,
+    keydir, cipher, auth, keysize, secret, no-replay, no-iv, tls-auth, key-method,
+    tls-server*, and *tls-client*.
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*opt-verify* 选项仅在服务器配置中检查服务器和客户端设置的兼容性，并断开不匹配的客户端。*opt-verify* 检查 *dev-type,
+    link-mtu, tun-mtu, proto, ifconfig, comp-lzo, fragment, keydir, cipher, auth,
+    keysize, secret, no-replay, no-iv, tls-auth, key-method, tls-server* 和 *tls-client*。'
+- en: See the Discussion for complete example configurations.
+  id: totrans-279
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看讨论以获取完整的示例配置。
+- en: Discussion
+  id: totrans-280
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Put these enhancements all together in the server configuration:'
+  id: totrans-281
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将这些增强功能全部整合到服务器配置中：
+- en: '[PRE37]'
+  id: totrans-282
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'An example client configuration, using the inline file format ([Recipe 13.9](#rec.ovpn)):'
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个示例客户端配置，使用内联文件格式（[第 13.9 节](#rec.ovpn)）：
+- en: '[PRE38]'
+  id: totrans-284
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: These options strengthen the authentication between client and server, and enforce
+    using TLS 1.2 and higher. If you’re wondering how to know which ciphers and ciphersuites
+    to use, I asked some experts. You can lock down your setup even tighter. For example,
+    disallowing users from saving passwords, adding more restrictions to client-server
+    authentication, using SELinux, or using a chroot. These are advanced topics not
+    covered here.
+  id: totrans-285
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些选项加强了客户端和服务器之间的认证，并强制使用 TLS 1.2 及更高版本。如果您想知道使用哪些密码和密码套件，可以向专家询问。您可以进一步限制您的设置。例如，禁止用户保存密码，增加客户端-服务器认证的限制，使用
+    SELinux 或使用 chroot。这些都是此处未涵盖的高级主题。
+- en: See Also
+  id: totrans-286
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[EasyRSA](https://oreil.ly/eKbsg)'
+  id: totrans-287
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[EasyRSA](https://oreil.ly/eKbsg)'
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-288
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN 文档](https://oreil.ly/Ah124)'
+- en: '*man 8 openvpn*'
+  id: totrans-289
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'
+- en: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+  id: totrans-290
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSL Cookbook](https://oreil.ly/Ctm0X)'
+- en: 13.11 Configuring Networking
+  id: totrans-291
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 13.11 配置网络
+- en: Problem
+  id: totrans-292
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your OpenVPN server is running, all of your connection tests work as expected,
+    and now you need to know how to set up your networking so that remote clients
+    can find your server and traffic gets routed appropriately.
+  id: totrans-293
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的 OpenVPN 服务器正在运行，所有连接测试都正常工作，现在您需要知道如何设置您的网络，以便远程客户端可以找到您的服务器并正确路由流量。
+- en: Solution
+  id: totrans-294
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: There is no one-size-fits-all solution. Configuring your networking has to take
+    into account how your LAN is set up, whether you are connecting individual clients
+    or linking networks, IPv4, IPv6, how your internet gateway is set up, and lots
+    more. Consult Jan Just Keijser’s excellent [*OpenVPN Cookbook*](https://learning.oreilly.com/library/view/openvpn-cookbook-/9781786463128/),
+    2nd Edition (O’Reilly), to find the answers you need. This book covers TUN versus
+    TAP, Windows clients, PAM and LDAP, IPv6, routing, and site-to-site configurations.
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 没有一种适合所有情况的解决方案。配置您的网络必须考虑到您的局域网设置，无论是连接个体客户端还是链接网络，IPv4、IPv6，您的互联网网关设置以及更多因素。请参阅
+    Jan Just Keijser 的优秀著作 [*OpenVPN Cookbook*](https://learning.oreilly.com/library/view/openvpn-cookbook-/9781786463128/)，第二版（O'Reilly），以找到您需要的答案。本书涵盖了
+    TUN 与 TAP、Windows 客户端、PAM 和 LDAP、IPv6、路由以及站点间配置。
+- en: Discussion
+  id: totrans-296
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Networking is the most challenging part of running any server, especially an
+    important security server. It pays to study this and take pains to get it right.
+    The OpenVPN documentation has a lot of good information on networking as well.
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 网络是运行任何服务器的最具挑战性的部分，尤其是一个重要的安全服务器。学习和确保正确配置网络是非常值得的。OpenVPN 文档也有很多关于网络的有用信息。
+- en: See Also
+  id: totrans-298
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[OpenVPN documentation](https://oreil.ly/Ah124)'
+  id: totrans-299
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVPN 文档](https://oreil.ly/Ah124)'
+- en: '*man 8 openvpn*'
+  id: totrans-300
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 openvpn*'

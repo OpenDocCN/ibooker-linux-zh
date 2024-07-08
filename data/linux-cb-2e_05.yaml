@@ -1,0 +1,2953 @@
+- en: Chapter 5\. Managing Users and Groups
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第5章 管理用户和组
+- en: 'Linux has two types of users: human users and system users. Each user has a
+    unique identity (UID), and at least one group identification (GID). All users
+    have one primary group and may be members of multiple groups.'
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux有两种类型的用户：人类用户和系统用户。每个用户都有唯一的标识（UID），至少一个组标识（GID）。所有用户都有一个主组，并可能是多个组的成员。
+- en: Each human user owns a home directory for their personal files. User home directories
+    belong in */home* and are named for the owner, like our example user Duchess,
+    who owns */home/duchess*. Users may belong to multiple groups, and the additional
+    group memberships are called *supplemental* groups. Users in a group have all
+    the privileges of that group. (To learn all about privileges, see [Chapter 6](ch06.xhtml#cha-files-directories).)
+    Privileges control access to files and commands, and are fundamental to system
+    security.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个人类用户拥有一个用于其个人文件的家目录。用户的家目录位于*/home*中，并以所有者的名字命名，比如我们的示例用户Duchess拥有*/home/duchess*。用户可能属于多个组，额外的组成员称为*附加*组。组中的用户拥有该组的所有权限。（要了解权限的所有内容，请参阅[第6章](ch06.xhtml#cha-files-directories)。）权限控制对文件和命令的访问是系统安全的基础。
+- en: System users represent system services and processes. System users need user
+    accounts for controlling their privileges and do not have logins or directories
+    in */home*.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统用户代表系统服务和进程。系统用户需要用户账户来控制其权限，并且不具有*/home*目录中的登录或目录。
+- en: 'Human users are divided into two categories: the *root* user, or the superuser,
+    is all-powerful and can do anything on the system. All other users are called
+    normal or unprivileged users. Normal users are given just enough privileges to
+    manage their own files and run commands that allow normal users to use them. Normal
+    users can be given limited or complete root powers, which you will learn about
+    in the recipes about *su* and *sudo*.'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 人类用户分为两类：*root*用户，或超级用户，拥有无限权力，可以在系统上执行任何操作。所有其他用户被称为普通用户或非特权用户。普通用户只被赋予足够的权限来管理自己的文件，并运行允许普通用户使用的命令。普通用户可以被赋予有限或完全的root权限，关于*su*和*sudo*的相关内容将在后续章节中详细介绍。
+- en: You can see all the users on your system in */etc/passwd*, and all the groups
+    in */etc/group*.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在*/etc/passwd*中查看系统中的所有用户，以及在*/etc/group*中查看所有的组。
+- en: Centralized User Management
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 集中式用户管理
+- en: '*/etc/passwd* and */etc/group* are inherited from Unix and have not changed
+    much since they were ported to Linux in 1992\. Since then, newer tools have evolved
+    to manage users and groups, such as centralized databases that serve entire organizations.
+    This chapter does not cover centralized user management tools.'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/passwd*和*/etc/group*源自Unix，并自1992年移植到Linux以来基本未变化。此后，出现了新的工具用于管理用户和组，例如为整个组织提供服务的集中式数据库。本章不涵盖集中式用户管理工具。'
+- en: 'Linux comes with a number of commands for managing users and groups:'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux附带了一些用于管理用户和组的命令：
+- en: '*useradd* creates new users.'
+  id: totrans-9
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*useradd* 用于创建新用户。'
+- en: '*groupadd* creates new groups.'
+  id: totrans-10
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*groupadd* 用于创建新组。'
+- en: '*userdel* deletes users.'
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*userdel* 用于删除用户。'
+- en: '*groupdel* deletes groups.'
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*groupdel* 用于删除组。'
+- en: '*usermod* is for making changes to existing users.'
+  id: totrans-13
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*usermod* 用于对现有用户进行更改。'
+- en: '*passwd* creates and changes passwords.'
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*passwd* 用于创建和更改密码。'
+- en: These are part of the *Shadow Password Suite*, and */etc/login.defs* is its
+    main configuration file.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些属于*Shadow Password Suite*，*/etc/login.defs*是其主要配置文件。
+- en: '*useradd* behaves differently on different systems, according to how it is
+    configured. Traditionally, it lumped all new users into the same primary group,
+    *users* (100). This meant that users had to be careful with permissions on their
+    files to avoid exposing them to other group users. Red Hat changed this with its
+    *User Private Group* scheme, which creates a personal private group for each new
+    user. Most Linux distributions make this the default, though there are exceptions,
+    such as openSUSE.'
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*useradd* 在不同系统上的行为不同，根据其配置方式而定。传统上，它将所有新用户归并到同一个主组*users*（100）中。这意味着用户必须小心文件的权限，以避免将其暴露给其他组的用户。Red
+    Hat通过其*User Private Group*方案改变了这一点，为每个新用户创建了一个个人私有组。大多数Linux发行版将其设为默认值，但也有例外，比如openSUSE。'
+- en: The Shadow Password Suite was created by Julianne Frances Haugh way back in
+    the 1980s, back before Linux was born, to improve Unix password security and to
+    make user account management easier. It was ported to Linux in 1992, when Linux
+    was barely a year old.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*Shadow Password Suite*是由Julianne Frances Haugh在上世纪80年代创建的，早在Linux诞生之前，旨在提高Unix密码安全性并简化用户账户管理。1992年，随着Linux刚刚一岁，它被移植到Linux上。'
+- en: Before the Shadow Password Suite, all the relevant files had to be edited individually,
+    there were multiple password management commands, and hashed passwords were stored
+    in */etc/passwd* and */etc/group*. These two files must be world readable, so
+    storing passwords in them, even when they’re hashed, is asking for trouble. Anyone
+    can copy a world-readable file, and then crack the passwords at their leisure.
+    Relocating the hashed passwords to the shadow files, */etc/shadow* and */etc/gshadow*,
+    which are accessible only by root, added a strong layer of protection. The longevity
+    of the Shadow Password Suite is a testament to how well it was designed and coded.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在影子密码套件出现之前，所有相关文件都必须单独编辑，存在多个密码管理命令，并且哈希密码存储在*/etc/passwd*和*/etc/group*中。这两个文件必须对所有人可读，因此即使密码被哈希，也会引发问题。任何人都可以复制一个全局可读文件，然后随意破解密码。将哈希密码重新定位到只有root用户才能访问的影子文件*/etc/shadow*和*/etc/gshadow*中，增加了强大的保护层。影子密码套件的长期存在证明了其设计和编码的优秀。
+- en: Newer arrivals are *adduser* and *addgroup* for Debian. They are Perl script
+    wrappers for *useradd* and *groupadd*. These scripts walk you through a complete
+    new user and new group configuration.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于Debian来说，新的到来者是*adduser*和*addgroup*。它们是*useradd*和*groupadd*的Perl脚本包装器。这些脚本将引导您完成完整的新用户和新组配置。
+- en: In this chapter, you will learn how to create and remove human and system users,
+    manage passwords, find UIDs and GIDs, set your desired defaults for creating new
+    users, change group memberships, customize the common files your new users need,
+    clean up after users that you have removed, become root, and grant limited root
+    powers to normal users.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您将学习如何创建和删除人类和系统用户，管理密码，查找UID和GID，设置创建新用户的所需默认值，更改组成员身份，定制新用户需要的公共文件，清理已删除用户的内容，成为root用户，并向普通用户授予有限的root权限。
+- en: 5.1 Finding a User’s UID and GID
+  id: totrans-21
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.1 查找用户的UID和GID
+- en: Problem
+  id: totrans-22
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to list users’ UIDs and GIDs.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要列出用户的UID和GID。
+- en: Solution
+  id: totrans-24
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *id* command with no options to see your own UID and GIDs. In the following
+    example, the user is Duchess:'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*id*命令而无需选项即可查看自己的UID和GIDs。在以下示例中，用户是Duchess：
+- en: '[PRE0]'
+  id: totrans-26
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'Display another user’s UID and GIDs by providing their username as an argument:'
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过将其用户名作为参数提供来显示另一个用户的UID和GIDs：
+- en: '[PRE1]'
+  id: totrans-28
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Display your effective ID. This is your ID when you run a command as another
+    user. You can see this with *sudo*:'
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示您的有效ID。这是您作为另一个用户运行命令时的ID。您可以使用*sudo*查看这一点：
+- en: '[PRE2]'
+  id: totrans-30
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: Discussion
+  id: totrans-31
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'There are three types of user IDs in Linux:'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux中有三种类型的用户ID：
+- en: Real UID/GID
+  id: totrans-33
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 真实的UID/GID
+- en: Effective UID/GID
+  id: totrans-34
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 有效的UID/GID
+- en: Saved UID/GID
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 保存的UID/GID
+- en: The *real ID* is the UID and primary GID assigned to the user at creation. These
+    are what you see when you run the *id* command, as yourself, with no options.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*真实ID*是在用户创建时分配给用户的UID和主要GID。这些是您运行*id*命令（作为您自己）时看到的内容，无需选项。'
+- en: The *effective ID* is the UID used to run a process that requires different
+    privileges than the user who launched the process, for example, the *passwd* command.
+    *passwd* requires root privileges but uses the special permission modes to allow
+    users to change their own passwords.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*有效ID*是用于运行需要与启动进程的用户不同权限的进程的UID，例如*passwd*命令。*passwd*需要root权限，但使用特殊权限模式允许用户更改自己的密码。'
+- en: 'You can see this for yourself. First, take a look at the *passwd* command’s
+    permissions:'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以自己查看这一点。首先，看看*passwd*命令的权限：
+- en: '[PRE3]'
+  id: totrans-39
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: This shows that *passwd* is owned by root, both UID and GID. Now type the *passwd*
+    command and press Enter.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这表明*passwd*的所有者是root，无论是UID还是GID。现在键入*passwd*命令并按Enter键。
+- en: 'Open a second terminal to find the process for *passwd*, then print its process
+    ID, effective ID, and real ID:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 打开第二个终端以查找*passwd*进程，然后打印其进程ID、有效ID和真实ID：
+- en: '[PRE4]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Even though an unprivileged user is running *passwd*, it runs with root permissions.
+    (See [Recipe 6.11](ch06.xhtml#rec-sticky-symbolic) for information on the special
+    permission modes.)
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 即使一个非特权用户在运行*passwd*，它也会以root权限运行。（有关特殊权限模式的信息，请参见[Recipe 6.11](ch06.xhtml#rec-sticky-symbolic)。）
+- en: The *saved ID* is used by processes that need elevated privileges, usually root
+    privileges. When a process needs to do work that requires fewer privileges, it
+    can temporarily switch to a nonprivileged user ID. The effective UID is changed
+    to the lower privilege value, and the original effective UID is saved to the SUID,
+    saved user ID. When the process needs elevated privileges again, it changes to
+    the SUID.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*saved ID* 被需要提升权限的进程使用，通常是 root 权限。当进程需要执行需要较少权限的工作时，它可以临时切换到非特权用户 ID。有效的
+    UID 被更改为较低的特权值，并且原始的有效 UID 被保存到 SUID，即 saved user ID。当进程再次需要提升权限时，它切换到 SUID。'
+- en: 'The *id* command has a few options:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*id* 命令有几个选项：'
+- en: '*-u* shows the effective UID number.'
+  id: totrans-46
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-u* 显示有效的 UID 号码。'
+- en: '*-g* shows the effective GID number.'
+  id: totrans-47
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-g* 显示有效的 GID 号码。'
+- en: '*-G* shows all group IDs.'
+  id: totrans-48
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-G* 显示所有组 ID。'
+- en: '*-n* prints the name rather than the number. You can use this in combination
+    with *-u*, *-g*, and *-G*.'
+  id: totrans-49
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-n* 打印名称而不是数字。您可以与 *-u*、*-g* 和 *-G* 一起使用。'
+- en: '*-un* shows the effective UID username.'
+  id: totrans-50
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-un* 显示有效的 UID 用户名。'
+- en: '*-gn* shows the effective group name.'
+  id: totrans-51
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-gn* 显示有效的组名。'
+- en: '*-Gn* shows all effective GID names.'
+  id: totrans-52
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-Gn* 显示所有有效 GID 名称。'
+- en: '*-r* shows the real ID instead of the effective ID. You can use this in combination
+    with *-u*, *-g*, and *-G*.'
+  id: totrans-53
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-r* 显示真实的 ID 而不是有效的 ID。您可以与 *-u*、*-g* 和 *-G* 一起使用。'
+- en: See Also
+  id: totrans-54
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 6.11](ch06.xhtml#rec-sticky-symbolic)'
+  id: totrans-55
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 6.11](ch06.xhtml#rec-sticky-symbolic)'
+- en: '*man 1 id*'
+  id: totrans-56
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 id*'
+- en: '*man 1 ps*'
+  id: totrans-57
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ps*'
+- en: 5.2 Creating a Human User with useradd
+  id: totrans-58
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.2 使用 useradd 创建一个普通用户
+- en: Problem
+  id: totrans-59
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create a new user with a user private group and home directory populated
+    with a set of default files like *.bashrc*, *.profile*, *.bash_history*, and any
+    other files you want them to have.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要创建一个新用户，并且希望用户私有组的主目录中包含一组默认文件，例如 *.bashrc*、*.profile*、*.bash_history*，以及您希望他们拥有的其他文件。
+- en: Solution
+  id: totrans-61
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The *useradd* command is included in most Linux distributions and is configurable
+    to suit your requirements. The default configuration varies across the various
+    Linux distributions, so the quickest way to learn how your system is set up is
+    to create a new test user:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Linux 发行版都包含 *useradd* 命令，并且可根据您的需求进行配置。不同 Linux 发行版的默认配置不同，因此了解您的系统设置的最快方法是创建一个新的测试用户：
+- en: '[PRE5]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Now run the *id* command, and then see if *useradd* created a home directory.
+    The following examples are from Fedora 34:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在运行 *id* 命令，然后查看 *useradd* 是否创建了主目录。以下示例来自 Fedora 34：
+- en: '[PRE6]'
+  id: totrans-65
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'In this example, the default configuration meets all the requirements listed
+    in the Problem. Now you only need to set a password:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个例子中，默认配置满足了问题中列出的所有要求。现在您只需要设置一个密码：
+- en: '[PRE7]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'You may elect to force the user to reset their password at first login, after
+    creating the user’s password:'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以选择在第一次登录后强制用户重置他们的密码，创建用户密码之后：
+- en: '[PRE8]'
+  id: totrans-69
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Give the login to your user, and they can start using their new account. The
+    new user account is represented like this in */etc/passwd*:'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将登录信息提供给您的用户，他们可以开始使用他们的新账户。新用户账户在 */etc/passwd* 中的表示如下：
+- en: '[PRE9]'
+  id: totrans-71
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Some Linuxes, for example openSUSE, configure *useradd* to not create the user’s
+    home directory by default and to put all users into the *users (100)* group. This
+    potentially exposes files to other users, if group permissions on the files allow
+    it. The following example creates a user private group:'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如 openSUSE 等一些 Linux 系统，默认配置 *useradd* 不会创建用户的主目录，并将所有用户放入 *users (100)* 组。如果文件的组权限允许，这可能会暴露文件给其他用户。下面的示例创建了一个用户私有组：
+- en: '[PRE10]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: '*-m* creates the user’s home directory, and *-U* creates their private group
+    with the same name as their username.'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-m* 创建用户的主目录，*-U* 创建与用户名相同的用户私有组。'
+- en: Discussion
+  id: totrans-75
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: All new user accounts are inactive until you set a password.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有新用户账户在您设置密码之前都是不活跃的。
+- en: The first group created for a user, whether it is a user private group or a
+    common group for all users, is their *primary* group. All other groups the user
+    is assigned to are *supplementary* groups.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于用户创建的第一个组，无论是用户私有组还是所有用户的通用组，都是他们的 *primary* 组。用户分配的所有其他组都是 *supplementary*
+    组。
+- en: 'There are some additional useful options:'
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有一些其他有用的选项：
+- en: '*-G*, *--groups* is for adding the user to multiple supplemental groups in
+    a comma-delimited list. The groups must already exist:'
+  id: totrans-79
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-G*、*--groups* 用于将用户添加到以逗号分隔的多个补充组中。这些组必须已经存在：'
+- en: '[PRE11]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: '*-c*, *--comment* accepts any text string. Use this for the user’s full name,
+    or any comment or description:'
+  id: totrans-81
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-c*、*--comment* 接受任何文本字符串。用于用户的全名，或者任何注释或描述：'
+- en: '[PRE12]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'The four commas define five fields: full name, room number, work phone, home
+    phone, and other. Way back in olden times this was called the GECOS data. GECOS
+    is short for General Electric Comprehensive Operating Supervisor, a mainframe
+    operating system. You may enter any text string in these fields, or nothing, though
+    it is useful to include the user’s full name. Study your */etc/passwd* file to
+    see how other entries use the GECOS fields.'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 四个逗号定义了五个字段：全名、房间号、工作电话、家庭电话和其他信息。很久以前，这被称为GECOS数据。GECOS是General Electric Comprehensive
+    Operating Supervisor的缩写，是一个大型机操作系统。您可以在这些字段中输入任何文本字符串，或者什么都不输入，尽管包括用户的全名很有用。查看您的*/etc/passwd*文件，了解其他条目如何使用GECOS字段。
+- en: The *useradd* defaults are scattered across multiple configuration files; see
+    [Recipe 5.4](#rec-change-useradd-defaults) to learn how to change the defaults.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*useradd*的默认设置分散在多个配置文件中；查看[Recipe 5.4](#rec-change-useradd-defaults)以了解如何更改这些默认设置。'
+- en: See Also
+  id: totrans-85
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参见
+- en: '*man 8 useradd*'
+  id: totrans-86
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 useradd*'
+- en: '*man 5 login.defs*'
+  id: totrans-87
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 login.defs*'
+- en: '*/etc/default/useradd*'
+  id: totrans-88
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/etc/default/useradd*'
+- en: '*/etc/skel*'
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/etc/skel*'
+- en: '*/etc/login/defs*'
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/etc/login/defs*'
+- en: 5.3 Creating a System User with useradd
+  id: totrans-91
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.3 使用useradd创建系统用户
+- en: Problem
+  id: totrans-92
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create a system user with the *useradd* command.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想使用*useradd*命令创建系统用户。
+- en: Solution
+  id: totrans-94
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The following example creates a new system user with no home directory, no
+    login shell, and uses the correct UID numbering range for system users:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例创建一个没有主目录、没有登录 shell，并使用正确的系统用户UID编号范围的新系统用户：
+- en: '[PRE13]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: '*-r* means create a system user with a real ID in the correct numerical range
+    for system users, and *-s* specifies the login shell. */bin/false* is a command
+    that does nothing and prevents the user from logging into the system.'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-r*意味着创建一个具有正确数值范围内真实ID的系统用户，*-s*指定登录 shell。*/bin/false*是一个什么都不做的命令，防止用户登录系统。'
+- en: See the Discussion in [Recipe 5.6](#rec-uid-gid-numbering) for information about
+    UID and GID numbering.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有关UID和GID编号的信息，请参见[Recipe 5.6](#rec-uid-gid-numbering)中的讨论。
+- en: Discussion
+  id: totrans-99
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: In olden times, most services ran as the *nobody* user. Now it is a common practice
+    for services to have their own unique users, as this provides stronger security
+    than the *nobody* user owning multiple services. You will rarely have to create
+    a system user, as services should create their own unique users when they are
+    installed.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在过去，大多数服务都以*nobody*用户身份运行。现在，服务通常会使用自己的唯一用户，这比*nobody*用户拥有多个服务提供了更强的安全性。您很少需要创建系统用户，因为安装服务时应该由服务自行创建其唯一用户。
+- en: The *nobody* user is always assigned UID 65534 and GID 65534.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*nobody*用户始终分配UID 65534和GID 65534。'
+- en: See Also
+  id: totrans-102
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参见
+- en: '*man 8 useradd*'
+  id: totrans-103
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 useradd*'
+- en: '*man 1 false*'
+  id: totrans-104
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 false*'
+- en: The Discussion in [Recipe 5.6](#rec-uid-gid-numbering)
+  id: totrans-105
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 5.6](#rec-uid-gid-numbering)中的讨论'
+- en: 5.4 Changing the useradd Default Settings
+  id: totrans-106
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.4 修改*useradd*的默认设置
+- en: Problem
+  id: totrans-107
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: The default *useradd* settings are not right for you, and you want to change
+    them.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认的*useradd*设置对您不适用，您希望进行更改。
+- en: Solution
+  id: totrans-109
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The *useradd* configuration is spread across multiple configuration files:
+    */etc/default/useradd*, */etc/login.defs*, and files in the */etc/skel* directory.'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*useradd*的配置分布在多个配置文件中：*/etc/default/useradd*，*/etc/login.defs*和*/etc/skel*目录中的文件。'
+- en: 'The following values appear in */etc/default/useradd*. This example shows the
+    openSUSE defaults:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下列值出现在*/etc/default/useradd*中。以下示例展示了openSUSE的默认设置：
+- en: '[PRE14]'
+  id: totrans-112
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: '*GROUP=100* sets a single shared group as the default for all new users, traditionally
+    *100*. The group must first exist, and *USERGROUPS_ENAB no* must be set in */etc/login.defs*.
+    Then set *GROUP=* in */etc/default/useradd* to the GID of the user group. If our
+    Duchess user is in a shared group, her *id* output shows *uid=1000(duchess) gid=100(users)*.'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*GROUP=100*将一个单一的共享组设置为所有新用户的默认组，传统上为*100*。该组必须首先存在，并且在*/etc/login.defs*中必须设置*USERGROUPS_ENAB
+    no*。然后在*/etc/default/useradd*中将*GROUP=*设置为用户组的GID。如果我们的Duchess用户在一个共享组中，她的*id*输出将显示*uid=1000(duchess)
+    gid=100(users)*。'
+- en: Enable private user groups by setting *USERGROUPS_ENAB yes* in */etc/login.defs*,
+    then comment out *GROUP=* in */etc/default/useradd*. This creates a nonshared
+    private group for each user. If our Duchess user has her own private group, her
+    *id* output shows *uid=1000(duchess) gid=1000(duchess)*.
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过在*/etc/login.defs*中设置*USERGROUPS_ENAB yes*并注释掉*/etc/default/useradd*中的*GROUP=*，启用私有用户组。这样每个用户都会创建一个非共享的私有组。如果我们的Duchess用户拥有自己的私有组，她的*id*输出将显示*uid=1000(duchess)
+    gid=1000(duchess)*。
+- en: HOME=
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: HOME=
+- en: sets the default directory for all user home directories. The default is */home*.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置所有用户主目录的默认目录。默认为*/home*。
+- en: INACTIVE=-1
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: INACTIVE=-1
+- en: sets the number of days after a password expires until the account is locked.
+    A value of 0 disables the account as soon as the password expires, and a value
+    of –1 disables locking the account.
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置密码过期后多少天锁定帐户。值为 0 表示密码过期后立即禁用帐户，值为 -1 表示不锁定帐户。
+- en: EXPIRE=
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: EXPIRE=
+- en: sets an expiration date on the account, in YYYY-MM-DD format. For example, if
+    you set it to 2021-12-31, the account will be disabled on that date. Leaving *EXPIRE=*
+    empty means the account will not expire.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 YYYY-MM-DD 格式中设置帐户过期日期。例如，如果设置为 2021-12-31，则帐户将在该日期禁用。将 *EXPIRE=* 留空表示帐户永不过期。
+- en: SHELL=/bin/bash
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SHELL=/bin/bash
+- en: sets the default command shell. */bin/bash* is the most commonly used Linux
+    shell. Other values are any installed shell on the user’s system, such as */bin/zsh*
+    or */usr/bin/tcsh*. *cat /etc/shells* lists all installed shells.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置默认命令 shell。*/bin/bash* 是最常用的 Linux shell。其他值是用户系统中安装的任何 shell，如 */bin/zsh*
+    或 */usr/bin/tcsh*。*cat /etc/shells* 列出所有安装的 shell。
+- en: SKEL=/etc/skel
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SKEL=/etc/skel
+- en: sets the location for the files that you want automatically distributed to new
+    users. Most Linuxes put them in */etc/skel*. These are files such as *.bash_logout*,
+    *.bash_profile* or *.profile*, *.bashrc*, and any other files you want new users
+    to have. You may edit these files to suit your own requirements. *SKEL* is short
+    for skeleton.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置要自动分发给新用户的文件的位置。大多数 Linux 系统将它们放在 */etc/skel* 中。这些文件如 *.bash_logout*、*.bash_profile*
+    或 *.profile*、*.bashrc*，以及任何其他您希望新用户拥有的文件。您可以编辑这些文件以满足自己的需求。*SKEL* 是 skeleton 的缩写。
+- en: CREATE_MAIL_SPOOL=yes
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CREATE_MAIL_SPOOL=yes
+- en: is a relic of olden times, and should be set to *yes*, as there may be some
+    legacy processes that still need it.
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是旧时代的遗留物，应设置为 *yes*，因为仍可能存在需要它的某些旧进程。
+- en: 'The following values in */etc/login.defs* are relevant to user creation defaults:'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/login.defs* 中以下值与用户创建默认值相关：'
+- en: '*USERGROUPS_ENAB yes* enables private user groups.'
+  id: totrans-128
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*USERGROUPS_ENAB yes* 启用私人用户组。'
+- en: '*CREATE_HOME yes* configures *useradd* to automatically create private user
+    home directories. This does not apply to system users (see [Recipe 5.3](#rec-create-system-user)).'
+  id: totrans-129
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*CREATE_HOME yes* 配置 *useradd* 自动创建私人用户主目录。这不适用于系统用户（参见 [5.3 节](#rec-create-system-user)）。'
+- en: Discussion
+  id: totrans-130
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The UID numbering range is defined in */etc/login.defs*. Every UID must be unique,
+    so the user account creation commands assign UIDs from the range defined in this
+    file. Typically, human UIDs start at 1000, and are automatically assigned by *useradd*.
+    You can override this with the *-u* option, but you must select an unused number
+    that follows the configured numbering scheme (see the Discussion in [Recipe 5.6](#rec-uid-gid-numbering)).
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UID 编号范围在 */etc/login.defs* 中定义。每个 UID 必须是唯一的，因此用户帐户创建命令从此文件中定义的范围分配 UID。通常，人类
+    UID 从 1000 开始，并由 *useradd* 自动分配。您可以使用 *-u* 选项覆盖此设置，但必须选择未使用的数字，遵循配置的编号方案（参见 [5.6
+    节](#rec-uid-gid-numbering) 中的讨论）。
+- en: A mandatory password change at first login is a simple precaution against the
+    original password possibly falling into the wrong hands as it passes from the
+    administrator to the user.
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在第一次登录时强制要求密码更改是防止原始密码可能落入错误手中的简单预防措施，因为它从管理员传递到用户。
+- en: See Also
+  id: totrans-133
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 useradd*'
+  id: totrans-134
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 useradd*'
+- en: '*man 5 login.defs*'
+  id: totrans-135
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 login.defs*'
+- en: '*/etc/default/useradd*'
+  id: totrans-136
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/etc/default/useradd*'
+- en: '*/etc/skel*'
+  id: totrans-137
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/etc/skel*'
+- en: '*/etc/login/defs*'
+  id: totrans-138
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/etc/login/defs*'
+- en: 5.5 Customizing the Documents, Music, Video, Pictures, and Downloads Directories
+  id: totrans-139
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.5 自定义文档、音乐、视频、图片和下载目录
+- en: Problem
+  id: totrans-140
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You followed [Recipe 5.2](#rec-create-user-useradd) to create a new user, now
+    you want to customize the Documents, Music, Video, Pictures, and Downloads directories
+    for new users.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您已按照 [5.2 节](#rec-create-user-useradd) 的方法创建了新用户，现在您希望为新用户定制文档、音乐、视频、图片和下载目录。
+- en: Solution
+  id: totrans-142
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Creating these directories is not a function of *useradd*, but rather the X
+    Desktop Group (XDG) user directories tool. The Documents, Music, Video, etc.,
+    directories are called the *well-known user directories*. These directories are
+    set up from the */etc/xdg/user-dirs.defaults* configuration file, which establishes
+    the default configuration for all users:'
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建这些目录不是 *useradd* 的功能，而是 X 桌面组（XDG）用户目录工具的功能。文档、音乐、视频等目录称为 *well-known user
+    directories*。这些目录是从 */etc/xdg/user-dirs.defaults* 配置文件设置的，该文件为所有用户建立了默认配置：
+- en: '[PRE15]'
+  id: totrans-144
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: These are name-value pairs. The names cannot be changed. The values are the
+    directories that the names are mapped to, and they are relative to users’ home
+    directories. For example, DOCUMENTS is mapped to */home/username/Documents*. The
+    directories are created automatically for every new user when they start their
+    graphical desktop environments for the first time. You may comment out any directories
+    you wish to exclude or change the directories the names are mapped to.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些是名称-值对。 名称不能更改。 值是名称映射到的目录，相对于用户的主目录。 例如，DOCUMENTS映射到*/home/username/Documents*。
+    当用户第一次启动他们的图形桌面环境时，这些目录会自动为每个新用户创建。 您可以注释掉任何要排除的目录，或更改名称映射到的目录。
+- en: 'Users may create their own personal configurations in *~/.config/user-dirs.dirs*.
+    The directories must exist before applying the changes. The following example
+    was created by our example user Duchess, who does not care for the boring default
+    values. Note that the name-value pair syntax is different in *~/.config/user-dirs.dirs*:'
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户可以在*~/.config/user-dirs.dirs*中创建自己的个人配置。 在应用更改之前，这些目录必须存在。 以下示例是我们的示例用户公爵夫人创建的，她不喜欢无聊的默认值。
+    请注意，在*~/.config/user-dirs.dirs*中，名称-值对语法不同：
+- en: '[PRE16]'
+  id: totrans-147
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'When your changes are complete and the new directories have been created, use
+    the *xdg-user-dirs-update* command to apply your changes:'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您的更改完成并创建了新目录后，请使用*xdg-user-dirs-update*命令应用您的更改：
+- en: '[PRE17]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: Log out, then log back in, and you will see something like [Figure 5-1](#fig-thunar-xdg).
+    XDG applies special icons to the well-known directories.
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注销，然后重新登录，您将看到类似于[图5-1](#fig-thunar-xdg)的东西。 XDG为著名目录应用特殊图标。
+- en: '![lcb2 0501](Images/lcb2_0501.png)'
+  id: totrans-151
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lcb2 0501](Images/lcb2_0501.png)'
+- en: Figure 5-1\. Custom well-known directories
+  id: totrans-152
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图5-1\. 自定义著名目录
+- en: The shortcuts in the side pane will not change, and the old directories are
+    unchanged except they do not have the special icons. You will have to change the
+    shortcuts and migrate the old directory contents manually.
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 侧栏中的快捷方式不会更改，旧目录也不会更改，除了它们没有特殊图标。 您将需要更改快捷方式并手动迁移旧目录内容。
+- en: 'Restore to the defaults in */etc/xdg/user-dirs.defaults* with this command:'
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 恢复到*/etc/xdg/user-dirs.defaults*中的默认值，使用以下命令：
+- en: '[PRE18]'
+  id: totrans-155
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: Log out and back in to see the changes. Again, none of your directories are
+    removed or changed in any way, except for the special icons that mark the well-known
+    user directories.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 退出并重新登录以查看更改。 除了标记著名用户目录的特殊图标外，您的任何目录都不会被移除或以任何方式更改。
+- en: Discussion
+  id: totrans-157
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'When you run the *xdg-user-dirs-update --set* command, you must use only the
+    names as listed in *man 5 user-dirs.default*:'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行*xdg-user-dirs-update --set*命令时，必须仅使用*man 5 user-dirs.default*中列出的名称：
+- en: '[PRE19]'
+  id: totrans-159
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Only the values, which are the target directories, are configurable. Target
+    directories must be relative to users’ home directories. If you want to use directories
+    outside of your home, create symlinks. For example, Duchess owns */users/stuff/duchess*
+    and stores music files in it. The following example links this directory to */home/duchess/singendance*:'
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只有目标目录即可配置的值。 目标目录必须相对于用户的主目录。 如果要使用主目录之外的目录，请创建符号链接。 例如，公爵夫人拥有*/users/stuff/duchess*并在其中存储音乐文件。
+    以下示例将此目录链接到*/home/duchess/singendance*：
+- en: '[PRE20]'
+  id: totrans-161
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: See Also
+  id: totrans-162
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 user-dirs.defaults*'
+  id: totrans-163
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 user-dirs.defaults*'
+- en: '*man 1 xdg-user-dirs-update*'
+  id: totrans-164
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 xdg-user-dirs-update*'
+- en: '*man 5 user-dirs.conf*'
+  id: totrans-165
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 user-dirs.conf*'
+- en: '[xdg-user-dirs at freedesktop](https://oreil.ly/FFDga)'
+  id: totrans-166
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[xdg-user-dirs at freedesktop](https://oreil.ly/FFDga)'
+- en: 5.6 Creating User and System Groups with groupadd
+  id: totrans-167
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.6 使用groupadd创建用户和系统组
+- en: Problem
+  id: totrans-168
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create groups with *groupadd*.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想使用*groupadd*创建组。
+- en: Solution
+  id: totrans-170
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The following example creates a new user group *musicians*:'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例创建了一个名为*musicians*的新用户组：
+- en: '[PRE21]'
+  id: totrans-172
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Use *groupadd* with the *-r* option to create a system group:'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*groupadd*和* -r*选项创建系统组：
+- en: '[PRE22]'
+  id: totrans-174
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: Discussion
+  id: totrans-175
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'System groups differ from human user groups in the UID and GID numbering ranges
+    assigned to them. This is configured in */etc/login.defs* for *groupadd* and *useradd*,
+    as this example from Fedora 34 shows:'
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统组与人类用户组在分配给它们的UID和GID编号范围上有所不同。 这在Fedora 34中的*/etc/login.defs*配置为*groupadd*和*useradd*，如下所示：
+- en: '[PRE23]'
+  id: totrans-177
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: These define the number ranges available to the system administrator. All others
+    are reserved for and managed by the system.
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些定义了系统管理员可用的数字范围。 所有其他范围均为系统保留和管理。
+- en: GID numbering is managed automatically by *groupadd*, according to the number
+    ranges defined in */etc/login.defs* You may override this with the *-g* option,
+    but your chosen GID must fall within the defined range, and must not already be
+    used.
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GID编号由*groupadd*根据*/etc/login.defs*中定义的数字范围自动管理。您可以使用*-g*选项覆盖此设置，但所选的GID必须落在定义的范围内，并且不能已经被使用。
+- en: See Also
+  id: totrans-180
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 groupadd*'
+  id: totrans-181
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 groupadd*'
+- en: '*/etc/login.defs*'
+  id: totrans-182
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/etc/login.defs*'
+- en: 5.7 Adding Users to Groups with usermod
+  id: totrans-183
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.7 使用usermod将用户添加到组中
+- en: Problem
+  id: totrans-184
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to assign users to groups.
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望将用户分配到组。
+- en: Solution
+  id: totrans-186
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *usermod* command. The following example adds Duchess to the *musicians*
+    group:'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*usermod*命令。以下示例将Duchess添加到*musicians*组中：
+- en: '[PRE24]'
+  id: totrans-188
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'This example adds Duchess to multiple groups:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例将Duchess添加到多个组：
+- en: '[PRE25]'
+  id: totrans-190
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: Alternatively, you could edit */etc/group* and type Duchess’s name after the
+    appropriate group or groups. When you list multiple group members, the list must
+    be comma-delimited, with no spaces between the names.
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，您可以编辑*/etc/group*，并在适当的组或组后键入Duchess的名称。当列出多个组成员时，列表必须以逗号分隔，名称之间不能有空格。
+- en: '[PRE26]'
+  id: totrans-192
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: Be Careful to Append, Not Replace
+  id: totrans-193
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 小心追加而不是替换
+- en: If you forget the *-a* option and use *-G* alone, all of the user’s existing
+    groups will be removed and replaced with the new groups. This is especially damaging
+    if this removes users from their *sudo* group.
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果忘记了*-a*选项，仅使用*-G*，所有用户现有的组将被移除并替换为新组。如果这将用户从其*sudo*组中移除，尤其具有破坏性。
+- en: When you change group memberships for logged-in users, users must log out and
+    then log back in to activate the changes. There are various workarounds to activate
+    a new group assignment without logging out, but they all have limitations, such
+    as being limited to the current shell. Groups are enumerated at login, so the
+    most reliable solution is to log out and log back in.
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您更改登录用户的组成员资格时，用户必须注销然后重新登录以激活更改。有各种解决方法可以在不注销的情况下激活新的组分配，但它们都有限制，比如仅限于当前shell。组在登录时枚举，因此最可靠的解决方案是注销并重新登录。
+- en: Discussion
+  id: totrans-196
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The *-a* option means append, and *-G* is group or groups.
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-a*选项表示追加，*-G*是组或组。'
+- en: See Also
+  id: totrans-198
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 usermod*'
+  id: totrans-199
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 usermod*'
+- en: 5.8 Creating Users with adduser on Ubuntu
+  id: totrans-200
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.8 在Ubuntu上使用adduser创建用户
+- en: Problem
+  id: totrans-201
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You are running Debian or a Debian-based Linux, and need to know how to create
+    new users with *adduser*.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您正在运行Debian或基于Debian的Linux，并且需要知道如何使用*adduser*创建新用户。
+- en: Solution
+  id: totrans-203
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*adduser* walks you through a complete new user setup, like this example for
+    Stash Cat:'
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*adduser*会为您完成完整的新用户设置，就像这个Stash Cat的示例：'
+- en: '[PRE27]'
+  id: totrans-205
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'Stash looks like this in */etc/passwd*:'
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Stash在*/etc/passwd*中看起来像这样：
+- en: '[PRE28]'
+  id: totrans-207
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: Discussion
+  id: totrans-208
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'The *adduser* defaults are managed in */etc/adduser.conf*. This provides a
+    number of useful defaults such as:'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*adduser*的默认设置在*/etc/adduser.conf*中管理。这提供了许多有用的默认设置，如：'
+- en: DSHELL=
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: DSHELL=
+- en: sets the default login shell. */bin/bash* is the most commonly used Linux shell.
+    Other values are any installed shell on the user’s system, such as */bin/zsh*
+    or */usr/bin/tcsh*. *cat /etc/shells* lists all installed shells.
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置默认登录shell。*/bin/bash*是最常用的Linux shell。其他值是用户系统上安装的任何shell，例如*/bin/zsh*或*/usr/bin/tcsh*。*cat
+    /etc/shells*列出了所有安装的shell。
+- en: USERGROUPS=yes
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: USERGROUPS=yes
+- en: creates user private groups, *no* puts all users into the same group.
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建用户私有组，*no*将所有用户放入同一组中。
+- en: USERS_GID=100
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: USERS_GID=100
+- en: is required when *USERGROUPS=no* is set.
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当设置*USERGROUPS=no*时需要。
+- en: EXTRA_GROUPS=
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: EXTRA_GROUPS=
+- en: is your list of supplemental groups for new users, for example, *EXTRA_GROUPS="audio
+    video plugdev libvirt"‍*.
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是您新用户的补充组列表，例如*EXTRA_GROUPS="audio video plugdev libvirt"*。
+- en: ADD_EXTRA_GROUPS=1
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ADD_EXTRA_GROUPS=1
+- en: makes the groups listed in *EXTRA_GROUPS=* the default for new users.
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将*EXTRA_GROUPS=*中列出的组设置为新用户的默认组。
+- en: '*/etc/adduser.conf* contains the following user and group numbering scheme:'
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/adduser.conf*包含以下用户和组编号方案：'
+- en: '[PRE29]'
+  id: totrans-221
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'Fedora Linux includes *adduser*, but it is not really *adduser*, just a symlink
+    to *useradd*:'
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Fedora Linux包含*adduser*，但实际上不是*adduser*，只是一个到*useradd*的符号链接：
+- en: '[PRE30]'
+  id: totrans-223
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: See Also
+  id: totrans-224
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 adduser.conf*'
+  id: totrans-225
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 adduser.conf*'
+- en: 5.9 Creating a System User with adduser on Ubuntu
+  id: totrans-226
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.9 在Ubuntu上使用adduser创建系统用户
+- en: Problem
+  id: totrans-227
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create a system user with *adduser* on your Ubuntu (or Debian, Mint,
+    or other Debian derivative) system.
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望在Ubuntu（或Debian、Mint或其他Debian衍生版）系统上使用*adduser*创建系统用户。
+- en: Solution
+  id: totrans-229
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The following example creates a new system user, *service1*, with *adduser*,
+    without a home directory, and with its own unique primary group:'
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例使用*adduser*创建了一个名为*service1*的新系统用户，没有家目录，并拥有独立的主要组：
+- en: '[PRE31]'
+  id: totrans-231
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'This is how it looks in */etc/passwd*:'
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在*/etc/passwd*中的显示如下：
+- en: '[PRE32]'
+  id: totrans-233
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: Discussion
+  id: totrans-234
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: System users do not have home directories.
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统用户没有家目录。
+- en: Back in olden times, it was common for services to run as the *nobody* user
+    and group, except Debian which uses *nobody* and *nogroup*. Recycling the same
+    user for multiple services is a security weakness. It is unlikely you will ever
+    have to create a system user, as the common practice now is for the package installer
+    to create a unique user and group when you install a new service. But now you
+    know how, just in case you ever need to.
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在古老的时代，服务通常作为*nobody*用户和组运行，除了Debian使用*nobody*和*nogroup*。将同一用户用于多个服务是一种安全弱点。您不太可能需要创建系统用户，因为现在的常见做法是在安装新服务时由软件包安装程序创建唯一的用户和组。但是现在您知道了，以防万一您需要。
+- en: '*nobody* and *nogroup* always have a real ID of 65534.'
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*nobody*和*nogroup*的真实ID始终为65534。'
+- en: See Also
+  id: totrans-238
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 adduser*'
+  id: totrans-239
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 adduser*'
+- en: 5.10 Creating User and System Groups with addgroup
+  id: totrans-240
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.10 使用addgroup创建用户和系统组
+- en: Problem
+  id: totrans-241
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know how to create user and system groups with Debian’s *addgroup*
+    command.
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想知道如何使用Debian的*addgroup*命令创建用户和系统组。
+- en: Solution
+  id: totrans-243
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The following example creates a human user group:'
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例创建一个人类用户组：
+- en: '[PRE33]'
+  id: totrans-245
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'It looks like this in */etc/group*:'
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在*/etc/group*中看起来是这样的：
+- en: '[PRE34]'
+  id: totrans-247
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'This example creates a new system group:'
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例创建一个新的系统组：
+- en: '[PRE35]'
+  id: totrans-249
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: Discussion
+  id: totrans-250
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The difference between user and system groups is they each have different numbering
+    ranges for UIDs and GIDs, which are configured in */etc/adduser.conf*.
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户组和系统组之间的区别在于它们各自具有不同的UID和GID编号范围，这些范围在*/etc/adduser.conf*中配置。
+- en: See Also
+  id: totrans-252
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 addgroup*'
+  id: totrans-253
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 addgroup*'
+- en: 5.11 Checking Password File Integrity
+  id: totrans-254
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.11 检查密码文件的完整性
+- en: Problem
+  id: totrans-255
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: There is a lot going on in all these user files and group files, and you want
+    to know if there is some kind of checker to verify that these files are written
+    correctly.
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有这些用户文件和组文件中都有很多内容，您想知道是否有某种检查程序来验证这些文件是否被正确写入。
+- en: Solution
+  id: totrans-257
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The *pwck* command checks the integrity of */etc/passwd* and */etc/shadow*,
+    and *grpck* checks */etc/group* and */etc/gshadow*. They look for correct format,
+    valid data, valid names, and valid GIDs (see the man pages for a complete list).
+    When you run these with no options, they report both warnings and errors:'
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*pwck*命令检查*/etc/passwd*和*/etc/shadow*的完整性，*grpck*检查*/etc/group*和*/etc/gshadow*。它们查找正确的格式、有效的数据、有效的名称和有效的GID（请参阅man手册以获取完整的列表）。当您不带任何选项运行它们时，它们会报告警告和错误：'
+- en: '[PRE36]'
+  id: totrans-259
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'Add the **`-q`** option to report only errors:'
+  id: totrans-260
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 添加**`-q`**选项以仅报告错误：
+- en: '[PRE37]'
+  id: totrans-261
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: This shows an error in */etc/gshadow*. This is not a very helpful message because
+    it’s not really an error. It is not a common practice to place passwords on user
+    groups, so reporting this an as error is needlessly confusing. The other checks
+    are useful, such as the correct number of fields, and a unique valid group name.
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这显示了*/etc/gshadow*中的错误。这不是一个非常有用的消息，因为它实际上并不是一个错误。将密码放在用户组上不是一个常见的做法，因此将其报告为错误只会令人困惑。其他检查非常有用，例如正确的字段数和唯一的有效组名。
+- en: You will never edit */etc/shadow* or */etc/gshadow*, but only */etc/passwd*
+    and */etc/group*.
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您永远不会编辑*/etc/shadow*或*/etc/gshadow*，而只会编辑*/etc/passwd*和*/etc/group*。
+- en: Discussion
+  id: totrans-264
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'The following example shows an error that must be corrected. Type **`n`**,
+    when prompted, to prevent deleting the entries. The first “delete line” example
+    is from */etc/passwd*, and the second is in */etc/shadow*:'
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例显示了必须纠正的错误。当提示时，键入**`n`**以防止删除条目。第一个“删除行”示例来自*/etc/passwd*，第二个示例来自*/etc/shadow*：
+- en: '[PRE38]'
+  id: totrans-266
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: Then correct the line in */etc/passwd*, and that will fix both error messages.
+    In the example, *fakeservice:x:996:996::/home/fakeservice* is missing the last
+    field, and should be *fakeservice:x:996:996::/home/fakeservice:/bin/false*.
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后修正*/etc/passwd*中的行，这将修复两个错误消息。例如，*fakeservice:x:996:996::/home/fakeservice*缺少最后一个字段，应为*fakeservice:x:996:996::/home/fakeservice:/bin/false*。
+- en: 'The “directory does not exist” warnings for */etc/passwd* usually refer to
+    default system users that are not in use. For example:'
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: “目录不存在”警告通常指的是未使用的默认系统用户。例如：
+- en: '[PRE39]'
+  id: totrans-269
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: The *www-data* user is unused when you are not running an HTTP server, and there
+    is no */var/www* directory until you install an HTTP server.
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您未运行HTTP服务器时，*www-data*用户未使用，并且没有*/var/www*目录，直到安装HTTP服务器。
+- en: The “no changes” message means that no changes were made to the password file.
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: “无更改”消息意味着未对密码文件进行任何更改。
+- en: See the man pages for a complete list of checks.
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请参阅man手册以获取完整的检查列表。
+- en: See Also
+  id: totrans-273
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 pwck*'
+  id: totrans-274
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 pwck*'
+- en: '*man 8 grpck*'
+  id: totrans-275
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 grpck*'
+- en: 5.12 Disabling a User Account
+  id: totrans-276
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.12 禁用用户帐户
+- en: Problem
+  id: totrans-277
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to disable a user account without deleting it.
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望禁用用户帐户而不是删除它。
+- en: Solution
+  id: totrans-279
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'To temporarily deactivate an account, disable the user’s password with the
+    *passwd* command:'
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 若要临时停用帐户，请使用 *passwd* 命令禁用用户的密码：
+- en: '[PRE40]'
+  id: totrans-281
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: 'Now the user cannot log in. The following example unlocks the user’s account:'
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在用户无法登录。下面的示例解锁用户的帐户：
+- en: '[PRE41]'
+  id: totrans-283
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: 'This does not prevent a user from logging in via a different authentication
+    method, such as an SSH key. To completely disable a user account, use *usermod*:'
+  id: totrans-284
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这不会阻止用户通过其他认证方法（如 SSH 密钥）登录。要完全禁用用户帐户，请使用 *usermod*：
+- en: '[PRE42]'
+  id: totrans-285
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: 'When the user tries to log in, they see a “Your account has expired; please
+    contact your system administrator” message. Restore their account:'
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当用户尝试登录时，他们会看到“您的帐户已过期，请联系系统管理员”消息。恢复他们的帐户：
+- en: '[PRE43]'
+  id: totrans-287
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: Discussion
+  id: totrans-288
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Another way to disable a user is to replace the x in the password field in
+    */etc/passwd* with an asterisk (*):'
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 禁用用户的另一种方法是在 */etc/passwd* 的密码字段中用星号（*）替换 x：
+- en: '[PRE44]'
+  id: totrans-290
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: Reenable Stash by replacing the asterisk with *x*.
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过将星号替换为 *x* 来重新启用 Stash。
+- en: See Also
+  id: totrans-292
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 passwd*'
+  id: totrans-293
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 passwd*'
+- en: 5.13 Deleting a User with userdel
+  id: totrans-294
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.13 使用 userdel 删除用户
+- en: Problem
+  id: totrans-295
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to delete a user, and possibly their home directory and its contents.
+  id: totrans-296
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要删除一个用户，可能还包括他们的主目录及其内容。
+- en: Solution
+  id: totrans-297
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The following example uses the *userdel* command to delete the user Stash from
+    */etc/passwd*, Stash’s primary group and all group memberships, and the shadow
+    files:'
+  id: totrans-298
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例使用 *userdel* 命令从 */etc/passwd* 删除用户 Stash，Stash 的主要组和所有组成员，以及影子文件：
+- en: '[PRE45]'
+  id: totrans-299
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: If Stash belongs to a shared primary user group (discussed in [Recipe 5.4](#rec-change-useradd-defaults)),
+    the group will not be deleted.
+  id: totrans-300
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果 Stash 属于共享的主用户组（见[Recipe 5.4](#rec-change-useradd-defaults)讨论），则该组不会被删除。
+- en: 'Use the *-r* option to delete the user’s home directory and its contents, and
+    their mail spool:'
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *-r* 选项删除用户的主目录及其内容，以及其邮件邮筒：
+- en: '[PRE46]'
+  id: totrans-302
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: If the user owns files outside of their home directory, you will have to find
+    and take care of them separately (see [Recipe 5.16](#rec-find-user-files)).
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果用户拥有其主目录之外的文件，则必须分别查找并处理它们（参见[Recipe 5.16](#rec-find-user-files)）。
+- en: Discussion
+  id: totrans-304
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Read your */etc/passwd* and */etc/group* files before and after deleting a user
+    to see the user disappear.
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在删除用户之前和之后，请阅读您的 */etc/passwd* 和 */etc/group* 文件，以查看用户的消失。
+- en: It is a good practice to clean up after removing a user.
+  id: totrans-306
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 删除用户后进行清理是一个良好的做法。
+- en: See Also
+  id: totrans-307
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man userdel*'
+  id: totrans-308
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man userdel*'
+- en: 5.14 Deleting a User with deluser on Ubuntu
+  id: totrans-309
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.14 在 Ubuntu 上使用 deluser 删除用户
+- en: Problem
+  id: totrans-310
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You’re running Ubuntu (or another Debian derivative) and want to use *deluser*
+    to delete a user.
+  id: totrans-311
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您正在运行 Ubuntu（或其他 Debian 派生版），并希望使用 *deluser* 删除用户。
+- en: Solution
+  id: totrans-312
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The following example deletes the user Stash from */etc/passwd*, Stash’s primary
+    group from */etc/group*, and their corresponding shadow files:'
+  id: totrans-313
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例从 */etc/passwd* 删除用户 Stash，从 */etc/group* 删除 Stash 的主要组，以及相应的影子文件：
+- en: '[PRE47]'
+  id: totrans-314
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: '*deluser* will not remove the primary group of an existing user, so if Stash
+    belongs to a shared primary group it will not be removed.'
+  id: totrans-315
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*deluser* 不会删除现有用户的主要组，因此如果 Stash 属于共享的主用户组，则不会被删除。'
+- en: 'This example removes Stash’s home directory and makes a backup of all the deleted
+    files:'
+  id: totrans-316
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本示例删除了 Stash 的主目录并备份了所有已删除文件：
+- en: '[PRE48]'
+  id: totrans-317
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE48]'
+- en: Discussion
+  id: totrans-318
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*--backup* creates a compressed archive of the user’s files in the current
+    directory. Use the *--backup-to* option to select a different directory:'
+  id: totrans-319
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*--backup* 在当前目录创建用户文件的压缩归档。使用 *--backup-to* 选项选择其他目录：'
+- en: '[PRE49]'
+  id: totrans-320
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE49]'
+- en: If the user owns files outside of their home directory, you will have to hunt
+    them down and deal with them manually (see [Recipe 5.16](#rec-find-user-files)).
+  id: totrans-321
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果用户拥有其主目录之外的文件，则必须手动查找并处理它们（参见[Recipe 5.16](#rec-find-user-files)）。
+- en: See Also
+  id: totrans-322
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 deluser*'
+  id: totrans-323
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 deluser*'
+- en: 5.15 Removing a Group with delgroup on Ubuntu
+  id: totrans-324
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.15 在 Ubuntu 上使用 delgroup 删除组
+- en: Problem
+  id: totrans-325
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have an Ubuntu system and want to use the *delgroup* command to delete groups.
+  id: totrans-326
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您有一个 Ubuntu 系统，并希望使用 *delgroup* 命令删除组。
+- en: Solution
+  id: totrans-327
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The following example removes the *musicians* group:'
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例移除了 *musicians* 组：
+- en: '[PRE50]'
+  id: totrans-329
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE50]'
+- en: '*delgroup* will not remove the primary group of an existing user. It will remove
+    supplemental groups even when they have members. If you do not want to remove
+    groups that have members, use the *--only-if-empty* option:'
+  id: totrans-330
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*delgroup* 不会删除现有用户的主要组。即使它们有成员，它也会删除附加组。如果不想删除有成员的组，请使用 *--only-if-empty*
+    选项：'
+- en: '[PRE51]'
+  id: totrans-331
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE51]'
+- en: Discussion
+  id: totrans-332
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The default behavior of *delgroup* is configured in */etc/deluser.conf* and
+    */etc/adduser.conf*.
+  id: totrans-333
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*delgroup*的默认行为已在*/etc/deluser.conf*和*/etc/adduser.conf*中配置。'
+- en: See Also
+  id: totrans-334
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 delgroup*'
+  id: totrans-335
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 delgroup*'
+- en: 5.16 Finding and Managing All Files for a User
+  id: totrans-336
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.16 查找和管理用户的所有文件
+- en: Problem
+  id: totrans-337
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to delete a user, but you don’t want a bunch of orphaned files left
+    over, and you need to find all of them.
+  id: totrans-338
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想删除一个用户，但不希望留下一堆孤立的文件，并且需要找到它们的所有位置。
+- en: Solution
+  id: totrans-339
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The *find* command will locate all files on the local system by UID or GID.
+    The following example searches the entire root directory for all files owned by
+    the user’s UID:'
+  id: totrans-340
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*find*命令将根据UID或GID在本地系统上定位所有文件。以下示例在整个根目录中搜索用户UID所有者的所有文件：'
+- en: '[PRE52]'
+  id: totrans-341
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE52]'
+- en: 'This can take some time if there are lot of files to search. If you are certain
+    you do not have to search the entire filesystem, you can narrow your search to
+    specific subdirectories, such as */etc*, */home*, or */var*:'
+  id: totrans-342
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果要搜索大量文件，可能需要一些时间。如果确定不需要搜索整个文件系统，可以将搜索范围缩小到特定的子目录，如*/etc*、*/home*或*/var*：
+- en: '[PRE53]'
+  id: totrans-343
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE53]'
+- en: 'You may also search by GID, username, or group name:'
+  id: totrans-344
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以按GID、用户名或组名搜索：
+- en: '[PRE54]'
+  id: totrans-345
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE54]'
+- en: 'Now that you know where all the files are, what to do with them? One option
+    is to change their ownership to another user and let the new user deal with them:'
+  id: totrans-346
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在知道所有文件的位置，该怎么处理呢？一种选择是将它们的所有权更改为另一个用户，让新用户处理它们：
+- en: '[PRE55]'
+  id: totrans-347
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE55]'
+- en: 'You could combine *find* and *cp* to find and copy all the files to a different
+    directory:'
+  id: totrans-348
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以结合*find*和*cp*来查找并复制所有文件到不同的目录：
+- en: '[PRE56]'
+  id: totrans-349
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE56]'
+- en: 'Using *cp -v* prints progress messages and copies only the files and not their
+    parent directories. If you wish to copy the parent directories, use the *-r* option:'
+  id: totrans-350
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*cp -v*会打印进度消息，并仅复制文件而不复制它们的父目录。如果希望复制父目录，请使用*-r*选项：
+- en: '[PRE57]'
+  id: totrans-351
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE57]'
+- en: 'Copying leaves the original files in place. After they are safely copied, you
+    may wish to delete the originals. One way to do this is to run *find* again and
+    use *rm* to delete the original files:'
+  id: totrans-352
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 复制会保留原始文件的位置。在安全复制后，您可能希望删除原始文件。一种方法是再次运行*find*并使用*rm*删除原始文件：
+- en: '[PRE58]'
+  id: totrans-353
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE58]'
+- en: 'This deletes the files but not the directories. Use the *-r* option to delete
+    the directories if you are certain there are no other files in those directories
+    that you want to keep:'
+  id: totrans-354
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将删除文件但不会删除目录。如果确定这些目录中没有其他想要保留的文件，请使用*-r*选项删除目录：
+- en: '[PRE59]'
+  id: totrans-355
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE59]'
+- en: 'One more option is to use *find* and *mv* to move the files to a different
+    location:'
+  id: totrans-356
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个选择是使用*find*和*mv*将文件移动到其他位置：
+- en: '[PRE60]'
+  id: totrans-357
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE60]'
+- en: If you see a “No such file or directory” message, usually that is because the
+    file or directory was moved, which you can verify by looking in the directory
+    they were moved to.
+  id: totrans-358
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果看到“找不到文件或目录”消息，通常是因为文件或目录已移动，您可以通过查看它们被移动到的目录来进行验证。
+- en: 'Find files owned by a nonexistent user or group:'
+  id: totrans-359
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找由不存在的用户或组拥有的文件：
+- en: '[PRE61]'
+  id: totrans-360
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE61]'
+- en: Discussion
+  id: totrans-361
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Be careful with *mv* and *rm* because there is no undo. If you make a mistake,
+    your best hope of recovery is from backup.
+  id: totrans-362
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要小心使用*mv*和*rm*，因为它们没有撤销功能。如果出错，恢复的最佳希望是从备份中恢复。
+- en: Cleaning up after departed users can be a chore, because computers make it too
+    easy to create as many files as your storage will hold. If you find yourself thinking
+    that *find* is taking too long, keep in mind it will find everything while you
+    go do something else.
+  id: totrans-363
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 清理离开的用户后可能会很麻烦，因为计算机使得创建尽可能多的文件变得太容易。如果发现*find*花费的时间太长，可以考虑让它在后台运行。
+- en: See Also
+  id: totrans-364
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 find*'
+  id: totrans-365
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 find*'
+- en: '*man 1 mv*'
+  id: totrans-366
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 mv*'
+- en: '*man 1 cp*'
+  id: totrans-367
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 cp*'
+- en: '*man 1 rm*'
+  id: totrans-368
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 rm*'
+- en: 5.17 Using su to Be Root
+  id: totrans-369
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.17 使用su切换到root用户
+- en: Problem
+  id: totrans-370
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to know how to get root permissions to perform some administration
+    chores.
+  id: totrans-371
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要知道如何获取根权限以执行一些管理任务。
+- en: Solution
+  id: totrans-372
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *su* command to change to the root user when you need to do system
+    chores:'
+  id: totrans-373
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当需要执行系统任务时，请使用*su*命令切换到root用户：
+- en: '[PRE62]'
+  id: totrans-374
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE62]'
+- en: If you do not know root’s password, or if there is no root password, see [Recipe
+    5.21](#rec-root-password) to learn how to use *sudo* to set a root password.
+  id: totrans-375
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果不知道root密码，或者没有root密码，请参见[Recipe 5.21](#rec-root-password)了解如何使用*sudo*设置root密码。
+- en: 'When you are finished, exit root and return to your own account:'
+  id: totrans-376
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成后，请退出root用户并返回到您自己的帐户：
+- en: '[PRE63]'
+  id: totrans-377
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE63]'
+- en: 'The *-l* option invokes the root user’s environment, changing to root’s home
+    directory and loading root’s environment variables. Omit *-l* to keep your own
+    environment:'
+  id: totrans-378
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*-l*选项调用root用户的环境，切换到root的主目录并加载root的环境变量。省略*-l*以保留您自己的环境：
+- en: '[PRE64]'
+  id: totrans-379
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE64]'
+- en: Discussion
+  id: totrans-380
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You can change to any user, as long as you have their password.
+  id: totrans-381
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以切换到任何用户，只要您有他们的密码。
+- en: Using *su* to change to root gives you absolute power over your system, and
+    every command that you run is run as root. Consider using *sudo* (see [Recipe
+    5.18](#rec-sudo)), which provides some safety features, such as protecting root’s
+    password and leaving an audit trail.
+  id: totrans-382
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *su* 切换到 root 给予您对系统的绝对控制，您运行的每个命令都是以 root 权限运行的。考虑使用 *sudo*（见 [Recipe 5.18](#rec-sudo)），它提供一些安全功能，如保护
+    root 的密码和留下审计日志。
+- en: See Also
+  id: totrans-383
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 1 su*'
+  id: totrans-384
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 su*'
+- en: 5.18 Granting Limited Root Powers with sudo
+  id: totrans-385
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.18 使用 *sudo* 授予有限的 root 权限
+- en: Problem
+  id: totrans-386
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to delegate some system administration chores to other users, and you
+    want to limit their root powers to what is needed for their specific tasks.
+  id: totrans-387
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想将一些系统管理任务委派给其他用户，并希望将他们的 root 权限限制在他们特定任务所需的范围内。
+- en: Solution
+  id: totrans-388
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use the *sudo* command. *sudo* is safer than *su* because it grants limited
+    root powers to specific users for specific tasks, logs activity, and caches the
+    user’s password for a limited amount of time, with a default of 15 minutes. After
+    15 minutes, the user must provide *sudo* with their password again. The caching
+    duration is configurable. *sudo* protects root’s password because *sudo* users
+    use their own passwords.
+  id: totrans-389
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *sudo* 命令。*sudo* 比 *su* 更安全，因为它为特定任务授予特定用户有限的 root 权限，记录活动并缓存用户的密码一段有限的时间，默认为
+    15 分钟。15 分钟后，用户必须再次向 *sudo* 提供密码。缓存持续时间可配置。*sudo* 保护 root 的密码，因为 *sudo* 用户使用自己的密码。
+- en: Note
+  id: totrans-390
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Some Linux distributions, such as openSUSE, default to *sudo* asking for the
+    root user’s password. See [Recipe 5.22](#rec-target-sudo-user) to learn how to
+    change this.
+  id: totrans-391
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些 Linux 发行版（例如 openSUSE）默认要求 *sudo* 输入 root 用户的密码。参见 [Recipe 5.22](#rec-target-sudo-user)
+    了解如何更改此设置。
+- en: '*/etc/sudoers* is the configuration file, and you should edit it with a special
+    command, *visudo*. This opens */etc/sudoers* with your default text editor, and
+    you can review and edit the default configuration. Once again, Duchess demonstrates
+    for us:'
+  id: totrans-392
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/sudoers* 是配置文件，您应该使用特殊命令 *visudo* 进行编辑。这将使用您的默认文本编辑器打开 */etc/sudoers*，您可以查看和编辑默认配置。再一次，Duchess
+    为我们演示：'
+- en: '[PRE65]'
+  id: totrans-393
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE65]'
+- en: '*%sudo ALL=(ALL) ALL* means that any user you add to the *sudo* group gets
+    full *sudo* powers just like root. The percent sign indicates *%sudo* is a group
+    from */etc/group*, and not a group configured in */etc/sudoers*.'
+  id: totrans-394
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*%sudo ALL=(ALL) ALL* 表示任何加入 *sudo* 组的用户都拥有与 root 相同的完全 *sudo* 权限。百分号表示 *%sudo*
+    是 */etc/group* 中的一个组，而不是 */etc/sudoers* 中配置的组。'
+- en: 'Suppose you have a junior admin, Stash, whose job is installing and removing
+    software and keeping the system updated. You could create a system group for Stash.
+    Or you could configure Stash for this task in */etc/sudoers*. The following example
+    gives Stash *sudo* powers to run the listed commands. You need the username, the
+    hostname of the local machine, and a comma-delimited list of allowed commands:'
+  id: totrans-395
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设您有一位初级管理员 Stash，其工作是安装和删除软件并保持系统更新。您可以为 Stash 创建一个系统组。或者您可以配置 Stash 在 */etc/sudoers*
+    中执行此任务。以下示例授予 Stash 运行列出命令的 *sudo* 权限。您需要用户名、本地机器的主机名以及允许的命令的逗号分隔列表：
+- en: '[PRE66]'
+  id: totrans-396
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE66]'
+- en: 'Suppose you want to give Stash more admin chores, such as managing services.
+    The allowed commands list will get long, so you could create some command aliases
+    instead. The following example aliases the software management commands to SOFTWARE,
+    and the service management commands to SYSTEMD:'
+  id: totrans-397
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设您想让 Stash 承担更多管理服务等的管理任务。允许的命令列表将变得很长，因此您可以创建一些命令别名。以下示例将软件管理命令别名为 SOFTWARE，服务管理命令别名为
+    SYSTEMD：
+- en: '[PRE67]'
+  id: totrans-398
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE67]'
+- en: 'Now Stash’s configuration looks like this:'
+  id: totrans-399
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在 Stash 的配置看起来像这样：
+- en: '[PRE68]'
+  id: totrans-400
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE68]'
+- en: 'You may create user groups in */etc/sudoers* (not related to system groups
+    in */etc/group*), then assign them some command aliases:'
+  id: totrans-401
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在 */etc/sudoers* 中创建用户组（与 */etc/group* 中的系统组无关），然后为它们分配一些命令别名：
+- en: '[PRE69]'
+  id: totrans-402
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE69]'
+- en: 'You may create a *Host_Alias* to give a user *sudo* rights on multiple machines:'
+  id: totrans-403
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以创建一个*Host_Alias*来给用户在多台机器上赋予*sudo*权限：
+- en: '[PRE70]'
+  id: totrans-404
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE70]'
+- en: 'Then bring in the JRADMINs:'
+  id: totrans-405
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后引入 JRADMINs：
+- en: '[PRE71]'
+  id: totrans-406
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE71]'
+- en: Discussion
+  id: totrans-407
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'When your limited *sudo* users try to run a not-allowed command, they see this
+    message: “Sorry, user *duchess* is not allowed to execute `*/some/command*` as
+    root on *server2*.”'
+  id: totrans-408
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您的有限 *sudo* 用户尝试运行不允许的命令时，他们会看到此消息：“对不起，用户 *duchess* 无法在 *server2* 上以 root
+    身份执行 `*/some/command*`。”
+- en: 'Don’t put too much faith in limiting users to a specific set of commands. Many
+    everyday applications provide a means for privilege escalation via shell escape,
+    and your users can gain full root powers. This example shows how it works with
+    *awk*:'
+  id: totrans-409
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不要对将用户限制在特定命令集合中抱有过多信心。许多日常应用程序通过 shell 脱逃提供特权升级的方法，您的用户可以获得完全的 root 权限。此示例展示了如何使用
+    *awk* 进行演示：
+- en: '[PRE72]'
+  id: totrans-410
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE72]'
+- en: 'And just like that, Duchess has full root powers. The humble *less* command
+    also provides a shell escape. Read a file with *less* that is large enough to
+    require paging:'
+  id: totrans-411
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就这样，公爵夫人就拥有了完整的 root 权限。谦卑的 *less* 命令还提供了一个 shell 转义。使用 *less* 读取足够大需要分页的文件：
+- en: '[PRE73]'
+  id: totrans-412
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE73]'
+- en: 'Type **`!*sh*`**, then when the prompt changes, type **`whoami`**:'
+  id: totrans-413
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输入 **`!*sh*`**，然后当提示符更改时，输入 **`whoami`**：
+- en: '[PRE74]'
+  id: totrans-414
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE74]'
+- en: Type **`exit`** to return your normal shell.
+  id: totrans-415
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输入 **`exit`** 返回到您的正常 shell。
+- en: In my experience, it is extremely difficult to keep track of the many applications
+    that can provide a shell escape. *journalctl* records everything, should you wish
+    to monitor your *sudo* users (see [Recipe 20.1](ch20.xhtml#rec-logfiles)).
+  id: totrans-416
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据我的经验，难以跟踪到能够提供 shell 转义的许多应用程序。*journalctl* 记录所有内容，如果您希望监视您的 *sudo* 用户（参见
+    [Recipe 20.1](ch20.xhtml#rec-logfiles)）。
+- en: In some Linuxes, such as Fedora, the *wheel* group is the default *sudo* group.
+    Check your */etc/sudoers* file to see how your distribution configures this. You
+    can also create your own *sudo* group, and name it whatever you want.
+  id: totrans-417
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在某些 Linux 发行版（如 Fedora）中，*wheel* 组是默认的 *sudo* 组。检查您的 */etc/sudoers* 文件以了解您的发行版如何配置。您还可以创建自己的
+    *sudo* 组，并将其命名为任何您想要的名称。
+- en: The */etc/sudoers* file controls users only on the local machine. Including
+    other machines, like the SERVERS alias, allows you to share a single configuration
+    file on multiple machines. *sudo* ignores any items, such as hosts or users, that
+    are not present on the local machine.
+  id: totrans-418
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/sudoers* 文件仅控制本地机器上的用户。包括其他机器，如 SERVERS 别名，允许您在多台机器上共享单个配置文件。*sudo* 会忽略任何在本地机器上不存在的项，比如主机或用户。'
+- en: Let’s dissect *root ALL=(ALL) ALL* to understand what all those ALLs mean.
+  id: totrans-419
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们解析 *root ALL=(ALL) ALL*，以了解所有这些 ALL 意味着什么。
+- en: root
+  id: totrans-420
+  prefs: []
+  type: TYPE_NORMAL
+  zh: root
+- en: is in the user field, and this field holds any single user, user alias, or system
+    group.
+  id: totrans-421
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在用户字段中，*(ALL)* 表示该用户或用户可以作为任何其他用户运行命令，或者您可以指定特定用户。
+- en: ALL=
+  id: totrans-422
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ALL=
+- en: is in the host field. ALL means any host anywhere, or you could use a host alias,
+    or name a single host.
+  id: totrans-423
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是主机字段中的内容。ALL 表示任何主机的任何位置，或者您可以使用主机别名，或命名单个主机。
+- en: (ALL)
+  id: totrans-424
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*(ALL)*'
+- en: is in the optional users field. *(ALL)* means the user or users can run commands
+    as any other user, or you can specify certain users.
+  id: totrans-425
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是可选用户字段中的内容。*(ALL)* 表示用户或用户可以作为任何其他用户运行命令，或者您可以指定某些用户。
+- en: ALL
+  id: totrans-426
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ALL
+- en: in is the command field. *ALL* is unrestricted, or you can specify a list of
+    allowed commands.
+  id: totrans-427
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在命令字段中。*ALL* 表示无限制，或者您可以指定允许的命令列表。
+- en: See Also
+  id: totrans-428
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 sudo*'
+  id: totrans-429
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 sudo*'
+- en: '*man 5 sudoers*'
+  id: totrans-430
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 sudoers*'
+- en: 5.19 Extending the sudo Password Timeout
+  id: totrans-431
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.19 延长 sudo 密码超时时间
+- en: Problem
+  id: totrans-432
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: On most Linux distributions, *sudo* caches passwords for a default interval
+    of 15 minutes. Then after 15 minutes you have to enter your password again. You
+    are tired of having to enter your password so often when you have a lot of work
+    to do, and want to make the caching interval longer.
+  id: totrans-433
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在大多数 Linux 发行版上，*sudo* 缓存密码的默认间隔是 15 分钟。15 分钟后，您需要再次输入密码。在您有很多工作要做时，您厌倦了频繁输入密码，并希望增加缓存间隔。
+- en: Solution
+  id: totrans-434
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Change the caching interval in */etc/sudoers*. Open the file for editing with
+    *visudo*:'
+  id: totrans-435
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改 */etc/sudoers* 中的缓存间隔。使用 *visudo* 打开文件进行编辑：
+- en: '[PRE75]'
+  id: totrans-436
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE75]'
+- en: 'Then look for a *Defaults* line and set your new cache interval. The following
+    example sets it to 60 minutes:'
+  id: totrans-437
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后查找 *Defaults* 行并设置新的缓存间隔。以下示例将其设置为 60 分钟：
+- en: '[PRE76]'
+  id: totrans-438
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE76]'
+- en: If you set it to 0, *sudo* asks for your password every time you use it.
+  id: totrans-439
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果将其设置为 0，*sudo* 每次使用时都会要求输入密码。
+- en: If you set *timestamp_timeout* to a negative number, like *-1*, your password
+    never expires.
+  id: totrans-440
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果将 *timestamp_timeout* 设置为负数，如 *-1*，则您的密码永不过期。
+- en: Discussion
+  id: totrans-441
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The *sudo* password caching is a useful protection against accidents, such as
+    forgetting you are running as root or wandering away and allowing someone else
+    to have some fun with your computer.
+  id: totrans-442
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*sudo* 密码缓存是一种有用的保护措施，可以防止意外事件，例如忘记以 root 身份运行或者离开时让其他人玩弄您的计算机。'
+- en: See Also
+  id: totrans-443
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 sudo*'
+  id: totrans-444
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 sudo*'
+- en: '*man 5 sudoers*'
+  id: totrans-445
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 sudoers*'
+- en: 5.20 Creating Individual sudoers Configurations
+  id: totrans-446
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.20 创建个别 sudoers 配置
+- en: Problem
+  id: totrans-447
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set some different *sudo* configurations for your users; for example,
+    you want your junior admins to have a different password timeout than you. Yours
+    is long, and you want theirs to be short.
+  id: totrans-448
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想为用户设置一些不同的 *sudo* 配置；例如，您希望您的初级管理员有一个不同的密码超时设置。您的设置很长，而您希望他们的设置很短。
+- en: Solution
+  id: totrans-449
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'You may create individual configurations in */etc/sudoers.d*. The following
+    example creates a 30-minute password timeout for Stash:'
+  id: totrans-450
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在 */etc/sudoers.d* 中创建个别配置。以下示例为 Stash 创建了一个 30 分钟的密码超时：
+- en: '[PRE77]'
+  id: totrans-451
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE77]'
+- en: 'Type **`Defaults timestamp_timeout=30`**, save the file, and you’re done. You
+    can see the new file:'
+  id: totrans-452
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输入**`Defaults timestamp_timeout=30`**，保存文件，完成。您可以查看新文件：
+- en: '[PRE78]'
+  id: totrans-453
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE78]'
+- en: You only need to enter configuration items that are different from the entries
+    in */etc/sudoers*, not to replicate the whole file.
+  id: totrans-454
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您只需要输入与*/etc/sudoers*中条目不同的配置项，而不是复制整个文件。
+- en: Discussion
+  id: totrans-455
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: This is a nice feature for managing multiple users. Instead of managing one
+    big configuration file, break it up into smaller per-user files.
+  id: totrans-456
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是一个管理多个用户的好功能。与其管理一个大的配置文件，不如将其分解为更小的每个用户文件。
+- en: See Also
+  id: totrans-457
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 8 sudo*'
+  id: totrans-458
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 sudo*'
+- en: '*man 5 sudoers*'
+  id: totrans-459
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 sudoers*'
+- en: 5.21 Managing the Root User’s Password
+  id: totrans-460
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.21 管理根用户的密码
+- en: Problem
+  id: totrans-461
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your Linux distribution set you up as system administrator during installation,
+    with unrestricted *sudo* privileges, and did not create a root password. Or, your
+    root user had a password but you forgot it. You need to know how to give root
+    a new password.
+  id: totrans-462
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在安装过程中，您的Linux发行版将您设置为系统管理员，具有无限制的*sudo*特权，并且未创建根密码。或者，您的根用户有密码但您忘记了。您需要知道如何为根用户设置新密码。
+- en: Solution
+  id: totrans-463
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'When you want to run as “real” root, use *sudo* to *su* to root:'
+  id: totrans-464
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您想要作为“真正的”根用户运行时，请使用*sudo*来*su*到根：
+- en: '[PRE79]'
+  id: totrans-465
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE79]'
+- en: At this point you can use the *passwd* command to give root a password so you
+    can log in as root directly, or reset a lost root password.
+  id: totrans-466
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一点上，您可以使用*passwd*命令为根用户设置密码，以便直接以根用户身份登录，或者重置丢失的根密码。
+- en: Discussion
+  id: totrans-467
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: There are times when you need a root password and not *sudo*; for example, when
+    you boot to an emergency runlevel.
+  id: totrans-468
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有时您需要根密码而不是*sudo*；例如，当您引导到紧急运行级别时。
+- en: See Also
+  id: totrans-469
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 8 sudo*'
+  id: totrans-470
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 sudo*'
+- en: '*man 5 sudoers*'
+  id: totrans-471
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 sudoers*'
+- en: '*man 1 passwd*'
+  id: totrans-472
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 passwd*'
+- en: 5.22 Changing sudo to Not Ask for the Root Password
+  id: totrans-473
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 5.22 将sudo设置为不要求根密码
+- en: Problem
+  id: totrans-474
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: 'You want your *sudo* users to authenticate with their own passwords, but your
+    Linux system asks for the root user’s password, like the following example:'
+  id: totrans-475
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望您的*sudo*用户使用自己的密码进行身份验证，但您的Linux系统要求使用根用户的密码，如下例所示：
+- en: '[PRE80]'
+  id: totrans-476
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE80]'
+- en: Solution
+  id: totrans-477
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: This is the default behavior on some Linux distributions, such as openSUSE.
+  id: totrans-478
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是某些Linux发行版（如openSUSE）上的默认行为。
+- en: When you install Ubuntu Linux and make your user an administrator during installation,
+    Ubuntu configures your user appropriately with full *sudo* powers, equivalent
+    to root but using your own password. openSUSE does not, but instead configures
+    your user to use the password of the target user, which is root.
+  id: totrans-479
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您安装Ubuntu Linux并在安装过程中将用户设置为管理员时，Ubuntu会使用您自己的密码为您的用户适当配置完全的*sudo*权限，相当于根用户。而openSUSE则不会这样做，而是配置您的用户使用目标用户即根用户的密码。
+- en: 'To set up *sudo* users to always be asked for their own passwords, edit */etc/sudoers*
+    by commenting out these two lines:'
+  id: totrans-480
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要设置*sudo*用户始终要求其自己的密码，请编辑*/etc/sudoers*并注释掉以下两行：
+- en: '[PRE81]'
+  id: totrans-481
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE81]'
+- en: In openSUSE and Fedora, create *sudo* users with full root powers by adding
+    them to the *wheel* group in */etc/group*. (For limited users, refer to [Recipe
+    5.18](#rec-sudo).)
+  id: totrans-482
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在openSUSE和Fedora中，通过将用户添加到*/etc/group*中的*wheel*组来创建具有完整根权限的*sudo*用户。（对于有限用户，请参阅[Recipe
+    5.18](#rec-sudo)。）
+- en: The change takes effect immediately after saving your changes and closing the
+    file.
+  id: totrans-483
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改将在保存更改并关闭文件后立即生效。
+- en: Discussion
+  id: totrans-484
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Protecting the root user’s password is a primary reason to use *sudo*, rather
+    than *su*.
+  id: totrans-485
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 保护根用户的密码是使用*sudo*而不是*su*的主要原因。
+- en: See Also
+  id: totrans-486
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[Recipe 5.18](#rec-sudo)'
+  id: totrans-487
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 5.18](#rec-sudo)'

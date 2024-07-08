@@ -1,0 +1,1980 @@
+- en: Chapter 14\. Building a Linux Firewall with firewalld
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第14章。使用firewalld构建Linux防火墙
+- en: This chapter covers the basics of using firewalld to build host firewalls. Individual
+    hosts have different requirements. For example, a server has to allow different
+    types of incoming connection requests, and a PC running no services does not have
+    to accept any connection requests. A laptop that is used to access multiple networks
+    needs dynamic firewall management.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章介绍使用firewalld构建主机防火墙的基础知识。不同的主机有不同的需求。例如，服务器必须允许各种类型的传入连接请求，而不运行服务的个人电脑则不需要接受任何连接请求。连接多个网络的笔记本电脑需要动态防火墙管理。
+- en: firewalld Overview
+  id: totrans-2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: firewalld概述
+- en: firewalld, like all firewalls, has a very long list of capabilities. We will
+    mainly learn about using firewalld *zones* to control traffic entering our systems.
+    A zone is a container for a level of trust; for example, some zones allow all
+    manner of incoming connection requests, and some are very restrictive. Each network
+    interface on a system may be assigned only one zone, and one zone may be assigned
+    to multiple interfaces.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 像所有防火墙一样，firewalld具有非常多的功能。我们主要学习如何使用firewalld的*zones*来控制进入系统的流量。区域是一种信任级别的容器；例如，某些区域允许各种传入连接请求，而某些区域则非常限制。系统上的每个网络接口只能分配一个区域，并且一个区域可以分配给多个接口。
+- en: Networking Knowledge Required
+  id: totrans-4
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 需要的网络知识
+- en: The most important networking concepts to understand are ports, services, TCP,
+    UDP, port forwarding, masquerade, routing, and IP addressing. You will understand
+    how to configure your firewall when you understand these. If you need some coaching
+    on computer networking, try *Networking Fundamentals* by Gordon Davies (Packt
+    Publishing), or *Networking All-in-One For Dummies*, 7th Edition by Doug Lowe
+    (For Dummies). If you have an [O’Reilly Learning Platform subscription](https://oreil.ly/mEsNB),
+    you will find a wealth of great information.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 理解的最重要的网络概念包括端口、服务、TCP、UDP、端口转发、伪装、路由和IP地址。当您理解这些概念时，您将了解如何配置防火墙。如果您需要关于计算机网络的指导，请参考Gordon
+    Davies的*Networking Fundamentals*（Packt出版社）或Doug Lowe的*Networking All-in-One For
+    Dummies*第7版（For Dummies）。如果您有[O’Reilly Learning Platform订阅](https://oreil.ly/mEsNB)，您将找到大量优质信息。
+- en: The traditional Linux firewall is built with the *netfilter* packet-filtering
+    framework in the Linux kernel, which filters incoming and outgoing network traffic,
+    and *iptables*, which is the software used to create and manage tables of rules
+    to filter your traffic.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传统的Linux防火墙建立在Linux内核的*netfilter*数据包过滤框架和用于创建和管理规则表的*iptables*软件之上，用于过滤传入和传出的网络流量。
+- en: Times change, and iptables is being replaced by newer rules managers, such as
+    *ufw* (Uncomplicated Firewall), *nftables* (Netfilter tables), and *firewalld*
+    (firewall daemon). firewalld, like iptables and nftables, uses tables of rules
+    to manage traffic filtering. It provides both a command-line interface and a nice
+    graphical interface, *firewall-config*. firewalld is a frontend to both iptables
+    and nftables. nftables is a significant improvement over iptables and is intended
+    to be the default backend for firewalld, but in some Linux distributions iptables
+    is still the default. Set your preferred backend in */etc/firewalld/firewalld.conf*
+    with the *FirewallBackend* option ([Recipe 14.4](#rec-firewall-backend)).
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 时代变迁，**iptables**正逐渐被诸如*ufw*（简易防火墙）、*nftables*（Netfilter 表）、*firewalld*（防火墙守护程序）等新的规则管理器所取代。与iptables和nftables类似，firewalld利用规则表来管理流量过滤。它提供了命令行界面和一个漂亮的图形界面*firewall-config*。firewalld同时是iptables和nftables的前端。nftables是对iptables的重大改进，并计划成为firewalld的默认后端，但在某些Linux发行版中，iptables仍然是默认选项。您可以在*/etc/firewalld/firewalld.conf*中使用*FirewallBackend*选项设置您的首选后端（[Recipe
+    14.4](#rec-firewall-backend)）。
+- en: firewalld comes with predefined sets of rules, called *zones*, for different
+    use cases, such as a machine running no services, a machine running services,
+    and different zones for different network interfaces on the same machine. You
+    can edit these zones to suit your own requirements.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: firewalld附带预定义的一组规则集，称为*zones*，用于不同的用例，例如不运行服务的机器、运行服务的机器，以及同一机器上不同网络接口的不同区域。您可以编辑这些区域以满足自己的需求。
+- en: firewalld zones manage *services*, which are configurations for common services
+    such as ssh, imaps, and rsync. Most of the predefined services include only the
+    standard port assignments. You may edit these as you need and create your own
+    custom zones.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: firewalld区域管理*services*，这些是针对常见服务（如ssh、imaps和rsync）的配置。大多数预定义服务仅包括标准端口分配。您可以根据需要编辑这些服务，并创建自己的自定义区域。
+- en: firewalld is integrated with NetworkManager, so you don’t have to worry about
+    managing dynamic connections, like when you tote your laptop all over and connect
+    to different networks.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: firewalld与NetworkManager集成，因此您无需担心管理动态连接，比如当您随身携带笔记本电脑并连接到不同的网络时。
+- en: The NetworkManager Service
+  id: totrans-11
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: NetworkManager服务
+- en: NetworkManager has been an important part of Linux since 2004\. NetworkManager
+    replaced a hodgepodge of cumbersome network client tools and manages all of your
+    network interfaces and network connections. If you’re not familiar with NetworkManager,
+    see [GNOME NetworkManager](https://oreil.ly/hkqaq).
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自2004年以来，NetworkManager一直是Linux的重要组成部分。NetworkManager取代了一堆繁琐的网络客户端工具，并管理着你的所有网络接口和网络连接。如果你对NetworkManager不熟悉，请参阅[GNOME
+    NetworkManager](https://oreil.ly/hkqaq)。
+- en: If you are running public servers on a commercial hosting service, your firewall
+    setup depends on what your service provider supports. Protecting public servers,
+    such as web servers and online storefronts, whether they are remotely hosted or
+    in your own datacenter, requires a great deal of skill and care that is beyond
+    the scope of this book. Do please get in-depth study and training, or hire experts.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您在商业托管服务上运行公共服务器，则您的防火墙设置取决于您的服务提供商支持的内容。保护公共服务器（例如Web服务器和在线商店），无论是远程托管还是位于您自己的数据中心，都需要超出本书范围的大量技能和关注。请进行深入学习和培训，或者聘请专家。
+- en: How Firewalls Work
+  id: totrans-14
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 防火墙的工作原理
+- en: Once upon a time, Ubuntu Linux did not ship with a firewall, because the default
+    installation had no public services, and therefore no listening network ports.
+    The reasoning was that with no listening ports there were no points of attack.
+    Fortunately, this decision was reversed in later releases, because users make
+    changes, even the most experts users make mistakes, and attackers are always discovering
+    new vulnerabilities. Security is a multilayered process.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 曾几何时，Ubuntu Linux没有随附防火墙，因为默认安装没有公共服务，因此没有监听的网络端口。其理由是没有监听端口就没有攻击点。幸运的是，这个决定在后来的版本中被改变，因为用户会做出更改，即使是最专业的用户也会犯错误，而攻击者总是在发现新的漏洞。安全是一个多层次的过程。
+- en: Let’s look at how firewalls work. The basic principle is deny all, allow only
+    as needed.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们来看看防火墙的工作原理。基本原则是拒绝一切，只允许必要的。
+- en: 'A network service, such as an SSH server, needs to open a network port to enable
+    remote users to log in. You are allowing other people into your system. The default
+    port for *sshd* is TCP port 22\. You can see all the listening ports on your system
+    with the *netstat* command. This snippet shows what the SSH port looks like:'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 网络服务，比如SSH服务器，需要打开一个网络端口以允许远程用户登录。你在允许其他人进入你的系统。*sshd* 的默认端口是TCP端口22。你可以使用*netstat*命令查看系统上所有监听的端口。以下是显示SSH端口的片段：
+- en: '[PRE0]'
+  id: totrans-18
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: This example shows that there is not an active connection because the Foreign
+    Address fields are all zeroes and the State is LISTEN. *sshd* is listening for
+    incoming IPv4 and IPv6 connections on all network interfaces and all IP addresses
+    on TCP port 22. The combination of IP address and port number is an address that
+    tells the Linux kernel where to send SSH packets.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个例子显示没有活动连接，因为外部地址字段都是零，并且状态是LISTEN。*sshd*在所有网络接口和所有IP地址上监听传入的IPv4和IPv6连接，TCP端口为22。IP地址和端口号的组合是一个地址，告诉Linux内核将SSH数据包发送到哪里。
+- en: 'This example shows an active SSH connection, with the ESTABLISHED State. It
+    lists the local address and port that the remote machine is connected to, and
+    the foreign address and port of the remote machine (the Recv-Q and Send-Q columns
+    have been removed for clarity):'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个例子显示了一个活动的SSH连接，状态为ESTABLISHED。它列出了远程机器连接的本地地址和端口，以及远程机器的外部地址和端口（为了清晰起见，已删除了Recv-Q和Send-Q列）：
+- en: '[PRE1]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: There are several ways to control which TCP/IP packets can access a particular
+    IP address and port. Most servers have configuration options to listen only on
+    particular network interfaces or IP addresses, and to accept requests from specific
+    addresses and address ranges. A firewall adds additional controls, and it is a
+    best practice to use both.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有几种方法可以控制哪些TCP/IP数据包可以访问特定的IP地址和端口。大多数服务器都有配置选项，只监听特定的网络接口或IP地址，并接受来自特定地址和地址范围的请求。防火墙添加了额外的控制，同时使用防火墙和服务器配置是最佳实践。
+- en: Network Ports and Numbering
+  id: totrans-23
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 网络端口和编号
+- en: There are 65,536 possible network ports on a Linux system, numbered 0-65535,
+    and many of them are reserved for specific services. 0 is reserved and not used.
+    You can see all of these in the */etc/services* file, which is on every Linux.
+    See the [IANA Service Name and Transport Protocol Port Number Registry](https://oreil.ly/CF0bF)
+    for the complete official list.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 系统上有 65536 个可能的网络端口，编号为 0-65535，其中许多端口保留用于特定服务。0 被保留且未使用。您可以在每个 Linux
+    上的 */etc/services* 文件中看到所有这些信息。请参阅[IANA 服务名称和传输协议端口号注册表](https://oreil.ly/CF0bF)获取完整的官方列表。
+- en: 'This is how the port numbering ranges are organized:'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 端口编号范围的组织方式如下：
+- en: 0-1023 are called the *well-known ports*. These are system ports for common
+    services, such as FTPS (secure file sharing), SSH (secure remote login), NTP (Network
+    Time Protocol), POP3 (email), HTTPS (encrypted web server), and so on.
+  id: totrans-26
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 0-1023 称为*众所周知的端口*。这些是常见服务的系统端口，例如 FTPS（安全文件共享）、SSH（安全远程登录）、NTP（网络时间协议）、POP3（电子邮件）、HTTPS（加密的
+    Web 服务器）等。
+- en: 1024-49151 are the *registered ports*, which are for additional services.
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1024-49151 是*注册端口*，用于额外的服务。
+- en: '49152-65535 are the *ephemeral ports*, also called private ports and dynamic
+    ports. These are used by your system to complete connections with remote services.
+    For example, when you are web surfing, it looks like this in *netstat* (the Recv-Q
+    and Send-Q columns have been removed for clarity):'
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 49152-65535 是*临时端口*，也称为私有端口和动态端口。这些由您的系统用于与远程服务完成连接。例如，在您进行网页浏览时，*netstat* 显示如下（已删除
+    Recv-Q 和 Send-Q 列以增加清晰度）：
+- en: '[PRE2]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: This illustrates a response to an outgoing request from your computer. When
+    you visit a website you initiate the connection request, and the remote web server
+    sends responses to ephemeral network ports on your system. The first connection
+    on the list is connected to the example local computer at IP address 192.168.43.234,
+    port 50586\. The Foreign Address is the remote server’s IP address and port. The
+    state ESTABLISHED means it is connected to another machine. When the session is
+    finished, after closing the web browser, port 50586 is released and ready to be
+    used again.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这说明了来自您的计算机的出站请求的响应。当您访问网站时，您发起连接请求，远程 Web 服务器将响应发送到您系统上的临时网络端口。列表中的第一个连接连接到示例本地计算机的
+    IP 地址 192.168.43.234，端口 50586。外部地址是远程服务器的 IP 地址和端口。状态 ESTABLISHED 表示它已连接到另一台计算机。会话结束后，在关闭
+    Web 浏览器后，端口 50586 被释放并准备再次使用。
+- en: Ephemeral ports are not listening ports for services. Connections to ephemeral
+    ports are temporary, and are created only as replies to an outgoing connection
+    request from your computer, such as visiting a website. A firewall can block ephemeral
+    ports, but then you have no access to hosts or sites outside of your computer.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 临时端口不是服务的监听端口。与临时端口的连接是临时的，仅作为回复您的计算机发出的出站连接请求（例如访问网站）。防火墙可以阻止临时端口，但这样您将无法访问计算机外的主机或站点。
+- en: 14.1 Querying Which Firewall Is Running
+  id: totrans-32
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.1 查询当前运行的防火墙
+- en: Problem
+  id: totrans-33
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to know which firewall your Linux system is using.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要知道您的 Linux 系统正在使用哪种防火墙。
+- en: Solution
+  id: totrans-35
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Start with the documentation for your particular Linux distribution, as most
+    Linuxes install with a firewall. The three most common are *iptables* (Internet
+    Protocol tables), *ufw* (Uncomplicated Firewall), and *nftables* (Netfilter tables).
+    All three manage filter rules on the netfilter framework, which is part of the
+    Linux kernel.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从您特定的 Linux 发行版文档开始，因为大多数 Linux 发行版都会安装防火墙。最常见的三种是 *iptables*（Internet Protocol
+    tables）、*ufw*（Uncomplicated Firewall）和 *nftables*（Netfilter tables）。这三种都管理 netfilter
+    框架上的过滤规则，netfilter 是 Linux 内核的一部分。
+- en: 'Then see what systemd says. This example shows that nftables is running:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后查看 systemd 说了什么。此示例显示 nftables 正在运行：
+- en: '[PRE3]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'This shows firewalld is running:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这显示 firewalld 正在运行：
+- en: '[PRE4]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'This example checks for ufw and shows that it is installed but inactive:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例检查 ufw 并显示它已安装但未激活：
+- en: '[PRE5]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: If any of them are not installed, you will see a message to that effect.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果其中任何一个未安装，您将看到相关消息。
+- en: 'You could remove ufw and nftables, or mask them so that they cannot be started:'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以移除 ufw 和 nftables，或者将它们掩盖，使其无法启动：
+- en: '[PRE6]'
+  id: totrans-45
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '[PRE7]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Discussion
+  id: totrans-47
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: It is best to run only one firewall, unless you enjoy untangling conflicting
+    firewall rules.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最好只运行一个防火墙，除非您喜欢解决冲突的防火墙规则。
+- en: See Also
+  id: totrans-49
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 4](ch04.xhtml#cha-systemd)'
+  id: totrans-50
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 4 章](ch04.xhtml#cha-systemd)'
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-51
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: 14.2 Installing firewalld
+  id: totrans-52
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.2 安装 firewalld
+- en: Problem
+  id: totrans-53
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to install firewalld on your Linux system.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要在 Linux 系统上安装 firewalld。
+- en: Solution
+  id: totrans-55
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: If firewalld is not on your system, install the *firewalld* package, and install
+    *firewall-config* to get the nice graphical interface.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的系统没有安装 firewalld，请安装 *firewalld* 软件包，并安装 *firewall-config* 以获得良好的图形界面。
+- en: Discussion
+  id: totrans-57
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: So far, the major Linux distributions, thankfully, all use the same package
+    names, *firewalld* and *firewall-config*.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到目前为止，主要的 Linux 发行版都幸运地使用相同的软件包名称，*firewalld* 和 *firewall-config*。
+- en: firewalld may or may not start automatically after installation, depending on
+    your Linux distribution. It must be running to create and test rules.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: firewalld 的启动方式可能会因 Linux 发行版的不同而有所不同。必须运行它才能创建和测试规则。
+- en: If possible, disable your machine’s network connection until you have completed
+    your initial firewalld configuration. Disconnect from your network by clicking
+    the NetworkManager applet, which is installed by default on most Linux distributions
+    ([Figure 14-1](#fig-firewalld-2)).
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果可能，请在完成初始 firewalld 配置之前禁用您的计算机网络连接。通过点击 NetworkManager 小程序来断开网络连接，默认情况下大多数
+    Linux 发行版都安装了它（[图 14-1](#fig-firewalld-2)）。
+- en: '![Disconnecting from the network.](Images/lcb2_1401.png)'
+  id: totrans-61
+  prefs: []
+  type: TYPE_IMG
+  zh: '![断开网络连接。](Images/lcb2_1401.png)'
+- en: Figure 14-1\. Disconnect from the network with NetworkManager
+  id: totrans-62
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 14-1\. 使用 NetworkManager 断开网络连接
+- en: 'Or use the *nmcli* command. The following example finds and disconnects a WiFi
+    connection. Use the CONNECTION name in your command:'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或使用 *nmcli* 命令。以下示例查找并断开 WiFi 连接。在您的命令中使用 CONNECTION 名称：
+- en: '[PRE8]'
+  id: totrans-64
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Restore the connection:'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 恢复连接：
+- en: '[PRE9]'
+  id: totrans-66
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Manage firewalld the usual way with systemd. Here are the commands:'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 systemd 正常管理 firewalld。以下是命令：
+- en: '*systemctl status firewalld.service*'
+  id: totrans-68
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*systemctl status firewalld.service*'
+- en: '*sudo systemctl enable firewalld.service*'
+  id: totrans-69
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*sudo systemctl enable firewalld.service*'
+- en: '*sudo systemctl start firewalld.service*'
+  id: totrans-70
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*sudo systemctl start firewalld.service*'
+- en: '*sudo systemctl stop firewalld.service*'
+  id: totrans-71
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*sudo systemctl stop firewalld.service*'
+- en: '*sudo systemctl restart firewalld.service*'
+  id: totrans-72
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*sudo systemctl restart firewalld.service*'
+- en: See Also
+  id: totrans-73
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 4](ch04.xhtml#cha-systemd)'
+  id: totrans-74
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 4 章](ch04.xhtml#cha-systemd)'
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-75
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: The [Appendix](app01.xhtml#appendix)
+  id: totrans-76
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[附录](app01.xhtml#appendix)'
+- en: 14.3 Finding Your firewalld Version
+  id: totrans-77
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.3 查找您的 firewalld 版本
+- en: Problem
+  id: totrans-78
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need the version number of your installed firewalld.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要已安装的 firewalld 版本号。
+- en: Solution
+  id: totrans-80
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Query the installed package with your package manager, or use *firewall-cmd*:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用您的包管理器查询已安装的软件包，或使用 *firewall-cmd*：
+- en: '[PRE10]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: Discussion
+  id: totrans-83
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: firewalld must be running for the *firewall-cmd* command to work. If it is not
+    running you will see a “FirewallD is not running” message.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: firewalld 必须运行才能使 *firewall-cmd* 命令生效。如果未运行，则会显示“FirewallD is not running”消息。
+- en: See Also
+  id: totrans-85
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-86
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: 14.4 Configuring iptables or nftables as the firewalld Backend
+  id: totrans-87
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.4 配置 iptables 或 nftables 作为 firewalld 后端
+- en: Problem
+  id: totrans-88
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to choose your own firewalld backend, either iptables or nftables.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以选择您自己的 firewalld 后端，可以是 iptables 或 nftables。
+- en: Solution
+  id: totrans-90
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Edit */etc/firewalld/firewalld.conf* with your preference:'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用您的偏好编辑 */etc/firewalld/firewalld.conf*：
+- en: '[PRE11]'
+  id: totrans-92
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Or:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或：
+- en: '[PRE12]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: Then restart firewalld.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后重新启动 firewalld。
+- en: Discussion
+  id: totrans-96
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You may need to install your preferred backend.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能需要安装您首选的后端。
+- en: Even if you don’t care which one your system uses, you should use nftables because
+    that is what the firewalld developers are actively working on.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 即使您不关心系统使用哪一个，也应该使用 nftables，因为这是 firewalld 开发人员正在积极开发的内容。
+- en: See Also
+  id: totrans-99
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[“firewalld Overview”](#ch14-overview)'
+  id: totrans-100
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“firewalld 概述”](#ch14-overview)'
+- en: The [nftables backend blog post](https://oreil.ly/xO5eS) by the firewalld developers
+    has detailed information about the two backends and future development.
+  id: totrans-101
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[firewalld 开发者的 nftables 后端博客文章](https://oreil.ly/xO5eS)详细介绍了两个后端和未来的开发。'
+- en: 14.5 Listing All Zones and All Services Managed by Each Zone
+  id: totrans-102
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.5 列出所有区域以及每个区域管理的所有服务
+- en: Problem
+  id: totrans-103
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to see all the available zones in your firewalld configuration and
+    the services that each zone manages.
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要查看 firewalld 配置中所有可用的区域以及每个区域管理的服务。
+- en: Solution
+  id: totrans-105
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'List the default zone:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出默认区域：
+- en: '[PRE13]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'List all zones:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出所有区域：
+- en: '[PRE14]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'List all active zones, the zones currently in use:'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出所有活动区域，当前正在使用的区域：
+- en: '[PRE15]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'List the configuration of a zone:'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出区域的配置：
+- en: '[PRE16]'
+  id: totrans-113
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'List the configurations of all zones:'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出所有区域的配置：
+- en: '[PRE17]'
+  id: totrans-115
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: Discussion
+  id: totrans-116
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: firewalld zones define levels of trust for network connections. Each zone contains
+    the zone description and other items as shown in the preceding example for the
+    *public* zone. Zone files are in XML format, and must have the *.xml* file extension.
+    Look in */usr/lib/firewalld/zones* to see their source files.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: firewalld区域定义了网络连接的信任级别。每个区域包含区域描述和其他项目，如上述示例中的*public*区域。区域文件以XML格式存在，并且必须具有*.xml*文件扩展名。查看*/usr/lib/firewalld/zones*以查看它们的源文件。
+- en: 'The following list defines zone options:'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的列表定义了区域选项：
+- en: '*target:* defines the default action for packets that do not match any rules.
+    It takes one of four values: *default*, *ACCEPT*, *DROP*, or *REJECT*. For example,
+    when connection requests for dhcpv6-client, ipp, ipp-client, mdns, or ssh packets
+    arrive in the example *public* zone, they are accepted. Any packets that do not
+    match the allowed services are rejected by the *default* target, and it sends
+    reject messages.'
+  id: totrans-119
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*target:* 定义不匹配任何规则的数据包的默认操作。它可以取四个值之一：*default*、*ACCEPT*、*DROP*或*REJECT*。例如，在*public*区域中，当连接请求dhcpv6-client、ipp、ipp-client、mdns或ssh数据包时，这些数据包将被接受。任何不匹配允许服务的数据包将被默认目标拒绝，并发送拒绝消息。'
+- en: '*ACCEPT* accepts all packets that are not explicitly blocked by rules.'
+  id: totrans-120
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*ACCEPT* 接受所有未明确被规则阻止的数据包。'
+- en: '*DROP* silently drops all packets not explicitly allowed.'
+  id: totrans-121
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*DROP* 静默丢弃所有未明确允许的数据包。'
+- en: '*REJECT* is similar to *DROP*, except that it also sends reject messages.'
+  id: totrans-122
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*REJECT*类似于*DROP*，但还会发送拒绝消息。'
+- en: '*icmp-block-inversion* inverts your ICMP requests settings. Any requests that
+    are blocked are changed to unblocked, and unblocked requests are inverted to blocked.
+    It is usually set to *no*.'
+  id: totrans-123
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*icmp-block-inversion*反转您的ICMP请求设置。被阻止的请求被改为未阻止，未阻止的请求被反转为阻止。通常设置为*no*。'
+- en: '*interfaces:* defines the network interface or interfaces that this zone is
+    applied to. Each interface may be bound to only one zone, and you may use the
+    same zone on multiple interfaces.'
+  id: totrans-124
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*interfaces:* 定义应用此区域的网络接口。每个接口可能仅绑定到一个区域，并且您可以在多个接口上使用相同的区域。'
+- en: '*source:* takes IP and MAC addresses, and IP address ranges. For example, you
+    can accept only packets from your local network, from specific hosts, or block
+    hosts or networks.'
+  id: totrans-125
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*source:* 接受IP和MAC地址以及IP地址范围。例如，您可以仅接受来自本地网络的数据包，来自特定主机的数据包，或者阻止主机或网络。'
+- en: '*services:* is the list of services managed by this zone.'
+  id: totrans-126
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*services:* 是由此区域管理的服务列表。'
+- en: '*ports:* list port numbers managed by this zone.'
+  id: totrans-127
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*ports:* 列出此区域管理的端口号。'
+- en: '*protocols:* list additional TCP protocols managed by this zone, as shown in
+    */etc/protocols*.'
+  id: totrans-128
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*protocols:* 列出由此区域管理的其他TCP协议，如*/etc/protocols*中所示。'
+- en: '*masquerade:* is either *yes* or *no*. Masquerading is for sharing an IPv4
+    internet connection. Set it to *no* on all hosts except routers.'
+  id: totrans-129
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*masquerade:* 可以设置为*yes*或*no*。Masquerade用于共享IPv4互联网连接。除了路由器外，所有主机都应将其设置为*no*。'
+- en: '*forward-ports:* is for forwarding packets that come in on one port to another
+    port.'
+  id: totrans-130
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*forward-ports:* 用于将进入一个端口的数据包转发到另一个端口。'
+- en: '*source-ports:* is for listing source ports.'
+  id: totrans-131
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*source-ports:* 用于列出源端口。'
+- en: '*icmp-blocks:* is for listing ICMP types to block.'
+  id: totrans-132
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*icmp-blocks:* 用于列出要阻止的ICMP类型。'
+- en: '*rich rules* are custom rules that you write.'
+  id: totrans-133
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*rich rules* 是您编写的自定义规则。'
+- en: See Also
+  id: totrans-134
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-135
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: '*man 5 firewalld.zone*'
+  id: totrans-136
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 firewalld.zone*'
+- en: '*man 1 firewall-cmd*'
+  id: totrans-137
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 firewall-cmd*'
+- en: 14.6 Listing and Querying Services
+  id: totrans-138
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.6 列出和查询服务
+- en: Problem
+  id: totrans-139
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to see a list of services that firewalld supports.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想查看firewalld支持的服务列表。
+- en: Solution
+  id: totrans-141
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *firewall-cmd* command:'
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*firewall-cmd*命令：
+- en: '[PRE18]'
+  id: totrans-143
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'That is rather a big glob. Convert it to nice tidy single column:'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 那是一个相当大的全局视图。将其转换为整洁的单列：
+- en: '[PRE19]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: Create more columns with *xargs -n2*, *xargs -n3*, and so on.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*xargs -n2*、*xargs -n3*等命令创建更多列。
+- en: 'firewalld services can be more than simple port addressing. For example, the
+    *bittorrent-lsd* service includes two destination IP addresses:'
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: firewalld服务不仅限于简单的端口地址。例如，*bittorrent-lsd*服务包括两个目标IP地址：
+- en: '[PRE20]'
+  id: totrans-148
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'The *ceph-mon* service opens two listening ports:'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*ceph-mon*服务打开了两个监听端口：'
+- en: '[PRE21]'
+  id: totrans-150
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: You may edit any of the predefined services to meet your requirements.
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以编辑任何预定义服务以满足您的需求。
+- en: Discussion
+  id: totrans-152
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: When you’re adding services to a zone, use their names exactly as they appear
+    in the list. You can create your own custom service; see “Add a Service” in the
+    [firewalld documentation](https://oreil.ly/kvMYY).
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您向区域添加服务时，请确保使用它们在列表中显示的名称。您可以创建自己的自定义服务；请参阅“在[firewalld文档](https://oreil.ly/kvMYY)中添加服务”。
+- en: See Also
+  id: totrans-154
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-155
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: “Add a Service” in the [firewalld documentation](https://oreil.ly/kvMYY)
+  id: totrans-156
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在[firewalld文档](https://oreil.ly/kvMYY)中的“添加服务”
+- en: 14.7 Selecting and Setting Zones
+  id: totrans-157
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.7 选择和设置区域
+- en: Problem
+  id: totrans-158
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know how to select and set the right zone.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想知道如何选择和设置正确的区域。
+- en: Solution
+  id: totrans-160
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The firewalld zone you select depends on which services your machine is running.
+    If your machine is not running any network services and needs only a network connection,
+    use the *drop* or the *block* zone. The *drop* zone is the most restrictive, dropping
+    all incoming connections requests, and allowing replies only to connections initiated
+    from the computer. *block* is like *drop*, except it sends rejection messages.
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您选择的firewalld区域取决于您的机器运行哪些服务。如果您的机器未运行任何网络服务且仅需要网络连接，请使用*drop*或*block*区域。*drop*区域最为严格，拒绝所有传入连接请求，并仅允许回复来自计算机发起的连接。*block*类似于*drop*，但它发送拒绝消息。
+- en: 'The other zones are configured differently on the different Linux distros,
+    so you need to see how they are configured on your system, like this example for
+    the *work* zone:'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不同Linux发行版上的其他区域配置不同，因此您需要查看系统上如何配置，例如*work*区域的示例：
+- en: '[PRE22]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'You must bind a zone to a network interface. The following example assigns
+    the *work* zone to eth0, then verifies it:'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您必须将区域绑定到网络接口。以下示例将*work*区域分配给eth0，然后进行验证：
+- en: '[PRE23]'
+  id: totrans-165
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'If you prefer to test changes before making them permanent, omit the *--permanent*
+    option. This creates a *runtime* configuration, and the change is immediately
+    applied. Runtime changes are lost when firewalld is restarted and when you run
+    *firewall-cmd --reload*. Convert runtime changes to permanent:'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您希望在永久应用更改之前测试更改，请省略*--permanent*选项。这将创建一个*运行时*配置，并立即应用更改。重新启动firewalld和运行*firewall-cmd
+    --reload*时，运行时更改将丢失。将运行时更改转换为永久更改：
+- en: '[PRE24]'
+  id: totrans-167
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: It is not necessary to reload the firewalld configuration when you bind a zone
+    to a network interface or restart firewalld.
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 绑定区域到网络接口或重新启动firewalld时，不需要重新加载firewalld配置。
+- en: Discussion
+  id: totrans-169
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: How do you know which zone to select? These are the predefined zones that come
+    with firewalld on Ubuntu 20.04, in order from most restrictive to least restrictive.
+    Zones may be configured a little differently on your Linux; see [Recipe 14.5](#rec-list-zones)
+    to learn how view your zone configurations.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如何知道选择哪个区域？这些是Ubuntu 20.04上带有firewalld的预定义区域，按照从最严格到最不严格的顺序排列。在您的Linux上，区域可能会稍有不同；查看[Recipe
+    14.5](#rec-list-zones)以了解如何查看您的区域配置。
+- en: 'The following list describes the default zones:'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下列出了默认区域：
+- en: '*drop*'
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*drop*'
+- en: All unsolicited incoming network packets are dropped, and there is no reply.
+    Only incoming packets that are replies to connections initiated from your computer
+    are allowed. This is the strongest protection when you are connected to an untrusted
+    network and don’t need to allow access for incoming SSH connections, shared files,
+    or any other external connection requests.
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有未经请求的传入网络数据包将被丢弃，并且不会有回复。仅允许回复到您的计算机发起的连接的传入数据包。当您连接到不受信任的网络并且不需要允许传入SSH连接、共享文件或任何其他外部连接请求时，这是最强的保护措施。
+- en: '*block*'
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*block*'
+- en: Any incoming network connections are rejected with an *icmp-host-prohibited*
+    message for IPv4, and *icmp6-adm-prohibited* for IPv6\. Only network connections
+    initiated from your system are allowed.
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 拒绝所有传入的网络连接请求，对于IPv4发送*icmp-host-prohibited*消息，对于IPv6发送*icmp6-adm-prohibited*消息。仅允许从您的系统发起的网络连接。
+- en: '*public*'
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*public*'
+- en: Incoming dhcpv6-client, ipp, ipp-client, mdns, and ssh connections are accepted,
+    all others are blocked.
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接受传入的dhcpv6-client、ipp、ipp-client、mdns和ssh连接，拒绝所有其他连接。
+- en: '*external*'
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*external*'
+- en: This is for a simple internet gateway, combining a firewall and simple routing.
+    Only incoming SSH connections are accepted, and IPv4 masqerading is enabled for
+    sharing an internet connection.
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是一个简单的互联网网关，结合了防火墙和简单的路由功能。仅接受传入的SSH连接，并且启用IPv4地址共享以共享互联网连接。
+- en: '*dmz*'
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*dmz*'
+- en: For computers in your demilitarized zone that are publicly accessible. Only
+    incoming SSH connections are accepted. (A DMZ is a separate network segment on
+    your network for internet-facing servers.)
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于公开访问的您的非军事区域中的计算机。仅接受传入的SSH连接。（DMZ是您网络上面向互联网服务器的单独网络段。）
+- en: '*work*'
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*work*'
+- en: Only incoming ssh and dhcpv6-client connections are accepted.
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只接受传入的ssh和dhcpv6-client连接。
+- en: '*home*'
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*home*'
+- en: Only incoming ssh, mdns samba-client, and dhcpv6-client connection requests
+    are accepted.
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只接受传入的ssh、mdns samba-client和dhcpv6-client连接请求。
+- en: '*internal*'
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*internal*'
+- en: Only incoming ssh, mdns, samba-client, and dhcpv6-client connection requests
+    are accepted.
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 仅接受传入的 ssh、mdns、samba-client 和 dhcpv6-client 连接请求。
+- en: '*trusted*'
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*trusted*'
+- en: All network connection requests are accepted.
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有网络连接请求均被接受。
+- en: You may customize any of these zones or create new zones; see [Recipe 14.9](#rec-custom-zones).
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以自定义任何这些区域或创建新区域；参见 [第 14.9 节](#rec-custom-zones)。
+- en: See Also
+  id: totrans-191
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 14.9](#rec-custom-zones)'
+  id: totrans-192
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 14.9 节](#rec-custom-zones)'
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-193
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: 14.8 Changing the Default firewalld Zone
+  id: totrans-194
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.8 更改默认的 firewalld 区域
+- en: Problem
+  id: totrans-195
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You don’t like your default firewalld zone and want to change it.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不喜欢默认的 firewalld 区域，想要更改它。
+- en: Solution
+  id: totrans-197
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Verify your current default:'
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 验证您当前的默认设置：
+- en: '[PRE25]'
+  id: totrans-199
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'Suppose you want *drop* as your default, because it is the most restrictive.
+    Set the new default with the *firewall-cmd* command:'
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设您希望将 *drop* 作为默认区域，因为它是最严格的。使用 *firewall-cmd* 命令设置新默认值：
+- en: '[PRE26]'
+  id: totrans-201
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: It is not necessary to reload the firewalld configuration or restart firewalld
+    when you use this command.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您使用此命令时，不需要重新加载 firewalld 配置或重新启动 firewalld。
+- en: Discussion
+  id: totrans-203
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You may assign zones with NetworkManager ([Recipe 14.11](#sec-networkman-firewalld)).
+    NetworkManager assigns the default zone to all connections that you do not explicitly
+    assign a zone to.
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 NetworkManager（[第 14.11 节](#sec-networkman-firewalld)）可以分配区域。NetworkManager
+    会将默认区域分配给所有未显式分配区域的连接。
+- en: See Also
+  id: totrans-205
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: The Discussion in [Recipe 14.7](#rec-host-firewall) to learn about firewalld
+    zones
+  id: totrans-206
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 参见 [第 14.7 节](#rec-host-firewall) 中的讨论以了解 firewalld 区域
+- en: '[Recipe 14.11](#sec-networkman-firewalld)'
+  id: totrans-207
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 14.11 节](#sec-networkman-firewalld)'
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-208
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: 14.9 Customizing firewalld Zones
+  id: totrans-209
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.9 自定义 firewalld 区域
+- en: Problem
+  id: totrans-210
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: None of the default zones meet your needs, and you want to modify the predefined
+    zones.
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认区域都不符合您的需求，您想修改预定义区域。
+- en: Solution
+  id: totrans-212
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Suppose you like the *internal* zone, but the default configuration isn’t quite
+    what you want. The current configuration allows *ssh*, *mdns*, *samba-client*,
+    and *dhcpv6-client*:'
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设您喜欢 *internal* 区域，但默认配置不完全符合您的要求。当前配置允许 *ssh*、*mdns*、*samba-client* 和 *dhcpv6-client*：
+- en: '[PRE27]'
+  id: totrans-214
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'The following example shows how to remove *samba-client* because you don’t
+    use Samba:'
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例显示如何删除 *samba-client*，因为您不使用 Samba：
+- en: '[PRE28]'
+  id: totrans-216
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'You are running a small local 389 Directory server, so you need to add the
+    LDAPS service:'
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您正在运行一个小型本地 389 目录服务器，因此需要添加 LDAPS 服务：
+- en: '[PRE29]'
+  id: totrans-218
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'These are temporary changes that will not survive a reboot or configuration
+    reload. However, they are immediately applied so that you can test them. Test
+    your changes, and if everything works as expected, make the changes permanent:'
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些是临时更改，不会在重新启动或重新加载配置后生效。但它们会立即应用，以便您可以测试它们。测试您的更改，如果一切按预期运行，请将更改变为永久：
+- en: '[PRE30]'
+  id: totrans-220
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'To discard the changes, do not use *--runtime-to-permanent*. Instead, use *--reload*
+    to discard the runtime changes and revert to your original configuration:'
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要放弃更改，请不要使用 *--runtime-to-permanent*。而是使用 *--reload* 来丢弃运行时更改，并恢复到原始配置：
+- en: '[PRE31]'
+  id: totrans-222
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: Discussion
+  id: totrans-223
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*--reload* does not interrupt any active connections.'
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*--reload* 不会中断任何活动连接。'
+- en: '*--complete-reload* reloads firewalld completely, including reloading kernel
+    modules, and terminates active connections. This is a good option when your runtime
+    changes are so messed up you want to start over.'
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*--complete-reload* 完全重新加载 firewalld，包括重新加载内核模块，并终止活动连接。当您的运行时变更混乱无法解决时，这是一个好选择。'
+- en: See Also
+  id: totrans-226
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: The Discussion in [Recipe 14.7](#rec-host-firewall) to learn about firewalld
+    zones
+  id: totrans-227
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 参见 [第 14.7 节](#rec-host-firewall) 中的讨论以了解 firewalld 区域
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-228
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: '[Chapter 4](ch04.xhtml#cha-systemd)'
+  id: totrans-229
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 4 章](ch04.xhtml#cha-systemd)'
+- en: 14.10 Creating a New Zone
+  id: totrans-230
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.10 创建新区域
+- en: Problem
+  id: totrans-231
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create a new custom zone.
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想创建一个新的自定义区域。
+- en: Solution
+  id: totrans-233
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Create an XML containing your zone configuration, then reload firewalld and
+    it is ready to use.
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建包含您的区域配置的 XML 文件，然后重新加载 firewalld，即可使用。
+- en: 'The following example creates a zone for local name services, with DNS and
+    DHCP servers on the same machine, and SSH access. The example file is named */etc/firewalld/zones/names.xml*:'
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例创建了一个用于本地名称服务的区域，具有同一台机器上的 DNS 和 DHCP 服务器以及 SSH 访问权限。示例文件名为 */etc/firewalld/zones/names.xml*：
+- en: '[PRE32]'
+  id: totrans-236
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'Run the *sudo firewall-cmd --get-zones* command, and your new zone will not
+    be listed. Add the *--permanent* option to see any new zones that are not yet
+    read by firewalld, and now the new “names” zone appears. Zone names are the filenames
+    without the *.xml* extension:'
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行 *sudo firewall-cmd --get-zones* 命令，您的新区域将不会列出。 添加 *--permanent* 选项以查看尚未被
+    firewalld 读取的任何新区域，现在新的“names”区域出现了。 区域名称是没有 *.xml* 扩展名的文件名：
+- en: '[PRE33]'
+  id: totrans-238
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'Reload firewalld:'
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新加载 firewalld：
+- en: '[PRE34]'
+  id: totrans-240
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'Now firewalld can read it, and you can see it with the other zones:'
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在 firewalld 可以读取它，并且您可以看到它与其他区域一起：
+- en: '[PRE35]'
+  id: totrans-242
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'And list its configuration:'
+  id: totrans-243
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并列出其配置：
+- en: '[PRE36]'
+  id: totrans-244
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: Your new zone is ready to use, and you can modify it just like any other zone.
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的新区域已准备就绪，您可以像任何其他区域一样修改它。
+- en: Discussion
+  id: totrans-246
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: See *man 5 firewalld.zone* to learn about configuration options and see the
+    source files for the predefined zones in */usr/lib/firewalld/zones/* to use as
+    examples. The only files that go in */etc/firewalld/zones/* are user custom files.
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看 *man 5 firewalld.zone* 了解配置选项，并查看 */usr/lib/firewalld/zones/* 中预定义区域的源文件作为示例。
+    唯一放在 */etc/firewalld/zones/* 中的文件是用户自定义文件。
+- en: Remove a zone by deleting its *.xml* file, and then reload firewalld.
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过删除其 *.xml* 文件来删除区域，然后重新加载 firewalld。
+- en: See Also
+  id: totrans-249
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 5 firewalld.zone*'
+  id: totrans-250
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 firewalld.zone*'
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-251
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: '[Recipe 14.9](#rec-custom-zones)'
+  id: totrans-252
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 14.9](#rec-custom-zones)'
+- en: 14.11 Integrating NetworkManager and firewalld
+  id: totrans-253
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.11 集成 NetworkManager 和 firewalld
+- en: Problem
+  id: totrans-254
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You travel between multiple networks, such as multiple work locations, coffee
+    shops, hotels, and coworking locations. You need to know how to set up NetworkManager
+    to keep up with these changes and always ensure that new connections are assigned
+    to the correct firewall zone.
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您在多个网络之间旅行，例如多个工作地点、咖啡店、酒店和共享工作场所。 您需要知道如何设置 NetworkManager 来跟上这些变化，并始终确保新连接分配到正确的防火墙区域。
+- en: Solution
+  id: totrans-256
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: NetworkManager includes firewalld integration. When you connect to a new network,
+    NetworkManager assigns it to your default firewalld zone.
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: NetworkManager 包含 firewalld 集成。 当您连接到新网络时，NetworkManager 将其分配给您的默认 firewalld
+    区域。
+- en: You may assign a nondefault zone to a particular connection with NetworkManager.
+    If you have the NetworkManager applet in your panel, click it to bring up the
+    Edit Connections dialog ([Figure 14-2](#fig-network-man-edit)).
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用 NetworkManager 将非默认区域分配给特定连接。 如果您的面板中有 NetworkManager 小程序，请单击它以显示“编辑连接”对话框（[Figure 14-2](#fig-network-man-edit)）。
+- en: '![Editing connections in NetworkManager.](Images/lcb2_1402.png)'
+  id: totrans-259
+  prefs: []
+  type: TYPE_IMG
+  zh: '![在 NetworkManager 中编辑连接。](Images/lcb2_1402.png)'
+- en: Figure 14-2\. Editing network connections in NetworkManager
+  id: totrans-260
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: Figure 14-2\. 在 NetworkManager 中编辑网络连接
+- en: Or, run the *nm-connection-editor* command to open the editor. Click Edit Connections,
+    click the connection you want to edit, and click the gear icon to open the editor.
+    This opens the editing dialog ([Figure 14-3](#fig-network-man-edit-2)).
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，运行 *nm-connection-editor* 命令打开编辑器。 点击“编辑连接”，点击要编辑的连接，然后点击齿轮图标打开编辑器。 这将打开编辑对话框（[Figure 14-3](#fig-network-man-edit-2)）。
+- en: '![Changing the firewall zone.](Images/lcb2_1403.png)'
+  id: totrans-262
+  prefs: []
+  type: TYPE_IMG
+  zh: '![更改防火墙区域。](Images/lcb2_1403.png)'
+- en: Figure 14-3\. Changing the firewall zone
+  id: totrans-263
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: Figure 14-3\. 更改防火墙区域
+- en: Go to the General tab and use the Firewall Zone drop-down menu to select the
+    zone you want for that connection. Save your change and you’re finished.
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 转到“常规”选项卡并使用防火墙区域下拉菜单选择您要为该连接选择的区域。 保存更改，完成设置。
+- en: See Also
+  id: totrans-265
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: The Discussion in [Recipe 14.7](#rec-host-firewall) to learn about firewalld
+    zones
+  id: totrans-266
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 通过 [Recipe 14.7](#rec-host-firewall) 中的讨论了解 firewalld 区域
+- en: '[Recipe 14.9](#rec-custom-zones)'
+  id: totrans-267
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 14.9](#rec-custom-zones)'
+- en: '[NetworkManager Reference Manual](https://oreil.ly/pvrwj)'
+  id: totrans-268
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[NetworkManager 参考手册](https://oreil.ly/pvrwj)'
+- en: 14.12 Allowing or Blocking Specific Ports
+  id: totrans-269
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.12 允许或阻止特定端口
+- en: Problem
+  id: totrans-270
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You are using nonstandard ports, for example, port 2022 for your SSH server.
+    You want to block port 22 and allow port 2022.
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您正在使用非标准端口，例如 SSH 服务器的端口 2022。 您希望阻止端口 22 并允许端口 2022。
+- en: Solution
+  id: totrans-272
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Any port that is not specifically allowed is denied for all firewalld zones,
+    except the *trusted* zone, which allows everything. If you were using the default
+    SSH service, which uses TCP port 22, first remove port 22 from the relevant zone,
+    then add port 2022, then reload firewalld. In this example the nonstandard port
+    is assigned to the *work* zone:'
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任何未明确允许的端口将被所有 firewalld 区域拒绝，除了 *trusted* 区域允许所有内容。 如果您正在使用默认的 SSH 服务，它使用 TCP
+    端口 22，请先从相关区域中移除端口 22，然后添加端口 2022，然后重新加载 firewalld。 在这个例子中，非标准端口分配给 *work* 区域：
+- en: '[PRE37]'
+  id: totrans-274
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'Verify by listing the zone configuration:'
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过列出区域配置来验证：
+- en: '[PRE38]'
+  id: totrans-276
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'When you are satisfied, make your changes permanent:'
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您满意时，请使您的更改永久化。
+- en: '[PRE39]'
+  id: totrans-278
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: Discussion
+  id: totrans-279
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'If you see a message like “Warning: NOT_ENABLED: 22:tcp” when you try to remove
+    that port, that means it was not enabled for that zone, and you can go ahead and
+    add your new port.'
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '如果您尝试删除该端口时看到类似“警告：NOT_ENABLED: 22:tcp”的消息，则表示该端口未在该区域启用，您可以继续添加您的新端口。'
+- en: 'When you use a nonstandard port, clients connecting to the service must specify
+    that port number. For example, for SSH:'
+  id: totrans-281
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您使用非标准端口时，连接到服务的客户端必须指定该端口号。例如，对于 SSH：
+- en: '[PRE40]'
+  id: totrans-282
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: How do you know what ports to use? Every service has its own default ports,
+    which you will find in the service’s documentation, and in the */etc/services*
+    file. You may use nonstandard ports, and they must be unused ports between 1024
+    and 49151\. Record your changes in */etc/services*. You also need to set your
+    nonstandard ports in the configuration for your server. See [Recipe 12.3](ch12.xhtml#rec-secure-server-ssh)
+    for an example.
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如何知道使用哪些端口？每个服务都有其自己的默认端口，在服务的文档和 */etc/services* 文件中可以找到。您可以使用非标准端口，这些端口必须是在
+    1024 到 49151 之间未使用的端口。请记录您对 */etc/services* 的更改。您还需要在服务器配置中设置您的非标准端口。参见 [Recipe
+    12.3](ch12.xhtml#rec-secure-server-ssh) 以查看示例。
+- en: See Also
+  id: totrans-284
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-285
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: '[Recipe 12.3](ch12.xhtml#rec-secure-server-ssh)'
+  id: totrans-286
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 12.3](ch12.xhtml#rec-secure-server-ssh)'
+- en: 14.13 Blocking IP Addresses with Rich Rules
+  id: totrans-287
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.13 使用丰富规则阻止 IP 地址
+- en: Problem
+  id: totrans-288
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to block certain IP addresses.
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要阻止某些 IP 地址。
+- en: Solution
+  id: totrans-290
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Create a *rich rule*, which defines the address to be blocked, and the target,
+    which in the example is *reject*. The following example blocks a single address,
+    and is added to the internal zone:'
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个定义要阻止的地址和目标（例如 *reject*）的 *rich rule*。以下示例阻止了单个地址，并将其添加到内部区域中。
+- en: '[PRE41]'
+  id: totrans-292
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: Test it by pinging from the blocked host. The blocked host should see the “Destination
+    Port Unreachable” message.
+  id: totrans-293
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过从被阻止的主机进行 ping 测试来测试它。被阻止的主机应该看到“目标端口不可达”的消息。
+- en: If you do not want to keep the rule, run *sudo firewall-cmd --reload* to delete
+    it.
+  id: totrans-294
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您不想保留该规则，请运行 *sudo firewall-cmd --reload* 来删除它。
+- en: 'To make it permanent, use the *--runtime-to-permanent* option:'
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使其永久化，使用 *--runtime-to-permanent* 选项：
+- en: '[PRE42]'
+  id: totrans-296
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: 'List the rich rules in a zone:'
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出区域中的丰富规则：
+- en: '[PRE43]'
+  id: totrans-298
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: 'To delete a permanent rich rule, use the *--remove-rich-rule* option:'
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要删除永久的丰富规则，请使用 *--remove-rich-rule* 选项：
+- en: '[PRE44]'
+  id: totrans-300
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: 'You don’t have to completely block the offending host, but you can apply blocks
+    to specific services. The following example blocks the source address only for
+    the SSH service:'
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您无需完全阻止有问题的主机，但可以将阻止应用于特定服务。以下示例仅为 SSH 服务的源地址阻止：
+- en: '[PRE45]'
+  id: totrans-302
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: Discussion
+  id: totrans-303
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You may create multiple rich rules in a zone, though be careful to avoid conflicts.
+  id: totrans-304
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在一个区域中创建多个丰富规则，但请注意避免冲突。
+- en: Once upon a time, a person I had the dubious pleasure of working with thought
+    it was funny to practice penetration testing on his coworkers. Our team ran a
+    number of test servers on our workstations and made them available to the team.
+    Our wannabe pen-tester was so annoying, we all blocked him at our firewalls.
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 曾经，我曾与一个有幸一起工作的人合作，他觉得在同事身上进行渗透测试很有趣。我们团队在工作站上运行了许多测试服务器，并向团队提供了这些服务器。我们那位想成为渗透测试员的人非常讨厌，我们都在防火墙上封锁了他。
+- en: See Also
+  id: totrans-306
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: The Discussion in [Recipe 14.7](#rec-host-firewall) to learn about firewalld
+    zones and options
+  id: totrans-307
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 参见 [Recipe 14.7](#rec-host-firewall) 了解 firewalld 的区域和选项
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-308
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: '*man 5 firewalld.richlanguage*'
+  id: totrans-309
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 firewalld.richlanguage*'
+- en: 14.14 Changing a Zone Default Target
+  id: totrans-310
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 14.14 更改区域的默认目标
+- en: Problem
+  id: totrans-311
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to change the default target for a zone.
+  id: totrans-312
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要更改区域的默认目标。
+- en: Solution
+  id: totrans-313
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'List the current target:'
+  id: totrans-314
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出当前的目标：
+- en: '[PRE46]'
+  id: totrans-315
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: 'Change it from *ACCEPT* to *REJECT*, then reload and verify:'
+  id: totrans-316
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将其从 *ACCEPT* 更改为 *REJECT*，然后重新加载并验证：
+- en: '[PRE47]'
+  id: totrans-317
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: Discussion
+  id: totrans-318
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'The zone target defines the default action for packets that do not match any
+    rules. It takes one of four values: *default*, *ACCEPT*, *DROP*, or *REJECT*.'
+  id: totrans-319
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 区域目标定义了不匹配任何规则的数据包的默认操作。它可以是以下四个值之一：*default*、*ACCEPT*、*DROP* 或 *REJECT*。
+- en: See Also
+  id: totrans-320
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://firewalld.org*](https://firewalld.org)'
+  id: totrans-321
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://firewalld.org*](https://firewalld.org)'
+- en: The Discussion in [Recipe 14.5](#rec-list-zones) to learn about firewalld zones
+  id: totrans-322
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 参见 [Recipe 14.5](#rec-list-zones) 了解 firewalld 区域的讨论
+- en: '[Recipe 14.11](#sec-networkman-firewalld)'
+  id: totrans-323
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 14.11](#sec-networkman-firewalld)'

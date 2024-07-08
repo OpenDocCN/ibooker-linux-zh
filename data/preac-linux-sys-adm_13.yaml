@@ -1,0 +1,1119 @@
+- en: Chapter 13\. Securing Your System
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第13章：保护你的系统
+- en: System security is the application of configurations, software, policies, rules,
+    and best practices to a system (whether it’s new or years old) so that the system
+    operates without significant downtime due to security breaches and compromises.
+    As a system administrator, security is your most important and time-consuming
+    task.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统安全是将配置、软件、政策、规则和最佳实践应用于系统（无论是新的还是多年前的），以使系统在不因安全漏洞和妥协而导致显著停机时间的情况下运行。作为系统管理员，安全是你最重要和耗时的任务。
+- en: This chapter concentrates on the prevention of security problems. Discovery
+    and mitigation are briefly covered. You will learn how to secure both newly deployed
+    systems and systems that have been in operation for years. No single treatment
+    is comprehensive because new threats and vulnerabilities arise on what seems like
+    a daily basis. You will learn how to apply basic security settings to your Linux
+    systems. Because many larger companies have their own standards, the security
+    settings I recommend are a good place to start, but you should always comply with
+    corporate security protocols and policies.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章专注于预防安全问题。发现和减轻风险只是简单提及。你将学习如何保护新部署的系统和长期运行的系统。没有一个单一的处理方法是全面的，因为看似每天都会出现新的威胁和漏洞。你将学习如何将基本安全设置应用于你的Linux系统。因为许多大型公司都有自己的标准，我推荐的安全设置是一个很好的起点，但你应该始终遵守公司的安全协议和政策。
+- en: Protecting the Root Account
+  id: totrans-3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 保护根账户
+- en: The root user account is the all-powerful account on every Linux system, and
+    you must protect access to it. If someone compromises this account, they can lock
+    you out, destroy the system, steal data, or maintain control of it and use it
+    to pivot to and compromise other systems within your network. Never write down
+    or share the root password with anyone outside the system administrators group.
+    If you use a database or other secure password manager to generate and store passwords,
+    ensure that you exercise extreme security measures around those applications.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根用户账户是每个Linux系统上的超级账户，你必须保护对它的访问。如果有人入侵了这个账户，他们可以将你锁在外面，摧毁系统，窃取数据，或者继续控制它并用它来进入和攻击你网络内的其他系统。永远不要把根密码写下来或与系统管理员组外的任何人分享。如果你使用数据库或其他安全密码管理器来生成和存储密码，请确保在这些应用程序周围采取极端的安全措施。
+- en: Beyond the protection of regular user accounts (with password complexity, length,
+    and expiration), you have the ultimate responsibility of protecting the root account
+    as a system administrator. System user account passwords can be shared, written
+    down, stolen via phishing, or given verbally to someone attempting to exploit
+    a user via social engineering tactics. For these reasons, passwords, no matter
+    how complex, are still vulnerable to many different types of attacks and should
+    be replaced with passwordless key files, whose creation and use are covered later
+    in this chapter.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了保护常规用户账户（具有复杂性、长度和过期时间的密码）之外，作为系统管理员，你还有责任保护根账户。系统用户账户密码可以共享、写下、通过钓鱼窃取，或口头给予试图通过社会工程学策略利用用户的人。因此，无论密码多么复杂，仍然容易受到许多不同类型的攻击，并且应该用无密码密钥文件替换，其创建和使用在本章后面有详细介绍。
+- en: The next section helps you understand the balance you must find and maintain
+    between securing a system and locking it down so tightly that users will be tempted
+    to circumvent security altogether by creating rogue systems or local virtual machines
+    that likely have little to no security measures in place.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一节将帮助你了解必须找到和保持的平衡，即保护系统的安全性并不至于将其严密锁定以至于用户会尝试绕过安全性，通过创建流氓系统或本地虚拟机来进行攻击，这些系统可能几乎没有任何安全措施。
+- en: Finding the Balance Between Security and Usability
+  id: totrans-7
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 在安全性和可用性之间找到平衡
+- en: As we’ve established, security is your greatest responsibility. However, you
+    must also support usable systems. The most secure system is powered off and locked
+    away, but it’s also not usable. Therefore, you have to strike a balance between
+    a system that is secure for everyone and one that’s also usable.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如我们所言，安全是你的最大责任。然而，你也必须支持可用的系统。最安全的系统是关机并锁起来的，但它也是不可用的。因此，你必须在安全和可用性之间取得平衡。
+- en: Systems must have users, software, files, and network connections to be useful.
+    All of these make your system less secure but more usable.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统必须具有用户、软件、文件和网络连接才能发挥作用。所有这些都会降低系统的安全性，但提高可用性。
+- en: 'Your job is to do the following:'
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的工作是执行以下任务：
+- en: Maintain systems so they’re secure from over-the-network attacks
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 维护系统，使其免受网络攻击
+- en: Protect the system from careless users
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 保护系统免受粗心用户的影响
+- en: Protect users from one another
+  id: totrans-13
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 保护用户免受彼此的影响
+- en: Protect the system’s configurations and data from everyone except those with
+    appropriate access granted to them.
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 保护系统的配置和数据，只允许具有适当访问权限的人访问。
+- en: In the following sections, you’ll learn how to perform these functions.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接下来的章节中，您将学习如何执行这些功能。
+- en: Minimizing Your System’s Attack Surface
+  id: totrans-16
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 减少系统的攻击面
+- en: Have you ever seen a reenactment of a duel on television or in a movie? Notice
+    that the participants turn sideways to each another with one arm outstretched
+    and holding the dueling pistol while holding the other hand behind them. This
+    “dueling” stance minimizes their exposed shootable surface, making them harder
+    to hit. By decreasing the target size, you also decrease the chances of a fatal
+    strike. You should protect your systems by decreasing their attackable surface
+    in the same way, exposing only what you must to support normal user operation.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您是否曾在电视或电影中看过决斗的再现？请注意，参与者会相向而立，一只手伸出持有决斗手枪，另一只手则在身后。这种“决斗”姿势可以减少他们的可击中表面，使他们更难被命中。通过减小目标大小，您还可以减少致命打击的可能性。您应该通过同样的方式减少系统的攻击表面，只暴露必要的部分以支持正常用户操作。
+- en: You must carefully select which services to install when installing a new system.
+    For example, when I install a Red Hat–based server system, I use a minimal installation
+    option that usually includes only the SSH service. I add services and packages
+    as required to keep my systems’ footprints purposely small and focused on a single
+    task. I never install a graphical user interface (GUI) or graphical display manager
+    onto a server system because of the security vulnerabilities inherent in these
+    user-friendly interfaces.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装新系统时，您必须仔细选择要安装的服务。例如，当我安装基于Red Hat的服务器系统时，我通常使用最小安装选项，通常仅包括SSH服务。根据需要添加服务和软件包，以保持系统的足迹小而专注于单一任务。我从不在服务器系统上安装图形用户界面(GUI)或图形显示管理器，因为这些用户友好界面固有的安全漏洞。
+- en: Checking for and removing a GUI
+  id: totrans-19
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 检查并移除GUI
+- en: 'To check if your system has a graphical display manager, issue the following
+    command:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要检查您的系统是否具有图形显示管理器，请执行以下命令：
+- en: '[PRE0]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'If the response is anything but `multi-user.target`, run the following command
+    to correct it:'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果回复不是`multi-user.target`，请运行以下命令进行纠正：
+- en: '[PRE1]'
+  id: totrans-23
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Check for the installation of a GUI or graphical display manager:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查GUI或图形显示管理器的安装情况：
+- en: '[PRE2]'
+  id: totrans-25
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'If you receive any response, it might look similar to the following:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您收到任何回复，它可能看起来类似于以下内容：
+- en: '[PRE3]'
+  id: totrans-27
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'You might also see packages similar to `xorg-x11-server-common` and `xorg-x11-server-utils`.
+    If you see any of these packages, issue the following command to remove them.
+    Use the specific package name corresponding to your system’s installed package:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可能看到类似`xorg-x11-server-common`和`xorg-x11-server-utils`的软件包。如果看到这些软件包之一，请执行以下命令将其移除。请使用与您系统安装的特定软件包名称对应的名称：
+- en: '[PRE4]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Creating single-purpose systems
+  id: totrans-30
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 创建单一用途系统
+- en: At a minimum, each of your systems needs an SSH server. It’s a secure method
+    of connecting and managing systems. Unused services make your system vulnerable
+    and are entry points for system- and network-wide compromise. You should install
+    your systems using a server or a minimal install option and add services as required
+    after installation and setup.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个系统至少需要一个SSH服务器。这是一种安全的连接和管理系统的方法。未使用的服务会使您的系统变得容易受攻击，并成为系统和网络广泛妥协的入口点。您应该使用服务器或最小安装选项安装系统，并在安装和设置后根据需要添加服务。
+- en: If your distribution doesn’t have a server or minimal install option, then you
+    must selectively uninstall any service or software package that isn’t explicitly
+    required for the system’s prescribed purpose. Let’s examine how to create systems
+    with a single purpose.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的发行版没有服务器或最小安装选项，那么您必须选择性地卸载任何不明确需要用于系统指定目的的服务或软件包。让我们来看看如何创建单一用途系统。
+- en: Virtualization and cloud computing have allowed businesses to focus on a single
+    service per system. Because of hardware costs, we used physical systems as servers
+    rather than virtualization hosts and had to stack multiple services on a single
+    system. Virtualization host systems can serve dozens of virtual machines or hundreds
+    of container systems, each performing a single business task, such as a web server,
+    database server, or application server.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虚拟化和云计算使企业能够专注于每个系统一个服务。由于硬件成本，我们曾将物理系统用作服务器而不是虚拟化主机，并且不得不在单个系统上堆叠多个服务。虚拟化主机系统可以为数十个虚拟机或数百个容器系统提供服务，每个执行单一的业务任务，如Web服务器、数据库服务器或应用服务器。
+- en: 'Building a system that hosts a single service is much easier than paring down
+    one that has existed for some time. However, as part of your system administrator
+    duties, you should perform security “sweeps” of any system under your management.
+    And a security sweep or audit includes examining the system for unused and outdated
+    services that cause it to be vulnerable to attack. A security sweep consists of
+    checking listening ports on the local machine using the following commands:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '构建一个仅托管单一服务的系统比精简存在已久的系统要简单得多。然而，作为系统管理员职责的一部分，您应对管理的任何系统执行安全“扫描”。安全扫描或审核包括使用以下命令检查本地计算机上的监听端口： '
+- en: '[PRE5]'
+  id: totrans-35
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'These two commands provide a list of listening daemons (services). The interface
+    `0.0.0.0` is all interfaces. Services accessible only on the local system listen
+    on `127.0.0.1` (`localhost` or `loopback`). Malicious actors often set up an exfiltration
+    service disguised as a web service, DNS service, or other legitimate service to
+    fool system administrators and port scanners. You should check the legitimacy
+    of all listening processes on your systems:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这两个命令提供了监听守护进程（服务）列表。接口`0.0.0.0`代表所有接口。仅在本地系统上可访问的服务监听`127.0.0.1`（`localhost`或`loopback`）。恶意行为者经常设置成外流服务伪装成Web服务、DNS服务或其他合法服务来愚弄系统管理员和端口扫描器。您应检查系统中所有监听进程的合法性：
+- en: '[PRE6]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'For example in the */etc/httpd/conf/httpd.conf* file (or your specific Apache
+    configuration file), there are two possible configurations, but you may only use
+    one or the other. You must comment the one you don’t wish to use. Here is the
+    excerpt from *httpd.conf*:'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，在*/etc/httpd/conf/httpd.conf*文件（或您特定的Apache配置文件）中，有两种可能的配置，但您只能使用其中一种。您必须注释掉您不希望使用的那一个。以下是*httpd.conf*的摘录：
+- en: '[PRE7]'
+  id: totrans-39
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: You may specify a particular network interface and port (`Listen 127.0.0.1:80`)
+    or a port to listen on all interfaces (`Listen 80`). The former configuration
+    ensures that only local system users may use the web service. While a local-only
+    web server isn’t very practical, it illustrates how to limit access to a network
+    service.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以指定特定的网络接口和端口（`Listen 127.0.0.1:80`）或监听所有接口的端口（`Listen 80`）。前一种配置确保只有本地系统用户可以使用Web服务。虽然仅限本地的Web服务器不太实用，但它说明了如何限制对网络服务的访问。
+- en: 'You should perform an `autoremove` to remove unused software from your system:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 执行`autoremove`命令可删除系统中未使用的软件：
+- en: '[PRE8]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: This command removes any leftover software package dependencies from an incomplete
+    uninstall or insufficient package removal cleanup.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此命令移除任何未完整卸载或未充分清理软件包残留的软件包依赖关系。
+- en: Warning
+  id: totrans-44
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Remember that enabling any over-the-network listening daemon or service puts
+    your system at potential risk. Protect all services with secure protocols, firewalls,
+    access control lists, and IP restrictions as necessary.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请记住，启用任何通过网络监听的守护进程或服务都会使您的系统面临潜在风险。必须通过安全协议、防火墙、访问控制列表和必要的IP限制来保护所有服务。
+- en: The next section discusses security for user accounts.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一节讨论用户账户的安全性。
+- en: Creating and Securing User Accounts
+  id: totrans-47
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 创建和保护用户账户
+- en: As soon as you create a user account on your system, your system’s security
+    is weakened. However, as you know, user accounts are a requirement. It is a rare
+    system with no user accounts other than the root account. Service accounts are
+    common user accounts, even with no interactive shell. Having no shell means no
+    one may interactively log in as that user and issue shell commands. Most systems
+    have interactive shell user accounts so that regular users may log in and issue
+    commands, compile software, connect to other systems, and use resources such as
+    storage and data.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦在您的系统上创建用户帐户，系统的安全性就会降低。但是，正如您所知，用户帐户是必需的。除了root帐户以外几乎没有没有用户帐户的系统。服务帐户是常见的用户帐户，即使没有交互式外壳。没有外壳意味着没有人可以交互式地登录为该用户并发出外壳命令。大多数系统都有交互式外壳用户帐户，以便常规用户可以登录并发出命令，编译软件，连接到其他系统并使用存储和数据等资源。
+- en: The biggest problem with interactive user accounts is weak passwords. Weak passwords
+    threaten your system’s security. There are at least two methods of mitigating
+    this problem. One is to set up your system to require strong passwords by creating
+    and enforcing a strong password policy. Another is to disable password use in
+    favor of SSH key files so that users can connect to other systems without a password.
+    You can also configure multifactor authentication (MFA) using various free or
+    commercial tools. MFA implementation is beyond the scope of this book.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 交互式用户帐户的最大问题是弱密码。弱密码威胁您系统的安全性。至少有两种方法可以减轻这个问题。一种方法是通过制定和执行强密码策略来设置系统要求强密码。另一种方法是禁用密码使用，而改用SSH密钥文件，以便用户可以在不需要密码的情况下连接到其他系统。您还可以使用各种免费或商业工具配置多因素认证（MFA）。本书不涉及MFA的实施。
+- en: Creating and enforcing a strong password policy
+  id: totrans-50
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 制定并执行强密码策略
+- en: 'On Red Hat Enterprise Linux–based systems, the */etc/security/pwquality.conf*
+    file is the configuration file that allows system administrators to set and enforce
+    corporate password policies. The following is a complete listing of that file:'
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在基于Red Hat Enterprise Linux的系统中，*/etc/security/pwquality.conf*文件是允许系统管理员设置和执行企业密码策略的配置文件。以下是该文件的完整列表：
+- en: '[PRE9]'
+  id: totrans-52
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Connecting to other systems via passwordless key files
+  id: totrans-53
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 通过无密码密钥文件连接到其他系统
+- en: Capturing passwords through packet sniffing or keylogger programs is a common
+    method of compromising systems when unsuspecting users connect from one system
+    to another using passwords. One of the best methods of password capture prevention
+    is to discontinue the use of passwords altogether. Using key files, users may
+    connect from one system to another without the need to interactively enter a password.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过数据包嗅探或键盘记录程序捕获密码是一种常见的系统妥协方法，当毫无戒心的用户使用密码从一个系统连接到另一个系统时。密码捕获的最佳方法之一是完全停止使用密码。使用密钥文件，用户可以在不需要交互输入密码的情况下从一个系统连接到另一个系统。
+- en: Setting up key files between systems is trivial but a little time-consuming.
+    Ultimately, it increases security because no passwords are traveling across networks,
+    written on sticky notes, or so simple that anyone can guess them.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在系统之间设置密钥文件是微不足道但稍显耗时的。最终，这提高了安全性，因为没有密码在网络上传输，也没有写在便签上，或者简单到任何人都能猜出来。
+- en: Creating the key file
+  id: totrans-56
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+  zh: 创建密钥文件
+- en: Remote login via key files provides you with a more secure connection between
+    remote systems than using passwords.  Without going into great detail about how
+    private/public key authentication works, which you can certainly research on your
+    own, realize that using key files doesn’t pass an encrypted or unencrypted password
+    to another system. There is no usable data (passwords) for an attacker to capture,
+    so brute-force attacks against encrypted information aren’t possible. Creating
+    a private/public key pair is easy.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过密钥文件的远程登录为您提供了比使用密码更安全的远程系统之间的连接。不详细讨论私钥/公钥身份验证的工作原理（您可以自行研究），使用密钥文件不会将加密或未加密的密码传递到另一个系统。对于攻击者来说，没有可用的数据（密码），因此无法对加密信息进行暴力破解攻击。创建私钥/公钥对非常简单。
+- en: 'The following example uses two Linux systems, `server1` and `server2`. You
+    can see in the following code that you haven’t configured remote login via key
+    files between these two systems:'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例使用两个Linux系统，`server1`和`server2`。您可以在以下代码中看到，您尚未配置这两个系统之间的通过密钥文件的远程登录：
+- en: '[PRE10]'
+  id: totrans-59
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'Run the following commands on both systems to set up your private/public key
+    pair between these two:'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这两个系统上运行以下命令来设置您之间的私钥/公钥对：
+- en: '[PRE11]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: The default encryption algorithm is RSA, but both RSA and DSA algorithms are
+    old, and you shouldn’t use them. The newer elliptical curve digital signature
+    algorithm (ECDSA) is currently the best option. And while this algorithm accepts
+    256- and 384-bit encryption, use 521 for maximum protection. You may optionally
+    provide a passphrase to protect your key file pair further. Providing a passphrase
+    ensures that even if your private key is stolen, it can’t be used without the
+    passphrase.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认加密算法是RSA，但RSA和DSA算法都已经过时，您不应该使用它们。较新的椭圆曲线数字签名算法（ECDSA）目前是最佳选择。虽然此算法接受256位和384位加密，但使用521位以获得最大保护。您可以选择提供一个密码来进一步保护您的密钥文件对。提供密码确保即使您的私钥被盗，也不能在没有密码的情况下使用它。
+- en: Note
+  id: totrans-63
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The three available key sizes are 256, 384, and 521\. No, the `521` you see
+    in the command isn’t an error. One would think the next available key size would
+    be 512, but for ECDSA, it is 521.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可用的三种密钥大小为256、384和521。不，你在命令中看到的`521`不是错误。人们可能会认为下一个可用的密钥大小将是512，但对于ECDSA来说，它是521。
+- en: 'Copy the ID from one server to another using the following command:'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用以下命令将ID从一个服务器复制到另一个服务器：
+- en: '[PRE12]'
+  id: totrans-66
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'As the message suggests, try to log into `server2`:'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如消息所建议的那样，尝试登录到`server2`：
+- en: '[PRE13]'
+  id: totrans-68
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: You have successfully created the key pair and may now log in from `server1`
+    to `server2` without a password. Your next question should be, “Is this passwordless
+    login only valid from `server1` to `server2` (unidirectional), or is it bidirectional
+    (`server2` to `server1`)?”
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您已成功创建密钥对，现在可以从`server1`登录到`server2`而无需密码。您的下一个问题应该是：“这种无密码登录只能从`server1`到`server2`（单向），还是双向的（`server2`到`server1`）？”
+- en: 'To answer the question, try to log in from `server2` to `server1`:'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要回答这个问题，请尝试从`server2`登录到`server1`：
+- en: '[PRE14]'
+  id: totrans-71
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'The answer is no. The key pair is unidirectional. To set up a reciprocal login
+    (`server2` to `server1`), you must repeat the process for `server2`:'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 答案是否定的。密钥对是单向的。要设置双向登录（`server2`到`server1`），您必须为`server2`重复该过程：
+- en: '[PRE15]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: You may now connect bidirectionally between `server1` and `server2` using key
+    pair authentication. If you want to learn more about SSH, encryption protocols,
+    and security-related topics, please visit the [OpenSSH website](https://oreil.ly/ontmn).
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您可以使用密钥对认证在`server1`和`server2`之间进行双向连接。如果您想了解更多关于SSH、加密协议和安全相关主题的信息，请访问[OpenSSH网站](https://oreil.ly/ontmn)。
+- en: Adding extra security to SSHD
+  id: totrans-75
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+  zh: 添加额外的SSHD安全性
+- en: 'You should secure your SSHD by accepting key file authentication if it’s not
+    already set up. You can check by issuing the following command:'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你应该通过接受密钥文件认证来保护你的SSHD，如果尚未设置。您可以通过执行以下命令进行检查：
+- en: '[PRE16]'
+  id: totrans-77
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Uncomment this line and restart the SSHD service. If you filter on the word
+    “password,” you will find the following line in */etc/ssh/sshd_config*:'
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 取消注释此行并重新启动SSHD服务。如果您过滤“password”一词，您将在*/etc/ssh/sshd_config*中找到以下行：
+- en: '[PRE17]'
+  id: totrans-79
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: This line allows users to connect and log in with a username and password. This
+    line is a requirement for setting up key-based authentication. (Refer to the preceding
+    subsection, where we saw that you must log in via username and password to copy
+    your key to the remote system.)
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此行允许用户使用用户名和密码连接和登录。此行是设置基于密钥的身份验证的要求。（请参阅上一小节，在那里我们看到您必须通过用户名和密码登录以将您的密钥复制到远程系统。）
+- en: Warning
+  id: totrans-81
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: If you change `PasswordAuthentication yes` to `Password​Authenti⁠cation no`,
+    you will exclude users who do not already have their key-based authentication
+    configured, because they will not be able to log in with a username and password.
+    You’ll have to manually configure each user account unless you use some automation.
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您将`PasswordAuthentication yes`更改为`Password​Authenti⁠cation no`，您将排除尚未配置其基于密钥的认证的用户，因为他们将无法使用用户名和密码登录。除非您使用某种自动化，否则您将需要手动配置每个用户帐户。
+- en: The preceding warning is one of those decision points that you must make as
+    a system administrator—finding the balance between usability and security. On
+    the one hand, your attempt to increase security by removing passwords from remote
+    connectivity is admirable. Still, on the other hand, you must leave password authentication
+    intact to enable users to create their key pairs for secure connectivity. My best
+    advice is to disable passwords and handle the task for your users because if you
+    leave this significant security step to your users, your systems may go unsecured
+    for months or years. Should you decide not to disable password authentication,
+    please increase password complexity, shorten the expiration interval to no more
+    than 90 days, and enforce nonrepeated passwords.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 前面的警告是作为系统管理员必须做出的决策点之一——在可用性和安全性之间找到平衡。一方面，您试图通过从远程连接中删除密码来增加安全性是令人钦佩的。但另一方面，您必须保留密码身份验证，以便用户可以创建他们自己的密钥对进行安全连接。我的最佳建议是禁用密码并为您的用户处理此任务，因为如果您将这一重要的安全步骤留给用户，您的系统可能会在数月或数年内未受保护。如果您决定不禁用密码身份验证，请增加密码复杂性，缩短过期间隔至不超过
+    90 天，并强制执行不重复使用的密码。
+- en: Implementing Advanced Security Measures
+  id: totrans-84
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 实施高级安全措施
+- en: The definition of *advanced* is certainly up for debate. For me, advanced means
+    security measures that generally conform to the Security Technical Implementation
+    Guide (STIG) as described in the [National Institute of Standards and Technology
+    (NIST) 800-53](https://oreil.ly/E1G1b) and related documents. The so-called “STIGging”
+    of a system protects it from over-the-network attacks and local system attacks.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: “高级”的定义肯定是一个有争议的问题。对我来说，高级意味着安全措施通常符合国家标准与技术研究所 (NIST) 800-53 和相关文件中描述的安全技术实施指南
+    (STIG)。所谓的“STIGging”系统保护它免受网络攻击和本地系统攻击。
+- en: Note
+  id: totrans-86
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Remember that even using STIG to secure a system is not a foolproof security
+    method, but it’s a great standard for setting up new systems. It would be best
+    to use it to secure your inherited systems.
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请记住，即使使用 STIG 来保护系统也不是绝对安全的方法，但它是建立新系统的良好标准。最好使用它来保护您继承的系统。
+- en: STIGs are generally used for government contractor–owned systems involved in
+    Department of Defense projects that must comply with strict data-handling regulations.
+    Still, they apply to any system, hosting sensitive data or not. It would help
+    if you implemented as many of these items as practical, especially those in the
+    high severity list. [Figure 13-1](#the_findings_and_severity_levels_of_the) shows
+    each guideline’s number and severity for reference.
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: STIG 通常用于参与国防部项目的政府承包商拥有的系统，这些系统必须遵守严格的数据处理规定。但它们适用于任何系统，无论是否托管敏感数据。您应尽可能地实施这些项目，特别是高严重性列表中的项目。[图
+    13-1](#the_findings_and_severity_levels_of_the) 显示了每个指南的编号和严重性以供参考。
+- en: '![](assets/plsa_1301.png)'
+  id: totrans-89
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_1301.png)'
+- en: Figure 13-1\. The findings and severity levels of the Red Hat Enterprise Linux
+    8 STIG
+  id: totrans-90
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 13-1\. 红帽企业 Linux 8 STIG 的发现和严重级别
+- en: The next section discusses applying these controls to your systems.
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一节将讨论将这些控制项应用于您的系统。
+- en: Applying STIG Security Controls
+  id: totrans-92
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 应用 STIG 安全控制
+- en: Applying a list of STIG controls is a time-consuming task. However, as you read
+    through the controls, you’ll find that you can automate most configurations necessary
+    to comply with the standard. And some STIGs provide you with downloadable scripts
+    to make compliance easier. While the STIG shown in [Figure 13-1](#the_findings_and_severity_levels_of_the)
+    is Red Hat Enterprise Linux–specific, these standards apply to all Linux distributions
+    used in businesses and government offices. Information related to an Ubuntu STIG
+    is available on the [Ubuntu DISA page](https://oreil.ly/Bob4c).
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 应用一系列 STIG 控制是一项耗时的任务。然而，当您阅读这些控制项时，您会发现大多数必要的配置可以自动化完成以符合标准。而且，一些 STIG 提供了可下载的脚本，以便更轻松地实现合规性。尽管所示的
+    STIG 是针对红帽企业 Linux 的，但这些标准适用于企业和政府办公室中使用的所有 Linux 发行版。有关 Ubuntu STIG 的信息可在 [Ubuntu
+    DISA 页面](https://oreil.ly/Bob4c) 上找到。
+- en: If you create “golden” images for your systems, which I highly recommend, you
+    can develop a STIG image with the security controls already in place. New, revised
+    STIGs are released when necessary and usually contain only a few new security
+    fixes that you can place on your systems via script or some automation tool. Updating
+    a golden image twice per year is probably enough to keep your systems updated
+    so that new controls will be easy to distribute.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您为系统创建“黄金”镜像（我强烈建议这样做），您可以开发一个已经设置了安全控制的 STIG 镜像。新的、修订后的 STIG 会根据需要发布，并且通常只包含一些新的安全修复，您可以通过脚本或某些自动化工具将这些修复应用于您的系统。每年更新一次“黄金”镜像可能足以保持系统更新，以便轻松分发新的控制措施。
+- en: To implement STIG controls, begin with the Category I (High severity) controls
+    and apply those first. If you have systems that you feel might be vulnerable,
+    immediately implement all Category I security controls. Currently, for Red Hat
+    Enterprise Linux 8, there are only 21 such controls, so the effort required is
+    minimal. For Category II (Medium severity) controls, you should employ an audit
+    tool because there are more than 300 Category II controls.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要实施 STIG 控制措施，请从第一类别（高严重性）控制措施开始，并首先应用这些控制措施。如果您认为某些系统可能存在漏洞，立即实施所有第一类别安全控制措施。目前，针对
+    Red Hat Enterprise Linux 8，只有 21 个这样的控制措施，因此所需的工作量是最少的。对于第二类别（中等严重性）控制措施，您应该使用审计工具，因为有超过
+    300 个第二类别控制措施。
+- en: Installing and Using Security Tools
+  id: totrans-96
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 安装和使用安全工具
+- en: There are dozens of commercial and free security tools that you can use to better
+    protect your systems. The following three tools used with STIG can greatly enhance
+    your systems’ security. As stated previously, you should install and run these
+    tools at least once before deploying your systems onto a live network. An initial
+    run provides you with a baseline assessment. Keep these initial reports to compare
+    with those you run in the future.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有数十种商业和免费的安全工具可用于更好地保护您的系统。以下三种工具与 STIG 结合使用可以极大增强您系统的安全性。正如前文所述，您应该在将系统部署到实时网络之前至少安装并运行这些工具一次。初步运行将为您提供一个基线评估。保留这些初步报告以便将来与您运行的报告进行比较。
+- en: I highly recommend the following short list of security tools. All new systems
+    should have these tools installed and an initial run completed before system production
+    deployment. These security tools have served me well and are well-accepted in
+    many enterprise environments.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 强烈建议使用以下几款安全工具。所有新系统应在系统生产部署之前安装这些工具，并完成初步运行。这些安全工具在许多企业环境中表现良好并得到广泛接受。
+- en: Lynis
+  id: totrans-99
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: Lynis
+- en: Lynis is a lighter-weight vulnerability checker than the Security Content Automation
+    Protocol (SCAP) and STIG tools. However, it is not a replacement for those tools
+    if you must comply with the Department of Defense or other government security
+    standards. Lynis is a security auditing tool that checks your servers’ system
+    and software configurations.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Lynis 是一个比安全内容自动化协议（SCAP）和 STIG 工具更轻量级的漏洞检测工具。但是，如果您必须符合国防部或其他政府安全标准，它并不能替代这些工具。Lynis
+    是一个安全审计工具，用于检查您服务器的系统和软件配置。
+- en: 'Install the Lynis package via your package manager, and then run a system audit:'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过您的软件包管理器安装 Lynis 软件包，然后运行系统审核：
+- en: '[PRE18]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: Once the audit is complete, I usually `grep` for `Suggestion`, as shown here,
+    to obtain a list of recommended security fixes. The list might be quite lengthy.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 审计完成后，我通常使用 `grep` 搜索 `Suggestion`，如下所示，以获取推荐安全修复的列表。这个列表可能非常长。
+- en: '[PRE19]'
+  id: totrans-104
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'You can refer to this list, make corrections and fixes, and rerun the system
+    audit. I recommend continuing to do this until there are no more recommended fixes
+    or to get the list to a point where the recommendations (suggestions) do not apply
+    to your system. The following is an excerpt from my suggestion list:'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以参考此列表，进行更正和修复，并重新运行系统审核。我建议继续这样做，直到没有更多建议的修复或者将列表推荐的修复不再适用于您的系统为止。以下是我的建议列表摘录：
+- en: '[PRE20]'
+  id: totrans-106
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: An example of something I can ignore is the */etc/issue* and */etc/issue.net*
+    legal notice. My systems are private virtual machines, and I’m the only one who
+    uses them. You will likely see a long list of SSH hardening suggestions. It would
+    be best if you implemented these. Some sysadmins create “golden” images from systems
+    that have passed through a Lynis “cleansing” so they can deploy a clean image.
+    Of course, Lynis should be run regularly to maintain this status. A scheduled
+    `cron` job is a good solution for creating regular reports.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我可以忽略的一个示例是*/etc/issue*和*/etc/issue.net*的法律声明。我的系统是私有虚拟机，只有我使用它们。您可能会看到一长串SSH加固建议。您应该实施这些建议。一些系统管理员从经过Lynis“清理”的系统创建“黄金”映像，以便部署一个干净的映像。当然，应定期运行Lynis以维护此状态。定期报告的计划`cron`作业是一个很好的解决方案。
+- en: Portsentry
+  id: totrans-108
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: Portsentry
+- en: Portsentry runs in memory and attempts to detect network port scans and then
+    ban the offending hosts’ IP address via *hosts.deny*, firewall rules, `ipchains`
+    and `iptables` entries, or dropped routes.
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Portsentry在内存中运行，并尝试检测网络端口扫描，然后通过*hosts.deny*、防火墙规则、`ipchains`和`iptables`条目或丢弃的路由禁止违规主机的IP地址。
+- en: 'The following ports defined in */etc/portsentry/portsentry.conf* are “activated.”
+    You may add custom ports or remove port numbers at will. In the Ubuntu implementation,
+    this is the default list of ports:'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在*/etc/portsentry/portsentry.conf*中定义的以下端口是“激活”的。您可以随意添加自定义端口或删除端口号。在Ubuntu实现中，这是默认的端口列表：
+- en: '[PRE21]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'The default action is to drop the route back to the scanning host:'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认操作是将路由返回到扫描主机：
+- en: '[PRE22]'
+  id: totrans-113
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'I also use the */etc/hosts.deny* entry by uncommenting the following line:'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我还通过取消注释以下行使用*/etc/hosts.deny*条目：
+- en: '[PRE23]'
+  id: totrans-115
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: This ensures that the route to the host is blocked and the IP address is blocked
+    in */etc/hosts.deny*. The entries from */etc/hosts.deny* and *route* look like
+    the result from a scan (the scanning host is `192.168.1.234`).
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确保主机的路由被阻止并且IP地址在*/etc/hosts.deny*中被阻止。*/etc/hosts.deny*和*路由*中的条目看起来像扫描的结果（扫描主机为`192.168.1.234`）。
+- en: 'From */etc/hosts.deny*:'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 来自*/etc/hosts.deny*：
+- en: '[PRE24]'
+  id: totrans-118
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'From the *route* table:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 来自*路由*表：
+- en: '[PRE25]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'Here are some entries from */var/log/syslog* that identify the offending system:'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面是*/var/log/syslog*中标识违规系统的一些条目：
+- en: '[PRE26]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: Portsentry is a handy little utility that’s always been one of my security layers.
+    You can see that it effectively eliminates connectivity from a particular host.
+    If you have a DMZ host, you should use Portsentry on it because it will be scanned
+    multiple times daily.
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Portsentry是一个非常有用的小工具，一直是我的安全层之一。您可以看到它有效地阻止了来自特定主机的连接。如果您有一个DMZ主机，应该在其上使用Portsentry，因为它每天会被扫描多次。
+- en: Advanced Intrusion and Detection Environment
+  id: totrans-124
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 高级入侵检测环境
+- en: 'Advanced Intrusion and Detection Environment (AIDE) is an intrusion-detection
+    system for checking file integrity. Install AIDE from a repository:'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 高级入侵检测环境（AIDE）是用于检查文件完整性的入侵检测系统。从存储库安装AIDE：
+- en: '[PRE27]'
+  id: totrans-126
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: If you do not use a Red Hat–based system, the installation proceeds differently.
+    On Ubuntu (and I assume on all Debian-based systems), the installer steps you
+    through a postfix configuration and creates multiple configuration files under
+    */etc/aide*. The Ubuntu implementation is different from the Red Hat Enterprise
+    Linux–based one. Differences are noted in the text. Before using AIDE, you must
+    first initialize its database with the following command. This process takes a
+    few minutes to complete.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您不使用基于Red Hat的系统，安装过程将有所不同。在Ubuntu（我认为在所有基于Debian的系统上都是如此），安装程序会引导您完成后缀配置，并在*/etc/aide*下创建多个配置文件。Ubuntu的实现与基于Red
+    Hat Enterprise Linux的实现不同。文本中已经注意到了这些差异。在使用AIDE之前，您必须首先使用以下命令初始化其数据库。此过程需要几分钟完成。
+- en: '[PRE28]'
+  id: totrans-128
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'You can initialize the AIDE database on Ubuntu with a similar command (script),
+    which executes `aide –init`:'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用类似的命令（脚本）在Ubuntu上初始化AIDE数据库，执行`aide –init`：
+- en: '[PRE29]'
+  id: totrans-130
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'On Red Hat Enterprise Linux–based systems, you must perform one last task before
+    checking your system:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在基于Red Hat Enterprise Linux的系统上，您必须在检查系统之前执行最后一个任务：
+- en: '[PRE30]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: You can perform a check on Ubuntu systems without copying the file. The Ubuntu
+    install completes the task for you. However, if you run `sudo aide --check`, you
+    receive the error `Couldn't open file /var/lib/aide/please-dont-call-aide-without-parameters/aide.db
+    for reading`.
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在Ubuntu系统上执行检查，而无需复制文件。Ubuntu安装程序会为您完成此任务。但是，如果您运行`sudo aide --check`，您会收到错误`Couldn't
+    open file /var/lib/aide/please-dont-call-aide-without-parameters/aide.db for reading`。
+- en: 'The Ubuntu system shows a positive report for changes. It’s lengthy but illustrates
+    the type of report you’ll see when AIDE detects changes. The report provides details
+    of changes made to files:'
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ubuntu 系统显示了一份对变更的正面报告。虽然冗长，但它说明了当 AIDE 检测到变更时，您会看到的报告类型。报告提供了对文件所做更改的详细信息：
+- en: '[PRE31]'
+  id: totrans-135
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'You can also run an update that checks and updates the database, but the input
+    and output databases must differ. The output from this command is also rather
+    lengthy and is truncated because of that length. But the part I show here is the
+    summary rather than the detailed view. This update was executed on an Ubuntu system
+    but worked the same on Red Hat Enterprise Linux–based systems using the `sudo
+    aide.wrapper --update` command:'
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以运行一个检查和更新数据库的更新，但输入和输出数据库必须不同。该命令的输出也相当冗长，因此被截断。但我在这里展示的是摘要而不是详细视图。此更新在
+    Ubuntu 系统上执行，但在基于 Red Hat Enterprise Linux 的系统上使用 `sudo aide.wrapper --update`
+    命令同样有效：
+- en: '[PRE32]'
+  id: totrans-137
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: As you can see, you might receive false positives because some files change
+    often, but it’s worth the slight annoyance to have a file integrity check that
+    works. The next section is an overview of responding to security incidents, including
+    internal and external system breaches.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如您所见，您可能会收到误报，因为一些文件经常更改，但为了保证文件完整性检查的工作是值得的。下一节是回应安全事件的概述，包括内部和外部系统漏洞的情况。
+- en: Responding to Security Incidents
+  id: totrans-139
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 回应安全事件
+- en: A security incident ranges from a user allowing  another user access to their
+    account, to a clever user attempting to crack the root user’s password, to a full
+    security breach by a malicious outside actor or advanced persistent threat. I’ve
+    witnessed these, plus many other types of security incidents. One of the least-pleasant
+    tasks that any sysadmin performs is responding to a security incident. Your worst
+    day imaginable is when you discover a security breach or someone tells you, “We’ve
+    been hacked.” These words are going to ruin an otherwise uneventful day.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安全事件范围从用户允许另一个用户访问其帐户，到聪明用户试图破解 root 用户的密码，再到恶意外部参与者或高级持续性威胁的全面安全漏洞。我目睹了这些情况，以及许多其他类型的安全事件。任何系统管理员执行的最不愉快的任务之一是应对安全事件。你能想象到的最糟糕的一天是当你发现安全漏洞或有人告诉你，“我们被黑了”。这些话会毁掉一个本来平静无事的日子。
+- en: A well-written security policy is the best defense against insider threats,
+    such as someone trying to crack the root user’s passwords or sharing credentials
+    between users. These incidents should be recorded and reported to management,
+    and policy-driven action should be taken to prevent future occurrences of these
+    types of security breaches. The story goes differently for external breaches because
+    corporate policies do not bind malicious actors outside your organization.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一份写得好的安全政策是防范内部威胁的最佳防线，比如有人试图破解 root 用户密码或者在用户之间共享凭证。这些事件应该记录并报告给管理层，并采取政策驱动的措施来防止此类安全漏洞的未来发生。对于外部漏洞，情况则不同，因为企业政策不约束组织外的恶意参与者。
+- en: The topics covered in this section deal with handling security incidents that
+    occur from internal and external actors.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本节涵盖处理由内部和外部参与者引发的安全事件的主题。
+- en: Creating a Written Security Policy
+  id: totrans-143
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 制定书面安全政策
+- en: Writing a security policy is a manageable task. Many examples are freely available
+    online. A quick search turns up hundreds of possibilities. Select one or more
+    generic policy examples and adapt them to your organization. All security incidents
+    are serious and should be handled as such. Even the simple sharing of usernames
+    and passwords between friendly coworkers is a violation and should be dealt with
+    immediately and sternly. Violating security policy is often grounds for reprimand,
+    termination, and criminal prosecution.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 编写安全政策是一项可以管理的任务。许多示例可以在网上免费找到。快速搜索会找到数百种可能性。选择一个或多个通用的政策示例，并适应到你的组织。所有的安全事件都很严重，都应该予以重视。即使是友好同事之间简单地共享用户名和密码也是一种违规行为，应立即严肃处理。违反安全政策往往是受到警告、解雇甚至刑事起诉的理由。
+- en: Each employee should be given a copy of the written security policy and should
+    sign that they’ve read and understood the policy and the consequences of its violation.
+    Annual security refresher courses should reinforce corporate security policy standards,
+    expectations, and violation consequences.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每位员工应该收到一份书面安全政策副本，并签署表示他们已阅读并理解该政策及其违反后果。年度安全复习课程应强化公司的安全政策标准、期望和违规后果。
+- en: Confirming the Breach
+  id: totrans-146
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 确认违规
+- en: You must confirm that a breach has occurred and to what extent the breach has
+    compromised intellectual property, financial records, employee information, and
+    other valuable information and data. Depending on your specific regulatory requirements
+    from the Securities and Exchange Commission, Department of Defense, and other
+    authorities, some breaches must be reported to law enforcement upon discovery
+    and confirmation.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您必须确认是否发生了违规行为，以及违规行为对知识产权、财务记录、员工信息和其他宝贵信息和数据造成了何种程度的损害。根据您从证券交易委员会、国防部和其他当局的具体监管要求，发现和确认后有些违规行为必须向执法部门报告。
+- en: If you aren’t classified under one of the many regulatory authorities, you might
+    find that you’re on your own for confirming and dealing with a breach. You should
+    contact a third-party security firm that deals with breach discovery to assist
+    in your efforts.
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您不属于众多监管机构的一员，您可能会发现您需要自行确认并处理违规行为。您应当联系一家处理违规发现的第三方安全公司，以协助您的努力。
+- en: The first course of action is to remove compromised systems from the network.
+    Unplug their network connections and disable WiFi adapters. Leave the systems
+    powered on. Load your forensic tools offline onto the affected systems and perform
+    a disk clone of the system before performing any mitigation. The duplicated disk
+    may prove valuable to law enforcement in tracking the suspects.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一步是将受损系统从网络中移除。拔掉它们的网络连接并禁用WiFi适配器。保持系统开启状态。将您的取证工具离线加载到受影响的系统上，并在执行任何缓解操作之前对系统进行磁盘克隆。复制的磁盘可能对执法部门追踪嫌疑人很有价值。
+- en: Identifying the Malicious Actor(s)
+  id: totrans-150
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 识别恶意行为者
+- en: Identifying internal actors is often far easier than identifying those from
+    an external source. Law enforcement, including the FBI, the Department of Homeland
+    Security, the NSA, and other agencies, might help with the investigation if the
+    threat is thought to be from a foreign source. Attackers cover their tracks by
+    removing log files, exfiltrating data in small amounts, and pivoting from one
+    system to another to remain inside your network undetected for months or years.
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常情况下，识别内部行为者比识别外部来源要容易得多。包括FBI、国土安全部、NSA和其他机构的执法部门可能会在威胁来自外部来源时帮助进行调查。攻击者通过删除日志文件、分批窃取数据并在不被察觉的情况下在您的网络内部系统之间进行转移，以保持未被发现数月甚至数年的状态。
+- en: If you suspect a malicious group or foreign government-sponsored collective
+    has breached your network or stolen intellectual property, your best option is
+    to contact law enforcement and the FBI. If your company is a contractor protected
+    by the Department of Defense or another agency, the FBI or NSA might contact you
+    about a breach before you know it has occurred. In these cases, it’s best to provide
+    those authorities with any information, data, and access they request. Identifying,
+    stopping, and prosecuting cybercriminals is a high priority for government agencies.
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您怀疑一个恶意组织或外国政府支持的集体已经侵入了您的网络或窃取了知识产权，您最好的选择是联系执法部门和联邦调查局（FBI）。如果您的公司是国防部或其他机构保护的承包商，FBI或NSA可能会在您发现发生违规之前与您联系。在这些情况下，最好向当局提供他们要求的任何信息、数据和访问权限。识别、阻止和起诉网络犯罪分子是政府机构的首要任务。
+- en: Taking Corrective Actions
+  id: totrans-153
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 采取纠正措施
+- en: Once you’ve confirmed a breach and evaluated the damage, it’s time to take corrective
+    action, including scanning and cleaning files, enabling host-based firewalls,
+    encrypting data, and reimaging systems. The actions you take will be dictated
+    by the extent of the breach and actions taken by the malicious actors. Good backups,
+    a disaster recovery plan, encrypted data, and multilayer security will help you
+    recover from a breach.
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦确认了违规行为并评估了损害情况，就是时候采取纠正措施了，包括扫描和清理文件、启用基于主机的防火墙、加密数据和重新镜像系统。你所采取的措施将取决于违规的程度以及恶意行为者采取的行动。良好的备份、灾难恢复计划、加密数据和多层安全措施将有助于您从违规中恢复。
+- en: You should report any breach to local law enforcement and take any recommended
+    actions. If the breach is ongoing, inform law enforcement that the breach is ongoing
+    so that they can take action or notify other agencies on your behalf.
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您应当向当地执法部门报告任何违规行为并采取任何建议的措施。如果违规行为仍在进行中，请通知执法部门违规行为仍在进行中，以便他们能够采取行动或代表您通知其他机构。
+- en: Unfortunately, when an attack’s breadth and depth aren’t clear, it’s recommended
+    to reimage key systems offline and apply all security measures before bringing
+    them back onto the corporate network.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不幸的是，当攻击的广度和深度不明确时，建议离线重置关键系统，并在将其重新引入企业网络之前应用所有安全措施。
+- en: Summary
+  id: totrans-157
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 概要
+- en: Network and system security are ongoing efforts, not a “set it and forget it”
+    scenario. Security requires constant vigilance, advanced training, regular software
+    and hardware patching, automated system software, and multiple layers of security
+    from MFA, firewalls, encryption, secure tools, secure development, and user training.
+    It’s wise to engage an external security firm to assist in the secure design and
+    protection of your network and assets.
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 网络和系统安全是持续的工作，而不是“安装完成就可以忘记”的情况。安全需要持续的警惕、高级培训、定期软件和硬件补丁、自动化系统软件以及来自多重安全层的安全性，包括MFA、防火墙、加密、安全工具、安全开发和用户培训。明智的做法是聘请外部安全公司协助设计和保护您的网络和资产。

@@ -1,0 +1,3463 @@
+- en: Chapter 3\. Shells and Scripting
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第3章 终端和脚本
+- en: In this chapter, we’ll focus on interacting with Linux on the terminal, that
+    is, via the shell that exposes a command-line interface (CLI). It is vitally important
+    to be able to use the shell effectively to accomplish everyday tasks, and to that
+    end we focus on usability here.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们将专注于通过终端与Linux交互，即通过提供命令行界面（CLI）的shell。能够有效地使用shell来完成日常任务非常重要，因此我们在这里着重介绍了其可用性。
+- en: First, we review some terminology and provide a gentle and concise introduction
+    to shell basics. Then we have a look at modern, human-friendly shells, such as
+    the Fish shell. We’ll also look at configuration and common tasks in the shell.
+    Then, we move on to the topic of how to effectively work on the CLI using a terminal
+    multiplexer, enabling you to work with multiple sessions, local or remote. In
+    the last part of this chapter, we switch gears and focus on automating tasks in
+    the shell using scripts, including best practices for writing scripts in a safe,
+    secure, and portable manner and also how to lint and test scripts.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我们将回顾一些术语，并对shell基础进行简要而清晰的介绍。然后我们会看一些现代、易用的shell，比如Fish shell。我们还会探讨shell中的配置和常见任务。接下来，我们会讨论如何使用终端复用器有效地在CLI上工作，从而使你能够处理多个会话，无论是本地还是远程。在本章的最后部分，我们会转变视角，专注于如何使用脚本自动化shell中的任务，包括安全、可靠和可移植的脚本编写最佳实践，以及如何对脚本进行lint和测试。
+- en: 'There are two major ways to interact with Linux, from a CLI perspective. The
+    first way is manually—that is, a human user sits in front of the terminal, interactively
+    typing commands and consuming the output. This ad-hoc interaction works for most
+    of the things you want to do in the shell on a day-to-day basis, including the
+    following:'
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从CLI的角度来看，与Linux交互有两种主要方式。第一种方式是手动操作，即人类用户坐在终端前，交互地输入命令并消耗输出。这种即兴的交互对于你在日常基础上想要在shell中完成的大部分事情都有效，包括以下内容：
+- en: Listing directories, finding files, or looking for content in files
+  id: totrans-4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 列出目录，查找文件，或在文件中查找内容
+- en: Copying files between directories or to remote machines
+  id: totrans-5
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在不同目录之间复制文件，或将文件复制到远程机器
+- en: Reading emails or the news or sending a Tweet from the terminal
+  id: totrans-6
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 从终端阅读电子邮件或新闻，或者从终端发送推文
+- en: Further, we’ll learn how to conveniently and efficiently work with multiple
+    shell sessions at the same time.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，我们还将学习如何在同一时间方便高效地处理多个shell会话。
+- en: The other mode of operation is the automated processing of a series of commands
+    in a special kind of file that the shell interprets for you and in turn executes.
+    This mode is usually called *shell scripting* or just *scripting*. You typically
+    want to use a script rather than manually repeating certain tasks. Also, scripts
+    are the basis of many config and install systems. Scripts are indeed very convenient.
+    However, they can also pose a danger if used without precautions. So, whenever
+    you think about writing a script, keep the XKCD web comic shown in [Figure 3-1](#fig-xkcd-automation)
+    in mind.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种操作模式是一系列命令的自动处理，这些命令包含在一种特殊的文件中，shell会解释并执行这些命令。这种模式通常称为*shell脚本*或简称*脚本*。通常情况下，你应该使用脚本而不是手动重复某些任务。此外，脚本是许多配置和安装系统的基础。脚本确实非常方便。但是，如果不加预防地使用，它们也可能带来危险。因此，每当你考虑编写脚本时，请记住[XKCD网络漫画](https://oreil.ly/GSKUb)第3-1图。
+- en: '![lmlx 0301](Images/lmlx_0301.png)'
+  id: totrans-9
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0301](Images/lmlx_0301.png)'
+- en: 'Figure 3-1\. XKCD on [automation](https://oreil.ly/GSKUb). *Credit*: Randall
+    Munroe (shared under CC BY-NC 2.5 license)'
+  id: totrans-10
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图3-1\. XKCD关于[自动化](https://oreil.ly/GSKUb)。*授权*：Randall Munroe（根据CC BY-NC 2.5许可共享）
+- en: I strongly recommend that you have a Linux environment available and try out
+    the examples shown here right away. With that, are you ready for some (inter)action?
+    If so, then let’s start with some terminology and basic shell usage.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我强烈建议你准备好一个Linux环境，并立即尝试这里展示的示例。有了这些，你准备好进行一些（互动）操作了吗？如果是这样，那么让我们从一些术语和基本shell使用开始。
+- en: Basics
+  id: totrans-12
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 基础
+- en: Before we get into different options and configurations, let’s focus on some
+    basic terms such as *terminal* and *shell*. In this section I’ll define the terminology
+    and show you how to accomplish everyday tasks in the shell. We’ll also review
+    modern commands and see them in action.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们深入研究不同选项和配置之前，让我们专注于一些基本术语，比如*终端*和*shell*。在本节中，我将定义这些术语，并展示如何在shell中完成日常任务。我们还将回顾现代命令并看到它们的实际应用。
+- en: Terminals
+  id: totrans-14
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 终端
+- en: 'We start with the terminal, or terminal emulator, or soft terminal, all of
+    which refer to the same thing: a *terminal* is a program that provides a textual
+    user interface. That is, a terminal supports reading characters from the keyboard
+    and displaying them on the screen. Many years ago, these used to be integrated
+    devices (keyboard and screen together), but nowadays terminals are simply apps.'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们从终端开始，或者终端仿真器，或软终端，它们都指的是同一物事：*终端* 是提供文本用户界面的程序。也就是说，终端支持从键盘读取字符并在屏幕上显示它们。许多年前，这些是集成设备（键盘和屏幕在一起），但现在终端只是应用程序。
+- en: In addition to the basic character-oriented input and output, terminals support
+    so-called [*escape sequences*, or *escape codes*](https://oreil.ly/AT5qC), for
+    cursor and screen handling and potentially support for colors. For example, pressing
+    Ctrl+H causes a backspace, which deletes the character to the left of the cursor.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了基本的面向字符的输入和输出之外，终端还支持所谓的 [*转义序列* 或 *转义代码*](https://oreil.ly/AT5qC)，用于光标和屏幕处理以及可能的颜色支持。例如，按下
+    Ctrl+H 会导致退格，删除光标左侧的字符。
+- en: 'The environment variable `TERM` has the terminal emulator in use, and its configuration
+    is available via `infocmp` as follows (note that the output has been shortened):'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 环境变量 `TERM` 指定正在使用的终端仿真器，并且其配置通过 `infocmp` 可以如下查看（注意输出已经被缩短）：
+- en: '[PRE0]'
+  id: totrans-18
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO1-1)'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO1-1)'
+- en: The output of `infocmp` is not easy to digest. If you want to learn about the
+    capabilities in detail, consult the [terminfo](https://oreil.ly/qjwiv) database.
+    For example, in my concrete output, the terminal supports 80 columns (`cols#80`)
+    and 24 lines (`lines#24`) for output as well as 256 colors (`colors#0x100`, in
+    hexadecimal notation).
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`infocmp` 的输出不容易理解。如果你想详细了解能力，请查阅 [terminfo](https://oreil.ly/qjwiv) 数据库。例如，在我的具体输出中，终端支持80列
+    (`cols#80`) 和24行 (`lines#24`) 的输出以及256色 (`colors#0x100`，十六进制表示法)。'
+- en: Examples of terminals include not only `xterm`, `rxvt`, and the Gnome terminator
+    but also new generation ones that utilize the GPU, such as [Alacritty](https://oreil.ly/zm9M9),
+    [kitty](https://oreil.ly/oxyMn), and [warp](https://oreil.ly/WBG9S).
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 终端的例子不仅包括 `xterm`，`rxvt` 和 Gnome 终止器，还包括利用 GPU 的新一代终端，例如 [Alacritty](https://oreil.ly/zm9M9)，[kitty](https://oreil.ly/oxyMn)
+    和 [warp](https://oreil.ly/WBG9S)。
+- en: In [“Terminal Multiplexer”](#terminal-mux), we will come back to the topic of
+    the terminal.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [“终端复用器”](#terminal-mux) 中，我们将再次回到终端这个主题。
+- en: Shells
+  id: totrans-23
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Shells
+- en: Next up is the *shell*, a program that runs inside the terminal and acts as
+    a command interpreter. The shell offers input and output handling via streams,
+    supports variables, has some built-in commands you can use, deals with command
+    execution and status, and usually supports both interactive usage as well as scripted
+    usage ([“Scripting”](#scripting)).
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来是 *shell*，它是一个在终端内运行并作为命令解释器的程序。shell 通过流处理输入和输出，支持变量，具有一些内置命令可供使用，处理命令执行和状态，并通常支持交互式使用以及脚本化使用（[“脚本化”](#scripting)）。
+- en: The shell is formally defined in [`sh`](https://oreil.ly/ISxwU), and we often
+    come across the term [POSIX shell](https://oreil.ly/rkfqG), which will become
+    more important in the context of scripts and portability.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell 的正式定义在[`sh`](https://oreil.ly/ISxwU)中已明确定义，并且我们经常遇到术语[POSIX shell](https://oreil.ly/rkfqG)，在脚本和可移植性的背景下，这将变得更为重要。
+- en: Originally, we had the Bourne shell `sh`, named after the author, but nowadays
+    it’s usually replaced with the [bash](https://oreil.ly/C9coL) shell—a wordplay
+    on the original version, short for “Bourne Again Shell”—which is widely used as
+    the default.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最初，我们有 Bourne shell `sh`，以作者命名，但现在通常用 [bash](https://oreil.ly/C9coL) shell 取而代之——这是对原始版本的一个双关语，缩写为
+    “Bourne Again Shell”，被广泛用作默认。
+- en: If you are curious about what you’re using, use the `file -h /bin/sh` command
+    to find out, or if that fails, try `echo $0` or `echo $SHELL`.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你对自己使用的内容感兴趣，请使用 `file -h /bin/sh` 命令查找，或者如果失败了，请尝试 `echo $0` 或 `echo $SHELL`。
+- en: Note
+  id: totrans-28
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: In this section, we assume the bash shell (`bash`), unless we call it out explicitly.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我们默认使用 bash shell (`bash`），除非我们明确指出。
+- en: There are many more implementations of `sh` as well as other variants, such
+    as the Korn shell, `ksh`, and C shell, `csh`, which are not widely used today.
+    We will, however, review modern `bash` replacements in [“Human-Friendly Shells”](#human-friendly-shells).
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有许多 `sh` 的实现以及其他变种，例如 Korn shell `ksh` 和 C shell `csh`，但今天并不广泛使用。然而，我们将在 [“用户友好的
+    shell”](#human-friendly-shells) 中审查现代的 `bash` 替代方案。
+- en: 'Let’s start our shell basics with two fundamental features: streams and variables.'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们从两个基本特性开始我们的Shell基础：流和变量。
+- en: Streams
+  id: totrans-32
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 流
+- en: Let’s start with the topic of input (streams) and output (streams), or I/O for
+    short. How can you feed a program some input? How do you control where the output
+    of a program lands, say, on the terminal or in a file?
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们从输入（流）和输出（流）或简称I/O的主题开始。如何为程序提供输入？如何控制程序的输出去向，比如在终端或文件中？
+- en: 'First off, the shell equips every process with three default file descriptors
+    (FDs) for input and output:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，Shell为每个进程配备了三个默认的文件描述符（FD），用于输入和输出：
+- en: '`stdin` (FD 0)'
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`stdin`（FD 0）'
+- en: '`stdout` (FD 1)'
+  id: totrans-36
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`stdout`（FD 1）'
+- en: '`stderr` (FD 2)'
+  id: totrans-37
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`stderr`（FD 2）'
+- en: These FDs are, as depicted in [Figure 3-2](#fig-shell-streams), by default connected
+    to your screen and keyboard, respectively. In other words, unless you specify
+    something else, a command you enter in the shell will take its input (`stdin`)
+    from your keyboard, and it will deliver its output (`stdout`) to your screen.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如图[Figure 3-2](#fig-shell-streams)所示，这些FD默认连接到您的屏幕和键盘。换句话说，除非指定其他方式，否则在Shell中输入的命令将从键盘输入（`stdin`），并将输出（`stdout`）发送到屏幕。
+- en: 'The following shell interaction demonstrates this default behavior:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的Shell交互演示了这种默认行为：
+- en: '[PRE1]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: In the preceding example using `cat`, you see the defaults in action. Note that
+    I used Ctrl+C (shown as `^C`) to terminate the command.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在前面使用`cat`的示例中，您可以看到默认行为。请注意，我使用Ctrl+C（显示为`^C`）来终止命令。
+- en: '![lmlx 0302](Images/lmlx_0302.png)'
+  id: totrans-42
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0302](Images/lmlx_0302.png)'
+- en: Figure 3-2\. Shell I/O default streams
+  id: totrans-43
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图3-2\. Shell I/O 默认流
+- en: If you don’t want to use the defaults the shell gives you—for example, you don’t
+    want `stderr` to be outputted on the screen but want to save it in a file—you
+    can [redirect](https://oreil.ly/pOIjp) the streams.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果不想使用Shell默认设置——例如，不希望`stderr`输出到屏幕而想将其保存到文件中——可以将流[重定向](https://oreil.ly/pOIjp)。
+- en: You redirect the output stream of a process using `$FD>` and `<$FD`, with `$FD`
+    being the file descriptor—for example, `2>` means redirect the `stderr` stream.
+    Note that `1>` and `>` are the same since `stdout` is the default. If you want
+    to redirect both `stdout` and `stderr`, use `&>`, and when you want to get rid
+    of a stream, you can use `/dev/null`.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`$FD>`和`<$FD`重定向进程的输出流，其中`$FD`是文件描述符——例如，`2>`表示重定向`stderr`流。请注意，`1>`和`>`是一样的，因为`stdout`是默认的。如果想要同时重定向`stdout`和`stderr`，可以使用`&>`；如果想要丢弃某个流，可以使用`/dev/null`。
+- en: 'Let’s see how that works in the context of a concrete example, downloading
+    some HTML content via `curl`:'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们通过具体例子来看看它是如何运行的，通过`curl`下载一些HTML内容：
+- en: '[PRE2]'
+  id: totrans-47
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO2-1)'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO2-1)'
+- en: Discard all output by redirecting both `stdout` and `stderr` to */dev/null*.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过将`stdout`和`stderr`都重定向到`/dev/null`来丢弃所有输出。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO2-2)'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO2-2)'
+- en: Redirect the output and status to different files.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将输出和状态重定向到不同的文件。
+- en: '[![3](Images/3.png)](#co_shells_and_scripting_CO2-3)'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_shells_and_scripting_CO2-3)'
+- en: Interactively enter input and save to file; use Ctrl+D to stop capturing and
+    store the content.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 交互地输入并保存到文件；使用Ctrl+D停止捕获并存储内容。
+- en: '[![4](Images/4.png)](#co_shells_and_scripting_CO2-4)'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_shells_and_scripting_CO2-4)'
+- en: Lowercase all words, using the `tr` command that reads from `stdin`.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用从`stdin`读取的`tr`命令将所有单词转换为小写。
+- en: 'Shells usually understand a number of special characters, such as:'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell通常理解一些特殊字符，例如：
+- en: Ampersand (`&`)
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 和号（`&`）
+- en: Placed at the end of a command, executes the command in the background (see
+    also [“Job control”](#job-control))
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 放置在命令末尾，以后台方式执行命令（参见[“作业控制”](#job-control)）
+- en: Backslash (`\`)
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 反斜杠（`\`）
+- en: Used to continue a command on the next line, for better readability of long
+    commands
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于将命令继续写在下一行，提高长命令的可读性
+- en: Pipe (`|`)
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 管道（`|`）
+- en: Connects `stdout` of one process with the `stdin` of the next process, allowing
+    you to pass data without having to store it in files as a temporary place
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将一个进程的`stdout`连接到下一个进程的`stdin`，允许您传递数据而无需将其存储在临时文件中
+- en: 'Again, let’s see some of the theoretical content in action. Let’s try to figure
+    out how many lines an HTML file contains by downloading it using `curl` and then
+    piping the content to the `wc` tool:'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 再次，让我们看看理论内容如何实际操作。让我们尝试通过使用`curl`下载HTML文件并将内容通过`wc`工具进行管道传输，来计算HTML文件包含多少行：
+- en: '[PRE3]'
+  id: totrans-64
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO3-1)'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO3-1)'
+- en: 'Use `curl` to download the content from the URL, and discard the status that
+    it outputs on `stderr`. (Note: in practice, you’d use the `-s` option of `curl`,
+    but we want to learn how to apply our hard-gained knowledge, right?)'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`curl`下载URL的内容，并丢弃它在`stderr`上输出的状态。（注意：实际上，你会使用`curl`的`-s`选项，但我们想要学习如何应用我们辛苦获得的知识，对吧？）
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO3-2)'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO3-2)'
+- en: The `stdout` of `curl` is fed to `stdin` of `wc`, which counts the number of
+    lines with the `-l` option.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`curl`的`stdout`被馈送到`wc`的`stdin`，使用`-l`选项计算行数。'
+- en: Now that you have a basic understanding of commands, streams, and redirection,
+    let’s move on to another core shell feature, the handling of variables.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你已经基本了解了命令、流和重定向，让我们继续学习另一个核心shell特性，即变量的处理。
+- en: Variables
+  id: totrans-70
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 变量
+- en: 'A term you will come across often in the context of shells is *variables*.
+    Whenever you don’t want to or cannot hardcode a value, you can use a variable
+    to store and change a value. Use cases include the following:'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在shell的上下文中，你会经常遇到*变量*这个术语。每当你不想或不能硬编码一个值时，可以使用变量来存储和更改值。使用案例包括以下内容：
+- en: When you want to handle configuration items that Linux exposes—for example,
+    the place where the shell looks for executables captured in the `$PATH` variable.
+    This is kind of an interface where a variable might be read/write.
+  id: totrans-72
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 当你想要处理Linux公开的配置项时——例如，shell寻找可执行文件所在的位置，捕获在`$PATH`变量中。这是一种接口，其中变量可能是读/写的。
+- en: When you want to interactively query the user for a value, say, in the context
+    of a script.
+  id: totrans-73
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 当你想要交互地查询用户的一个值，比如在脚本的上下文中。
+- en: When you want to shorten input by defining a long value once—for example, the
+    URL of an HTTP API. This use case roughly corresponds to a `const` value in a
+    program language since you don’t change the value after you have declared the
+    variable.
+  id: totrans-74
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 当你想通过一次定义长值来缩短输入，比如HTTP API的URL。这个用例大致对应于程序语言中的`const`值，因为定义变量后不再改变值。
+- en: 'We distinguish between two kinds of variables:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们区分两种变量类型：
+- en: Environment variables
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 环境变量
+- en: Shell-wide settings; list them with `env`.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell-wide设置；用`env`列出它们。
+- en: Shell variables
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell变量
+- en: Valid in the context of the current execution; list with `set` in bash. Shell
+    variables are not inherited by subprocesses.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在当前执行上下文中有效；在bash中使用`set`列出。shell变量不会被子进程继承。
+- en: You can, in bash, use `export` to create an environment variable. When you want
+    to access the value of a variable, put a `$` in front of it, and when you want
+    to get rid of it, use `unset`.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在bash中，你可以使用`export`创建一个环境变量。当你想要访问一个变量的值时，在它前面加上`$`，当你想要摆脱它时，使用`unset`。
+- en: 'OK, that was a lot of information. Let’s see how that looks in practice (in
+    bash):'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 好的，刚才我们学到了很多信息。让我们看看在实践中的样子（在bash中）：
+- en: '[PRE4]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO4-1)'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO4-1)'
+- en: Create a shell variable called `MY_VAR`, and assign a value of 42.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个名为`MY_VAR`的shell变量，并赋值为42。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO4-2)'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO4-2)'
+- en: List shell variables and filter out `MY_VAR`. Note the `_=`, indicating it’s
+    not exported.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出shell变量并过滤掉`MY_VAR`。注意`_=`，表示它未导出。
+- en: '[![3](Images/3.png)](#co_shells_and_scripting_CO4-3)'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_shells_and_scripting_CO4-3)'
+- en: Create a new environment variable called `MY_GLOBAL_VAR`.
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个名为`MY_GLOBAL_VAR`的新环境变量。
+- en: '[![4](Images/4.png)](#co_shells_and_scripting_CO4-4)'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_shells_and_scripting_CO4-4)'
+- en: List shell variables and filter out all that start with `MY_`. We see, as expected,
+    both of the variables we created in the previous steps.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出shell变量并过滤掉所有以`MY_`开头的变量。正如预期的那样，我们看到了前面步骤中创建的两个变量。
+- en: '[![5](Images/5.png)](#co_shells_and_scripting_CO4-5)'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_shells_and_scripting_CO4-5)'
+- en: List environment variables. We see `MY_GLOBAL_VAR`, as we would hope.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出环境变量。我们看到`MY_GLOBAL_VAR`，正如我们希望的那样。
+- en: '[![6](Images/6.png)](#co_shells_and_scripting_CO4-6)'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](Images/6.png)](#co_shells_and_scripting_CO4-6)'
+- en: Create a new shell session—that is, a child process of the current shell session
+    that doesn’t inherit `MY_VAR`.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个新的shell会话——也就是当前shell会话的子进程，它不会继承`MY_VAR`。
+- en: '[![7](Images/7.png)](#co_shells_and_scripting_CO4-7)'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![7](Images/7.png)](#co_shells_and_scripting_CO4-7)'
+- en: Access the environment variable `MY_GLOBAL_VAR`.
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 访问环境变量`MY_GLOBAL_VAR`。
+- en: '[![8](Images/8.png)](#co_shells_and_scripting_CO4-8)'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![8](Images/8.png)](#co_shells_and_scripting_CO4-8)'
+- en: List the shell variables, which gives us only `MY_GLOBAL_VAR` since we’re in
+    a child process.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出shell变量，这里我们只得到了`MY_GLOBAL_VAR`，因为我们在子进程中。
+- en: '[![9](Images/9.png)](#co_shells_and_scripting_CO4-9)'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![9](Images/9.png)](#co_shells_and_scripting_CO4-9)'
+- en: Exit the child process, remove the `MY_VAR` shell variable, and list our shell
+    variables. As expected, `MY_VAR` is gone.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 退出子进程，移除`MY_VAR` shell 变量，并列出我们的 shell 变量。正如预期的那样，`MY_VAR` 已经不存在。
+- en: In [Table 3-1](#table-common-variables) I put together common shell and environment
+    variables. You will find those variables almost everywhere, and they are important
+    to understand and to use. For any of the variables, you can have a look at the
+    respective value using `echo $XXX`, with `XXX` being the variable name.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[表 3-1](#table-common-variables)中，我整理了常见的 shell 和环境变量。你几乎在任何地方都会找到这些变量，它们非常重要，需要理解和使用。对于任何变量，你可以通过`echo
+    $XXX`来查看相应的值，其中`XXX`是变量名。
+- en: Table 3-1\. Common shell and environment variables
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 3-1\. 常见的 shell 和环境变量
+- en: '| Variable | Type | Semantics |'
+  id: totrans-103
+  prefs: []
+  type: TYPE_TB
+  zh: '| 变量 | 类型 | 语义 |'
+- en: '| --- | --- | --- |'
+  id: totrans-104
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| `EDITOR` | Environment | The path to program used by default to edit files
+    |'
+  id: totrans-105
+  prefs: []
+  type: TYPE_TB
+  zh: '| `EDITOR` | 环境 | 默认用于编辑文件的程序路径 |'
+- en: '| `HOME` | POSIX | The path of the home directory of the current user |'
+  id: totrans-106
+  prefs: []
+  type: TYPE_TB
+  zh: '| `HOME` | POSIX | 当前用户的主目录路径 |'
+- en: '| `HOSTNAME` | bash shell | The name of the current host |'
+  id: totrans-107
+  prefs: []
+  type: TYPE_TB
+  zh: '| `HOSTNAME` | bash shell | 当前主机名 |'
+- en: '| `IFS` | POSIX | List of characters to separate fields; used when the shell
+    splits words on expansion |'
+  id: totrans-108
+  prefs: []
+  type: TYPE_TB
+  zh: '| `IFS` | POSIX | 用于分隔字段的字符列表；当 shell 扩展时用到 |'
+- en: '| `PATH` | POSIX | Contains a list of directories in which the shell looks
+    for executable programs (binaries or scripts) |'
+  id: totrans-109
+  prefs: []
+  type: TYPE_TB
+  zh: '| `PATH` | POSIX | 包含一组目录，shell 在其中寻找可执行程序（二进制文件或脚本） |'
+- en: '| `PS1` | Environment | The primary prompt string in use |'
+  id: totrans-110
+  prefs: []
+  type: TYPE_TB
+  zh: '| `PS1` | 环境 | 当前使用的主提示字符串 |'
+- en: '| `PWD` | Environment | The full path of the working directory |'
+  id: totrans-111
+  prefs: []
+  type: TYPE_TB
+  zh: '| `PWD` | 环境 | 当前工作目录的完整路径 |'
+- en: '| `OLDPWD` | bash shell | The full path of the directory before the last `cd`
+    command |'
+  id: totrans-112
+  prefs: []
+  type: TYPE_TB
+  zh: '| `OLDPWD` | bash shell | 上一次 `cd` 命令前的完整路径 |'
+- en: '| `RANDOM` | bash shell | A random integer between 0 and 32767 |'
+  id: totrans-113
+  prefs: []
+  type: TYPE_TB
+  zh: '| `RANDOM` | bash shell | 0 到 32767 之间的随机整数 |'
+- en: '| `SHELL` | Environment | Contains the currently used shell |'
+  id: totrans-114
+  prefs: []
+  type: TYPE_TB
+  zh: '| `SHELL` | 环境 | 当前使用的 shell |'
+- en: '| `TERM` | Environment | The terminal emulator used |'
+  id: totrans-115
+  prefs: []
+  type: TYPE_TB
+  zh: '| `TERM` | 环境 | 使用的终端模拟器 |'
+- en: '| `UID` | Environment | Current user unique ID (integer value) |'
+  id: totrans-116
+  prefs: []
+  type: TYPE_TB
+  zh: '| `UID` | 环境 | 当前用户唯一ID（整数值） |'
+- en: '| `USER` | Environment | Current user name |'
+  id: totrans-117
+  prefs: []
+  type: TYPE_TB
+  zh: '| `USER` | 环境 | 当前用户名 |'
+- en: '| `_` | bash shell | Last argument to the previous command executed in the
+    foreground |'
+  id: totrans-118
+  prefs: []
+  type: TYPE_TB
+  zh: '| `_` | bash shell | 在前台执行的上一个命令的最后一个参数 |'
+- en: '| `?` | bash shell | Exit status; see [“Exit status”](#shell-exit-status) |'
+  id: totrans-119
+  prefs: []
+  type: TYPE_TB
+  zh: '| `?` | bash shell | 退出状态；参见[“Exit status”](#shell-exit-status) |'
+- en: '| `$` | bash shell | The ID of the current process (integer value) |'
+  id: totrans-120
+  prefs: []
+  type: TYPE_TB
+  zh: '| `$` | bash shell | 当前进程的ID（整数值） |'
+- en: '| `0` | bash shell | The name of the current process |'
+  id: totrans-121
+  prefs: []
+  type: TYPE_TB
+  zh: '| `0` | bash shell | 当前进程的名称 |'
+- en: Further, check out the full list of [bash-specific variables](https://oreil.ly/EIgVc),
+    and also note that the variables from [Table 3-1](#table-common-variables) will
+    come in handy again in the context of [“Scripting”](#scripting).
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，请查看完整的[bash 特定变量列表](https://oreil.ly/EIgVc)，同时注意[表 3-1](#table-common-variables)中的变量在[“Scripting”](#scripting)环境下再次会派上用场。
+- en: Exit status
+  id: totrans-123
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 退出状态
+- en: The shell communicates the completion of a command execution to the caller using
+    what is called the *exit status*. In general, it is expected that a Linux command
+    returns a status when it terminates. This can either be a normal termination (happy
+    path) or an abnormal termination (something went wrong). A `0` exit status means
+    that the command was successfully run, without any errors, whereas a nonzero value
+    between 1 and 255 signals a failure. To query the exit status, use `echo $?`.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell 使用所谓的*退出状态*向调用者通知命令执行的完成情况。一般来说，Linux 命令在终止时会返回一个状态。这可以是正常终止（成功路径）或异常终止（出现错误）。`0`
+    退出状态表示命令成功运行且无任何错误，而在 1 到 255 之间的非零值则表示失败。要查询退出状态，请使用`echo $?`。
+- en: Be careful with exit status handling in a pipeline, since some shells make only
+    the last status available. You can work around that limitation [by using `$PIPESTATUS`](https://oreil.ly/mMz9k).
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在管道中要小心处理退出状态，因为某些 shell 只会将最后一个状态可用。你可以通过使用`$PIPESTATUS`来解决这个限制（https://oreil.ly/mMz9k）。
+- en: Built-in commands
+  id: totrans-126
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 内建命令
+- en: Shells come with a number of built-in commands. Some useful examples are `yes`,
+    `echo`, `cat`, or `read` (depending on the Linux distro, some of those commands
+    might not be built-ins but located in */usr/bin*). You can use the `help` command
+    to list built-ins. Do remember, however, that everything else is a shell-external
+    program that you usually can find in */usr/bin* (for user commands) or in */usr/sbin*
+    (for administrative commands).
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell 提供了许多内置命令。一些有用的例子包括`yes`、`echo`、`cat`或`read`（取决于 Linux 发行版，其中一些命令可能不是内置的，而是位于*/usr/bin*）。您可以使用`help`命令列出内置命令。但请记住，其他所有程序都是
+    Shell 外部程序，通常可以在*/usr/bin*（用户命令）或*/usr/sbin*（管理命令）找到。
+- en: 'How do you know where to find an executable? Here are some ways:'
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您如何知道在哪里找到可执行文件？以下是一些方法：
+- en: '[PRE5]'
+  id: totrans-129
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Note
+  id: totrans-130
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: One of the technical reviewers of this book rightfully pointed out that `which`
+    is a non-POSIX, external program that may not always be available. Also, they
+    suggested using `*command* -v` rather than `which` to get the program path and
+    or shell alias/function. See also the [shellcheck docs](https://oreil.ly/5toUM)
+    for further details on the matter.
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书的一位技术审阅者正确指出，`which`是一个非 POSIX 的外部程序，可能并不总是可用。此外，他们建议使用`*command* -v`而不是`which`来获取程序路径或
+    Shell 别名/函数。另请参阅[shellcheck 文档](https://oreil.ly/5toUM)获取更多详细信息。
+- en: Job control
+  id: totrans-132
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 作业控制
+- en: 'A feature most shells support is called [*job control*](https://oreil.ly/zeMsU).
+    By default, when you enter a command, it takes control of the screen and the keyboard,
+    which we usually call *running in the foreground*. But what if you don’t want
+    to run something interactively, or, in case of a server, what if there is no input
+    from `stdin` at all? Enter job control and background jobs: to launch a process
+    in the background, put an `&` at the end, or to send a foreground process to the
+    background, press Ctrl+Z.'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Shell 支持的一个特性称为[*作业控制*](https://oreil.ly/zeMsU)。默认情况下，当您输入一个命令时，它会接管屏幕和键盘，我们通常称之为*前台运行*。但是如果您不想交互式地运行某些内容，或者在服务器上，如果`stdin`没有输入怎么办呢？这时候就要用到作业控制和后台作业了：要在后台启动一个进程，可以在命令末尾加上`&`，或者将前台进程发送到后台，按Ctrl+Z。
+- en: 'The following example shows this in action, giving you a rough idea:'
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例展示了这一操作，让您对此有一个大致的了解：
+- en: '[PRE6]'
+  id: totrans-135
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO5-1)'
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO5-1)'
+- en: By putting the `&` at the end, we launch the command in the background.
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过在命令末尾加上`&`，我们将命令在后台启动。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO5-2)'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO5-2)'
+- en: List all jobs.
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出所有作业。
+- en: '[![3](Images/3.png)](#co_shells_and_scripting_CO5-3)'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_shells_and_scripting_CO5-3)'
+- en: With the `fg` command, we can bring a process to the foreground. If you want
+    to quit the `watch` command, use Ctrl+C.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`fg`命令，我们可以将一个进程带回前台。如果您想退出`watch`命令，请使用Ctrl+C。
+- en: If you want to keep a background process running, even after you close the shell
+    you can prepend the `nohup` command. Further, for a process that is already running
+    and wasn’t prepended with `nohup`, you can use `disown` after the fact to achieve
+    the same effect. Finally, if you want to get rid of a running process, you can
+    use the `kill` command with various levels of forcefulness (see [“Signals”](ch09.xhtml#signals)
+    for more details).
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您希望保持后台进程在关闭 Shell 后继续运行，可以在命令前加上`nohup`。此外，对于已经运行且未使用`nohup`前置的进程，您可以事后使用`disown`来实现相同效果。最后，如果您想终止运行中的进程，可以使用带有不同强度级别的`kill`命令（详见[“信号”](ch09.xhtml#signals)获取更多详细信息）。
+- en: Rather than job control, I recommend using terminal multiplexer, as discussed
+    in [“Terminal Multiplexer”](#terminal-mux). These programs take care of the most
+    common use cases (shell closes, multiple processes running and need coordination,
+    etc.) and also support working with remote systems.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与其使用作业控制，我建议使用终端复用器，如[“终端复用器”](#terminal-mux)中讨论的那样。这些程序处理了大多数常见用例（Shell 关闭、多个进程运行需要协调等），同时还支持与远程系统的工作。
+- en: Let’s move on to discuss modern replacements for frequently used core commands
+    that have been around forever.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们继续讨论替换历史悠久的核心命令的现代替代品。
+- en: Modern Commands
+  id: totrans-145
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 现代命令
+- en: There are a handful of commands you will find yourself using over and over again
+    on a daily basis. These include commands for navigating directories (`cd`), listing
+    the content of a directory (`ls`), finding files (`find`), and displaying the
+    content of files (`cat`, `less`). Given that you are using these commands so often,
+    you want to be as efficient as possible—every keystroke counts.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每天你会发现自己反复使用几个命令。这些包括导航目录的命令（`cd`）、列出目录内容的命令（`ls`）、查找文件的命令（`find`）和显示文件内容的命令（`cat`、`less`）。考虑到你经常使用这些命令，你希望尽可能高效——每次按键都很重要。
+- en: 'Modern variations exist for some of these often-used commands. Some of them
+    are drop-in replacements, and others extend the functionality. All of them offer
+    somewhat sane default values for common operations and rich output that is generally
+    easier to comprehend, and they usually lead to you typing less to accomplish the
+    same task. This reduces the friction when you work with the shell, making it more
+    enjoyable and improving the flow. If you want to learn more about modern tooling,
+    check out [Appendix B](app02.xhtml#appendix-modern). In this context, a word of
+    caution, especially if you’re applying this knowledge in an enterprise environment:
+    I have no stake in any of these tools and purely recommend them because I have
+    found them useful myself. A good way to go about installing and using any of these
+    tools is to use a version of the tool that has been vetted by your Linux distro
+    of choice.'
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现代版本的某些常用命令存在变体。其中一些是可替换的，而其他一些则扩展了功能。所有这些命令都提供了一些合理的默认值用于常见操作，并且提供了易于理解的丰富输出，通常能够让你在完成相同任务时输入更少的内容。这减少了在使用Shell时的摩擦，使工作更加愉快并改善了流程。如果你想了解更多关于现代工具的信息，请查看[附录
+    B](app02.xhtml#appendix-modern)。在这个背景下，特别是如果你在企业环境中应用这些知识，需要注意：我对这些工具没有任何利益关系，纯粹是因为我自己发现它们有用而推荐它们。安装和使用任何这些工具的一个好方法是使用经你选择的Linux发行版验证过的工具版本。
+- en: Listing directory contents with exa
+  id: totrans-148
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 使用 `exa` 列出目录内容
+- en: 'Whenever you want to know what a directory contains, you use `ls` or one of
+    its variants with parameters. For example, in bash I used to have `l` aliased
+    to `ls -GAhltr`. But there’s a better way: [`exa`](https://oreil.ly/5lPAl), a
+    modern replacement for `ls`, written in Rust, with built-in support for Git and
+    tree rendering. In this context, what would you guess is the most often used command
+    after you’ve listed the directory content? In my experience it’s to clear the
+    screen, and very often people use `clear`. That’s typing five characters and then
+    hitting `ENTER`. You can have the same effect much faster—simply use Ctrl+L.'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每当你想知道一个目录包含什么，你会使用 `ls` 或其带参数的变体之一。例如，在bash中我曾经将 `l` 别名为 `ls -GAhltr`。但是有更好的方法：[`exa`](https://oreil.ly/5lPAl)，一个用Rust编写的现代替代品，具有内置的Git支持和树形渲染。在这种情况下，你认为在列出目录内容后最常用的命令是什么？在我的经验中，是清屏，人们经常使用
+    `clear`。这是输入五个字符然后按 `ENTER`。你可以更快地达到同样的效果——简单地使用 Ctrl+L。
+- en: Viewing file contents with bat
+  id: totrans-150
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 使用 `bat` 查看文件内容
+- en: 'Let’s assume that you listed a directory’s contents and found a file you want
+    to inspect. You’d use `cat`, maybe? There’s something better I recommend you have
+    a look at: [`bat`](https://oreil.ly/w3K76). The `bat` command, shown in [Figure 3-3](#fig-bat-rendering),
+    comes with syntax highlighting, shows nonprintable characters, supports Git, and
+    has an integrated pager (the page-wise viewing of files longer than what can be
+    displayed on the screen).'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你列出了一个目录的内容并找到了一个你想检查的文件。你会使用 `cat`，也许？我建议你看看更好的东西：[`bat`](https://oreil.ly/w3K76)。`bat`
+    命令在 [图 3-3](#fig-bat-rendering) 中显示了语法高亮，显示不可打印字符，支持Git，并且有一个集成的分页器（用于分页查看比屏幕显示更长的文件）。
+- en: Finding content in files with rg
+  id: totrans-152
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 使用 `rg` 在文件中查找内容
+- en: Traditionally, you would use `grep` to find something in a file. However, there’s
+    a modern command, [`rg`](https://oreil.ly/u3Sfw), that is fast and powerful.
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传统上，你会使用 `grep` 在文件中查找内容。然而，有一个现代命令 [`rg`](https://oreil.ly/u3Sfw)，它速度快且功能强大。
+- en: 'We’re going to compare `rg` to a `find` and `grep` combination in this example,
+    where we want to find YAML files that contain the string “sample”:'
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个例子中，我们将 `rg` 与 `find` 和 `grep` 的组合进行比较，我们希望找到包含字符串“sample”的YAML文件：
+- en: '[PRE7]'
+  id: totrans-155
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO6-1)'
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO6-1)'
+- en: Use `find` and `grep` together to find a string in YAML files.
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `find` 和 `grep` 结合在YAML文件中查找字符串。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO6-2)'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO6-2)'
+- en: Use `rg` for the same task.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `rg` 完成同样的任务。
+- en: If you compare the commands and the results in the previous example, you see
+    that not only is `rg` easier to use but the results are more informative (providing
+    context, in this case the line number).
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你比较前面示例中的命令和结果，你会发现 `rg` 不仅更容易使用，而且结果更具信息量（在本例中提供上下文，即行号）。
+- en: '![lmlx 0303](Images/lmlx_0303.png)'
+  id: totrans-161
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0303](Images/lmlx_0303.png)'
+- en: Figure 3-3\. Rendering of a Go file (top) and a YAML file (bottom) by `bat`
+  id: totrans-162
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 3-3\. 通过 `bat` 渲染的 Go 文件（上）和 YAML 文件（下）的显示
+- en: JSON data processing with jq
+  id: totrans-163
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 使用 jq 进行 JSON 数据处理
+- en: And now for a bonus command. This one, `jq`, is not an actual replacement but
+    more like a specialized tool for JSON, a popular textual data format. You find
+    JSON in HTTP APIs and configuration files alike.
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在来看一个额外的命令。这个命令 `jq` 并不是一个实际的替代品，而更像是 JSON 的专用工具，这种流行的文本数据格式。你会在 HTTP API 和配置文件中找到
+    JSON。
+- en: 'So, use [`jq`](https://oreil.ly/9s7yh) rather than `awk` or `sed` to pick out
+    certain values. For example, by using a [JSON generator](https://oreil.ly/bcT9d)
+    to generate some random data, I have a 2.4 kB JSON file *example.json* that looks
+    something like this (only showing the first record here):'
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因此，使用 [`jq`](https://oreil.ly/9s7yh) 而不是 `awk` 或 `sed` 来提取特定的值。例如，通过使用 [JSON
+    生成器](https://oreil.ly/bcT9d) 来生成一些随机数据，我得到了一个 2.4 kB 的 JSON 文件 *example.json*，大致如下（这里只显示第一条记录）：
+- en: '[PRE8]'
+  id: totrans-166
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Let’s say we’re interested in all “first” friends—that is, entry 0 in the `friends`
+    array—of people whose favorite fruit is “strawberry.” With `jq` you would do the
+    following:'
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设我们对所有“第一个”朋友感兴趣——也就是说，在 `friends` 数组中的第 0 个条目——这些朋友最喜欢的水果是“草莓”。使用 `jq`，你会执行以下操作：
+- en: '[PRE9]'
+  id: totrans-168
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: That was some CLI fun, right? If you’re interested in finding out more about
+    the topic of modern commands and what other candidates there might be for you
+    to replace, check out the [modern-unix repo](https://oreil.ly/cBAXt), which lists
+    suggestions. Let’s now move our focus to some common tasks beyond directory navigation
+    and file content viewing and how to go about them.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CLI 玩得开心吧？如果你对现代命令主题和替代选择感兴趣，请查看 [modern-unix 仓库](https://oreil.ly/cBAXt)，其中列出了一些建议。现在我们把注意力转移到超出目录导航和文件内容查看的一些常见任务及其处理方法。
+- en: Common Tasks
+  id: totrans-170
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 常见任务
+- en: There are a number of things you likely find yourself doing often, and there
+    are certain tricks you can use to speed up your tasks in the shell. Let’s review
+    these common tasks and see how we can be more efficient.
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 经常你可能发现自己在做一些事情，并且有些技巧可以帮助你加快在 shell 中的任务。让我们回顾一下这些常见任务，并看看如何更高效地完成它们。
+- en: Shorten often-used commands
+  id: totrans-172
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 缩短经常使用的命令
+- en: 'One fundamental insight with interfaces is that commands that you are using
+    very often should take the least effort—they should be quick to enter. Now apply
+    this idea to the shell: rather than `git diff --color-moved`, I type `d` (a single
+    character), since I’m viewing changes in my repositories many hundreds of times
+    per day. Depending on the shell, there are different ways to achieve this: in
+    bash this is called an [*alias*](https://oreil.ly/fbBvm), and in Fish ([“Fish
+    Shell”](#fish-shell)) there are [abbreviations](https://oreil.ly/rrmNI) you can
+    use.'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在界面上的一个基本洞察是，你经常使用的命令应该耗费最少的精力——它们应该快速输入。现在把这个想法应用到 shell 中：而不是 `git diff --color-moved`，我只需输入
+    `d`（一个字符），因为我每天在我的仓库中查看变更几百次。根据不同的 shell，有不同的方法可以实现这一点：在 bash 中这称为 [*alias*](https://oreil.ly/fbBvm)，而在
+    Fish ([“Fish Shell”](#fish-shell)) 中则可以使用 [缩写](https://oreil.ly/rrmNI)。
+- en: Navigating
+  id: totrans-174
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 导航
+- en: When you enter commands on the shell prompt, there are a number of things you
+    might want to do, such as navigating the line (for example, moving the cursor
+    to the start) or manipulating the line (say, deleting everything left of the cursor).
+    [Table 3-2](#table-shell-shortcuts) lists common shell shortcuts.
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你在 shell 提示符中输入命令时，有几件事情你可能想做，比如导航行（例如，将光标移动到开头）或操作行（比如删除光标左边的所有内容）。[表 3-2](#table-shell-shortcuts)
+    列出了常见的 shell 快捷键。
+- en: Table 3-2\. Shell navigation and editing shortcuts
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 3-2\. Shell 导航和编辑快捷键
+- en: '| Action | Command | Note |'
+  id: totrans-177
+  prefs: []
+  type: TYPE_TB
+  zh: '| 动作 | 命令 | 注释 |'
+- en: '| --- | --- | --- |'
+  id: totrans-178
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| Move cursor to start of line | Ctrl+a | - |'
+  id: totrans-179
+  prefs: []
+  type: TYPE_TB
+  zh: '| 移动光标到行首 | Ctrl+a | - |'
+- en: '| Move cursor to end of line | Ctrl+e | - |'
+  id: totrans-180
+  prefs: []
+  type: TYPE_TB
+  zh: '| 移动光标到行尾 | Ctrl+e | - |'
+- en: '| Move cursor forward one character | Ctrl+f | - |'
+  id: totrans-181
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向前移动一个字符 | Ctrl+f | - |'
+- en: '| Move cursor back one character | Ctrl+b | - |'
+  id: totrans-182
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向后移动一个字符 | Ctrl+b | - |'
+- en: '| Move cursor forward one word | Alt+f | Works only with left Alt |'
+  id: totrans-183
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向前移动一个单词 | Alt+f | 只适用于左 Alt 键 |'
+- en: '| Move cursor back one word | Alt+b | - |'
+  id: totrans-184
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向后移动一个单词 | Alt+b | - |'
+- en: '| Delete current character | Ctrl+d | - |'
+  id: totrans-185
+  prefs: []
+  type: TYPE_TB
+  zh: '| 删除当前字符 | Ctrl+d | - |'
+- en: '| Delete character left of cursor | Ctrl+h | - |'
+  id: totrans-186
+  prefs: []
+  type: TYPE_TB
+  zh: '| 删除光标左侧字符 | Ctrl+h | - |'
+- en: '| Delete word left of cursor | Ctrl+w | - |'
+  id: totrans-187
+  prefs: []
+  type: TYPE_TB
+  zh: '| 删除光标左侧单词 | Ctrl+w | - |'
+- en: '| Delete everything right of cursor | Ctrl+k | - |'
+  id: totrans-188
+  prefs: []
+  type: TYPE_TB
+  zh: '| 删除光标右侧所有内容 | Ctrl+k | - |'
+- en: '| Delete everything left of cursor | Ctrl+u | - |'
+  id: totrans-189
+  prefs: []
+  type: TYPE_TB
+  zh: '| 删除光标左侧所有内容 | Ctrl+u | - |'
+- en: '| Clear screen | Ctrl+l | - |'
+  id: totrans-190
+  prefs: []
+  type: TYPE_TB
+  zh: '| 清屏 | Ctrl+l | - |'
+- en: '| Cancel command | Ctrl+c | - |'
+  id: totrans-191
+  prefs: []
+  type: TYPE_TB
+  zh: '| 取消命令 | Ctrl+c | - |'
+- en: '| Undo | Ctrl+_ | bash only |'
+  id: totrans-192
+  prefs: []
+  type: TYPE_TB
+  zh: '| 撤销 | Ctrl+_ | 仅限bash |'
+- en: '| Search history | Ctrl+r | Some shells |'
+  id: totrans-193
+  prefs: []
+  type: TYPE_TB
+  zh: '| 搜索历史记录 | Ctrl+r | 一些shell |'
+- en: '| Cancel search | Ctrl+g | Some shells |'
+  id: totrans-194
+  prefs: []
+  type: TYPE_TB
+  zh: '| 取消搜索 | Ctrl+g | 一些shell |'
+- en: Note that not all shortcuts may be supported in all shells, and certain actions
+    such as history management may be implemented differently in certain shells. In
+    addition, you might want to know that these shortcuts are based on Emacs editing
+    keystrokes. Should you prefer `vi`, you can use `set -o vi` in your *.bashrc*
+    file, for example, to perform command-line editing based on `vi` keystrokes. Finally,
+    taking [Table 3-2](#table-shell-shortcuts) as a starting point, try out what your
+    shell supports and see how you can configure it to suit your needs.
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，并非所有快捷方式都在所有shell中受支持，并且某些操作（例如历史记录管理）可能在某些shell中实现方式有所不同。此外，您可能希望了解这些快捷键基于Emacs编辑按键。如果您喜欢`vi`，您可以在*.bashrc*文件中使用`set
+    -o vi`，例如，以执行基于`vi`按键的命令行编辑。最后，从[表3-2](#table-shell-shortcuts)开始，尝试您的shell支持的功能，并查看如何配置以满足您的需求。
+- en: File content management
+  id: totrans-196
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 文件内容管理
+- en: You don’t always want to fire up an editor such as `vi` to add a single line
+    of text. And sometimes you can’t do it—for example, in the context of writing
+    a shell script ([“Scripting”](#scripting)).
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您并非总是想启动编辑器（如`vi`）来添加一行文本。有时候您无法这样做——例如，在编写shell脚本的上下文中（参见[“脚本编写”](#scripting)）。
+- en: 'So, how can you manipulate textual content? Let’s have a look at a few examples:'
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 那么，如何操作文本内容呢？让我们看几个例子：
+- en: '[PRE10]'
+  id: totrans-199
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO7-1)'
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO7-1)'
+- en: Create a file by redirecting the `echo` output.
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过重定向`echo`输出来创建文件。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO7-2)'
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO7-2)'
+- en: View content of file.
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看文件内容。
+- en: '[![3](Images/3.png)](#co_shells_and_scripting_CO7-3)'
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_shells_and_scripting_CO7-3)'
+- en: Append a line to file using the `>>` operator and then view content.
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`>>`运算符向文件追加一行，然后查看内容。
+- en: '[![4](Images/4.png)](#co_shells_and_scripting_CO7-4)'
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_shells_and_scripting_CO7-4)'
+- en: Replace content from file using `sed` and output to `stdout`.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`sed`替换文件内容并输出到`stdout`。
+- en: '[![5](Images/5.png)](#co_shells_and_scripting_CO7-5)'
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_shells_and_scripting_CO7-5)'
+- en: Create a file using the [here document](https://oreil.ly/FPWqT).
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用[此处文档](https://oreil.ly/FPWqT)创建文件。
+- en: '[![6](Images/6.png)](#co_shells_and_scripting_CO7-6)'
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](Images/6.png)](#co_shells_and_scripting_CO7-6)'
+- en: Show differences between the files we created.
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示我们创建的文件之间的差异。
+- en: Now that you know the basic file content manipulation techniques, let’s have
+    a look at the advanced viewing of file contents.
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您了解了基本的文件内容操作技巧，让我们来看一下高级文件内容查看。
+- en: Viewing long files
+  id: totrans-213
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 查看长文件
+- en: For long files—that is, files that have more lines than the shell can display
+    on your screen—you can use pagers like `less` or `bat` (`bat` comes with a built-in
+    pager). With paging, a program splits the output into pages where each page fits
+    into what the screen can display and some commands to navigate the pages (view
+    next page, previous page, etc.).
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于长文件——即文件的行数超过shell可以在屏幕上显示的行数——您可以使用分页程序如`less`或`bat`（`bat`带有内置分页程序）。使用分页，程序将输出分为适合屏幕显示的页面，并提供一些命令来导航页面（查看下一页、上一页等）。
+- en: 'Another way to deal with long files is to display only a select region of the
+    file, like the first few lines. There are two handy commands for this: `head`
+    and `tail`.'
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种处理长文件的方式是仅显示文件的选择区域，比如前几行。这有两个方便的命令：`head`和`tail`。
+- en: 'For example, to display the beginning of a file:'
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，要显示文件的开头：
+- en: '[PRE11]'
+  id: totrans-217
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO8-1)'
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO8-1)'
+- en: Create a long file (100 lines here).
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个长文件（这里有100行）。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO8-2)'
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO8-2)'
+- en: Display the first five lines of the long file.
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示长文件的前五行。
+- en: 'Or, to get live updates of a file that is constantly growing, we could use:'
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，要获取正在不断增长的文件的实时更新，我们可以使用：
+- en: '[PRE12]'
+  id: totrans-223
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO9-1)'
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO9-1)'
+- en: Display the end of a log file using `tail`, with the `-f` option meaning to
+    follow, or to update automatically.
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `tail` 显示日志文件的末尾，使用 `-f` 选项表示跟随或自动更新。
+- en: Lastly, in this section we look at dealing with date and time.
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，在这一节中我们将看看如何处理日期和时间。
+- en: Date and time handling
+  id: totrans-227
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 日期和时间处理
+- en: The `date` command can be a useful way to generate unique file names. It allows
+    you to generate dates in various formats, including the [Unix time stamp](https://oreil.ly/xB7UG),
+    as well as to convert between different date and time formats.
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`date` 命令是生成唯一文件名的有用方法。它允许您生成各种格式的日期，包括 [Unix 时间戳](https://oreil.ly/xB7UG)，并且可以在不同的日期和时间格式之间转换。'
+- en: '[PRE13]'
+  id: totrans-229
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO10-1)'
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO10-1)'
+- en: Create a UNIX time stamp.
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个 UNIX 时间戳。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO10-2)'
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO10-2)'
+- en: Convert a UNIX time stamp to a human-readable date.
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 UNIX 时间戳转换为人类可读的日期。
+- en: With that we wrap up the shell basics section. By now you should have a good
+    understanding of what terminals and shells are and how to use them to do basic
+    tasks such as navigating the filesystem, finding files, and more. We now move
+    on to the topic of human-friendly shells.
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过这些基础知识，您现在应该对终端和 shell 是什么，以及如何使用它们来执行基本任务，如导航文件系统、查找文件等有了很好的理解。现在我们继续讨论人性化的
+    shell 主题。
+- en: Human-Friendly Shells
+  id: totrans-235
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 人性化的 Shell
+- en: While the [bash shell](https://oreil.ly/9GNyA) is likely still the most widely
+    used shell, it is not necessarily the most human-friendly one. It has been around
+    since the late 1980s, and its age sometimes shows. There are a number of modern,
+    human-friendly shells I strongly recommend you evaluate and use instead of bash.
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然 [bash shell](https://oreil.ly/9GNyA) 可能仍然是最广泛使用的 shell，但不一定是最人性化的。自上世纪80年代末问世以来，它的年龄有时体现出来。我强烈建议您评估并使用一些现代、用户友好的
+    shell 替代 bash。
+- en: We’ll first examine in detail one concrete example of a modern, human-friendly
+    shell called the Fish shell and then briefly discuss others, just to make sure
+    you have an idea about the range of choices. We wrap up this section with a quick
+    recommendation and conclusion in [“Which Shell Should I Use?”](#which-shell-should-you-use).
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将首先详细研究一个名为 Fish shell 的现代、用户友好的具体例子，然后简要讨论其他选择，以确保您了解各种选择。我们在 [“Which Shell
+    Should I Use?”](#which-shell-should-you-use) 中快速给出推荐和结论。
+- en: Fish Shell
+  id: totrans-238
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Fish Shell
+- en: The [Fish shell](https://fishshell.com/) describes itself as a smart and user-friendly
+    command-line shell. Let’s have a look at some basic usage first and then move
+    on to configuration topics.
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Fish shell](https://fishshell.com/) 自称为智能且用户友好的命令行 shell。让我们先看一些基本用法，然后再讨论配置主题。'
+- en: Basic usage
+  id: totrans-240
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 基本用法
+- en: 'For many daily tasks, you won’t notice a big difference from bash in terms
+    of input; most of the commands provided in [Table 3-2](#table-shell-shortcuts)
+    are valid. However, there are two areas where `fish` is different from and much
+    more convenient than `bash`:'
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于许多日常任务，您在输入方面可能不会注意到与 bash 的显著区别；[Table 3-2](#table-shell-shortcuts) 中提供的大多数命令是有效的。但是，`fish`
+    与 `bash` 不同并且更加方便的地方有两个：
+- en: There is no explicit history management.
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 没有明确的历史管理。
+- en: You simply type and you get previous executions of a command shown. You can
+    use the up and down key to select one (see [Figure 3-4](#fig-fish-history)).
+  id: totrans-243
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您只需输入命令即可看到之前执行的命令历史。您可以使用上下键选择其中一个（参见 [Figure 3-4](#fig-fish-history)）。
+- en: Autosuggestions are available for many commands.
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对许多命令都可以使用自动建议。
+- en: This is shown in [Figure 3-5](#fig-fish-autocompletion). In addition, when you
+    press Tab, the Fish shell will try to complete the command, argument, or path,
+    giving you visual hints such as coloring your input red if it doesn’t recognize
+    the command.
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这在 [Figure 3-5](#fig-fish-autocompletion) 中显示。此外，当您按 Tab 键时，Fish shell 将尝试完成命令、参数或路径，并为您提供视觉提示，例如如果不认识命令，会将您的输入着色为红色。
+- en: '![lmlx 0304](Images/lmlx_0304.png)'
+  id: totrans-246
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0304](Images/lmlx_0304.png)'
+- en: Figure 3-4\. Fish history handling in action
+  id: totrans-247
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 3-4\. Fish 历史记录处理示例
+- en: '![lmlx 0305](Images/lmlx_0305.png)'
+  id: totrans-248
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0305](Images/lmlx_0305.png)'
+- en: Figure 3-5\. Fish autosuggestion in action
+  id: totrans-249
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 3-5\. Fish 自动建议的示例
+- en: '[Table 3-3](#table-fish-reference) lists some common `fish` commands. In this
+    context, note specifically the handling of environment variables.'
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Table 3-3](#table-fish-reference) 列出了一些常见的 `fish` 命令。在这个背景下，特别注意环境变量的处理方式。'
+- en: Table 3-3\. Fish shell reference
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 3-3\. Fish shell 参考
+- en: '| Task | Command |'
+  id: totrans-252
+  prefs: []
+  type: TYPE_TB
+  zh: '| 任务 | 命令 |'
+- en: '| --- | --- |'
+  id: totrans-253
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| Export environment variable `KEY` with value `VAL` | `set -x KEY VAL` |'
+  id: totrans-254
+  prefs: []
+  type: TYPE_TB
+  zh: '| 导出环境变量 `KEY` 的值为 `VAL` | `set -x KEY VAL` |'
+- en: '| Delete environment variable `KEY` | `set -e KEY` |'
+  id: totrans-255
+  prefs: []
+  type: TYPE_TB
+  zh: '| 删除环境变量`KEY` | `set -e KEY` |'
+- en: '| Inline env var `KEY` for command `cmd` | `env KEY=VAL cmd` |'
+  id: totrans-256
+  prefs: []
+  type: TYPE_TB
+  zh: '| 内联环境变量`KEY`用于命令`cmd` | `env KEY=VAL cmd` |'
+- en: '| Change path length to 1 | `set -g fish_prompt_pwd_dir_length 1` |'
+  id: totrans-257
+  prefs: []
+  type: TYPE_TB
+  zh: '| 将路径长度更改为1 | `set -g fish_prompt_pwd_dir_length 1` |'
+- en: '| Manage abbreviations | `abbr` |'
+  id: totrans-258
+  prefs: []
+  type: TYPE_TB
+  zh: '| 管理简写 | `abbr` |'
+- en: '| Manage functions | `functions` and `funcd` |'
+  id: totrans-259
+  prefs: []
+  type: TYPE_TB
+  zh: '| 管理函数 | `functions`和`funcd` |'
+- en: Unlike other shells, `fish` stores the exit status of the last command in a
+    variable called `$status` instead of in `$?`.
+  id: totrans-260
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与其他Shell不同，`fish`将上一个命令的退出状态存储在名为`$status`的变量中，而不是存储在`$?`中。
+- en: If you’re coming from bash, you may also want to consult the [Fish FAQ](https://oreil.ly/Nk2S2),
+    which addresses most of the gotchas.
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你从bash转来，你可能也想参考[Fish常见问题解答](https://oreil.ly/Nk2S2)，这里解决了大部分常见问题。
+- en: Configuration
+  id: totrans-262
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 配置
+- en: To [configure the Fish shell](https://oreil.ly/FCSne), you simply enter the
+    `fish_config` command (you might need to add the `browse` subcommand, depending
+    on your distro), and `fish` will launch a server via *[*http://localhost:8000*](http://localhost:8000)*
+    and automatically open your default browser with a fancy UI, shown in [Figure 3-6](#fig-fish-config-ui),
+    which allows you to view and change settings.
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要[配置Fish Shell](https://oreil.ly/FCSne)，你只需输入`fish_config`命令（根据你的发行版，可能需要添加`browse`子命令），Fish将通过*[*http://localhost:8000*](http://localhost:8000)*启动一个服务器，并自动用一个漂亮的UI在你默认的浏览器中打开，如[图3-6](#fig-fish-config-ui)所示，允许你查看和更改设置。
+- en: '![lmlx 0306](Images/lmlx_0306.png)'
+  id: totrans-264
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0306](Images/lmlx_0306.png)'
+- en: Figure 3-6\. Fish shell configuration via browser
+  id: totrans-265
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图3-6\. 通过浏览器配置Fish Shell
+- en: Tip
+  id: totrans-266
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 小贴士
+- en: To switch between `vi` and Emacs (default) key bindings for command-line navigation,
+    use the `fish_vi_key_bindings` to start `vi` mode, and use `fish_default_key_bindings`
+    to reset it to Emacs. Note that the changes will take place in all active shell
+    sessions immediately.
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在命令行导航中切换`vi`和Emacs（默认）键绑定，请使用`fish_vi_key_bindings`启动`vi`模式，并使用`fish_default_key_bindings`将其重置为Emacs。请注意，更改将立即在所有活动的Shell会话中生效。
+- en: 'Let’s now see how I have configured my environment. In fact, my config is rather
+    short; in *config.fish* I have the following:'
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看我如何配置我的环境。实际上，我的配置相当简短；在*config.fish*中我有以下内容：
+- en: '[PRE14]'
+  id: totrans-269
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'My prompt, defined in *fish_prompt.fish*, looks as follows:'
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我的提示符，在*fish_prompt.fish*中定义，看起来是这样的：
+- en: '[PRE15]'
+  id: totrans-271
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: The preceding prompt definition yields the prompt shown in [Figure 3-7](#fig-fish-prompt);
+    note the difference between a directory that contains a Git repo and one that
+    does not, a built-in visual cue to speed up your flow. Also, notice the current
+    time on the righthand side.
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 前面的提示符定义产生了[图3-7](#fig-fish-prompt)中显示的提示符；请注意包含Git存储库和不包含Git存储库的目录之间的区别，这是加速你工作流的内置视觉提示。同时，注意右侧显示的当前时间。
+- en: '![lmlx 0307](Images/lmlx_0307.png)'
+  id: totrans-273
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0307](Images/lmlx_0307.png)'
+- en: Figure 3-7\. Fish shell prompt
+  id: totrans-274
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图3-7\. Fish Shell提示符
+- en: 'My abbreviations—think of these as `alias` replacements, as found in other
+    shells—look as follows:'
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我的简写——把它们当作在其他Shell中找到的`alias`替代品——看起来是这样的：
+- en: '[PRE16]'
+  id: totrans-276
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: To add a new abbreviation, use `abbr --add`. Abbreviations are handy for simple
+    commands that take no arguments. What if you have a more complicated construct
+    you want to shorten? Say you want to shorten a sequence involving `git` that also
+    takes an argument. Meet functions in Fish.
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要添加新的简写，请使用`abbr --add`。简写对于不带参数的简单命令非常方便。如果你有更复杂的构造想要缩短怎么办？比如你想缩短一个涉及`git`并且带有参数的序列。那就来认识一下Fish中的函数吧。
+- en: 'Let’s now take a look at an example function, which is defined in the file
+    named *c.fish*. We can use the `functions` command to list all defined functions,
+    the `function` command to create a new function, and in this case the command
+    `function c` to edit it as follows:'
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看一个示例函数，这个函数定义在名为*c.fish*的文件中。我们可以使用`functions`命令列出所有定义的函数，使用`function`命令创建一个新函数，而在这种情况下使用`function
+    c`来编辑它如下：
+- en: '[PRE17]'
+  id: totrans-279
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: With that we have reached the end of the Fish section, in which we walked through
+    a usage tutorial and configuration tips. Now let’s have a quick look at other
+    modern shells.
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到此为止我们已经完成了Fish部分，我们通过一个使用教程和配置技巧来进行了详细讨论。现在让我们快速看看其他现代Shell。
+- en: Z-shell
+  id: totrans-281
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Z-shell
+- en: '[Z-shell](https://oreil.ly/6y06N), or `zsh`, is a Bourne-like shell with a
+    powerful [completion](https://oreil.ly/bqS8y) system and rich theming support.
+    With [Oh My Zsh](https://ohmyz.sh), you can pretty much configure and use `zsh`
+    in the way you’ve seen earlier on with `fish` while retaining wide backward compatibility
+    with bash.'
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Z-shell](https://oreil.ly/6y06N)，或`zsh`，是一种类似Bourne Shell的Shell，具有强大的[补全](https://oreil.ly/bqS8y)系统和丰富的主题支持。借助[Oh
+    My Zsh](https://ohmyz.sh)，你可以在保留广泛的bash向后兼容性的同时，配置和使用`zsh`，就像之前在`fish`上看到的那样。'
+- en: '`zsh` uses five startup files, as shown in the following example (note that
+    if `$ZDOTDIR` is not set, `zsh` uses `$HOME` instead):'
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`zsh`使用五个启动文件，如下例所示（注意，如果未设置`$ZDOTDIR`，`zsh`将使用`$HOME`代替）：'
+- en: '[PRE18]'
+  id: totrans-284
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO11-1)'
+  id: totrans-285
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO11-1)'
+- en: Sourced on all invocations of the shell. It should contain commands to set the
+    search path, plus other important environment variables. But it should not contain
+    commands that produce output or assume the shell is attached to a `tty`.
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Shell的所有调用中被引用。它应该包含设置搜索路径以及其他重要环境变量的命令。但不应包含产生输出或假设Shell连接到`tty`的命令。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO11-2)'
+  id: totrans-287
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO11-2)'
+- en: Meant as an alternative to *.zlogin* for `ksh` fans (these two are not intended
+    to be used together); similar to *.zlogin*, except that it is sourced before *.zshrc*.
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为`ksh`爱好者的*.zlogin*替代品（这两者不应同时使用）；与*.zlogin*类似，但在*.zshrc*之前被引用。
+- en: '[![3](Images/3.png)](#co_shells_and_scripting_CO11-3)'
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_shells_and_scripting_CO11-3)'
+- en: Sourced in interactive shells. It should contain commands to set up aliases,
+    functions, options, key bindings, and so on.
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在交互式Shell中被引用。它应该包含设置别名、函数、选项、键绑定等命令。
+- en: '[![4](Images/4.png)](#co_shells_and_scripting_CO11-4)'
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_shells_and_scripting_CO11-4)'
+- en: Sourced in login shells. It should contain commands that should be executed
+    only in login shells. Note that *.zlogin* is not the place for alias definitions,
+    options, environment variable settings, and the like.
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在登录Shell中被引用。它应该包含仅在登录Shell中执行的命令。请注意，*.zlogin*不适合别名定义、选项、环境变量设置等。
+- en: '[![5](Images/5.png)](#co_shells_and_scripting_CO11-5)'
+  id: totrans-293
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_shells_and_scripting_CO11-5)'
+- en: Sourced when login shells exit.
+  id: totrans-294
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在登录Shell退出时被引用。
+- en: For more `zsh` plug-ins, see also the [awesome-zsh-plugins repo on GitHub](https://oreil.ly/XHwBd).
+    If you want to learn `zsh`, consider reading [“An Introduction to the Z Shell”](https://oreil.ly/cMfnw)
+    by Paul Falstad and Bas de Bakker.
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 欲了解更多`zsh`插件，请参阅GitHub上的[awesome-zsh-plugins repo](https://oreil.ly/XHwBd)。如果你想学习`zsh`，可以阅读Paul
+    Falstad和Bas de Bakker的[“An Introduction to the Z Shell”](https://oreil.ly/cMfnw)。
+- en: Other Modern Shells
+  id: totrans-296
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 其他现代Shell
+- en: In addition to `fish` and `zsh`, there are a number of other interesting—but
+    not necessarily always bash-compatible—shells available out there. When you have
+    a look at those, ask yourself what the focus of the respective shell is (interactive
+    usage vs. scripting) and how active the community around it is.
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了`fish`和`zsh`外，还有许多其他有趣的Shell可供选择，但不一定始终与bash兼容。当你查看这些时，请考虑各自Shell的重点（交互使用
+    vs. 脚本编写）以及社区活跃程度。
+- en: 'Some examples of modern shells for Linux I came across and can recommend you
+    have a look at include the following:'
+  id: totrans-298
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我发现的一些适用于Linux的现代Shell示例，并推荐你查看：
+- en: '[Oil shell](https://www.oilshell.org)'
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Oil shell](https://www.oilshell.org)'
+- en: Targets Python and JavaScript users. Put in other words, the focus is less on
+    interactive use but more on scripting.
+  id: totrans-300
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 面向Python和JavaScript用户。换句话说，更专注于脚本编写而非交互使用。
+- en: '[murex](https://murex.rocks)'
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[murex](https://murex.rocks)'
+- en: A POSIX shell that sports interesting features such as an integrated testing
+    framework, typed pipelines, and event-driven programming.
+  id: totrans-302
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个POSIX Shell，具有集成的测试框架、类型化管道和事件驱动编程等有趣特性。
+- en: '[Nushell](https://www.nushell.sh)'
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Nushell](https://www.nushell.sh)'
+- en: An experimental new shell paradigm, featuring tabular output with a powerful
+    query language. Learn more via the detailed [Nu Book](https://oreil.ly/jIa5w).
+  id: totrans-304
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一种实验性的新Shell范例，展示了带有强大查询语言的表格输出。通过详细的[Nu Book](https://oreil.ly/jIa5w)了解更多信息。
+- en: '[PowerShell](https://oreil.ly/bYKnd)'
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[PowerShell](https://oreil.ly/bYKnd)'
+- en: A cross-platform shell that started off as a fork of the Windows PowerShell
+    and offers a different set of semantics and interactions than POSIX shells.
+  id: totrans-306
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个跨平台的Shell，最初作为Windows PowerShell的分支，并提供与POSIX Shell不同的语义和交互方式。
+- en: There are many more options out there. Keep looking and see what works best
+    for you. Try thinking beyond bash and optimize for your use case.
+  id: totrans-307
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有很多其他选择。继续寻找并找到最适合你的方法。试着超越bash并优化你的使用场景。
+- en: Which Shell Should I Use?
+  id: totrans-308
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 我应该使用哪个Shell？
+- en: At this point in time, every modern shell—other than bash—seems like a good
+    choice, from a human-centric perspective. Smooth auto-complete, easy config, and
+    smart environments are no luxury in 2022, and given the time you usually spend
+    on the command line, you should try out different shells and pick the one you
+    like most. I personally use the Fish shell, but many of my peers are super happy
+    with the Z-shell.
+  id: totrans-309
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，除了bash之外的现代Shell似乎都是一个不错的选择，从人性化的角度来看。流畅的自动完成，简单的配置和智能环境在2022年并不奢侈，在你通常花在命令行上的时间里，你应该尝试不同的Shell，并选择你最喜欢的那个。我个人使用Fish
+    Shell，但我的许多同行都对Z Shell非常满意。
+- en: 'You may have issues that make you hesitant to move away from bash, such as
+    the following:'
+  id: totrans-310
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能会有一些问题，让你不愿意远离bash，例如以下问题：
+- en: You work in remote systems and/or cannot install your own shell.
+  id: totrans-311
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 你在远程系统工作和/或无法安装自己的Shell。
+- en: You’ve stayed with bash due to compatibility and/or muscle memory. It can be
+    hard to get rid of certain habits.
+  id: totrans-312
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 由于兼容性或肌肉记忆，你一直在使用bash。摆脱某些习惯可能会很难。
+- en: Almost all instructions (implicitly) assume bash. For example, you’ll see instructions
+    like `export FOO=BAR`, which is bash specific.
+  id: totrans-313
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 几乎所有的指令（隐含地）假设bash。例如，你会看到像`export FOO=BAR`这样的指令，这是特定于bash的。
+- en: It turns out that these issues are by and large not relevant to most users.
+    While you may have to temporarily use bash in a remote system, most of the time
+    you will be working in an environment that you control. There is a learning curve,
+    but the investment pays off in the long run.
+  id: totrans-314
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 结果表明，这些问题在大多数用户那里基本上不成问题。虽然你可能不得不在远程系统中暂时使用bash，但大多数情况下你将在你控制的环境中工作。学习曲线是存在的，但长期投资是值得的。
+- en: 'With that, let’s focus on another way to boost your productivity in the terminal:
+    multiplexer.'
+  id: totrans-315
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，让我们集中精力讨论另一种提升终端生产力的方式：多路复用器。
+- en: Terminal Multiplexer
+  id: totrans-316
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 终端多路复用器
+- en: 'We came across terminals at the beginning of this chapter, in [“Terminals”](#terminals).
+    Now let’s dive deeper into the topic of how to improve your terminal usage, building
+    on a concept that is both simple and powerful: multiplexing.'
+  id: totrans-317
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们在本章开头遇到了终端，在[“终端”](#terminals)。现在让我们深入探讨如何改善你的终端使用，基于一个简单而强大的概念：多路复用。
+- en: 'Think of it in this way: you usually work on different things that can be grouped
+    together. For example, you may work on an open source project, author a blog post
+    or docs, access a server remotely, interact with an HTTP API to test things, and
+    so forth. These tasks may each require one or more terminal windows, and often
+    you want or need to do potentially interdependent tasks in two windows at the
+    same time. For example:'
+  id: totrans-318
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这样想：通常你会在不同的事物上工作，可以将它们分组在一起。例如，你可能会在一个开源项目上工作，撰写博客文章或文档，远程访问服务器，与HTTP API交互进行测试等等。这些任务可能每个都需要一个或多个终端窗口，并且通常你希望或需要在两个窗口中同时进行可能相互依赖的任务。例如：
+- en: You are using the `watch` command to periodically execute a directory listing
+    and at the same time edit a file.
+  id: totrans-319
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用`watch`命令定期执行目录列表，并同时编辑文件。
+- en: You start a server process (a web server or application server) and want to
+    have it running in the foreground (see also [“Job control”](#job-control)) to
+    keep an eye on the logs.
+  id: totrans-320
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 你启动一个服务器进程（Web服务器或应用服务器），希望它在前台运行（也见[“作业控制”](#job-control)）以便查看日志。
+- en: You want to edit a file using `vi` and at the same time use `git` to query the
+    status and commit changes.
+  id: totrans-321
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 你想使用`vi`编辑文件，同时使用`git`查询状态并提交更改。
+- en: You have a VM running in the public cloud and want to `ssh` into it while having
+    the possibility to manage files locally.
+  id: totrans-322
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 你有一个在公共云中运行的虚拟机，想要通过`ssh`登录它，并有可能在本地管理文件。
+- en: Think of all these examples as things that logically belong together and that
+    in terms of time duration can range from short term (a few minutes) to long term
+    (days and weeks). The grouping of those tasks is usually called a *session*.
+  id: totrans-323
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 把所有这些例子看作是逻辑上属于一起的事情，时间跨度从短期（几分钟）到长期（几天或几周）。这些任务的分组通常称为*会话*。
+- en: 'Now, there are a number of challenges if you want to achieve this grouping:'
+  id: totrans-324
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，如果你想要实现这种分组，会有一些挑战：
+- en: You need multiple windows, so one solution is to launch multiple terminals or,
+    if the UI supports it, multiple instances (tabs).
+  id: totrans-325
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 您需要多个窗口，因此一种解决方案是启动多个终端，或者如果 UI 支持，多个实例（选项卡）。
+- en: You would like to have all the windows and paths around, even if you close the
+    terminal or the remote side closes down.
+  id: totrans-326
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 即使您关闭终端或远程端关闭，也希望保留所有窗口和路径。
+- en: You want to expand or zoom in and out to focus on certain tasks while keeping
+    an overview of all your sessions and being able to navigate between them.
+  id: totrans-327
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 您希望扩展或缩放以专注于特定任务，同时保持所有会话的概览，并能够在它们之间导航。
+- en: To enable these tasks, people came up with the idea of overlaying a terminal
+    with multiple windows (and sessions, to group windows)—in other words, multiplexing
+    the terminal I/O.
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了实现这些任务，人们提出了在终端上叠加多个窗口（和会话，以分组窗口）的想法，换句话说，复用终端 I/O。
+- en: Let’s have a brief look at the original implementation of terminal multiplexing,
+    called `screen`. Then we’ll focus in-depth on a widely used implement called `tmux`
+    and wrap up with other options in this space.
+  id: totrans-329
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们简要了解终端复用的原始实现，称为 `screen`。然后我们将深入研究广泛使用的 `tmux` 实现，并总结此领域的其他选项。
+- en: screen
+  id: totrans-330
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: screen
+- en: '[`screen`](https://oreil.ly/xx3ik) is the original terminal multiplexer and
+    is still used. Unless you’re in a remote environment where nothing else is available
+    and/or you can’t install another multiplexer, you should probably not be using
+    `screen`. One reason is that it’s not actively maintained anymore, and another
+    is that it’s not very flexible and lacks a number of features modern terminal
+    multiplexers have.'
+  id: totrans-331
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`screen`](https://oreil.ly/xx3ik) 是最初的终端复用工具，目前仍在使用。除非您在没有其他选择的远程环境中，或者无法安装其他复用工具，否则建议不要使用
+    `screen`。原因之一是它不再处于活跃维护状态，另一个原因是它不太灵活且缺乏许多现代终端复用工具的功能。'
+- en: tmux
+  id: totrans-332
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: tmux
+- en: '[`tmux`](https://oreil.ly/kVg7M) is a flexible and rich terminal multiplexer
+    that you can bend to your needs. As you can see in [Figure 3-8](#fig-tmux-concept),
+    there are three core elements you’re interacting with in `tmux`, from coarse-grained
+    to fine-grained units:'
+  id: totrans-333
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`tmux`](https://oreil.ly/kVg7M) 是一个灵活且功能丰富的终端复用工具，可以根据您的需求进行定制。正如您在[图 3-8](#fig-tmux-concept)
+    中所见，`tmux` 有三个核心元素，您可以与之交互，从粗粒度到细粒度单元：'
+- en: '![](Images/lmlx_0308.png)'
+  id: totrans-334
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](Images/lmlx_0308.png)'
+- en: 'Figure 3-8\. The `tmux` elements: sessions, windows, and panes'
+  id: totrans-335
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 3-8\. `tmux` 的元素：会话、窗口和 pane
+- en: Sessions
+  id: totrans-336
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 会话
+- en: A logical unit that you can think of as a working environment dedicated to a
+    specific task such as “working on project X” or “writing blog post Y.” It’s the
+    container for all other units.
+  id: totrans-337
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个逻辑单元，您可以将其视为专用于特定任务（如“在项目 X 上工作”或“撰写博客文章 Y”）的工作环境。它是所有其他单元的容器。
+- en: Windows
+  id: totrans-338
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 窗口
+- en: You can think of a window as a tab in a browser, belonging to a session. It’s
+    optional to use, and often you only have one window per session.
+  id: totrans-339
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以将窗口视为浏览器中的标签，属于一个会话。使用它是可选的，通常每个会话只有一个窗口。
+- en: Panes
+  id: totrans-340
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Panes
+- en: 'These are your workhorses, effectively a single shell instance running. A pane
+    is part of a window, and you can easily split it vertically or horizontally, as
+    well as expand/collapse it (think: zoom) and close panes as you need them.'
+  id: totrans-341
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些是您的工作马，实际上是运行的单个 shell 实例。一个 pane 是一个窗口的一部分，您可以轻松地垂直或水平分割它，以及展开/折叠它（类似于缩放），并根据需要关闭
+    panes。
+- en: 'Just like `screen`, in `tmux` you have the ability to attach and detach a session.
+    Let’s assume we start from scratch, let’s launch it with a session called `test`:'
+  id: totrans-342
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与 `screen` 类似，在 `tmux` 中您可以附加和分离会话。假设我们从头开始，让我们使用一个名为 `test` 的会话来启动它：
+- en: '[PRE19]'
+  id: totrans-343
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: With the preceding command, `tmux` is running as a server, and you find yourself
+    in a shell you’ve configured in `tmux`, running as the client. This client/server
+    model allows you to create, enter, leave, and destroy sessions and use the shells
+    running in it without having to think of the processes running (or failing) in
+    it.
+  id: totrans-344
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用上述命令，`tmux` 作为服务器运行，您会进入一个您在 `tmux` 中配置的 shell，作为客户端运行。这种客户端/服务器模型允许您创建、进入、离开和销毁会话，并使用其中运行的
+    shell，而无需考虑它们运行（或失败）的进程。
+- en: '`tmux` uses Ctrl+b as the default keyboard shortcut, also called *prefix* or
+    *trigger*. So for example, to list all windows, you would press Ctrl+b and then
+    w, or to expand the current (active) pane, you would use Ctrl+b and then z.'
+  id: totrans-345
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`tmux` 使用 Ctrl+b 作为默认键盘快捷键，也称为*前缀*或*触发器*。例如，要列出所有窗口，您可以按 Ctrl+b 然后 w，或者要扩展当前（活动）窗格，您可以使用
+    Ctrl+b 然后 z。'
+- en: Tip
+  id: totrans-346
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 小贴士
+- en: In `tmux` the default trigger is Ctrl+b. To improve the flow, I mapped the trigger
+    to an unused key, so a single keystroke is sufficient. I did this by first mapping
+    the trigger to the Home key in `tmux` and then mapping that Home key to the Caps
+    Lock key by changing its mapping in */usr/share/X11/xkb/symbols/pc* to `key <CAPS>
+    { [ Home ] };`.
+  id: totrans-347
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 `tmux` 中，默认的触发键是 Ctrl+b。为了改善流程，我将触发键映射到一个未使用的键上，因此只需按一次按键即可。我是通过首先将触发键映射到
+    `tmux` 中的 Home 键，然后通过更改 */usr/share/X11/xkb/symbols/pc* 中的映射将 Home 键映射到 Caps Lock
+    键来实现这一点的。
+- en: This double-mapping was a workaround I needed to do. Depending on your target
+    key or terminal, you might not have to do this, but I encourage you to map Ctrl+b
+    to an unused key you can easily reach since you will press it many times a day.
+  id: totrans-348
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种双映射是我需要做的一种变通方法。根据您的目标键或终端，您可能不必这样做，但我建议您将 Ctrl+b 键映射到一个易于到达的未使用键，因为您每天会频繁按下它。
+- en: You can now use any of the commands listed in [Table 3-4](#table-tmux-reference)
+    to manage further sessions, windows, and panes. Also, when pressing Ctrl+b+d,
+    you can detach sessions. This means effectively that you put `tmux` into the background.
+  id: totrans-349
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您现在可以使用 [表格 3-4](#table-tmux-reference) 中列出的任何命令来管理进一步的会话、窗口和窗格。此外，按下 Ctrl+b+d
+    键，您可以分离会话。这有效地将 `tmux` 放入后台。
+- en: 'When you then start a new terminal instance or, say, you `ssh` to your machine
+    from a remote place, you can then attach to an existing session, so let’s do that
+    with the `test` session we created earlier:'
+  id: totrans-350
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您启动新的终端实例或者从远程位置通过 `ssh` 到您的机器时，您可以附加到一个已有的会话，所以让我们使用之前创建的 `test` 会话来做这件事：
+- en: '[PRE20]'
+  id: totrans-351
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO12-1)'
+  id: totrans-352
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO12-1)'
+- en: Attach to existing session called `test`. Note that if you want to detach the
+    session from its previous terminal, you would also supply the `-d` parameter.
+  id: totrans-353
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 附加到名为 `test` 的现有会话。请注意，如果您想要从之前的终端分离会话，还需要提供 `-d` 参数。
+- en: '[Table 3-4](#table-tmux-reference) lists common `tmux` commands grouped by
+    the units discussed, from widest scope (session) to narrowest (pane).'
+  id: totrans-354
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表格 3-4](#table-tmux-reference) 列出了按单元分组的常见 `tmux` 命令，从最广泛的范围（会话）到最窄的范围（窗格）。'
+- en: Table 3-4\. `tmux` reference
+  id: totrans-355
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表格 3-4\. `tmux` 参考
+- en: '| Target | Task | Command |'
+  id: totrans-356
+  prefs: []
+  type: TYPE_TB
+  zh: '| 目标 | 任务 | 命令 |'
+- en: '| --- | --- | --- |'
+  id: totrans-357
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| Session | Create new | `:new -s NAME` |'
+  id: totrans-358
+  prefs: []
+  type: TYPE_TB
+  zh: '| 会话 | 创建新的 | `:new -s NAME` |'
+- en: '| Session | Rename | trigger + `$` |'
+  id: totrans-359
+  prefs: []
+  type: TYPE_TB
+  zh: '| 会话 | 重命名 | 触发键 + `$` |'
+- en: '| Session | List all | trigger + `s` |'
+  id: totrans-360
+  prefs: []
+  type: TYPE_TB
+  zh: '| 会话 | 列出全部 | 触发键 + `s` |'
+- en: '| Session | Close | trigger  |'
+  id: totrans-361
+  prefs: []
+  type: TYPE_TB
+  zh: '| 会话 | 关闭 | 触发键  |'
+- en: '| Window | Create new | trigger + `c` |'
+  id: totrans-362
+  prefs: []
+  type: TYPE_TB
+  zh: '| 窗口 | 创建新的 | 触发键 + `c` |'
+- en: '| Window | Rename | trigger + `,` |'
+  id: totrans-363
+  prefs: []
+  type: TYPE_TB
+  zh: '| 窗口 | 重命名 | 触发键 + `,` |'
+- en: '| Window | Switch to | trigger + `1` … `9` |'
+  id: totrans-364
+  prefs: []
+  type: TYPE_TB
+  zh: '| 窗口 | 切换到 | 触发键 + `1` … `9` |'
+- en: '| Window | List all | trigger + `w` |'
+  id: totrans-365
+  prefs: []
+  type: TYPE_TB
+  zh: '| 窗口 | 列出全部 | 触发键 + `w` |'
+- en: '| Window | Close | trigger + `&` |'
+  id: totrans-366
+  prefs: []
+  type: TYPE_TB
+  zh: '| 窗口 | 关闭 | 触发键 + `&` |'
+- en: '| Pane | Split horizontal | trigger + `"` |'
+  id: totrans-367
+  prefs: []
+  type: TYPE_TB
+  zh: '| 窗格 | 水平分割 | 触发键 + `"` |'
+- en: '| Pane | Split vertical | trigger + `%` |'
+  id: totrans-368
+  prefs: []
+  type: TYPE_TB
+  zh: '| 窗格 | 垂直分割 | 触发键 + `%` |'
+- en: '| Pane | Toggle | trigger + `z` |'
+  id: totrans-369
+  prefs: []
+  type: TYPE_TB
+  zh: '| 窗格 | 切换 | 触发键 + `z` |'
+- en: '| Pane | Close | trigger + `x` |'
+  id: totrans-370
+  prefs: []
+  type: TYPE_TB
+  zh: '| 窗格 | 关闭 | 触发键 + `x` |'
+- en: 'Now that you have a basic idea of how to use `tmux`, let’s turn our attention
+    to configuring and customizing it. My *.tmux.conf* looks as follows:'
+  id: totrans-371
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经基本了解如何使用 `tmux`，让我们转向配置和自定义。我的 *.tmux.conf* 如下所示：
+- en: '[PRE21]'
+  id: totrans-372
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO13-1)'
+  id: totrans-373
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO13-1)'
+- en: This line and the next two lines change the trigger to `Home`.
+  id: totrans-374
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此行及接下来两行将触发键更改为 `Home`。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO13-2)'
+  id: totrans-375
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO13-2)'
+- en: Reload config via trigger + r.
+  id: totrans-376
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过触发键 + r 重新加载配置。
+- en: '[![3](Images/3.png)](#co_shells_and_scripting_CO13-3)'
+  id: totrans-377
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_shells_and_scripting_CO13-3)'
+- en: This line and the next redefine pane splitting; retain current directory of
+    existing pane.
+  id: totrans-378
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此行及以下重新定义了窗格分割；保留现有窗格的当前目录。
+- en: '[![4](Images/4.png)](#co_shells_and_scripting_CO13-4)'
+  id: totrans-379
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_shells_and_scripting_CO13-4)'
+- en: Adds shortcuts for new and kill sessions.
+  id: totrans-380
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为新会话和终止会话添加快捷方式。
+- en: '[![5](Images/5.png)](#co_shells_and_scripting_CO13-5)'
+  id: totrans-381
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_shells_and_scripting_CO13-5)'
+- en: No delays.
+  id: totrans-382
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无延迟。
+- en: '[![6](Images/6.png)](#co_shells_and_scripting_CO13-6)'
+  id: totrans-383
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](Images/6.png)](#co_shells_and_scripting_CO13-6)'
+- en: Enable mouse selections.
+  id: totrans-384
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启用鼠标选择。
+- en: '[![7](Images/7.png)](#co_shells_and_scripting_CO13-7)'
+  id: totrans-385
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![7](Images/7.png)](#co_shells_and_scripting_CO13-7)'
+- en: Set the default terminal mode to 256-color mode.
+  id: totrans-386
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将默认终端模式设置为 256 色模式。
+- en: '[![8](Images/8.png)](#co_shells_and_scripting_CO13-8)'
+  id: totrans-387
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![8](Images/8.png)](#co_shells_and_scripting_CO13-8)'
+- en: Theme settings (next six lines).
+  id: totrans-388
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 主题设置（下面六行）。
+- en: '[![9](Images/9.png)](#co_shells_and_scripting_CO13-9)'
+  id: totrans-389
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![9](Images/9.png)](#co_shells_and_scripting_CO13-9)'
+- en: 'From here to the end: plug-in management.'
+  id: totrans-390
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从这里到末尾：插件管理。
+- en: 'First install [tpm](https://oreil.ly/hsoau), the `tmux` plug-in manager, and
+    then trigger + I for the plug-ins. The plug-ins used here are the following:'
+  id: totrans-391
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先安装 [tpm](https://oreil.ly/hsoau)，`tmux` 插件管理器，然后按下触发键 + I 进行插件管理。这里使用的插件如下：
+- en: '[tmux-resurrect](https://oreil.ly/JugvE)'
+  id: totrans-392
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[tmux-resurrect](https://oreil.ly/JugvE)'
+- en: Allows you to restore sessions with Ctrl+s (safe) and Ctrl+r (restore)
+  id: totrans-393
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您使用 Ctrl+s（安全）和 Ctrl+r（恢复）来恢复会话。
+- en: '[tmux-continuum](https://oreil.ly/KvT7l)'
+  id: totrans-394
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[tmux-continuum](https://oreil.ly/KvT7l)'
+- en: Automatically saves/restores a session (15-minute interval)
+  id: totrans-395
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自动保存/恢复会话（每 15 分钟间隔）。
+- en: '[Figure 3-9](#fig-tmux-example) shows my Alacritty terminal running `tmux`.
+    You can see the sessions with the shortcuts 0 to 9, located in the left upper
+    corner.'
+  id: totrans-396
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图 3-9](#fig-tmux-example) 显示了我的 Alacritty 终端正在运行 `tmux`。您可以看到位于左上角的快捷方式 0
+    到 9 的会话。'
+- en: '![lmlx 0309](Images/lmlx_0309.png)'
+  id: totrans-397
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0309](Images/lmlx_0309.png)'
+- en: Figure 3-9\. An example `tmux` instance in action, showing available sessions
+  id: totrans-398
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 3-9\. `tmux` 实例示例，显示可用会话。
+- en: While `tmux` certainly is an excellent choice, there are indeed other options
+    than `tmux`, so let’s have a peek.
+  id: totrans-399
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然 `tmux` 确实是一个极好的选择，但确实还有其他选项，所以让我们来看看吧。
+- en: Other Multiplexers
+  id: totrans-400
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 其他复用器
+- en: 'Other terminal multiplexers you can have a look at and try out include the
+    following:'
+  id: totrans-401
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以查看并尝试的其他终端复用器包括以下几种：
+- en: '[tmuxinator](https://oreil.ly/JyWmA)'
+  id: totrans-402
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[tmuxinator](https://oreil.ly/JyWmA)'
+- en: A meta-tool allowing you to manage `tmux` sessions
+  id: totrans-403
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 元工具，允许您管理 `tmux` 会话。
+- en: '[Byobu](https://oreil.ly/pJLa2)'
+  id: totrans-404
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Byobu](https://oreil.ly/pJLa2)'
+- en: A wrapper around either `screen` or `tmux`; it’s especially interesting if you’re
+    using the Ubuntu- or Debian-based Linux distros
+  id: totrans-405
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是 `screen` 或 `tmux` 的包装器；如果您使用基于 Ubuntu 或 Debian 的 Linux 发行版，它尤其有趣。
+- en: '[Zellij](https://oreil.ly/ZRHnX)'
+  id: totrans-406
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Zellij](https://oreil.ly/ZRHnX)'
+- en: Calls itself a terminal workspace, is written in Rust, and goes beyond what
+    `tmux` offers, including a layout engine and a powerful plug-in system
+  id: totrans-407
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自称为终端工作区，用 Rust 编写，并且超越了 `tmux` 的功能，包括布局引擎和强大的插件系统。
+- en: '[dvtm](https://oreil.ly/yaTan)'
+  id: totrans-408
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[dvtm](https://oreil.ly/yaTan)'
+- en: Brings the concept of tiling window management to the terminal; it’s powerful
+    but has a learning curve like `tmux`
+  id: totrans-409
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将平铺窗口管理概念引入终端；功能强大但像 `tmux` 一样有学习曲线。
+- en: '[3mux](https://oreil.ly/S6nvV)'
+  id: totrans-410
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[3mux](https://oreil.ly/S6nvV)'
+- en: A simple terminal multiplexer written in Go; it’s easy to use but not as powerful
+    as `tmux`
+  id: totrans-411
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个简单的用 Go 编写的终端复用器；易于使用但不像 `tmux` 那样强大。
+- en: With this quick review of multiplexer options out of the way, let’s talk about
+    selecting one.
+  id: totrans-412
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过对复用器选项进行快速回顾后，让我们来谈谈如何选择一个。
+- en: Which Multiplexer Should I Use?
+  id: totrans-413
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 我应该使用哪个复用器？
+- en: 'Unlike with shells for human users, I do have a concrete preference here in
+    the context of terminal multiplexer: use `tmux`. The reasons are manifold: it
+    is mature, stable, rich (has many available plug-ins), and flexible. Many folks
+    are using it, so there’s plenty of material out there to read up on as well as
+    help available. The other multiplexers are exciting but relatively new or are,
+    as is the case with `screen`, no longer in their prime.'
+  id: totrans-414
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不像面向人类用户的 shell，我在终端复用器的背景下确实有一个明确的偏好：使用 `tmux`。理由多种多样：它成熟稳定、功能丰富（有许多可用插件）、灵活。很多人都在使用它，所以有很多相关资料和可用的帮助。其他复用器也很令人兴奋，但相对较新或者像
+    `screen` 一样已经不再是首选了。
+- en: With that, I hope I was able to convince you to consider using a terminal multiplexer
+    to improve your terminal and shell experience, speed up your tasks, and make the
+    overall flow smoother.
+  id: totrans-415
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 希望能说服您考虑使用终端复用器来改善终端和 shell 的体验，加快任务速度，使整体流程更加顺畅。
+- en: Now, we turn our attention to the last topic in this chapter, automating tasks
+    with shell scripts.
+  id: totrans-416
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，让我们转向本章的最后一个主题，使用 shell 脚本自动化任务。
+- en: Scripting
+  id: totrans-417
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 脚本编写
+- en: In the previous sections of this chapter, we focused on the manual, interactive
+    usage of the shell. Once you’ve done a certain task over and over again manually
+    on the prompt, it’s likely time to automate the task. This is where scripts come
+    in.
+  id: totrans-418
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章的前几节中，我们专注于 shell 的手动、交互式使用。一旦您在提示符上反复执行某项任务，很可能是时候自动化该任务了。这就是脚本的用武之地。
+- en: 'Here we focus on writing scripts in bash. This is due to two reasons:'
+  id: totrans-419
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里我们关注在 bash 中编写脚本。这是由于两个原因：
+- en: Most of the scripts out there are written in bash, and hence you will find a
+    lot of examples and help available for bash scripts.
+  id: totrans-420
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 大多数脚本都是用 bash 编写的，因此您会找到很多 bash 脚本的示例和帮助。
+- en: The likelihood of finding bash available on a target system is high, making
+    your potential user base bigger than if you used a (potentially more powerful
+    but esoteric or not widely used) alternative to bash.
+  id: totrans-421
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在目标系统上找到 bash 的可能性很高，这使得你的潜在用户群比使用其他（可能更强大但是又神秘或不常用）的 bash 替代品要大。
+- en: 'Just to provide you with some context before we start, there are shell scripts
+    out there that clock in at [several thousands](https://oreil.ly/0oWzI) of lines
+    of code. Not that I encourage you to aim for this—quite the opposite: if you find
+    yourself writing long scripts, ask yourself if a proper scripting language such
+    as Python or Ruby is the better choice.'
+  id: totrans-422
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们开始之前，我想提供一些背景信息，有些 shell 脚本的代码量可以达到[几千行](https://oreil.ly/0oWzI)。并不是鼓励你去追求这样的量级
+    —— 相反，如果你发现自己在编写长脚本，可以考虑是否应该选择像 Python 或 Ruby 这样的适当脚本语言。
+- en: 'Let’s step back now and develop a short but useful example, applying good practices
+    along the way. Let’s assume we want to automate the task of displaying a single
+    statement on the screen that, given a user’s GitHub handle, shows when the user
+    joined, using their full name, something along the lines of the following:'
+  id: totrans-423
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们退后一步，开发一个简短但有用的示例，一路上应用良好的实践。我们假设我们想要自动化显示一个单一语句在屏幕上的任务，给定一个用户的 GitHub
+    句柄，显示用户加入的时间，使用他们的全名，类似以下的内容：
+- en: '[PRE22]'
+  id: totrans-424
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: How do we go about automating this task with a script? Let’s start with the
+    basics, then review portability, and work our way up to the “business logic” of
+    the script.
+  id: totrans-425
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们如何用脚本自动化这个任务呢？让我们从基础开始，然后审视可移植性，并逐步提升到脚本的“业务逻辑”。
+- en: Scripting Basics
+  id: totrans-426
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 脚本基础
+- en: The good news is that by interactively using a shell, you already know most
+    of the relevant terms and techniques. In addition to variables, streams and redirection,
+    and common commands, there are a few specific things you want to be familiar with
+    in the context of scripts, so let’s review them.
+  id: totrans-427
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 好消息是，通过交互式使用 shell，你已经掌握了大部分相关术语和技术。除了变量、流和重定向以及常见命令之外，在脚本的上下文中还有一些特定的事物，让我们来复习一下。
+- en: Advanced data types
+  id: totrans-428
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 高级数据类型
+- en: While shells usually treat everything as strings (if you want to perform some
+    more complicated numerical tasks, you should probably not use a shell script),
+    they do support some advanced data types such as arrays.
+  id: totrans-429
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然 shell 通常将一切视为字符串（如果你想执行一些更复杂的数值任务，可能不应该使用 shell 脚本），但它们支持一些高级数据类型如数组。
+- en: 'Let’s have a look at arrays in action:'
+  id: totrans-430
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看数组的实际运用：
+- en: '[PRE23]'
+  id: totrans-431
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO14-1)'
+  id: totrans-432
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO14-1)'
+- en: Define an array with three elements.
+  id: totrans-433
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义一个包含三个元素的数组。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO14-2)'
+  id: totrans-434
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO14-2)'
+- en: Access the first element; this would print `Linux`.
+  id: totrans-435
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 访问第一个元素；这将打印 `Linux`。
+- en: '[![3](Images/3.png)](#co_shells_and_scripting_CO14-3)'
+  id: totrans-436
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_shells_and_scripting_CO14-3)'
+- en: Get the length of the array, resulting in `numberofos` being 3.
+  id: totrans-437
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 获取数组长度，结果为 `numberofos` 为 3。
+- en: Flow control
+  id: totrans-438
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 流程控制
+- en: Flow control allows you to branch (`if`) or repeat (`for` and `while`) in your
+    script, making the execution dependent on a certain condition.
+  id: totrans-439
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 流程控制允许你在脚本中进行分支（`if`）或重复（`for` 和 `while`），使执行依赖于特定条件。
+- en: 'Some usage examples of flow control:'
+  id: totrans-440
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 流程控制的一些用法示例：
+- en: '[PRE24]'
+  id: totrans-441
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO15-1)'
+  id: totrans-442
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO15-1)'
+- en: Basic loop iterating over a directory, printing each file name
+  id: totrans-443
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基本循环遍历目录，打印每个文件名
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO15-2)'
+  id: totrans-444
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO15-2)'
+- en: Range loop
+  id: totrans-445
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 范围循环
+- en: '[![3](Images/3.png)](#co_shells_and_scripting_CO15-3)'
+  id: totrans-446
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_shells_and_scripting_CO15-3)'
+- en: Forever loop; break out with Ctrl+C
+  id: totrans-447
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无限循环；使用 Ctrl+C 退出。
+- en: Functions
+  id: totrans-448
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 函数
+- en: Functions allow you to write more modular and reusable scripts. You have to
+    define the function before you use it since the shell interprets the script from
+    top to bottom.
+  id: totrans-449
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 函数允许你编写更模块化和可重复使用的脚本。在使用之前必须先定义函数，因为 shell 会逐行解析脚本。
+- en: 'A simple function example:'
+  id: totrans-450
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简单函数示例：
+- en: '[PRE25]'
+  id: totrans-451
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO16-1)'
+  id: totrans-452
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO16-1)'
+- en: Function definition; parameters implicitly passed via `$n`
+  id: totrans-453
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 函数定义；参数通过 `$n` 隐式传递。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO16-2)'
+  id: totrans-454
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO16-2)'
+- en: Function invocation; the output is “Hi Michael hope you are well!”
+  id: totrans-455
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 调用函数；输出为 “Hi Michael hope you are well!”
+- en: Advanced I/O
+  id: totrans-456
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 高级 I/O
+- en: With `read` you can read user input from `stdin` that you can use to elicit
+    runtime input—for example, with a menu of options. Further, rather than using
+    `echo`, consider `printf`, which allows you fine-grained control over the output,
+    including colors. `printf` is also more portable than `echo`.
+  id: totrans-457
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`read`可以从`stdin`中读取用户输入，你可以用它来获取运行时输入，例如使用选项菜单。此外，与使用`echo`相比，考虑使用`printf`，它允许你对输出进行精细的控制，包括颜色。与`echo`相比，`printf`更具可移植性。
+- en: 'Following is an example usage of the advanced I/O in action:'
+  id: totrans-458
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下是高级I/O使用示例：
+- en: '[PRE26]'
+  id: totrans-459
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO17-1)'
+  id: totrans-460
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO17-1)'
+- en: Read value from user input.
+  id: totrans-461
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从用户输入读取值。
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO17-2)'
+  id: totrans-462
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO17-2)'
+- en: Output value read in the previous step.
+  id: totrans-463
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在上一步中读取输出值。
+- en: There are other, more advanced concepts available for you, such as [signals
+    and traps](https://oreil.ly/JsV1v). Given that we want to provide only an overview
+    and introduction to the scripting topic here, I will refer you to the excellent
+    [bash Scripting Cheatsheet](https://oreil.ly/nVjhN) for a comprehensive reference
+    of all the relevant constructs. If you are serious about writing shell scripts,
+    I recommend you read [*bash Cookbook*](https://oreil.ly/0jEt9) by Carl Albing,
+    JP Vossen, and Cameron Newham, which contains lots and lots of great snippets
+    you can use as a starting point.
+  id: totrans-464
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于你来说还有其他更高级的概念，比如[信号和陷阱](https://oreil.ly/JsV1v)。鉴于我们只想在这里提供脚本主题的概述和介绍，我会推荐你参考优秀的[bash脚本速查表](https://oreil.ly/nVjhN)，以获取所有相关结构的全面参考。如果你真的想要写shell脚本，我建议你阅读卡尔·阿尔宾、JP·沃森和卡梅伦·纽汉的[*bash
+    Cookbook*](https://oreil.ly/0jEt9)，其中包含了很多优秀的片段，可以作为起点使用。
+- en: Writing Portable bash Scripts
+  id: totrans-465
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 编写可移植的bash脚本
+- en: We’ll now look at what it means to write portable scripts in bash. But wait.
+    What does *portable* mean, and why should you care?
+  id: totrans-466
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们来看看在bash中编写可移植脚本意味着什么。但是等等。*可移植*意味着什么，为什么你应该关心呢？
+- en: At the beginning of [“Shells”](#shells), we defined what *POSIX* means, so let’s
+    build on that. When I say “portable,” I mean that we are not making too many assumptions—implicitly
+    or explicitly—about the environment a script will be executed in. If a script
+    is portable, it runs on many different systems (shells, Linux distros, etc.).
+  id: totrans-467
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[“Shells”](#shells)的开头，我们定义了*POSIX*的含义，所以让我们在此基础上继续。当我说“可移植”时，我的意思是我们对脚本将被执行的环境不会有太多假设——无论是隐含地还是明确地。如果一个脚本是可移植的，它可以在许多不同的系统（shell、Linux发行版等）上运行。
+- en: But remember that, even if you pin down the type of shell, in our case to bash,
+    not all features work the same way across different versions of a shell. At the
+    end of the day, it boils down to the number of different environments you can
+    test your script in.
+  id: totrans-468
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但请记住，即使你将shell的类型固定在bash上，不是所有功能在不同版本的shell中都能以相同的方式工作。归根结底，这取决于你可以在多少不同的环境中测试你的脚本。
+- en: Executing portable scripts
+  id: totrans-469
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 执行可移植脚本
+- en: 'How are scripts executed? First, let’s state that scripts really are simply
+    text files; the extension doesn’t matter, although often you find *.sh* used as
+    a convention. But there are two things that turn a text file into a script that
+    is executable and able to be run by the shell:'
+  id: totrans-470
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 脚本是如何执行的？首先，我们要说明脚本实际上只是文本文件；扩展名并不重要，尽管通常你会发现使用*.sh*作为约定。但有两件事可以将一个文本文件变成一个可执行的脚本，并能够由shell运行：
+- en: The text file needs to declare the interpreter in the first line, using what
+    is called [*shebang*](https://oreil.ly/88BcE) (or *hashbang*), which is written
+    as `#!` (see also the first line of the template that follows).
+  id: totrans-471
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 文本文件需要在第一行声明解释器，使用所谓的[*shebang*](https://oreil.ly/88BcE)（或*hashbang*），写为`#!`（另请参见下面模板的第一行）。
+- en: Then, you need to make the script executable using, for example, `chmod +x`,
+    which allows everyone to run it, or, even better, `chmod 750`, which is more along
+    the lines of the least privileges principle, as it allows only the user and group
+    associated with the script to run it. We’ll dive deep into this topic in [Chapter 4](ch04.xhtml#access-control).
+  id: totrans-472
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 然后，你需要使用例如`chmod +x`使脚本可执行，这允许任何人运行它，或者更好的是`chmod 750`，这更符合最小权限原则，因为它只允许与脚本关联的用户和组来运行它。我们将在[第四章](ch04.xhtml#access-control)深入探讨这个主题。
+- en: Now that you know the basics, let’s have a look at a concrete template we can
+    use as a starting point.
+  id: totrans-473
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你已经了解了基础知识，让我们来看一个具体的模板，作为起点使用。
+- en: A skeleton template
+  id: totrans-474
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 一个骨架模板
+- en: 'A skeleton template for a portable bash shell script that you can use as a
+    seed looks as follows:'
+  id: totrans-475
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个可移植bash shell脚本的骨架模板如下所示：
+- en: '[PRE27]'
+  id: totrans-476
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: '[![1](Images/1.png)](#co_shells_and_scripting_CO18-1)'
+  id: totrans-477
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_shells_and_scripting_CO18-1)'
+- en: The [hashbang](https://oreil.ly/l6xNO) instructs the program loader that we
+    want it to use `bash` to interpret this script.
+  id: totrans-478
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[哈希注释](https://oreil.ly/l6xNO)告诉程序加载器我们要使用`bash`来解释此脚本。'
+- en: '[![2](Images/2.png)](#co_shells_and_scripting_CO18-2)'
+  id: totrans-479
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_shells_and_scripting_CO18-2)'
+- en: Define that we want to stop the script execution if an error happens.
+  id: totrans-480
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义我们希望在发生错误时停止脚本执行。
+- en: '[![3](Images/3.png)](#co_shells_and_scripting_CO18-3)'
+  id: totrans-481
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_shells_and_scripting_CO18-3)'
+- en: Define that we treat unset variables as an error (so the script is less likely
+    to fail silently).
+  id: totrans-482
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将未设置的变量视为错误（以便脚本不会悄无声息地失败）。
+- en: '[![4](Images/4.png)](#co_shells_and_scripting_CO18-4)'
+  id: totrans-483
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_shells_and_scripting_CO18-4)'
+- en: Define that when one part of a pipe fails, the whole pipe should be considered
+    failed. This helps to avoid silent failures.
+  id: totrans-484
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义管道的一部分失败时整个管道应被视为失败。这有助于避免悄无声息的失败。
+- en: '[![5](Images/5.png)](#co_shells_and_scripting_CO18-5)'
+  id: totrans-485
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_shells_and_scripting_CO18-5)'
+- en: An example command-line parameter with a default value.
+  id: totrans-486
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 带有默认值的命令行参数示例。
+- en: We will use this template later in this section to implement our GitHub info
+    script.
+  id: totrans-487
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将在本节后面使用此模板来实现我们的 GitHub 信息脚本。
+- en: Good practices
+  id: totrans-488
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 良好的实践
+- en: 'I’m using *good* practices instead of *best* practices because what you should
+    do depends on the situation and how far you want to go. There is a difference
+    between a script you write for yourself and one that you ship to thousands of
+    users, but in general, high-level good practices writing scripts are as follows:'
+  id: totrans-489
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我使用*良好*的实践而不是*最佳*实践，因为你应该根据情况和你想要达到的目标来做决定。一个你为自己编写的脚本和一个你提供给成千上万用户的脚本之间有区别，但总体来说，编写脚本的高级良好实践如下：
+- en: Fail fast and loud
+  id: totrans-490
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 快速失败和大声失败
+- en: Avoid silent fails, and fail fast; things like `errexit` and `pipefail` do that
+    for you. Since bash tends to fail silently by default, failing fast is almost
+    always a good idea.
+  id: totrans-491
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 避免悄无声息的失败，并快速失败；像`errexit`和`pipefail`可以帮助你做到这一点。由于 bash 默认倾向于悄无声息地失败，快速失败几乎总是一个好主意。
+- en: Sensitive information
+  id: totrans-492
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 敏感信息
+- en: Don’t hardcode any sensitive information such as passwords into the script.
+    Such information should be provided at runtime, via user input or calling out
+    to an API. Also, consider that a `ps` reveals program parameters and more, which
+    is another way that sensitive information can be leaked.
+  id: totrans-493
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不要在脚本中硬编码任何敏感信息，如密码。此类信息应在运行时通过用户输入或调用 API 提供。同时，考虑到 `ps` 命令可以泄漏程序参数和更多信息，这也是敏感信息泄漏的另一种方式。
+- en: Input sanitization
+  id: totrans-494
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输入的净化
+- en: Set and provide sane defaults for variables where possible, and sanitize the
+    input you receive from users or other sources. For example, launch parameters
+    provided or interactively ingested via the `read` command to avoid situations
+    where an innocent-looking `rm -rf "$PROJECTHOME/"*` wipes your drive because the
+    variable wasn’t set.
+  id: totrans-495
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在可能的情况下设置和提供合理的默认变量，并清理用户或其他来源接收到的输入。例如，通过 `read` 命令提供的启动参数或交互式摄取，避免因未设置变量而导致类似于
+    `rm -rf "$PROJECTHOME/"*` 这样看似无害的命令删除你的驱动器。
+- en: Check dependencies
+  id: totrans-496
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查依赖项
+- en: Don’t assume that a certain tool or command is available, unless it’s a build-in
+    or you know your target environment. Just because your machine has `curl` installed
+    doesn’t mean the target machine has. If possible, provide fallbacks—for example,
+    if no `curl` is available, use `wget`.
+  id: totrans-497
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不要假设某个特定工具或命令是可用的，除非它是内置的或你了解你的目标环境。仅仅因为你的机器安装了 `curl` 并不意味着目标机器也有。如果可能的话，提供备用方案——例如，如果没有
+    `curl` 可用，使用 `wget`。
+- en: Error handling
+  id: totrans-498
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 错误处理
+- en: When your script fails (and it’s not a matter of if but when and where), provide
+    actionable instructions for your users. For example, rather than `Error 123`,
+    say what has failed and how your user can fix the situation, such as `Tried to
+    write to /project/xyz/ but seems this is read-only for me`.
+  id: totrans-499
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你的脚本失败时（这不是一个“如果”而是“何时”和“何处”的问题），为用户提供可操作的指导。例如，而不是`错误 123`，说清楚发生了什么问题以及用户如何解决，比如`试图写入
+    /project/xyz/ 但似乎对我来说这是只读的`。
+- en: Documentation
+  id: totrans-500
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文档
+- en: Document your scripts inline (using `# Some doc here`) for main blocks, and
+    try to stick to 80-column width for readability and diffing.
+  id: totrans-501
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内联文档你的脚本（使用 `# 这里是一些文档`）主要块，并尽量保持 80 列宽以提高可读性和差异化。
+- en: Versioning
+  id: totrans-502
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 版本控制
+- en: Consider versioning your scripts using Git.
+  id: totrans-503
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 考虑使用 Git 对你的脚本进行版本控制。
+- en: Testing
+  id: totrans-504
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 测试
+- en: Lint and *test* the scripts. Since this is such an important practice, we will
+    discuss it in greater detail in the next section.
+  id: totrans-505
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对脚本进行检查和*测试*。由于这是如此重要的实践，我们将在下一节详细讨论它。
+- en: Let’s now move on to making scripts safe(r) by linting them while developing
+    and testing them before you distribute them.
+  id: totrans-506
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们在开发和测试时通过检查脚本的语法来使脚本更加安全，然后再分发它们。
+- en: Linting and Testing Scripts
+  id: totrans-507
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 语法检查和测试脚本
+- en: While you’re developing, you want to check and lint your scripts, making sure
+    that you’re using commands and instructions correctly. There’s a nice way to do
+    that, depicted in [Figure 3-10](#fig-shellcheck), with the program [ShellCheck](https://oreil.ly/Z3blD);
+    you can download and install it locally, or you can also use the online version
+    via [*shell​​check.net*](https://oreil.ly/EVVRg). Also, consider formatting your
+    script with [shfmt](https://oreil.ly/obaKQ). It automatically fixes issues that
+    can be reported later by `shellcheck`.
+  id: totrans-508
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在开发过程中，您希望检查和检查您的脚本，确保正确使用命令和指令。有一个很好的方式来做到这一点，在[图3-10](#fig-shellcheck)中有所描绘，使用[ShellCheck](https://oreil.ly/Z3blD)程序；您可以在本地下载和安装它，或者也可以通过[*shell​​check.net*](https://oreil.ly/EVVRg)的在线版本来使用它。此外，考虑使用[shfmt](https://oreil.ly/obaKQ)格式化您的脚本。它可以自动修复稍后由`shellcheck`报告的问题。
+- en: '![lmlx 0310](Images/lmlx_0310.png)'
+  id: totrans-509
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0310](Images/lmlx_0310.png)'
+- en: Figure 3-10\. A screenshot of the online ShellCheck tool
+  id: totrans-510
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图3-10。在线ShellCheck工具的屏幕截图
+- en: And further, before you check your script into a repo, consider using `bats`
+    to test it. [`bats`](https://oreil.ly/uVNgh), short for Bash Automated Testing
+    System, allows you to define test files as a bash script with special syntax for
+    test cases. Each test case is simply a bash function with a description, and you
+    would typically invoke these scripts as part of a CI pipeline—for example, as
+    a GitHub action.
+  id: totrans-511
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，在将脚本提交到存储库之前，请考虑使用`bats`进行测试。[`bats`](https://oreil.ly/uVNgh)，即Bash自动化测试系统，允许您定义测试文件作为具有特殊语法的bash脚本，每个测试用例都是一个带有描述的bash函数。通常将这些脚本作为GitHub操作的一部分调用。
+- en: Now we’ll put our good practices for script writing, linting, and testing into
+    use. Let’s implement the example script we specified in the beginning of this
+    section.
+  id: totrans-512
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们将运用脚本编写、语法检查和测试的良好实践。让我们实现我们在本节开头指定的示例脚本。
+- en: 'End-to-End Example: GitHub User Info Script'
+  id: totrans-513
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 端到端示例：GitHub用户信息脚本
+- en: In this end-to-end example, we bring all of the preceding tips and tooling together
+    to implement our example script that is supposed to take a GitHub user handle
+    and print out a message that contains what year the user joined, along with their
+    full name.
+  id: totrans-514
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此端到端示例中，我们将前面的所有提示和工具汇总在一起，实现我们的示例脚本，该脚本应该接受GitHub用户句柄并打印出包含用户加入年份及其全名的消息。
+- en: 'This is how one implementation looks, taking the good practices into account.
+    Store the following in a file called *gh-user-info.sh*, and make it executable:'
+  id: totrans-515
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是一个实现的示例，考虑了良好的实践。将以下内容存储在名为*gh-user-info.sh*的文件中，并使其可执行：
+- en: '[PRE28]'
+  id: totrans-516
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: '[![1](Images/1.png)](#custom_co_shells_and_scripting_CO19-1)'
+  id: totrans-517
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#custom_co_shells_and_scripting_CO19-1)'
+- en: Provide a default value to use if user doesn’t supply one.
+  id: totrans-518
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果用户未提供值，请提供一个默认值。
+- en: '[![2](Images/2.png)](#custom_co_shells_and_scripting_CO19-2)'
+  id: totrans-519
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#custom_co_shells_and_scripting_CO19-2)'
+- en: Using `curl`, access the [GitHub API](https://oreil.ly/A7CLS) to download the
+    user information as a JSON file, and store it in a temporary file (next line).
+  id: totrans-520
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`curl`访问[GitHub API](https://oreil.ly/A7CLS)以下载用户信息的JSON文件，并将其存储在临时文件中（下一行）。
+- en: '[![3](Images/3.png)](#custom_co_shells_and_scripting_CO19-3)'
+  id: totrans-521
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#custom_co_shells_and_scripting_CO19-3)'
+- en: Using `jq`, pull out the fields we need. Note that the `created_at` field has
+    a value that looks something like `"2009-02-07T16:07:32Z"`.
+  id: totrans-522
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`jq`提取我们需要的字段。请注意，`created_at`字段的值看起来类似于`"2009-02-07T16:07:32Z"`。
+- en: '[![4](Images/4.png)](#custom_co_shells_and_scripting_CO19-4)'
+  id: totrans-523
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#custom_co_shells_and_scripting_CO19-4)'
+- en: Using `cut`, extract the year from the `created_at` field in the JSON file.
+  id: totrans-524
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`cut`从JSON文件的`created_at`字段中提取年份。
+- en: '[![5](Images/5.png)](#custom_co_shells_and_scripting_CO19-5)'
+  id: totrans-525
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#custom_co_shells_and_scripting_CO19-5)'
+- en: Assemble the output message and print to screen.
+  id: totrans-526
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 组装输出消息并打印到屏幕。
+- en: 'Now let’s run it with the defaults:'
+  id: totrans-527
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们使用默认设置运行它：
+- en: '[PRE29]'
+  id: totrans-528
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'Congratulations, you now have everything at your disposal to use the shell,
+    both interactively on the prompt and for scripting. Before we wrap up, take a
+    moment to think about the following concerning our *gh-user-info.sh* script:'
+  id: totrans-529
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 恭喜，现在您可以随时使用shell进行交互和脚本编写。在我们结束之前，花点时间考虑我们的*gh-user-info.sh*脚本：
+- en: What if the JSON blob the GitHub API returns is not valid? What if we encounter
+    a 500 HTTP error? Maybe adding a message along the lines of “try later” is more
+    useful if there’s nothing the user can do themselves.
+  id: totrans-530
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果 GitHub API 返回的 JSON 数据块不合法怎么办？如果我们遇到 500 HTTP 错误怎么办？也许添加类似于“稍后再试”的消息会更有用，如果用户自己无法做任何事情的话。
+- en: For the script to work, you need network access, otherwise the `curl` call will
+    fail. What could you do about a lack of network access? Informing the user about
+    it and suggesting what they can do to check networking may be an option.
+  id: totrans-531
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 要使脚本工作，你需要网络访问，否则 `curl` 调用将失败。关于缺乏网络访问，你可以做些什么？向用户通知并建议他们检查网络可能是一个选择。
+- en: Think about improvements around dependency checks—for example, we implicitly
+    assume here that `curl` is installed. Can you maybe add a check that makes the
+    binary variable and falls back to `wget`?
+  id: totrans-532
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 思考如何改进依赖检查——例如，我们在这里暗示 `curl` 已安装。你可以添加一个检查，使二进制变量并回退到 `wget` 吗？
+- en: How about adding some usage help? If the script is called with an `-h` or `--help`
+    parameter, perhaps show a concrete usage example and the options that users can
+    use to influence the execution (ideally, including defining default values used).
+  id: totrans-533
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如何添加一些使用帮助？如果脚本带有 `-h` 或 `--help` 参数调用，或许显示一个具体的使用示例和用户可以使用的选项来影响执行（最好包括定义使用的默认值）。
+- en: You see now that, although this script looks good and works in most cases, there’s
+    always something you can improve, such as making the script more robust and providing
+    actionable error messages. In this context, consider using frameworks such as
+    [bashing](https://oreil.ly/gLmlB), [rerun](https://oreil.ly/t8U9u), or [rr](https://oreil.ly/7F2lT)
+    to improve modularity.
+  id: totrans-534
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你可以看到，尽管这个脚本看起来不错，在大多数情况下可以工作，但总是有一些地方可以改进，比如使脚本更加健壮，并提供可操作的错误消息。在这种情况下，考虑使用诸如
+    [bashing](https://oreil.ly/gLmlB)，[rerun](https://oreil.ly/t8U9u)，或者 [rr](https://oreil.ly/7F2lT)
+    等框架来提升模块化。
+- en: Conclusion
+  id: totrans-535
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: In this chapter, we focused on working with Linux in the terminal, a textual
+    user interface. We discussed shell terminology, provided a hands-on introduction
+    to using the shell basics, and reviewed common tasks and how you can improve your
+    shell productivity using modern variants of certain commands (such as `exa` rather
+    than `ls`).
+  id: totrans-536
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们专注于在终端中使用 Linux，这是一个文本用户界面。我们讨论了 shell 的术语，提供了使用 shell 基础的实际介绍，并审查了常见任务及如何使用某些命令的现代变体来提高
+    shell 生产力（例如使用 `exa` 而不是 `ls`）。
+- en: Then, we looked at modern, human-friendly shells, specifically at `fish`, and
+    how to configure and use them. Further, we covered the terminal multiplexer by
+    using `tmux` as the hands-on example, enabling you to work with multiple local
+    or remote sessions. Using modern shells and multiplexers can dramatically improve
+    your efficiency on the command line, and I strongly recommend you consider adopting
+    them.
+  id: totrans-537
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接着，我们看了现代、用户友好的 shell，特别是 `fish`，以及如何配置和使用它们。此外，我们通过使用 `tmux` 作为实际示例来介绍了终端复用器，使你能够同时处理多个本地或远程会话。使用现代
+    shell 和复用器可以极大提高你在命令行上的效率，我强烈建议你考虑采用它们。
+- en: Lastly, we discussed automating tasks by writing safe and portable shell scripts,
+    including linting and testing said scripts. Remember that shells are effectively
+    command interpreters, and as with any kind of language, you have to practice to
+    get fluent. Having said this, now that you’re equipped with the basics of using
+    Linux from the command line, you can already work with the majority of Linux-based
+    systems out there, be it an embedded system or a cloud VM. In any case, you’ll
+    find a way to get hold of a terminal and issue commands interactively or via executing
+    scripts.
+  id: totrans-538
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，我们讨论了通过编写安全和可移植的 shell 脚本自动化任务，包括对这些脚本进行检查和测试。请记住，shell 实际上是命令解释器，和任何语言一样，你需要实践才能流利。说到这一点，现在你已经掌握了使用
+    Linux 命令行的基础，你已经可以在大多数基于 Linux 的系统上工作，无论是嵌入式系统还是云虚拟机。无论如何，你都会找到方法获取一个终端，并通过交互或执行脚本发出命令。
+- en: 'If you want to dive deeper into the topics discussed in this chapter, here
+    are some additional resources:'
+  id: totrans-539
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想深入研究本章讨论的主题，这里有一些额外的资源：
+- en: Terminals
+  id: totrans-540
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 终端
+- en: '[“Anatomy of a Terminal Emulator”](https://oreil.ly/u2CFr)'
+  id: totrans-541
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“终端仿真器的解剖”](https://oreil.ly/u2CFr)'
+- en: '[“The TTY Demystified”](https://oreil.ly/8GT6s)'
+  id: totrans-542
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“TTY 的解密”](https://oreil.ly/8GT6s)'
+- en: '[“The Terminal, the Console and the Shell—What Are They?”](https://oreil.ly/vyVAV)'
+  id: totrans-543
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“终端、控制台和 Shell—它们是什么？”](https://oreil.ly/vyVAV)'
+- en: '[“What Is a TTY on Linux? (and How to Use the tty Command)”](https://oreil.ly/E0EGG)'
+  id: totrans-544
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 上的 TTY 是什么？（以及如何使用 tty 命令）”](https://oreil.ly/E0EGG)'
+- en: '[“Your Terminal Is Not a Terminal: An Introduction to Streams”](https://oreil.ly/xIEoZ)'
+  id: totrans-545
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“你的终端不只是终端：流的介绍”](https://oreil.ly/xIEoZ)'
+- en: Shells
+  id: totrans-546
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell
+- en: '[“Unix Shells: bash, Fish, ksh, tcsh, zsh”](https://oreil.ly/4pepC)'
+  id: totrans-547
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Unix Shells：bash、Fish、ksh、tcsh、zsh”](https://oreil.ly/4pepC)'
+- en: '[“Comparison of Command Shells”](https://oreil.ly/RQfS6)'
+  id: totrans-548
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“命令Shell的比较”](https://oreil.ly/RQfS6)'
+- en: '[“bash vs zsh” thread on reddit](https://oreil.ly/kseEe)'
+  id: totrans-549
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Reddit上的“bash vs zsh”讨论串](https://oreil.ly/kseEe)'
+- en: '[“Ghost in the Shell—Part 7—ZSH Setup”](https://oreil.ly/1KGz6)'
+  id: totrans-550
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Shell中的幽灵—第7部分—ZSH设置”](https://oreil.ly/1KGz6)'
+- en: Terminal multiplexer
+  id: totrans-551
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 终端复用器
+- en: '[“A tmux Crash Course”](https://oreil.ly/soqPv)'
+  id: totrans-552
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“tmux速成课程”](https://oreil.ly/soqPv)'
+- en: '[“A Quick and Easy Guide to tmux”](https://oreil.ly/0hVCS)'
+  id: totrans-553
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“tmux快速简易指南”](https://oreil.ly/0hVCS)'
+- en: '[“How to Use tmux on Linux (and Why It’s Better Than screen)”](https://oreil.ly/Q75TR)'
+  id: totrans-554
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“如何在Linux上使用tmux（为什么它比screen更好）”](https://oreil.ly/Q75TR)'
+- en: '[*The Tao of tmux*](https://oreil.ly/QDsYI)'
+  id: totrans-555
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*tmux之道*](https://oreil.ly/QDsYI)'
+- en: '[*tmux 2: Productive Mouse-Free Development*](https://oreil.ly/eO9y2)'
+  id: totrans-556
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*tmux 2：高效无鼠标开发*](https://oreil.ly/eO9y2)'
+- en: '[Tmux Cheat Sheet & Quick Reference website](https://oreil.ly/SWCa5)'
+  id: totrans-557
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Tmux速查表与快速参考网站](https://oreil.ly/SWCa5)'
+- en: Shell scripts
+  id: totrans-558
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell脚本
+- en: '[“Shell Style Guide”](https://oreil.ly/3cxAw)'
+  id: totrans-559
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Shell风格指南”](https://oreil.ly/3cxAw)'
+- en: '[“bash Style Guide”](https://oreil.ly/zfy1v)'
+  id: totrans-560
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“bash风格指南”](https://oreil.ly/zfy1v)'
+- en: '[“bash Best Practices”](https://oreil.ly/eC1ol)'
+  id: totrans-561
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“bash最佳实践”](https://oreil.ly/eC1ol)'
+- en: '[“bash Scripting Cheatsheet”](https://oreil.ly/nVroM)'
+  id: totrans-562
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“bash脚本编程速查表”](https://oreil.ly/nVroM)'
+- en: '[“Writing bash Scripts That Are Not Only bash: Checking for bashisms and Testing
+    with Dash”](https://oreil.ly/D0zwe)'
+  id: totrans-563
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“编写不仅仅是bash的bash脚本：检查bash特有功能并使用Dash进行测试”](https://oreil.ly/D0zwe)'
+- en: With the shell basics at our disposal, we now turn our focus to access control
+    and enforcement in Linux.
+  id: totrans-564
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了Shell基础，我们现在转向Linux中的访问控制和执行。

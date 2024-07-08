@@ -1,0 +1,2293 @@
+- en: Chapter 12\. Secure Remote Access with OpenSSH
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第12章。使用OpenSSH进行安全远程访问
+- en: OpenSSH is the tool of choice for secure remote administration. It encrypts
+    authentication and all traffic during a session, and guarantees the integrity
+    of the data transfer. If something happens to alter your packets, SSH will tell
+    you. In this chapter you will learn how to set up SSH access to remote hosts,
+    manage your SSH encryption keys, configure logins to multiple remote hosts, customize
+    your Bash prompt to show when it is an SSH session, and more good things.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenSSH是安全远程管理的首选工具。它在会话期间加密认证和所有流量，并保证数据传输的完整性。如果有什么问题影响了你的数据包，SSH会告诉你。在本章中，你将学习如何设置SSH访问远程主机，管理SSH加密密钥，配置登录到多个远程主机，自定义Bash提示以显示SSH会话等好用的功能。
+- en: OpenSSH supports a large number of strong encryption algorithms. All of them
+    are unencumbered by patents because the OpenSSH team has gone to great lengths
+    to ensure that no patented or otherwise encumbered code is inside OpenSSH. [Recipe
+    12.16](#rec-list-algorithms) shows how to print lists of all supported algorithms.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenSSH支持大量强加密算法。所有这些算法都没有专利限制，因为OpenSSH团队已经尽最大努力确保OpenSSH内部没有受专利或其他限制的代码。[Recipe
+    12.16](#rec-list-algorithms)展示了如何打印所有支持算法的列表。
+- en: 'OpenSSH is a suite of remote transfer utilities:'
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenSSH是一套远程传输实用程序：
+- en: '*sshd*, the OpenSSH server daemon.'
+  id: totrans-4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*sshd*，OpenSSH服务器守护进程。'
+- en: '*ssh*, short for secure shell, though it doesn’t really include a shell, but
+    provides a secure channel to the command shell on the remote system.'
+  id: totrans-5
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*ssh*，安全外壳的缩写，虽然它实际上并不包含外壳，但提供了与远程系统上的命令外壳的安全通道。'
+- en: '*scp*, secure copy, for encrypted file transfer.'
+  id: totrans-6
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*scp*，加密文件传输的安全副本。'
+- en: '*sftp*, Secure File Transfer Protocol, provides file access.'
+  id: totrans-7
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*sftp*，安全文件传输协议，提供文件访问。'
+- en: '*ssh-copy-id*, a nice little program for installing your public key to a remote
+    SSH server’s *authorized_keys* file.'
+  id: totrans-8
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*ssh-copy-id*，一个非常好的小程序，用于将你的公钥安装到远程SSH服务器的*authorized_keys*文件中。'
+- en: '*ssh-keyscan*, finds and collects public host keys on a network, saving you
+    the trouble of hunting them down manually.'
+  id: totrans-9
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*ssh-keyscan*，在网络上查找和收集公共主机密钥，免去了手动查找的麻烦。'
+- en: '*ssh-keygen*, generates and manages authentication keys.'
+  id: totrans-10
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*ssh-keygen*，生成和管理认证密钥。'
+- en: '*ssh-add*, adds your identities to the authentication agent, *ssh-agent*.'
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*ssh-add*，将你的身份添加到认证代理*ssh-agent*中。'
+- en: 'In this chapter you will learn about *ssh*, *sshd*, *ssh-copy-id*, *ssh-keygen*,
+    and two useful related utilities: *sshfs* and *ssh-agent*.'
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，你将了解关于*ssh*、*sshd*、*ssh-copy-id*、*ssh-keygen*以及两个有用的相关实用程序：*sshfs*和*ssh-agent*。
+- en: '*sshfs* mounts remote filesystems on your local PC, while *ssh-agent* remembers
+    the passphrases on your private SSH keys over multiple SSH logins for automatic
+    authentication. *ssh-agent* binds to a single login session, so logging out or
+    opening another terminal means starting over. A better utility for automated operations
+    is Keychain, which is a frontend to *ssh-agent*. Keychain reuses *ssh-agent* until
+    you restart your machine, so you only have to enter your passphrases at startup
+    (see [Recipe 12.10](#rec-keychain)).'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*sshfs*，将远程文件系统挂载到本地PC上，而*ssh-agent*则记住了多个SSH登录中私有SSH密钥的密码。*ssh-agent*绑定到单个登录会话，因此登出或打开另一个终端意味着重新开始。一个更好的用于自动化操作的实用程序是Keychain，它是*ssh-agent*的前端。Keychain会重用*ssh-agent*直到你重新启动机器，因此你只需要在启动时输入密码（参见[Recipe
+    12.10](#rec-keychain)）。'
+- en: 'OpenSSH supports different types of authentication:'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenSSH支持不同类型的身份验证：
+- en: Password authentication
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 密码认证
+- en: Uses your Linux login and password to authenticate. This is the simplest and
+    the most flexible, because you can log in from any machine. You must be careful
+    to not open an SSH session from an untrustworthy computer, like in a library or
+    internet cafe. If it is infected with a keylogger, it will capture your credentials.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用你的Linux登录名和密码进行身份验证。这是最简单和最灵活的方式，因为你可以从任何机器登录。但是要注意不要从不可信任的计算机（如图书馆或网吧）打开SSH会话，因为如果被键盘记录器感染，它会捕获你的凭据。
+- en: Public key authentication
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 公钥认证
+- en: Authenticates with your personal SSH public keys, not your system login. This
+    is a bit more work to set up because you need to create and distribute your public
+    keys, and you can log in only from machines that hold your private key. Some commercial
+    services require customers to use some form of public key authentication.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用个人SSH公钥进行身份验证，而不是系统登录。这需要更多的设置工作，因为你需要创建和分发你的公钥，并且只能从保存有你私钥的机器上登录。一些商业服务要求客户使用某种形式的公钥认证。
+- en: Passphrase-less authentication
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无密码认证
+- en: Public key authentication without a passphrase. This is useful for automated
+    services, like scripts and cron jobs. Anyone who succeeds in thieving the private
+    key can easily masquerade as you, so you need to be very protective of a passphrase-less
+    private key.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 公钥认证无需密码短语。这对于自动化服务如脚本和cron作业非常有用。任何成功窃取私钥的人都可以轻松冒充你，因此你需要非常谨慎地保护没有密码短语的私钥。
+- en: An alternative to using keys without passphrases is Keychain, which remembers
+    your private keys for you (see [Recipe 12.10](#rec-keychain)).
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种使用无密码短语的密钥的替代方法是Keychain，它会为您记住私钥（见[Recipe 12.10](#rec-keychain)）。
+- en: 'There are two different uses for authentication keys: host keys, which authenticate
+    computers, and public keys, which authenticate users. SSH keys come in pairs,
+    private and public. Transmissions are encrypted with the public key and decrypted
+    with the private key, a brilliantly simple scheme. You can safely distribute your
+    public keys as much as you want, while you must protect your private key and not
+    let anyone else have it.'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 认证密钥有两种不同的用途：主机密钥用于认证计算机，公钥用于认证用户。SSH密钥是成对出现的，私钥和公钥。传输使用公钥加密，私钥解密，这是一个非常简单却精巧的方案。你可以安全地分发你的公钥，而私钥则需要保护，不让任何人获取。
+- en: Server and client are defined by the direction of the transaction. The server
+    has the SSH daemon running and listening for connection requests, and the client
+    is anyone logging in to this machine via SSH.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 服务器和客户端由事务的方向定义。服务器运行SSH守护程序并监听连接请求，客户端是通过SSH登录到这台机器的任何人。
+- en: 12.1 Installing OpenSSH Server
+  id: totrans-24
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.1 安装OpenSSH服务器
+- en: Problem
+  id: totrans-25
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to install an OpenSSH server.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要安装一个OpenSSH服务器。
+- en: Solution
+  id: totrans-27
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Most Linux distributions install the OpenSSH client by default, but not always
+    the server. The different Linux distributions package OpenSSH in different ways,
+    so use your package manager to list the packages for your Linux (see the [Appendix](app01.xhtml#appendix)).
+    Install the server, then check if it has started:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数Linux发行版默认安装OpenSSH客户端，但不总是安装服务器。不同的Linux发行版以不同方式打包OpenSSH，因此请使用你的软件包管理器列出Linux的软件包（见[附录](app01.xhtml#appendix)）。安装服务器后，检查是否已启动：
+- en: '[PRE0]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: This shows that the server is not running and is not enabled. On most Linuxes,
+    OpenSSH is not configured to start automatically after installation. This is good
+    because you need to configure your server correctly before opening it up to receive
+    connection requests. If it is running before you have examined the server configuration,
+    stop it, or block its listening port(s) with your firewall.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这表明服务器未运行且未启用。在大多数Linux上，安装后OpenSSH未配置自动启动是件好事，因为在打开接收连接请求之前，你需要正确配置服务器。如果在检查服务器配置之前它已运行，请停止它或使用防火墙阻止其监听端口。
+- en: The next steps are to set up host encryption keys and configure your server.
+    See Recipes [12.2](#rec-gen-host-keys) and [12.3](#rec-secure-server-ssh).
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来的步骤是设置主机加密密钥并配置你的服务器。参见[12.2](#rec-gen-host-keys)和[12.3](#rec-secure-server-ssh)。
+- en: Discussion
+  id: totrans-32
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Remember, server and client are not only about hardware, but are defined by
+    the direction of the transaction. The server has the SSH daemon running and listening
+    for connection requests, and the client is anyone logging in to the server via
+    SSH. Any Linux PC can be a server, client, or both.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请记住，服务器和客户端不仅仅是硬件问题，而是由事务的方向定义的。服务器运行SSH守护程序并监听连接请求，客户端是通过SSH登录到服务器的任何人。任何Linux
+    PC都可以是服务器、客户端或两者兼有。
+- en: See Also
+  id: totrans-34
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 14](ch14.xhtml#cha-firewalld)'
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第14章](ch14.xhtml#cha-firewalld)'
+- en: '[OpenSSH](https://openssh.com)'
+  id: totrans-36
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSH](https://openssh.com)'
+- en: sshd (8)
+  id: totrans-37
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: sshd (8)
+- en: The [Appendix](app01.xhtml#appendix)
+  id: totrans-38
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[附录](app01.xhtml#appendix)'
+- en: 12.2 Generating New Host Keys
+  id: totrans-39
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.2 生成新的主机密钥
+- en: Problem
+  id: totrans-40
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your Linux distribution does not automatically create host keys at installation,
+    or you want to replace your existing host keys, or when you clone an installation
+    or a virtual machine your clones need their own unique host keys.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在你的Linux发行版安装时未自动创建主机密钥，或者你想替换现有的主机密钥，或者当你克隆一个安装或虚拟机时，克隆需要拥有自己独特的主机密钥。
+- en: Solution
+  id: totrans-42
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *ssh-keygen* command. There are four different types of keys: RSA,
+    DSA, ECDSA, and ED25519\. First, delete the old keys, if they exist:'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*ssh-keygen*命令。有四种不同类型的密钥：RSA、DSA、ECDSA和ED25519。首先，如果存在旧密钥，请删除：
+- en: '[PRE1]'
+  id: totrans-44
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Create all of the new keys at once with the following command:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用以下命令一次性创建所有新密钥：
+- en: '[PRE2]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: Discussion
+  id: totrans-47
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you ever get bored and need something to do, try researching “Which SSH key
+    formats should I use?” The arguments are endless. The short answer is use RSA,
+    ECDSA, and ED25519, and avoid DSA. Delete your DSA host key and keep the rest.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您感到无聊并需要做点什么，请尝试研究“我应该使用哪种SSH密钥格式？” 论点是无穷无尽的。简短的答案是使用RSA、ECDSA和ED25519，避免使用DSA。删除您的DSA主机密钥并保留其余内容。
+- en: RSA is the oldest. It is strong and provides the most compatibility.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: RSA是最古老的。它强大且提供了最广泛的兼容性。
+- en: ECDSA and ED25519 are newer, very strong, and computationally less expensive.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ECDSA和ED25519是更新的，非常强大且计算成本较低。
+- en: Some older SSH clients do not support ECDSA and ED25519\. Hopefully you are
+    not using such ancient clients, because ECDSA and ED25519 were released with OpenSSH
+    6.5 in 2014\. It is extremely important to keep security services updated and
+    to not allow unsafe old clients.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些较旧的SSH客户端不支持ECDSA和ED25519\. 希望您不使用这样的古老客户端，因为ECDSA和ED25519是2014年OpenSSH 6.5发布的。保持安全服务更新并且不允许不安全的旧客户端非常重要。
+- en: See Also
+  id: totrans-52
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[OpenSSH](https://openssh.com)'
+  id: totrans-53
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSH](https://openssh.com)'
+- en: ssh-keygen (1)
+  id: totrans-54
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: ssh-keygen (1)
+- en: 12.3 Configuring Your OpenSSH Server
+  id: totrans-55
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.3 配置您的OpenSSH服务器
+- en: Problem
+  id: totrans-56
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to configure your OpenSSH server as securely as possible and test it
+    safely.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望尽可能安全地配置您的OpenSSH服务器并安全地进行测试。
+- en: Solution
+  id: totrans-58
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'First, verify that your server’s private host keys are owned by root, read-only:'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，请验证您服务器的私有主机密钥是否由root拥有，只读：
+- en: '[PRE3]'
+  id: totrans-60
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'That is how they are supposed to look. Then check your public keys, which are
+    owned by root, read-write for root, and read-only for everyone else:'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它们应该是这样的。然后检查您的公钥，这些公钥由root拥有，对root为读写，对其他人为只读：
+- en: '[PRE4]'
+  id: totrans-62
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: These are correct.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些都是正确的。
+- en: 'Now take a look at */etc/ssh/sshd_config*. When you change this file, reload
+    *sshd* to load your changes:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在看一看 */etc/ssh/sshd_config*。当您更改此文件时，请重新加载 *sshd* 以加载您的更改：
+- en: '[PRE5]'
+  id: totrans-65
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Uncomment the options you want to use or change.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 取消注释要使用或更改的选项。
+- en: 'Configure *sshd* to check if the file modes and ownership of the user’s files
+    and home directory are correct before accepting their login:'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 配置 *sshd* 以检查用户文件和主目录的文件模式和所有权是否正确，然后才接受其登录：
+- en: '[PRE6]'
+  id: totrans-68
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: If file permissions are not correct, this setting will not allow them to log
+    in.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果文件权限不正确，此设置将不允许它们登录。
+- en: 'If your machine has more than one IP address, define which address, or addresses,
+    it listens on:'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的机器有多个IP地址，请定义它监听的地址或地址：
+- en: '[PRE7]'
+  id: totrans-71
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'You may assign nonstandard ports for *sshd* to listen on. Use only ports above
+    1024, and check */etc/services* to find unused ports, then add your new ports
+    to */etc/services*:'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以为 *sshd* 指定非标准端口进行侦听。仅使用高于1024的端口，并检查 */etc/services* 查找未使用的端口，然后将您的新端口添加到
+    */etc/services* 中：
+- en: '[PRE8]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Then add them to */etc/ssh/sshd_config*:'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后将它们添加到 */etc/ssh/sshd_config*：
+- en: '[PRE9]'
+  id: totrans-75
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'You can restrict access to only the specified groups (create these groups in
+    */etc/group*):'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以限制访问仅限于指定的组（在 */etc/group* 中创建这些组）：
+- en: '[PRE10]'
+  id: totrans-77
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: Or deny access with *DenyGroups*.
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或使用 *DenyGroups* 拒绝访问。
+- en: 'Do not allow root logins. It is safer to log in as an unprivileged user, and
+    then use *sudo* after login:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不允许root登录。作为非特权用户登录然后在登录后使用 *sudo* 更安全：
+- en: '[PRE11]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'An alternative is to allow root logins only with public key authentication:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种选择是仅允许公钥认证的root登录：
+- en: '[PRE12]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'You can disable password logins for all users, and allow only public key authentication
+    (see [Recipe 12.7](#rec-public-key-auth)):'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以禁用所有用户的密码登录，并仅允许公钥认证（参见[Recipe 12.7](#rec-public-key-auth)）：
+- en: '[PRE13]'
+  id: totrans-84
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'You can deny specified users, either by username, or user at hostname or IP
+    address:'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以拒绝指定的用户，无论是用户名，用户在主机名或IP地址：
+- en: '[PRE14]'
+  id: totrans-86
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: Or allow access with *AllowUsers*. You may use both, and *DenyUsers* is always
+    processed first.
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或允许使用 *AllowUsers*。您可以同时使用 *DenyUsers* 总是首先处理。
+- en: 'Limit the length of time the server waits for a user to log in and complete
+    the connection. The default is 120 seconds:'
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 限制服务器等待用户登录并完成连接的时间长度。默认为120秒：
+- en: '[PRE15]'
+  id: totrans-89
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'You can limit the number of failed connection attempts. The default is 6:'
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以限制失败的连接尝试次数。默认为6次：
+- en: '[PRE16]'
+  id: totrans-91
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: Discussion
+  id: totrans-92
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Any port scanner will find your open ports, and attackers will attempt brute
+    force password cracking. Attackers still target the default SSH port 22 the most.
+    Changing the port won’t reduce this risk very much, but it should reduce the number
+    of entries in your log files. When you use alternate port numbers, first look
+    in */etc/services* to find unused ports, and then record the ports you use in
+    this file.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任何端口扫描器都会找到你的开放端口，并且攻击者会尝试暴力破解密码。攻击者仍然最频繁地攻击默认的SSH端口22。改变端口不会显著降低这种风险，但它应该会减少日志文件中的条目数。当你使用备用端口号时，首先查看*/etc/services*以找到未使用的端口，然后将你使用的端口记录在该文件中。
+- en: Public key authentication is very strong and cannot be brute-forced like password
+    logins (see [Recipe 12.7](#rec-public-key-auth)). The trade-off is less convenience,
+    as you can log in only from machines that have your private key.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 公钥认证非常安全，无法像密码登录那样被暴力破解（参见[Recipe 12.7](#rec-public-key-auth)）。但是这样做的代价是不太方便，因为你只能从有你私钥的机器上登录。
+- en: See Also
+  id: totrans-95
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[OpenSSH](https://openssh.com)'
+  id: totrans-96
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSH](https://openssh.com)'
+- en: '*man 5 sshd_config*'
+  id: totrans-97
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 sshd_config*'
+- en: '[Recipe 12.5](#rec-host-key-auth)'
+  id: totrans-98
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 12.5](#rec-host-key-auth)'
+- en: '[Recipe 12.7](#rec-public-key-auth)'
+  id: totrans-99
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 12.7](#rec-public-key-auth)'
+- en: 12.4 Checking Configuration Syntax
+  id: totrans-100
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.4 检查配置语法
+- en: Problem
+  id: totrans-101
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Everyone makes mistakes, and you want a syntax checker for */etc/ssh/sshd_config*.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个人都会犯错，你想要一个用于 */etc/ssh/sshd_config* 的语法检查器。
+- en: Solution
+  id: totrans-103
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'And you shall have one. After making your changes, run this command:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你应该有一个。在做出更改后，运行以下命令：
+- en: '[PRE17]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'If there are no syntax errors, it exits silently. If it find mistakes, it tells
+    you:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果没有语法错误，它会静默退出。如果发现错误，它会告诉你：
+- en: '[PRE18]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: You can do this while the SSH daemon is running, so you can correct your mistakes
+    before issuing a reload or restart command.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在SSH守护进程运行时执行这些操作，因此你可以在发出重新加载或重启命令之前纠正你的错误。
+- en: Discussion
+  id: totrans-109
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The *-t* stands for *test*. It does not affect the SSH daemon, it only checks
+    */etc/ssh/sshd_config* for syntax errors, so you can use it anytime.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-t*代表*测试*。它不会影响SSH守护进程，只会检查*/etc/ssh/sshd_config*的语法错误，因此你可以随时使用它。'
+- en: See Also
+  id: totrans-111
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 sshd_config*'
+  id: totrans-112
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 sshd_config*'
+- en: '[OpenSSH](https://openssh.com)'
+  id: totrans-113
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSH](https://openssh.com)'
+- en: 12.5 Setting Up Password Authentication
+  id: totrans-114
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.5 设置密码认证
+- en: Problem
+  id: totrans-115
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set up your OpenSSH client to log in to a remote host using the
+    simplest method that it supports.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要设置你的OpenSSH客户端，使用它支持的最简单的方法登录远程主机。
+- en: Solution
+  id: totrans-117
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Password authentication is the simplest way to set up remote SSH access. You
+    need:'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 密码认证是设置远程SSH访问的最简单方法。你需要：
+- en: OpenSSH server installed and properly configured on the machine you want to
+    log in to ([Recipe 12.3](#rec-secure-server-ssh))
+  id: totrans-119
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在你想要登录的机器上安装并正确配置了OpenSSH服务器（参见[Recipe 12.3](#rec-secure-server-ssh)）
+- en: The SSH daemon running on the remote machine, and port 22, or whatever port
+    *sshd* uses, not blocked by firewalls
+  id: totrans-120
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 远程机器上运行的SSH守护进程，以及端口22，或者*sshd*使用的任何端口，不受防火墙阻挡
+- en: The SSH client installed on your client machine
+  id: totrans-121
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 客户端机器上安装的SSH客户端
+- en: Your own user account on the remote machine
+  id: totrans-122
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 远程机器上的你自己的用户账户
+- en: Host keys on the server (see [Recipe 12.2](#rec-gen-host-keys))
+  id: totrans-123
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 服务器上的主机密钥（参见[Recipe 12.2](#rec-gen-host-keys))
+- en: 'The public host key must be distributed to the clients. The easy way is to
+    log in from the client, and let OpenSSH transfer the key:'
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 公共主机密钥必须分发给客户端。最简单的方法是从客户端登录，并让OpenSSH传输密钥：
+- en: '[PRE19]'
+  id: totrans-125
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: Now Duchess can work on *server1* just as if she were sitting at *server1*’s
+    keyboard. All traffic and authentication are encrypted.
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，Duchess可以在*server1*上工作，就像她坐在*server1*的键盘旁一样。所有的流量和认证都是加密的。
+- en: The host key exchange happens only once, the first time you log in. You should
+    never be asked again unless the key is replaced with a new key, or you delete
+    it from your personal *~/.ssh/known_hosts* file.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 主机密钥交换只会发生一次，第一次登录时。除非密钥被替换为新密钥或从个人的*~/.ssh/known_hosts*文件中删除，否则不应再次询问。
+- en: Discussion
+  id: totrans-128
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*server1*’s public host key is stored in the *~/.ssh/known_hosts* file on the
+    client PC. This file can contain any number of host keys.'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*server1*的公共主机密钥存储在客户端PC上的*~/.ssh/known_hosts*文件中。该文件可以包含任意数量的主机密钥。'
+- en: 'It is unsafe to log in as root over SSH; it is better to log in as an ordinary
+    user, then *su* or *sudo* after login. You can log in as any user that has an
+    account on the remote machine, if you know their password:'
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过SSH以root身份登录是不安全的；最好以普通用户身份登录，然后在登录后使用*su*或*sudo*。如果你知道他们的密码，你可以作为任何在远程机器上有账户的用户登录：
+- en: '[PRE20]'
+  id: totrans-131
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'When you have the same username on both machines, you don’t need to specify
+    the user, and can log in like this:'
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你在两台机器上有相同的用户名时，你不需要指定用户，可以像这样登录：
+- en: '[PRE21]'
+  id: totrans-133
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: I make it a habit to always specify the username as cheap insurance against
+    mistakes.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我习惯于始终指定用户名，以防万一出错。
+- en: Don’t get too worked up over *client* and *server*. These are not about hardware.
+    The server is whatever machine you are logging in to, and the client is wherever
+    you are logging in from. *sshd* does not need to be running on the client.
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不要对*client*和*server*太过纠结。这与硬件无关。服务器是您登录的任何机器，客户端是您登录的位置。*sshd*不需要在客户端运行。
+- en: There is a risk that the host key transmission could be intercepted and a forged
+    key substituted, which would allow an attacker access to your systems. You can
+    verify the public key fingerprint before typing **`yes`**. Use an old-fashioned
+    method like writing it down and comparing, or a newfangled method like taking
+    a photo of the host key with your phone for comparison, or using your phone as
+    an actual phone and calling someone who has access to the remote machine to read
+    the fingerprint to you.
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有风险主机密钥传输可能被拦截并替换为伪造密钥，这将允许攻击者访问您的系统。您可以在键入**`yes`**之前验证公钥指纹。可以使用老式方法如写下并比较，或新潮方法如用手机拍摄主机密钥进行比较，或使用手机作为实际电话，联系拥有远程机器访问权限的人员读取指纹给您听。
+- en: See [Recipe 12.6](#rec-retrieve-fingerprint) to learn how to retrieve a key
+    fingerprint.
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看[配方 12.6](#rec-retrieve-fingerprint)以了解如何检索密钥指纹。
+- en: See Also
+  id: totrans-138
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[Recipe 12.6](#rec-retrieve-fingerprint)'
+  id: totrans-139
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 12.6](#rec-retrieve-fingerprint)'
+- en: '[OpenSSH](https://openssh.com)'
+  id: totrans-140
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSH](https://openssh.com)'
+- en: '*man 1 ssh*'
+  id: totrans-141
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh*'
+- en: '*man 1 ssh-keygen*'
+  id: totrans-142
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh-keygen*'
+- en: '*man 8 sshd*'
+  id: totrans-143
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 sshd*'
+- en: 12.6 Retrieving a Key Fingerprint
+  id: totrans-144
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.6 检索密钥指纹
+- en: Problem
+  id: totrans-145
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need the fingerprint of a host key so you can verify for the client that
+    the key is legitimate.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要主机密钥的指纹，以便为客户端验证该密钥的合法性。
+- en: Solution
+  id: totrans-147
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the *ssh-keygen* command on the server with the host key you want to query:'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在服务器上使用希望查询的主机密钥使用*ssh-keygen*命令：
+- en: '[PRE22]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: Discussion
+  id: totrans-150
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: This is where old-fashioned methods of communication, like telephone and sneakernet,
+    come in handy. Don’t use email, unless you already have encrypted email with its
+    own separate encryption and authentication, because unencrypted email is easy
+    to intercept and read.
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这里，像电话和悄悄网这样的老式通信方法非常有用。不要使用电子邮件，除非您已经使用了自己的独立加密和认证的加密电子邮件，因为未加密的电子邮件容易被拦截和阅读。
+- en: See Also
+  id: totrans-152
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[OpenSSH](https://openssh.com)'
+  id: totrans-153
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSH](https://openssh.com)'
+- en: '*man 1 ssh-keygen*'
+  id: totrans-154
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh-keygen*'
+- en: 12.7 Using Public Key Authentication
+  id: totrans-155
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.7 使用公钥认证
+- en: Problem
+  id: totrans-156
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to use public key authentication because it is stronger than password
+    authentication, and because it does not use your Linux password. You want the
+    option of using a single public key to access multiple systems, or creating a
+    unique public key for each remote machine.
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 想要使用公钥认证，因为它比密码认证更加安全，而且不使用您的Linux密码。您希望能够使用单个公钥访问多个系统，或者为每台远程机器创建一个唯一的公钥。
+- en: Solution
+  id: totrans-158
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Yes, Linux user, you can have it all. You may create as many SSH keys as you
+    want and use them however you wish. This is my favorite incantation for creating
+    a new RSA key pair. Of course you will create your own comment and key name. (See
+    the Discussion to learn if you need to set a passphrase on your private key.)
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是的，Linux用户，您可以拥有一切。您可以创建任意数量的SSH密钥，并根据需要使用它们。这是我创建新RSA密钥对的最喜欢的咒语。当然，您会创建自己的评论和密钥名称。（查看讨论了解是否需要在私钥上设置密码。）
+- en: '[PRE23]'
+  id: totrans-160
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'The next step is to copy your nice new key to a remote machine, which in this
+    case is the local backup server *server1*. You must already have SSH access to
+    the remote machine, for example, via host key authentication, then use the *ssh-copy-id*
+    command to transfer your public key to the server:'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一步是将您的新密钥复制到远程机器，例如本地备份服务器*server1*。您必须已经通过主机密钥认证等方式访问远程机器，然后使用*ssh-copy-id*命令将您的公钥传输到服务器：
+- en: '[PRE24]'
+  id: totrans-162
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'Try logging in:'
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尝试登录：
+- en: '[PRE25]'
+  id: totrans-164
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: You may use this new key to access multiple remote hosts, or create a unique
+    key for each remote host. Using the same key for multiple machines is easy to
+    use, but a pain to change on multiple hosts. If a unique key is compromised or
+    lost, you only need to replace it once.
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用此新密钥访问多个远程主机，或为每个远程主机创建唯一的密钥。使用相同的密钥访问多台机器很方便，但在多个主机上更改时会很麻烦。如果唯一密钥被泄露或丢失，您只需要替换一次。
+- en: Discussion
+  id: totrans-166
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Always use a passphrase on SSH keys created for human users, because anyone
+    who gains access to your private keys can masquerade as you if there is no passphrase.
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于为人类用户创建的SSH密钥，始终使用密码短语，因为任何获取您私钥的人如果没有密码短语，可以冒充您。
+- en: '*ssh-copy-id* is a lovely little utility that ensures your public keys are
+    copied into the correct location, which is *~/.ssh/authorized_keys* on the remote
+    host, in the correct format and with the correct permissions. It also ensures
+    your private key will not be copied by mistake.'
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*ssh-copy-id* 是一个非常方便的实用工具，确保您的公钥以正确的格式和权限复制到远程主机的 *~/.ssh/authorized_keys*
+    中。它还确保您的私钥不会被误复制。'
+- en: 'Options are as follows:'
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选项如下：
+- en: '*-C* is for adding a comment to your key, which can help you remember what
+    the key is for.'
+  id: totrans-170
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-C* 用于向您的密钥添加注释，这有助于您记住密钥的用途。'
+- en: '*-f* is the key name, which can be anything you want. Be mindful of your current
+    working directory; if you are not in *~/.ssh*, include the path.'
+  id: totrans-171
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-f* 是密钥的名称，可以任意设置。请注意当前工作目录；如果不在 *~/.ssh* 下，请包括路径。'
+- en: '*-t* is the key type: *rsa*, *ecdsa*, or *ed25519*.'
+  id: totrans-172
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-t* 是密钥类型：*rsa*、*ecdsa* 或 *ed25519*。'
+- en: '*-b* is the bit strength, and only *rsa* takes this option. The default is
+    2048, and 4096 is the maximum. More bits equals more processing overhead, but
+    it is doubtful you would notice any difference using 4096 bits except on old feeble
+    hardware or on very busy servers.'
+  id: totrans-173
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-b* 是位强度，只有 *rsa* 可以使用此选项。默认值为2048，最大为4096。比特数越多，处理开销就越大，但在除旧硬件或繁忙服务器外，使用4096比特可能不会感觉到任何差异。'
+- en: '*-i* tells your SSH client which key you want to use. When you have more than
+    one key, you must use this. When you have multiple public keys, you may see a
+    “Too many authentication failures” error message if you do not specify one key,
+    because SSH tries all of them when one is not specified.'
+  id: totrans-174
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-i* 告诉您的SSH客户端要使用哪个密钥。当您拥有多个密钥时，必须使用此选项。如果不指定任何密钥，当SSH尝试使用所有密钥时，您可能会看到“Too
+    many authentication failures”错误消息。'
+- en: See Also
+  id: totrans-175
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[OpenSSH](https://openssh.com)'
+  id: totrans-176
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSH](https://openssh.com)'
+- en: '*man 1 ssh*'
+  id: totrans-177
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh*'
+- en: '*man 1 ssh-keygen*'
+  id: totrans-178
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh-keygen*'
+- en: 12.8 Managing Multiple Public Keys
+  id: totrans-179
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.8 管理多个公钥
+- en: Problem
+  id: totrans-180
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to use different keys for different servers. How do you manage keys
+    with different names?
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望为不同的服务器使用不同的密钥。如何管理具有不同名称的密钥？
+- en: Solution
+  id: totrans-182
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'When you create a new key pair, use the *-f* option of the *ssh-keygen* command
+    to give keys unique names:'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建新密钥对时，请使用 *ssh-keygen* 命令的 *-f* 选项为密钥命名：
+- en: '[PRE26]'
+  id: totrans-184
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'Then, use the *-i* option to specify the key you want to use when you log in
+    to the remote host:'
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后，在登录远程主机时使用 *-i* 选项指定要使用的密钥：
+- en: '[PRE27]'
+  id: totrans-186
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'To manage multiple public keys more easily, create a new file, *~/.ssh.config*.
+    This file configures the logins for your various remote hosts, so you log in with
+    *ssh foo* instead of a long command string. The following example configures a
+    simpler login for Duchess to access *server2*:'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要更轻松地管理多个公钥，请创建一个新文件，*~/.ssh/config*。此文件配置了您各个远程主机的登录信息，因此您可以使用 *ssh foo* 而不是冗长的命令字符串进行登录。以下示例配置了一个更简单的登录方式，让
+    Duchess 访问 *server2*：
+- en: '[PRE28]'
+  id: totrans-188
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'Now Duchess logs in like this, using the *Host* value:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在 Duchess 使用 *Host* 值这样登录：
+- en: '[PRE29]'
+  id: totrans-190
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'Keep adding to this file for your other public key logins, like this:'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 继续向该文件添加其他公钥登录信息，如下所示：
+- en: '[PRE30]'
+  id: totrans-192
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: Discussion
+  id: totrans-193
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'In the preceding solution snippet:'
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在上述解决方案片段中：
+- en: The *Host* line defines the start of each configuration. This is the label you
+    use to login, and it can be anything you want.
+  id: totrans-195
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*Host* 行定义了每个配置的开始。这是您用于登录的标签，可以是任何您喜欢的名称。'
+- en: '*HostName* is the remote machine’s hostname, fully qualified domain name, or
+    IP address.'
+  id: totrans-196
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*HostName* 是远程机器的主机名、完全限定域名或IP地址。'
+- en: '*User* is your user on the remote machine.'
+  id: totrans-197
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*User* 是远程机器上的用户名。'
+- en: '*IdentityFile* is the full path to your public key.'
+  id: totrans-198
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*IdentityFile* 是您公钥的完整路径。'
+- en: '*IdentitiesOnly yes* tells *ssh* to use the settings in *~/.ssh/config*, or
+    passed on the command line, and not other providers, if there are any.'
+  id: totrans-199
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*IdentitiesOnly yes* 告诉 *ssh* 使用 *~/.ssh/config* 中的设置或通过命令行传递的设置，而不使用其他提供者（如果有的话）。'
+- en: 'The default SSH port number is 22\. When you need to connect to a nonstandard
+    port, for example 2022, specify it with *Port*:'
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认的SSH端口号是22。当您需要连接到非标准端口（例如2022）时，请使用 *Port* 指定：
+- en: '[PRE31]'
+  id: totrans-201
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: You may call your keys anything you want. I like to use descriptive names so
+    I know what machines they belong to.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以按任意名称命名您的密钥。我喜欢使用描述性名称，以便知道它们属于哪些机器。
+- en: Remember to always put a passphrase on your personal private keys.
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请记得为您个人的私钥始终设置一个密码短语。
+- en: See Also
+  id: totrans-204
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[OpenSSH](https://openssh.com)'
+  id: totrans-205
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSH](https://openssh.com)'
+- en: '*man 1 ssh_config*'
+  id: totrans-206
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh_config*'
+- en: '*man 1 ssh*'
+  id: totrans-207
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh*'
+- en: 12.9 Changing a Passphrase
+  id: totrans-208
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.9 更改密码短语
+- en: Problem
+  id: totrans-209
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Problem
+- en: You want to change the passphrase on one of your private keys.
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要更改一个私钥的密码短语。
+- en: Solution
+  id: totrans-211
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Solution
+- en: 'Use the *-p* option with the *ssh-keygen* command:'
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *-p* 选项与 *ssh-keygen* 命令：
+- en: '[PRE32]'
+  id: totrans-213
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: Discussion
+  id: totrans-214
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Discussion
+- en: Passphrases are not recoverable. If you lose a passphrase, your only option
+    is to create a new key with a new passphrase.
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 密码短语无法恢复。如果你丢失了密码短语，你唯一的选择就是用新密码创建一个新的密钥。
+- en: See Also
+  id: totrans-216
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[OpenSSH](https://openssh.com)'
+  id: totrans-217
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSH](https://openssh.com)'
+- en: '*man 1 ssh_*'
+  id: totrans-218
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh_*'
+- en: '*man 1 ssh-keygen*'
+  id: totrans-219
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh-keygen*'
+- en: 12.10 Automatic Passphrase Management with Keychain
+  id: totrans-220
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.10 使用 Keychain 自动管理 Passphrase
+- en: Problem
+  id: totrans-221
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Problem
+- en: You want something to remember your private key passphrases for you, and use
+    them as needed.
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你希望有些东西能为你记住私钥的密码短语，并在需要时使用它们。
+- en: Solution
+  id: totrans-223
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Solution
+- en: The Keychain utility was made for this. Install the *keychain* package, then
+    copy the lines in the following example into your *.bashrc* file.
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Keychain 实用程序专为此而制作。安装 *keychain* 软件包，然后将以下示例中的行复制到你的 *.bashrc* 文件中。
+- en: 'In the following example, you want access to *server1*, *server2*, and *server3*
+    without entering your passphrases every time you log in. Copy these lines, except
+    using your own key names:'
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下面的示例中，你想要在登录时无需每次输入密码短语即可访问 *server1*、*server2* 和 *server3*。复制这些行，但使用你自己的密钥名称：
+- en: '[PRE33]'
+  id: totrans-226
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: Keychain keeps your private keys available until you shut down, so you must
+    enter your passphrases every time you start up your system.
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Keychain 会保持你的私钥可用，直到你关机，因此每次启动系统时都必须输入你的密码短语。
+- en: 'When you boot to a graphical environment, you may not be prompted to enter
+    your passphrases. Try opening a terminal, and if you still don’t see a Keychain
+    prompt for your passphrases, you must enter a Linux console. Press Ctrl-Alt-F2
+    and log in. After logging in, you should see something like this:'
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你启动到图形环境时，可能不会提示你输入密码短语。尝试打开终端，如果仍然看不到 Keychain 提示输入密码短语，请进入 Linux 控制台。按下 Ctrl-Alt-F2
+    并登录。登录后，你应该看到类似于以下内容：
+- en: '[PRE34]'
+  id: totrans-229
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: Discussion
+  id: totrans-230
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Discussion
+- en: The leading dot in *. ~/.keychain/$HOSTNAME-sh* is short for *source*, meaning
+    use the named file.
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 *. ~/.keychain/$HOSTNAME-sh* 中的前导点是 *source* 的简写，意味着使用指定的文件。
+- en: '*$HOSTNAME* tells Keychain to look in the user’s environment variables to fetch
+    their hostname. You can see this for yourself:'
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*$HOSTNAME* 告诉 Keychain 在用户的环境变量中查找他们的主机名。你可以自己看到这一点：'
+- en: '[PRE35]'
+  id: totrans-233
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: Keychain is a manager for both *ssh-agent* and *gpg-agent*, caching your SSH
+    and GPG passphrases for as long as your computer is powered on. You can log out
+    and log back in, and will have to reenter your passphrases only after a restart.
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Keychain 是 *ssh-agent* 和 *gpg-agent* 的管理器，缓存你的 SSH 和 GPG 密码短语，只要你的计算机开机。你可以注销然后重新登录，只需在重新启动后重新输入密码短语。
+- en: 'A good alternative is *gnome-keyring*, which runs in graphical environments.
+    This provides a graphical interface for viewing and managing SSH and GPG keys,
+    and it also includes a password manager. This appears as “Passwords and Keys”
+    on most systems. Its has two disadvantage: it’s not suitable to use on headless
+    systems, and it does not make passphrases available to cron (see [Recipe 12.11](#rec-keychain-cron).)'
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个很好的替代方案是 *gnome-keyring*，它运行在图形环境中。这提供了一个图形界面来查看和管理 SSH 和 GPG 密钥，还包括一个密码管理器。在大多数系统上，它显示为“密码和密钥”。它有两个缺点：不适合在无头系统上使用，并且不会使密码短语对
+    cron 可用（参见 [Recipe 12.11](#rec-keychain-cron)）。
+- en: See Also
+  id: totrans-236
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[Funtoo Keychain](https://oreil.ly/rljaf)'
+  id: totrans-237
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Funtoo Keychain](https://oreil.ly/rljaf)'
+- en: 12.11 Using Keychain to Make Passphrases Available to Cron
+  id: totrans-238
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.11 使用 Keychain 使密码短语可用于 Cron
+- en: Problem
+  id: totrans-239
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Problem
+- en: You need to use cron to automate tasks, such as running rsync backups to a remote
+    host. But no matter what you try, you get nothing for your troubles but failed
+    backups with authentication errors.
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要使用 cron 自动化任务，例如运行 rsync 备份到远程主机。但无论你尝试什么，都只会得到麻烦的失败备份和身份验证错误。
+- en: Solution
+  id: totrans-241
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Solution
+- en: 'To configure Keychain to manage your private keys for cron jobs, create a script
+    for cron to use. The following example is for an rsync backup, and the script
+    is named *duchess-backup-server1*:'
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要配置 Keychain 来管理你的私钥用于 cron 作业，请创建一个供 cron 使用的脚本。以下示例是针对一个 rsync 备份，并命名脚本为 *duchess-backup-server1*：
+- en: '[PRE36]'
+  id: totrans-243
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'Make this script executable with *chmod*:'
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *chmod* 使此脚本可执行。
+- en: '[PRE37]'
+  id: totrans-245
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'This example adds a line to your crontab to run the script every night at 10:15
+    P.M.:'
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例将一行添加到你的 crontab 中，以在每晚 10:15 运行脚本：
+- en: '[PRE38]'
+  id: totrans-247
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: Discussion
+  id: totrans-248
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Discussion
+- en: In the example script, the line starting with */usr/bin/rsync* must be all on
+    a single line.
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在示例脚本中，以 */usr/bin/rsync* 开头的行必须放在一行上。
+- en: Cron runs in its own special limited environment and needs Keychain to provide
+    the required keys and environment variables.
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Cron 在其自己的特殊限制环境中运行，并且需要 Keychain 提供所需的密钥和环境变量。
+- en: See Also
+  id: totrans-251
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 crontab*'
+  id: totrans-252
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 crontab*'
+- en: '[Funtoo Keychain](https://oreil.ly/rljaf)'
+  id: totrans-253
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Funtoo Keychain](https://oreil.ly/rljaf)'
+- en: 12.12 Tunneling an X Session Securely over SSH
+  id: totrans-254
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.12 安全地通过 SSH 隧道传输 X 会话
+- en: Problem
+  id: totrans-255
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to run graphical applications from the remote host. You know that the
+    X Window System has built-in networking abilities, but it sends all traffic in
+    cleartext, which is insecure, and you want to do this safely.
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要从远程主机运行图形应用程序。您知道 X 窗口系统具有内置的网络功能，但它发送的所有流量都是明文的，这是不安全的，您希望安全地执行此操作。
+- en: Solution
+  id: totrans-257
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Tunneling X over SSH requires no additional software. First, use these commands
+    to see if your client machine is running the X11 or Wayland protocol. The following
+    examples show both results:'
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过 SSH 隧道传输 X 不需要额外的软件。首先，使用这些命令查看您的客户机是否正在运行 X11 或 Wayland 协议。以下示例显示了两种结果：
+- en: '[PRE39]'
+  id: totrans-259
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: '*loginctl* is part of systemd.'
+  id: totrans-260
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*loginctl* 是 systemd 的一部分。'
+- en: If you are running Wayland, you cannot tunnel it over SSH because it does not
+    have networking support.
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您正在使用 Wayland，则无法通过 SSH 隧道传输，因为它不具备网络支持。
+- en: 'If your system is using X11, configure X11 forwarding in */etc/ssh/sshd_config*
+    on the remote machine:'
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的系统使用 X11，则在远程机器的 */etc/ssh/sshd_config* 中配置 X11 转发：
+- en: '[PRE40]'
+  id: totrans-263
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: 'The following example tunnels X over SSH, using the *-Y* option:'
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例使用 *-Y* 选项通过 SSH 隧道传输 X：
+- en: '[PRE41]'
+  id: totrans-265
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: 'Now you can run graphical applications, though only one at a time, like the
+    game in [Figure 12-1](#fig-x-tunnel-ssh):'
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您可以运行图形应用程序，尽管一次只能运行一个，例如 [图 12-1](#fig-x-tunnel-ssh) 中的游戏。
+- en: '[PRE42]'
+  id: totrans-267
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: '![KMahjongg tunneled over SSH](Images/lcb2_1201.png)'
+  id: totrans-268
+  prefs: []
+  type: TYPE_IMG
+  zh: '![KMahjongg 通过 SSH 隧道传输](Images/lcb2_1201.png)'
+- en: Figure 12-1\. Playing KMahjongg on the remote server
+  id: totrans-269
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 12-1\. 在远程服务器上玩 KMahjongg 游戏
+- en: Discussion
+  id: totrans-270
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'The X server runs with the offset specified in */etc/ssh/sshd.conf*, *X11DisplayOffset
+    10*. This avoids colliding with existing X sessions. Your regular local X session
+    is :0.0, so your first remote X session is :10.0\. You can see this with your
+    own eyes. Run the following commands on your local machine. The first one is at
+    your local command prompt:'
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: X 服务器以 */etc/ssh/sshd.conf* 中指定的偏移量运行，*X11DisplayOffset 10*。这避免了与现有 X 会话的冲突。您的常规本地
+    X 会话是 :0.0，因此您的第一个远程 X 会话是 :10.0。您可以亲眼看到这一点。在本地机器上运行以下命令。第一个命令在您的本地命令提示符下：
+- en: '[PRE43]'
+  id: totrans-272
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: 'The second example is at your SSH command prompt:'
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第二个示例在您的 SSH 命令提示符下：
+- en: '[PRE44]'
+  id: totrans-274
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: The remote system only needs to be powered on. You don’t need any local users
+    to be logged in, and you don’t even need X to be running. X needs to be running
+    only on the client PC.
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 远程系统只需处于开机状态。您不需要任何本地用户登录，甚至不需要 X 运行。X 仅需要在客户端 PC 上运行。
+- en: See Also
+  id: totrans-276
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 sshd*'
+  id: totrans-277
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 sshd*'
+- en: '*man 1 ssh_config*'
+  id: totrans-278
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh_config*'
+- en: 12.13 Opening an SSH Session and Running a Command in One Line
+  id: totrans-279
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.13 在一行中打开 SSH 会话并运行命令
+- en: Problem
+  id: totrans-280
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have a single command to run on the remote machine, and you think it would
+    be nice to run it without logging in and running the command, and then logging
+    out. After all, is it not true that laziness is a virtue for system administrators?
+  id: totrans-281
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您有一个在远程机器上运行的单个命令，您认为直接运行它而不是登录、运行命令，然后退出会更好。毕竟，系统管理员的懒惰难道不是一种美德吗？
+- en: Solution
+  id: totrans-282
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'OpenSSH can do this. This example shows how to restart Postfix:'
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenSSH 可以做到这一点。此示例显示如何重新启动 Postfix：
+- en: '[PRE45]'
+  id: totrans-284
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: You’ll be asked for a *sudo* password, but you will still save one whole step.
+  id: totrans-285
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将被要求输入 *sudo* 密码，但仍然可以省去一个步骤。
+- en: 'This shows how to open a quick game of GNOME Sudoku, which requires the X Window
+    System:'
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这演示了如何在 X 窗口系统中快速打开 GNOME Sudoku 游戏：
+- en: '[PRE46]'
+  id: totrans-287
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: Discussion
+  id: totrans-288
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Another way to do this is with public key authentication for the root user,
+    so you don’t have to invoke *sudo* ([Recipe 12.7](#rec-public-key-auth)).
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种方法是为 root 用户使用公钥认证，这样您就不必调用 *sudo* ([Recipe 12.7](#rec-public-key-auth))。
+- en: See Also
+  id: totrans-290
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 ssh*'
+  id: totrans-291
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ssh*'
+- en: 12.14 Mounting Entire Remote Filesystems with sshfs
+  id: totrans-292
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.14 使用 sshfs 挂载整个远程文件系统
+- en: Problem
+  id: totrans-293
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: OpenSSH is fast and efficient, and even tunneling X applications over OpenSSH
+    isn’t too laggy. But you want a faster way to edit a number of remote files without
+    running a graphical file manager over SSH.
+  id: totrans-294
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenSSH 是快速高效的，即使通过 OpenSSH 隧道传输 X 应用程序也不会太卡顿。但是您希望有一种更快的方式来编辑多个远程文件，而不是通过 SSH
+    运行图形文件管理器。
+- en: Solution
+  id: totrans-295
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*sshfs* is the tool for you. *sshfs* is for mounting an entire remote filesystem,
+    and then accessing it just like a local filesystem, without the hassles of setting
+    up an NFS or Samba server.'
+  id: totrans-296
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*sshfs* 就是为您准备的工具。*sshfs* 用于挂载整个远程文件系统，然后像本地文件系统一样访问它，而无需设置 NFS 或 Samba 服务器的麻烦。'
+- en: 'Install the *sshfs* package, which should also install FUSE, the Filesystem
+    in Userspace. You need a local directory that you have write permissions for as
+    your mountpoint:'
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装 *sshfs* 软件包，这应该也会安装 FUSE（用户空间文件系统）。您需要一个本地目录，您对其具有写权限作为挂载点：
+- en: '[PRE47]'
+  id: totrans-298
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: 'Then mount your chosen remote directory in your local *sshfs* directory. This
+    example mounts the home directory for *duchess@server2* in the *sshfs* directory
+    at *duchess@pc*:'
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后在本地 *sshfs* 目录中挂载您选择的远程目录。此示例将 *duchess@server2* 的主目录挂载到 *duchess@pc* 的 *sshfs*
+    目录中：
+- en: '[PRE48]'
+  id: totrans-300
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE48]'
+- en: 'The remote filesystem is just as accessible as your local filesystems:'
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 远程文件系统与本地文件系统一样易于访问：
+- en: '[PRE49]'
+  id: totrans-302
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE49]'
+- en: Access these files from the command line or with your graphical file manager,
+    just like your local files.
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从命令行或图形文件管理器中访问这些文件，就像访问本地文件一样。
+- en: Your command prompt will not change to the remote prompt.
+  id: totrans-304
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的命令提示符不会更改为远程提示符。
+- en: 'When you’re finished, unmount the remote filesystem:'
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成后，卸载远程文件系统：
+- en: '[PRE50]'
+  id: totrans-306
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE50]'
+- en: 'That mounts Duchess’s entire home directory. Specify a subdirectory instead:'
+  id: totrans-307
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将挂载 Duchess 的整个主目录。指定一个子目录：
+- en: '[PRE51]'
+  id: totrans-308
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE51]'
+- en: You cannot use the tilde, ~, as a shortcut for */home/user* because *sshfs*
+    does not support it.
+  id: totrans-309
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不能使用波浪号，~，作为 */home/user* 的快捷方式，因为 *sshfs* 不支持它。
+- en: 'If your network connection is not reliable, tell *sshfs* to automatically reconnect
+    after an interruption:'
+  id: totrans-310
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的网络连接不可靠，请告诉 *sshfs* 在中断后自动重新连接：
+- en: '[PRE52]'
+  id: totrans-311
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE52]'
+- en: Discussion
+  id: totrans-312
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Users who are new to *sshfs* always ask these questions: why not just run X
+    over SSH, or why not just use NFS? The answers are: it is faster than running
+    X over SSH, it is easier to set up than NFS, and you may use NFS, Samba, or whatever
+    your heart desires.'
+  id: totrans-313
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于新手用户来说，他们总是会问这些问题：为什么不直接通过 SSH 运行 X，或者为什么不直接使用 NFS？答案是：它比通过 SSH 运行 X 更快，比
+    NFS 更容易设置，您可以使用 NFS、Samba 或任何您喜欢的东西。
+- en: See Also
+  id: totrans-314
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 sshfs*'
+  id: totrans-315
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 sshfs*'
+- en: 12.15 Customizing the Bash Prompt for SSH
+  id: totrans-316
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.15 为 SSH 自定义 Bash 提示符
+- en: Problem
+  id: totrans-317
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Sure, you know that the prompt changes to display the remote hostname when you’re
+    logged in via SSH. But it’s just a plain prompt, and it’s easy to make mistakes,
+    so you want a customized, colorful prompt to indicate when you have an active
+    SSH login.
+  id: totrans-318
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您通过 SSH 登录时，您知道提示符会更改以显示远程主机名。但它只是一个普通的提示符，很容易出错，因此您希望有一个自定义的、彩色的提示符来指示您何时有活动的
+    SSH 登录。
+- en: Solution
+  id: totrans-319
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Customize the Bash prompt on the remote machines. This example turns the prompt
+    purple and adds “ssh” to it.
+  id: totrans-320
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在远程机器上自定义 Bash 提示符。此示例将提示符变为紫色并添加“ssh”。
+- en: 'Copy these lines into the *.bashrc* file for the remote account you want to
+    log in to:'
+  id: totrans-321
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将这些行复制到您想要登录的远程帐户的 *.bashrc* 文件中：
+- en: '[PRE53]'
+  id: totrans-322
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE53]'
+- en: When you log in to this machine, the prompt will look like what’s shown in [Figure 12-2](#fig-ssh-prompt).
+  id: totrans-323
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您登录到这台机器时，提示符将显示为[图 12-2](#fig-ssh-prompt)中所示。
+- en: '![Customized SSH prompt](Images/lcb2_1202.png)'
+  id: totrans-324
+  prefs: []
+  type: TYPE_IMG
+  zh: '![自定义 SSH 提示符](Images/lcb2_1202.png)'
+- en: Figure 12-2\. A customized SSH prompt
+  id: totrans-325
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 12-2\. 自定义的 SSH 提示符
+- en: Only the prompt is purple, and all the other text will be your normal shell
+    colors.
+  id: totrans-326
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只有提示符是紫色的，所有其他文本将是您正常的 shell 颜色。
+- en: Discussion
+  id: totrans-327
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Customizing the Bash prompt is practically a book topic in itself. The example
+    in this recipe can be edited to suit your preferences. You don’t have to use the
+    term “ssh” or name the variable “text”; these can be anything you like. You could
+    say “super duper encrypted session” and name your variable “sekkret-squirl” if
+    you want.
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自定义 Bash 提示符实际上是一个独立的书籍主题。本示例可以根据您的喜好进行编辑。您不必使用术语“ssh”或命名变量为“text”; 这些可以是任何您喜欢的东西。如果愿意，您可以说“超级加密会话”并将变量命名为“sekkret-squirl”。
+- en: '*[\e[0;31m\]* is the code block that determines the text color. All you have
+    to do is change the numbers to change the colors.'
+  id: totrans-329
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*[\e[0;31m\]* 是确定文本颜色的代码块。您只需更改数字即可更改颜色。'
+- en: '*[\e[0m\]* turns off the custom colors, so that your commands and command output
+    will return to the normal shell colors. Here are the color codes:'
+  id: totrans-330
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*[\e[0m\]* 关闭自定义颜色，这样您的命令和命令输出将恢复到正常的 shell 颜色。以下是颜色代码：'
+- en: Black 0;30
+  id: totrans-331
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 黑色 0;30
+- en: Blue 0;34
+  id: totrans-332
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 蓝色 0;34
+- en: Green 0;32
+  id: totrans-333
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 绿色 0;32
+- en: Cyan 0;36
+  id: totrans-334
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 青色 0;36
+- en: Red 0;31
+  id: totrans-335
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 红色 0;31
+- en: Purple 0;35
+  id: totrans-336
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 紫色 0;35
+- en: Brown 0;33
+  id: totrans-337
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 棕色 0;33
+- en: Light Gray 0;37
+  id: totrans-338
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 浅灰色 0;37
+- en: Dark Gray 1;30
+  id: totrans-339
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 深灰色 1;30
+- en: Light Blue 1;34
+  id: totrans-340
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 浅蓝色 1;34
+- en: Light Green 1;32
+  id: totrans-341
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 浅绿色 1;32
+- en: Light Cyan 1;36
+  id: totrans-342
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 浅青色 1;36
+- en: Light Red 1;31
+  id: totrans-343
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 浅红色 1;31
+- en: Light Purple 1;35
+  id: totrans-344
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 浅紫色 1;35
+- en: Yellow 1;33
+  id: totrans-345
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 黄色 1;33
+- en: White 1;37
+  id: totrans-346
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: White 1;37
+- en: 'This customization works by checking for the presence of the *SSH_CLIENT* environment
+    variable, which is present only when there is an active SSH connection. You can
+    see this for yourself on the remote host:'
+  id: totrans-347
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此自定义通过检查*SSH_CLIENT*环境变量的存在来工作，只有在有活动SSH连接时才存在。您可以在远程主机上自行查看：
+- en: '[PRE54]'
+  id: totrans-348
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE54]'
+- en: Then Bash knows to use the custom SSH prompt instead of the default prompt.
+    When you run this command on a machine without any active SSH sessions, it returns
+    an empty line.
+  id: totrans-349
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后Bash会使用自定义的SSH提示而不是默认的提示。当您在没有任何活动的SSH会话的机器上运行此命令时，它会返回一个空行。
+- en: See Also
+  id: totrans-350
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 bash*'
+  id: totrans-351
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 bash*'
+- en: Bash Prompt HOWTO, [Chapter 6](https://oreil.ly/QXWmT)
+  id: totrans-352
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Bash提示HOWTO，[第6章](https://oreil.ly/QXWmT)
+- en: 12.16 Listing Supported Encryption Algorithms
+  id: totrans-353
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 12.16 列出支持的加密算法
+- en: Problem
+  id: totrans-354
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have compliance rules to follow and need to know what encryption algorithms
+    OpenSSH supports.
+  id: totrans-355
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您必须遵循合规规定，并且需要知道OpenSSH支持哪些加密算法。
+- en: Solution
+  id: totrans-356
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'OpenSSH includes a command to query and list all supported algorithms, *ssh
+    -Q <query_option>*. List them with the *help* option:'
+  id: totrans-357
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenSSH包括一个命令来查询和列出所有支持的算法，*ssh -Q <query_option>*。使用*help*选项列出它们：
+- en: '[PRE55]'
+  id: totrans-358
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE55]'
+- en: 'The following example lists the *sig* signature algorithms:'
+  id: totrans-359
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例列出了*sig*签名算法：
+- en: '[PRE56]'
+  id: totrans-360
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE56]'
+- en: Discussion
+  id: totrans-361
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'The following list briefly describes each option:'
+  id: totrans-362
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的列表简要描述了每个选项：
+- en: '*cipher* lists supported symmetric ciphers.'
+  id: totrans-363
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*cipher* 列出支持的对称密码。'
+- en: '*cipher-auth* lists supported symmetric ciphers that also support authenticated
+    encryption.'
+  id: totrans-364
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*cipher-auth* 列出支持的对称密码，还支持身份验证加密。'
+- en: '*compression* lists supported compression types.'
+  id: totrans-365
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*compression* 列出支持的压缩类型。'
+- en: '*mac* lists supported message integrity codes. These protect your message’s
+    data integrity and its authenticity.'
+  id: totrans-366
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*mac* 列出支持的消息完整性代码。这些保护了您消息的数据完整性和真实性。'
+- en: '*kex* lists key exchange algorithms.'
+  id: totrans-367
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*kex* 列出密钥交换算法。'
+- en: '*kex-gss* lists GSSAPI (Generic Security Service Application Program Interface)
+    key exchange algorithms.'
+  id: totrans-368
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*kex-gss* 列出GSSAPI（通用安全服务应用程序接口）密钥交换算法。'
+- en: '*key* lists key types.'
+  id: totrans-369
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*key* 列出密钥类型。'
+- en: '*key-cert* lists certificate key types.'
+  id: totrans-370
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*key-cert* 列出证书密钥类型。'
+- en: '*key-plain* lists noncertificate key types.'
+  id: totrans-371
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*key-plain* 列出非证书密钥类型。'
+- en: '*key-sig* lists all key types and signature algorithms.'
+  id: totrans-372
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*key-sig* 列出所有密钥类型和签名算法。'
+- en: '*protocol-version* lists supported SSH protocol versions, which is only version
+    2 at the time of writing.'
+  id: totrans-373
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*protocol-version* 列出支持的SSH协议版本，目前只支持版本2。'
+- en: '*sig* lists supported signature algorithms.'
+  id: totrans-374
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*sig* 列出支持的签名算法。'
+- en: See Also
+  id: totrans-375
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[OpenSSH](https://openssh.com)'
+  id: totrans-376
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenSSH](https://openssh.com)'
+- en: '*Serious Cryptography* by Jean-Philippe Aumasson (No Starch Press)'
+  id: totrans-377
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*《严谨的密码学》* by Jean-Philippe Aumasson（No Starch Press）'

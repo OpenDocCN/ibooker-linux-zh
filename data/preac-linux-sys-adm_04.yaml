@@ -1,0 +1,981 @@
+- en: Chapter 4\. Managing Users
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第 4 章 管理用户
+- en: As a system administrator, you’ll spend a significant portion of your time managing
+    users. You’ll also spend time troubleshooting user problems that aren’t account-
+    or permissions-related, such as connectivity problems, broken applications, data
+    corruption, training issues, security issues, and user-created problems.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为系统管理员，您将花费大部分时间管理用户。您还将花时间解决与账户或权限无关的用户问题，如连接问题、应用程序故障、数据损坏、培训问题、安全问题和用户创建的问题。
+- en: 'Managing users covers the following tasks:'
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户管理涵盖以下任务：
+- en: Creating user accounts
+  id: totrans-3
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 创建用户账户
+- en: Modifying user accounts
+  id: totrans-4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 修改用户账户
+- en: Removing user accounts
+  id: totrans-5
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 移除用户账户
+- en: Granting access to files and directories
+  id: totrans-6
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 授予对文件和目录的访问权限
+- en: Restricting access to files and directories
+  id: totrans-7
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 限制对文件和目录的访问
+- en: Enforcing security policies
+  id: totrans-8
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 强制执行安全策略
+- en: Setting permissions on files and directories
+  id: totrans-9
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 对文件和目录设置权限
+- en: Some user management tasks can be learned from this book, while others are purely
+    experiential and on-the-job training for you. No two user environments are exactly
+    alike, and no two user experiences are exactly alike. In this chapter, you learn
+    some preemptive user management methods, but problems still occur. The techniques
+    you learn in this chapter will get you started on being able to handle an array
+    of user-related problems.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书可以学到一些用户管理任务，而其他任务则纯粹是您的经验和在职培训。没有两个用户环境完全相同，没有两个用户体验完全相同。在本章中，您将学习一些预防性的用户管理方法，但问题仍然会发生。本章中学到的技术将帮助您开始处理各种与用户相关的问题。
+- en: User and Group ID Numbering Conventions
+  id: totrans-11
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 用户和组 ID 编号约定
+- en: There are some guidelines associated with creating and maintaining user accounts
+    on Linux systems, as shown in [Table 4-1](#numbering_conventions_for_user_and_grou).
+    These aren’t hard and fast rules, but they’re generally followed on most corporate
+    systems.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Linux 系统上创建和维护用户账户有一些指导原则，如[表 4-1](#numbering_conventions_for_user_and_grou)所示。这些不是硬性规定，但通常在大多数企业系统中遵循。
+- en: Table 4-1\. Numbering conventions for user and group accounts
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 4-1\. 用户和组账户编号约定
+- en: '| UID | GID | Description |'
+  id: totrans-14
+  prefs: []
+  type: TYPE_TB
+  zh: '| UID | GID | 描述 |'
+- en: '| --- | --- | --- |'
+  id: totrans-15
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| 0 | 0 | Root |'
+  id: totrans-16
+  prefs: []
+  type: TYPE_TB
+  zh: '| 0 | 0 | Root |'
+- en: '| 1–999 | 1–999 | System/service accounts |'
+  id: totrans-17
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1–999 | 1–999 | 系统/服务账户 |'
+- en: '| 1000+ | 1000+ | User accounts |'
+  id: totrans-18
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1000+ | 1000+ | 用户账户 |'
+- en: User account UID and GID numbers typically begin at 1000 and increment by one
+    for each new account. The UID and GID for the root user are always 0; no other
+    user on the system has these user and group IDs.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户账户的 UID 和 GID 通常从 1000 开始，每新增一个账户递增一个数。root 用户的 UID 和 GID 始终为 0；系统上没有其他用户拥有这些用户和组
+    ID。
+- en: System and service accounts aren’t human user accounts and typically don’t have
+    an interactive shell associated with them. These accounts are given UIDs and GIDs
+    ranging from 1–999\. These separations make system housekeeping much easier than
+    randomly assigning UIDs and GIDs to user accounts.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统和服务账户不是人类用户账户，通常没有关联的交互式 shell。这些账户的 UID 和 GID 范围从 1 到 999。这些分离使得系统维护比随机分配
+    UID 和 GID 给用户账户要容易得多。
+- en: Creating User Accounts
+  id: totrans-21
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 创建用户账户
+- en: 'Like most tasks in Linux, there’s more than one way to create user accounts.
+    For this book, I stick with the two mainstream methods of creating accounts: `useradd`
+    and `adduser`.'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 像 Linux 中的大多数任务一样，创建用户账户有多种方法。对于本书，我坚持使用两种主流方法来创建账户：`useradd` 和 `adduser`。
+- en: Adding Users with useradd
+  id: totrans-23
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 `useradd` 添加用户
+- en: 'The `useradd` command is the standard command-line Linux method of adding new
+    users to a system. The `useradd` command is simple; all you really need to supply
+    is a username as an argument:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`useradd` 命令是在 Linux 系统中添加新用户的标准命令行方法。`useradd` 命令很简单；您真正需要提供的只是一个用户名作为参数：'
+- en: '[PRE0]'
+  id: totrans-25
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'This creates the home directory, */home/jsmith*, fills it with the default
+    complement of hidden environment files, and places an entry into */etc/passwd*.
+    When I create a user account with `useradd`, I supply a single argument and bit
+    of information (the user’s full name) that otherwise requires me to edit the */etc/passwd*
+    file:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将创建主目录 */home/jsmith*，填充默认的隐藏环境文件，并将条目添加到 */etc/passwd* 中。当我使用 `useradd` 创建用户账户时，我只需提供一个参数和一些信息（用户的全名），否则需要编辑
+    */etc/passwd* 文件：
+- en: '[PRE1]'
+  id: totrans-27
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'The `-c` option writes the information you supply to it to the fifth field
+    of the `/etc/passwd` file. If you wish to supply more information, such as phone
+    number, email address, or whatever you wish to include, use commas (`,`) to separate
+    the information:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-c` 选项将您提供的信息写入到 */etc/passwd* 文件的第五个字段中。如果您希望提供更多信息，例如电话号码、电子邮件地址或其他任何您想包含的信息，请使用逗号（`,`）来分隔这些信息：'
+- en: '[PRE2]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'The new user’s */etc/passwd* entry:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 新用户的 */etc/passwd* 条目：
+- en: '[PRE3]'
+  id: totrans-31
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'The individual fields in a user’s */etc/passwd* entry are as follows (from
+    left to right):'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户的 */etc/passwd* 条目中各个字段依次是（从左到右）：
+- en: Username
+  id: totrans-33
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 用户名
+- en: '*/etc/shadow* password field'
+  id: totrans-34
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/etc/shadow* 密码字段'
+- en: User ID
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 用户 ID
+- en: Primary group ID
+  id: totrans-36
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 主组 ID
+- en: The comment field
+  id: totrans-37
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 注释字段
+- en: Home directory
+  id: totrans-38
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 家目录
+- en: Default shell
+  id: totrans-39
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 默认 shell
+- en: 'Passwords are not stored in the */etc/passwd* file. The */etc/shadow* field
+    refers to the */etc/shadow* file that contains each user’s encrypted password
+    and is readable only by the root user. Note the */etc/shadow* file’s permissions
+    are `000` on Red Hat Enterprise Linux–based systems. The file permissions vary
+    among distributions but are never readable by regular users:'
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 密码不存储在 */etc/passwd* 文件中。*/etc/shadow* 字段指的是包含每个用户加密密码的 */etc/shadow* 文件，只有
+    root 用户可以读取。请注意，在基于 Red Hat Enterprise Linux 的系统中，*/etc/shadow* 文件的权限为 `000`。在不同的发行版中，文件权限会有所不同，但从不允许普通用户读取该文件：
+- en: '[PRE4]'
+  id: totrans-41
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Although Jane Smith’s user account is created, her home directory exists, and
+    there’s an entry in the */etc/passwd* file for the account, Jane can’t log into
+    the system. Do you know why? It’s because the account has no password. As the
+    sysadmin, you have to supply an initial password to Jane so that the user can
+    log in. Since you haven’t supplied a password for the account, the */etc/shadow*
+    entry shows that there is no password:'
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管 Jane Smith 的用户账户已经创建，她的家目录也存在，并且在 */etc/passwd* 文件中有一个条目来表示该账户，但是 Jane 无法登录系统。知道为什么吗？因为这个账户没有密码。作为系统管理员，您需要为
+    Jane 提供一个初始密码，以便用户可以登录。由于您尚未为该账户提供密码，因此 */etc/shadow* 条目显示没有密码：
+- en: '[PRE5]'
+  id: totrans-43
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Use the `passwd` command to supply a password to the account:'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `passwd` 命令为账户设置密码：
+- en: '[PRE6]'
+  id: totrans-45
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: Now, you have to give the password to Jane before she can successfully log into
+    the system.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，您必须在 Jane 成功登录系统之前为她设置密码。
+- en: Adding Users with adduser
+  id: totrans-47
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 adduser 添加用户
+- en: 'On some Linux distributions, `adduser` is a symbolic link to `useradd`:'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在一些 Linux 发行版中，`adduser` 是指向 `useradd` 的符号链接：
+- en: '[PRE7]'
+  id: totrans-49
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: On other distributions, `adduser` is an interactive Perl script that steps you
+    through adding a new user, and `useradd` is a separate utility with its standard
+    switches and arguments.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在其他发行版中，`adduser` 是一个交互式 Perl 脚本，引导您逐步添加新用户，而 `useradd` 是一个独立的实用程序，带有其标准开关和参数。
+- en: Modifying User Accounts
+  id: totrans-51
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 修改用户帐户
+- en: 'There’s rarely such a thing as a static user account. Therefore, the `usermod`
+    command exists to assist you in making those required changes without editing
+    */etc/passwd*, a home directory, or configuration files. The `usermod` command
+    is the catchall for changing all things user account related. The following is
+    an abbreviated list of modifications that you can make with the `usermod` command:'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 几乎不存在静态用户账户。因此，`usermod` 命令存在以帮助您进行这些必要的更改，而无需编辑 */etc/passwd*、家目录或配置文件。`usermod`
+    命令是用于更改与用户账户相关的所有内容的综合命令。以下是您可以使用 `usermod` 命令进行的修改的简要列表：
+- en: Add the user to a supplementary group
+  id: totrans-53
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将用户添加到附加组
+- en: Change the user’s comment field in */etc/passwd*
+  id: totrans-54
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 更改 */etc/passwd* 中的用户注释字段
+- en: Change the user’s home directory
+  id: totrans-55
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 更改用户的家目录
+- en: Set an account expiry date
+  id: totrans-56
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 设置账户过期日期
+- en: Remove an expiry date
+  id: totrans-57
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 删除过期日期
+- en: Change a user’s login name (username)
+  id: totrans-58
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 更改用户的登录名（用户名）
+- en: Lock/unlock a user’s account
+  id: totrans-59
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 锁定/解锁用户账户
+- en: Move the contents of a user’s home directory
+  id: totrans-60
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 移动用户家目录的内容
+- en: Change a user’s login shell
+  id: totrans-61
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 更改用户的登录 shell
+- en: Change a user’s ID
+  id: totrans-62
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 更改用户的 ID
+- en: Some of these options are more frequently used than others. For example, it’s
+    completely reasonable to change a user’s login shell, lock and unlock an account,
+    set or remove an expiry date, or add a user to a supplementary group. Changing
+    a user’s ID once it’s set during account creation is rare, as is relocating a
+    user’s home directory.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些选项中有些比其他选项更常用。例如，更改用户的登录 shell、锁定和解锁账户、设置或删除过期日期或将用户添加到附加组是完全合理的。一旦在账户创建过程中设置了用户的
+    ID，很少会再次更改用户的 ID，就像很少会重新定位用户的家目录一样。
+- en: In the following sections, I give examples of the most commonly requested user
+    account changes. Check the man page for details if you need to alter other aspects
+    of a user’s account.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接下来的章节中，我将给出用户账户最常被请求修改的示例。如果你需要改变用户账户的其他方面，请查阅手册获取详细信息。
+- en: Adding a Supplementary Group
+  id: totrans-65
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 添加一个附加组
+- en: 'When you create a new user account, the system assigns the user a user ID (UID)
+    and a primary group ID (GID). (They can be the same sequential number, but that
+    isn’t always the case.) For example, for the account created earlier for Jane
+    Smith, the UID is `1007`, and the GID is `1007`:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你创建一个新用户账户时，系统会分配给用户一个用户ID（UID）和一个主组ID（GID）。它们可以是相同的连续号码，但并非总是如此。例如，对于之前为简·史密斯创建的账户，UID是`1007`，GID是`1007`：
+- en: '[PRE8]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Jane’s primary GID is `1007`, but she might also work in an area of the company,
+    such as IT, engineering, or application development, that requires her to have
+    access to a group-owned directory. For this exercise, Jane works in the engineering
+    department as an associate engineer. The engineering department’s shared directory
+    GID is `8020`. Using `usermod`, here’s how to grant Jane access to that group’s
+    shared directory:'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简的主要GID是`1007`，但她可能还在公司的IT、工程或应用开发等领域工作，需要访问一个由组拥有的目录。在这个案例中，简在工程部门担任副工程师。工程部门的共享目录GID是`8020`。使用`usermod`，以下是如何授予简访问该组共享目录的方法：
+- en: '[PRE9]'
+  id: totrans-69
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'This adds Jane’s user account to the engineering group in the */etc/group*
+    file:'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将简的用户账户添加到*/etc/group*文件中的工程组：
+- en: '[PRE10]'
+  id: totrans-71
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'Now Jane can access the engineering group’s shared directory. To correctly
+    add Jane’s account to a new group, use the `-a` (append) and the `-G` (supplementary
+    group) together. For example, if you want Jane to access the finance department’s
+    shared directory, you must append her to that group. When adding a user, you can
+    use the GID number or the group’s name:'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在简可以访问工程组的共享目录了。为了正确地将简的账户添加到一个新组中，使用`-a`（追加）和`-G`（附加组）选项一起使用。例如，如果你希望简访问财务部门的共享目录，你必须将她追加到该组中。在添加用户时，你可以使用GID号码或组名：
+- en: '[PRE11]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: Warning
+  id: totrans-74
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: You must use the `-a` (append) and the `-G` (supplementary group) together.
+    If you don’t use the `-a` option, your user will be removed from all other supplementary
+    groups and added only to the one you specify.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你必须同时使用`-a`（追加）和`-G`（附加组）选项。如果你不使用`-a`选项，你的用户将从所有其他附加组中删除，并且只添加到你指定的一个组中。
+- en: 'A user can be a member of several other groups. For example, a user might be
+    in the finance department (GID `8342`) but also require access to human resources
+    (GID `8901`) information. You can also add a user to more than one group at once:'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户可以是多个其他组的成员。例如，用户可能在财务部门（GID `8342`）工作，但也需要访问人力资源（GID `8901`）信息。你也可以一次性将用户添加到多个组中：
+- en: '[PRE12]'
+  id: totrans-77
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: This command adds Jane Smith to the finance and the human resources group with
+    a single command.
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用此命令，可以一次性将简·史密斯添加到财务和人力资源组中。
+- en: Changing the User Comments Field
+  id: totrans-79
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 更改用户注释字段
+- en: Changing the user comments (GECOS) field is a common task. You can edit the
+    */etc/passwd* file directly, although it comes with significant risk. The rule
+    of thumb is that if there’s a tool to perform some action or task, you should
+    use it rather than directly editing configuration files. You can easily change
+    the GECOS field using the `usermod` command and the `-c` option.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改用户注释（GECOS）字段是一个常见的任务。你可以直接编辑*/etc/passwd*文件，但这样做存在很大的风险。经验法则是，如果有工具可以执行某个操作或任务，你应该使用它而不是直接编辑配置文件。你可以使用`usermod`命令和`-c`选项轻松更改GECOS字段。
+- en: 'Let’s say the company has recently hired a second person named Jane Smith,
+    so you need to distinguish between them by adding a middle initial to the first
+    Jane Smith’s GECOS field:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设公司最近雇佣了另一位名叫简·史密斯的员工，因此你需要通过在第一位简·史密斯的GECOS字段中添加中间名来区分它们：
+- en: '[PRE13]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: This command replaces `Jane Smith` with `Jane R Smith`.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此命令将`简·史密斯`替换为`简·R·史密斯`。
+- en: 'The `-c` option tells the `usermod` command that you’re editing the “comments”
+    field. You can also change this information using the `chfn` command:'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-c`选项告诉`usermod`命令，你正在编辑“注释”字段。你也可以使用`chfn`命令更改这些信息：'
+- en: '[PRE14]'
+  id: totrans-85
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: The `chfn` command changes your finger information. Finger is an old daemon
+    that ran on early Unix systems and some Linux systems and supplied information
+    about users. Almost no one uses it these days because of security issues, but
+    the information is still referred to as finger information. The `-f` option changes
+    the user’s full name field for the specified account. There are other options
+    for office (`-o`), office phone (`-p`), and home phone (`-h`). Generally, only
+    the user’s full name or the service’s name and purpose are used for the GECOS
+    field.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`chfn` 命令更改你的 finger 信息。Finger 是早期 Unix 系统和一些 Linux 系统上运行的一个旧守护程序，提供有关用户的信息。由于安全问题，现在几乎没有人再使用它，但信息仍被称为
+    finger 信息。 `-f` 选项为指定的账户更改用户的全名字段。还有其他选项用于办公室（`-o`）、办公室电话（`-p`）和家庭电话（`-h`）。通常，只使用用户的全名或服务的名称和目的用于
+    GECOS 字段。'
+- en: Setting an Expiration (Expiry) Date on an Account
+  id: totrans-87
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 设置账户过期日期
+- en: 'If a user gives notice at a company, moves to a different business unit, or
+    goes on parental leave, sysadmins might decide to disable that user’s account
+    for security reasons until the person returns or before removing the account from
+    a system:'
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果用户在公司给出通知、转移到不同的业务单位或休产假，系统管理员可能决定出于安全原因禁用该用户的账户，直到该人返回或在从系统中移除账户之前：
+- en: '[PRE15]'
+  id: totrans-89
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Rob Smith’s account will be disabled (expired) on the specified date in the
+    format YYYY-MM-DD. The `-e` option sets the account for expiration.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 罗布·史密斯的账户将在指定的 YYYY-MM-DD 格式日期上失效（过期）。 `-e` 选项设置账户过期。
+- en: Changing a User’s Login Shell
+  id: totrans-91
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 更改用户登录 shell
+- en: 'The default Linux shell is bash, but some users prefer to use a different shell,
+    so they request that their default shell be changed to one of the many other available
+    shell options. There are three methods of changing a user’s default shell: `usermod`,
+    `chsh`, and directly editing */etc/passwd*. Direct editing of the */etc/passwd*
+    file is not recommended.'
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认的 Linux shell 是 bash，但一些用户更喜欢使用其他可用的 shell，因此他们请求将其默认 shell 更改为其中一种。有三种方法可以更改用户的默认
+    shell：`usermod`、`chsh` 和直接编辑 */etc/passwd*。不建议直接编辑 */etc/passwd* 文件。
+- en: 'The `usermod` command method uses the `-s` option, the new shell, and the username
+    to make the change:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`usermod` 命令方法使用 `-s` 选项、新 shell 和用户名来进行更改：'
+- en: '[PRE16]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'The updated */etc/passwd* file is shown here:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更新后的 */etc/passwd* 文件显示如下：
+- en: '[PRE17]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'Only a user with root privileges may edit the */etc/passwd* file or use the
+    `usermod` command. However, any user may change their shell with the `chsh` command:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只有具有 root 权限的用户才能编辑 */etc/passwd* 文件或使用 `usermod` 命令。但是，任何用户都可以使用 `chsh` 命令更改其
+    shell：
+- en: '[PRE18]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'The resulting */etc/passwd* entry is as follows:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 结果为 */etc/passwd* 的条目如下：
+- en: '[PRE19]'
+  id: totrans-100
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: For other changes, consult the man page for `usermod`.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于其他更改，请参阅 `usermod` 的 man 手册。
+- en: Note
+  id: totrans-102
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'At the end of any man page, you’ll find a list of related alternative commands,
+    links to external documentation, and configuration files referenced in the “See
+    Also” section. These are handy to explore and might prove more efficient for making
+    changes. The following is the “See Also” section excerpted from the [`usermod`
+    man page](https://oreil.ly/nqaH_):'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在任何 man 手册的末尾，你会找到相关的替代命令列表、外部文档链接以及“参见”部分引用的配置文件。这些都很方便探索，并且可能在进行更改时更有效。以下是从
+    [`usermod` man 手册](https://oreil.ly/nqaH_) 中摘录的“参见”部分：
+- en: See Also
+  id: totrans-104
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: 参见
+- en: ''
+  id: totrans-105
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: chfn(1), chsh(1), passwd(1), crypt(3), gpasswd(8), groupadd(8), groupdel(8),
+    groupmod(8), login.defs(5), useradd(8), userdel(8).
+  id: totrans-106
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: chfn(1)、chsh(1)、passwd(1)、crypt(3)、gpasswd(8)、groupadd(8)、groupdel(8)、groupmod(8)、login.defs(5)、useradd(8)、userdel(8)。
+- en: Now that you’ve learned to create and modify user accounts, let’s discuss how
+    to remove user accounts.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你已经学会了如何创建和修改用户账户，让我们讨论如何移除用户账户。
+- en: Removing User Accounts
+  id: totrans-108
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 移除用户账户
+- en: Fortunately, system administrators and developers who give names to commands
+    do so in a way that makes them easy to remember. Command names often describe
+    their functions. The `useradd` command is one such example. To remove a user account
+    from a system, you use the `userdel` command, which is just as easy to use as
+    `useradd` is.
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 幸运的是，系统管理员和开发人员命名命令时考虑了使其易于记忆的方式。命令名称通常描述其功能。`useradd` 命令就是一个例子。要从系统中移除用户账户，可以使用
+    `userdel` 命令，它像 `useradd` 一样易于使用。
+- en: 'To remove a user account from your system, issue the `userdel` command and
+    supply the username for the account:'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要从系统中移除用户账户，使用 `userdel` 命令并提供账户的用户名：
+- en: '[PRE20]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: This command removes the user’s entry from */etc/passwd* and from */etc/shadow*
+    but leaves the user’s home directory (*/home/jsmith*) intact. Why do you think
+    that’s a good option? Sysadmins often leave a user’s home directory intact after
+    a user has separated from a company or has changed jobs within the company but
+    no longer requires access to a system. Retaining the user’s home directory ensures
+    that only the root user can access any documents left by the user that might be
+    important to the company.
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此命令从*/etc/passwd*和*/etc/shadow*中删除用户条目，但保留用户的主目录（*/home/jsmith*）不变。您认为这是一个好选择的原因是什么？系统管理员通常在用户离开公司或在公司内部更换工作但不再需要访问系统时保留用户的主目录。保留用户的主目录确保只有根用户可以访问用户可能留下的对公司重要的任何文档。
+- en: 'If you make nightly backups of users’ home directories, you don’t necessarily
+    need to retain the user’s home directory. The following `userdel` command removes
+    the user’s home directory and all files inside it:'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您每晚备份用户的主目录，您不一定需要保留用户的主目录。以下`userdel`命令将删除用户的主目录及其中的所有文件：
+- en: '[PRE21]'
+  id: totrans-114
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: Warning
+  id: totrans-115
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Destructive Linux commands, such as `userdel` and `rm`, are irreversible and
+    can’t be undone once executed. Always be sure that you have the correct user account
+    before pressing the Enter key—and have good backups.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`userdel`和`rm`等破坏性Linux命令是不可逆的，一旦执行就无法撤销。在按下回车键之前，请务必确认您选择了正确的用户账户，并且进行了良好的备份。'
+- en: When it’s time to change passwords, you need to know how to force users to do
+    it. Our next section shows you how.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当需要更改密码时，您需要知道如何强制用户执行此操作。我们的下一节将向您展示如何操作。
+- en: Forcing Password Changes
+  id: totrans-118
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 强制密码更改
+- en: 'It’s a matter of trust that the user will change their password when you provide
+    them with an initial password. Sysadmins who regularly audit their users’ passwords
+    realize that this “honor system” level of trust doesn’t work 100% of the time.
+    You can easily audit a user’s account settings using the `chage` command. The
+    `-l` option lists the current settings for the specified user account:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您为用户提供初始密码时，用户更改其密码是基于信任的问题。定期审核用户密码的系统管理员意识到这种“诚信制度”的信任并非始终有效。您可以使用`chage`命令轻松审核用户账户设置。`-l`选项列出指定用户账户的当前设置：
+- en: '[PRE22]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: As you can see, this account’s password never expires, which is a security violation
+    that needs to be fixed. In addition to a regular forced change, you should also
+    set a minimum change period. For example, as shown in the following code listing,
+    I set the `rsmith` account to force a password change every 90 days (`-M 90`)
+    with a minimum number of days between password changes to 1 (`-m 1`). Setting
+    a minimum number of days ensures that users don’t change their passwords 10 times
+    (or whatever the number of the system’s remembered passwords is set to) to reset
+    it to their original password, which amounts to no net password change.
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如您所见，此账户的密码永不过期，这是一个安全违规，需要修复。除了定期强制更改外，您还应设置最小更改周期。例如，如下代码所示，我将`rsmith`账户设置为每90天强制更改密码（`-M
+    90`），并设置最小更改天数为1天（`-m 1`）。设置最小更改天数可确保用户不会多次更改密码（或者无论系统设置的记忆密码数量是多少），以将其重置为原始密码，这实际上没有净密码更改。
+- en: '[PRE23]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: The expiration date set by the system is 90 days after the last password change.
+    If the last password change is in the past, the user must change their password
+    on the next login.
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统设置的到期日期是最后一次密码更改后的90天。如果最后一次密码更改是在过去，用户必须在下次登录时更改其密码。
+- en: Note
+  id: totrans-124
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'From the [`chage` man page](https://oreil.ly/-NeGX): “The `chage` command changes
+    the number of days between password changes and the last password change date.
+    The system uses this information to determine when users must change their passwords.”'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 来自[`chage` man page](https://oreil.ly/-NeGX)：“`chage`命令用于更改密码更改之间的天数和最后一次密码更改日期。系统使用此信息确定用户何时必须更改密码。”
+- en: Passwords are a weak form of authentication because they can be guessed, cracked,
+    or read in plain text if users write them down. Thus, you must ensure that passwords
+    are changed often and not reused.
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 密码是一种弱身份验证形式，因为它们可以被猜测、破解或者如果用户将其写下，可以以纯文本形式读取。因此，您必须确保密码经常更改且不重复使用。
+- en: Handling Service Accounts
+  id: totrans-127
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 处理服务账户
+- en: Nothing stirs controversy among sysadmins and security administrators like the
+    mere mention of service accounts. I’m not sure what all the controversy is about
+    because every Linux system has more than 30 service accounts.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 没有什么比服务账户的提及更能激起系统管理员和安全管理员之间的争议了。我不确定所有争议的原因，因为每个Linux系统都有超过30个服务账户。
+- en: 'An example of a service account is the *nobody* account, which is the Kernel
+    Overflow User account:'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 服务帐户的一个例子是*nobody*帐户，这是内核溢出用户帐户：
+- en: '[PRE24]'
+  id: totrans-130
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'Generally, you can spot a service account because in the */etc/passwd* file,
+    you see that the user account has no assigned shell. Service accounts have */sbin/nologin,*
+    where the user’s shell should be. This means that the service accounts have no
+    interactive shell or passwords. That doesn’t mean their passwords are blank or
+    null, they simply don’t exist. In other words, if a user account has */sbin/nologin*
+    as their shell, they can’t log into the system with any password. And no user,
+    not even the root user, can `su` or `sudo` to those accounts:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常，你可以通过*/etc/passwd*文件来识别服务帐户，看到用户帐户没有分配的shell。服务帐户有*/sbin/nologin*，用户的shell应该在那里。这意味着服务帐户没有交互式shell或密码。这并不意味着他们的密码是空白或null，它们根本不存在。换句话说，如果一个用户帐户的shell是*/sbin/nologin*，他们无法使用任何密码登录系统。甚至root用户也不能通过`su`或`sudo`切换到这些帐户：
+- en: '[PRE25]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: Because service accounts have no interactive shell and no method of switching
+    to one via `su` or `sudo`, there’s no security violation associated with having
+    service accounts on a system. The controversy comes from the fact that some system
+    administrators don’t know that service accounts don’t usually have interactive
+    shells or passwords. Services may require an interactive shell account for their
+    service to function. For those services, extreme scrutiny and other security measures
+    should be in place to thwart potential clandestine logins on those accounts.
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为服务帐户没有交互式shell，也没有通过`su`或`sudo`切换到交互式shell的方法，所以在系统上拥有服务帐户不会导致安全违规。争议来自于一些系统管理员不知道服务帐户通常没有交互式shell或密码。某些服务可能需要一个交互式shell帐户才能使其服务正常运行。对于这些服务，应该采取极端审查和其他安全措施来阻止潜在的秘密登录。
+- en: Managing Groups Rather Than Users
+  id: totrans-134
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 管理组而不是用户
+- en: 'When managing permissions for a set of users, it’s more convenient to define
+    and manage a group than to manage each user separately. Group management allows
+    you to do the following:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在管理一组用户的权限时，定义和管理一个组比单独管理每个用户更方便。组管理允许你做以下事情：
+- en: Manage permissions on assets such as folders and files
+  id: totrans-136
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 管理资产（如文件夹和文件）的权限
+- en: Manage permissions according to job function
+  id: totrans-137
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 根据工作职能管理权限
+- en: Change permissions for a large number of users rather than for each user individually
+  id: totrans-138
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 更改大量用户的权限而不是为每个用户单独更改
+- en: Easily add users to and remove users from a group’s shared folders and files
+  id: totrans-139
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 轻松地将用户添加到组的共享文件夹和文件中，并从中删除用户
+- en: Restrict permissions to sensitive folders and files
+  id: totrans-140
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 限制对敏感文件夹和文件的权限
+- en: It’s very difficult to manage permissions for individual users because if those
+    permissions need to change, you have to trace permissions for that user on every
+    system on which they have an account. Managing permissions for groups allows sysadmins
+    to manage fine-grained user access on a more global level.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于单个用户管理权限非常困难，因为如果这些权限需要更改，你必须在用户在每个拥有帐户的系统上追踪该用户的权限。管理组的权限允许系统管理员在更全局的层面上管理细粒度的用户访问。
+- en: For example, if you have a user who works in the human resources (HR) department
+    and then moves to the finance department, it’s easy to remove that user from the
+    HR group and add them to the finance group. The user immediately has access to
+    all shared files and folders that other finance group members do. And the user
+    no longer has access to HR files and folders.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，如果你有一个在人力资源（HR）部门工作的用户，然后转移到财务部门，很容易将该用户从HR组中移除并添加到财务组中。用户立即可以访问所有其他财务组成员可以访问的共享文件和文件夹。而且用户不再可以访问HR文件和文件夹。
+- en: You learned earlier in this chapter how to add users to supplementary groups.
+    You should practice adding directories to the system, adding a group account,
+    setting that particular group ownership to the directory, and then adding users
+    to the group. You can then `su - *username*`, becoming that user to test your
+    permissions settings.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章的前面，你学习了如何将用户添加到附加组中。你应该练习将目录添加到系统中，添加一个组帐户，将该特定组的所有权设置为该目录，然后将用户添加到该组中。然后你可以`su
+    - *用户名*`，成为该用户以测试你的权限设置。
+- en: 'The following is one possible scenario for you to work through to learn group
+    management. This example assumes you already have a finance group and users assigned
+    to it. Notice that during this example, the root user exits and returns to a regular
+    account that is part of the finance group. And users can change group ownership
+    and permissions of files they own:'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面是一个你可以通过学习来了解组管理的可能场景。这个例子假设你已经有一个财务组，并且分配了用户给它。请注意，在这个例子中，root用户退出并返回到一个属于财务组的普通账户。用户可以改变他们拥有的文件的组所有权和权限：
+- en: '[PRE26]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: If you understand everything that’s going on in this example, then you’re ready
+    to move on to the next chapter. If you haven’t yet mastered these concepts, work
+    through the chapter examples again and return to this exercise. Remember that
+    creating users, groups, and directories and changing permissions are daily tasks
+    for sysadmins, and practicing these skills is the only way to acquire them and
+    become comfortable using them.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你理解这个例子中发生的一切，那么你已经准备好进入下一章了。如果你还没有掌握这些概念，请再次通过章节示例进行学习，然后返回到这个练习。请记住，创建用户、组和目录以及更改权限是系统管理员的日常任务，练习这些技能是掌握它们并且熟练使用它们的唯一途径。
+- en: Summary
+  id: totrans-147
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 总结
+- en: This chapter taught you how to create, remove, and change user accounts. You
+    also learned how to set up service accounts and had a brief overview of managing
+    groups. In the next chapter, you will learn about Linux networking, from the basics
+    of why networks are important to more-complex concepts such as network troubleshooting.
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章教会了你如何创建、删除和修改用户账户。你还学习了如何设置服务账户，并简要介绍了管理组的概述。在下一章中，你将学习关于Linux网络的知识，从网络的重要性基础到网络故障排除等更复杂的概念。

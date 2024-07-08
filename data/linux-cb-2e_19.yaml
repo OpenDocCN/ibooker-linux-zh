@@ -1,0 +1,1897 @@
+- en: Chapter 18\. Building an Internet Firewall/Router on Raspberry Pi
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第18章。在Raspberry Pi上构建Internet防火墙/路由器
+- en: The Raspberry Pi (RPi) makes a great internet firewall/router for small networks,
+    and it does not cost a lot of money. You can use any Raspberry Pi, but I recommend
+    the Raspberry Pi 4B because it is more powerful than the older Pis and is the
+    first Pi with a dedicated gigabit Ethernet port.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Raspberry Pi（RPi）非常适合小型网络的Internet防火墙/路由器，成本不高。您可以使用任何Raspberry Pi，但我推荐Raspberry
+    Pi 4B，因为它比旧版Pi更强大，并且是第一个配备专用千兆以太网端口的Pi。
+- en: Overview
+  id: totrans-2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 概述
+- en: In this chapter you will learn how to install Raspberry Pi OS, connect your
+    Pi to a computer monitor or TV, use the Raspberry Pi OS recovery mode, run your
+    Pi headless, add a second Ethernet port, share an internet connection, and use
+    the Pi for LAN name services.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您将学习如何安装Raspberry Pi OS，将您的Pi连接到计算机显示器或电视，使用Raspberry Pi OS恢复模式，无头运行您的Pi，添加第二个以太网口，共享Internet连接，并使用Pi进行LAN名称服务。
+- en: Note
+  id: totrans-4
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The examples in this chapter are all on a Raspberry Pi 4 Model B, using the
+    Raspberry Pi OS. Raspberry Pi OS used to be called Raspbian. Underneath it is
+    Debian Linux, so if you are accustomed to Debian, Ubuntu, Mint, or any other Debian
+    variant, it’s the same Linux.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章的示例均基于Raspberry Pi 4 Model B，在Raspberry Pi OS上运行。Raspberry Pi OS以前称为Raspbian。其底层是Debian
+    Linux，因此如果您习惯于Debian、Ubuntu、Mint或其他任何Debian变体，它都是相同的Linux。
+- en: Pros and Cons of a Raspberry Pi Firewall/Router
+  id: totrans-6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Raspberry Pi防火墙/路由器的优缺点
+- en: The Raspberry Pi is a general-purpose computer, not a specialized firewall/router.
+    It has WiFi, Ethernet, and Bluetooth, and it runs Linux. In comparison, a common
+    choice for small networks is the small combination firewall/router/wireless access
+    point/ Ethernet switch, like the Linksys AC1900 or the TP-Link Archer AX20\. These
+    have WiFi, gigabit Ethernet, multiple antennas, and support for “smart” services
+    like Alexa and smartphone administration apps.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Raspberry Pi是通用计算机，而不是专用防火墙/路由器。它具有WiFi、以太网和蓝牙，并运行Linux。相比之下，小型网络的常见选择是类似Linksys
+    AC1900或TP-Link Archer AX20的小型组合防火墙/路由器/无线接入点/以太网交换机，它们具有WiFi、千兆以太网、多个天线，并支持像Alexa和智能手机管理应用程序等“智能”服务。
+- en: The drawback to these devices is their inflexibility, especially limited storage
+    and operating system support. If you want to replace the vendor software, you
+    must use specialized router distributions like OpenWRT, DD-WRT, pfSense, or OPNsense,
+    which are all excellent, but it is not easy, and you have to find supported devices.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些设备的缺点在于其不灵活性，特别是存储和操作系统支持有限。如果您想替换供应商软件，必须使用像OpenWRT、DD-WRT、pfSense或OPNsense这样的专门的路由器发行版，这些都非常出色，但并不容易，并且您必须找到受支持的设备。
+- en: 'These are some of the advantages Raspberry Pi has over the all-in-one boxes:'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Raspberry Pi相比于一体化设备具有以下优势：
+- en: Flexibility, just like any general-purpose Linux computer
+  id: totrans-10
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 灵活性，就像任何通用Linux计算机一样
+- en: More memory and storage
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 更多的内存和存储
+- en: Connects to a computer monitor or TV, keyboard, and mouse
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 连接到计算机显示器或电视、键盘和鼠标
+- en: Runs a number of Linux distributions, so you can use your existing knowledge
+    and not have to learn some weird new interface or command set
+  id: totrans-13
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 运行多种Linux发行版，因此您可以利用现有的知识，无需学习一些奇怪的新界面或命令集
+- en: Runs a number of *bsd operating systems, Windows 10, Android, Chromium, and
+    others
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 运行多种*bsd操作系统、Windows 10、Android、Chromium和其他操作系统
+- en: Tethers to a mobile hotspot
+  id: totrans-15
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 连接到移动热点
+- en: 64-bit support
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 支持64位
+- en: You can run the Raspberry Pi with a graphical desktop, with no graphical desktop,
+    and headless via SSH, just like any Linux system.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以像任何Linux系统一样，通过图形桌面、无图形桌面和SSH无头运行Raspberry Pi。
+- en: 'Downsides of Raspberry Pi:'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Raspberry Pi的缺点：
+- en: Cannot function as an Ethernet switch, like the all-in-one devices
+  id: totrans-19
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 不能像一体化设备那样作为以太网交换机运行
+- en: WiFi is not as strong as all-in-one devices
+  id: totrans-20
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: WiFi不如一体化设备强
+- en: Raspberry Pi models 3 and older have poor Ethernet performance because the Ethernet
+    port shares the USB bus; RPi 4 cures this with a dedicated gigabit Ethernet port
+  id: totrans-21
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Raspberry Pi模型3及更早版本的以太网性能较差，因为以太网端口共享USB总线；RPi 4通过专用千兆以太网端口解决了这个问题
+- en: There are a number of customized Linux operating systems for Raspberry Pi. The
+    official operating system is Raspberry Pi OS, which is based on Debian Linux.
+    SUSE, Ubuntu, Fedora, Arch Linux ARM, and MX Linux have Raspberry Pi variants.
+    There are also specialized media server and gaming distros. In this chapter we’ll
+    stick with Raspberry Pi OS because it is optimized for the Pi, and you get a full
+    graphical desktop with decent performance even on the older RPi models. Raspberry
+    Pi OS is just like any other Linux, so anything you can do on a big Linux machine
+    you can do on Raspberry Pi.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 树莓派有许多定制的 Linux 操作系统。官方操作系统是基于 Debian Linux 的树莓派 OS。SUSE、Ubuntu、Fedora、Arch
+    Linux ARM 和 MX Linux 都有树莓派变种。此处我们将专注于树莓派 OS，因为它针对树莓派进行了优化，在旧款树莓派上也能提供良好的图形桌面性能。树莓派
+    OS 就像其他任何 Linux 一样，您可以在树莓派上做任何您在大型 Linux 机器上可以做的事情。
+- en: Hardware Architecture
+  id: totrans-23
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 硬件架构
+- en: The RPi is powered by a Broadcom system-on-a-chip (SoC). The CPU, GPU, and I/O
+    are all on a single chip. This is especially impressive on the Raspberry Pi 4
+    Model B, which supports running two screens at the same time. It handles high-definition
+    movies without a hiccup.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 树莓派由 Broadcom SoC 提供动力。CPU、GPU 和 I/O 都集成在一颗芯片上。在树莓派 4 Model B 上尤为引人注目，支持同时运行两个屏幕，并能轻松处理高清电影。
+- en: The Broadcom SoC is an ARM chip, rather than the x86_64 architecture that dominates
+    the PC market. ARM processors are less complex, using a reduced instruction set
+    (RISC). x86_64 processors are CISC, complex instruction set computers. x86_64
+    processors work a lot harder, are considerably more complex, and consume more
+    power.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Broadcom SoC 是一款 ARM 芯片，而不是主导 PC 市场的 x86_64 架构。ARM 处理器较少复杂，采用精简指令集（RISC）。x86_64
+    处理器是 CISC，复杂指令集计算机。x86_64 处理器工作更加艰苦，复杂度更高，耗电量更大。
+- en: Rasberry Pi Banquet of Products
+  id: totrans-26
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 树莓派产品盛宴
+- en: Every Raspberry Pi model ever made is still available, including updated releases
+    of the Raspberry Pi 1, models A and B. The A models are the lower-cost versions
+    of every release, and the B models cost a little more for more features.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每款曾发布的树莓派型号仍然可供购买，包括树莓派 1 的更新版本，A 和 B 型号。A 型号是每个发布的低成本版本，而 B 型号则因具备更多功能而稍贵。
+- en: 'You have many other Pis to choose from, such as:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以选择许多其他的树莓派产品，例如：
+- en: Raspberry Pi Zero, the smallest Pi for $5
+  id: totrans-29
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 树莓派 Zero，价格仅为 $5，是最小的树莓派
+- en: Raspberry Pi Zero W includes WiFi, $10
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 树莓派 Zero W 集成了 WiFi 功能，售价 $10
+- en: Raspberry Pi 400 Personal Computer Kit, a complete system integrated into a
+    compact keyboard (all you need to add is a display), $100
+  id: totrans-31
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 树莓派 400 个人电脑套件，集成在一个紧凑的键盘内（您需要添加的只是显示器），售价 $100
+- en: RPi prices have been stable since the first RPi was released, though of course
+    this could change.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自第一款树莓派发布以来，其价格保持稳定，尽管当然可能会发生变化。
+- en: 'There is a giant thundering herd of accessories: cases, touchscreens, heat
+    sinks, fans, breakout boards, hats (expansion boards), all manner of cables and
+    adapters, motors, cameras, audio boards, little wireless keyboards with touchpads,
+    gaming emulators, RGB matrices, powered USB hubs, real-time clocks, tiny displays…it
+    is one of the best playgrounds ever.'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有大量的配件可供选择：外壳、触摸屏、散热器、风扇、扩展板（HATs）、各种电缆和适配器、电机、摄像头、音频板、带触摸板的小型无线键盘、游戏模拟器、RGB
+    矩阵、带电源的 USB 集线器、实时时钟、小尺寸显示器……这是一个绝佳的玩乐场。
+- en: History and Purpose
+  id: totrans-34
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 历史与目的
+- en: The Raspberry Pi is a real phenomenon. The original intent of its creator, Eben
+    Upton, was to produce a small and inexpensive computer to encourage young students
+    to study computing, especially students who could not afford to buy a PC. The
+    first Raspberry Pi, Version 1 Model B, cost about $35\. Add a keyboard and mouse,
+    connect to a TV or monitor, and for less than a tenth the price of a PC you had
+    a working Linux computer with audio, video, Ethernet, and USB. The open hardware
+    design, combined with open source software, encourages hacking and learning.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 树莓派是一个真正的现象。其创始人 Eben Upton 最初的目的是生产一台小巧廉价的计算机，以鼓励年轻学生学习计算机，特别是那些买不起 PC 的学生。第一款树莓派，版本
+    1 Model B，约售价 $35。添加键盘和鼠标，连接至电视或显示器，价格不到 PC 的十分之一，您就拥有了一台可以工作的 Linux 计算机，具备音频、视频、以太网和
+    USB 接口。开放的硬件设计和开源软件鼓励了黑客和学习活动。
+- en: Note
+  id: totrans-36
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The Broadcom chipsets that power the Pi are not open. This has been a point
+    of contention since the first Pi was released. The schematics are open, available
+    on [RaspberryPi.org](https://raspberrypi.org), and the operating system and BIOS
+    are open source. In my moderately humble opinion, a completely open source platform
+    is preferable and would be great, and having something that works and is available
+    now is better than not having something that works and is available now.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 驱动Pi的Broadcom芯片组并非开源。自第一代Pi发布以来，这一点一直存在争议。电路图是公开的，可以在[RaspberryPi.org](https://raspberrypi.org)找到，操作系统和BIOS是开源的。以我适度谦虚的看法，一个完全开源的平台更可取，目前可用的东西总比没有可用的东西好。
+- en: 'The first Raspberry Pi was an immediate success, selling over 500,000 units
+    in the first 6 months after its release in February 2012\. Since then around 30
+    million Raspberry Pis have been sold. The current version, Version 4 Model B,
+    is a significant upgrade, the most powerful model yet, featuring:'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一代Raspberry Pi立即取得了成功，在2012年2月发布后的首6个月内销售了超过50万台。此后大约销售了3000万台Raspberry Pi。当前版本，Version
+    4 Model B，是一个重大升级，是迄今为止性能最强大的型号，具有以下特点：
+- en: 2 USB 2 ports
+  id: totrans-39
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 2个USB 2端口
+- en: 2 USB 3 ports
+  id: totrans-40
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 2个USB 3端口
+- en: 2 micro HDMI ports, supporting 2 4K displays
+  id: totrans-41
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 2个Micro HDMI端口，支持2个4K显示器
+- en: 1 dedicated gigabit Ethernet port
+  id: totrans-42
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1个专用千兆以太网端口
+- en: Supports RAM from 2 GB–8 GB
+  id: totrans-43
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 支持2 GB至8 GB的RAM
+- en: Broadcom BCM2711, 1.5 GHz Quad-core Cortex-A72 (ARM v8) 64-bit SoC
+  id: totrans-44
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Broadcom BCM2711，1.5 GHz四核 Cortex-A72（ARM v8）64位SoC
+- en: 2.4 GHz and 5.0 GHz IEEE 802.11ac WiFi
+  id: totrans-45
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 支持2.4 GHz和5.0 GHz IEEE 802.11ac WiFi
+- en: Bluetooth
+  id: totrans-46
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 蓝牙
+- en: 40-pin GPIO header
+  id: totrans-47
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 40针GPIO引脚头
+- en: Compared to modern Intel and AMD CPUs, these specs are far from bragworthy,
+    but it’s enough horsepower to run a Linux graphical desktop, play music, movies,
+    surf the web, write documents…it is quite capable for its size and price.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与现代的Intel和AMD CPU相比，这些规格远不能称为令人自豪的，但足以运行Linux图形桌面，播放音乐、电影，浏览网页，撰写文档……它在尺寸和价格上非常有能力。
+- en: The Raspberry Pi is developed and produced by the Raspberry Pi Foundation, a
+    registered nonprofit charity. The foundation supports numerous education projects
+    for teachers and students; visit [*https://raspberrypi.org*](https://raspberrypi.org)
+    for current educational materials and information.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Raspberry Pi由Raspberry Pi基金会开发和生产，这是一个注册的非营利慈善组织。该基金会支持多个教育项目，供教师和学生使用；访问[*https://raspberrypi.org*](https://raspberrypi.org)获取当前的教育资料和信息。
+- en: 18.1 Starting and Shutting Down Raspberry Pi
+  id: totrans-50
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.1 启动和关闭Raspberry Pi
+- en: Problem
+  id: totrans-51
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You don’t see a power switch on your Raspberry Pi (RPi), and you want to turn
+    it on and off.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在你的Raspberry Pi（RPi）上看不到电源开关，你想要打开和关闭它。
+- en: Solution
+  id: totrans-53
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Power it up by plugging in the power connector. Shut it down from the menu in
+    your operating system, then unplug it.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过插入电源连接器来启动它。从操作系统菜单中关闭它，然后拔掉电源插头。
+- en: Discussion
+  id: totrans-55
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: When you shut down your RPi, you have to disconnect and then reconnect the power
+    to start it up again.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你关闭你的RPi时，你必须断开然后重新连接电源才能重新启动它。
+- en: It wouldn’t surprise me if there is a power switch out there somewhere made
+    for the RPi, though I have not seen one. One alternative is to plug it into a
+    switched power strip.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果有为RPi设计的电源开关，我一点也不会感到惊讶，尽管我没见过。一个替代方案是将其插入一个带开关的电源插排。
+- en: See Also
+  id: totrans-58
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://raspberrypi.org*](https://raspberrypi.org)'
+  id: totrans-59
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://raspberrypi.org*](https://raspberrypi.org)'
+- en: 18.2 Finding Hardware and How-Tos
+  id: totrans-60
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.2 查找硬件和操作指南
+- en: Problem
+  id: totrans-61
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You bought a Raspberry Pi 4 Model B, and you want to know what other hardware
+    devices you need in order to use it.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你购买了一台Raspberry Pi 4 Model B，并想知道你需要哪些其他硬件设备才能使用它。
+- en: Solution
+  id: totrans-63
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Presumably you already have a computer monitor or TV, mouse, and keyboard.
+    You also need:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 据推测，你已经有了一台计算机显示器或电视、鼠标和键盘。你还需要：
+- en: Raspberry Pi power supply
+  id: totrans-65
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Raspberry Pi电源适配器
+- en: HDMI-to-micro-HDMI cable
+  id: totrans-66
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: HDMI至Micro HDMI电缆
+- en: Micro SD card of at least 16 GB
+  id: totrans-67
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 至少16 GB的Micro SD卡
+- en: Cooling fan, or heat sinks on the CPU, RAM module, and USB controller
+  id: totrans-68
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 冷却风扇，或者在CPU、RAM模块和USB控制器上安装散热片
+- en: Case
+  id: totrans-69
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 机箱
+- en: Micro SD card reader
+  id: totrans-70
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Micro SD卡读卡器
+- en: Start by installing Raspberry Pi OS to your micro SD card on another computer.
+    While that is running, assemble your hardware. When everything is ready, connect
+    the power and watch your new system boot up. (See Recipes [18.4](#rec-install-pi)
+    and [18.5](#rec-install-noobs) to learn how to install Raspberry Pi OS.)
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，在另一台计算机上将Raspberry Pi OS安装到你的Micro SD卡上。当这个过程运行时，组装你的硬件。当一切准备就绪时，连接电源，看着你的新系统启动。（查看[18.4](#rec-install-pi)和[18.5](#rec-install-noobs)章节，了解如何安装Raspberry
+    Pi OS的方法。）
+- en: To learn all about RPi, there are numerous sources of schematics, specifications,
+    how-tos, and clever ideas. The “See Also” section of this recipe lists a nice
+    selection to get you started.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要全面了解RPi，有很多源提供电路图、规格、操作指南和巧妙点子。本篇的“参见”部分列出了一个不错的选择，可以帮助你入门。
+- en: Discussion
+  id: totrans-73
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If your display does not have an HDMI port, see [Recipe 18.6](#rec-no-hdmi).
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你的显示器没有HDMI接口，请参见[Recipe 18.6](#rec-no-hdmi)。
+- en: You may use any micro SD card at least 16 GB in size. High-speed cards make
+    a noticeable performance improvement. 16 GB is pretty small, and you can use as
+    large a card as you like.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以使用至少16 GB大小的任何micro SD卡。高速卡可以显著提高性能。16 GB相当小，你可以使用任意大的卡。
+- en: The RPi 4B has three RAM options, 2 GB, 4 GB, and 8 GB. It is not upgradable,
+    so whatever you buy is what you will have. 2 GB is more than enough for an internet
+    gateway, and using your Pi as a lightweight Linux desktop. More memory is good
+    for multimedia processing, compiling code, games, and other memory-intensive tasks.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: RPi 4B有三种内存选项，2 GB、4 GB和8 GB。它不可升级，所以你购买的就是你会拥有的。2 GB对于作为互联网网关和轻量级Linux桌面的Pi已经足够了。更多内存适合多媒体处理、编译代码、游戏和其他内存密集型任务。
+- en: The RPi 4B is quite a bit more powerful than older Pis, and it runs hotter than
+    older versions. See [Recipe 18.3](#cooling-rpi) to learn how to keep it cool.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: RPi 4B比旧版RPi强大得多，运行时也更热。参见[Recipe 18.3](#cooling-rpi)了解如何保持其冷却。
+- en: With 4 USB ports, the RPi 4B has a lot of flexibility. You can use standard
+    USB keyboards and mice, a keyboard with a trackpad, and USB-to-PS/2 adapters for
+    older keyboards and mice. You can attach a USB hard drive for more storage or
+    backups, and any other USB devices just like on a big computer. The 40-pin GPIO
+    header supports attaching nearly any expansion board.
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: RPi 4B有4个USB端口，非常灵活。你可以使用标准USB键盘和鼠标，带有触控板的键盘，以及USB到PS/2转接器用于旧键盘和鼠标。你可以连接USB硬盘进行更多存储或备份，以及像在大型计算机上一样连接任何其他USB设备。40针GPIO头支持连接几乎任何扩展板。
+- en: There are many nice kits that bundle everything you need to get started. My
+    favorite store is [Adafruit.com](https://adafruit.com), and you can find many
+    more listed on [*https://raspberrypi.org*](https://raspberrypi.org).
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有许多很棒的套件捆绑了你开始所需的一切。我最喜欢的商店是[Adafruit.com](https://adafruit.com)，你还可以在[*https://raspberrypi.org*](https://raspberrypi.org)上找到更多。
+- en: See Also
+  id: totrans-80
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: 'These sites publish excellent Raspberry Pi tutorials:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些网站发布了优秀的树莓派教程：
+- en: '[The Raspberry Pi Foundation](https://oreil.ly/Ji4j2)'
+  id: totrans-82
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Raspberry Pi基金会](https://oreil.ly/Ji4j2)'
+- en: '[Adafruit](https://oreil.ly/5qwn5)'
+  id: totrans-83
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Adafruit](https://oreil.ly/5qwn5)'
+- en: '[MagPi](https://oreil.ly/EuMY7)'
+  id: totrans-84
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[MagPi](https://oreil.ly/EuMY7)'
+- en: '[Hackspace](https://oreil.ly/5KY5B)'
+  id: totrans-85
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Hackspace](https://oreil.ly/5KY5B)'
+- en: '[Maker Pro](https://oreil.ly/NQcB0)'
+  id: totrans-86
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Maker Pro](https://oreil.ly/NQcB0)'
+- en: '[Makezine](https://oreil.ly/foZqS)'
+  id: totrans-87
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Makezine](https://oreil.ly/foZqS)'
+- en: 18.3 Cooling the Raspberry Pi
+  id: totrans-88
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.3 冷却树莓派
+- en: Problem
+  id: totrans-89
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your Raspberry Pi feels hot to the touch, and you want to install some kind
+    of cooling for it.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的树莓派摸起来很热，你想为它安装一些冷却设备。
+- en: Solution
+  id: totrans-91
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Install a cooling fan in the case, or heat sinks on the CPU, RAM module, and
+    USB controller. Install a fan and heat sinks on the Raspberry Pi 4, which runs
+    hotter than older Pis.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在机箱内安装冷却风扇，或在CPU、RAM模块和USB控制器上安装散热片。在比旧版RPi更热的RPi 4上安装风扇和散热片。
+- en: 'Use the built-in *vcgencmd* command to measure CPU temperatures before and
+    after installing cooling devices, and before and after running computationally
+    intensive tasks such as compiling code or playing videos. The following example
+    is a fanless board at idle with the case lid removed, and then after five minutes
+    of playing a movie at 1080p:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用内置的*vcgencmd*命令，在安装冷却装置之前和之后，以及编译代码或播放视频等计算密集任务之前和之后，来测量CPU温度。以下示例是在无风扇板载状态下，打开机箱盖后的空闲状态，以及在播放1080p电影5分钟后的状态：
+- en: '[PRE0]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'This example shows the effect of a cooling fan when playing the same movie:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个示例展示了在播放同一部电影时，使用冷却风扇的效果：
+- en: '[PRE1]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: The temperature should not go over 70°C. 40°C to 60°C is a good operating range.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 温度不应超过70°C。40°C到60°C是一个良好的操作范围。
+- en: See Also
+  id: totrans-98
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[The Raspberry Pi Foundation](https://oreil.ly/Ji4j2)'
+  id: totrans-99
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Raspberry Pi基金会](https://oreil.ly/Ji4j2)'
+- en: '[Adafruit](https://oreil.ly/5qwn5)'
+  id: totrans-100
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Adafruit](https://oreil.ly/5qwn5)'
+- en: '[MagPi](https://oreil.ly/EuMY7)'
+  id: totrans-101
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[MagPi](https://oreil.ly/EuMY7)'
+- en: 18.4 Installing Raspberry Pi OS with Imager and dd
+  id: totrans-102
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.4 使用Imager和dd安装树莓派OS
+- en: Problem
+  id: totrans-103
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have your hardware, and you want to install the operating system.
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经准备好硬件，想要安装操作系统。
+- en: Solution
+  id: totrans-105
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: You will create a bootable micro SD card on another computer, then load the
+    SD card into your Raspberry Pi and start it up.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将在另一台计算机上创建一个可启动的微型 SD 卡，然后将 SD 卡插入树莓派并启动。
+- en: 'There are four ways to get a bootable SD card:'
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有四种方法可以获得可启动的 SD 卡：
+- en: Use the Raspberry Pi Imager (currently only for *.deb* systems such as Debian,
+    Ubuntu, or Mint)
+  id: totrans-108
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用树莓派 Imager（目前仅适用于 *.deb* 系统，如 Debian、Ubuntu 或 Mint）
+- en: Use the NOOBS installer ([Recipe 18.5](#rec-install-noobs))
+  id: totrans-109
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用 NOOBS 安装程序（[Recipe 18.5](#rec-install-noobs)）
+- en: Copy your installation image to your micro SD card with the *dd* command
+  id: totrans-110
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用 *dd* 命令将安装镜像复制到微型 SD 卡
+- en: Buy a micro SD card with the installer already loaded
+  id: totrans-111
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 购买已加载安装程序的微型 SD 卡
+- en: I favor NOOBs because it works on all Linuxes, and it creates a rescue boot
+    mode.
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我喜欢 NOOBS，因为它适用于所有的 Linux 发行版，并创建了一个救援引导模式。
+- en: 'To install the Raspberry Pi Imager from the *.deb* package, download it from
+    [*https://raspberrypi.org*](https://raspberrypi.org). Then install the package:'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要从 *.deb* 包安装树莓派 Imager，请从 [*https://raspberrypi.org*](https://raspberrypi.org)
+    下载它。然后安装该软件包：
+- en: '[PRE2]'
+  id: totrans-114
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Alternatively, Ubuntu users can install the Raspberry Pi Imager with *apt*:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另外，Ubuntu 用户可以使用 *apt* 安装树莓派 Imager：
+- en: '[PRE3]'
+  id: totrans-116
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Plug your SD card into your computer. Locate it with *lsblk -p* (see [Recipe
+    10.9](ch10.xhtml#rec-lsblk-hardware)).
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将您的 SD 卡插入计算机。使用 *lsblk -p* 定位它（参见 [Recipe 10.9](ch10.xhtml#rec-lsblk-hardware)）。
+- en: Start the Raspberry Pi Imager from your system menu, and enjoy its cheery raspberry
+    logo. Click Operating System to select the operating system you want to install,
+    and the Imager will download it and copy it to your SD card. If you have already
+    downloaded an image, scroll down the selection menu to Use Custom to select your
+    downloaded image. You will see a screen like [Figure 18-1](#fig-rpi-1).
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从系统菜单启动树莓派 Imager，并享受其可爱的树莓Logo。点击操作系统选择您想要安装的操作系统，Imager 将下载并复制到您的 SD 卡。如果您已经下载了映像，请在选择菜单中向下滚动到使用自定义以选择您下载的映像。您将看到类似
+    [图 18-1](#fig-rpi-1) 的屏幕。
+- en: '![Creating a bootable micro SD card with Raspberry Pi Imager](Images/lcb2_1801.png)'
+  id: totrans-119
+  prefs: []
+  type: TYPE_IMG
+  zh: '![使用树莓派 Imager 创建可启动微型 SD 卡](Images/lcb2_1801.png)'
+- en: Figure 18-1\. Creating a bootable micro SD card with Raspberry Pi Imager
+  id: totrans-120
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 18-1\. 使用树莓派 Imager 创建可启动微型 SD 卡
+- en: Click SD Card to select the device, and then click Write to install the operating
+    system.
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 点击 SD 卡选择设备，然后点击写入以安装操作系统。
+- en: 'If you don’t have an Ubuntu system, download your chosen operating system image
+    from [*https://raspberrypi.org*](https://raspberrypi.org) and use the *dd* command
+    to copy it to your SD card. The following example unzips and copies *2021-03-24-raspios-buster-armhf.zip*
+    to the SD card:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您没有 Ubuntu 系统，请从 [*https://raspberrypi.org*](https://raspberrypi.org) 下载您选择的操作系统映像，并使用
+    *dd* 命令将其复制到 SD 卡。以下示例解压并将 *2021-03-24-raspios-buster-armhf.zip* 复制到 SD 卡：
+- en: '[PRE4]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: When the SD card is ready, insert it in your Raspberry Pi and power it on. When
+    it boots up, you will complete a short setup, and then it is ready to use.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当 SD 卡准备就绪后，将其插入树莓派并开机。开机后，您将完成简短的设置，然后可以开始使用。
+- en: The default user is *pi*. Look in */home/pi/Bookshelf* for a PDF copy of *The
+    Official Raspberry Pi Beginner’s Guide* by Gareth Halfacree (Raspberry Pi Press).
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认用户为 *pi*。在 */home/pi/Bookshelf* 中可以找到 Gareth Halfacree（Raspberry Pi Press）撰写的《官方树莓派初学者指南》的
+    PDF 版本。
+- en: Discussion
+  id: totrans-126
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You do not have to format your SD card before copying with *dd*.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在使用树莓派 Imager之前，您不必格式化SD卡。
+- en: 'The imager creates two partitions: a 256 MB FAT32 */boot* partition, and an
+    Ext4 *rootfs* partition just big enough to hold the filesystem. On my test system
+    that is 3.4 GB, and the rest of the card is unallocated space.'
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Imager 创建两个分区：一个 256 MB 的 FAT32 */boot* 分区，一个刚好足够容纳文件系统的 Ext4 *rootfs* 分区。在我的测试系统上为
+    3.4 GB，卡片的其余空间未分配。
+- en: When you boot up your new system for the first time, the root filesystem is
+    expanded to fill all the unallocated space. You may shrink the root filesystem
+    and create more partitions with GParted ([Chapter 9](ch09.xhtml#cha-partitioning-gparted))
+    or *parted* ([Chapter 8](ch08.xhtml#cha-partitioning-parted)).
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您首次启动新系统时，根文件系统将被扩展以填充所有未分配空间。您可以使用 GParted（[第 9 章](ch09.xhtml#cha-partitioning-gparted)）或
+    *parted*（[第 8 章](ch08.xhtml#cha-partitioning-parted)）缩小根文件系统并创建更多分区。
+- en: See Also
+  id: totrans-130
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[The Raspberry Pi Foundation](https://oreil.ly/Ji4j2)'
+  id: totrans-131
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[树莓派基金会](https://oreil.ly/Ji4j2)'
+- en: 18.5 Installing Raspberry Pi with NOOBS
+  id: totrans-132
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.5 使用 NOOBS 安装树莓派
+- en: Problem
+  id: totrans-133
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to use NOOBS to install Raspberry Pi.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要使用 NOOBS 安装树莓派。
+- en: Solution
+  id: totrans-135
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: NOOBS (New Out Of the Box Software) is an older installer. It works on all Linux
+    distributions and creates a recovery boot mode, which Raspberry Pi Imager does
+    not do.
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: NOOBS（New Out Of the Box Software）是一个较旧的安装程序。它适用于所有 Linux 发行版，并创建了一个恢复引导模式，而
+    Raspberry Pi Imager 则不会这样做。
+- en: Download NOOBS on another computer, unzip the download archive, copy all of
+    its files to a micro SD card, then load the SD card into your Raspberry Pi and
+    start it up.
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在另一台计算机上下载 NOOBS，解压下载的存档文件，将所有文件复制到 micro SD 卡上，然后将 SD 卡插入您的 Raspberry Pi 并启动它。
+- en: 'Download NOOBS from [*https://raspberrypi.org*](https://raspberrypi.org). There
+    are two versions: NOOBS and NOOBS Lite. NOOBS includes Raspberry Pi OS, and a
+    network installer for other operating systems. NOOBS Lite includes only the network
+    installer.'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从 [*https://raspberrypi.org*](https://raspberrypi.org) 下载 NOOBS。有两个版本：NOOBS
+    和 NOOBS Lite。NOOBS 包括 Raspberry Pi OS 和其他操作系统的网络安装程序。NOOBS Lite 仅包括网络安装程序。
+- en: 'Unpack NOOBS after downloading:'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下载后解压缩 NOOBS：
+- en: '[PRE5]'
+  id: totrans-140
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Plug your SD card into your computer. Locate it with *lsblk -p* (see [Recipe
+    10.9](ch10.xhtml#rec-lsblk-hardware)).
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将您的 SD 卡插入计算机中。使用 *lsblk -p* 查找它（参见 [配方 10.9](ch10.xhtml#rec-lsblk-hardware)）。
+- en: Format your micro SD card as a single FAT32 partition.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将您的 micro SD 卡格式化为单个 FAT32 分区。
+- en: Copy all the NOOBS files to your SD card, then use it to boot your Raspberry
+    Pi. First you will see a cool rainbow colored screen, then NOOBS boots to the
+    installation menu ([Figure 18-2](#fig-rpi-8)). Set up networking to use the network
+    installer or to get updates after installation. Select your operating system,
+    then go find something to do until it is finished.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将所有 NOOBS 文件复制到您的 SD 卡，然后使用它启动您的 Raspberry Pi。首先，您会看到一个酷炫的彩虹色屏幕，然后 NOOBS 启动安装菜单（[图 18-2](#fig-rpi-8)）。设置网络以使用网络安装程序或在安装后获取更新。选择您的操作系统，然后找些事情做，直到安装完成。
+- en: '![NOOBS installation screen.](Images/lcb2_1802.png)'
+  id: totrans-144
+  prefs: []
+  type: TYPE_IMG
+  zh: '![NOOBS 安装屏幕。](Images/lcb2_1802.png)'
+- en: Figure 18-2\. NOOBS installation screen
+  id: totrans-145
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 18-2\. NOOBS 安装屏幕
+- en: After installation is complete, you will go through a brief setup process, and
+    then your Raspberry Pi is ready to use.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装完成后，您将进行简短的设置过程，然后您的 Raspberry Pi 就可以使用了。
+- en: The default user is *pi*. Look in */home/pi/Bookshelf* for a PDF copy of *The
+    Official Raspberry Pi Beginner’s Guide* by Gareth Halfacree (Raspberry Pi Press).
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认用户是 *pi*。在 */home/pi/Bookshelf* 中查找由 Gareth Halfacree（Raspberry Pi Press）编写的
+    *The Official Raspberry Pi Beginner’s Guide* 的 PDF 版本。
+- en: Discussion
+  id: totrans-148
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: NOOBS is a simple unzip and copy, so it works on any computer.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: NOOBS 是一个简单的解压和复制过程，因此适用于任何计算机。
+- en: Copying the NOOBS files to your SD card can take a long time. Usually it is
+    faster to copy the ZIP file to the SD card, then unzip it on the card. You can
+    delete the ZIP file after installation.
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 NOOBS 文件复制到您的 SD 卡可能需要很长时间。通常情况下，将 ZIP 文件复制到 SD 卡上，然后在卡上解压缩会更快。安装完成后，您可以删除
+    ZIP 文件。
+- en: See Also
+  id: totrans-151
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 9](ch09.xhtml#cha-partitioning-gparted)'
+  id: totrans-152
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第九章](ch09.xhtml#cha-partitioning-gparted)'
+- en: '[The Raspberry Pi Foundation](https://oreil.ly/Ji4j2)'
+  id: totrans-153
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Raspberry Pi Foundation](https://oreil.ly/Ji4j2)'
+- en: 18.6 Connecting to a Video Display Without HDMI
+  id: totrans-154
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.6 连接到没有 HDMI 的视频显示器
+- en: Problem
+  id: totrans-155
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have a TV or computer monitor that does not have HDMI ports, and you want
+    to connect your Raspberry Pi to it.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您有一台没有 HDMI 端口的电视或计算机显示器，并且想要将您的 Raspberry Pi 连接到它。
+- en: Solution
+  id: totrans-157
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'There are four ways to connect a screen to the RPi 4B. You can use:'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有四种方法可以将屏幕连接到 RPi 4B。您可以使用以下方法之一：
+- en: Small screens made for the Raspberry Pi
+  id: totrans-159
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 为 Raspberry Pi 制造的小屏幕
+- en: DVI-to-HDMI adapter
+  id: totrans-160
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: DVI 到 HDMI 适配器
+- en: VGA-to-HDMI adapter
+  id: totrans-161
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: VGA 到 HDMI 适配器
+- en: RCA composite video (use cables made for Raspberry Pi)
+  id: totrans-162
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: RCA 复合视频（使用专为 Raspberry Pi 制作的电缆）
+- en: 'There is quite a variety of screens made for the RPi: touchscreens, LED, LCD,
+    OLED, eInk—you name it, there is probably an RPi version. Follow the installation
+    instructions that come with the screen.'
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有多种适用于 RPi 的屏幕类型：触摸屏、LED、LCD、OLED、电子墨水等等，应有尽有。遵循随屏幕附带的安装说明进行安装。
+- en: The DVI-to-HDMI and VGA-to-HDMI adapters connect to your screen, and then your
+    HDMI-to-micro-HDMI cable connects to the adapter. When you connect to a single
+    HDMI display on the RPi 4B, plug into the HDMI 0 port, which is the one closest
+    to the power port.
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: DVI 到 HDMI 和 VGA 到 HDMI 适配器连接到您的屏幕，然后您的 HDMI 到 micro-HDMI 电缆连接到适配器。当您连接到 RPi
+    4B 上的单个 HDMI 显示器时，请插入 HDMI 0 端口，即靠近电源端口的端口。
+- en: 'Composite video requires some extra steps on the RPi 4B because it is disabled
+    by default. The easy way is to find an HDMI screen to use when you boot your Pi
+    for the first time and complete your installation. After your installation is
+    complete, open the configuration tool to enable composite video:'
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于默认情况下在 RPi 4B 上禁用复合视频，因此复合视频需要额外的步骤。简便的方法是在首次启动 Pi 并完成安装时找到一个 HDMI 屏幕。安装完成后，打开配置工具以启用复合视频：
+- en: '[PRE6]'
+  id: totrans-166
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: Arrow-key down to 6 Advanced Options, then select A8 HDMI/Composite. Select
+    V2 Enable Composite. Exit *raspi-config*, shut down your Pi, connect your Pi to
+    your composite video screen, then start it up again. It should default to your
+    composite video screen.
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 向下箭头键到 6 高级选项，然后选择 A8 HDMI/Composite。选择 V2 启用复合。退出 *raspi-config*，关闭您的 Pi，连接您的
+    Pi 到复合视频屏幕，然后再次启动。它应该默认显示在您的复合视频屏幕上。
+- en: Discussion
+  id: totrans-168
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Older flat-panel screens usually have VGA and composite video connectors, so
+    you could use either composite video or a VGA-to-HDMI adapter. Technically, HDMI
+    delivers a higher-quality image than composite video, but most people cannot tell
+    the difference.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 较老的平板显示器通常具有 VGA 和复合视频连接器，因此您可以使用复合视频或 VGA 到 HDMI 适配器。从技术上讲，HDMI 提供比复合视频更高质量的图像，但大多数人分辨不出区别。
+- en: '[Figure 18-3](#fig-rpi-4) shows a Rocketfish DVI-to-HDMI adapter, a composite
+    cable bundle, a Rasberry Pi 4B in a CanaKit case with the top removed, and a micro
+    SD card.'
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图 18-3](#fig-rpi-4) 显示了 Rocketfish DVI 到 HDMI 适配器，一个复合电缆捆绑包，一个带有拆下顶部的 CanaKit
+    外壳的 Rasberry Pi 4B 和一个 micro SD 卡。'
+- en: '![Raspberry Pi 4B with accessories](Images/lcb2_1803.png)'
+  id: totrans-171
+  prefs: []
+  type: TYPE_IMG
+  zh: '![带有配件的 Raspberry Pi 4B](Images/lcb2_1803.png)'
+- en: Figure 18-3\. Raspberry Pi 4B with accessories
+  id: totrans-172
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 18-3\. 带有配件的 Raspberry Pi 4B
+- en: 'The RCA composite audio/video cable set, the one with the yellow, red, and
+    white connectors, plugs into the nifty little 3.5 mm TRRS port on the RPi. You
+    need one made for the RPi because there is no standard for how the TRRS plug is
+    ordered. You might find some that don’t work as they are supposed to, which is
+    yellow for video, and red and white for audio. Avoid composite cables made for
+    camcorders and MP3 players, which have their own weird ordering that puts the
+    ground ring in the wrong place. The TRRS (tip-ring-ring-sleeve) plug should be
+    configured like this:'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: RCA 复合音频/视频电缆套件，带有黄色、红色和白色连接器，插入 RPi 上的巧妙小型 3.5 mm TRRS 端口。您需要为 RPi 制作一个，因为
+    TRRS 插头的排列方式没有标准。您可能会发现一些不起作用的电缆，因为它们的黄色用于视频，红色和白色用于音频。避免为摄像机和 MP3 播放器制作的复合电缆，它们具有自己的奇怪排列顺序，将地面环放在错误的位置。TRRS（尖端-环-环-套筒）插头应该配置如下：
+- en: '[PRE7]'
+  id: totrans-174
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: There are several options for tweaking your composite video settings in */boot/config.txt*.
+    If you plan to use composite video, use the NOOBS installer. Then if you need
+    to correct its settings, you can boot to recovery mode ([Recipe 18.7](Images/#rec-recovery-mode))
+    and have access to */boot/config.txt*.
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 */boot/config.txt* 中有几个调整复合视频设置的选项。如果打算使用复合视频，请使用 NOOBS 安装程序。然后，如果需要更正设置，可以启动到恢复模式（[配方
+    18.7](Images/#rec-recovery-mode)）并访问 */boot/config.txt*。
+- en: '*sdtv_mode=* sets the TV standard. *sdtv_mode=0* is the default for North America.
+    Most of the world uses PAL; see [Table 18-1](#table18-1) for the settings.'
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*sdtv_mode=* 设置了电视标准。*sdtv_mode=0* 是北美的默认设置。大部分世界使用 PAL；请参阅 [表 18-1](#table18-1)
+    中的设置。'
+- en: Table 18-1\. sdtv_mode settings
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 18-1\. sdtv_mode 设置
+- en: '| value | mode |'
+  id: totrans-178
+  prefs: []
+  type: TYPE_TB
+  zh: '| 值 | 模式 |'
+- en: '| --- | --- |'
+  id: totrans-179
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| 0 | Normal NTSC (default) |'
+  id: totrans-180
+  prefs: []
+  type: TYPE_TB
+  zh: '| 0 | 普通 NTSC（默认） |'
+- en: '| 1 | Japanese version of NTSC |'
+  id: totrans-181
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1 | NTSC 的日文版 |'
+- en: '| 2 | Normal PAL |'
+  id: totrans-182
+  prefs: []
+  type: TYPE_TB
+  zh: '| 2 | 普通 PAL |'
+- en: '| 3 | Brazilian version of PAL |'
+  id: totrans-183
+  prefs: []
+  type: TYPE_TB
+  zh: '| 3 | PAL 的巴西版 |'
+- en: '| 16 | Progressive scan NTSC |'
+  id: totrans-184
+  prefs: []
+  type: TYPE_TB
+  zh: '| 16 | 逐行扫描 NTSC |'
+- en: '| 18 | Progressive scan PAL |'
+  id: totrans-185
+  prefs: []
+  type: TYPE_TB
+  zh: '| 18 | 逐行扫描 PAL |'
+- en: '*sdtv_aspect=* command defines the aspect ratio ([Table 18-2](#table18-2)).'
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*sdtv_aspect=* 命令定义了显示比例（参见 [表 18-2](#table18-2)）。'
+- en: Table 18-2\. sdtv_aspect screen ratio settings
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 18-2\. sdtv_aspect 屏幕比例设置
+- en: '| value | ratio |'
+  id: totrans-188
+  prefs: []
+  type: TYPE_TB
+  zh: '| 值 | 比例 |'
+- en: '| --- | --- |'
+  id: totrans-189
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| 1 | 4:3 (default) |'
+  id: totrans-190
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1 | 4:3（默认） |'
+- en: '| 2 | 14:9 |'
+  id: totrans-191
+  prefs: []
+  type: TYPE_TB
+  zh: '| 2 | 14:9 |'
+- en: '| 3 | 16:9 |'
+  id: totrans-192
+  prefs: []
+  type: TYPE_TB
+  zh: '| 3 | 16:9 |'
+- en: See Also
+  id: totrans-193
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[Video options in config.txt](https://oreil.ly/yp7Mu)'
+  id: totrans-194
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配置文件中的视频选项](https://oreil.ly/yp7Mu)'
+- en: 18.7 Booting into Recovery Mode
+  id: totrans-195
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.7 进入恢复模式
+- en: Problem
+  id: totrans-196
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know how to boot into recovery mode in case you ever have problems.
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望了解如何进入恢复模式以防有问题时。
+- en: Solution
+  id: totrans-198
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: You must have installed your operating system with NOOBS because that is the
+    only installer that sets up a recovery mode. Power on your Pi and watch your startup
+    screen. A screen with the Raspberry Pi logo and a “For recovery mode, hold Shift”
+    message appears briefly. Press and hold the shift key until the recovery screen
+    appears ([Figure 18-2](#fig-rpi-8); the recovery screen is the same as the NOOBS
+    installation screen).
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您必须使用NOOBS安装操作系统，因为这是唯一可以设置恢复模式的安装程序。打开您的Pi并观看启动屏幕。屏幕会短暂显示树莓派标志和“要进入恢复模式，请按住Shift键”的消息。按住Shift键直到出现恢复屏幕（[图18-2](#fig-rpi-8);
+    恢复屏幕与NOOBS安装屏幕相同）。
+- en: The recovery screen is a nice graphical utility for performing some basic operations.
+    You can connect to the internet, browse the online help, edit the */boot/cinfig.txt*,
+    or blow away your installation and install something else.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 恢复屏幕是一个很好的图形实用程序，用于执行一些基本操作。您可以连接到互联网，浏览在线帮助，编辑*/boot/cinfig.txt*，或者彻底清除您的安装并安装其他内容。
+- en: Discussion
+  id: totrans-201
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The recovery screen is the same as the NOOBS installation screen. You have this
+    recovery option only when you install Raspberry Pi with NOOBS, though by the time
+    you read this it could be different.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 恢复屏幕与NOOBS安装屏幕相同。只有在使用NOOBS安装树莓派时才有此恢复选项，尽管在您阅读此文时可能已有所不同。
+- en: See Also
+  id: totrans-203
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[The Raspberry Pi Foundation](https://oreil.ly/Ji4j2)'
+  id: totrans-204
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[树莓派基金会](https://oreil.ly/Ji4j2)'
+- en: 18.8 Adding a Second Ethernet Interface
+  id: totrans-205
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.8 添加第二个以太网接口
+- en: Problem
+  id: totrans-206
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to use your Raspberry Pi as an internet firewall/router, but it has
+    only one Ethernet port, and you really want two Ethernet ports.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要将树莓派用作互联网防火墙/路由器，但它只有一个以太网口，您确实希望有两个以太网口。
+- en: Solution
+  id: totrans-208
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'There are two ways to get a second Ethernet port: with a USB-to-Ethernet adapter
+    or by installing an Ethernet port that connects to the GPIO pins.'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 获取第二个以太网口有两种方法：使用USB转以太网适配器或安装连接到GPIO引脚的以太网口。
+- en: USB-to-Ethernet is easy; just plug it in.
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: USB转以太网很简单；只需插入即可。
+- en: A wired Ethernet port is a little more work. You need an Ethernet adapter powered
+    by an ENC28J60 Ethernet controller module ([Figure 18-4](#fig-rpi-6)).
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有线以太网端口需要更多工作。您需要一个由ENC28J60以太网控制器模块驱动的以太网适配器（[图18-4](#fig-rpi-6)）。
+- en: '![ENC28J60 Ethernet adapter.](Images/lcb2_1804.png)'
+  id: totrans-212
+  prefs: []
+  type: TYPE_IMG
+  zh: '![ENC28J60以太网适配器。](Images/lcb2_1804.png)'
+- en: Figure 18-4\. ENC28J60 Ethernet adapter
+  id: totrans-213
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图18-4\. ENC28J60以太网适配器
+- en: The HanRun HR911105A adapter in the photo needs seven female-to-female jumper
+    wires to connect to the GPIO pins. You can buy multicolor bundles that supply
+    an assortment of wires for cheap.
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 照片中的HanRun HR911105A适配器需要七根母对母跳线连接到GPIO引脚。您可以购买提供各种颜色线束的多色捆绑包，价格便宜。
+- en: Before connecting the wires, generate your own handy pinout diagram by running
+    the *pinout* command on your Raspberry Pi ([Figure 18-5](#fig-rpi-9)).
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在连接电线之前，通过在您的树莓派上运行*pinout*命令生成您自己的便捷引脚布局图（[图18-5](#fig-rpi-9)）。
+- en: '[Figure 18-6](#fig-rpi-10) shows the diagram from RaspberryPi.org numbers and
+    labels the GPIO pinouts.'
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图18-6](#fig-rpi-10)显示了来自RaspberryPi.org的图表，标记了GPIO引脚排列。'
+- en: '![Pinout diagram generated by pinout command.](Images/lcb2_1805.png)'
+  id: totrans-217
+  prefs: []
+  type: TYPE_IMG
+  zh: '![由pinout命令生成的引脚布局图。](Images/lcb2_1805.png)'
+- en: Figure 18-5\. Pinout diagram generated by pinout command
+  id: totrans-218
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图18-5\. 由pinout命令生成的引脚布局图
+- en: '![Pinout diagram from raspberrypi.org.](Images/lcb2_1806.png)'
+  id: totrans-219
+  prefs: []
+  type: TYPE_IMG
+  zh: '![来自raspberrypi.org的引脚布局图。](Images/lcb2_1806.png)'
+- en: Figure 18-6\. Pinout diagram from RaspberryPi.org
+  id: totrans-220
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图18-6\. 来自RaspberryPi.org的引脚布局图
+- en: 'Edit */boot/config.txt* to enable the new Ethernet port and load the drivers:'
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 编辑*/boot/config.txt*以启用新的以太网口并加载驱动程序：
+- en: '[PRE8]'
+  id: totrans-222
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Keep a copy of the pinout diagram available and power off your Raspberry Pi.
+    Connect the jumper wires in the following locations on your RPi and ENC28J60 module:'
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 保留引脚布局图的副本，并关闭您的树莓派电源。在您的RPi和ENC28J60模块上以下位置连接跳线线：
+- en: '[PRE9]'
+  id: totrans-224
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Note the orientation of the GPIO pins: pin #1 is on the same end of the RPi
+    board as the SD card slot. Start with 3V3 pin 17, then all of your wires are in
+    the same area, and the other 3V3 pin is free for a case fan.'
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意GPIO引脚的方向：引脚＃1位于RPi板的SD卡插槽同一端。从3V3引脚17开始，然后所有电线都在同一区域，另一个3V3引脚可用于机箱风扇。
+- en: 'When all of the wires are in place, power up your RPi. Run *ifconfig* to see
+    your new Ethernet interface. It should be *eth1*:'
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当所有电线都就位后，启动您的RPi。运行*ifconfig*命令查看您的新以太网接口。它应该是*eth1*：
+- en: '[PRE10]'
+  id: totrans-227
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: There it is, all ready to be configured.
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这就是，所有配置都已准备好。
+- en: Discussion
+  id: totrans-229
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The ENC28J60 Ethernet controller supports only 10 MBps. If your internet speeds
+    are no better 10 MBps, then this is fine. On the Raspberry Pi 4 you will get as
+    much as 900 MBps with a USB 3.0 Ethernet adapter.
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ENC28J60以太网控制器仅支持10 MBps。如果您的互联网速度不超过10 MBps，则这没问题。在树莓派4上，使用USB 3.0以太网适配器可以获得高达900
+    MBps的速度。
+- en: Older Raspberry Pis have slower Ethernet because it runs over the USB 2.0 bus.
+    The RPi 4B is the first Pi to have a dedicated Ethernet bus.
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 较旧的树莓派因通过USB 2.0总线运行而具有较慢的以太网速度。树莓派4B是第一台具有专用以太网总线的树莓派。
+- en: Keep an eye on new product releases for dual gigabit Ethernet options, as there
+    are likely to be some soon.
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 密切关注双千兆以太网选项的新产品发布，很可能很快会有一些产品。
+- en: The *pinout* command is provided by the *python3-gpiozero* package. This is
+    installed by default in the Raspberry Pi OS desktop image, but not on Raspberry
+    Pi OS Lite. Install it with *apt install python3-gpiozero*.
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*pinout*命令由*python3-gpiozero*包提供。这在树莓派OS桌面镜像中默认安装，但在树莓派OS Lite上没有安装。您可以使用*apt
+    install python3-gpiozero*进行安装。'
+- en: See Also
+  id: totrans-234
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GPIO diagram](https://oreil.ly/0pgXZ)'
+  id: totrans-235
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GPIO图表](https://oreil.ly/0pgXZ)'
+- en: '[Technical information and datasheet for ENC28J60 controller](https://oreil.ly/HjlAM)'
+  id: totrans-236
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[ENC28J60控制器的技术信息和数据表](https://oreil.ly/HjlAM)'
+- en: 18.9 Setting Up an Internet Connection Sharing Firewall with firewalld
+  id: totrans-237
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.9 使用firewalld设置互联网连接共享防火墙
+- en: Problem
+  id: totrans-238
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to configure a simple firewall on your Raspberry Pi that shares your
+    internet connection and keeps the bad bits out.
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望在您的树莓派上配置一个简单的防火墙，共享您的互联网连接，并阻止不良信息。
+- en: Solution
+  id: totrans-240
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: We will use *firewalld* to filter incoming packets, allowing only responses
+    to traffic that originated from inside the LAN and disallowing external connection
+    requests.
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将使用*firewalld*来过滤传入的数据包，只允许LAN内部起始的流量响应，并禁止外部连接请求。
+- en: Your internet gateway setup looks something like [Figure 18-7](#fig-rpi-3).
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的互联网网关设置类似于[图18-7](#fig-rpi-3)。
+- en: '![Raspberry Pi firewall/router](Images/lcb2_1807.png)'
+  id: totrans-243
+  prefs: []
+  type: TYPE_IMG
+  zh: '![树莓派防火墙/路由器](Images/lcb2_1807.png)'
+- en: Figure 18-7\. Raspberry Pi firewall/router
+  id: totrans-244
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图18-7\. 树莓派防火墙/路由器
+- en: The big bad internet comes in through whatever device connects you to your ISP,
+    which connects to your Raspberry Pi, which filters and routes traffic to your
+    LAN through an Ethernet switch.
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 互联网通过连接您与ISP的任何设备进入，然后连接到您的树莓派，树莓派通过以太网交换机将流量过滤和路由到您的LAN。
+- en: You need two network interfaces on your RPi, one that connects from your internet
+    box to the RPi, and a second interface to connect your RPi to your LAN. In this
+    recipe we will use two Ethernet interfaces.
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的RPi需要两个网络接口，一个连接从互联网盒子到RPi，第二个接口连接从RPi到LAN。在这个步骤中，我们将使用两个以太网接口。
+- en: 'Install *firewalld*, and optionally *firewall-config* and *firewall-applet*.
+    *firewall-config* provides a graphical configuration tool, and *firewall-applet*
+    sits in the panel and provides quick access to some commands, such as the panic
+    button and lockdown:'
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装*firewalld*，以及可选的*firewall-config*和*firewall-applet*。*firewall-config*提供了一个图形化配置工具，*firewall-applet*位于面板上，提供了一些命令的快速访问，如紧急按钮和锁定：
+- en: '[PRE11]'
+  id: totrans-248
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Find your default router/gateway:'
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 找到你的默认路由器/网关：
+- en: '[PRE12]'
+  id: totrans-250
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: '*default via 192.168.1.1* is your default gateway.'
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*default via 192.168.1.1*是您的默认网关。'
+- en: Make *eth1* the external interface by connecting it to your internet box. *eth0*
+    is your internal interface, connected to your LAN switch. The two interfaces should
+    be on different subnets. *eth1* should be on the same subnet as your internet
+    box. Suppose the LAN interface of your internet box is 192.168.1.1, then *eth1*
+    could be 192.168.1.2.
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将*eth1*设置为外部接口，连接到您的互联网盒子。*eth0*是您的内部接口，连接到LAN交换机。这两个接口应该位于不同的子网上。*eth1*应该位于与您的互联网盒子相同的子网上。假设您的互联网盒子的LAN接口是192.168.1.1，则*eth1*可以是192.168.1.2。
+- en: '*eth0* is on your LAN subnet, for example, 192.168.2.1.'
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*eth0*位于您的LAN子网上，例如192.168.2.1。'
+- en: 'Configure the two interfaces in */etc/dhcpcd.conf*:'
+  id: totrans-254
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在*/etc/dhcpcd.conf*中配置两个接口：
+- en: '[PRE13]'
+  id: totrans-255
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Reboot to apply the changes.
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动以应用更改。
+- en: 'The next step is to set up *firewalld*. The two interfaces must be in two different
+    firewall zones. *eth1* goes in the *external* zone, and *eth0* goes in the *internal*
+    zone, then verify your changes:'
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一步是设置*firewalld*。这两个接口必须位于两个不同的防火墙区域。*eth1*放在*external*区域，*eth0*放在*internal*区域，然后验证您的更改：
+- en: '[PRE14]'
+  id: totrans-258
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'List the configuration for each zone:'
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出每个区域的配置：
+- en: '[PRE15]'
+  id: totrans-260
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Note that *ssh* access is the default for the external zone. You may add or
+    remove any services that you wish. You must leave *masquerade* enabled because
+    this is what enables internet access.
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意*ssh*访问是外部区域的默认设置。您可以添加或删除任何希望的服务。您必须保持*masquerade*启用，因为这是实现互联网访问的方法。
+- en: 'Make your changes permanent:'
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使您的更改永久化：
+- en: '[PRE16]'
+  id: totrans-263
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: IPv4 forwarding is also enabled by default in the *external* zone, which you
+    can verify by reading */proc*. IPv4 forwarding enables routing; otherwise, all
+    the packets entering your RPi would not be routed to other hosts on your network.
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: IPv4转发在*external*区域也是默认启用的，您可以通过读取*/proc*来验证。IPv4转发启用后，才能进行路由；否则，进入您的RPi的所有数据包将无法路由到网络中的其他主机。
+- en: '[PRE17]'
+  id: totrans-265
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 1 means it is enabled, 0 is not enabled.
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 1表示启用，0表示未启用。
+- en: Discussion
+  id: totrans-267
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: IPv4 masquerading is network address translation, or NAT. NAT was created to
+    extend the limited pool of IPv4 addresses (which is officially exhausted). NAT
+    allows us to freely use the private IPv4 address spaces on our internal networks
+    without having to purchase public IPv4 addresses. Your internet provider gives
+    you at least one public IPv4 address. Your private addresses are translated to
+    appear as your one public IPv4 address; otherwise, your internal hosts would have
+    no internet access.
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: IPv4伪装是网络地址转换（NAT）。NAT的创建是为了扩展有限的IPv4地址池（正式耗尽）。NAT允许我们在内部网络上自由使用私有IPv4地址空间，而无需购买公共IPv4地址。您的互联网供应商提供至少一个公共IPv4地址。您的私有地址被转换为显示为您的一个公共IPv4地址；否则，您的内部主机将无法访问互联网。
+- en: You can add and remove services from your zones; see [Chapter 14](ch14.xhtml#cha-firewalld).
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在各个区域中添加和删除服务；详见[第14章](ch14.xhtml#cha-firewalld)。
+- en: See Also
+  id: totrans-270
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 14](ch14.xhtml#cha-firewalld)'
+  id: totrans-271
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第14章](ch14.xhtml#cha-firewalld)'
+- en: '[Debian Bug report logs - #914694](https://oreil.ly/SuHLL)'
+  id: totrans-272
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Debian错误报告日志 - #914694](https://oreil.ly/SuHLL)'
+- en: 18.10 Running Your Raspberry Pi Headless
+  id: totrans-273
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.10 在您的树莓派上运行无头模式
+- en: Problem
+  id: totrans-274
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You are using your Raspberry Pi as an internet firewall/router, LAN router,
+    or some kind of lightweight LAN server, and you want to reduce the load by running
+    it without a graphical desktop.
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将您的树莓派用作互联网防火墙/路由器、LAN路由器或某种轻量级LAN服务器，并希望通过无图形桌面运行来减少负载。
+- en: Solution
+  id: totrans-276
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Follow these steps:'
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按照以下步骤操作：
+- en: Set up SSH access on your RPi ([Chapter 12](ch12.xhtml#cha-ssh)).
+  id: totrans-278
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在您的RPi上设置SSH访问（参见[第12章](ch12.xhtml#cha-ssh)）。
+- en: Run *raspi-config* to disable the graphical desktop.
+  id: totrans-279
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 运行*raspi-config*来禁用图形桌面。
+- en: Reboot.
+  id: totrans-280
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 重新启动。
+- en: Launch *sudo raspi-config*, then navigate to 1 System Options → S5 Boot / Auto
+    Login (see [Figure 18-8](#fig-rpi-5)).
+  id: totrans-281
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 启动*sudo raspi-config*，然后导航至1. 系统选项 → S5. 启动/自动登录（参见[图18-8](#fig-rpi-5)）。
+- en: Set the next boot to console, not GUI, then reboot.
+  id: totrans-282
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 设置下次启动为控制台，而不是GUI，然后重新启动。
+- en: As long as you can open an SSH session to your RPi, you will be able to access
+    it without a screen.
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只要您能够通过SSH会话访问您的RPi，即使没有屏幕，也能访问它。
+- en: You can launch your graphical environment from the text console by typing the
+    **`startx`** command.
+  id: totrans-284
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过输入**`startx`**命令从文本控制台启动图形环境。
+- en: '![Set the next boot to console, no GUI](Images/lcb2_1808.png)'
+  id: totrans-285
+  prefs: []
+  type: TYPE_IMG
+  zh: '![设置下次启动为控制台，无GUI](Images/lcb2_1808.png)'
+- en: Figure 18-8\. Set the next boot to console, not GUI
+  id: totrans-286
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图18-8\. 设置下次启动为控制台，而不是GUI。
+- en: Discussion
+  id: totrans-287
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*rpi-config* uses the *ncurses* interface. *ncurses* is a console interface
+    that looks like a simple GUI.'
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*rpi-config*使用*ncurses*界面。*ncurses*是一个看起来像简单GUI的控制台界面。'
+- en: When you run the Raspberry Pi headless, it needs only power and network connections,
+    because you control it over an SSH session from another computer.
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您将树莓派设置为无头模式时，它只需要电源和网络连接，因为您可以从另一台计算机上的SSH会话中控制它。
+- en: See Also
+  id: totrans-290
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 12](ch12.xhtml#cha-ssh)'
+  id: totrans-291
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第12章](ch12.xhtml#cha-ssh)'
+- en: '[The Raspberry Pi Foundation](https://oreil.ly/Ji4j2)'
+  id: totrans-292
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[树莓派基金会](https://oreil.ly/Ji4j2)'
+- en: 18.11 Building a DNS/DHCP Server with Raspberry Pi
+  id: totrans-293
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 18.11 使用树莓派构建DNS/DHCP服务器
+- en: Problem
+  id: totrans-294
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your internet box does not offer much in the way of administration features,
+    and you want control of your local name services, DNS and DHCP.
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的互联网路由器在管理功能方面提供的功能不多，您希望控制本地名称服务DNS和DHCP。
+- en: Solution
+  id: totrans-296
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Disable the name services on your internet box, and set up a second Raspberry
+    Pi to provide your LAN name services with Dnsmasq ([Chapter 16](ch16.xhtml#cha-dns-dhcp)).
+    Use DHCP to supply all services and addresses to your LAN hosts, including static
+    addresses, except for your internet gateway, which should be independent of any
+    internal services.
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在你的互联网盒子上禁用命名服务，并设置第二台树莓派来使用Dnsmasq提供你的局域网命名服务（[第16章](ch16.xhtml#cha-dns-dhcp)）。使用DHCP为所有局域网主机提供所有服务和地址，包括静态地址，但不包括你的互联网网关，它应独立于任何内部服务。
+- en: Discussion
+  id: totrans-298
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You could install your name server on your internet firewall/gateway, but it
+    is not a good security practice to put internal services on a host that is directly
+    connected to the internet. Your Raspberry Pi DNS/DHCP server needs only a single
+    network interface, like any other LAN server.
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以将你的域名服务器安装在你的互联网防火墙/网关上，但是把内部服务放在直接连接到互联网的主机上并不是一个良好的安全实践。你的树莓派DNS/DHCP服务器只需要一个单独的网络接口，就像任何其他局域网服务器一样。
+- en: See Also
+  id: totrans-300
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[Chapter 16](ch16.xhtml#cha-dns-dhcp)'
+  id: totrans-301
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第16章](ch16.xhtml#cha-dns-dhcp)'

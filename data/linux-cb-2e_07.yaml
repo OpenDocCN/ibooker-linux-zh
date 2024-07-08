@@ -1,0 +1,2221 @@
+- en: Chapter 7\. Backup and Recovery with rsync and cp
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第7章。使用rsync和cp进行备份和恢复
+- en: You know you need to make good backups of your computer files and to test them
+    periodically to see if you can restore your files. But how do you do this on Linux?
+    Fear not, for backups and restores on Linux are quite understandable, and your
+    backup files are easy to search and restore.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您知道您需要对计算机文件进行良好的备份，并定期测试以查看是否可以还原文件。但是在Linux上如何实现这一点？不用担心，在Linux上备份和恢复非常容易理解，并且您的备份文件易于搜索和还原。
+- en: It is helpful to have a couple of USB sticks for practicing the commands in
+    this chapter and a few directories full of files that you won’t mind losing, should
+    anything go wrong.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于练习本章命令，拥有几个USB闪存驱动器和几个充满文件的目录是很有帮助的，这些文件如果出现问题也不会遗憾。
+- en: We will use *rsync* and *cp*. Both are essential Linux tools, and you can count
+    on them being well maintained and available.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将使用*rsync*和*cp*。这两者都是基本的Linux工具，您可以放心它们已得到良好维护并且随处可用。
+- en: '*cp* is the copy command included in the GNU *coreutils* package, which is
+    installed by default on nearly every Linux distribution. *cp* is for simple copying.
+    It may be all you need to maintain regular backups.'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*cp*是GNU *coreutils*包中包含的复制命令，默认安装在几乎所有Linux发行版上。*cp*用于简单的复制。这可能是您维护常规备份所需的全部功能。'
+- en: '*rsync* is an efficient file-transfer program, and its main purpose is keeping
+    filesystems in sync with each other. When you use it for making backups, it keeps
+    your local files in sync with your backup device. It is fast and efficient because
+    it transfers only the changes in files. Unlike a lot of backup software, which
+    never want you to delete anything, it even mirrors deletions. Because of these
+    features, rsync is the tool of choice for updating and mirroring user home directories,
+    websites, git repositories, and other large complex file trees.'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*rsync*是一款高效的文件传输程序，其主要目的是保持不同文件系统之间的同步。当您用它来进行备份时，它会将本地文件与备份设备保持同步。由于它仅传输文件中的更改，因此速度快且效率高。与许多备份软件不同的是，它甚至可以镜像删除操作。正是由于这些特点，rsync成为更新和镜像用户主目录、网站、git仓库以及其他大型复杂文件树的首选工具。'
+- en: 'There are two ways to use rsync over a network: over SSH, for authenticated
+    login and transport, or by running it as a daemon. Using SSH requires users to
+    have login accounts on every machine for which they need rsync access. When rsync
+    is run in daemon mode, you can use its built-in authentication methods to control
+    access so that users do not need login accounts on the rsync server. Daemon mode
+    is well-suited for a LAN backup server. It is not safe to access over untrusted
+    networks, unless you use a VPN (see [Chapter 13](ch13.xhtml#cha-openvpn)).'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有两种方法可以通过网络使用rsync：通过SSH进行身份验证的登录和传输，或者将其作为守护进程运行。使用SSH需要用户在每台需要rsync访问的机器上拥有登录账户。当rsync以守护进程模式运行时，您可以使用其内置的身份验证方法来控制访问，以便用户无需在rsync服务器上拥有登录账户。守护进程模式非常适合局域网备份服务器。在不受信任的网络上访问是不安全的，除非您使用VPN（参见[第13章](ch13.xhtml#cha-openvpn)）。
+- en: What sort of device do you store your backups on? This depends on your needs.
+    I am a fan of USB storage media for a single user. Suppose you have a desktop
+    Linux PC, a laptop, a tablet, and a smartphone. Back up your phone and tablet
+    to your PC, then back up the PC to a USB hard drive. Super-important files could
+    go to an online backup service.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您会将备份存储在什么设备上？这取决于您的需求。对于单个用户，我喜欢使用USB存储介质。假设您有一台台式Linux PC、一台笔记本、一台平板和一部智能手机。将手机和平板备份到您的PC，然后将PC备份到USB硬盘驱动器上。重要的文件可以备份到在线备份服务。
+- en: For multiple users, a good solution is a central backup server. This can be
+    any Linux PC.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于多用户，一个好的解决方案是一个中央备份服务器。这可以是任何Linux PC。
+- en: Consider longevity. You cannot count on longevity with digital storage media,
+    because even if the medium (hard disk, USB storage drive, CD/DVD) survives, there
+    is no guarantee that the tools to read it will endure. Hardware and file formats
+    change. Can you still read floppy disks? Remember Zip disks? How about those archives
+    of old Microsoft Word and Powerpoint documents? With open source file formats
+    you can always find a way to recover them. Good luck with proprietary formats
+    when the vendor decides to stop supporting them.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 考虑长期性。您不能依赖数字存储介质的长期存储，因为即使介质（硬盘、USB存储驱动器、CD/DVD）存活下来，也不能保证能够持久读取。硬件和文件格式会发生变化。您还能读取软盘吗？还记得ZIP盘吗？还有那些旧版Microsoft
+    Word和Powerpoint文档的档案？使用开源文件格式，您总能找到恢复它们的方法。但是在供应商决定停止支持它们时，专有格式的恢复就很困难了。
+- en: Paper is still the long-term storage champion, and worth considering for your
+    most important documents and photos.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 纸张仍然是长期存储的冠军，值得考虑用于你最重要的文件和照片。
+- en: For long-term digital storage, plan to transfer your archives to new media periodically,
+    possibly with new commands and to new filesystem formats.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 长期数字存储中，计划定期将你的存档转移到新的媒体，可能需要新的命令和新的文件系统格式。
+- en: 'What about backing up your backup server? No problem. Setting up a remote rsync
+    mirror for backing up the backups is a common strategy, if your internet connection
+    is robust enough to handle the traffic. But before you build a massive backup
+    infrastructure, think about how many levels of redundancy you really need. Offsite
+    backups are insurance against a disaster at your site. This can be a remote backup
+    server at a site you control, or a friend’s site, or rented space in a datacenter.
+    Maybe regular drops of an external hard drive to a bank safe-deposit box would
+    be enough for your needs. Also think about recovery: can you get to your backups
+    quickly?'
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 那么备份你的备份服务器怎么样？没问题。建立一个远程rsync镜像来备份备份是一种常见策略，如果你的互联网连接足够强大来处理流量的话。但在建立大规模备份基础设施之前，请考虑你真正需要多少级冗余。离站点备份是对你站点灾难的保险。这可以是你控制的远程备份服务器，也可以是朋友的站点，或者是数据中心的租用空间。也要考虑恢复：你能快速获取你的备份吗？
+- en: Always remember that the purpose of backups is *recovery*. Test your backups
+    regularly to avoid learning the hard way that your backup method failed.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 永远记住备份的目的是*恢复*。定期测试你的备份，避免以最艰难的方式发现你的备份方法失败。
+- en: In this chapter you will learn about simple copying to USB storage devices with
+    *cp*. For some users this is all they will ever need.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，你将学习如何使用*cp*简单地将文件复制到USB存储设备。对一些用户来说，这可能是他们所需要的全部。
+- en: Most of the chapter is about using the *rsync* command for faster and more efficient
+    copying. You can use *rsync* to back up your files to local media or remote servers.
+    You will learn which files you should back up, how to fine-tune your file selection,
+    maintain the same file permissions and timestamps on your files, how to build
+    an rsync backup server for multiple users, and how to make secure remote backups.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大部分章节讲述使用*rsync*命令进行更快、更有效的复制。你可以使用*rsync*将文件备份到本地媒体或远程服务器。你将学习哪些文件应该备份，如何微调文件选择，保持文件的相同权限和时间戳，如何为多用户建立一个rsync备份服务器，以及如何进行安全的远程备份。
+- en: 7.1 Selecting Which Files to Back Up
+  id: totrans-16
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.1 选择需要备份的文件
+- en: Problem
+  id: totrans-17
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You’re not sure which files you should back up. Do you need to make backups
+    of your system files? Do you really need to back up all of your personal files?
+    Are there files you should not back up?
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你不确定应该备份哪些文件。是否需要备份系统文件？你真的需要备份所有的个人文件吗？有些文件是不需要备份的吗？
+- en: Solution
+  id: totrans-19
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Any file that you would be sorry to lose is a file you need to back up. Your
+    personal files and system data files are the most important. Restoring system
+    files such as commands, applications, and libraries is less important because
+    you can always download and reinstall these.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任何你会后悔丢失的文件都是需要备份的文件。你的个人文件和系统数据文件是最重要的。恢复系统文件，如命令、应用程序和库，相对不那么重要，因为你总是可以重新下载和安装这些文件。
+- en: 'The following directories contain files such as configurations; data files
+    for servers such as web, FTP, and mail servers; log files; applications installed
+    in nonstandard locations; and shared directories, all of which should be backed
+    up:'
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下目录包含诸如配置文件、服务器数据文件（如 web、FTP 和邮件服务器）、日志文件、安装在非标准位置的应用程序以及共享目录等文件，都应该进行备份：
+- en: '*/boot/grub*, if it contains any customizations such as themes, background
+    images, or fonts.'
+  id: totrans-22
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/boot/grub*，如果其中包含任何自定义内容，如主题、背景图片或字体。'
+- en: '*/etc* contains system configuration files.'
+  id: totrans-23
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/etc* 包含系统配置文件。'
+- en: '*/home*, users’ personal files.'
+  id: totrans-24
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/home*，用户的个人文件。'
+- en: '*/mnt*, temporary filesystem mountpoints. Back this up if you have mountpoints
+    you want to preserve.'
+  id: totrans-25
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/mnt*，临时文件系统挂载点。如果你有想要保留的挂载点，也需要备份它。'
+- en: '*/opt*, for proprietary or other applications not installed the standard way.'
+  id: totrans-26
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/opt*，用于专有或其他非标准安装的应用程序。'
+- en: '*/root*, the root user’s personal files.'
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/root*，root 用户的个人文件。'
+- en: '*/srv*, data for servers such as web, FTP, and rsync servers.'
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/srv*，服务器数据，如 web、FTP 和 rsync 服务器的数据。'
+- en: '*/tmp* holds temporary data that is automatically updated or deleted as needed.
+    Some of the data in */tmp* is persistent, for example user-created files and some
+    system services, and they should be backed up.'
+  id: totrans-29
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/tmp* 包含临时数据，根据需要会自动更新或删除。*/tmp* 中的一些数据是持久的，例如用户创建的文件和一些系统服务，它们应该备份。'
+- en: '*/var* stores many types of data such as log files, mail spools, cron jobs,
+    and data for system services, though most distros have migrated to using */srv*
+    for system services.'
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/var* 存储许多类型的数据，如日志文件、邮件池、cron 作业和系统服务的数据，尽管大多数发行版已经迁移到使用 */srv* 用于系统服务。'
+- en: If you have any shared directories, custom commands and scripts, or any data
+    files or directories not listed previously, back them up.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你有任何共享目录、自定义命令和脚本，或者之前未列出的任何数据文件或目录，请备份它们。
+- en: '*/proc*, */sys*, and */dev* are pseudofilesystems that exist only in memory
+    and should not be backed up.'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/proc*、*/sys* 和 */dev* 是存在于内存中的伪文件系统，不应备份。'
+- en: '*/media* is for mounting removable storage media and should be managed by the
+    system, so there is no need to back it up. If you are manually creating mountpoints
+    in */media*, they really need to be moved to */mnt*.'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/media* 用于挂载可移动存储介质，应由系统管理，因此无需备份。如果你在 */media* 手动创建挂载点，则确实需要将它们移动到 */mnt*。'
+- en: Many databases should not be backed up with simple copying because they have
+    special utilities and procedures for making copies and backups, and for restoring
+    from backups. Use the tools made for your databases. Some examples are PostrgreSQL,
+    MariaDB, and MySQL.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 许多数据库不应该使用简单复制备份，因为它们有专门的实用程序和流程用于复制、备份和恢复。使用专为你的数据库制作的工具。一些示例是 PostrgreSQL、MariaDB
+    和 MySQL。
+- en: Restoring From Backup
+  id: totrans-35
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 从备份中恢复
+- en: Some files should not be restored from backup; see [Recipe 7.2](#rec-restore-from-backup).
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有些文件不应从备份中恢复；参见[配方 7.2](#rec-restore-from-backup)。
+- en: Copying everything is the easy way if your backup storage is large enough. You
+    also have the option of fine-tuning your file selection by creating lists of files
+    to copy or to exclude; see Recipes [7.8](#rec-exclude-files-backup) and [7.9](#rec-include-files).
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果备份存储足够大，复制一切是简单的方法。你还可以通过创建文件复制或排除列表来精确调整文件选择；参见[配方 7.8](#rec-exclude-files-backup)和[7.9](#rec-include-files)。
+- en: Discussion
+  id: totrans-38
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Storage media is so cheap now you may not have to care about conserving storage
+    space. If you need to be mindful of storage limitations, see the recipes in this
+    chapter on file selection.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 存储媒体现在价格很便宜，你可能不必关心存储空间的保留。如果你需要注意存储限制，请参阅本章关于文件选择的配方。
+- en: See Also
+  id: totrans-40
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Filesystem Hierarchy Standard](https://oreil.ly/y1pJs)'
+  id: totrans-41
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[文件系统层次标准](https://oreil.ly/y1pJs)'
+- en: 7.2 Selecting Files to Restore from Backups
+  id: totrans-42
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.2 从备份中选择要恢复的文件
+- en: Problem
+  id: totrans-43
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You are restoring files from backup, and you want to know if there are files
+    that should not be restored.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你正在从备份中恢复文件，并且想知道是否有文件不应该被恢复。
+- en: Solution
+  id: totrans-45
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Some files should not be restored, depending on the circumstances.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据情况，有些文件不应该被恢复。
+- en: Do not restore */etc/fstab* after reinstalling Linux (the file that configures
+    your static filesystem mounts). Every time you install Linux, all the filesystems
+    get new Universal Unique Identifiers (UUIDs), so they will not be recognized and
+    your new installation will fail.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在重新安装 Linux 后不要恢复 */etc/fstab*（配置静态文件系统挂载的文件）。每次安装 Linux 时，所有文件系统都会获得新的通用唯一标识符（UUID），因此它们将无法被识别，你的新安装将失败。
+- en: Be careful restoring any file in */etc* or the dotfiles (such as */home/.config*
+    or */home/.local*) in your home directory. If you are restoring from backup to
+    a new installation of a different release, or a different Linux distribution,
+    there may be incompatibilities in configuration options or file locations. Restore
+    them one at a time so you can quickly spot any problems.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意，恢复任何 */etc* 中的文件或家目录中的点文件（如 */home/.config* 或 */home/.local*），如果你要将其从备份恢复到不同版本或不同
+    Linux 发行版的新安装中，可能会存在配置选项或文件位置的不兼容性。逐个恢复它们，这样你可以快速发现任何问题。
+- en: See Also
+  id: totrans-49
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 1](ch01.xhtml#cha-install-linux)'
+  id: totrans-50
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第1章](ch01.xhtml#cha-install-linux)'
+- en: 7.3 Using the Simplest Local Backup Method
+  id: totrans-51
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.3 使用最简单的本地备份方法
+- en: Problem
+  id: totrans-52
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know the easiest, simplest way to make regular backups to a local
+    USB storage device.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想知道最简单、最简便的方法来定期备份到本地 USB 存储设备。
+- en: Solution
+  id: totrans-54
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The answer is to use simple copying. Get yourself a nice USB hard drive or USB
+    stick. Plug it in and use your file manager to copy your files. Easy peasey, no
+    muss, no fuss, and it is dead simple to restore your files. Or, use the *cp* command
+    (see [Recipe 7.4](#rec-automate-cp)).
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 答案是使用简单复制。弄一个好用的USB硬盘或USB存储棒。插上它，用你的文件管理器复制你的文件。简单易行，没麻烦，恢复文件也很简单。或者，使用 *cp*
+    命令（参见[第7.4节](#rec-automate-cp)）。
+- en: Discussion
+  id: totrans-56
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Simple copying doesn’t scale all that well, but for a few devices, like a PC,
+    laptop, and phone, it works fine. The important part is making regular backups,
+    verifying that you can restore files from your backups, and not worrying if you’re
+    being nerdy enough.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简单复制并不完全适合所有情况，但对于少量设备，如个人电脑、笔记本电脑和手机，效果还不错。重要的是定期进行备份，验证你可以从备份中恢复文件，并且不必担心是否足够“极客”。
+- en: Back in olden times, backups were more complicated because storage was expensive,
+    so backup programs used a lot of tricks to save space. Now you can buy multi-terabyte
+    external USB 3.0 hard drives for less than $200.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从前，备份更复杂，因为存储空间昂贵，所以备份程序使用了很多技巧来节省空间。现在你可以花不到200美元购买支持多TB容量的外部USB 3.0硬盘。
+- en: See Also
+  id: totrans-59
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 cp*'
+  id: totrans-60
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 cp*'
+- en: 7.4 Automating Simple Local Backups
+  id: totrans-61
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.4 自动化简单的本地备份
+- en: Problem
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You like using simple copying for making your backups to an external USB storage
+    drive, and you want to automate the process.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你喜欢使用简单复制来将文件备份到外部USB存储驱动器，并且希望自动化这个过程。
+- en: Solution
+  id: totrans-64
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: This calls for the *cp* command and *crontab* to schedule your backups.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这需要使用 *cp* 命令和 *crontab* 来安排你的备份。
+- en: 'You may list individual files and directories to copy with *cp*, separated
+    by spaces:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以列出要复制的单个文件和目录，用空格分隔：
+- en: '[PRE0]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'The following example copies Duchess’s entire home directory to the *backups*
+    directory on an external USB drive named *2tbdisk*:'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例将Duchess的整个主目录复制到名为*2tbdisk*的外部USB驱动器上的*backups*目录中：
+- en: '[PRE1]'
+  id: totrans-69
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: This creates */media/duchess/2tbdisk/backups/duchess/* on the backup device.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将在备份设备上创建 */media/duchess/2tbdisk/backups/duchess/*。
+- en: 'Copy the contents of a directory without copying the directory itself:'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 复制目录内容而不复制目录本身：
+- en: '[PRE2]'
+  id: totrans-72
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Create a personal cron job to run your backup every night at 10:30 P.M.:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个个人cron作业，在每晚10:30运行你的备份：
+- en: '[PRE3]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Discussion
+  id: totrans-75
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you want to preserve file attributes such as ownership and permissions, format
+    your backup drive with a Linux filesystem that supports file attributes, such
+    as Ext4, XFS, or Btrfs (see [Chapter 11](ch11.xhtml#cha-create-filesystems)).
+    The FAT filesystems do not preserve ownership or permissions.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想保留文件属性（如所有权和权限），请使用支持文件属性的Linux文件系统格式化你的备份驱动器，例如Ext4、XFS或Btrfs（见[第11章](ch11.xhtml#cha-create-filesystems)）。FAT文件系统不保留所有权或权限。
+- en: Keep an eye on how long it takes your backup to run. If it takes longer than
+    your scheduled backup interval, cron will start the next backup on schedule, and
+    then you have a mess.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 留意备份运行的时间长短。如果超过了预定的备份间隔时间，cron会按计划启动下一次备份，然后你就有麻烦了。
+- en: The first run takes the longest because all the files are new. Subsequent backups
+    will go faster as only new files and files with newer timestamps will be copied.
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一次运行时间最长，因为所有文件都是新的。随后的备份将更快，因为只会复制新文件和时间戳更新的文件。
+- en: The tilde, ~, is a shortcut for the current user’s home directory, so in this
+    recipe it is short for */home/duchess*.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 波浪线，~，是当前用户主目录的快捷方式，在这个示例中，它是 */home/duchess* 的缩写。
+- en: The asterisk in */home/duchess/** means copy all the files in */home/duchess*,
+    but not the directory */home/duchess*.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/home/duchess/* 中的星号表示复制 */home/duchess* 中的所有文件，但不包括目录 */home/duchess*。'
+- en: 'The *-a*, *-u*, and *-v* options for *cp* mean:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-a*、*-u* 和 *-v* 选项用于 *cp* 的含义是：'
+- en: '*-a, --archive* recursively copies and preserves all file attributes: mode,
+    ownership, timestamps, and extended attributes.'
+  id: totrans-82
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-a, --archive* 递归复制并保留所有文件属性：模式、所有权、时间戳和扩展属性。'
+- en: '*-u, --update* tells *cp* to copy only files with newer timestamps than the
+    copies in the backup directory, or new files that have not been backed up yet.'
+  id: totrans-83
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-u, --update* 告诉 *cp* 仅复制比备份目录中的副本更新的文件，或尚未备份的新文件。'
+- en: '*-v, --verbose* prints activity messages during the copy operation.'
+  id: totrans-84
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-v, --verbose* 在复制操作期间打印活动消息。'
+- en: 'Some other useful options:'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有一些其他有用的选项：
+- en: '*-R, -r* recursive; use this to copy directories when you do not use the *-a*
+    option. *-a* preserves file attributes, *-R, -r* does not. FAT and exFAT filesystems
+    do not support file attributes, so use *-R, -r* with these.'
+  id: totrans-86
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-R, -r* 递归；当你不使用 *-a* 选项时，用它来复制目录。*-a* 保留文件属性，*-R, -r* 则不保留。FAT 和 exFAT 文件系统不支持文件属性，因此在这些文件系统中使用
+    *-R, -r*。'
+- en: '*--parents* creates missing parent directories on the destination.'
+  id: totrans-87
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*--parents* 在目标上创建丢失的父目录。'
+- en: '*-x, --one-file-system* This prevents recursing into other partitions and mounted
+    network filesystems. For example, if you have an NFS share mounted you may not
+    want to add it to your backup.'
+  id: totrans-88
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-x, --one-file-system* 这可以防止递归到其他分区和挂载的网络文件系统中。例如，如果你挂载了一个 NFS 共享，你可能不希望将其添加到备份中。'
+- en: 'Most Linux distributions mount USB devices in */run/media* or */media*. The
+    easy way to find the filepath for your USB drive is to look in your file manager
+    or use the *lsblk* command:'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Linux 发行版在 */run/media* 或 */media* 中挂载 USB 设备。找到你的 USB 驱动器的文件路径的简单方法是查看文件管理器或使用
+    *lsblk* 命令：
+- en: '[PRE4]'
+  id: totrans-90
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: See Also
+  id: totrans-91
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 3.7](ch03.xhtml#rec-scheduled-shutdowns-cron) to learn more about using
+    *cron*'
+  id: totrans-92
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 3.7](ch03.xhtml#rec-scheduled-shutdowns-cron) 了解更多关于使用 *cron* 的信息'
+- en: '*man 1 crontab*'
+  id: totrans-93
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 crontab*'
+- en: '*man 1 cp*'
+  id: totrans-94
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 cp*'
+- en: 7.5 Using rsync for Local Backups
+  id: totrans-95
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.5 使用 rsync 进行本地备份
+- en: Problem
+  id: totrans-96
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to make backups to a USB stick or USB hard drive, and you want something
+    that is faster and more efficient than simple copying. You also want simple file
+    restorations that you can make with standard Linux tools, without needing special
+    software.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要将备份存储到 USB 闪存或 USB 硬盘，并且你希望比简单复制更快更高效。你还希望使用标准 Linux 工具进行简单的文件恢复，而不需要特殊软件。
+- en: Solution
+  id: totrans-98
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*rsync* is what you want. It keeps filesystems synchronized, both local and
+    remote. *rsync* is fast and efficient, as it transfers only the changes in files,
+    and you can restore files with the *rsync* command, the *cp* command, your file
+    manager, or whatever copying tool you prefer.'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*rsync* 是你想要的。它可以同步文件系统，无论是本地还是远程。*rsync* 快速高效，因为它只传输文件中的更改，你可以使用 *rsync* 命令、*cp*
+    命令、你的文件管理器或者你喜欢的任何复制工具来恢复文件。'
+- en: 'The following example shows how to back up a home directory. First, name your
+    source directory, which is the directory you want to back up, then name the destination
+    directory. This example copies Duchess’s */home* to a USB drive named *2tbdisk*:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例展示了如何备份一个主目录。首先，命名你的源目录，即你想要备份的目录，然后命名目标目录。这个示例将 Duchess 的 */home* 复制到名为
+    *2tbdisk* 的 USB 驱动器中：
+- en: '[PRE5]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'You can specify two or more directories, in a space-delimited list, to transfer
+    to the destination directory:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以指定两个或更多的目录，用空格分隔的列表，传输到目标目录：
+- en: '[PRE6]'
+  id: totrans-103
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'Copy files from your backup device to your computer by reversing the source
+    and destination:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将文件从备份设备复制到计算机上，反转源和目标：
+- en: '[PRE7]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'You may safely test your *rsync* command, without copying any files, with the
+    *--dry-run* option:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以安全地使用 *--dry-run* 选项测试你的 *rsync* 命令，而不复制任何文件：
+- en: '[PRE8]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'If any files are deleted from a source directory, *rsync* will not delete them
+    from the destination directory unless you explicitly tell it to with the *delete*
+    option:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果从源目录删除了任何文件，*rsync* 将不会从目标目录中删除它们，除非你使用 *delete* 选项显式告诉它要删除：
+- en: '[PRE9]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Discussion
+  id: totrans-110
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The tilde, *~*, is a shortcut for your home directory, so in the examples it
+    means */home/duchess*.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 波浪号 *~* 是你的家目录的快捷方式，所以在例子中它意味着 */home/duchess*。
+- en: Command examples with line breaks use a slash, \, to indicate that the command
+    continues on the next line. You can copy the whole command, with the slashes,
+    and it should work.
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 带有换行的命令示例使用斜杠 \ 表示命令在下一行继续。你可以复制整个带有斜杠的命令，它应该可以工作。
+- en: If you have networked filesystems mounted on your PC, such as NFS or Samba,
+    use the *-x* option to copy only from your local filesystem, and not recurse into
+    the remote filesystems.
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果在你的个人电脑上挂载了网络文件系统，比如 NFS 或 Samba，使用 *-x* 选项仅从本地文件系统复制，而不递归到远程文件系统。
+- en: Adding a trailing slash, *~/*, (*/home/duchess/*) copies only the contents of
+    the *duchess/* directory, but not the directory itself, resulting in */media/duchess/2tbdisk/[files]*.
+    Omitting the trailing slash transfers the contents of */home/duchess* and the
+    *duchess* directory, resulting in */media/duchess/2tbdisk/duchess/[files]*. The
+    trailing slash only matters on the source directory, and it makes no difference
+    on the destination directory.
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 添加尾部斜杠*~/*（*/home/duchess/*）只复制*duchess/*目录的内容，但不包括目录本身，结果为*/media/duchess/2tbdisk/[files]*。省略尾部斜杠会传输*/home/duchess*和*duchess*目录的内容，结果为*/media/duchess/2tbdisk/duchess/[files]*。尾部斜杠只在源目录上有影响，在目标目录上没有影响。
+- en: Don’t feel bad if you have to count on your fingers or make a lot of test runs
+    to remind yourself how the trailing slash behaves, because this vexes everyone.
+    It might help to think of the trailing slash as a little fence that prevents the
+    source directory from escaping.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你不得不用手指计数或进行多次测试来提醒自己尾部斜杠的行为，不要感到难过，因为这困扰着每个人。可以将尾部斜杠想象成一个小篱笆，防止源目录逃逸。
+- en: 'The *-a* and *-v* options for *rsync* mean:'
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-a*和*-v*选项对*rsync*的含义是：'
+- en: '*-a, --archive* retains the mode, timestamps, permissions, and ownership, and
+    copies recursively. This is the same as **-rlptgoD**, which copies recursively,
+    copies symlinks, preserves permissions, preserves file modification times, preserves
+    file ownership, and preserves special files, such as device files.'
+  id: totrans-117
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-a, --archive*保留模式、时间戳、权限和所有权，并进行递归复制。这与**-rlptgoD**相同，它进行递归复制、复制符号链接、保留权限、保留文件修改时间、保留文件所有权和保留设备文件等特殊文件。'
+- en: '*-v, --verbose* displays activity messages.'
+  id: totrans-118
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-v, --verbose*显示活动消息。'
+- en: 'You may wish to use some of these options:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能希望使用其中一些选项：
+- en: '*-q, --quiet* suppresses nonerror messages.'
+  id: totrans-120
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-q, --quiet*抑制非错误消息。'
+- en: '*--progress* shows information on each file as it is transferred.'
+  id: totrans-121
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*--progress*显示每个文件传输时的信息。'
+- en: '*-A, --als* preserves access control lists (ACLs).'
+  id: totrans-122
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-A, --als*保留访问控制列表（ACLs）。'
+- en: '*-X, --xattrs* preserves extended file attributes (xattrs).'
+  id: totrans-123
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-X, --xattrs*保留扩展文件属性（xattrs）。'
+- en: Your filenames, of course, will be different than the examples. *2tbdisk* is
+    a filesystem label created by the user (see [Recipe 9.4](ch09.xhtml#rec-new-partition-gparted)).
+    It is an abbreviation for “2 terabyte disk.” If you do not create a label, *udev*
+    creates one, for example */media/duchess/488B-7971/*.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当然，你的文件名会与示例不同。*2tbdisk*是用户创建的文件系统标签（参见[第9.4节](ch09.xhtml#rec-new-partition-gparted)）。它是“2TB硬盘”的缩写。如果你没有创建标签，*udev*会创建一个，例如*/media/duchess/488B-7971/*。
+- en: You may use the normal Linux tools, such as *rsync*, your file manager, or the
+    *cp* command, to restore files.
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以使用正常的Linux工具，比如*rsync*、文件管理器或*cp*命令来恢复文件。
+- en: See Also
+  id: totrans-126
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 rsync*'
+  id: totrans-127
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 rsync*'
+- en: 7.6 Making Secure Remote File Transfers with rsync over SSH
+  id: totrans-128
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.6 使用rsync通过SSH进行安全的远程文件传输
+- en: Problem
+  id: totrans-129
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to use *rsync* to copy files to another computer on your local network
+    or over the internet, and you want encrypted transport and authentication.
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想使用*rsync*将文件复制到本地网络上的另一台计算机或通过互联网，并且希望进行加密传输和身份验证。
+- en: Solution
+  id: totrans-131
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*rsync* uses SSH by default when you transfer files to another machine. The
+    remote machine must be running an SSH server, and the source machine must have
+    an SSH client already set up (see [Chapter 12](ch12.xhtml#cha-ssh)).'
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*rsync*在向另一台机器传输文件时默认使用SSH。远程机器必须运行SSH服务器，源机器必须已经设置好SSH客户端（参见[第12章](ch12.xhtml#cha-ssh)）。'
+- en: 'This example transfers files over the local network from Duchess’s PC to her
+    laptop. Duchess’s username on her laptop is Empress, and she is copying files
+    from her home directory on her PC to her home directory on her laptop:'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个例子在本地网络上从Duchess的PC传输文件到她的笔记本电脑。Duchess在她的笔记本电脑上的用户名是Empress，她正在从她的PC的主目录复制文件到她笔记本电脑的主目录：
+- en: '[PRE10]'
+  id: totrans-134
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: If the destination directory does not exist, *rsync* will create it.
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果目标目录不存在，*rsync*会创建它。
+- en: 'To upload files over the internet, use the fully qualified domain name of the
+    server you are logging in to:'
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要通过互联网上传文件，请使用你要登录的服务器的完全限定域名：
+- en: '[PRE11]'
+  id: totrans-137
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'The syntax for copying files from a remote host is reversed. This example copies
+    the */woodwinds* directory and its contents from the remote host to Duchess’s
+    home directory:'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从远程主机复制文件的语法是相反的。这个例子将远程主机的*/woodwinds*目录及其内容复制到Duchess的主目录：
+- en: '[PRE12]'
+  id: totrans-139
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: Discussion
+  id: totrans-140
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You might remember when the SSH option had to be explicit—for example, *rsync
+    -a -e ssh [options]*. This is no longer necessary.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能还记得以前必须显式指定SSH选项，例如*rsync -a -e ssh [options]*。现在不再需要这样做。
+- en: 'You may find some of these options to be useful:'
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能会发现以下一些选项很有用：
+- en: '*--partial* preserves partially downloaded files when the network connection
+    is interrupted, and resumes the file transfer from where it left off when the
+    connection is restored.'
+  id: totrans-143
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*--partial* 在网络连接中断时保留部分下载的文件，并在恢复连接时从中断处恢复文件传输。'
+- en: '*-h, --human-readable* displays file sizes in kilobytes, megabytes, and gigabytes,
+    rather than bytes.'
+  id: totrans-144
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*-h, --human-readable* 显示文件大小为千字节、兆字节和千兆字节，而不是字节。'
+- en: '*--log-file=* stores a complete record of each transfer in a text file. Put
+    them all together like this:'
+  id: totrans-145
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*--log-file=* 将每次传输的完整记录存储在文本文件中。像这样将它们放在一起：'
+- en: '[PRE13]'
+  id: totrans-146
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Both authentication and transport are encrypted by SSH. Users need shell accounts
+    on all machines they are going to transfer files to. See [Chapter 12](ch12.xhtml#cha-ssh)
+    to learn about secure remote administration with SSH.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SSH同时加密验证和传输。用户需要在所有要传输文件的机器上拥有shell帐户。请参见[第12章](ch12.xhtml#cha-ssh)了解使用SSH进行安全远程管理的内容。
+- en: Consider setting up a central backup server for simplifying administration.
+    Your users have their own accounts with their own */home* directories and can
+    manage their own backups and restores without bothering you.
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 考虑设置一个中央备份服务器来简化管理。您的用户拥有自己的帐户和自己的*/home*目录，并可以管理自己的备份和还原，而不会打扰您。
+- en: Another option for a backup server is to run *rsync* as a service. The advantage
+    of this is your *rsync* users do not need login accounts on the server. One disadvantage
+    is it does not support encrypted transfers. See [Recipe 7.13](#rec-rsyncd-backup-server)
+    to learn about this.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为备份服务器的另一个选择是将*rsync*作为服务运行。这样做的优点是*rsync*用户不需要服务器上的登录帐户。缺点之一是不支持加密传输。请参见[Recipe
+    7.13](#rec-rsyncd-backup-server)了解详情。
+- en: See Also
+  id: totrans-150
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 rsync*'
+  id: totrans-151
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 rsync*'
+- en: '[Recipe 12.5](ch12.xhtml#rec-host-key-auth)'
+  id: totrans-152
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 12.5](ch12.xhtml#rec-host-key-auth)'
+- en: '[Recipe 12.7](ch12.xhtml#rec-public-key-auth)'
+  id: totrans-153
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 12.7](ch12.xhtml#rec-public-key-auth)'
+- en: 7.7 Automating rsync Transfers with cron and SSH
+  id: totrans-154
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.7 使用cron和SSH自动化rsync传输
+- en: Problem
+  id: totrans-155
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create crontabs to automatically run your secure *rsync* transfers.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望创建crontabs以自动运行您的安全*rsync*传输。
+- en: Solution
+  id: totrans-157
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: You need SSH set up for passwordless authentication on the destination machine
+    (see Recipes [12.10](ch12.xhtml#rec-keychain) and [12.11](ch12.xhtml#rec-keychain-cron))
+    and network access to the destination machine for the clients.
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要在目标机器上设置SSH以进行无密码验证（请参阅[Recipe 12.10](ch12.xhtml#rec-keychain)和[Recipe 12.11](ch12.xhtml#rec-keychain-cron)），并且客户端需要访问目标机器的网络。
+- en: 'Then use */etc/crontab* for transfers that require root permissions. The following
+    example makes a backup of */etc* every night at 10 P.M. to a LAN server named
+    *server1*:'
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后使用*/etc/crontab*来进行需要root权限的传输。以下示例每晚10点将*/etc*备份到名为*server1*的LAN服务器：
+- en: '[PRE14]'
+  id: totrans-160
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: Use personal crontabs for transferring your own files (see [Recipe 3.7](ch03.xhtml#rec-scheduled-shutdowns-cron)).
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用个人crontabs来传输您自己的文件（请参阅[Recipe 3.7](ch03.xhtml#rec-scheduled-shutdowns-cron)）。
+- en: Discussion
+  id: totrans-162
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: OpenSSH is a lovely tool that provides secure network transfers for a host of
+    tasks. Anything that you run over a network can probably run over SSH.
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OpenSSH是一个很好的工具，提供安全的网络传输服务，适用于各种任务。任何可以在网络上运行的内容都可能可以通过SSH运行。
+- en: See Also
+  id: totrans-164
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 12](ch12.xhtml#cha-ssh)'
+  id: totrans-165
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第12章](ch12.xhtml#cha-ssh)'
+- en: '[Recipe 12.10](ch12.xhtml#rec-keychain)'
+  id: totrans-166
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 12.10](ch12.xhtml#rec-keychain)'
+- en: '[Recipe 12.11](ch12.xhtml#rec-keychain-cron)'
+  id: totrans-167
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 12.11](ch12.xhtml#rec-keychain-cron)'
+- en: 7.8 Excluding Files from Backup
+  id: totrans-168
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.8 从备份中排除文件
+- en: Problem
+  id: totrans-169
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: So far the examples have shown how to transfer entire directories. You want
+    to know how to exclude files and directories from being copied.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到目前为止，示例已经展示了如何传输整个目录。您想知道如何排除文件和目录以防止复制。
+- en: Solution
+  id: totrans-171
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: For simplicity, the following examples demonstrate local transfers to a USB
+    drive, but they also work for remote transfers over SSH; see [Recipe 7.6](#rec-rsync-over-ssh).
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为简单起见，以下示例演示了向USB驱动器进行本地传输的操作，但也适用于通过SSH进行远程传输；参见[Recipe 7.6](#rec-rsync-over-ssh)。
+- en: 'When it’s just a few files, you can list them on the command line using *--exclude=*.
+    This example excludes one file from */home/duchess/Music/arias*:'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当只有几个文件时，您可以使用命令行列出它们，并使用*--exclude=*来排除一个文件。例如，此示例从*/home/duchess/Music/arias*排除一个文件：
+- en: '[PRE15]'
+  id: totrans-174
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'This is nice and easy and reliable. However, there is a gotcha: if there are
+    multiple files in your source directory with the same name as your excluded file,
+    all of them will be excluded. If you do not want the duplicates to be excluded,
+    you need to specify which one is to be excluded. In the following example you
+    want to exclude only the copy in the *arias/* source directory:'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这很简单和可靠。但是，有一个需要注意的地方：如果源目录中有与排除文件相同名称的多个文件，则所有这些文件都将被排除。如果您不想排除重复文件，需要指定要排除的文件。在以下示例中，您只想排除*arias/*源目录中的复制文件：
+- en: '[PRE16]'
+  id: totrans-176
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Exclude more than one file by enclosing them in curly braces, separated with
+    single quotes and commas. There must be no spaces between the equals sign and
+    the curly brace, and no spaces between the commas and single quotes:'
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过用单引号和逗号分隔它们来排除多个文件，将它们放在大括号中。等号和大括号之间不能有空格，逗号和单引号之间也不能有空格：
+- en: '[PRE17]'
+  id: totrans-178
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'Excluding directories works the same way as excluding files, and you can mix
+    files and directories in your exclude list:'
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 排除目录的工作方式与排除文件相同，您可以在排除列表中混合文件和目录：
+- en: '[PRE18]'
+  id: totrans-180
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: See [Recipe 7.11](#rec-includes-excludes) to learn how to put your excludes
+    list in a file.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见[Recipe 7.11](#rec-includes-excludes)了解如何将您的排除列表放入文件中。
+- en: Discussion
+  id: totrans-182
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The root directory in an *rsync* transfer is the top-level directory you are
+    transferring files from. In the examples in this recipe, that is *~/Music/arias*.
+    *rsync* checks all the files and directories in your root directory, and compares
+    them to your exclude directives, which *rsync* calls *patterns*. Patterns are
+    checked against the files and directories in your root directory, starting at
+    the root and proceeding down through the directory hierarchy. Every time a pattern
+    is matched, it is excluded from the transfer. If the pattern *arias/lho-perduta.wav*
+    is duplicated in another location, such as *2arias/lho-perduta.wav*, it will also
+    be excluded. When a pattern ends with a slash (*/*), *rsync* will match only directories.
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*rsync*传输中的根目录是您从中传输文件的顶级目录。在本例中，这是*~/Music/arias*。*rsync*检查根目录中的所有文件和目录，并将它们与排除指令（*rsync*称为*模式*）进行比较。模式与根目录中的文件和目录进行匹配，从根目录开始并沿着目录层次结构向下进行。每次匹配模式时，它都会从传输中排除。如果模式*arias/lho-perduta.wav*在另一个位置重复，例如*2arias/lho-perduta.wav*，它也将被排除。当模式以斜杠（*/*）结尾时，*rsync*将仅匹配目录。'
+- en: See Also
+  id: totrans-184
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 rsync*'
+  id: totrans-185
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 rsync*'
+- en: '[Recipe 7.10](#rec-simple-include)'
+  id: totrans-186
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 7.10](#rec-simple-include)'
+- en: 7.9 Including Selected Files to Backup
+  id: totrans-187
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.9 包括选定的备份文件
+- en: Problem
+  id: totrans-188
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to include a selected set of files in your backup, rather than defining
+    a list of files to exclude.
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望在备份中包含一组选定的文件，而不是定义要排除的文件列表。
+- en: Solution
+  id: totrans-190
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'When you want to back up just a few files, you can do this on the command line.
+    *--include=* operates differently than *--exclude=* because it doesn’t really
+    mean “include,” it means “do not exclude.” It needs two additional options, *--include=*/*
+    and *--exclude=''*''*, as this example of transferring a single file shows:'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您只想备份几个文件时，可以在命令行上执行此操作。*--include=* 操作与*--exclude=* 不同，因为它实际上并不意味着“包括”，而是“不排除”。它需要两个额外选项，*--include=*/*
+    和 *--exclude='*'，如此单个文件的传输示例所示：
+- en: '[PRE19]'
+  id: totrans-192
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'You may transfer a list of files:'
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以传输文件列表：
+- en: '[PRE20]'
+  id: totrans-194
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: There must be no spaces between the equals sign and the curly brace, and no
+    spaces between the commas and single quotes.
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 等号和大括号之间不能有空格，逗号和单引号之间也不能有空格。
+- en: 'If there are multiple files with the same name in different locations in your
+    source directory, *rsync* will transfer all of them. In this example only */home/duchess/Music/arias/sopranos/lho-perduta.wav*
+    is transferred because the pattern *soprano/lho-perduta.wav* is unique in */Music/arias*:'
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果在源目录中的不同位置有多个同名文件，则*rsync*将传输所有这些文件。在此示例中，仅传输了*/home/duchess/Music/arias/sopranos/lho-perduta.wav*，因为*arias/sopranos/lho-perduta.wav*模式在*/Music/arias*中是唯一的：
+- en: '[PRE21]'
+  id: totrans-197
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'That transfers only a single file, but all the subdirectories in *~/Music/arias*
+    are copied. Use the *-m, --prune-empty-dirs* option to prevent copying empty directories,
+    like this example:'
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 仅传输一个文件，但所有子目录在*~/Music/arias*都会被复制。使用*-m, --prune-empty-dirs*选项来防止复制空目录，如下例：
+- en: '[PRE22]'
+  id: totrans-199
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: When you have more than a few files to include, store your list in a plain-text
+    file (see Recipes [7.10](#rec-simple-include) and [7.11](#rec-includes-excludes)).
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您有多个要包含的文件时，请将列表存储在纯文本文件中（参见[7.10](#rec-simple-include)和[7.11](#rec-includes-excludes)的示例）。
+- en: Discussion
+  id: totrans-201
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*--include=*/* tells *rsync* to traverse your entire source directory.'
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*--include=*/* 告诉*rsync*遍历整个源目录。'
+- en: '*--include=[files]* means do not exclude these files.'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*--include=[files]* 意味着不排除这些文件。'
+- en: '*--exclude=''*''* tells *rsync* to exclude everything not included.'
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*--exclude=''*''* 告诉 *rsync* 排除所有未被包含的内容。'
+- en: Remember that all filepaths are relative to your source directory and not your
+    system’s root directory.
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 记住所有文件路径都是相对于你的源目录而不是系统的根目录。
+- en: See Also
+  id: totrans-206
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 rsync*'
+  id: totrans-207
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 rsync*'
+- en: '[Recipe 7.10](#rec-simple-include)'
+  id: totrans-208
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 7.10](#rec-simple-include)'
+- en: '[Recipe 7.11](#rec-includes-excludes)'
+  id: totrans-209
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 7.11](#rec-includes-excludes)'
+- en: 7.10 Managing Includes with a Simple Include File
+  id: totrans-210
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.10 使用简单包含文件管理包含内容
+- en: Problem
+  id: totrans-211
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your includes are too many for a command-line incantation, and you want to maintain
+    your list in a file that *rsync* can read. You also want this to be simple, if
+    possible, thanks to past experience with *rsync* include/exclude files that never
+    would work right.
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的包含内容对于命令行来说太多了，你希望将列表维护在一个 *rsync* 能读取的文件中。你也希望如果可能的话，这一切都简单些，多亏了以前与 *rsync*
+    的包含/排除文件的经验，那些东西从来就不会正常工作。
+- en: Solution
+  id: totrans-213
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The simplest way to maintain a list, without going crazy over figuring out
+    *rsync*’s include/exclude syntax, is to create a plain list of files that you
+    provide to the *--files-from=* option. You don’t have to worry about getting them
+    in the right order, or using *rsync*’s filter notation, just a plain list with
+    whatever files and directories you want. The only gotcha is every item in your
+    list must be relative to your source directory. In the following example, all
+    list items are relative to */home/duchess*:'
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 维护清单的最简单方法，不要因为要理解 *rsync* 的包含/排除语法而感到烦躁，就是创建一个纯文本文件清单，然后将其提供给 *--files-from=*
+    选项。你不必担心它们的顺序，也不用使用 *rsync* 的过滤符号，只需一个包含你想要的文件和目录的简单清单即可。唯一需要注意的是你清单中的每个条目都必须是相对于你的源目录的路径。在下面的示例中，所有清单条目都相对于
+    */home/duchess*：
+- en: '[PRE23]'
+  id: totrans-215
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'Then use the list with the *--files-from* option:'
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后使用带有 *--files-from* 选项的列表：
+- en: '[PRE24]'
+  id: totrans-217
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: Discussion
+  id: totrans-218
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: This is the easiest way to maintain a list of files and directories to back
+    up. There are no excludes, no wildcards, no funny syntax, just a nice clean understandable
+    list.
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是维护备份文件和目录列表的最简单方法。没有排除项，没有通配符，没有奇怪的语法，只是一个清晰易懂的干净列表。
+- en: When you use the tilde to indicate your home directory, leave off the equals
+    sign from *--files-from*, like the last example in the recipe.
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你使用波浪线表示你的主目录时，与配方中的最后一个示例一样，不要加上 *--files-from=* 中的等号。
+- en: See Also
+  id: totrans-221
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 rsync*'
+  id: totrans-222
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 rsync*'
+- en: '[Recipe 7.9](#rec-include-files)'
+  id: totrans-223
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 7.9](#rec-include-files)'
+- en: '[Recipe 7.11](#rec-includes-excludes)'
+  id: totrans-224
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 7.11](#rec-includes-excludes)'
+- en: 7.11 Managing Includes and Excludes with an Exclude File
+  id: totrans-225
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.11 使用排除文件管理包含和排除内容
+- en: Problem
+  id: totrans-226
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You like the simple include file concept in [Recipe 7.10](#rec-simple-include),
+    but you really want to have both includes and excludes.
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你喜欢配方 [7.10](#rec-simple-include) 中的简单包含文件概念，但你真的想要同时包含和排除。
+- en: Solution
+  id: totrans-228
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'What you want is an *rsync* exclude file. An exclude file provides more flexibility
+    and contains both includes and excludes. The following example illustrates a basic
+    configuration. Every item must start by including the source root, which in this
+    example is */home/duchess*, and end with excluding the source root:'
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要一个 *rsync* 排除文件。排除文件提供了更多的灵活性，并包含包括和排除的内容。下面的示例展示了一个基本的配置。每个条目必须以源根目录开始，本示例中为
+    */home/duchess*，并以排除源根目录结束：
+- en: '[PRE25]'
+  id: totrans-230
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'Feed it to *rsync* with the *exclude-from=* option:'
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将其输入 *rsync* 的 *--exclude-from=* 选项：
+- en: '[PRE26]'
+  id: totrans-232
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: Discussion
+  id: totrans-233
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'The *exclude-list.txt* example demonstrates backing up:'
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*exclude-list.txt* 示例演示了备份：'
+- en: Two dotfiles, *.config* and *.local*
+  id: totrans-235
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 两个点文件，*.config* 和 *.local*
+- en: A single subdirectory of */Documents*, */jazz*
+  id: totrans-236
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/Documents*、*/jazz* 中的单个子目录'
+- en: A single file in */Music*, *schedule.odt*, and only *.ogg* files in */Music/arias/*
+  id: totrans-237
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/Music* 中的单个文件 *schedule.odt*，以及 */Music/arias/* 中的 *.ogg* 文件'
+- en: A single directory in */Videos*, */courses*
+  id: totrans-238
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/Videos*、*/courses* 中的单个目录'
+- en: There must be no spaces between lines, and comments (#) are useful for reminding
+    you of the purpose of each section, and for adding a bit of whitespace. Preface
+    your includes with the plus sign and the excludes with the minus sign.
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 行间不应该有空格，评论符号（#）对于提醒每个部分的目的以及增加一些空白是有用的。包含的部分前面要加上加号，排除的部分前面要加上减号。
+- en: 'All other files in */home/duchess* are excluded from backup. Includes must
+    always come first. As the example file shows, you have to be precise in defining
+    each include/exclude. Includes must be listed in their directory hierarchy order,
+    with all subdirectories. For example, this will fail with all files excluded:'
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有其他位于*/home/duchess*中的文件都被排除在备份之外。必须首先包括。
+- en: '[PRE27]'
+  id: totrans-241
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'Try including */Documents*:'
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尝试包括*/Documents*：
+- en: '[PRE28]'
+  id: totrans-243
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'Now all the subdirectories and their contents in */Documents* are transferred,
+    and not just */compositions*. To copy only */compositions* you have to exclude
+    */Documents*; it is not enough to exclude only */duchess*. The following example
+    copies only */duchess/Documents/compositions/* and nothing else:'
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在*/Documents*中的所有子目录及其内容都被传输，而不仅仅是*/compositions*。要仅复制*/compositions*，您必须排除*/Documents*；仅排除*/duchess*是不够的。以下示例仅复制*/duchess/Documents/compositions/*而不复制其他任何内容：
+- en: '[PRE29]'
+  id: totrans-245
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'You may use wildcards to include or exclude files by type. For example, include
+    all *.ogg* and *.flac* files, exclude all *.wav* files, and exclude all *cache*
+    and *temp* directories:'
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用通配符按类型包括或排除文件。例如，包括所有*.ogg*和*.flac*文件，排除所有*.wav*文件，以及排除所有*cache*和*temp*目录：
+- en: '[PRE30]'
+  id: totrans-247
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: You may have multiple source directories.
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以有多个源目录。
+- en: There is always just one destination directory.
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 始终只有一个目标目录。
+- en: See also
+  id: totrans-250
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参见
+- en: '*man 1 rsync*'
+  id: totrans-251
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 rsync*'
+- en: '[Recipe 7.10](#rec-simple-include)'
+  id: totrans-252
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 7.10](#rec-simple-include)'
+- en: 7.12 Limiting rsync’s Bandwidth Use
+  id: totrans-253
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.12 限制rsync的带宽使用
+- en: Problem
+  id: totrans-254
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Large file transfers can use a lot of network bandwidth and slow down everything.
+    You want a simple way to restrict *rsync*’s bandwidth use without implementing
+    something complex like traffic shaping.
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大文件传输可能会使用大量网络带宽并减慢所有操作。您希望有一种简单的方法来限制*rsync*的带宽使用，而不实施像流量整形这样复杂的东西。
+- en: Solution
+  id: totrans-256
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use *rsync*’s *--bwlimit* option. This example limits it to 512 Kbps:'
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*rsync*的*--bwlimit*选项。以下示例将其限制为512 Kbps：
+- en: '[PRE31]'
+  id: totrans-258
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: Discussion
+  id: totrans-259
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '*--bwlimit* only accepts values in kilobits.'
+  id: totrans-260
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*--bwlimit*只接受以千位为单位的值。'
+- en: See Also
+  id: totrans-261
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 rsync*'
+  id: totrans-262
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 rsync*'
+- en: 7.13 Building an rsyncd Backup Server
+  id: totrans-263
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.13 构建rsyncd备份服务器
+- en: Problem
+  id: totrans-264
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want your users to back up their own data on a central backup server, but
+    you don’t want to give them shell accounts on your backup server.
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望用户在中央备份服务器上备份自己的数据，但又不想在备份服务器上给他们提供shell帐户。
+- en: Solution
+  id: totrans-266
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Set up a central backup server, and run *rsync* in daemon mode. You should have
+    name services already set up, and the hosts on your network have access to the
+    backup server. Users will not need login accounts on the server because you will
+    use *rsync*’s own access controls and user authorization to control access to
+    the *rsync* archives.
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置一个中央备份服务器，并以守护进程模式运行*rsync*。您应该已经设置了名称服务，并且网络上的主机可以访问备份服务器。用户不需要在服务器上有登录帐户，因为您将使用*rsync*自己的访问控制和用户授权来控制对*rsync*存档的访问。
+- en: For LAN Use Only
+  id: totrans-268
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 仅限局域网使用
+- en: This is suitable for LAN use only, and not over untrusted networks, because
+    the *rsync* daemon does not encrypt the authentication or file transfers. For
+    encrypted transfers you need OpenVPN ([Chapter 13](ch13.xhtml#cha-openvpn)).
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这仅适用于局域网使用，不适用于不受信任的网络，因为*rsync*守护程序不会对认证或文件传输进行加密。要进行加密传输，您需要OpenVPN（[第13章](ch13.xhtml#cha-openvpn)）。
+- en: '*rsync* must be installed on all machines. *rsyncd* runs on the backup server,
+    and clients will use the *rsync* command to connect to the server.'
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在所有机器上必须安装*rsync*。*rsyncd*在备份服务器上运行，客户端将使用*rsync*命令连接服务器。
+- en: 'On the backup server, edit or create */etc/rsyncd.conf* to create an *rsync*
+    module defining the archive:'
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在备份服务器上编辑或创建*/etc/rsyncd.conf*以创建定义存档的*rsync*模块：
+- en: '[PRE32]'
+  id: totrans-272
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'Create your */backups* directory, mode 0700, owned by root, to prevent unauthorized
+    access from anyone who has access to the server:'
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建您的*/backups*目录，模式为0700，由root所有，以防止任何有权访问服务器的人员未经授权访问：
+- en: '[PRE33]'
+  id: totrans-274
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'Start *rsyncd* on the server in daemon mode with systemd:'
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在服务器上以守护进程模式使用systemd启动*rsyncd*：
+- en: '[PRE34]'
+  id: totrans-276
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: On Debian/Ubuntu it is *rsync.service*.
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Debian/Ubuntu上，它是*rsync.service*。
+- en: 'If your Linux does not have systemd, start it with the *rsync* command:'
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的Linux系统没有systemd，请使用*rsync*命令启动它：
+- en: '[PRE35]'
+  id: totrans-279
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'On the backup server, test that *rsyncd* is listening and accepting connections:'
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在备份服务器上测试*rsyncd*是否正在监听并接受连接：
+- en: '[PRE36]'
+  id: totrans-281
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'Then test from another PC on your network using the server’s hostname or IP
+    address:'
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后从网络上的另一台PC上使用服务器的主机名或IP地址进行测试：
+- en: '[PRE37]'
+  id: totrans-283
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'Now you know that it is ready to transfer files. Test that you can copy files
+    to your new *rsyncd* server:'
+  id: totrans-284
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您知道它已准备好传输文件。测试您是否可以将文件复制到您的新*rsyncd*服务器：
+- en: '[PRE38]'
+  id: totrans-285
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'Now view the nice new uploaded files:'
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在查看漂亮的新上传文件：
+- en: '[PRE39]'
+  id: totrans-287
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: 'Upload a few more files to the server, then download files to a different computer
+    from the *rsyncd* server:'
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 向服务器上传更多文件，然后从 *rsyncd* 服务器下载文件到另一台计算机：
+- en: '[PRE40]'
+  id: totrans-289
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: Everything works. Take a break and enjoy your success.
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一切顺利。休息一下，享受您的成功。
+- en: Discussion
+  id: totrans-291
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: This is not a secure form of file transfer because there is no encryption, and
+    anyone on the network can access the files. It is suitable to use on your local
+    network for easy archiving and file sharing.
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这不是一种安全的文件传输形式，因为没有加密，网络上的任何人都可以访问文件。适合在本地网络上进行简单的归档和文件共享。
+- en: '*rsync [hostname]::* needs double colons when connecting to an *rsync* server
+    running in daemon mode. This tells *rsync* to look for a module name.'
+  id: totrans-293
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 连接到运行在守护程序模式下的 *rsync* 服务器时，*rsync [hostname]::* 需要双冒号。这告诉 *rsync* 查找模块名称。
+- en: 'These are the command options in the */etc/rsyncd.conf* example:'
+  id: totrans-294
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些是 */etc/rsyncd.conf* 示例中的命令选项：
+- en: '*[backup_dir1]*'
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*[backup_dir1]*'
+- en: The module name can be anything you want.
+  id: totrans-296
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 模块名称可以随意设置。
+- en: '*path =*'
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*path =*'
+- en: Defines the directory for the module to use.
+  id: totrans-298
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义模块要使用的目录。
+- en: '*comment =*'
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*comment =*'
+- en: This is a brief description to remind you who the module belongs to, or what
+    it is for.
+  id: totrans-300
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是一个简要描述，提醒您模块属于谁，或者用于什么用途。
+- en: '*list=yes*'
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*list=yes*'
+- en: Permits users to see a list of files in the module. *no* hides the module.
+  id: totrans-302
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许用户查看模块中的文件列表。*no* 将隐藏模块。
+- en: '*read only = no*'
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*read only = no*'
+- en: This allows users to upload files to the server.
+  id: totrans-304
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许用户上传文件到服务器。
+- en: '*use chroot = no*'
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*use chroot = no*'
+- en: Overrides the default of *use chroot = yes*. *chroot* is *change root*, sometimes
+    called a *chroot jail*. A *chroot jail* is a separate environment inside your
+    filesystem that contains its own root filesystem, commands, libraries, and everything
+    else it needs to function. This is not a secure environment, though it is commonly
+    thought of as a security tool. For *rsync*, the man page describes this as useful
+    protection from configuration errors. The trade-off is *rsync* is blocked from
+    following symlinks to files outside of the chroot environment, and it complicates
+    preserving UIDs and GIDs by name. As they say, your mileage may vary, and it may
+    be a good option for you. See the *use chroot* section of *rsyncd.conf (5)*.
+  id: totrans-306
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 覆盖了 *use chroot = yes* 的默认设置。*chroot* 是 *change root*，有时被称为 *chroot jail*。*chroot
+    jail* 是您文件系统内的一个独立环境，包含其自己的根文件系统、命令、库以及所有其他所需内容。虽然通常被视为安全工具，但这并不是一个安全的环境。对于 *rsync*，手册页面将其描述为对配置错误有用的保护措施。折衷之处在于，*rsync*
+    被阻止跟随符号链接到 *chroot* 环境外的文件，且通过名称保存 UID 和 GID 复杂化。正如人们所说，效果因人而异，对您可能是一个不错的选择。参见
+    *rsyncd.conf (5)* 的 *use chroot* 部分。
+- en: Set both *uid* and *gid* to *root* or *0*. This preserves UIDs and GIDs, and
+    manages permissions correctly.
+  id: totrans-307
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 *uid* 和 *gid* 都设置为 *root* 或 *0*。这样可以保留 UID 和 GID，并正确管理权限。
+- en: If any of your transfers fail, look at the *rsync* error messages. They will
+    tell you if you made a mistake in your filepaths, misspelled something, or couldn’t
+    connect to the server, and give useful hints for correcting the problem.
+  id: totrans-308
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的任何传输失败，请查看 *rsync* 错误消息。它们会告诉您是否在文件路径中出错、拼写错误或无法连接到服务器，并提供有用的修正提示。
+- en: If you are running a Linux without systemd, consult its documentation to learn
+    how to start and stop rsyncd.
+  id: totrans-309
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您使用的是没有 systemd 的 Linux，请查阅其文档，了解如何启动和停止 rsyncd。
+- en: See [Recipe 7.14](#rec-access-control) to learn how to set up access controls.
+  id: totrans-310
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见 [7.14 节](#rec-access-control) 了解如何设置访问控制。
+- en: See Also
+  id: totrans-311
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 rsyncd.conf*'
+  id: totrans-312
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 rsyncd.conf*'
+- en: 7.14 Limiting Access to rsyncd Modules
+  id: totrans-313
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.14 限制对 rsyncd 模块的访问
+- en: Problem
+  id: totrans-314
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You don’t want an open *rsyncd* server, and you want users to have their own
+    protected modules that other users cannot access.
+  id: totrans-315
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不希望开放 *rsyncd* 服务器，并希望用户拥有自己的受保护模块，其他用户无法访问。
+- en: Solution
+  id: totrans-316
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*rsyncd* comes with its own simple authentication and access controls. Create
+    a new file containing username/password pairs, and add *auth users* and *secrets
+    file* directives to */etc/rsyncd.conf*.'
+  id: totrans-317
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*rsyncd* 自带简单的身份验证和访问控制。创建一个新文件，包含用户名/密码对，并将 *auth users* 和 *secrets file*
+    指令添加到 */etc/rsyncd.conf*。'
+- en: 'First create the password file. In the following example, */etc/rsyncd-users*
+    sets up three users and their passwords:'
+  id: totrans-318
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先创建密码文件。在下面的示例中，*/etc/rsyncd-users* 设置了三个用户及其密码：
+- en: '[PRE41]'
+  id: totrans-319
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: 'Set permissions to read-write for root-only:'
+  id: totrans-320
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置权限为仅根用户读写：
+- en: '[PRE42]'
+  id: totrans-321
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: 'Now create a module for one of your users in */etc/rsyncd.conf*. This example
+    creates a module for Duchess, using the */backups/duchess* directory on the *rsync*
+    server:'
+  id: totrans-322
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在在*/etc/rsyncd.conf*为您的一个用户创建一个模块。此示例为 Duchess 创建了一个模块，使用*rsync*服务器上的*/backups/duchess*目录：
+- en: '[PRE43]'
+  id: totrans-323
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: 'Create your user’s backup directory, like this example for Duchess, with mode
+    0700:'
+  id: totrans-324
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建您的用户备份目录，例如 Duchess 的此示例，权限设置为 0700：
+- en: '[PRE44]'
+  id: totrans-325
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: 'Now try logging in:'
+  id: totrans-326
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在尝试登录：
+- en: '[PRE45]'
+  id: totrans-327
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: 'Try transferring some files:'
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尝试传输一些文件：
+- en: '[PRE46]'
+  id: totrans-329
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: 'It worked! If the file transfer fails, check the *rsync* log to learn why.
+    On systemd Linuxes, read the most recent log entries in the status output:'
+  id: totrans-330
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 成功了！如果文件传输失败，请查看*rsync*日志了解原因。在 systemd Linux 上，阅读状态输出中的最新日志条目：
+- en: '[PRE47]'
+  id: totrans-331
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: On other Linux distributions the rsyncd log should be in */var/log*.
+  id: totrans-332
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在其他 Linux 发行版上，*rsyncd* 日志应该位于 */var/log*。
+- en: Discussion
+  id: totrans-333
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The username/password pairs are arbitrary and are not related to system user
+    accounts. *rsyncd* users have no access to the host system outside of their *rsync*
+    shares.
+  id: totrans-334
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户名/密码对是任意的，与系统用户帐户无关。*rsyncd*用户在其*rsync*共享之外没有访问主机系统的权限。
+- en: 'For additional security, add these directives to */etc/rsyncd.conf*:'
+  id: totrans-335
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了增加安全性，在*/etc/rsyncd.conf*中添加以下指令：
+- en: '*hosts allow*'
+  id: totrans-336
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*hosts allow*'
+- en: 'Use this to list hosts that are allowed to access the *rsyncd* archives. For
+    example, you can limit access to hosts on a single subnet:'
+  id: totrans-337
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用此选项列出允许访问*rsyncd*档案的主机。例如，您可以限制对单个子网上的主机的访问：
+- en: '[PRE48]'
+  id: totrans-338
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE48]'
+- en: All hosts not allowed are denied, so you don’t need a *hosts deny* directive.
+  id: totrans-339
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有未允许的主机都会被拒绝，因此您不需要一个*hosts deny*指令。
+- en: '*hosts deny*'
+  id: totrans-340
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*hosts deny*'
+- en: This usually isn’t needed, if you use *hosts allow*. It is useful for denying
+    access to specific hosts that cause annoyance.
+  id: totrans-341
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常情况下，如果使用*hosts allow*，则不需要这个。但对于拒绝访问引起麻烦的特定主机，它很有用。
+- en: The password file is in cleartext, so it must be restricted to the superuser.
+  id: totrans-342
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 密码文件以明文存储，因此必须限制为超级用户。
+- en: See Also
+  id: totrans-343
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 rsyncd.conf*'
+  id: totrans-344
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 rsyncd.conf*'
+- en: The Discussion in [Recipe 7.13](#rec-rsyncd-backup-server) to learn about the
+    command options.
+  id: totrans-345
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 7.13 节](#rec-rsyncd-backup-server)中的讨论了解命令选项。'
+- en: 7.15 Creating a Message of the Day for rsyncd
+  id: totrans-346
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 7.15 为 rsyncd 创建一条消息的尝试
+- en: Problem
+  id: totrans-347
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You’re running an *rsyncd* server, and you think it would be nice to greet users
+    with a cheerful message.
+  id: totrans-348
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您正在运行一个*rsyncd*服务器，并且您认为向用户致以愉快的问候会很好。
+- en: Solution
+  id: totrans-349
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Create your message of the day (MOTD) in a plain-text file, such as */etc/rsync-motd*:'
+  id: totrans-350
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在一个纯文本文件中创建您的每日消息（MOTD），例如*/etc/rsync-motd*：
+- en: '[PRE49]'
+  id: totrans-351
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE49]'
+- en: 'Then configure the MOTD file location at the top of */etc/rsyncd.conf*:'
+  id: totrans-352
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后在*/etc/rsyncd.conf*的顶部配置MOTD文件的位置：
+- en: '[PRE50]'
+  id: totrans-353
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE50]'
+- en: 'When users connect to your server, they will see your message:'
+  id: totrans-354
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当用户连接到您的服务器时，他们会看到您的消息：
+- en: '[PRE51]'
+  id: totrans-355
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE51]'
+- en: Discussion
+  id: totrans-356
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: A message of the day is an old Unix tradition. Use it for cheery greetings,
+    maintenance downtime announcements, security tips, backup tips, or anything you
+    think is important.
+  id: totrans-357
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每日消息是一个古老的 Unix 传统。您可以用它来欢迎问候、维护停机公告、安全提示、备份技巧或任何您认为重要的事情。
+- en: See Also
+  id: totrans-358
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 rsyncd.conf*'
+  id: totrans-359
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 rsyncd.conf*'

@@ -1,0 +1,858 @@
+- en: Chapter 5\. Connecting to a Network
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第5章 连接到网络
+- en: A standalone Linux system is powerful, but the scope of what the system is ultimately
+    capable of is limited. Only a single operator or administrator can use a standalone
+    system simultaneously. While the system can still run multiple workloads, its
+    services are restricted to local access.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 独立的Linux系统功能强大，但其最终能力范围有限。只有一个操作员或管理员可以同时使用独立系统。虽然系统仍然可以运行多个工作负载，但其服务仅限于本地访问。
+- en: Linux is a multitasking, multiuser operating system. One of its most outstanding
+    values is being networked with other computers to allow multiple users to run
+    various workloads simultaneously. Connecting a Linux system to a network enables
+    it to become part of a local network, a grid, a cloud, or the global internet.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux是一种多任务、多用户操作系统。它最突出的价值之一是能够与其他计算机联网，允许多用户同时运行各种工作负载。将Linux系统连接到网络使其能够成为本地网络、网格、云或全球互联网的一部分。
+- en: In this chapter, you will learn how to select an IP addressing scheme for your
+    network and some advantages and disadvantages of the static and dynamic options.
+    You also learn the security implications of connecting systems to a network. You
+    will learn how to, as much as possible, prevent security breaches by implementing
+    good security practices, such as using secure protocols, turning off unnecessary
+    services and daemons, and keeping systems patched and updated.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您将学习如何为您的网络选择IP寻址方案以及静态和动态选项的一些优缺点。您还将了解将系统连接到网络的安全影响。您将学习如何通过实施良好的安全实践，如使用安全协议、关闭不必要的服务和守护程序，以及保持系统的补丁和更新，尽可能地防止安全漏洞。
+- en: Plugging into a Network
+  id: totrans-4
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 连接到网络
+- en: There’s no great skill required to plug a server system into an existing network.
+    These days, as soon as a new system comes online, a Dynamic Host Configuration
+    Protocol (DHCP) server provides it with an IP address, subnet mask, gateway, Domain
+    Name System (DNS) servers, and some basic routing information. There are two schools
+    of thought concerning DHCP and servers. The first claims that all server systems
+    should have static IP addresses, and the second asserts that all systems should
+    use DHCP for IP address distribution and management. I’ve always configured servers,
+    printers, and networking equipment with static IP addresses near the lower end
+    of the IP address pool. For me, it makes good organizational sense to do so rather
+    than relying on DHCP and DNS services to maintain order for services that users
+    rely on so heavily.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将服务器系统连接到现有网络不需要太多技能。如今，一旦新系统上线，动态主机配置协议（DHCP）服务器将为其提供IP地址、子网掩码、网关、域名系统（DNS）服务器和一些基本的路由信息。关于DHCP和服务器有两种思想流派。一种认为所有服务器系统都应具有静态IP地址，另一种则认为所有系统都应使用DHCP进行IP地址分配和管理。我一直将服务器、打印机和网络设备配置为静态IP地址，这些IP地址接近IP地址池的下端。对我来说，这样做比依赖DHCP和DNS服务来维护用户非常依赖的服务的秩序更有组织性。
+- en: 'In the following sections, I describe the two IP addressing schemes—static
+    and dynamic—and the advantages and disadvantages of each. The example network
+    for each has the following IP addressing information:'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接下来的章节中，我将描述两种IP寻址方案——静态和动态——以及各自的优缺点。每种情况下的示例网络具有以下IP寻址信息：
+- en: 'Network: 192.168.1.0/24'
+  id: totrans-7
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 网络：192.168.1.0/24
+- en: 'Gateway: 192.168.1.254 (static IP address)'
+  id: totrans-8
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 网关：192.168.1.254（静态IP地址）
+- en: 'DNS: 192.168.1.1, 192.168.1.2 (static IP addresses)'
+  id: totrans-9
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: DNS：192.168.1.1, 192.168.1.2（静态IP地址）
+- en: This example network is for learning purposes and is only practical for the
+    smallest of companies or groups of users. This scheme will only work for small
+    companies because there are only 251 usable IP addresses on this network after
+    subtracting the gateway address and two DNS server addresses (254 – 3 = 251).
+    A user might have as many as five devices that consume IP addresses, and it’s
+    easy to see that it doesn’t take long to exhaust such a small pool.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例网络仅用于学习目的，仅适用于最小的公司或用户组。因为在这个网络上只有251个可用的IP地址（254 - 3 = 251，扣除网关地址和两个DNS服务器地址），所以这种方案只适用于小型公司。用户可能有多达五个消耗IP地址的设备，很容易看出这样一个小的地址池很快就会被用完。
+- en: Assigning a static IP address varies among Linux distributions. For these examples,
+    I use Debian and CentOS distributions.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 分配静态IP地址在Linux发行版中有所不同。在这些示例中，我使用Debian和CentOS发行版。
+- en: Static IP Addressing
+  id: totrans-12
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 静态IP地址分配
+- en: A static IP address is a “hard-coded” IP address embedded into a configuration
+    file. The IP address does not change unless it’s changed manually. Static IP addresses
+    do not depend on or use DHCP services. When assigning static IP addresses to systems,
+    you should decide on a reserved block of IP addresses that you use for servers,
+    network equipment (switches, routers, WiFi access points), printers, and any IP-capable
+    system that is not mobile. Workstations, laptops, tablets, phones, and other mobile
+    devices should use DHCP.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 静态 IP 地址是嵌入到配置文件中的“硬编码” IP 地址。除非手动更改，否则该 IP 地址不会变化。静态 IP 地址不依赖于或使用 DHCP 服务。在为系统分配静态
+    IP 地址时，您应该决定一个保留的 IP 地址块，用于服务器、网络设备（交换机、路由器、WiFi 接入点）、打印机以及任何不可移动的 IP 可能系统。工作站、笔记本电脑、平板电脑、手机和其他移动设备应使用
+    DHCP。
+- en: For example, using the network parameters mentioned in the preceding section,
+    I reserve 192.168.1.1 through 192.168.1.25 for servers, network equipment, printers,
+    and other stationary systems. As you note, the addresses 192.168.1.1 and .2 are
+    already used on this reserved list. You can exclude a range of IP addresses in
+    your DHCP configuration so that these addresses are not part of the available
+    IP address pool.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，在前一节提到的网络参数中，我保留了 192.168.1.1 到 192.168.1.25 用于服务器、网络设备、打印机和其他固定系统。正如您所注意到的，地址
+    192.168.1.1 和 .2 已在此保留列表中使用。您可以在 DHCP 配置中排除一段 IP 地址范围，以使这些地址不成为可用 IP 地址池的一部分。
+- en: One of the advantages of using a static pool of IP addresses is that network
+    services are stable. If you set up some inventory service and monitoring on your
+    network, which I highly recommend, having those statically addressed systems will
+    save some headaches for you. You’ll be able to compare inventories over time,
+    see what’s changed, measure growth, and plan for changes. Another advantage is
+    that you can find critical systems even if DNS and DHCP are down. A static IP
+    address gives you the stability you need, irrespective of any other services’
+    status.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用静态 IP 地址池的一个优点是网络服务稳定。如果在您的网络上设置了一些库存服务和监视，我强烈建议您，拥有这些静态寻址系统将为您节省一些麻烦。您将能够随时间比较库存、看到发生了什么变化、测量增长并计划变更。另一个优点是，即使
+    DNS 和 DHCP 失效，您也可以找到关键系统。静态 IP 地址为您提供了所需的稳定性，无论其他服务的状态如何。
+- en: Some network services require static IP addresses for the server systems on
+    which they reside. Services such as FTP, web, VPN, database, Active Directory,
+    and DNS require static IP addresses or are recommended to have them. The primary
+    disadvantage and argument against static IP addressing is management. The argument
+    is that managing static IP addresses is labor-intensive and might cause conflicts
+    elsewhere on the network. I don’t see this as a problem for most sysadmins because
+    the equipment you assign static IP addresses to lasts for years, and their locations
+    are stable. You don’t typically move a server to different locations within a
+    company; you never move them offsite to use and then return them as you do laptops,
+    tablets, and mobile phones. A reserved pool that’s excluded from your DHCP pool
+    prevents potential conflicts with other systems.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些网络服务要求服务器系统具有静态 IP 地址。FTP、Web、VPN、数据库、Active Directory 和 DNS 等服务需要静态 IP 地址或建议具有静态
+    IP 地址。静态 IP 地址分配的主要缺点和反对观点是管理。争论是管理静态 IP 地址是费时费力的，可能会在网络的其他地方引起冲突。对于大多数系统管理员来说，我不认为这是一个问题，因为您为静态
+    IP 地址分配的设备使用年限长，它们的位置是稳定的。您通常不会将服务器移动到公司内的不同位置；您不会像笔记本电脑、平板电脑和手机一样将它们移动到外部使用，然后归还。从
+    DHCP 池中排除的保留池可以防止与其他系统的潜在冲突。
+- en: Dynamic IP Addressing
+  id: totrans-17
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 动态 IP 地址分配
+- en: Using a DHCP service eliminates many of the IP address management problems that
+    plagued system administrators in the days before DHCP. Assigning static IP addresses
+    and keeping up with them for more than a few systems becomes a management nightmare.
+    Static IP addresses made a little more sense when users only had desktop systems.
+    But these days, with laptops, tablets, and mobile phones, a static IP address
+    would likely mean that the user would have network access only on their corporate
+    network, that they would experience IP conflicts if they ever connected to another
+    network, or that they would have to know how to change their systems from static
+    to dynamically assigned IP addresses each time they connected to a different network.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 DHCP 服务可以消除在 DHCP 之前困扰系统管理员的许多 IP 地址管理问题。为超过几个系统分配静态 IP 地址并跟踪它们变成了管理噩梦。在桌面系统唯一存在的时代，静态
+    IP 地址有点合理。但如今，有了笔记本电脑、平板电脑和手机，静态 IP 地址可能意味着用户只能在其企业网络上访问，如果他们连接到另一个网络，可能会遇到 IP
+    冲突，或者他们必须知道如何每次连接到不同网络时将其系统从静态分配 IP 地址改为动态分配 IP 地址。
+- en: For example, if your laptop has a static IP address for your corporate network
+    of 192.168.1.50, and you take that laptop to a remote location, such as your home,
+    to do some work, then your home would have to use the same IP addressing scheme
+    as your office. If it does, your laptop might conflict with a dynamically assigned
+    IP address for your television, someone’s mobile phone, or some other IP-capable
+    gadget. You might be able to work around the issue at home, but when you take
+    that same laptop to a hotel and attempt to connect to your corporate VPN, chances
+    are very good that you wouldn’t be able to because of that statically assigned
+    IP address. The hotel might use a 10.0.1.0 IP addressing scheme, so your laptop
+    would never connect.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，如果您的笔记本电脑在公司网络上有一个静态 IP 地址 192.168.1.50，而您带着笔记本电脑去家里或其他远程地点工作，那么您家里必须使用与您的办公室相同的
+    IP 地址方案。如果是这样，您的笔记本电脑可能与电视、某人的手机或其他支持 IP 的设备的动态分配 IP 地址发生冲突。在家里可能会解决这个问题，但是当您将同一台笔记本电脑带到酒店并尝试连接公司
+    VPN 时，很可能由于静态分配的 IP 地址而无法连接。酒店可能使用 10.0.1.0 IP 地址方案，因此您的笔记本电脑将永远无法连接。
+- en: Device mobility is one great advantage of DHCP. The user never has to reconfigure
+    anything no matter where the laptop connects to another network or the internet.
+    The other advantage is that once you configure a DHCP pool of addresses, there’s
+    not much maintenance for you to do. You’ll have to determine which lease duration
+    best suits your users. I’ve seen lease durations range from 24 hours to 30 days.
+    I don’t have a particular preference, but if you use a long lease duration (more
+    than a few days), you might have some occasional cleanup by removing duplicates,
+    stale leases, and so on. DHCP is supposed to clean up after itself but doesn’t
+    always.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设备的移动性是 DHCP 的一大优势。用户无论在笔记本电脑连接到另一个网络或互联网的任何地方，都无需重新配置任何内容。另一个优势是，一旦您配置了一个 DHCP
+    地址池，您就不需要做太多维护工作。您将需要确定哪种租约持续时间最适合您的用户。我见过的租约持续时间范围从 24 小时到 30 天不等。我没有特别偏爱，但如果您使用长租约（超过几天），您可能会偶尔需要通过删除重复、过期的租约等来进行一些清理工作。DHCP
+    应该在自身之后进行清理，但并非总是如此。
+- en: Whether to use static IP addressing, DHCP, or a mixture of the two is really
+    up to your personal preference for IP address management. You can still use a
+    pure DHCP scheme and reserve IP addresses by entering MAC addresses, making them
+    statically assigned. The only time there’s a problem is if you change network
+    interface cards (NICs). You must remember to update the DHCP reservations list
+    with the new NIC’s MAC address.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是否使用静态 IP 地址分配、DHCP 或两者混合取决于您个人对 IP 地址管理的偏好。您仍然可以使用纯 DHCP 方案，并通过输入 MAC 地址保留
+    IP 地址，使其静态分配。唯一的问题是如果您更改了网络接口卡（NIC），您必须记住使用新 NIC 的 MAC 地址更新 DHCP 预留列表。
+- en: Tip
+  id: totrans-22
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: Tip
+- en: 'If you change network interface card (NIC or adapter) settings, such as changing
+    from DHCP to a static IP address, you need to restart the adapter for those changes
+    to take effect. Restart the adapter by issuing these commands:'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果更改网络接口卡（NIC 或适配器）设置，例如从 DHCP 更改为静态 IP 地址，则需要重新启动适配器才能使这些更改生效。通过发出以下命令重新启动适配器：
+- en: '[PRE0]'
+  id: totrans-24
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: The adapter name varies by system, but some examples are `eth0` and `enp0s3`.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 适配器名称因系统而异，但一些示例是 `eth0` 和 `enp0s3`。
+- en: The next section discusses the security-related repercussions of placing systems
+    on the network and how you can apply best security practices to your systems.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来的部分讨论了将系统放置在网络上的安全相关后果，以及如何在您的系统上应用最佳安全实践。
+- en: Networking and Security
+  id: totrans-27
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 网络和安全
+- en: 'Two types of Linux systems can be considered secure: one powered off and one
+    powered on but not connected to a network. The powered-off system is safe from
+    over-the-network attacks, as are non-networked systems. The powered-off system’s
+    only security vulnerability is physical security. Someone with physical access
+    to the system could steal, dismantle, or damage it. Non-networked systems are,
+    as mentioned at the outset of the chapter, still somewhat useful but have limited
+    use beyond a single operator.'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可以认为两种类型的Linux系统是安全的：一个是关闭电源的系统，另一个是开机但未连接到网络的系统。关闭电源的系统免受网络攻击，非网络化系统同样如此。关闭电源的系统唯一的安全漏洞是物理安全性。有人可以物理访问系统，窃取、拆解或损坏它。虽然非网络化系统在本章开头提到过，仍然有一定的用处，但除了单个操作员之外的用途有限。
+- en: Once you network a system, you’ve exposed it to over-the-network attacks. Malicious
+    actors continuously scan IP address ranges, searching for vulnerable systems to
+    exploit. While many servers are exposed to the internet via [demilitarized zones
+    (DMZs)](https://oreil.ly/wxezB) or are inside corporate or home firewall-protected
+    networks, they are also susceptible to attack. Once inside your network, a malicious
+    actor can perform automated scans of all connected systems, searching for vulnerabilities.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦您将系统网络化，就暴露于网络攻击之下。恶意行为者不断扫描IP地址范围，寻找可利用的易受攻击系统。尽管许多服务器通过[非军事区（DMZ）](https://oreil.ly/wxezB)暴露在互联网上，或者位于企业或家庭防火墙保护的网络内部，它们仍然容易受到攻击。一旦进入您的网络，恶意行为者可以对所有连接的系统执行自动扫描，寻找漏洞。
+- en: Additionally, creating user accounts on your system decreases security because
+    of weak passwords, the potential for on-path attacks, and social engineering exploits
+    that might compromise one’s credentials to a malicious actor.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，在您的系统上创建用户账户会降低安全性，因为密码弱、存在路径攻击的潜在风险，以及社会工程学攻击可能会向恶意行为者泄露其凭据。
+- en: 'For these reasons, administrators must take the following measures:'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于这些原因，管理员必须采取以下措施：
+- en: Only grant what’s required for users to work (the principle of *least privilege*)
+  id: totrans-32
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 仅授予用户必要的工作权限（最小特权原则）
+- en: Enforce strong security policies for passwords, keys, or multifactor authentication
+  id: totrans-33
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 强制执行强密码、密钥或多因素认证的安全策略
+- en: Regularly patch and update systems
+  id: totrans-34
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 定期打补丁和更新系统
+- en: Perform periodic security audits on all systems, network equipment, and devices
+    that access corporate resources
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 对所有系统、网络设备和访问企业资源的设备定期进行安全审计
+- en: Preparing a System for Network Connectivity
+  id: totrans-36
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 为网络连接准备系统
+- en: When a system administrator provisions a new system and installs it into a rack,
+    plugging in network cables or connecting a virtual machine to a virtual network
+    is standard practice. We often rely on others to vet the systems’ function, purpose,
+    and security options. However, this is not always the case. New system installation
+    is often automatically performed by provisioning a “standard build” from a prepared
+    operating system image that could be months or years old. Using old images is
+    a poor security practice. If the system is immediately connected to a network
+    before it’s fully updated and secured, it’s vulnerable to attack and compromise
+    before it begins its regular duties on the network.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当系统管理员为新系统提供配置并将其安装到机架中时，插入网络电缆或将虚拟机连接到虚拟网络是标准做法。我们经常依赖他人来审查系统的功能、目的和安全选项。然而，并非总是如此。新系统安装通常是通过从准备好的操作系统镜像中提供“标准构建”自动执行的，这些镜像可能已有几个月或几年之久。使用旧镜像是一种糟糕的安全实践。如果在系统完全更新和安全保护之前立即将其连接到网络，则在正式开始在网络上执行常规任务之前，它可能会容易受到攻击和妥协。
+- en: A solution is to provision new systems on a private network where they can receive
+    updates, patches, and secure configurations from an internal repository before
+    being placed into a production network.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个解决方案是在私有网络上为新系统提供配置，这样它们可以从内部仓库接收更新、补丁和安全配置，然后再放入生产网络中。
+- en: Pruning Your Systems
+  id: totrans-39
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 修剪您的系统
+- en: Pruning means removing any unnecessary services and daemons from your systems.
+    There’s no need to create problems for yourself by running a production system
+    with multiple services that no one uses but that could leave your system vulnerable
+    to attack. Only install what you need to provide services to your users or other
+    systems.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 精简意味着从系统中删除任何不必要的服务和守护程序。没有必要通过运行生产系统中没有人使用但可能使系统容易受攻击的多个服务来给自己制造问题。只安装您需要为用户或其他系统提供服务的内容。
+- en: At a minimum, you need to have an SSH daemon running on your systems so that
+    you can log in and manage them remotely. If you find that some users require a
+    special service that’s only used occasionally or that leaves a system in a less
+    than secure state, either turn on the service when needed and turn it off when
+    it’s no longer being used or place the service on a secure network that can only
+    be accessed from a restricted number of systems.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 至少，您需要在系统上运行SSH守护程序，以便远程登录和管理系统。如果发现某些用户需要的特殊服务仅偶尔使用，或者使系统处于不太安全状态，则在需要时打开服务，不再使用时关闭，或将服务放置在只能从受限制的系统访问的安全网络上。
+- en: Securing Network Daemons
+  id: totrans-42
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 安全的网络守护程序
+- en: Deciding which network daemons to install and support is generally easy because
+    you know your system’s intended purpose each time you build a system. If it’s
+    a web server, you know that you’ll install a web service such as Apache or NGINX.
+    You’ll install MySQL, MariaDB, or some other database software if the system is
+    a database server. The issue is that for a system to be useful, it must expose
+    the corresponding TCP ports for its services. These network daemons are vulnerable
+    to attack and, therefore, must be protected.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确定安装和支持哪些网络守护程序通常很容易，因为每次构建系统时您都知道系统的预期用途。如果是Web服务器，您知道会安装诸如Apache或NGINX之类的Web服务。如果系统是数据库服务器，则会安装MySQL、MariaDB或其他一些数据库软件。问题在于，为了使系统有用，必须暴露其服务的相应TCP端口。这些网络守护程序容易受到攻击，因此必须加以保护。
+- en: There are multiple methods of securing network daemons and services, but installing
+    secure versions of the services you want to provide is the simplest method. For
+    example, if your new system is a DNS server, use DNSSEC. If you configure a Lightweight
+    Directory Access Protocol (LDAP) server, use LDAPS. And always use HTTPS for web
+    servers secured with a certificate. [Table 5-1](#examples_of_secure_services)
+    shows a partial list of secure services.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 保护网络守护程序和服务有多种方法，但安装所需提供的服务的安全版本是最简单的方法。例如，如果您的新系统是DNS服务器，请使用DNSSEC。如果配置轻量级目录访问协议（LDAP）服务器，请使用LDAPS。对于通过证书保护的Web服务器，请始终使用HTTPS。[表格 5-1](#examples_of_secure_services)显示了安全服务的部分列表。
+- en: Table 5-1\. Examples of secure services
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表格 5-1\. 安全服务示例
+- en: '| Protocol | Port | Description |'
+  id: totrans-46
+  prefs: []
+  type: TYPE_TB
+  zh: '| Protocol | Port | 描述 |'
+- en: '| --- | --- | --- |'
+  id: totrans-47
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| https | 443/tcp | HTTP protocol over TLS/SSL |'
+  id: totrans-48
+  prefs: []
+  type: TYPE_TB
+  zh: '| https | 443/tcp | TLS/SSL上的HTTP协议 |'
+- en: '| https | 443/udp | HTTP protocol over TLS/SSL |'
+  id: totrans-49
+  prefs: []
+  type: TYPE_TB
+  zh: '| https | 443/udp | TLS/SSL上的HTTP协议 |'
+- en: '| ldaps | 636/tcp | LDAP over SSL |'
+  id: totrans-50
+  prefs: []
+  type: TYPE_TB
+  zh: '| ldaps | 636/tcp | SSL上的LDAP |'
+- en: '| ldaps | 636/udp | LDAP over SSL |'
+  id: totrans-51
+  prefs: []
+  type: TYPE_TB
+  zh: '| ldaps | 636/udp | SSL上的LDAP |'
+- en: '| imaps | 993/tcp | IMAP over SSL |'
+  id: totrans-52
+  prefs: []
+  type: TYPE_TB
+  zh: '| imaps | 993/tcp | SSL上的IMAP |'
+- en: '| imaps | 993/udp | IMAP over SSL |'
+  id: totrans-53
+  prefs: []
+  type: TYPE_TB
+  zh: '| imaps | 993/udp | SSL上的IMAP |'
+- en: '| pop3s | 995/tcp | POP-3 over SSL |'
+  id: totrans-54
+  prefs: []
+  type: TYPE_TB
+  zh: '| pop3s | 995/tcp | SSL上的POP-3 |'
+- en: '| pop3s | 995/udp | POP-3 over SSL |'
+  id: totrans-55
+  prefs: []
+  type: TYPE_TB
+  zh: '| pop3s | 995/udp | SSL上的POP-3 |'
+- en: Using secure protocols and encryption doesn’t guarantee security. Still, it’s
+    better than using nonsecure protocols with no encryption. Vulnerabilities frequently
+    appear even for secure applications and protocols. Keeping your systems updated
+    and patched helps prevent security breaches. Security patches are generally available
+    before widespread damage can be done but not always, so you must remain vigilant
+    in maintaining security.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用安全协议和加密并不能保证安全性，但比起使用没有加密的非安全协议要好得多。即使是安全的应用程序和协议也经常会出现漏洞。保持系统更新和打补丁有助于防止安全漏洞。安全补丁通常在造成广泛破坏之前就可用，但并非总是如此，因此您必须保持警惕以维护安全性。
+- en: The Secure Shell Daemon
+  id: totrans-57
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 安全外壳守护程序
+- en: The most common network daemon available on almost every Linux system is the
+    Secure Shell (SSH) daemon. SSH provides a secure (encrypted) connection to a Linux
+    system over the network. Although the SSH daemon (SSHD) has built-in security
+    through its encrypted channel, its communications are still vulnerable to attack.
+    There are multiple methods of securing the SSHD so that attacks are less fruitful
+    for an attacker.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 几乎每个Linux系统上都有的最常见的网络守护程序是安全外壳（SSH）守护程序。SSH通过网络为Linux系统提供安全（加密）连接。尽管SSH守护程序（SSHD）通过其加密通道具有内置安全性，但其通信仍然容易受到攻击。有多种方法可以增强SSH的安全性，以减少攻击者的成功几率。
+- en: Limiting access to SSHD from specific hosts
+  id: totrans-59
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 限制从特定主机访问SSHD
+- en: 'There are two files that an administrator can use to limit access to any daemon:
+    */etc/hosts.allow* and */etc/hosts.deny*. They require no service restart because
+    they’re not configuration files, and the system checks them each time a client
+    accesses a service. The */etc/hosts.allow* file is the more important of the two
+    because its settings override those in the */etc/hosts.deny* file.'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 管理员可以使用两个文件来限制对任何守护程序的访问：*/etc/hosts.allow*和*/etc/hosts.deny*。它们不需要服务重启，因为它们不是配置文件，系统在每次客户端访问服务时检查它们。*/etc/hosts.allow*文件比*/etc/hosts.deny*文件更重要，因为其设置会覆盖后者的设置。
+- en: 'An */etc/hosts.allow* file entry to enable SSH connectivity from a single IP
+    address (192.168.1.50) is shown here:'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示了一个允许从单个IP地址（192.168.1.50）启用SSH连接的*/etc/hosts.allow*文件条目：
+- en: '[PRE1]'
+  id: totrans-62
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'This entry will only accept SSH connections from 192.168.1.50 and will deny
+    them from all other IP addresses. If you find that setting such an entry in */etc/hosts.allow*
+    doesn’t work for you, then you need to check for `tcp_wrapper` integration in
+    `sshd` using the following command:'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此条目仅接受来自192.168.1.50的SSH连接，并拒绝来自所有其他IP地址的连接。如果您发现在*/etc/hosts.allow*中设置这样的条目对您无效，则需要使用以下命令检查`sshd`中的`tcp_wrapper`集成：
+- en: '[PRE2]'
+  id: totrans-64
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'If you receive no response, your `sshd` wasn’t compiled with `tcp_wrappers`
+    enabled and is likely deprecated for your distribution. This is, unfortunately,
+    the case with many packaged `sshd` installations. The response you’re looking
+    for is similar to the following:'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果未收到响应，则您的`sshd`未启用`tcp_wrappers`，并且可能已被您的发行版淘汰。很遗憾，这在许多打包的`sshd`安装中是这样的。您希望看到的响应类似于以下内容：
+- en: '[PRE3]'
+  id: totrans-66
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'You have three options if your `sshd` doesn’t have `tcp_wrappers` support:'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的`sshd`不支持`tcp_wrappers`，您有三个选项：
+- en: Use other methods to secure `sshd` (`firewall` rules, `iptables`, `nftables`).
+  id: totrans-68
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用其他方法保护`sshd`（`firewall`规则，`iptables`，`nftables`）。
+- en: Compile `openssh_server` with `tcp_wrappers` enabled.
+  id: totrans-69
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用启用了`tcp_wrappers`的`openssh_server`进行编译。
+- en: Find and replace your current `sshd` with an `openssh_server` package that has
+    `tcp_wrappers` enabled.
+  id: totrans-70
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 查找并替换您当前的`sshd`为已启用`tcp_wrappers`的`openssh_server`软件包。
+- en: To give you options for `firewalld`, `iptables`, and `nftables`, consider the
+    following commands that perform similar functions to adding entries into */etc/hosts.allow*
+    and */etc/hosts.deny*.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了为`firewalld`、`iptables`和`nftables`提供选项，请考虑执行以下命令，这些命令执行与将条目添加到*/etc/hosts.allow*和*/etc/hosts.deny*相似的功能。
+- en: Implementing firewalld rules
+  id: totrans-72
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 实施`firewalld`规则
+- en: 'If you use `firewalld`, first delete the `ssh` service from `firewalld`’s rules:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您使用`firewalld`，首先从`firewalld`的规则中删除`ssh`服务：
+- en: '[PRE4]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Add a new `zone` rather than using the default `zone`:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 添加一个新的`zone`，而不是使用默认的`zone`：
+- en: '[PRE5]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'You must reload the `firewall` to make the new configuration active:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 必须重新加载`firewall`以使新配置生效：
+- en: '[PRE6]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'If you use `iptables`, you can restrict `ssh` access to a single IP address
+    with a single command:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您使用`iptables`，可以使用单个命令将`ssh`访问限制为单个IP地址：
+- en: '[PRE7]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'For netfilter (`nft`), you add a new `rule`:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于netfilter（`nft`），您可以添加一个新的`rule`：
+- en: '[PRE8]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'However if you receive an error that reads as follows, either you must create
+    a new table and chain for the rule, or use an existing chain:'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但是，如果您收到以下错误消息，则必须为规则创建新表和链，或使用现有链：
+- en: '[PRE9]'
+  id: totrans-84
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Use the following commands to create a new table and chain named `input`:'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用以下命令创建一个名为`input`的新表和链：
+- en: '[PRE10]'
+  id: totrans-86
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'Note that chain names are case-sensitive. For example, if you had used the
+    existing input chain, `INPUT`, you would not have received the error:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意链名区分大小写。例如，如果您使用了现有的输入链`INPUT`，您将不会收到错误：
+- en: '[PRE11]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Restart `nftables` after you’ve made your changes:'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在进行更改后重新启动`nftables`：
+- en: '[PRE12]'
+  id: totrans-90
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: The `nftables` system replaces `iptables` and combines functionality from `iptables`,
+    `ip6tables`, `arptables`, and `ebtables` into a single utility. You can read more
+    about `nftables` on the [netfilter homepage](https://oreil.ly/1RXmC).
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`nftables` 系统取代了 `iptables`，并将 `iptables`、`ip6tables`、`arptables` 和 `ebtables`
+    的功能合并到一个单一的实用程序中。您可以在 [netfilter 主页](https://oreil.ly/1RXmC) 上了解更多关于 `nftables`
+    的信息。'
+- en: You now have multiple methods of limiting access to the SSH daemon from random
+    hosts. If you don’t want to single out a specific IP address, you can isolate
+    the target system by subnet using 192.168.1.0/24 instead of the individual IP
+    address.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您现在有多种方法可以限制SSH守护进程从随机主机的访问。如果不想单独指定特定IP地址，您可以使用 192.168.1.0/24 代替单个IP地址来隔离目标系统。
+- en: Note
+  id: totrans-93
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Be aware that opening access from an entire subnet might still place your system
+    in significant danger if an intruder infiltrates your network. Ideally, you should
+    limit access to one or two hosts so that logs and monitoring systems are likelier
+    to detect a breach.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意，如果从整个子网打开访问权限，仍可能使您的系统处于显著的危险中，如果入侵者渗入您的网络。理想情况下，您应该将访问限制在一到两台主机上，以便日志和监控系统更容易检测到入侵。
+- en: You can also configure the SSH daemon to limit access to certain users using
+    the */etc/ssh/sshd_config* file. You must prevent the root user from using SSH.
+    You learn how to prevent root SSH access in the next section.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以通过修改 */etc/ssh/sshd_config* 文件来配置SSH守护进程，限制对特定用户的访问。您必须阻止根用户使用SSH。您将在下一节学习如何防止根用户通过SSH访问。
+- en: Denying SSH access for the root user
+  id: totrans-96
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 拒绝根用户通过SSH访问
+- en: You should, upon installation, deny SSH access to the root user. Some Linux
+    systems deny root logins via SSH by default, while others allow it. The root user
+    should never log into any system via SSH. A regular user should log in via SSH
+    and then become root or use the `sudo` command to perform tasks as the root user.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装后，您应该禁止根用户通过SSH访问。一些Linux系统默认禁止根用户通过SSH登录，而其他系统允许此操作。根用户绝不能通过SSH登录任何系统。普通用户应通过SSH登录，然后成为根用户或使用
+    `sudo` 命令以根用户身份执行任务。
+- en: 'You’ll have to check your */etc/ssh/sshd_config* for the following line:'
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要检查 */etc/ssh/sshd_config* 中的以下行：
+- en: '[PRE13]'
+  id: totrans-99
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'Change the `yes` to `no` and restart the SSH service:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 `yes` 改为 `no`，然后重新启动SSH服务：
+- en: '[PRE14]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: The root user cannot login via SSH. The root user may directly log into the
+    console.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根用户不能通过SSH登录。根用户可以直接登录控制台。
+- en: Using keys rather than passwords for authentication
+  id: totrans-103
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 使用密钥而不是密码进行身份验证
+- en: 'Password authentication is the least secure method for authenticating users.
+    Using key files is much more secure and efficient. You must make the following
+    changes to the */etc/ssh/sshd_config* file and restart `sshd` for the new configuration
+    to take effect:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 密码认证是验证用户身份最不安全的方法。使用密钥文件更安全和高效。您必须对 */etc/ssh/sshd_config* 文件进行以下更改，并重新启动 `sshd`
+    以使新配置生效：
+- en: '[PRE15]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'Change the `yes` to `no` and then look for the following two entries to ensure
+    they’re uncommented and set as shown:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 `yes` 改为 `no`，然后查找以下两个条目，确保它们被取消注释并设置如下所示：
+- en: '[PRE16]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Restart `sshd` to enable the new settings:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动 `sshd` 以启用新的设置：
+- en: '[PRE17]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'On the client side (local system), users need to do the following to set up
+    key pair authentication. Create the public/private key pair. This example is for
+    the user `tux`, and the remote target system is 192.168.1.99:'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在客户端（本地系统）上，用户需要执行以下操作来设置密钥对认证。本示例适用于用户 `tux`，远程目标系统为 192.168.1.99：
+- en: '[PRE18]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'Copy the generated keys to a remote host:'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将生成的密钥复制到远程主机：
+- en: '[PRE19]'
+  id: totrans-113
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Now try logging into the target system with `ssh tux@192.168.1.99` and check
+    to ensure that only the key(s) you want exist on the target system:'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在尝试使用 `ssh tux@192.168.1.99` 登录目标系统，并确保只有您想要的密钥存在于目标系统上：
+- en: '[PRE20]'
+  id: totrans-115
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: User `tux` has successfully logged into the remote host, `server1` (192.168.1.99),
+    using a secure key pair rather than a password.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户 `tux` 已成功使用安全密钥对而非密码登录到远程主机 `server1` (192.168.1.99)。
+- en: 'Remote connectivity: client to server'
+  id: totrans-117
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 远程连接：客户端到服务器
+- en: When connecting to a secure protocol service, your client software communicates
+    on a secure channel with the service daemon. You don’t have to have users do anything
+    special to negotiate a secure communications link between the client and the service
+    daemon.
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当连接到安全协议服务时，您的客户端软件与服务守护进程在安全通道上通信。您无需让用户执行任何特殊操作来在客户端和服务守护进程之间协商安全通信链接。
+- en: It’s just as important to keep client software up to date as it is for you,
+    as an administrator, to update the software on servers. I suggest you set up `cron`
+    jobs on each user system to automatically download and install updates and configure
+    each new system to receive regular updates with no user interaction required.
+    Be sure to schedule any required reboots for nighttime or when the user’s system
+    is idle.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让客户端软件保持更新就像让您作为管理员更新服务器软件一样重要。我建议您在每个用户系统上设置`cron`任务来自动下载和安装更新，并配置每个新系统以接收定期更新，无需用户交互。请确保将任何必需的重新启动安排在夜间或用户系统处于空闲状态时进行。
+- en: Summary
+  id: totrans-120
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 总结
+- en: In this chapter, you learned about selecting an IP addressing scheme for your
+    network and some advantages and disadvantages of the static and dynamic options.
+    You also now know the security implications of connecting systems to your network.
+    You should understand the dangers and how to, as much as possible, prevent security
+    breaches by implementing some good security practices, such as using secure protocols,
+    turning off unnecessary services and daemons, and keeping systems patched and
+    updated.
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您学习了为您的网络选择 IP 地址方案以及静态和动态选项的一些优缺点。您现在还了解了将系统连接到您的网络的安全影响。您应该了解到安全漏洞的危险以及如何尽可能通过实施一些良好的安全实践来预防安全漏洞，例如使用安全协议、关闭不必要的服务和守护程序，并保持系统的补丁和更新。
+- en: In the next chapter, you will learn how to install software via a package manager,
+    update your system, and install software from source code.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一章中，您将学习如何通过软件包管理器安装软件，更新系统，并从源代码安装软件。

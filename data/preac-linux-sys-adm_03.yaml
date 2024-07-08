@@ -1,0 +1,624 @@
+- en: Chapter 3\. Customizing the User Experience
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第三章。定制用户体验
+- en: This chapter covers customizing the user experience for yourself and your users.
+    System administrators are often called upon to make minor changes to a user’s
+    environment or to the default environment for all users on the system (the latter
+    is known as a global change). As long as any requested alterations and enhancements
+    don’t compromise system security or violate corporate policy, there’s no harm
+    in making changes that accommodate a user’s needs and workflows. Our duty as sysadmins
+    is, after all, to the company first (and then to the user). The user is your customer.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章讨论了为自己和您的用户定制用户体验。系统管理员经常需要对用户环境进行微小更改或对系统上所有用户的默认环境进行全局更改（后者称为全局更改）。只要任何请求的更改和增强不会损害系统安全或违反公司政策，那么进行符合用户需求和工作流的更改就没有坏处。作为系统管理员，我们的职责首先是对公司负责（然后才是对用户负责）。用户就是您的客户。
+- en: Customizing the default user environment globally changes the environment for
+    everyone on the system. However, you or the user can override some global parameters.
+    You made such an override in [Chapter 2](ch02.xhtml#working_with_permissions_and_privileged)
+    when you added the new `umask` to your user account. By setting your personal
+    `umask` preference after the global one was set, you superseded the one set by
+    the system. It’s a common practice for users to customize the environments they
+    have control over.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 全局定制默认用户环境会更改系统上所有用户的环境。但是，您或用户可以覆盖某些全局参数。在[第二章](ch02.xhtml#working_with_permissions_and_privileged)中，当您为用户账户添加新的
+    `umask` 时，您就做了这样的覆盖。通过在设置全局 umask 之后设置个人 umask 偏好，您超越了系统设置的 umask。用户定制他们可以控制的环境是一个常见的做法。
+- en: This chapter covers customizing your and your users’ environments by editing
+    key files in each user’s home directory. As a system administrator, you’ll also
+    explore the “global” versions of these environment files that can be changed or
+    added to, enabling you to create a specific experience for your users.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章将通过编辑每个用户家目录中的关键文件，讨论如何定制您和您的用户的环境。作为系统管理员，您还将探索这些环境文件的“全局”版本，这些文件可以进行更改或添加，从而为您的用户创建特定的体验。
+- en: Altering Home Directory Options
+  id: totrans-4
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 更改家目录选项
+- en: In every user’s home directory, a few hidden files control most of the user’s
+    environment. Since many Linux users use bash, it is the focus of the default and
+    custom user environment discussions in this chapter. (Other shells such as ash,
+    zsh, csh, and ksh are also available to you, and their hidden, user-editable files
+    are similar in name, function, and structure.)
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在每个用户的家目录中，几个隐藏文件控制着大部分用户的环境。由于许多 Linux 用户使用 bash，因此本章节将重点讨论默认和自定义用户环境的相关内容。（其他如
+    ash、zsh、csh 和 ksh 等 shell 也可供选择，它们的隐藏、可编辑文件在名称、功能和结构上相似。）
+- en: 'Because some users don’t have adequate skills to make the necessary changes,
+    you might have to make them on the users’ behalf. The relevant files are as follows:'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于一些用户没有足够的技能来进行必要的更改，您可能需要代表用户进行更改。相关文件如下：
+- en: '*.bashrc*'
+  id: totrans-7
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*.bashrc*'
+- en: '*.bash_logout*'
+  id: totrans-8
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*.bash_logout*'
+- en: Depending on your Linux distribution and previous configuration changes, you
+    might also see files named *.profile*, *.bash_profile*, *.bash_login*, and *.bash_history*
+    in your home directory.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据您的 Linux 发行版和之前的配置更改，您的家目录中还可能会看到名为 *.profile*、*.bash_profile*、*.bash_login*
+    和 *.bash_history* 的文件。
+- en: You won’t have to make changes to all of them. For example, the *.bash_history*
+    file doesn’t require any changes. It’s a log of issued commands, and there are
+    no user-configurable items. When you log into a Linux system, the *.bashrc* file
+    executes first, and then the *.bash_profile* executes. The *.bash_logout* file
+    executes upon logout.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不必对它们都进行更改。例如，*.bash_history* 文件不需要任何更改。它记录了发出的命令，没有用户可配置的项目。当您登录 Linux 系统时，*.bashrc*
+    文件首先执行，然后执行 *.bash_profile*。*.bash_logout* 文件在注销时执行。
+- en: Warning
+  id: totrans-11
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Be careful about which (and how many) programs, scripts, and messages you place
+    in your startup files because if they’re corrupt, damaged, or half open, you might
+    find that your login either is delayed or that you’re completely unable to log
+    in and will have to be rescued by another sysadmin. Pass this warning on to your
+    users, too.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您的启动文件中放置的程序、脚本和消息要小心，因为如果它们损坏、损坏或部分打开，您可能会发现您的登录要么延迟，要么您完全无法登录，需要其他系统管理员进行救援。也把这个警告传递给您的用户。
+- en: When you log into a Linux system interactively, a group of files automatically
+    execute to build your user environment, as described in the following sections.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您交互登录到Linux系统时，一组文件会自动执行，以构建您的用户环境，如以下部分所述。
+- en: Login Versus Nonlogin Shells
+  id: totrans-14
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 登录与非登录Shell
+- en: 'You’ll read and hear about two types of interactive shells: login and nonlogin.
+    An interactive login shell is one you SSH to or directly log into by supplying
+    a username and password or SSH key. An interactive nonlogin shell is one for which
+    you call a child shell from your command line:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您会听到和阅读关于两种类型的交互式shell：登录和非登录。交互式登录shell是您通过SSH登录或直接输入用户名和密码或SSH密钥登录的shell。交互式非登录shell是您从命令行调用子shell的shell：
+- en: '[PRE0]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: The `$SHLVL` is a variable that tracks your shell level. When you first log
+    into an interactive shell with a username and password or a key, your `$SHLVL`
+    is `1`. Child shells that you call after the first one increment the `SHLVL` variable.
+    A child shell called in this way is an interactive, nonlogin shell because it
+    is interactive but doesn’t involve a new login.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`$SHLVL` 是一个跟踪您的shell级别的变量。当您首次使用用户名和密码或密钥交互式登录shell时，您的`$SHLVL` 为`1`。调用第一个之后的子shell会增加`SHLVL`
+    变量。以这种方式调用的子shell是交互式的非登录shell，因为它是交互式的，但不涉及新的登录。'
+- en: /etc/bashrc
+  id: totrans-18
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: /etc/bashrc
+- en: When you interactively log into a Linux system, */etc/bashrc* is the first personalization
+    file to execute. The */etc/bashrc* file also executes on interactive nonlogin
+    shells. The */etc/bashrc* file is a global personalization file that provides
+    your login shell (bash) with functions and aliases. This file should be left as
+    is—meaning that even as a system administrator, you shouldn’t edit it.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您交互登录到Linux系统时，*/etc/bashrc* 是第一个执行的个性化文件。*/etc/bashrc* 文件还会在交互非登录shell上执行。*/etc/bashrc*
+    文件是一个全局的个性化文件，为您的登录shell（bash）提供函数和别名。这个文件应该保持不变——即使作为系统管理员，您也不应该编辑它。
+- en: 'The information and warning shown here are reprinted from the */etc/bashrc*
+    file. You’ll see them if you attempt to edit the file:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此处显示的信息和警告重新列印自*/etc/bashrc* 文件。如果您尝试编辑文件，您会看到它们：
+- en: '[PRE1]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: The */etc/bashrc* file is analogous to the *.bashrc* file in your home directory.
+    If you need to change functions and aliases, change them there.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/bashrc* 文件类似于您家目录中的*.bashrc* 文件。如果需要更改函数和别名，请在那里更改。'
+- en: /etc/profile
+  id: totrans-23
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: /etc/profile
+- en: 'The */etc/profile* file is a system-wide startup file. It provides generic
+    variables, paths, and other settings to all users. A warning in this file, shown
+    in the following code listing, states that you shouldn’t edit this file unless
+    you know what you’re doing:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/profile* 文件是一个系统范围的启动文件。它为所有用户提供通用的变量、路径和其他设置。该文件中的警告如下代码清单所示，指出除非您知道自己在做什么，否则不应编辑此文件：'
+- en: '[PRE2]'
+  id: totrans-25
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: Again, as stated in the warning, it’s better to edit the personalization files
+    in the user’s home directory or create other global personalization files under
+    */etc/profile.d*.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如警告所述，最好编辑用户家目录中的个性化文件，或在*/etc/profile.d* 下创建其他全局个性化文件。
+- en: However, these global settings can be overwritten by the individual personalization
+    startup files located in the home directory. It is the second environment personalization
+    file that executes when you log in to a Linux system. Strangely, it also calls
+    the */etc/bashrc* file so */etc/bashrc* is executed twice.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然而，这些全局设置可以被位于家目录中的个人化启动文件覆盖。这是您登录Linux系统时执行的第二个环境个性化文件。奇怪的是，它也调用*/etc/bashrc*
+    文件，因此*/etc/bashrc* 被执行两次。
+- en: The */etc/profile* file is analogous to the *.bash_profile* file in your home
+    directory. Change any environment settings there.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/profile* 文件类似于您家目录中的*.bash_profile* 文件。在那里更改任何环境设置。'
+- en: .bashrc
+  id: totrans-29
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: .bashrc
+- en: 'The *.bashrc* file is a hidden file in your home directory. It’s hidden because
+    you don’t want direct access to it when renaming or deleting files with a wildcard.
+    You have full ownership of the file and can edit it at will. This file is for
+    setting and including any functions you might need and setting aliases for commands.
+    After the global personalization files execute, the *.bashrc* file executes. The
+    *.bashrc* file, like its global analog, executes in interactive nonlogin shells.
+    The following is a listing of an unchanged *.bashrc* file. You should augment
+    or change your `PATH` in this file so that your shell behaves similarly for login
+    and nonlogin instances:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`.bashrc`文件是您家目录中的一个隐藏文件。它是隐藏的，因为在使用通配符重命名或删除文件时，您不希望直接访问它。您可以完全拥有该文件，并可以随意编辑它。该文件用于设置和包含您可能需要的任何函数，并为命令设置别名。全局个性化文件执行后，`.bashrc`文件将执行。`.bashrc`文件与其全局类似，在交互式非登录
+    shell 中执行。以下是未更改的`.bashrc`文件的列表。您应该在此文件中增加或更改您的`PATH`，以便您的 shell 在登录和非登录实例中表现类似：'
+- en: '[PRE3]'
+  id: totrans-31
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Aliases are useful shortcuts to commands and their options. For example, if
+    you want a “chatty” version of common commands, create the following aliases in
+    your `.bashrc` file:'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 别名是对命令及其选项的有用快捷方式。例如，如果您希望常用命令的“啰嗦”版本，在您的`.bashrc`文件中创建以下别名：
+- en: '[PRE4]'
+  id: totrans-33
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'The `-i` option means *interactive* and asks you to verify before the command
+    performs its action. You get a verification message when you issue the new aliased
+    `rm` command. This option is especially handy for destructive commands such as
+    `rm` because Linux isn’t “chatty.” For example, it provides no feedback when you
+    remove a file. The `-i` option provides you with a more Windows command–like experience
+    by prompting you to confirm your actions:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-i` 选项意味着*交互式*，并要求您在执行命令之前进行确认。当您发出新的别名`rm`命令时，您将收到一个验证消息。这个选项特别适用于破坏性命令，比如`rm`，因为Linux并不“啰嗦”。例如，当您删除文件时，它不提供任何反馈。`-i`
+    选项通过提示您确认操作，提供了更类似于 Windows 命令的体验：'
+- en: '[PRE5]'
+  id: totrans-35
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Aliases are handy if you run the same commands and options frequently. For
+    example, I create a few default aliases on every system I use. My most useful
+    one is for long lists:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您经常运行相同的命令和选项，别名非常方便。例如，我在使用的每个系统上都创建了几个默认别名。我最有用的一个是用于长列表：
+- en: '[PRE6]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: You can also create aliases on a per-session basis. This means that you can
+    simply issue the alias command at the command line without saving it to a file,
+    and it remains in effect until you log off or terminate the current shell.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以按会话创建别名。这意味着您可以简单地在命令行上发出别名命令，而无需将其保存到文件中，并且它保持有效，直到您注销或终止当前 shell。
+- en: Tip
+  id: totrans-39
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: Many sources recommend placing all customizations in the *.bashrc* file because
+    it’s executed for interactive login and nonlogin shells. Making your shell customizations
+    in the *.bashrc* file guarantees shell consistency.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 许多来源建议将所有定制内容放在`.bashrc`文件中，因为它适用于交互式登录和非登录 shell。在`.bashrc`文件中进行 shell 定制可以保证
+    shell 的一致性。
+- en: .bash_profile
+  id: totrans-41
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '`.bash_profile`'
+- en: 'The last file to execute on an interactive login is the *.bash_profile* file
+    in your home directory:'
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在交互式登录上执行的最后一个文件是您的家目录中的`.bash_profile`文件：
+- en: '[PRE7]'
+  id: totrans-43
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: You may place customizations in this file that will run in interactive login
+    shells, but they will not be available for interactive, nonlogin shells.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在此文件中放置定制内容，这些内容将在交互式登录 shell 中运行，但在交互式非登录 shell 中不可用。
+- en: .bash_logout
+  id: totrans-45
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '`.bash_logout`'
+- en: The *.bash_logout* file executes upon logout. This file is optional. It only
+    exists to allow users to clean up temporary files on exit. One could also use
+    it to log time using the shell or to send a message upon logout.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在注销时执行的最后一个文件是`.bash_logout`文件。此文件是可选的。它仅存在以允许用户在退出时清理临时文件。您还可以使用它来使用 shell
+    记录时间或在注销时发送消息。
+- en: In the next section, you learn the origins of these shell personalization files
+    and how you can change the defaults for each user.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一节中，您将了解这些 shell 个性化文件的起源，以及如何为每个用户更改默认设置。
+- en: The /etc/skel Directory
+  id: totrans-48
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: '`/etc/skel`目录'
+- en: 'The */etc/skel* directory is a special directory for holding files you want
+    every user to receive in their home directories as you create their user accounts.
+    The files you create in */etc/skel* don’t have to be hidden, although the default
+    ones are. These files are copied to the user’s home directory during account creation.
+    These are the global copies of the environment personalization files. The list
+    of */etc/skel* default files on Red Hat Enterprise Linux–based systems is shown
+    in the following example:'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/skel* 目录是一个特殊目录，用于保存您希望在创建用户账户时每个用户都收到的文件。您在 */etc/skel* 中创建的文件不必是隐藏文件，尽管默认是这样。这些文件在创建账户时会被复制到用户的主目录中。这些是环境个性化文件的全局副本。Red
+    Hat Enterprise Linux 系统上的 */etc/skel* 默认文件列表如下所示：'
+- en: '[PRE8]'
+  id: totrans-50
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: If you create a file in the */etc/skel* directory, it’s copied to a new user’s
+    home directory during account creation. Existing users won’t receive files placed
+    in */etc/skel* after you have created their accounts. You’ll have to manually
+    copy those to each user’s home directory and change the permissions so that the
+    user has full control of them.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您在 */etc/skel* 目录中创建文件，则在创建账户时，这些文件将被复制到新用户的主目录中。已存在的用户在您创建他们的账户后，将不会接收到放置在
+    */etc/skel* 中的文件。您需要手动将这些文件复制到每个用户的主目录，并更改权限，以便用户完全控制它们。
+- en: Note
+  id: totrans-52
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Linux has a local help system known as manual pages, or *man pages* for short.
+    If you need help for a command, configuration, or system setting, enter `man`
+    and the keyword to see if the documentation exists for it. For example, for help
+    with the `ls` command, you’d use `$ man ls`. You can move through the man pages
+    using vi (Vim) navigation commands.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 有一个称为手册页或简称 *man 页* 的本地帮助系统。如果您需要有关命令、配置或系统设置的帮助，请输入 `man` 和关键字以查看是否存在相关文档。例如，要获取
+    `ls` 命令的帮助，您可以使用 `$ man ls`。您可以使用 vi（Vim）导航命令浏览 man 页。
+- en: Customizing the Shell Prompt
+  id: totrans-54
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 自定义 Shell 提示符
+- en: Generally, users accept the default prompt presented by the system. Generically,
+    it looks like `[username@hostname pwd]$` or, specifically in my case, `[khess​@server1 ~]⁠$`.
+    The tilde (`~`) represents the user’s home directory. For example, in the previous
+    sections discussing personalization scripts, they are often represented as `~/.bashrc`
+    and `~/.bash_profile` to illustrate that these files are located in the user’s
+    home directories.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常，用户接受系统呈现的默认提示符。通常，它看起来像 `[username@hostname pwd]$`，或者在我的具体情况下，像 `[khess​@server1 ~]⁠$`。波浪号
+    (`~`) 表示用户的主目录。例如，在前面讨论个性化脚本的部分中，它们通常表示为 `~/.bashrc` 和 `~/.bash_profile`，以说明这些文件位于用户的主目录中。
+- en: 'To set a custom prompt, the shell provides a list of escape characters representing
+    locations, username, time, carriage returns, etc. For example, the default prompt
+    is given by the following code for the prompt environment variable (`PS1`): `PS1="[\u@\h
+    \W]\\$ "`. The system sets this default prompt in the */etc/bashrc* file. You
+    may override it with an entry in your *~/.bashrc* file.'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要设置自定义提示符，Shell 提供了一组转义字符，表示位置、用户名、时间、回车等。例如，提示符环境变量 (`PS1`) 的默认提示符由以下代码给出：`PS1="[\u@\h
+    \W]\\$ "`。系统在 */etc/bashrc* 文件中设置此默认提示符。您可以在您的 *~/.bashrc* 文件中覆盖它。
+- en: Bash allows these prompt strings to be customized by inserting a number of backslash-escaped
+    special characters that are decoded as shown in [Table 3-1](#backslash_escaped_special_characters).
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Bash 允许通过插入多个反斜杠转义的特殊字符来定制这些提示字符串，如 [表 3-1](#backslash_escaped_special_characters)
+    所示解码。
+- en: Table 3-1\. Backslash-escaped special characters
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 3-1\. 反斜杠转义的特殊字符
+- en: '| Special character | Description |'
+  id: totrans-59
+  prefs: []
+  type: TYPE_TB
+  zh: '| 特殊字符 | 描述 |'
+- en: '| --- | --- |'
+  id: totrans-60
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| `\a` | An ASCII bell character (07) |'
+  id: totrans-61
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\a` | ASCII 响铃字符（07） |'
+- en: '| `\d` | The date in “Weekday Month Date” format (e.g., “Tue May 26”) |'
+  id: totrans-62
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\d` | “星期 月份 日期” 格式的日期（例如，“周二 5 月 26 日”） |'
+- en: '| `\D{format}` | The format is passed to `strftime(3)` and the result is inserted
+    into the prompt string; an empty format results in a locale-specific time representation.
+    The braces are required. |'
+  id: totrans-63
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\D{format}` | 格式将传递给 `strftime(3)`，并将结果插入到提示字符串中；空格式将得到本地化的时间表示。大括号是必需的。
+    |'
+- en: '| `\e` | An ASCII escape character (033) |'
+  id: totrans-64
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\e` | ASCII 转义字符（033） |'
+- en: '| `\h` | The hostname up to the first `''.''` |'
+  id: totrans-65
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\h` | 直到第一个 `''.''` 的主机名 |'
+- en: '| `\H` | The hostname |'
+  id: totrans-66
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\H` | 主机名 |'
+- en: '| `\j` | The number of jobs currently managed by the shell |'
+  id: totrans-67
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\j` | 当前由 Shell 管理的作业数 |'
+- en: '| `\l` | The basename of the shell’s terminal device name |'
+  id: totrans-68
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\l` | Shell 终端设备名称的基本名称 |'
+- en: '| `\n` | Newline |'
+  id: totrans-69
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\n` | 换行符 |'
+- en: '| `\r` | Carriage return |'
+  id: totrans-70
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\r` | 回车符 |'
+- en: '| `\s` | The name of the shell, the basename of `$0` (the portion following
+    the final slash) |'
+  id: totrans-71
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\s` | Shell的名称，即`$0`的基本名称（最后斜杠后的部分） |'
+- en: '| `\t` | The current time in 24-hour HH:MM:SS format |'
+  id: totrans-72
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\t` | 当前时间，24小时制的HH:MM:SS格式 |'
+- en: '| `\T` | The current time in 12-hour HH:MM:SS format |'
+  id: totrans-73
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\T` | 当前时间，12小时制的HH:MM:SS格式 |'
+- en: '| `\@` | The current time in 12-hour am/pm format |'
+  id: totrans-74
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\@` | 当前时间，12小时制的上午/下午格式 |'
+- en: '| `\A` | The current time in 24-hour HH:MM format |'
+  id: totrans-75
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\A` | 当前时间，24小时制的HH:MM格式 |'
+- en: '| `\u` | The username of the current user |'
+  id: totrans-76
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\u` | 当前用户的用户名 |'
+- en: '| `\v` | The version of bash (e.g., 2.00) |'
+  id: totrans-77
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\v` | Bash的版本（例如，2.00） |'
+- en: '| `\V` | The release of bash, version + patch level (e.g., 2.00.0) |'
+  id: totrans-78
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\V` | Bash的发布版本，版本+补丁级别（例如，2.00.0） |'
+- en: '| `\w` | The current working directory, with `$HOME` abbreviated with a tilde
+    (uses the value of the `PROMPT_DIRTRIM` variable) |'
+  id: totrans-79
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\w` | 当前工作目录，以`$HOME`用波浪号缩写（使用`PROMPT_DIRTRIM`变量的值） |'
+- en: '| `\W` | The basename of the current working directory, with `$HOME` abbreviated
+    with a tilde |'
+  id: totrans-80
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\W` | 当前工作目录的基本名称，以`$HOME`用波浪号缩写 |'
+- en: '| `\!` | The history number of this command |'
+  id: totrans-81
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\!` | 此命令的历史编号 |'
+- en: '| `\#` | The command number of this command |'
+  id: totrans-82
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\#` | 此命令的命令编号 |'
+- en: '| `\$` | If the effective UID is `0`, a `#`, otherwise a `$` |'
+  id: totrans-83
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\$` | 如果有效UID为`0`，则为`#`，否则为`$` |'
+- en: '| `\nnn` | The character corresponding to the octal number `nnn` |'
+  id: totrans-84
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\nnn` | 对应于八进制数字`nnn`的字符 |'
+- en: '| `\\` | A backslash |'
+  id: totrans-85
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\\` | 一个反斜杠 |'
+- en: '| `\[` | Begin a sequence of nonprinting characters which could be used to
+    embed a terminal control sequence into the prompt |'
+  id: totrans-86
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\[` | 开始一系列非打印字符，可用于将终端控制序列嵌入提示符 |'
+- en: '| `\]` | End a sequence of nonprinting characters |'
+  id: totrans-87
+  prefs: []
+  type: TYPE_TB
+  zh: '| `\]` | 结束一系列非打印字符 |'
+- en: 'The default prompt is sufficient for most users, but some users and sysadmins
+    prefer something a little different, so they’re free to change it. Some clever
+    users have devised codes for colorful and artistic prompts, such as this Christmas-themed
+    prompt:'
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认提示符对大多数用户来说足够了，但一些用户和系统管理员可能希望有所不同，因此他们可以自由更改它。一些聪明的用户已经设计出了彩色和艺术风格的提示符代码，例如这个圣诞主题的提示符：
+- en: '[PRE9]'
+  id: totrans-89
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Search online for “fun Linux prompts” and enjoy yourself. After playing with
+    that, you can log out and back in to reset your prompt or enter `PS1="[\u@\h \W]\\$
+    "` to return to the default.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在网上搜索“有趣的Linux提示符”，尽情享受。玩耍后，您可以注销并重新登录以重置您的提示符，或输入`PS1="[\u@\h \W]\\$ "`以恢复默认设置。
+- en: Summary
+  id: totrans-91
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 摘要
+- en: In this chapter, you learned how to edit user environments through personalization
+    files and the default location and configuration for adding more files to new
+    accounts. You also learned these files’ locations, the order they’re loaded, and
+    which ones you should edit for a particular effect. Finally, you had a brief overview
+    of the shell prompt and how to alter it.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您学习了如何通过个性化文件编辑用户环境，并了解了添加更多文件到新帐户的默认位置和配置。您还学习了这些文件的位置、加载顺序以及应该为特定效果编辑哪些文件。最后，您对shell提示符有了简要的概述以及如何修改它。
+- en: In [Chapter 4](ch04.xhtml#managing_users), you’ll get an overview of user management
+    from user account creation to managing users through groups to how to grant access
+    to resources.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[第4章](ch04.xhtml#managing_users)中，您将获得有关用户管理的概述，从用户帐户创建到通过组管理用户，再到如何授予资源访问权限。

@@ -1,0 +1,143 @@
+- en: Appendix B. Modern Linux Tools
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 附录 B. 现代 Linux 工具
+- en: In this appendix, we focus on modern Linux tools and commands. Some of the commands
+    are drop-in replacements of existing commands; others are new ones. Most of the
+    tools listed here improve on the user experience (UX), including simpler usage
+    and making use of colored output, resulting in a more efficient flow.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本附录聚焦于现代 Linux 工具和命令。其中一些命令是现有命令的即插即用替代品，而另一些是全新的。这些工具大多数都改善了用户体验（UX），包括简化用法和使用彩色输出，从而提高了效率流程。
+- en: I’ve compiled a list of relevant tools in [Table B-1](#tab-modern-linux-tools),
+    showing features and potential replacement scenarios.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我已经整理了一个相关工具列表，详见[表 B-1](#tab-modern-linux-tools)，展示了功能和潜在的替代方案。
+- en: Table B-1\. Modern Linux tools and commands
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 B-1\. 现代 Linux 工具和命令
+- en: '| Command | License | Features | Can replace or enhance: |'
+  id: totrans-4
+  prefs: []
+  type: TYPE_TB
+  zh: '| 命令 | 许可证 | 特性 | 可替换或增强： |'
+- en: '| --- | --- | --- | --- |'
+  id: totrans-5
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- | --- |'
+- en: '| [`bat`](https://oreil.ly/zg9xE) | MIT License and Apache License 2.0 | Display,
+    page, syntax highlighting | `cat` |'
+  id: totrans-6
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`bat`](https://oreil.ly/zg9xE) | MIT 许可证 和 Apache 许可证 2.0 | 显示、分页、语法高亮 |
+    `cat` |'
+- en: '| [`envsubst`](https://oreil.ly/4i1gz) | MIT License | Template-based env variables
+    | N/A |'
+  id: totrans-7
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`envsubst`](https://oreil.ly/4i1gz) | MIT 许可证 | 基于模板的环境变量 | 不适用 |'
+- en: '| [`exa`](https://oreil.ly/F3dRV) | MIT License | Meaningful colored output,
+    sane defaults | `ls` |'
+  id: totrans-8
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`exa`](https://oreil.ly/F3dRV) | MIT 许可证 | 有意义的彩色输出，理智的默认设置 | `ls` |'
+- en: '| [`dog`](https://oreil.ly/tHgYT) | European Union Public Licence v1.2 | Simple,
+    powerful DNS lookups | `dig` |'
+  id: totrans-9
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`dog`](https://oreil.ly/tHgYT) | 欧洲联盟公共许可证 v1.2 | 简单强大的 DNS 查询 | `dig` |'
+- en: '| [`fx`](https://oreil.ly/oCQ20) | MIT License | JSON processing tool | `jq`
+    |'
+  id: totrans-10
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`fx`](https://oreil.ly/oCQ20) | MIT 许可证 | JSON 处理工具 | `jq` |'
+- en: '| [`fzf`](https://oreil.ly/0I0Va) | MIT License | Command-line fuzzy finder
+    | `ls` + `find` + `grep` |'
+  id: totrans-11
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`fzf`](https://oreil.ly/0I0Va) | MIT 许可证 | 命令行模糊查找器 | `ls` + `find` + `grep`
+    |'
+- en: '| [`gping`](https://oreil.ly/psKX3) | MIT License | Multitarget, graphing |
+    `ping` |'
+  id: totrans-12
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`gping`](https://oreil.ly/psKX3) | MIT 许可证 | 多目标，图形化 | `ping` |'
+- en: '| [`httpie`](https://oreil.ly/pu9f2) | BSD 3-Clause “New” or “Revised” License
+    | Simple UX | `curl` (also note there is `curlie`) |'
+  id: totrans-13
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`httpie`](https://oreil.ly/pu9f2) | BSD 3-Clause “New” 或 “Revised” 许可证 |
+    简单的用户体验 | `curl`（还有 `curlie`） |'
+- en: '| [`jo`](https://oreil.ly/VhLXG) | GPL | Generate JSON | N/A |'
+  id: totrans-14
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`jo`](https://oreil.ly/VhLXG) | GPL 许可证 | 生成 JSON | 不适用 |'
+- en: '| [`jq`](https://oreil.ly/tL5fR) | MIT License | Native JSON processor | `sed`,
+    `awk` |'
+  id: totrans-15
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`jq`](https://oreil.ly/tL5fR) | MIT 许可证 | 本地 JSON 处理器 | `sed`，`awk` |'
+- en: '| [`rg`](https://oreil.ly/n9Jmj) | MIT License | Fast, sane defaults | `find`,
+    `grep` |'
+  id: totrans-16
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`rg`](https://oreil.ly/n9Jmj) | MIT 许可证 | 快速，理智的默认设置 | `find`，`grep` |'
+- en: '| [`sysz`](https://oreil.ly/aYGlL) | The Unlicense | `fzf` user interface for
+    `systemctl` | `systemctl` |'
+  id: totrans-17
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`sysz`](https://oreil.ly/aYGlL) | The Unlicense | `fzf` 的 `systemctl` 用户界面
+    | `systemctl` |'
+- en: '| [`tldr`](https://oreil.ly/wDQwB) | CC-BY (content) and MIT License (scripts)
+    | Focus on usage examples of commands | `man` |'
+  id: totrans-18
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`tldr`](https://oreil.ly/wDQwB) | CC-BY（内容）和 MIT 许可证（脚本） | 重点放在命令的使用示例上
+    | `man` |'
+- en: '| [`zoxide`](https://oreil.ly/Fx2kI) | MIT License | Quickly change directories
+    | `cd` |'
+  id: totrans-19
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`zoxide`](https://oreil.ly/Fx2kI) | MIT 许可证 | 快速更改目录 | `cd` |'
+- en: 'To learn more about the background and usage of many of the tools listed in
+    this appendix, you can make use of the following resources:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要了解本附录中列出的许多工具的背景和用法，请利用以下资源：
+- en: 'Check out the podcast episode on [modern UNIX tools](https://oreil.ly/9sfmW)
+    from *The Changelog: Software Development, Open Source*.'
+  id: totrans-21
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '欢迎收听来自 *The Changelog: Software Development, Open Source* 的 [现代 UNIX 工具](https://oreil.ly/9sfmW)的播客集。'
+- en: There is an active list of modern tools available via the GitHub repo [Modern
+    UNIX](https://oreil.ly/LdtI2).
+  id: totrans-22
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 现在可以通过 GitHub 仓库[Modern UNIX](https://oreil.ly/LdtI2)查看现代工具的活跃列表。

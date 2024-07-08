@@ -1,0 +1,1769 @@
+- en: Chapter 19\. System Rescue and Recovery with SystemRescue
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第19章 SystemRescue与SystemRescue的系统恢复
+- en: A SystemRescue DVD or USB drive is an essential tool, and you may use it to
+    rescue nonbooting Linux and Windows systems. In this chapter you will learn how
+    to create SystemRescue boot media, how to find your way around SystemRescue, customize
+    boot options, repair GRUB, retrieve files from a failing disk, reset Linux and
+    Windows passwords, and convert SystemRescue from a read-only filesystem to a read-write
+    filesystem with a data partition.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SystemRescue DVD或USB驱动器是一个必备工具，您可以使用它来救援非启动的Linux和Windows系统。在本章中，您将学习如何创建SystemRescue引导介质，如何在SystemRescue中找到您所需的内容，自定义引导选项，修复GRUB，从故障磁盘中恢复文件，重置Linux和Windows密码，以及将SystemRescue从只读文件系统转换为带有数据分区的读写文件系统。
+- en: Any live Linux can serve as a rescue Linux. The advantage of SystemRescue is
+    its small size, and it is tailored for rescue operations.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任何Live Linux都可以用作救援系统。SystemRescue的优势在于其小巧的体积，专为救援操作而设计。
+- en: The root SystemRescue filesystem is read-only, so any changes you make are lost
+    when you shut it down. You will learn how to set it up to preserve your changes,
+    such as configurations, appearance, and adding software.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: root用户的SystemRescue文件系统是只读的，因此关闭后会丢失所有更改。您将学习如何设置以保留更改，如配置、外观和添加软件。
+- en: SystemRescue was originally based on Gentoo Linux, and since version 6.0 it
+    is built from Arch Linux. Arch Linux is known for being a reliable and efficient
+    Linux distribution, and has first-rate documentation. Visit [*https://archlinux.org*](https://archlinux.org)
+    for documentation and forums.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SystemRescue最初基于Gentoo Linux，自6.0版本起改为基于Arch Linux构建。Arch Linux以其可靠和高效的特性而闻名，拥有一流的文档。请访问[*https://archlinux.org*](https://archlinux.org)获取文档和论坛。
+- en: I prefer USB devices for SystemRescue, both thumb drives and USB hard disks.
+    They’re fast and have as much capacity as you need for copying files.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我更喜欢使用USB设备进行SystemRescue，包括U盘和USB硬盘。它们速度快，而且容量足够大，可以满足你复制文件的需求。
+- en: 19.1 Creating Your SystemRescue Bootable Device
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.1 创建您的SystemRescue可引导设备
+- en: Problem
+  id: totrans-7
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to make a SystemRescue DVD or USB drive.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望制作一个SystemRescue DVD或USB驱动器。
+- en: Solution
+  id: totrans-9
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Download the latest SystemRescue *.iso* from [*https://system-rescue.org*](https://system-rescue.org).
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从[*https://system-rescue.org*](https://system-rescue.org)下载最新的SystemRescue *.iso*文件。
+- en: The most reliable way to create a bootable SystemRescue USB stick is with the
+    *dd* command (see [Recipe 1.6](ch01.xhtml#recipe0106)). See Recipes [1.4](ch01.xhtml#rec-bootable-dvd)
+    and [1.5](ch01.xhtml#recipe0105) for instructions on creating a bootable DVD.
+    [Chapter 1](ch01.xhtml#cha-install-linux) also describes how to boot to your new
+    medium and how to disable Secure Boot. SystemRescue does not include signing keys,
+    so you must disable Secure Boot.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建可引导SystemRescue USB存储设备的最可靠方法是使用*dd*命令（参见[Recipe 1.6](ch01.xhtml#recipe0106)）。参见[1.4](ch01.xhtml#rec-bootable-dvd)和[1.5](ch01.xhtml#recipe0105)中的Recipes，了解创建可引导DVD的说明。[第1章](ch01.xhtml#cha-install-linux)还描述了如何引导到新介质以及如何禁用安全启动。SystemRescue不包括签名密钥，因此您必须禁用安全启动。
+- en: When you boot from a USB stick, plug it in to a USB port on your computer, not
+    a USB hub, because it will not be recognized on a hub.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您从USB存储设备引导时，请将其插入计算机的USB端口，而不是USB集线器，因为在集线器上可能无法识别。
+- en: Discussion
+  id: totrans-13
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Remember to reenable Secure Boot when you are finished using SystemRescue.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用SystemRescue完成后，请记得重新启用安全启动。
+- en: See Also
+  id: totrans-15
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://system-rescue.org*](https://system-rescue.org)'
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://system-rescue.org*](https://system-rescue.org)'
+- en: '[Chapter 1](ch01.xhtml#cha-install-linux)'
+  id: totrans-17
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第1章](ch01.xhtml#cha-install-linux)'
+- en: 19.2 Getting Started with SystemRescue
+  id: totrans-18
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.2 开始使用SystemRescue
+- en: Problem
+  id: totrans-19
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have booted up SystemRescue, and it stops at a plain console prompt, and
+    you need to know what to do.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您已启动SystemRescue，并停留在简单的控制台提示符处，需要知道接下来该做什么。
+- en: Solution
+  id: totrans-21
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: SystemRescue gives you instructions on the initial login screen ([Figure 19-1](#fig-sysrec-6)).
+    You are automatically logged in as root, and there is no root password.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SystemRescue在初始登录屏幕上为您提供说明（[图 19-1](#fig-sysrec-6)）。您会自动以root用户登录，无需输入root密码。
+- en: You can either work from the console or type **`startx`** to launch the Xfce4
+    desktop environment ([Figure 19-2](#fig-sysrec-7)).
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在控制台工作，也可以输入**`startx`**来启动Xfce4桌面环境（参见[图 19-2](#fig-sysrec-7)）。
+- en: '![The SystemRescue login screen..](Images/lcb2_1901.png)'
+  id: totrans-24
+  prefs: []
+  type: TYPE_IMG
+  zh: '![SystemRescue登录屏幕。](Images/lcb2_1901.png)'
+- en: Figure 19-1\. The SystemRescue login screen
+  id: totrans-25
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 19-1\. SystemRescue登录屏幕
+- en: '![The SystemRescue Xfce4 desktop environment.](Images/lcb2_1902.png)'
+  id: totrans-26
+  prefs: []
+  type: TYPE_IMG
+  zh: '![SystemRescue Xfce4桌面环境。](Images/lcb2_1902.png)'
+- en: Figure 19-2\. The SystemRescue Xfce4 desktop environment
+  id: totrans-27
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 19-2\. SystemRescue Xfce4桌面环境
+- en: Explore the applications menu, adjust the appearance of Xfce, connect to networks
+    with NetworkManager, and shut it down or reboot just like any Linux system.
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 探索应用程序菜单，调整Xfce的外观，使用NetworkManager连接网络，并像任何Linux系统一样关闭或重新启动。
+- en: Discussion
+  id: totrans-29
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The one thing you cannot do with the stock SystemRescue image is make persistent
+    changes in its own configuration. Any changes you make will not survive a restart
+    because SystemRescue runs from a compressed read-only SquashFS filesystem. However,
+    you can set it up to preserve your changes; see [Recipe 19.14](#rec-preserve-changes).
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用存储在压缩只读SquashFS文件系统中的系统救援镜像，唯一不能做到的是对其自身配置进行持久更改。因此，任何更改都不会在重启后保存。然而，你可以设置以保留你的更改；参见[第19.14节](#rec-preserve-changes)。
+- en: SquashFS is the basis of many live Linux distributions, such as Ubuntu, Debian,
+    Mint, Fedora, and Arch. It is also used by the open source router firmware projects
+    DD-WRT and OpenWRT. SquashFS is lightweight and fast.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SquashFS是许多Live Linux发行版的基础，如Ubuntu、Debian、Mint、Fedora和Arch。它还被开源路由器固件项目DD-WRT和OpenWRT使用。SquashFS轻量且快速。
+- en: I like working from Xfce4 because it provides a lightweight graphical environment
+    and applications, and an X terminal for command-line operations.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我喜欢使用Xfce4，因为它提供了轻量级的图形环境和应用程序，以及用于命令行操作的X终端。
+- en: See Also
+  id: totrans-33
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://system-rescue.org*](https://system-rescue.org)'
+  id: totrans-34
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://system-rescue.org*](https://system-rescue.org)'
+- en: '[*https://xfce.org*](https://xfce.org)'
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://xfce.org*](https://xfce.org)'
+- en: 19.3 Understanding SystemRescue’s Two Boot Screens
+  id: totrans-36
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.3 理解SystemRescue的两个引导屏幕
+- en: Problem
+  id: totrans-37
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: While testing SystemRescue, you noticed there are two different boot screens,
+    and you want to know what they are for.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在测试SystemRescue时，你注意到有两个不同的引导屏幕，想知道它们的作用是什么。
+- en: Solution
+  id: totrans-39
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: There are two different boot screens according to how you boot SystemRescue.
+    You’ll see one boot screen with legacy BIOS boot ([Figure 19-3](#fig-sysrec-2))
+    and a different screen with UEFI boot ([Figure 19-4](#fig-sysrec-4)).
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 根据启动SystemRescue的方式，有两个不同的引导屏幕。你将看到一个传统BIOS引导屏幕（见[图19-3](#fig-sysrec-2)）和一个UEFI引导屏幕（见[图19-4](#fig-sysrec-4)）。
+- en: When the UEFI setup on my Dell system is configured to allow booting legacy
+    devices, the one-time boot menu (press F12 at startup) shows all possible boot
+    options ([Figure 19-5](#fig-sysrec-5)). SystemRescue supports UEFI, so it is not
+    necessary to enable legacy boot. (Remember that Secure Boot must be disabled for
+    SystemRescue to boot.)
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当我戴尔系统上的UEFI设置允许启动传统设备时，一次性引导菜单（启动时按F12）将显示所有可能的启动选项（见[图19-5](#fig-sysrec-5)）。SystemRescue支持UEFI，因此不需要启用传统引导。（请记住，要启动SystemRescue，必须禁用安全启动。）
+- en: Your system’s BIOS/UEFI may not look like mine, as they all vary.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的系统的BIOS/UEFI可能与我的不同，因为它们各不相同。
+- en: '![The SystemRescue legacy boot screen.](Images/lcb2_1903.png)'
+  id: totrans-43
+  prefs: []
+  type: TYPE_IMG
+  zh: '![SystemRescue的传统引导屏幕。](Images/lcb2_1903.png)'
+- en: Figure 19-3\. The SystemRescue legacy BIOS boot screen
+  id: totrans-44
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图19-3\. SystemRescue传统BIOS引导屏幕
+- en: '![The SystemRescue UEFI boot screen.](Images/lcb2_1904.png)'
+  id: totrans-45
+  prefs: []
+  type: TYPE_IMG
+  zh: '![SystemRescue的UEFI引导屏幕。](Images/lcb2_1904.png)'
+- en: Figure 19-4\. The SystemRescue UEFI boot screen
+  id: totrans-46
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图19-4\. SystemRescue的UEFI引导屏幕
+- en: '![Dell one-time boot menu shows all possible boot options.](Images/lcb2_1905.png)'
+  id: totrans-47
+  prefs: []
+  type: TYPE_IMG
+  zh: '![戴尔一次性引导菜单显示所有可能的启动选项。](Images/lcb2_1905.png)'
+- en: Figure 19-5\. Dell one-time boot menu shows all possible boot options
+  id: totrans-48
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图19-5\. 戴尔一次性引导菜单显示所有可能的启动选项
+- en: The main difference between the two boot screens is the SystemRescue UEFI boot
+    screen has the “Start EFI Shell” and “EFI Firmware Setup” options, which are not
+    applicable to a legacy BIOS boot.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 两个引导屏幕的主要区别在于SystemRescue的UEFI引导屏幕具有“启动EFI Shell”和“EFI固件设置”选项，这些选项不适用于传统BIOS引导。
+- en: The legacy BIOS boot screen does not have the two EFI options, but it includes
+    Memtest86+ for testing system memory.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传统BIOS引导屏幕没有两个EFI选项，但包括Memtest86+用于测试系统内存。
+- en: See [Recipe 19.4](#rec-boot-options) to learn what the different SystemRescue
+    boot options are for.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见[第19.4节](#rec-boot-options)了解不同的SystemRescue引导选项。
+- en: Discussion
+  id: totrans-52
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You can configure removable media as the default boot device. Then you don’t
+    have to hassle with entering your BIOS/UEFI to enable a different boot device
+    or waiting for the right moment to call up your one-time boot menu; just insert
+    your removable boot media when you need it.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以将可移动介质配置为默认启动设备。然后，你无需麻烦地进入BIOS/UEFI以启用不同的启动设备或等待合适的时机调用一次性启动菜单；只需在需要时插入可移动启动介质即可。
+- en: If you are running an older system with no UEFI, you won’t have to choose or
+    hassle with Secure Boot.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你正在使用没有UEFI的旧系统，你不必选择或麻烦于安全启动。
+- en: See Also
+  id: totrans-55
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://system-rescue.org*](https://system-rescue.org)'
+  id: totrans-56
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://system-rescue.org*](https://system-rescue.org)'
+- en: '[Chapter 1](ch01.xhtml#cha-install-linux)'
+  id: totrans-57
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第一章](ch01.xhtml#cha-install-linux)'
+- en: '[Recipe 19.4](#rec-boot-options)'
+  id: totrans-58
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第19.4节](#rec-boot-options)'
+- en: 19.4 Understanding SystemRescue’s Boot Options
+  id: totrans-59
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.4 理解SystemRescue的引导选项
+- en: Problem
+  id: totrans-60
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know what all those SystemRescue boot options are for ([Recipe 19.3](#rec-boot-screens)).
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想知道所有这些SystemRescue引导选项是用来做什么的（[第19.3节](#rec-boot-screens)）。
+- en: Solution
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The boot menu options are shortcuts for the most commonly used boot options,
+    saving you the trouble of opening the editing form and typing them. In most cases
+    you will use the first boot option, “Boot SystemRescue Using Default Options.”
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 引导菜单选项是最常用的引导选项的快捷方式，省去了打开编辑表单和输入它们的麻烦。在大多数情况下，您将使用第一个引导选项，“使用默认选项启动SystemRescue”。
+- en: The second option, “Boot SystemRescue and copy to RAM (copytoram),” speeds up
+    performance by loading SystemRescue completely into memory. This is especially
+    useful when you run SystemRescue from a DVD. It uses about 2 GB of RAM.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第二个选项，“启动SystemRescue并将其复制到RAM中 (copytoram)” 通过将SystemRescue完全加载到内存中来加快性能。当您从DVD运行SystemRescue时，这尤其有用。它大约使用2GB
+    RAM。
+- en: The third option, “Boot SystemRescue and verify integrity of the medium (checksum),”
+    tests itself for corruption. Use this to verify that your SystemRescue is healthy.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第三个选项，“引导SystemRescue并验证介质的完整性 (checksum)” 检测自身是否损坏。使用此选项验证您的SystemRescue是否健康。
+- en: The fourth option, “Boot SystemRescue using basic display drivers (nomodeset),”
+    uses lower-resolution basic video drivers. Use this if your video does not look
+    right because SystemRescue does not have the right graphics drivers.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第四个选项，“使用基本显示驱动程序启动SystemRescue (nomodeset)” 使用低分辨率的基本视频驱动程序。如果您的视频显示不正确，因为SystemRescue没有正确的图形驱动程序，请使用此选项。
+- en: The fifth option, “Boot a Linux operating system installed on the disk (findroot),”
+    is a good way to test if the bootloader is the problem on a nonbooting Linux installation.
+    It will find a bootable partition, and if there is more than one it lists all
+    of them, and you select which one you want to use.
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第五个选项，“引导已安装在磁盘上的Linux操作系统 (findroot)” 是检查非引导Linux安装问题的良好方法。它将找到可引导的分区，如果有多个分区，它会列出所有分区，您可以选择要使用的分区。
+- en: The sixth option, “Stop during the root process before mounting the root filesystem,”
+    is a repair mode in case SystemRescue will not boot. I think it’s easier to keep
+    some extra SystemRescue drives on hand than to try to repair a broken SystemRescue.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第六个选项，“在挂载根文件系统之前停止根过程” 是SystemRescue无法启动时的修复模式。我认为准备一些额外的SystemRescue驱动比尝试修复损坏的SystemRescue更容易。
+- en: 'The UEFI boot screen has two additional options: “Start EFI Shell,” and “EFI
+    Firmware Setup.” “Start EFI Shell” gives you access to the numerous EFI utilities,
+    and “EFI Firmware Setup” takes you to your system’s UEFI setup.'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UEFI启动屏幕有两个额外选项：“启动EFI Shell” 和 “EFI固件设置”。 “启动EFI Shell” 可访问多个EFI实用工具，“EFI固件设置”
+    可进入系统的UEFI设置。
+- en: Then Reboot and Power off.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后重新启动和关机。
+- en: 'The BIOS boot screen has two additional options: “Boot existing OS” and “Run
+    Memtest86+.” “Boot existing OS” helps diagnose bootloader problems by bypassing
+    the system’s bootloader, and “Memtest86+” tests system memory.'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BIOS启动屏幕有两个额外选项：“启动现有操作系统” 和 “运行Memtest86+”。 “启动现有操作系统” 通过绕过系统的引导加载程序来帮助诊断引导加载程序问题，“Memtest86+”
+    测试系统内存。
+- en: Both screens include “Reboot” and “Power off,” for rebooting or shutting down
+    SystemRescue instead of starting it up.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 两个屏幕都包括“重新启动”和“关机”，用于重新启动或关闭SystemRescue而不是启动它。
+- en: Discussion
+  id: totrans-73
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: I don’t see much value in using the EFI shell because it supports advanced operations
+    far beyond what you need for rescuing a nonbooting system. See Intel’s [Basic
+    Instructions for Using the Extensible Firmware Interface](https://oreil.ly/dktzy)
+    to learn all about it.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我认为使用EFI Shell并没有太大的价值，因为它支持远远超出您需要用于救援非引导系统的高级操作。参见Intel的[使用可扩展固件接口的基本说明](https://oreil.ly/dktzy)以了解更多信息。
+- en: All of these menu options are shortcuts for some of SystemRescue’s boot options,
+    which are documented on [*https://system-rescue.org*](https://system-rescue.org).
+    You may append boot options to any of the SystemRescue boot menu items, which
+    you will see in several of the recipes in this chapter.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有这些菜单选项都是SystemRescue的一些引导选项的快捷方式，这些选项在[*https://system-rescue.org*](https://system-rescue.org)中有文档记录。您可以在本章的几个示例中看到，可以在任何SystemRescue引导菜单项中附加引导选项。
+- en: You can do these tasks after you start SystemRescue, or pass in boot options.
+    In the legacy BIOS screen, select your boot entry, then press the Tab key, which
+    opens an edit field. Enter **`rootpass=*yourpassword* nofirewall`**, then press
+    Enter to resume startup.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在启动SystemRescue后执行这些任务，或传入启动选项。在传统BIOS屏幕上，选择您的启动条目，然后按Tab键打开编辑字段。输入**`rootpass=*yourpassword*
+    nofirewall**，然后按Enter键继续启动。
+- en: In the UEFI boot screen, press the E key to pass in your own boot options.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在UEFI启动屏幕上，按E键以传递您自己的启动选项。
+- en: See Also
+  id: totrans-78
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://system-rescue.org*](https://system-rescue.org)'
+  id: totrans-79
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://system-rescue.org*](https://system-rescue.org)'
+- en: 19.5 Identifying Filesystems
+  id: totrans-80
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.5 识别文件系统
+- en: Problem
+  id: totrans-81
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to know how to identify the filesystems on your hard disks, so you
+    are certain which ones to use in your rescue operations.
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要知道如何识别硬盘上的文件系统，以确保在救援操作中使用正确的文件系统。
+- en: Solution
+  id: totrans-83
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use the good old *lsblk* command:'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用经典的*lsblk*命令：
+- en: '[PRE0]'
+  id: totrans-85
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: Discussion
+  id: totrans-86
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Using filesystem labels makes finding the correct filesystems a lot easier.
+    You may also use labels in place of UUIDs, for example, in */etc/fstab*. See [Recipe
+    9.4](ch09.xhtml#rec-new-partition-gparted) and [Chapter 11](ch11.xhtml#cha-create-filesystems)
+    for information on managing filesystem labels.
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用文件系统标签可以更轻松地找到正确的文件系统。例如，在*/etc/fstab*中，您也可以使用标签代替UUID。有关管理文件系统标签的信息，请参阅[第9.4节](ch09.xhtml#rec-new-partition-gparted)和[第11章](ch11.xhtml#cha-create-filesystems)。
+- en: '*lsblk* does not need root privileges and displays information about your block
+    devices in almost any way you want to see it.'
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*lsblk*不需要root权限，并且可以以几乎任何您想要查看的方式显示有关块设备的信息。'
+- en: See Also
+  id: totrans-89
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 9.4](ch09.xhtml#rec-new-partition-gparted)'
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第9.4节](ch09.xhtml#rec-new-partition-gparted)'
+- en: '[Recipe 11.2](ch11.xhtml#rec-lsblk)'
+  id: totrans-91
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第11.2节](ch11.xhtml#rec-lsblk)'
+- en: '[Chapter 11](ch11.xhtml#cha-create-filesystems)'
+  id: totrans-92
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第11章](ch11.xhtml#cha-create-filesystems)'
+- en: 19.6 Resetting a Linux Root Password
+  id: totrans-93
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.6 重置Linux根密码
+- en: Problem
+  id: totrans-94
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You forgot your Linux root password and need to reset it.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您忘记了Linux的根密码，需要重置它。
+- en: Solution
+  id: totrans-96
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Boot SystemRescue, then mount the correct root filesystem. In the following
+    examples, the root filesystem is on */dev/sdb2*. Create a mountpoint in */mnt*,
+    then mount your filesystem:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动SystemRescue，然后挂载正确的根文件系统。在以下示例中，根文件系统位于*/dev/sdb2*。在*/mnt*中创建一个挂载点，然后挂载您的文件系统：
+- en: '[PRE1]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Change from the SystemRescue root filesystem to your mounted filesystem:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从SystemRescue的根文件系统切换到您挂载的文件系统：
+- en: '[PRE2]'
+  id: totrans-100
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Reset the root password:'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重置根密码：
+- en: '[PRE3]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Type **`exit`** to return to the SystemRescue root filesystem.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输入**`exit`**返回到SystemRescue的根文件系统。
+- en: Reboot, log in, and try your new password.
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新启动，登录，然后尝试您的新密码。
+- en: Discussion
+  id: totrans-105
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You cannot recover a forgotten password, but only create a new one.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您无法恢复忘记的密码，只能创建一个新密码。
+- en: This works for any user’s password.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这适用于任何用户的密码。
+- en: By changing to the host system’s root filesystem you can run some commands,
+    but not all of them because it is not a complete filesystem. It is missing all
+    the pseudo-filesystems that exist only in memory, such as *sysfs* and *proc*.
+    See [Recipe 19.9](#rec-repair-grub) to learn how to set up a more complete *chroot*
+    environment.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 切换到主机系统的根文件系统后，您可以运行一些命令，但不是所有命令，因为这不是完整的文件系统。它缺少所有仅存在于内存中的伪文件系统，如*sysfs*和*proc*。参见[第19.9节](#rec-repair-grub)了解如何设置更完整的*chroot*环境。
+- en: Once upon a time you could reset a root password by deleting the password hash
+    in */etc/shadow*. That was then, and now the *pam* subsystem is more complex and
+    controls authorization. If you’re curious, study the SystemRescue *pam* configuration
+    to see how it is set up to allow an empty root password.
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 曾经，您可以通过删除*/etc/shadow*中的密码哈希来重置根密码。那时候是这样，现在*pam*子系统更复杂并控制授权。如果您感兴趣，请研究SystemRescue的*pam*配置，了解如何设置允许空根密码。
+- en: See Also
+  id: totrans-110
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://system-rescue.org*](https://system-rescue.org)'
+  id: totrans-111
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://system-rescue.org*](https://system-rescue.org)'
+- en: '[Chapter 5](ch05.xhtml#cha-users-groups)'
+  id: totrans-112
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第5章](ch05.xhtml#cha-users-groups)'
+- en: '*man 7 pam*'
+  id: totrans-113
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 7 pam*'
+- en: 19.7 Enabling SSH in SystemRescue
+  id: totrans-114
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.7 在SystemRescue中启用SSH
+- en: Problem
+  id: totrans-115
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want SSH access to SystemRescue.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望访问SystemRescue的SSH。
+- en: Solution
+  id: totrans-117
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: SSH is enabled by default, and so is the firewall. Disable the firewall to allow
+    incoming SSH sessions.
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SSH默认启用，防火墙也是如此。禁用防火墙以允许传入的SSH会话。
+- en: 'After launching SystemRescue, disable the firewall with *systemctl*:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动SystemRescue后，使用*systemctl*禁用防火墙：
+- en: '[PRE4]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'By default, root has no password on SystemRescue. You must create one to enable
+    an SSH session:'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在SystemRescue上，默认情况下，root没有密码。您必须创建一个密码才能启用SSH会话：
+- en: '[PRE5]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Now you can log in to SystemRescue from another computer:'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您可以从另一台计算机登录到SystemRescue：
+- en: '[PRE6]'
+  id: totrans-124
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: Discussion
+  id: totrans-125
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Every time you boot SystemRescue, it is like a brand-new system with a different
+    SSH host key. If you reboot SystemRescue, then open a second SSH system from the
+    same computer to SystemRescue, you will see this warning:'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每次启动SystemRescue，它都像一个全新的系统，具有不同的SSH主机密钥。如果重新启动SystemRescue，然后从同一台计算机向SystemRescue打开第二个SSH系统，您将看到此警告：
+- en: '[PRE7]'
+  id: totrans-127
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'This goes on for a few more lines, and it tells you the remedy:'
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这还要继续几行，并告诉您补救方法：
+- en: '[PRE8]'
+  id: totrans-129
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: Do what is says, then you can SSH in to SystemRescue.
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按照它说的做，然后您可以通过SSH连接到SystemRescue。
+- en: You may disable the firewall from the boot menu. Press the Tab key (legacy boot)
+    or the E key (UEFI boot) to add the *nofirewall* boot option (see the boot parameters
+    line at the bottom of the screen, [Figure 19-6](#fig-sysrec-8)).
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以从引导菜单禁用防火墙。按Tab键（传统引导）或E键（UEFI引导）添加*nofirewall*引导选项（请参见屏幕底部的引导参数行，[图 19-6](#fig-sysrec-8)）。
+- en: '![Disabling the firewall at boot.](Images/lcb2_1906.png)'
+  id: totrans-132
+  prefs: []
+  type: TYPE_IMG
+  zh: '![在引导时禁用防火墙。](Images/lcb2_1906.png)'
+- en: Figure 19-6\. Disabling the firewall at boot
+  id: totrans-133
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 19-6\. 在引导时禁用防火墙
+- en: See Also
+  id: totrans-134
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[*https://system-rescue.org*](https://system-rescue.org)'
+  id: totrans-135
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://system-rescue.org*](https://system-rescue.org)'
+- en: '[Recipe 19.4](#rec-boot-options)'
+  id: totrans-136
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第19.4节](#rec-boot-options)'
+- en: '[Chapter 12](ch12.xhtml#cha-ssh)'
+  id: totrans-137
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第12章](ch12.xhtml#cha-ssh)'
+- en: 19.8 Copying Files over the Network with scp and sshfs
+  id: totrans-138
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.8 通过scp和sshfs在网络上复制文件
+- en: Problem
+  id: totrans-139
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have SystemRescue up and running on the system you are rescuing and want
+    to rescue files by copying them over the network.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您已经在要救援的系统上运行SystemRescue，并希望通过网络复制文件来救援它们。
+- en: Solution
+  id: totrans-141
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: No problem, do this just like on any Linux. First, enable SSH ([Recipe 19.7](#rec-enable-ssh)).
+    Then use *scp* or *sshfs* to move the files you want to save. All of the commands
+    in this recipe are run from SystemRescue.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 没问题，就像在任何Linux上一样操作。首先启用SSH（[第19.7节](#rec-enable-ssh)）。然后使用*scp*或*sshfs*移动您想要保存的文件。本配方中的所有命令都是从SystemRescue运行的。
+- en: 'Find the filesystem you want to copy files from with *lsblk*. If you don’t
+    remember which partition you want, mount each one to see the files until you find
+    the right one:'
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*lsblk*找到要从中复制文件的文件系统。如果您不记得要复制哪个分区，请挂载每个分区以查看文件，直到找到正确的分区：
+- en: '[PRE9]'
+  id: totrans-144
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'The following example mounts the partition containing */home* on the system
+    being rescued in */mnt* on SystemRescue, lists the files in the mountpoint, then
+    copies the whole */home* directory to Duchess’s PC with *scp*:'
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例将在SystemRescue上将包含*/home*的分区挂载到*/mnt*，列出挂载点中的文件，然后使用*scp*将整个*/home*目录复制到Duchess的PC上：
+- en: '[PRE10]'
+  id: totrans-146
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: The result is */home/duchess/home*.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 结果是*/home/duchess/home*。
+- en: Always Create a Subdirectory in /mnt
+  id: totrans-148
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 永远在/mnt中创建子目录
+- en: Never mount any filesystems in */mnt*; it will freeze SystemRescue. Always create
+    subdirectories for your mountpoints.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 永远不要在*/mnt*中挂载任何文件系统；这会使SystemRescue冻结。始终为您的挂载点创建子目录。
+- en: 'You may copy a space-delimited list of files and mix files and directories.
+    This example copies them to the *rescue* directory on *duchess@pc*. The remote
+    directory must already exist:'
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以复制一个以空格分隔的文件和目录列表，并将它们混合复制到*duchess@pc*上的*rescue*目录。远程目录必须已经存在：
+- en: '[PRE11]'
+  id: totrans-151
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: '*sshfs* is convenient because it mounts a remote filesystem so that it appears
+    as a local filesystem, and you can copy files just as though they were local.
+    Create a mountpoint on SystemRescue, then mount a remote directory on it, which
+    must already exist. You will copy files from SystemRescue to the remote system:'
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*sshfs*很方便，因为它挂载远程文件系统，使其看起来像本地文件系统一样，并且您可以像操作本地文件一样复制文件。在SystemRescue上创建一个挂载点，然后在其上挂载远程目录（该目录必须已经存在）。您将从SystemRescue复制文件到远程系统：'
+- en: '[PRE12]'
+  id: totrans-153
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: Now you can use the *cp* command on SystemRescue, or use a graphical file manager
+    to copy files ([Figure 19-7](#fig-sysrec-10)).
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您可以在SystemRescue上使用*cp*命令，或使用图形文件管理器复制文件（[图 19-7](#fig-sysrec-10)）。
+- en: '![Copy files on SystemRescue with a graphical file manager.](Images/lcb2_1907.png)'
+  id: totrans-155
+  prefs: []
+  type: TYPE_IMG
+  zh: '![使用图形文件管理器在SystemRescue上复制文件。](Images/lcb2_1907.png)'
+- en: Figure 19-7\. Copy files on SystemRescue with a graphical file manager
+  id: totrans-156
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 19-7\. 使用图形文件管理器在SystemRescue上复制文件
+- en: When you are finished, run **`fusermount -u *remote*`** to cleanly unmount the
+    *sshfs* filesystem.
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成后，运行**`fusermount -u *remote*`**以安全卸载*sshfs*文件系统。
+- en: Discussion
+  id: totrans-158
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you have disabled SSH password authentication on the system you are copying
+    the files to, reenable it temporarily by commenting out *PermitRootLogin no* in
+    */etc/ssh/sshd_config*.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您已在要将文件复制到的系统上禁用了SSH密码身份验证，请通过在*/etc/ssh/sshd_config*中注释掉*PermitRootLogin
+    no*来临时重新启用它。
+- en: The syntax for connecting to the remote directory is relative to the user account
+    you are logging into. *duchess@pc:* is the same as *duchess@pc:/home/duchess*.
+    *duchess@pc:/* accesses the root filesystem. When you need to edit system configuration
+    files, use *duchess@pc:/etc*; for bootfiles, use *duchess@pc:/boot*, and so on.
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 连接到远程目录的语法与您登录的用户帐户相关。*duchess@pc:* 等同于 *duchess@pc:/home/duchess*。*duchess@pc:/*
+    访问根文件系统。当您需要编辑系统配置文件时，请使用*duchess@pc:/etc*；对于引导文件，请使用*duchess@pc:/boot*等等。
+- en: 'You can create the remote directory from SystemRescue with *ssh*:'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用*ssh*从SystemRescue创建远程目录：
+- en: '[PRE13]'
+  id: totrans-162
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: See Also
+  id: totrans-163
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 6.5](ch06.xhtml#rec-cp-mv)'
+  id: totrans-164
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 6.5](ch06.xhtml#rec-cp-mv)'
+- en: '[Chapter 12](ch12.xhtml#cha-ssh)'
+  id: totrans-165
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第12章](ch12.xhtml#cha-ssh)'
+- en: 19.9 Repairing GRUB from SystemRescue
+  id: totrans-166
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.9 从SystemRescue修复GRUB
+- en: Problem
+  id: totrans-167
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your GRUB bootloader is broken, and your system does not boot.
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的GRUB引导加载程序损坏，系统无法启动。
+- en: Solution
+  id: totrans-169
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Boot up SystemRescue, create a *chroot* environment, and reinstall GRUB.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动SystemRescue，创建*chroot*环境，并重新安装GRUB。
+- en: 'After starting up SystemRescue, create a *chroot* environment for the root
+    filesystem on the host:'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在启动SystemRescue后，为主机上的根文件系统创建*chroot*环境：
+- en: '[PRE14]'
+  id: totrans-172
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'Enter the *chroot* environment:'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进入*chroot*环境：
+- en: '[PRE15]'
+  id: totrans-174
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'If */boot* is on its own partition, mount it:'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果*/boot*位于单独的分区上，请将其挂载：
+- en: '[PRE16]'
+  id: totrans-176
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Now reinstall GRUB:'
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在重新安装GRUB：
+- en: '[PRE17]'
+  id: totrans-178
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: When this is completed, type **`exit`** to leave the *chroot* environment, then
+    unmount all the filesystems. Reboot your system, and GRUB should work.
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成后，键入**`exit`**退出*chroot*环境，然后卸载所有文件系统。重新启动您的系统，GRUB应该正常工作。
+- en: Discussion
+  id: totrans-180
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Be very careful when creating a *chroot* environment, and make sure you are
+    using the correct partitions and filesystems. *chroot*, change root, is a great
+    utility for changing to a different root filesystem without rebooting.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建*chroot*环境时一定要非常小心，并确保使用正确的分区和文件系统。*chroot*，即change root，是一个在不重启的情况下切换到不同根文件系统的强大工具。
+- en: You must unmount all *chroot* filesystems so that they unmount cleanly. It should
+    be all right to simply reboot, but it is cheap insurance to manually unmount them
+    first.
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您必须卸载所有*chroot*文件系统，以便它们能够干净卸载。简单重启应该没问题，但手动卸载它们是一种廉价的保险措施。
+- en: See Also
+  id: totrans-183
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 chroot*'
+  id: totrans-184
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 chroot*'
+- en: 19.10 Resetting a Windows Password
+  id: totrans-185
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.10 重置Windows密码
+- en: Problem
+  id: totrans-186
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You lost your Windows password, and you don’t want to jump through the usual
+    Windows hoops to reset it.
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您忘记了Windows密码，并且不想按照通常的Windows步骤重置密码。
+- en: Solution
+  id: totrans-188
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'No worries, for SystemRescue will have you back in action in a jiffy. Boot
+    up SystemRescue on your Windows machine, then mount your Windows system directory:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不用担心，SystemRescue将使您迅速恢复正常。在Windows机器上启动SystemRescue，然后挂载您的Windows系统目录：
+- en: '[PRE18]'
+  id: totrans-190
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'Navigate to the */mnt/windows/Windows/System32/config* directory, then use
+    the *chntpw* (change NT password) command to list users:'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 导航到*/mnt/windows/Windows/System32/config*目录，然后使用*chntpw*（更改NT密码）命令列出用户：
+- en: '[PRE19]'
+  id: totrans-192
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Examine the information on the user you want to change:'
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查您要更改的用户信息：
+- en: '[PRE20]'
+  id: totrans-194
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'Enter **`1`** to remove the existing password:'
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输入**`1`**以删除现有密码：
+- en: '[PRE21]'
+  id: totrans-196
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: Press **`q`** to quit, and **`y`** to “write hive files,” which saves your changes.
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按**`q`**退出，按**`y`**“写入hive文件”，保存您的更改。
+- en: Now the Administrator, or whatever user you selected, must log in and set a
+    new password.
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在管理员或您选择的用户必须登录并设置新密码。
+- en: Discussion
+  id: totrans-199
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You cannot create a new password or recover the old one with *chntpw*, but only
+    delete it. Then you log in without a password and create a new password, or, if
+    your user is present, let them do it.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您无法使用*chntpw*创建新密码或恢复旧密码，只能删除密码。然后您可以无密码登录并创建新密码，或者如果您的用户存在，让他们完成。
+- en: See Also
+  id: totrans-201
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://system-rescue.org*](https://system-rescue.org)'
+  id: totrans-202
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://system-rescue.org*](https://system-rescue.org)'
+- en: '*man 8 chntpw*'
+  id: totrans-203
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 chntpw*'
+- en: 19.11 Rescuing a Failing Hard Disk with GNU ddrescue
+  id: totrans-204
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.11 使用GNU ddrescue拯救失败的硬盘
+- en: Problem
+  id: totrans-205
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You suspect that your hard disk is dying, and you want to copy your data from
+    it before it expires.
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您怀疑您的硬盘即将损坏，并希望在其失效之前将数据从中复制出来。
+- en: Solution
+  id: totrans-207
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: You want the excellent GNU *ddrescue* utility. *ddrescue* tries to copy all
+    the good blocks first, saving as much data as possible, and skips over the bad
+    blocks, tracking their locations in a log file. You may make multiple passes to
+    try to capture more data.
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要优秀的GNU *ddrescue*实用工具。*ddrescue*首先尝试复制所有良好的数据块，尽可能保存更多数据，并跳过坏块，将其位置记录在日志文件中。您可以进行多次尝试以获取更多数据。
+- en: The disk you are trying to rescue must be unmounted. You need another disk,
+    also unmounted, such as a USB storage device or an internal hard disk, to copy
+    the rescued data to. Your target partition must already exist and be at least
+    50% larger than the partition you are trying to rescue.
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你正在尝试救援的磁盘必须卸载。你需要另一个也卸载的磁盘，比如USB存储设备或者内部硬盘，来复制已救援的数据。你的目标分区必须已经存在，并且比你尝试救援的分区大至少50%。
+- en: 'The following example copies */dev/sdb1* to */dev/sdc1*:'
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例将*/dev/sdb1*复制到*/dev/sdc1*：
+- en: '[PRE22]'
+  id: totrans-211
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: This will take some time. When it is finished the last line will say “Finished.”
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将花费一些时间。当完成时，最后一行会显示“Finished.”。
+- en: 'This example does one pass, copying the most easily read blocks as quickly
+    as possible. This is a good tactic on a drive with a lot of errors because *ddrescue*
+    won’t spend a lot of time trying to recover the most damaged blocks. After making
+    this first pass, run it three more times to try to recover more data:'
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个示例进行了一次复制，尽快地复制最容易读取的块。在有很多错误的驱动器上，这是一个很好的策略，因为*ddrescue*不会花费大量时间来恢复最受损块。在进行第一次复制后，再运行三次，尝试恢复更多数据：
+- en: '[PRE23]'
+  id: totrans-214
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'When it is finished, run a filesystem check on the recovery disk, which should
+    remain unmounted. This example checks and automatically repairs Ext4 filesystems:'
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当完成时，在恢复磁盘上运行文件系统检查，该磁盘应保持未挂载状态。此示例检查并自动修复Ext4文件系统：
+- en: '[PRE24]'
+  id: totrans-216
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: '*-f* forces a check, in case *e2fsck* thinks the filesystem is clean. *-p*
+    is short for preen, or repair, and *-v* is verbose. If it finds a problem that
+    requires your intervention, it prints a description of the problem and exits.'
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*-f* 强制检查，以防*e2fsck*认为文件系统是干净的。*-p* 是preen（修复）的简写，*-v* 是详细模式。如果它发现需要你干预的问题，它会打印问题的描述并退出。'
+- en: '*e2fsck -vf [device]* launches an interactive check and repair.'
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*e2fsck -vf [device]* 启动交互式检查和修复。'
+- en: '*fsck.vfat -vfp [device]* is for FAT16/32.'
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*fsck.vfat -vfp [device]* 适用于FAT16/32。'
+- en: '*xfs_repair [device]* is for XFS filesystems.'
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*xfs_repair [device]* 适用于XFS文件系统。'
+- en: 'If your recovered filesystem passes the filesystem checks, go ahead and copy
+    your files to their final location. If there are still problems, mount it read-only:'
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你恢复的文件系统通过了文件系统检查，那么可以将文件复制到最终位置。如果仍然存在问题，请以只读方式挂载它：
+- en: '[PRE25]'
+  id: totrans-222
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: Then copy as many files as you can to another disk.
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后尽可能多地复制文件到另一个磁盘。
+- en: Discussion
+  id: totrans-224
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Make sure you have GNU *ddrescue*, by Antonio Diaz Diaz, and not *dd-rescue*
+    by Kurt Garloff. *dd-rescue* is a great tool, but it is more complicated to use.
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确保你安装的是GNU *ddrescue*，作者是Antonio Diaz Diaz，而不是Kurt Garloff的*dd-rescue*。*dd-rescue*
+    是一个很棒的工具，但使用起来更复杂。
+- en: '*ddrescue* copies at the block level, so it doesn’t matter what the filesystem
+    is that you are trying to rescue. *ddrescue* will make an exact copy regardless
+    of what filesystems your Linux supports.'
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*ddrescue* 在块级别复制，所以你尝试救援的文件系统是什么并不重要。*ddrescue*会无论你的Linux支持哪些文件系统，都会做一个精确的复制。'
+- en: If *ddrescue* runs out of space, it will fail at the very end, so be sure your
+    recovery drive has a generous amount of room.
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果*ddrescue*在最后一刻空间不足，它将失败，所以确保你的恢复驱动器有足够的空间。
+- en: You can use *ddrescue* on USB sticks, CompactFlash, and SD cards.
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在USB存储设备，CompactFlash和SD卡上使用*ddrescue*。
+- en: See Also
+  id: totrans-229
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[GNU ddrescue](https://oreil.ly/mMxQf)'
+  id: totrans-230
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU ddrescue](https://oreil.ly/mMxQf)'
+- en: '*man 8 fsck (e2fsprogs)*'
+  id: totrans-231
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 fsck（e2fsprogs）*'
+- en: 19.12 Managing Partitions and Filesystems from SystemRescue
+  id: totrans-232
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.12 从SystemRescue管理分区和文件系统
+- en: Problem
+  id: totrans-233
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to partition your hard disk or make changes to filesystem, and you
+    need to do it from an external Linux system.
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要对硬盘进行分区或者对文件系统进行更改，并且你需要从一个外部Linux系统来完成。
+- en: Solution
+  id: totrans-235
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Use SystemRescue. SystemRescue includes both GParted and *parted*. You don’t
+    have to mount any filesystems, and SystemRescue will operate directly on the block
+    devices on your host system. Use *lsblk* to see your host block devices:'
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用SystemRescue。SystemRescue包括GParted和*parted*。你不需要挂载任何文件系统，SystemRescue会直接在你的主机系统的块设备上操作。使用*lsblk*来查看你的主机块设备：
+- en: '[PRE26]'
+  id: totrans-237
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: Follow the recipes in Chapters [8](ch08.xhtml#cha-partitioning-parted), [9](ch09.xhtml#cha-partitioning-gparted),
+    and [11](ch11.xhtml#cha-create-filesystems) for managing partitions and filesystems.
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按照第[8](ch08.xhtml#cha-partitioning-parted)，[9](ch09.xhtml#cha-partitioning-gparted)和[11](ch11.xhtml#cha-create-filesystems)章的说明来管理分区和文件系统。
+- en: See Also
+  id: totrans-239
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[Chapter 8](ch08.xhtml#cha-partitioning-parted)'
+  id: totrans-240
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第8章](ch08.xhtml#cha-partitioning-parted)'
+- en: '[Chapter 9](ch09.xhtml#cha-partitioning-gparted)'
+  id: totrans-241
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第9章](ch09.xhtml#cha-partitioning-gparted)'
+- en: '[Chapter 11](ch11.xhtml#cha-create-filesystems)'
+  id: totrans-242
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第11章](ch11.xhtml#cha-create-filesystems)'
+- en: 19.13 Creating a Data Partition on Your SystemRescue USB Drive
+  id: totrans-243
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.13 在你的SystemRescue USB驱动器上创建一个数据分区
+- en: Problem
+  id: totrans-244
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: SystemRescue on USB drives is working well for you, but you want to know how
+    to partition your device with the SystemRescue root filesystem on the first partition
+    and a writable filesystem on the second partition. Then you will need only a single
+    device for copying files.
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: USB 驱动器上的 SystemRescue 对你很有效，但你想知道如何将设备分区，使得 SystemRescue 根文件系统在第一个分区上，第二个分区上有可写文件系统。然后你只需一个设备来复制文件。
+- en: Solution
+  id: totrans-246
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: You can do this in just a few steps.
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你只需几个步骤就可以完成这个操作。
+- en: The stock SystemRescue image cannot boot from a partition. It uses less than
+    a gigabyte of space, so any USB stick will have a lot of wasted space. The trick
+    to making SystemRescue bootable from a partition is to make your SystemRescue
+    ISO capable of booting from a partition, add a Master Boot Record (MBR), then
+    install the boot code, *mbr.bin*.
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 标准的 SystemRescue 镜像无法从分区引导。它使用的空间不到 1 GB，因此任何 USB 闪存都会有大量的空间浪费。使 SystemRescue
+    从分区引导的技巧是使你的 SystemRescue ISO 能够从分区引导，添加主引导记录（MBR），然后安装引导代码 *mbr.bin*。
+- en: You need *isohybrid* and *mbr.bin*, which are provided by *syslinux*. This is
+    provided by the *syslinux* package on Fedora and openSUSE, and by *syslinux-utils*
+    and *install-mbr* on Ubuntu.
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要 *isohybrid* 和 *mbr.bin*，它们由 *syslinux* 提供。在 Fedora 和 openSUSE 上由 *syslinux*
+    包提供，在 Ubuntu 上由 *syslinux-utils* 和 *install-mbr* 提供。
+- en: In the following examples, replace */dev/sdc* with your own device.
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下面的示例中，将 */dev/sdc* 替换为你自己的设备。
+- en: 'First, make the SystemRescue image bootable from a partition:'
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，使 SystemRescue 镜像可以从分区引导：
+- en: '[PRE27]'
+  id: totrans-252
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'Create an *msdos* partition table on your USB drive. Use GParted ([Recipe 9.2](ch09.xhtml#rec-gparted-create-partition-table))
+    or *parted*:'
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在你的 USB 驱动器上创建一个 *msdos* 分区表。使用 GParted（[Recipe 9.2](ch09.xhtml#rec-gparted-create-partition-table)）或
+    *parted*：
+- en: '[PRE28]'
+  id: totrans-254
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'Create two partitions on your USB drive. Set the filesystem type on Partition
+    1 as FAT32, and set the *boot* flag. The following example creates an approximately
+    2 GB boot partition:'
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在你的 USB 驱动器上创建两个分区。将第一个分区的文件系统类型设置为 FAT32，并设置 *boot* 标志。下面的示例创建了一个大约 2 GB 的引导分区：
+- en: '[PRE29]'
+  id: totrans-256
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'Add a second partition for data storage, using any filesystem type you want.
+    The following example creates a 2 GB partition, then quits *parted*:'
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为数据存储添加第二个分区，使用你喜欢的任何文件系统类型。下面的示例创建了一个 2 GB 的分区，然后退出 *parted*：
+- en: '[PRE30]'
+  id: totrans-258
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'Create your filesystems. Partition 1 is FAT32, with the label *SYSRESCUE*;
+    Partition 2 is XFS, labeled *data*:'
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建你的文件系统。第一个分区是带有标签 *SYSRESCUE* 的 FAT32，第二个分区是带有标签 *data* 的 XFS：
+- en: '[PRE31]'
+  id: totrans-260
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'Install SystemRescue to the first partition:'
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 SystemRescue 安装到第一个分区：
+- en: '[PRE32]'
+  id: totrans-262
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'On Ubuntu, install the MBR to the USB drive:'
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Ubuntu 上，将 MBR 安装到 USB 驱动器上：
+- en: '[PRE33]'
+  id: totrans-264
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'On other Linuxes, use *dd*:'
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在其他 Linux 上，使用 *dd*：
+- en: '[PRE34]'
+  id: totrans-266
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: '*mbr.bin* may be in a different directory, depending which Linux you are using.'
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*mbr.bin* 可能位于不同目录，具体取决于你使用的 Linux 发行版。'
+- en: Boot up your SystemRescue drive, and it should start up normally.
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动你的 SystemRescue 驱动器，它应该正常启动。
+- en: Discussion
+  id: totrans-269
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Your filesystems do not need labels; they are a convenience to help you remember
+    what they are for.
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的文件系统不需要标签；它们是方便帮助你记住它们的用途。
+- en: You may use any filesystem on the first partition. FAT32 is universal, so you
+    can boot SystemRescue on Linux, macOS, and Windows. For copying files from macOS
+    and Windows, format your data partition as FAT32 or exFAT.
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在第一个分区上使用任何文件系统。FAT32 是通用的，因此你可以在 Linux、macOS 和 Windows 上引导 SystemRescue。对于从
+    macOS 和 Windows 复制文件，将数据分区格式化为 FAT32 或 exFAT。
+- en: You will have to mount your second partition manually, then you can use it however
+    you want. It is convenient for copying files from the host system, and the coolest
+    thing about having this writable partition is you can use it as a backing store
+    for storing changes you make to SystemRescue, such as configuration changes and
+    installing software. See [Recipe 19.14](#rec-preserve-changes) to learn all about
+    it.
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你必须手动挂载第二个分区，然后你可以按照你的意愿使用它。它方便地用于从主机系统复制文件，拥有这个可写分区的最酷的事情是你可以将其用作存储 SystemRescue
+    中所做更改的后备存储，例如配置更改和安装软件。查看 [Recipe 19.14](#rec-preserve-changes) 详细了解。
+- en: See Also
+  id: totrans-273
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 8](ch08.xhtml#cha-partitioning-parted)'
+  id: totrans-274
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第八章](ch08.xhtml#cha-partitioning-parted)'
+- en: '[Chapter 11](ch11.xhtml#cha-create-filesystems)'
+  id: totrans-275
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第十一章](ch11.xhtml#cha-create-filesystems)'
+- en: '[*https://system-rescue.org*](https://system-rescue.org)'
+  id: totrans-276
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://system-rescue.org*](https://system-rescue.org)'
+- en: '*man 1 isohybrid*'
+  id: totrans-277
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 isohybrid*'
+- en: '*man 1 dd*'
+  id: totrans-278
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 dd*'
+- en: 19.14 Preserving Changes in SystemRescue
+  id: totrans-279
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 19.14 在 SystemRescue 中保留更改
+- en: Problem
+  id: totrans-280
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: SystemRescue is working well for you, but you wish you could preserve some changes
+    and not have to start over every time you start SystemRescue.
+  id: totrans-281
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SystemRescue 对你很有效，但你希望能保留一些更改，而不必每次启动 SystemRescue 时重新开始。
+- en: Solution
+  id: totrans-282
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: See [Recipe 19.13](#rec-writable-partition) to learn how to create a writable
+    partition on your SystemRescue USB drive. Give this partition a filesystem label,
+    such as *data*. Once this is set up, boot up SystemRescue, select your boot menu
+    choice, press the Tab key, and append **`cow_label=*data*`** to your boot selection
+    ([Figure 19-8](#fig-sysrec-9)).
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见 [Recipe 19.13](#rec-writable-partition)，学习如何在你的SystemRescue USB驱动器上创建一个可写分区。给这个分区取一个文件系统标签，比如*data*。设置好后，启动SystemRescue，选择你的启动菜单选项，按Tab键，并在你的启动选择中添加**`cow_label=*data*`**（见[图 19-8](#fig-sysrec-9)）。
+- en: '![Appending boot options.](Images/lcb2_1908.png)'
+  id: totrans-284
+  prefs: []
+  type: TYPE_IMG
+  zh: '![添加引导选项。](Images/lcb2_1908.png)'
+- en: Figure 19-8\. Appending boot options
+  id: totrans-285
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 19-8\. 添加引导选项
+- en: 'SystemRescue mounts both of your partitions in */run/archiso/*:'
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SystemRescue挂载你的两个分区到*/run/archiso/*：
+- en: '[PRE35]'
+  id: totrans-287
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: All changes you make to SystemRescue are stored in */run/archiso/cowspace/persistent_RESCUE800*,
+    and the root filesystem remains the same. *RESCUE800* is different for each SystemRescue
+    release, according to the release number.
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你对SystemRescue所做的所有更改都存储在*/run/archiso/cowspace/persistent_RESCUE800*中，而根文件系统保持不变。*RESCUE800*对于每个SystemRescue发布版本都是不同的，根据发布编号而定。
+- en: 'You can configure SystemRescue just like any Linux: enable and disable services,
+    set a root password, change appearance, install new software, change network configurations,
+    or write new documents.'
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以像配置任何Linux系统一样配置SystemRescue：启用和禁用服务，设置root密码，更改外观，安装新软件，更改网络配置或编写新文档。
+- en: Discussion
+  id: totrans-290
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Large USB drives are inexpensive, and needing only a single rescue device is
+    convenient. You can use either USB thumb drives or USB hard drives.
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大容量USB驱动器价格便宜，只需要一个救援设备非常方便。你可以使用USB闪存驱动器或USB硬盘驱动器。
+- en: See Also
+  id: totrans-292
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[*https://system-rescue.org*](https://system-rescue.org)'
+  id: totrans-293
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*https://system-rescue.org*](https://system-rescue.org)'

@@ -1,0 +1,2231 @@
+- en: Chapter 1\. Installing Linux
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第一章 安装 Linux
+- en: 'One of the hurdles for new Linux users is installing Linux. Linux is the easiest
+    computer operating system to install: pop in your installation disk, answer a
+    few questions, and then do something else until it finishes. In this chapter you
+    will learn how to install Linux by itself, how to run a live Linux, how to multiboot
+    multiple Linux distributions on one computer, and how to dual-boot with Microsoft
+    Windows.'
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 新 Linux 用户面临的障碍之一是安装 Linux。Linux 是最容易安装的计算机操作系统：插入安装光盘，回答几个问题，然后做其他事情，直到安装完成。在本章中，你将学习如何单独安装
+    Linux，如何运行 Live Linux，如何在一台计算机上多重引导多个 Linux 发行版，以及如何与 Microsoft Windows 双引导。
+- en: Experimenting with Linux
+  id: totrans-2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 尝试 Linux
+- en: You need the freedom to make mistakes, so if it is possible, use a second computer
+    for getting acquainted with Linux. If this is not possible, make sure you always
+    have fresh backups of your data. You can always restore a broken Linux installation,
+    but your data is irreplaceable. If you are setting up dual-boot with Windows,
+    be sure you have your Windows installation and recovery media.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要自由地犯错误，所以如果可能的话，使用第二台计算机来熟悉 Linux。如果这不可能，确保你的数据有新鲜的备份。你可以随时恢复损坏的 Linux 安装，但你的数据是无法替代的。如果要设置与
+    Windows 的双引导，请确保有 Windows 的安装和恢复介质。
+- en: 'Most Linux distributions provide dual-purpose installation images: you can
+    run them live from a USB stick and install them to your hard drive from the same
+    image. A live Linux makes no changes to your computer—just boot it up, check it
+    out, then reboot to your host system. Some live Linuxes, such as Ubuntu, support
+    storing your data on the USB stick, so you have a completely portable Linux that
+    you can run from any computer.'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Linux 发行版提供双重用途的安装镜像：你可以从 USB 硬盘启动并从同一镜像安装到硬盘。Live Linux 不会对你的计算机进行任何更改——只需启动它，查看一下，然后重新启动到你的主机系统。一些
+    Live Linux，如 Ubuntu，支持将数据存储在 USB 硬盘上，因此你拥有一个完全便携的 Linux，可以在任何计算机上运行。
+- en: Multiboot is installing more than one operating system on a computer, and then
+    picking the one you want to use from your boot menu. You can multiboot any Linux
+    system, any of the free Unixes (FreeBSD, NetBSD, OpenBSD), and you can multiboot
+    Linux and Microsoft Windows. Dual-booting Linux and Windows is a common way for
+    Windows users to get acquainted with Linux, and for users who need both.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 多重引导是在一台计算机上安装多个操作系统，然后从启动菜单中选择要使用的操作系统。你可以多重引导任何 Linux 系统，任何自由的 Unix 系统（如 FreeBSD、NetBSD、OpenBSD），也可以多重引导
+    Linux 和 Microsoft Windows。Linux 和 Windows 的双引导是 Windows 用户熟悉 Linux 的常见方式，也适用于需要两者的用户。
+- en: What about Apple’s macOS, you ask? Sorry, but dual-booting Linux and macOS is
+    an unreliable endeavor that gets more difficult with every macOS release. One
+    alternative for running both on a single machine is to run Linux in Parallels,
+    the macOS virtual machine host.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你问道：那么苹果的 macOS 呢？抱歉，但是在一台计算机上双引导 Linux 和 macOS 是一种不可靠的尝试，而且随着每个 macOS 版本的发布，变得越来越困难。在同一台机器上运行两者的一个替代方法是在
+    Parallels 中运行 Linux，这是 macOS 的虚拟机主机。
+- en: Rather than installing Linux yourself, you could buy a PC with Linux already
+    installed. There are a number of good Linux specialists that sell Linux laptops,
+    desktops, and servers. System76, ZaReason, Linux Certified, Think Penguin, Entroware,
+    and Tuxedo Computers are all Linux specialists. Dell has been expanding its Linux
+    lineup, and enterprise Linux vendors Red Hat, SUSE, and Ubuntu all partner with
+    hardware vendors, including Dell, Hewlett-Packard, and IBM.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与其自己安装 Linux，你可以购买已经预装了 Linux 的个人电脑。有许多出售 Linux 笔记本电脑、台式机和服务器的优秀 Linux 专家。System76、ZaReason、Linux
+    Certified、Think Penguin、Entroware 和 Tuxedo Computers 都是 Linux 专家。戴尔一直在扩展其 Linux
+    产品线，企业 Linux 供应商 Red Hat、SUSE 和 Ubuntu 都与硬件供应商合作，包括戴尔、惠普和 IBM。
+- en: Still, it pays to know how to install Linux. This opens up a whole world of
+    experimentation, customization, and disaster recovery. *Distro-hopping* is a time-honored
+    pastime, where you download and try different Linux distributions.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但是，了解如何安装 Linux 也是值得的。这将开启一整个实验、定制和灾难恢复的世界。*Distro-hopping* 是一种历史悠久的消遣，你可以下载和尝试不同的
+    Linux 发行版。
+- en: Even though installing Linux takes just a few steps, you need a certain amount
+    of knowledge, especially when you want to customize your installation, like setting
+    up disk partitions in a particular way or multibooting with other Linux distributions
+    or with Microsoft Windows. You need to know how to enter your system Basic Input
+    Output System (BIOS) or Unified Extensible Firmware Interface (UEFI) setup. You
+    need good internet access. All Linux distributions are freely downloadable, even
+    the commercial enterprise distributions like Red Hat, SUSE, and Ubuntu. Download
+    sizes range from a few megabytes for super-small Linuxes like Tiny Core Linux,
+    which bundles a complete operating system with a graphical desktop into 12 MB,
+    to 10+ GB for SUSE Linux Enterprise Server. Most Linux distros provide 2–4 GB
+    installation images, which fit perfectly on a DVD or small USB stick.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管安装Linux只需几个步骤，但在您想要自定义安装时（如以特定方式设置磁盘分区或与其他Linux发行版或Microsoft Windows多重引导），您需要一定的知识。您需要知道如何进入系统的基本输入输出系统（BIOS）或统一可扩展固件接口（UEFI）设置。您需要良好的互联网访问。所有Linux发行版都可以免费下载，即使是商业企业发行版如Red
+    Hat、SUSE和Ubuntu。下载大小从12 MB的超小型Linux发行版（如Tiny Core Linux，将完整操作系统和图形桌面捆绑在一起）到SUSE
+    Linux Enterprise Server的10+ GB不等。大多数Linux发行版提供2-4 GB的安装镜像，非常适合DVD或小型USB存储设备。
+- en: Most Linux distributions provide a network installer image; for example, Debian’s
+    is around 200 megabytes. This installs enough of a Debian system to boot up, connect
+    to the internet, and then download only the packages you want, rather than downloading
+    a complete installation image.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数Linux发行版提供网络安装镜像；例如，Debian的镜像大小约为200兆字节。这样安装足以启动Debian系统，连接到互联网，然后仅下载你想要的软件包，而不是下载完整的安装镜像。
+- en: You can freely share any Linux distribution that you download.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以自由分享任何下载的Linux发行版。
+- en: You also have the option to buy Linux distributions on DVD and USB media. Visit
+    [Shop Linux Online](https://shoplinuxonline.com) and [Linux Disc Online](https://linuxdisconline.com)
+    to find physical installation media for various Linux distributions.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你还可以选择购买DVD和USB媒体上的Linux发行版。访问[在线Linux商店](https://shoplinuxonline.com)和[Linux光盘在线](https://linuxdisconline.com)以找到各种Linux发行版的物理安装介质。
+- en: Booting from Installation Media
+  id: totrans-13
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 从安装媒体引导
+- en: 'You must be able to boot your system from your USB or DVD installation disk.
+    You may have to enter your system’s BIOS or UEFI setup to enable booting from
+    a removable device. Some have an option to select an alternate boot device without
+    entering the BIOS/UEFI; for example, my laptop’s UEFI displays a screen at startup
+    that lists all the relevant keypresses: F2 or Delete to enter setup, and F11 to
+    enter the alternate boot device menu. Dell systems use F12 to open their one-time
+    boot menu. Every one is special and unique, so check out your motherboard manual
+    to learn how.'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你必须能够从USB或DVD安装盘启动系统。你可能需要进入系统的BIOS或UEFI设置以启用从可移动设备启动。有些设备在不进入BIOS/UEFI的情况下可以选择备用启动设备；例如，我的笔记本电脑的UEFI在启动时显示一个屏幕，列出所有相关的按键操作：按F2或Delete进入设置，按F11进入备用启动设备菜单。戴尔系统使用F12打开一次性启动菜单。每个设备都是特殊且独特的，因此请查阅您的主板手册以了解详情。
+- en: You may have to disable Secure Boot in your UEFI setup to enable booting from
+    removable media. Fedora, openSUSE, and Ubuntu all have their own signing keys
+    and will boot with Secure Boot enabled. Other Linux distributions, such as SystemRescue
+    ([Chapter 19](Images/ch19.html#cha-rescue-recovery)), do not.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能需要在UEFI设置中禁用安全启动以启用从可移动媒体引导。Fedora、openSUSE和Ubuntu都有自己的签名密钥，并且可以在启用安全启动的情况下引导。其他Linux发行版，如SystemRescue（[第19章](Images/ch19.html#cha-rescue-recovery)），则没有。
+- en: Secure Boot
+  id: totrans-16
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 安全启动
+- en: Secure Boot is a security feature of your UEFI setup. When Secure Boot is enabled,
+    it allows booting only operating systems that provide special signed keys. The
+    idea is to prevent malicious code from controlling your bootloader.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安全启动是UEFI设置的一项安全功能。启用安全启动时，只允许启动提供特殊签名密钥的操作系统。其目的是防止恶意代码控制您的引导加载程序。
+- en: Most Linux distributions do not provide signed keys, so Secure Boot must be
+    disabled to run them.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数Linux发行版不提供签名密钥，因此必须禁用安全启动才能运行它们。
+- en: Where to Download Linux
+  id: totrans-19
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Linux下载位置
+- en: There are hundreds of Linux distributions, and a great place to learn about
+    them is [DistroWatch.com](https://distrowatch.com), the most comprehensive Linux
+    distribution resource. DistroWatch publishes reviews, detailed information, and
+    news, and their popular list of the top 100 distributions.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有数百种Linux发行版，了解它们的好地方是[DistroWatch.com](https://distrowatch.com)，这是最全面的Linux发行版资源。DistroWatch发布评论、详细信息和新闻，并列出了前100名最受欢迎的发行版。
+- en: Best Linux for Newbies
+  id: totrans-21
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 新手最佳Linux系统
+- en: Linux provides rather a lot of a good thing, maybe too much. The recipes in
+    this book were tested on openSUSE, Fedora Linux, and Ubuntu Linux. These three
+    are well-established, popular, and well-maintained, and they represent three different
+    Linux families (see the [Appendix](app01.xhtml#appendix)). In my experience Ubuntu
+    is perfect for a Linux newbie because it has the easiest installer, good documentation,
+    and a large and supportive user community.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux提供了相当多的好东西，也许有点过多。本书中的配方在openSUSE、Fedora Linux和Ubuntu Linux上进行了测试。这三者是成熟、流行且得到良好维护的，它们代表了三个不同的Linux家族（参见[附录](app01.xhtml#appendix)）。根据我的经验，Ubuntu非常适合Linux新手，因为它拥有最简单的安装程序、良好的文档和庞大支持的用户社区。
+- en: 'Every Linux has its differences: different software installers, different defaults,
+    different file locations…but the fundamentals are all similar. Most of what you
+    learn on any particular distro is applicable to all of them.'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个Linux都有其不同之处：不同的软件安装程序、不同的默认设置、不同的文件位置……但基本原理都是相似的。您在任何特定发行版上学到的大部分内容都适用于所有发行版。
+- en: Hardware Architectures
+  id: totrans-24
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 硬件架构
+- en: How-to authors used to be able to take it for granted that readers were using
+    x86 hardware. With the rise in popularity of ARM processors this is no longer
+    true. Linux supports a large number of hardware architectures, and [Recipe 10.11](ch10.xhtml#rec-hardware-arch)
+    shows how to detect what you have. You cannot accidentally install the wrong Linux
+    version because the installation will fail at the beginning, and you will see
+    an error message telling why.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如何作者曾经可以想当然地认为读者在使用x86硬件。随着ARM处理器的普及，这种情况不再成立了。Linux支持多种硬件架构，[配方 10.11](ch10.xhtml#rec-hardware-arch)展示了如何检测您所拥有的硬件。您不能意外安装错误的Linux版本，因为安装将在开始时失败，并显示错误消息告知原因。
+- en: Linux installation images are packaged in the ISO 9660 format, and have a **.iso*
+    extension, for example, *ubuntu-20.04.1-desktop-amd64.iso* for x86-64 machines,
+    and *ubuntu-20.04.1-live-server-arm64.iso* for ARM machines. This is a compressed
+    archive that contains the entire filesystem and the installation program. When
+    you copy this archive to your installation medium, it is uncompressed and you
+    can see all the files.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux安装映像以ISO 9660格式打包，并带有**.iso*扩展名，例如，对于x86-64机器，是*ubuntu-20.04.1-desktop-amd64.iso*，对于ARM机器是*ubuntu-20.04.1-live-server-arm64.iso*。这是一个压缩的存档，包含整个文件系统和安装程序。当您将此存档复制到安装介质时，它将被解压缩，您可以看到所有文件。
+- en: The **.iso* format was originally for CDs and DVDs. Once upon a time, Linux
+    fit on a single CD. (Once upon a time, it fit on a few 3.5” diskettes!) Now most
+    Linux distributions are too large for CDs. USB sticks are perfect for Linux installations,
+    as they are inexpensive, reusable, and much faster than optical media.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '**.iso*格式最初是用于CD和DVD。曾经，Linux适合单张CD上。（曾经，它适合几个3.5英寸软盘！）现在大多数Linux发行版都太大了，不适合CD。USB存储设备非常适合Linux安装，它们价格便宜、可重复使用，比光盘媒体快得多。'
+- en: 1.1 Entering your System BIOS/UEFI Setup
+  id: totrans-28
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.1 进入系统的BIOS/UEFI设置
+- en: Problem
+  id: totrans-29
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to enter your system’s BIOS/UEFI setup.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望进入系统的BIOS/UEFI设置。
+- en: Solution
+  id: totrans-31
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Enter your BIO/UEFI setup by pressing the appropriate F*n* key at startup. On
+    Dell, ASUS, and Acer systems this is usually F2, and Lenovo uses F1\. However,
+    this varies; for example, some systems use the Delete key, so check your machine’s
+    documentation. Some systems tell which key to press on their startup screens.
+    It can be a bit tricky to press the key at the right time, so start pressing it
+    right after you press the power button, just like banging on an elevator button
+    to make it arrive faster.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过在启动时按适当的F*n*键进入您的BIO/UEFI设置。在戴尔、华硕和宏碁系统上，通常是F2，而联想则使用F1\. 不过，这会有所不同；例如，某些系统使用Delete键，请查看您的机器文档。一些系统在启动屏幕上显示要按哪个键。按对时间有点棘手，所以在按电源按钮后立即开始按键，就像猛按电梯按钮以加快到达速度一样。
+- en: Every UEFI looks different; for example, Lenovo’s is bright and well organized
+    ([Figure 1-1](#fig-install-uefi)).
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个UEFI看起来都不同；例如，联想的亮度和良好的组织结构（参见[图 1-1](#fig-install-uefi)）。
+- en: The ASRock UEFI on my test system is dark and dramatic ([Figure 1-2](#fig-install-uefi-3)).
+    This particular motherboard targets gamers and has many settings for overclocking
+    the CPU and other performance enhancements. This screen shows the motherboard
+    browser; hover the cursor over any item and it provides information about that
+    item.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我的测试系统上的ASRock UEFI界面深色而戏剧化（[图1-2](#fig-install-uefi-3)）。这款特定的主板面向游戏玩家，具有许多CPU超频和其他性能增强的设置。此屏幕显示主板浏览器；将光标悬停在任何项目上，它会提供有关该项目的信息。
+- en: '![Lenovo''s UEFI on a new Thinkpad.](Images/lcb2_0101.png)'
+  id: totrans-35
+  prefs: []
+  type: TYPE_IMG
+  zh: '![联想新ThinkPad上的Lenovo UEFI。](Images/lcb2_0101.png)'
+- en: Figure 1-1\. Lenovo’s UEFI on a new ThinkPad
+  id: totrans-36
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图1-1\. 联想新ThinkPad上的Lenovo UEFI
+- en: '![ASRock UEFI has a motherboard browser.](Images/lcb2_0102.png)'
+  id: totrans-37
+  prefs: []
+  type: TYPE_IMG
+  zh: '![ASRock UEFI 具有主板浏览器。](Images/lcb2_0102.png)'
+- en: Figure 1-2\. ASRock UEFI has a motherboard browser
+  id: totrans-38
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图1-2\. ASRock UEFI 具有主板浏览器
+- en: Discussion
+  id: totrans-39
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: When you boot up your computer, the first startup instructions come from the
+    BIOS or UEFI firmware, stored on the computer’s motherboard. BIOS is the old legacy
+    system that has been with us since 1980\. UEFI is its modern replacement. UEFI
+    includes legacy BIOS support. Nearly all computers made after the mid-2000s have
+    UEFI.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你启动计算机时，第一次启动指令来自存储在计算机主板上的BIOS或UEFI固件。BIOS是自1980年以来一直存在的旧传统系统。UEFI是它的现代替代品。UEFI包括对传统BIOS的支持。2000年代中期后几乎所有的计算机都配备了UEFI。
+- en: UEFI has considerably more features than the old BIOS and is like a little operating
+    system. The UEFI setup screens control boot order, boot devices, security options,
+    Secure Boot, overclocking, displaying hardware health, networking, and many more
+    functions.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UEFI比旧BIOS具有更多功能，类似于一个小型操作系统。UEFI设置界面控制启动顺序、启动设备、安全选项、安全启动、超频、显示硬件健康状况、网络等许多功能。
+- en: See Also
+  id: totrans-42
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: The documentation for your motherboard
+  id: totrans-43
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 主板的文档
+- en: '[Unified Extensible Firmware Interface Forum](https://uefi.org)'
+  id: totrans-44
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[统一可扩展固件接口论坛](https://uefi.org)'
+- en: 1.2 Downloading a Linux Installation Image
+  id: totrans-45
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.2 下载Linux安装镜像
+- en: Problem
+  id: totrans-46
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to find and download a Linux installation image.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要找到并下载一个Linux安装镜像。
+- en: Solution
+  id: totrans-48
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: First, you need to choose which Linux you want to try. If you don’t know where
+    to start, I recommend [Ubuntu Linux](https://ubuntu.com). [Fedora Linux](https://getfedora.org)
+    and [openSUSE Linux](https://opensuse.org) are also excellent for anyone new to
+    Linux.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，你需要选择想尝试的Linux版本。如果不知道从哪里开始，我推荐[Ubuntu Linux](https://ubuntu.com)。[Fedora
+    Linux](https://getfedora.org)和[openSUSE Linux](https://opensuse.org)对于Linux新手也是很好的选择。
+- en: After your download is completed, verify that you have a good download. This
+    is an important step that ensures you have an image that did not get damaged during
+    the download or was otherwise altered in some way.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下载完成后，请验证你下载了一个良好的镜像。这是一个重要的步骤，可以确保你下载的镜像在下载过程中没有损坏或以其他方式被修改。
+- en: 'Every Linux distribution provides signed keys and checksums for its download
+    images. Ubuntu provides copy-and-paste instructions. Open a terminal and change
+    to the directory where you downloaded Ubuntu. For Ubuntu 21.04, verifying the
+    installation image looks like this:'
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个Linux发行版都提供签名密钥和下载镜像的校验和。Ubuntu提供了复制粘贴的验证指令。打开终端并切换到你下载Ubuntu的目录。对于Ubuntu
+    21.04，验证安装镜像看起来是这样的：
+- en: '[PRE0]'
+  id: totrans-52
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'If you see “shasum: WARNING: 1 computed checksum did NOT match,” then your
+    download is no good, assuming you copied the correct checksum. In most cases the
+    image was corrupted during the download, so try downloading it again.'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '如果看到“shasum: WARNING: 1 computed checksum did NOT match”，那么你的下载可能有问题，假设你复制了正确的校验和。在大多数情况下，镜像在下载过程中损坏了，因此请尝试重新下载。'
+- en: Other Linux distributions provide slightly different verification methods, so
+    follow their instructions.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其他Linux发行版提供略有不同的验证方法，请按照它们的说明进行操作。
+- en: Discussion
+  id: totrans-55
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: A great site to learn about the hundreds of Linux distributions is [Distrowatch.com](https://distrowatch.com).
+    Distrowatch provides news and information about more Linux distros than anyone.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 了解数百种Linux发行版的一个好网站是[Distrowatch.com](https://distrowatch.com)。Distrowatch提供关于比任何其他网站更多Linux发行版的新闻和信息。
+- en: See Also
+  id: totrans-57
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 sha256sum*'
+  id: totrans-58
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 sha256sum*'
+- en: '[Ubuntu Linux](https://ubuntu.com)'
+  id: totrans-59
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Ubuntu Linux](https://ubuntu.com)'
+- en: '[Fedora Linux](https://getfedora.org)'
+  id: totrans-60
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Fedora Linux](https://getfedora.org)'
+- en: '[openSUSE Linux](https://opensuse.org)'
+  id: totrans-61
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[openSUSE Linux](https://opensuse.org)'
+- en: 1.3 Creating a Linux Installation USB Stick with UNetbootin
+  id: totrans-62
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.3 使用UNetbootin创建Linux安装USB驱动器
+- en: Problem
+  id: totrans-63
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have downloaded a Linux installation **.iso* image, and you want to transfer
+    it to a USB stick to create your own installation media. You prefer a graphical
+    tool to create your installation media.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经下载了一个Linux安装**.iso*镜像，并希望将其传输到USB存储设备以创建自己的安装介质。你更喜欢使用图形化工具来创建安装介质。
+- en: Solution
+  id: totrans-65
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Try [UNetbootin](https://oreil.ly/8CXp9), Universal Netboot Installer. It runs
+    on Linux, macOS, and Windows, so you can download and create a Linux installation
+    disk on any of these operating systems. UNetbootin creates an installation USB
+    drive from your downloaded **.iso* file or downloads a fresh **.iso* file ([Figure 1-3](#fig-unetbootin)).
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尝试使用[UNetbootin](https://oreil.ly/8CXp9)，通用网络引导安装程序。它可以在Linux、macOS和Windows上运行，因此你可以在这些操作系统中下载并创建Linux安装盘。UNetbootin可以根据你下载的**.iso*文件创建安装USB驱动器，或者下载一个新的**.iso*文件（[图1-3](#fig-unetbootin)）。
+- en: You may use any size USB stick (that is larger than your **.iso* file, of course).
+    The **.iso* overwrites the entire device, so you can’t use it for anything else,
+    and you must use a separate USB stick for each **.iso* file.
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以使用任何大于你的**.iso*文件的USB存储设备，当然了。**.iso*文件会覆盖整个设备，因此你不能再用它进行其他用途，并且每个**.iso*文件必须使用单独的USB存储设备。
+- en: '![Using UNetbootin to create an installable Linux USB stick](Images/lcb2_0103.png)'
+  id: totrans-68
+  prefs: []
+  type: TYPE_IMG
+  zh: '![使用UNetbootin创建可安装的Linux USB存储设备](Images/lcb2_0103.png)'
+- en: Figure 1-3\. Using UNetbootin to create an installable Linux USB stick
+  id: totrans-69
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图1-3\. 使用UNetbootin创建可安装的Linux USB存储设备
+- en: The UNetbootin site provides downloads and instructions. Some Linux distributions
+    provide UNetbootin packages, but downloading from the [UNetbootin site](https://unetbootin.github.io)
+    is simple and always up-to-date.
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: UNetbootin官网提供下载和说明。一些Linux发行版提供UNetbootin软件包，但从[UNetbootin官网](https://unetbootin.github.io)下载更为简单和始终更新。
+- en: Discussion
+  id: totrans-71
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Other good graphical apps are USB Creator, ISO Image Writer, and GNOME MultiWriter,
+    which copies to multiple USB drives at one time.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其他优秀的图形化应用包括USB Creator、ISO Image Writer和GNOME MultiWriter，后者可以同时复制到多个USB驱动器。
+- en: 'After you have created your installation USB drive, you can view the files
+    on it. The single **.iso* expands into a complete filesystem full of files and
+    directories, like this example for Ubuntu:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在创建了安装USB驱动器后，你可以查看其中的文件。单个**.iso*文件会展开为一个完整的文件系统，包含类似Ubuntu示例中的文件和目录：
+- en: '[PRE1]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Every Linux distribution sets up its installers in its own way. This example
+    shows Fedora’s installation files:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个Linux发行版都以自己的方式设置其安装程序。这个示例展示了Fedora的安装文件：
+- en: '[PRE2]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: It would be lovely to have a single USB stick with a herd of Linux installation
+    files, and there are some programs that do this. My favorite is [Ventoy](https://ventoy.net).
+    Ventoy supports a large number of Linux distributions. It runs on both Linux and
+    Windows, and you can create a USB stick full of Linux installers for running live
+    Linuxes, and for permanent installations to hard disks.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 拥有一个USB存储设备，并载入一群Linux安装文件会很不错，而有些程序正是这么做的。我最喜欢的是[Ventoy](https://ventoy.net)。Ventoy支持大量Linux发行版，可以在Linux和Windows上运行，你可以使用它创建一个充满Linux安装程序的USB存储设备，用于运行Live
+    Linux和永久安装到硬盘。
+- en: See Also
+  id: totrans-78
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[UNetbootin](https://oreil.ly/8CXp9)'
+  id: totrans-79
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[UNetbootin](https://oreil.ly/8CXp9)'
+- en: '[Chapter 9](ch09.xhtml#cha-partitioning-gparted)'
+  id: totrans-80
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第9章](ch09.xhtml#cha-partitioning-gparted)'
+- en: '[Ventoy](https://ventoy.net)'
+  id: totrans-81
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Ventoy](https://ventoy.net)'
+- en: 1.4 Creating a Linux Installation DVD with K3b
+  id: totrans-82
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.4 使用K3b创建Linux安装DVD
+- en: Problem
+  id: totrans-83
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create a Linux DVD installation disk with a graphical tool.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要使用图形工具创建Linux DVD安装光盘。
+- en: Solution
+  id: totrans-85
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use K3b (KDE Burn Baby Burn). K3b is the best graphical CD/DVD writing app for
+    Linux.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用K3b（KDE刻录专家）。K3b是Linux下最好的图形化CD/DVD写入应用程序。
+- en: If you do not have a Linux system, then use any CD/DVD writing program that
+    writes an ISO 9660 image. Your chosen CD/DVD writer will phrase this as something
+    like “burn an existing image to disk.”
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你没有Linux系统，可以使用任何能够写入ISO 9660镜像的CD/DVD写入程序。你选择的CD/DVD写入器可能会显示类似“将现有镜像刻录到光盘”的选项。
+- en: You will see something like [Figure 1-4](#fig-k3b-1) on K3b. Click “Burn Image,”
+    and note the confirmation on the bottom left that says “Write an ISO 9660…image
+    to an optical disk.”
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在K3b上你会看到类似[图1-4](#fig-k3b-1)的内容。点击“刻录镜像”，并注意左下角的确认信息显示“将ISO 9660…镜像写入光盘”。
+- en: On the next screen ([Figure 1-5](#fig-k3b-2)), in the top left drop-down selector,
+    select your **.iso* image. Then on the top right select “ISO 9660 filesystem image.”
+    At the bottom under Settings, check “Verify written data.” This computes a checksum
+    after your image is written and compares it to the checksum of the original **.iso*.
+    This is an important step because if the checksums do not match you have a corrupted
+    disk, which is unusable.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一个屏幕（[图 1-5](#fig-k3b-2)）中，在左上角的下拉选择器中选择你的 **.iso** 镜像。然后在右上角选择 “ISO 9660
+    文件系统映像”。在底部的设置中，选中 “验证写入数据”。这将在写入图像后计算校验和，并将其与原始 **.iso** 的校验和进行比较。这是一个重要的步骤，因为如果校验和不匹配，说明你有一个损坏的磁盘，无法使用。
+- en: '![Creating an installation DVD with K3b](Images/lcb2_0104.png)'
+  id: totrans-90
+  prefs: []
+  type: TYPE_IMG
+  zh: '![使用 K3b 创建安装 DVD](Images/lcb2_0104.png)'
+- en: Figure 1-4\. Creating an installation DVD with K3b
+  id: totrans-91
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-4\. 使用 K3b 创建安装 DVD
+- en: '![Configuring the burn](Images/lcb2_0105.png)'
+  id: totrans-92
+  prefs: []
+  type: TYPE_IMG
+  zh: '![配置刻录](Images/lcb2_0105.png)'
+- en: Figure 1-5\. Configuring the burn
+  id: totrans-93
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-5\. 配置刻录
+- en: When the disk is successfully written, you will see a success message like the
+    one shown in [Figure 1-6](#fig-k3b-3). If there were any errors, this screen will
+    show some helpful error messages.
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当磁盘成功写入时，您将看到一个成功消息，如 [图 1-6](#fig-k3b-3) 中所示。如果有任何错误，该屏幕将显示一些有用的错误消息。
+- en: '![Success!](Images/lcb2_0106.png)'
+  id: totrans-95
+  prefs: []
+  type: TYPE_IMG
+  zh: '![成功！](Images/lcb2_0106.png)'
+- en: Figure 1-6\. Success!
+  id: totrans-96
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-6\. 成功！
+- en: Discussion
+  id: totrans-97
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Brasero and XFBurn are also great CD/DVD writing apps for Linux, with simpler
+    interfaces than K3b, but still plenty of functionality.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Brasero 和 XFBurn 也是 Linux 上出色的 CD/DVD 刻录应用程序，比 K3b 更简单的界面，但功能仍然很多。
+- en: The tech world changes fast. Just a few years ago I was burning CDs and DVDs
+    for everything. Then USB devices swept the market, and I haven’t burned a disk
+    for years, until I started writing this chapter.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 技术世界变化迅速。就在几年前，我还为一切事情刻录 CD 和 DVD。然后 USB 设备席卷市场，多年来我再也没有刻录过光盘，直到我开始写这一章节。
+- en: Take heart, for CDs and DVDs are not obsolete, despite the efforts of computer
+    makers to make them obsolete by not including CD/DVD drives in their machines.
+    This is not a problem because you can purchase an external USB CD/DVD drive. You
+    can even find bus-powered drives, so you only need a USB cable, and don’t have
+    to hassle with a power cable. CD/DVD blanks are still good quality, so if you
+    prefer optical disks, they are a reliable choice.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请放心，尽管计算机制造商不再在其机器中包含 CD/DVD 驱动器，但 CD 和 DVD 并未过时。这不是问题，因为你可以购买一个外置 USB CD/DVD
+    驱动器。您甚至可以找到总线供电的驱动器，因此您只需要一个 USB 线，无需使用电源线。CD/DVD 空白仍然是高质量的，因此如果您喜欢光盘，它们是一个可靠的选择。
+- en: See Also
+  id: totrans-101
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[K3b](https://oreil.ly/MJmXF)'
+  id: totrans-102
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[K3b](https://oreil.ly/MJmXF)'
+- en: '[Brasero](https://oreil.ly/a9Dxx)'
+  id: totrans-103
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Brasero](https://oreil.ly/a9Dxx)'
+- en: 1.5 Using the wodim Command to Create a Bootable CD/DVD
+  id: totrans-104
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.5 使用 **wodim** 命令创建可引导的 CD/DVD
+- en: Problem
+  id: totrans-105
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want a command-line tool to create a bootable CD/DVD.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要一个命令行工具来创建可引导的 CD/DVD。
+- en: Solution
+  id: totrans-107
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Try the *wodim* command. Your optical drive is most likely */dev/cdrom*, symlinked
+    to */dev/sr0*. Use the symlink because it has correct permissions:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尝试 *wodim* 命令。你的光学驱动器很可能是 */dev/cdrom*，链接到 */dev/sr0*。使用符号链接是因为它具有正确的权限：
+- en: '[PRE3]'
+  id: totrans-109
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Then copy your installation image to disk:'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后将您的安装镜像复制到磁盘：
+- en: '[PRE4]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Discussion
+  id: totrans-112
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: In the *ls -l* example, there are *sg2* and *sr0* devices. *sg2* is a character
+    device, and *sr0* is a block device. Character devices provide raw access to a
+    hardware device using the raw kernel drivers. Block devices provide buffered access
+    to a hardware device through various software programs that handle reading and
+    writing to physical media. Users interact with storage devices, like DVDs and
+    hard disks, through the kernel’s block device drivers. You can see raw and block
+    kernel modules listed in your */boot/config-** file.
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 *ls -l* 示例中，有 *sg2* 和 *sr0* 设备。*sg2* 是一个字符设备，*sr0* 是一个块设备。字符设备使用原始内核驱动程序提供对硬件设备的原始访问。块设备通过各种软件程序提供对硬件设备的缓冲访问。用户通过内核的块设备驱动程序与存储设备（如
+    DVD 和硬盘）进行交互。您可以在 */boot/config-** 文件中看到列出的原始和块内核模块。
+- en: See Also
+  id: totrans-114
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '*man 1 wodim*'
+  id: totrans-115
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 wodim*'
+- en: 1.6 Creating a Linux Installation USB Stick with the dd Command
+  id: totrans-116
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.6 使用 *dd* 命令创建 Linux 安装 USB 闪存驱动器
+- en: Problem
+  id: totrans-117
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to create your installation USB drive from the command line, rather
+    than using a graphical tool.
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望从命令行而不是使用图形工具创建您的安装 USB 驱动器。
+- en: Solution
+  id: totrans-119
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Use the *dd* command. *dd* is on every Linux and works the same way on all of
+    them.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *dd* 命令。*dd* 在每个 Linux 上都适用，并且使用方法相同。
+- en: 'First, verify the dev name for your USB stick with the *lsblk* command, so
+    that you copy your image to the correct device. In the following example, that
+    is */dev/sdb*:'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先用 *lsblk* 命令验证你的 USB 硬盘的设备名称，以便将映像复制到正确的设备。在下面的示例中，设备名称为 */dev/sdb*：
+- en: '[PRE5]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'The following example creates a USB installation stick and shows its progress:'
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例创建了一个 USB 安装盘并显示了其进度：
+- en: '[PRE6]'
+  id: totrans-124
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'This takes a few minutes. When it’s finished, it looks like this:'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个过程需要几分钟时间。当完成时，看起来像这样：
+- en: '[PRE7]'
+  id: totrans-126
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Remove the drive, then reinsert it and take a quick look at the files. [Figure 1-7](#fig-nemo)
+    shows the installation files for Ubuntu Linux in the Thunar file manager.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 拔出驱动器，然后重新插入并快速查看文件。[图 1-7](#fig-nemo) 在 Thunar 文件管理器中显示了 Ubuntu Linux 的安装文件。
+- en: '![Ubuntu installation files in Thunar](Images/lcb2_0107.png)'
+  id: totrans-128
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Thunar 中的 Ubuntu 安装文件](Images/lcb2_0107.png)'
+- en: Figure 1-7\. Ubuntu Linux installation files in Thunar
+  id: totrans-129
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-7\. Thunar 中的 Ubuntu Linux 安装文件
+- en: The files are marked with padlocks because the Ubuntu installer uses the SquashFS
+    read-only filesystem. You can read them, but not delete or edit them.
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件被标记为带有挂锁，因为 Ubuntu 安装程序使用 SquashFS 只读文件系统。你可以读取它们，但无法删除或编辑。
+- en: The installation USB stick is ready to use.
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 准备好使用安装 USB 硬盘。
+- en: Discussion
+  id: totrans-132
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Identifying the correct device to copy your installation to is super important.
+    In the *lsblk* example, there are only two storage devices. Note the LABEL column;
+    you can create labels on filesystems so you know what they are. (See [Recipe 9.2](ch09.xhtml#rec-gparted-create-partition-table)
+    and the filesystem creation recipes in [Chapter 11](ch11.xhtml#cha-create-filesystems)
+    to learn how to create filesystem labels.)
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 识别正确的设备以复制你的安装非常重要。在 *lsblk* 的示例中，只有两个存储设备。请注意 LABEL 列；你可以在文件系统上创建标签，以便知道它们是什么（参见
+    [Recipe 9.2](ch09.xhtml#rec-gparted-create-partition-table) 和第 11 章的文件系统创建配方 [Chapter 11](ch11.xhtml#cha-create-filesystems)
+    学习如何创建文件系统标签）。
+- en: The graphical installation media creators are good, but I prefer the *dd* command
+    because it is simple and reliable. *dd* is short for Disk Duplicator. This is
+    one of those ancient useful GNU commands, in the GNU *coreutils* package, that
+    has been around forever.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 图形化安装媒体创建工具不错，但我更喜欢 *dd* 命令，因为它简单且可靠。*dd* 是 Disk Duplicator 的缩写。这是一个古老而实用的 GNU
+    命令，在 GNU 的 *coreutils* 包中存在已久。
+- en: See Also
+  id: totrans-135
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 dd*'
+  id: totrans-136
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 dd*'
+- en: 1.7 Trying a Simple Ubuntu Installation
+  id: totrans-137
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.7 尝试简单的 Ubuntu 安装
+- en: Problem
+  id: totrans-138
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to try a simple Ubuntu installation. You have your installation medium
+    ready, and you know how to boot to your installation medium. There is nothing
+    on the computer that you want to keep, so Ubuntu can take over the hard drive.
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想尝试一个简单的 Ubuntu 安装。你的安装介质已经准备好，并且你知道如何引导到你的安装介质。计算机上没有你想保留的任何东西，所以 Ubuntu 可以接管硬盘。
+- en: Solution
+  id: totrans-140
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The following example demonstrates a fast, simple installation of Ubuntu Linux
+    21.04, Hirsute Hippo. All Ubuntu releases have alliterative animal names.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的示例演示了 Ubuntu Linux 21.04 Hirsute Hippo 的快速简单安装。所有的 Ubuntu 版本都有带有谐音动物名称。
+- en: Insert your installation device, power on the machine, and open your system’s
+    one-time boot menu. Select the installation device and boot up ([Figure 1-8](#fig-boot-usb)).
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 插入你的安装设备，启动机器，并打开系统的一次性启动菜单。选择安装设备并启动（参见 [图 1-8](#fig-boot-usb)）。
+- en: '![Booting to an installation USB stick.](Images/lcb2_0108.png)'
+  id: totrans-143
+  prefs: []
+  type: TYPE_IMG
+  zh: '![启动到安装 USB 硬盘。](Images/lcb2_0108.png)'
+- en: Figure 1-8\. Booting to an installation USB stick
+  id: totrans-144
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-8\. 启动到安装 USB 硬盘
+- en: All UEFI Screens Look Different
+  id: totrans-145
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 所有 UEFI 屏幕看起来都不同
+- en: Every vendor’s UEFI looks different, and every release changes in appearance.
+    The preceding example is a Dell UEFI one-time boot screen.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个厂商的 UEFI 界面看起来都不同，每个版本的外观也会有变化。上面的例子是 Dell UEFI 的一次性启动屏幕。
+- en: When the GRUB menu appears, select the default option. For Ubuntu 21.04 this
+    is *Ubuntu*, and it boots by default when you make no selection ([Figure 1-9](#fig-install-1)).
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当 GRUB 菜单出现时，选择默认选项。对于 Ubuntu 21.04，默认为 *Ubuntu*，如果没有选择则默认启动（参见 [图 1-9](#fig-install-1)）。
+- en: '![Ubuntu installer''s GRUB boot menu.](Images/lcb2_0109.png)'
+  id: totrans-148
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Ubuntu 安装程序的 GRUB 启动菜单。](Images/lcb2_0109.png)'
+- en: Figure 1-9\. Ubuntu installer’s GRUB boot menu
+  id: totrans-149
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-9\. Ubuntu 安装程序的 GRUB 启动菜单
+- en: Then you will have a choice of Try Ubuntu and Install Ubuntu. Try Ubuntu launches
+    the live version, and Install Ubuntu opens the installer ([Figure 1-10](#fig-boot-usb-2)).
+    It doesn’t matter which one you select because there is a big installation button
+    on the live desktop.
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后你将可以选择尝试 Ubuntu 和安装 Ubuntu。尝试 Ubuntu 启动 live 版本，安装 Ubuntu 打开安装程序（参见 [图 1-10](#fig-boot-usb-2)）。无论选择哪个，因为
+    live 桌面上有一个大的安装按钮。
+- en: '![Choosing the live image, or the installer.](Images/lcb2_0110.png)'
+  id: totrans-151
+  prefs: []
+  type: TYPE_IMG
+  zh: '![选择实时映像或安装程序。](Images/lcb2_0110.png)'
+- en: Figure 1-10\. Choosing the live image or the installer
+  id: totrans-152
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-10\. 选择实时映像或安装程序
+- en: When you launch the installer, it walks you through a few steps. First, language
+    and keyboard layout.
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你启动安装程序时，它会引导你完成几个步骤。首先是选择语言和键盘布局。
+- en: Then, if you have a wireless network interface, you have the option to set it
+    up or wait until after installation.
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后，如果你有无线网络接口，你可以选择设置或等到安装完成后再进行设置。
+- en: Then configure your installation. On the “Updates and other software” screen,
+    select “Normal installation” ([Figure 1-11](#fig-boot-usb-3)).
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后配置你的安装。在“更新和其他软件”屏幕上，选择“正常安装”（[图 1-11](#fig-boot-usb-3)）。
+- en: '![Select Normal installation..](Images/lcb2_0111.png)'
+  id: totrans-156
+  prefs: []
+  type: TYPE_IMG
+  zh: '![选择正常安装..](Images/lcb2_0111.png)'
+- en: Figure 1-11\. Select Normal installation
+  id: totrans-157
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-11\. 选择正常安装
+- en: On the next screen, select “Erase disk and install Ubuntu,” then click Install
+    Now ([Figure 1-12](#fig-boot-usb-4)).
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一个屏幕上，选择“擦除磁盘并安装 Ubuntu”，然后点击“立即安装”（[图 1-12](#fig-boot-usb-4)）。
+- en: '![Select Normal installation..](Images/lcb2_0112.png)'
+  id: totrans-159
+  prefs: []
+  type: TYPE_IMG
+  zh: '![选择正常安装..](Images/lcb2_0112.png)'
+- en: Figure 1-12\. Select Erase disk and install Ubuntu
+  id: totrans-160
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-12\. 选择擦除磁盘并安装 Ubuntu
+- en: 'The next screen asks “Write the changes to disk?” Click Continue. There are
+    a few more screens: set your time zone, create your username, password, and hostname,
+    and then the installation starts. You do not have to do anything until the installation
+    is finished, then restart the computer, remove your installation device when prompted,
+    and press the Enter key. After restart you will have a few setup screens, then
+    you can play with your nice new Ubuntu Linux.'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一个屏幕会询问“写入更改到磁盘？” 点击“继续”。接下来还有几个屏幕：设置时区，创建用户名、密码和主机名，然后安装开始。安装过程中你无需操作，安装完成后重新启动计算机，按提示移除安装设备，然后按
+    Enter 键。重新启动后，会有几个设置屏幕，然后你就可以使用全新的 Ubuntu Linux 了。
+- en: Discussion
+  id: totrans-162
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Most Linux distributions have a similar installation process: boot your installation
+    medium, then choose a default simple installation or choose a customizable installation.
+    Some ask all the questions at the beginning, such as username and password; others
+    do the final setup after reboot.'
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Linux 发行版都有类似的安装过程：启动安装介质，然后选择默认的简单安装或选择可定制的安装。有些在开始时就会询问所有问题，如用户名和密码；其他则在重新启动后完成最终设置。
+- en: Linux installers typically have back buttons to go back and make changes. You
+    may quit at any time, though this may leave your system in an unusable state.
+    This is not fatal; just start over and do a complete installation.
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 安装程序通常有返回按钮可以返回并进行更改。你可以随时退出，尽管这可能会使你的系统处于不可用状态。这并不致命；重新开始并进行完整安装即可。
+- en: You may reinstall as many times on as many machines as you want without worrying
+    about license keys, except for the enterprise distros that require registration
+    keys (Red Hat, SUSE, or Ubuntu with paid support).
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在任意数量的机器上重新安装多次，无需担心许可密钥，除了需要注册密钥的企业发行版（如 Red Hat、SUSE 或带付费支持的 Ubuntu）。
+- en: See Also
+  id: totrans-166
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Ubuntu documentation](https://help.ubuntu.com)'
+  id: totrans-167
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Ubuntu 文档](https://help.ubuntu.com)'
+- en: 1.8 Customizing Partitioning
+  id: totrans-168
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.8 自定义分区
+- en: Problem
+  id: totrans-169
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to set up your own partitioning scheme.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以设置自己的分区方案。
+- en: Solution
+  id: totrans-171
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: In this recipe we will redo the example Ubuntu installation in [Recipe 1.7](#rec-simple-installation)
+    and set up our own partitioning scheme.
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个方案中，我们将重新做一个例子，安装 Ubuntu 在 [1.7 节](#rec-simple-installation)，并设置我们自己的分区方案。
+- en: Entire Disk Will Be Erased
+  id: totrans-173
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 整个磁盘将被擦除
+- en: In this recipe a new partition table is created, which erases the entire disk.
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个方案中，创建了一个新的分区表，擦除了整个磁盘。
+- en: You can set up partitioning in any number of ways. [Table 1-1](#table-1-1) shows
+    how I prefer to set up my Linux workstations.
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以按照任意方式设置分区。[表 1-1](#table-1-1) 展示了我喜欢在 Linux 工作站上设置的方式。
+- en: Table 1-1\. Example partitioning scheme
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 1-1\. 示例分区方案
+- en: '| Partition name | Filesystem type | Mountpoint |'
+  id: totrans-177
+  prefs: []
+  type: TYPE_TB
+  zh: '| 分区名称 | 文件系统类型 | 挂载点 |'
+- en: '| --- | --- | --- |'
+  id: totrans-178
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| /dev/sda1 | ext4 | /boot |'
+  id: totrans-179
+  prefs: []
+  type: TYPE_TB
+  zh: '| /dev/sda1 | ext4 | /boot |'
+- en: '| /dev/sda2 | ext4 | / |'
+  id: totrans-180
+  prefs: []
+  type: TYPE_TB
+  zh: '| /dev/sda2 | ext4 | / |'
+- en: '| /dev/sda3 | ext4 | /home |'
+  id: totrans-181
+  prefs: []
+  type: TYPE_TB
+  zh: '| /dev/sda3 | ext4 | /home |'
+- en: '| /dev/sda4 | ext4 | /tmp |'
+  id: totrans-182
+  prefs: []
+  type: TYPE_TB
+  zh: '| /dev/sda4 | ext4 | /tmp |'
+- en: '| /dev/sda5 | ext4 | /var |'
+  id: totrans-183
+  prefs: []
+  type: TYPE_TB
+  zh: '| /dev/sda5 | ext4 | /var |'
+- en: '| /dev/sda6 | swap |  |'
+  id: totrans-184
+  prefs: []
+  type: TYPE_TB
+  zh: '| /dev/sda6 | 交换 |  |'
+- en: When you get to the Installation Type screen, select “Something else” to start
+    your customized installation ([Figure 1-13](#fig-ubuntu-install-1)).
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你到达“安装类型”屏幕时，选择“其他选项”以开始你的自定义安装（[图 1-13](#fig-ubuntu-install-1)）。
+- en: '![Selecting the installation type](Images/lcb2_0113.png)'
+  id: totrans-186
+  prefs: []
+  type: TYPE_IMG
+  zh: '![选择安装类型](Images/lcb2_0113.png)'
+- en: Figure 1-13\. Selecting the installation type
+  id: totrans-187
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图1-13\. 选择安装类型
+- en: When you get to the partitioning screen, erase the entire disk by clicking New
+    Partition Table. Then you will see something like [Figure 1-14](#fig-ubuntu-install-2).
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到达分区屏幕后，通过点击新分区表来擦除整个磁盘。然后您将看到类似[图1-14](#fig-ubuntu-install-2)的东西。
+- en: '![Creating a new partition table.](Images/lcb2_0114.png)'
+  id: totrans-189
+  prefs: []
+  type: TYPE_IMG
+  zh: '![创建新的分区表。](Images/lcb2_0114.png)'
+- en: Figure 1-14\. Creating a new partition table
+  id: totrans-190
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图1-14\. 创建新的分区表
+- en: To create new partitions click on the “free space” line to select it, then click
+    the plus sign, +, to add a new partition. Set the size, filesystem, and mountpoint.
+    [Figure 1-15](#fig-ubuntu-install-3) creates a 500 MB */boot* partition.
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要创建新分区，请点击“空闲空间”行以选中它，然后点击加号+添加新分区。设置大小、文件系统和挂载点。[图1-15](#fig-ubuntu-install-3)创建了一个500
+    MB的*/boot*分区。
+- en: '![Creating the boot partition.](Images/lcb2_0115.png)'
+  id: totrans-192
+  prefs: []
+  type: TYPE_IMG
+  zh: '![创建引导分区。](Images/lcb2_0115.png)'
+- en: Figure 1-15\. Creating the boot partition
+  id: totrans-193
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图1-15\. 创建引导分区
+- en: 'Click on “free space” again, click the plus sign, and keep going until you
+    have created all of your partitions. [Figure 1-16](#fig-ubuntu-install-4) shows
+    the result: */boot*, */home*, */var*, */tmp*, and the swap file are all on their
+    own partitions.'
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 再次点击“空闲空间”，点击加号，一直进行下去，直到创建所有分区。[图1-16](#fig-ubuntu-install-4)显示的结果：*/boot*、*/home*、*/var*、*/tmp*
+    和交换文件都位于各自的分区上。
+- en: '![Partitions set up and ready to continue the installation.](Images/lcb2_0116.png)'
+  id: totrans-195
+  prefs: []
+  type: TYPE_IMG
+  zh: '![分区设置完毕，准备继续安装。](Images/lcb2_0116.png)'
+- en: Figure 1-16\. Partitions set up and ready to continue the installation
+  id: totrans-196
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图1-16\. 分区设置完毕，准备继续安装
+- en: Selecting Partitions to Format
+  id: totrans-197
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 选择要格式化的分区
+- en: Note the “Format?” checkboxes in the partitioning screen. All new partitions
+    must be formatted with a filesystem.
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意分区屏幕上的“格式化？”复选框。所有新分区必须使用文件系统进行格式化。
+- en: Discussion
+  id: totrans-199
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The examples are from a virtual machine, so the hard disk is *vda* instead of
+    *sda*.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例来自虚拟机，因此硬盘为*vda*而不是*sda*。
+- en: The example in the recipe uses the Ext4 filesystem on all the partitions. You
+    may use whatever filesystems you want; see [Chapter 11](ch11.xhtml#cha-create-filesystems)
+    to learn more.
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本示例在所有分区上使用Ext4文件系统。您可以使用任何文件系统，请参阅[第11章](ch11.xhtml#cha-create-filesystems)了解更多信息。
+- en: Disk partitions are like having a bunch of separate physical disks. Each one
+    is an independent section of the hard disk, and each partition can have a different
+    filesystem. The filesystems you select, and their sizes, all depend on how you
+    use your system. If you need a lot of data storage, then */home* needs to be large.
+    It could even be a separate disk.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 磁盘分区就像有一堆独立的物理磁盘一样。每个都是硬盘的独立部分，每个分区可以有不同的文件系统。您选择的文件系统及其大小都取决于您如何使用系统。如果需要大量数据存储，则*/home*需要更大。它甚至可以是单独的磁盘。
+- en: Giving */boot* its own partition makes managing multiboot systems easier because
+    this makes the boot files independent of whatever operating systems you install
+    or remove. 500 MB is more than enough.
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将*/boot*放在独立分区中可以更轻松地管理多启动系统，因为这使得引导文件与您安装或删除的任何操作系统无关。500 MB足够了。
+- en: Putting */*, root, in its own partition makes it easy to restore or to nuke
+    and replace with a different Linux. 30 GB is more than enough for most distros,
+    except when you use the Btrfs filesystem, then you should make it 60 GB to make
+    room for storing snapshots.
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将*/*根目录放在独立分区中可以轻松恢复或替换为不同的Linux。对于大多数发行版来说，30 GB足够了，但如果使用Btrfs文件系统，则应将其增加到60
+    GB以便存储快照。
+- en: Put */home* on its own partition to isolate it from the root filesystem, so
+    you can replace your Linux installation without touching */home*. */home* could
+    even be on a separate disk.
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将*/home*放在独立的分区中以隔离它免受根文件系统的影响，这样您可以更换Linux安装而不触及*/home*。*/home*甚至可以在单独的磁盘上。
+- en: '*/var* and */tmp* can fill up from runaway processes. Putting them on their
+    own partitions prevents them from crashing the other filesystems. Mine are usually
+    20 GB each, and for a busy server they need to be larger.'
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/var* 和 */tmp* 可能因为运行中的进程而填满。将它们放在独立的分区中可以防止它们崩溃其他文件系统。我的通常每个都是20 GB，并且对于繁忙的服务器，它们需要更大的空间。'
+- en: Putting a swap file equal to the size of your RAM on its own partition enables
+    suspend-to-disk.
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将交换文件设置为内存大小的分区，以便支持挂起到磁盘。
+- en: See Also
+  id: totrans-208
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: The discussion in [Recipe 3.9](ch03.xhtml#rec-rtc-wakeups) to learn about suspend
+    and sleep states
+  id: totrans-209
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在[第3.9节的讨论](ch03.xhtml#rec-rtc-wakeups)中了解挂起和睡眠状态
+- en: '[Chapter 8](ch08.xhtml#cha-partitioning-parted)'
+  id: totrans-210
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第8章](ch08.xhtml#cha-partitioning-parted)'
+- en: '[Chapter 9](ch09.xhtml#cha-partitioning-gparted)'
+  id: totrans-211
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第9章](ch09.xhtml#cha-partitioning-gparted)'
+- en: 1.9 Preserving Existing Partitions
+  id: totrans-212
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.9 保留现有分区
+- en: Problem
+  id: totrans-213
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have */home* on its own partition and want to preserve it for the new Linux
+    installation.
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的 */home* 单独存在于一个分区，并希望将其保留用于新的 Linux 安装。
+- en: Solution
+  id: totrans-215
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: In Recipes [1.7](#rec-simple-installation) and [1.8](#rec-install-partition)
+    we erased the existing installation by creating a new partition table. When you
+    have partitions that you want to preserve, such as */home* or any shared directory,
+    do not create a new partition table. Instead, edit the existing partitions. You
+    can delete existing partitions, create new partitions, and reuse existing partitions.
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [1.7 节](#rec-simple-installation) 和 [1.8 节](#rec-install-partition) 中，我们通过创建新的分区表来删除现有安装。当你有想要保留的分区，如
+    */home* 或任何共享目录时，请勿创建新的分区表。而是编辑现有分区。你可以删除现有分区，创建新的分区，或重用现有分区。
+- en: In the following example in the Ubuntu installer, */dev/sda3* is a separate
+    */home* partition. Right-click on it, then click “Change…” Then you can set its
+    mountpoint to */home*, and make sure that the “Format?” box is NOT checked ([Figure 1-17](#fig-install-save-part)).
+    If you format it or change the filesystem type, all data on the partition will
+    be erased.
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Ubuntu安装程序的以下示例中，*/dev/sda3* 是一个单独的 */home* 分区。右键点击它，然后点击“更改…” 然后你可以将其挂载点设置为
+    */home*，并确保“格式化？”框未被选中（[图 1-17](#fig-install-save-part)）。如果你格式化它或更改文件系统类型，分区上的所有数据将被删除。
+- en: '![Saving /dev/sda3, instead of overwriting it.](Images/lcb2_0117.png)'
+  id: totrans-218
+  prefs: []
+  type: TYPE_IMG
+  zh: '![保存 /dev/sda3，而不是覆盖它。](Images/lcb2_0117.png)'
+- en: Figure 1-17\. Saving /dev/sda3, instead of overwriting it
+  id: totrans-219
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-17\. 保存 /dev/sda3，而不是覆盖它
+- en: Discussion
+  id: totrans-220
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The Discussion in [Recipe 1.8](#rec-install-partition) goes into some detail
+    on customizing your partitioning scheme and which filesystems benefit from being
+    isolated on their own partitions.
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [1.8 节](#rec-install-partition) 中的讨论详细介绍了定制分区方案以及哪些文件系统适合在单独的分区上隔离。
+- en: See Also
+  id: totrans-222
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Chapter 8](ch08.xhtml#cha-partitioning-parted)'
+  id: totrans-223
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第8章](ch08.xhtml#cha-partitioning-parted)'
+- en: '[Chapter 9](ch09.xhtml#cha-partitioning-gparted)'
+  id: totrans-224
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第9章](ch09.xhtml#cha-partitioning-gparted)'
+- en: 1.10 Customizing Package Selection
+  id: totrans-225
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.10 自定义软件包选择
+- en: Problem
+  id: totrans-226
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You don’t want the default package installation, but prefer to select your own
+    software to install. For example, you might want to set up a development workstation,
+    a web server, a central backup server, a multimedia production workstation, a
+    desktop publishing workstation, or choose your own office productivity applications.
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你不想要默认的软件包安装，而是更喜欢选择自己要安装的软件。例如，你可能想设置一个开发工作站、web 服务器、中央备份服务器、多媒体制作工作站、桌面发布工作站，或选择自己的办公生产力应用程序。
+- en: Solution
+  id: totrans-228
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Every Linux distro manages installation options a little differently. In this
+    recipe you will see examples for openSUSE and Fedora Linux. openSUSE supports
+    multiple installation types from a single installation image, and Fedora Linux
+    has several different installation images.
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个 Linux 发行版管理安装选项的方式都有所不同。在本示例中，你将看到 openSUSE 和 Fedora Linux 的示例。openSUSE 支持从单个安装镜像安装多个安装类型，而
+    Fedora Linux 则有几个不同的安装镜像。
+- en: These two examples are typical of the general-purpose Linux distributions.
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这两个示例代表了通用的 Linux 发行版。
+- en: Remember, you can install and remove software all you want after installation.
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请记住，你可以在安装后随意安装和删除软件。
+- en: openSUSE
+  id: totrans-232
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: openSUSE
+- en: The openSUSE installer supports both a simple installation from defaults and
+    extensive customization options. It has two screens that control package selection.
+    The first screen ([Figure 1-18](#fig-opensuse-1)) provides a selection of system
+    roles to choose from, such as a desktop system with the KDE or GNOME graphical
+    environment, a generic desktop with the IceWM window manager, a server with no
+    graphical environment, or a transactional server with no graphical environment.
+    Each role comes with a prefab set of packages. You can install one of these as
+    is or select packages to install or remove.
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: openSUSE 安装程序支持从默认设置的简单安装和广泛的定制选项。它有两个屏幕来控制软件包选择。第一个屏幕 ([图 1-18](#fig-opensuse-1))
+    提供了多个系统角色选择，例如带有 KDE 或 GNOME 图形环境的桌面系统，带有 IceWM 窗口管理器的通用桌面，无图形环境的服务器，或者无图形环境的事务服务器。每个角色都有一组预设的软件包。你可以选择按原样安装其中之一，或选择要安装或删除的软件包。
+- en: Each role is customizable, as you will see a few screens later ([Figure 1-19](#fig-opensuse-2)).
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个角色都是可定制的，稍后你将看到几个屏幕 ([图 1-19](#fig-opensuse-2))。
+- en: '![openSUSE installation roles](Images/lcb2_0118.png)'
+  id: totrans-235
+  prefs: []
+  type: TYPE_IMG
+  zh: '![openSUSE 安装角色](Images/lcb2_0118.png)'
+- en: Figure 1-18\. openSUSE installation roles
+  id: totrans-236
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-18\. openSUSE安装角色
+- en: '![openSUSE installation settings](Images/lcb2_0119.png)'
+  id: totrans-237
+  prefs: []
+  type: TYPE_IMG
+  zh: '![openSUSE安装设置](Images/lcb2_0119.png)'
+- en: Figure 1-19\. openSUSE installation settings
+  id: totrans-238
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-19\. openSUSE安装设置
+- en: Click Software to open the package selection screen. This screen displays the
+    openSUSE *patterns*, which are related groups of packages you can install with
+    a single command. I like the Xfce desktop, so I am adding it to my installation
+    ([Figure 1-20](#fig-opensuse-3)).
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 点击“软件”以打开软件包选择屏幕。该屏幕显示了openSUSE *模式*，这些是相关的软件包组，您可以使用单个命令安装。我喜欢Xfce桌面环境，所以我将其添加到我的安装中（[图 1-20](#fig-opensuse-3)）。
+- en: 'Note the Details button at the bottom left. Click this to open a screen with
+    multiple tabs for more fine-grained package selection ([Figure 1-21](#fig-opensuse-5)).
+    In this screen you will find a massive amount of information: the individual packages
+    in each pattern, package groups, download repositories, installation summary,
+    dependencies, and information on every package. Use the window on the right to
+    select or deselect packages from each pattern. The installer will automatically
+    resolve dependencies after your changes.'
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意左下角的“详细信息”按钮。点击它将打开一个屏幕，具有多个选项卡，用于更精细的软件包选择（[图 1-21](#fig-opensuse-5)）。在此屏幕上，您将找到大量信息：每个模式中的单独软件包、软件包组、下载仓库、安装摘要、依赖关系以及每个软件包的信息。在右侧窗口中选择或取消选择每个模式中的软件包后，安装程序将自动解决依赖关系。
+- en: '![openSUSE software patterns](Images/lcb2_0120.png)'
+  id: totrans-241
+  prefs: []
+  type: TYPE_IMG
+  zh: '![openSUSE软件模式](Images/lcb2_0120.png)'
+- en: Figure 1-20\. openSUSE software patterns
+  id: totrans-242
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-20\. openSUSE软件模式
+- en: '![openSUSE individual package selection](Images/lcb2_0121.png)'
+  id: totrans-243
+  prefs: []
+  type: TYPE_IMG
+  zh: '![openSUSE单独软件包选择](Images/lcb2_0121.png)'
+- en: Figure 1-21\. openSUSE individual package selection
+  id: totrans-244
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-21\. openSUSE单独软件包选择
+- en: When you are finished with software selection, you are returned to the Installation
+    Summary screen, giving you another chance to change your installation settings.
+    Click the green Next button to complete the installation.
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您完成软件选择后，将返回到安装摘要屏幕，再次有机会更改安装设置。点击绿色的“下一步”按钮以完成安装。
+- en: Fedora Linux
+  id: totrans-246
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: Fedora Linux
+- en: The Fedora Linux Workstation and Server installers provide only partitioning
+    options and no package customization. You need the 600 MB network installer image
+    for a customizable installation, from [Fedora Alternative Downloads](https://oreil.ly/JW9J8).
+    It is labeled as Fedora Server, but it provides complete package selection for
+    any type of Fedora installation. Set up all your installation choices from the
+    Installation Summary screen ([Figure 1-22](#fig-fedora-1)).
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Fedora Linux工作站和服务器安装程序仅提供分区选项，没有软件包定制功能。您需要下载600 MB的网络安装镜像进行可定制的安装，从[Fedora备选下载](https://oreil.ly/JW9J8)获取。它被标记为Fedora服务器，但它为任何类型的Fedora安装提供完整的软件包选择。从安装摘要屏幕设置所有安装选项（[图 1-22](#fig-fedora-1)）。
+- en: 'Take note of all the installation options on the Installation Summary screen:
+    software selection, user creation, partitioning, keyboard and language, time zone,
+    network, and hostname. Click Software Selection to open the screen for selecting
+    the packages you want to install ([Figure 1-23](#fig-fedora-2)).'
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意安装摘要屏幕上的所有选项：软件选择、用户创建、分区、键盘和语言、时区、网络和主机名。点击“软件选择”以打开选择要安装的软件包的屏幕（[图 1-23](#fig-fedora-2)）。
+- en: '![Fedora Linux network installer](Images/lcb2_0123.png)'
+  id: totrans-249
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Fedora Linux网络安装程序](Images/lcb2_0123.png)'
+- en: Figure 1-22\. Fedora Linux network installer
+  id: totrans-250
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-22\. Fedora Linux网络安装程序
+- en: '![Fedora Linux package selection](Images/lcb2_0124.png)'
+  id: totrans-251
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Fedora Linux软件包选择](Images/lcb2_0124.png)'
+- en: Figure 1-23\. Fedora Linux package selection
+  id: totrans-252
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-23\. Fedora Linux软件包选择
+- en: When you are finished, click Done; you are returned to the Installation Summary
+    screen. When you are finished setting up your installation, click Begin Installation,
+    and the rest of the installation runs unattended.
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当完成后，请点击“完成”；您将返回到安装摘要屏幕。设置完成后，请点击“开始安装”，其余安装将无人值守运行。
+- en: Discussion
+  id: totrans-254
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Whatever Linux you want to try, read its documentation and release notes. This
+    is important information that saves a lot of aggravation. Also look for forums,
+    mailing lists, and wikis to find help.
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论您想尝试哪种Linux版本，请阅读其文档和发布说明。这是重要的信息，可以节省很多麻烦。还要寻找论坛、邮件列表和维基以寻找帮助。
+- en: You may install as many desktop environments as you want, and then select the
+    one you want to use when you log in. The button to select desktops is usually
+    small and not obvious; for example, the default Ubuntu login screen ([Figure 1-24](#fig-login-1))
+    hides the desktop selector button until you click on a username. Xfce, Lxde, GNOME,
+    and KDE are some of the popular graphical desktops. GNOME is the default on Ubuntu,
+    openSUSE, and Fedora.
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以安装任意多个桌面环境，然后在登录时选择要使用的环境。选择桌面环境的按钮通常很小并不明显；例如，默认的 Ubuntu 登录界面（[图 1-24](#fig-login-1)）在您点击用户名之前会隐藏桌面选择按钮。Xfce、Lxde、GNOME
+    和 KDE 是一些流行的图形桌面环境。GNOME 是 Ubuntu、openSUSE 和 Fedora 的默认桌面环境。
+- en: '![Selecting a different graphical environment.](Images/lcb2_0122.png)'
+  id: totrans-257
+  prefs: []
+  type: TYPE_IMG
+  zh: '![选择不同的图形环境。](Images/lcb2_0122.png)'
+- en: Figure 1-24\. Selecting a different graphical environment
+  id: totrans-258
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-24\. 选择不同的图形环境
+- en: See Also
+  id: totrans-259
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[openSUSE documentation](https://oreil.ly/AupNr)'
+  id: totrans-260
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[openSUSE 文档](https://oreil.ly/AupNr)'
+- en: '[SUSE Transactional Updates](https://oreil.ly/mTyuV)'
+  id: totrans-261
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[SUSE 事务更新](https://oreil.ly/mTyuV)'
+- en: 1.11 Multibooting Linux Distributions
+  id: totrans-262
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.11 多启动 Linux 发行版
+- en: Problem
+  id: totrans-263
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to install more than one Linux distribution on your computer in a multiboot
+    setup, then select the one you want to run from your boot menu.
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想在计算机上设置多个 Linux 发行版的多引导系统，请从启动菜单中选择要运行的发行版。
+- en: Solution
+  id: totrans-265
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'No worries, for you can install as many Linuxes as your hard disk (or disks)
+    will hold. You must already have one Linux installed, and it must have a separate
+    */boot* partition. Then the steps are:'
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不用担心，因为您可以安装尽可能多的 Linux，只要硬盘（或硬盘）有容量。您必须已经安装了一个 Linux，并且必须有一个单独的 */boot* 分区。然后按照以下步骤进行操作：
+- en: Provide sufficient free disk space for the new Linux, which can be on the same
+    hard disk as your existing Linux, or on a separate hard disk, either internal
+    or external.
+  id: totrans-267
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 为新的 Linux 提供足够的免费磁盘空间，可以与您现有的 Linux 放在同一硬盘上，也可以放在另一个硬盘上，无论是内置的还是外置的。
+- en: Make careful note of the partitions that belong to your first installed Linux,
+    so that you do not accidentally overwrite or delete any partitions you want to
+    keep.
+  id: totrans-268
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 仔细记录属于您首次安装的 Linux 的分区，以免意外覆盖或删除任何您想保留的分区。
+- en: Mount the */boot* partition in every new Linux that you install, and do not
+    format it.
+  id: totrans-269
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在每个新安装的 Linux 中挂载 */boot* 分区，而不要格式化它。
+- en: Boot to your installation medium, then configure the new installation to install
+    on the free disk space.
+  id: totrans-270
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 启动到安装介质，然后配置新安装以安装在空闲的磁盘空间上。
+- en: The installer will automatically find your existing Linux installation and add
+    the new Linux to the boot menu. After the installation is completed, you will
+    see a boot menu like [Figure 1-25](#fig-mint-4), which has options to boot to
+    Linux Mint or Ubuntu.
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装程序会自动找到您现有的 Linux 安装，并将新的 Linux 添加到启动菜单中。安装完成后，您将看到一个启动菜单，例如 [图 1-25](#fig-mint-4)，其中有选项可以启动
+    Linux Mint 或 Ubuntu。
+- en: '![New boot menu with Linux Mint and Ubuntu](Images/lcb2_0125.png)'
+  id: totrans-272
+  prefs: []
+  type: TYPE_IMG
+  zh: '![新的启动菜单，带有 Linux Mint 和 Ubuntu](Images/lcb2_0125.png)'
+- en: Figure 1-25\. New boot menu with Linux Mint and Ubuntu
+  id: totrans-273
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-25\. 新的启动菜单，带有 Linux Mint 和 Ubuntu
+- en: Discussion
+  id: totrans-274
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you need to free up space on your hard disk, you can shrink existing partitions
+    safely (see [Recipe 9.7](ch09.xhtml#rec-resize-partitions-gparted)) before you
+    launch the installer. It is safest to do this on unmounted partitions, and some
+    filesystems cannot be shrunk while they are mounted. Use SystemRescue to shrink
+    partitions, see [Recipe 19.12](ch19.xhtml#rec-partition-sysrescue).
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您需要在硬盘上释放空间，可以安全地缩小现有分区（参见 [第 9.7 节](ch09.xhtml#rec-resize-partitions-gparted)）。最安全的方法是在未挂载的分区上进行此操作，并且某些文件系统在挂载状态下无法缩小。使用
+    SystemRescue 缩小分区，参见 [第 19.12 节](ch19.xhtml#rec-partition-sysrescue)。
+- en: Most Linux installers are smart enough to recognize existing Linux installations
+    and to offer the option to preserve them. In [Figure 1-26](#fig-mint-1) you see
+    the Linux Mint installer, providing the options to take over your whole hard disk
+    or to install next to Ubuntu without deleting it.
+  id: totrans-276
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Linux 安装程序足够智能，可以识别现有的 Linux 安装，并提供保留其选项。在 [图 1-26](#fig-mint-1) 中，您可以看到
+    Linux Mint 安装程序，提供了选项，可以占用整个硬盘或在不删除 Ubuntu 的情况下安装在其旁边。
+- en: '![Installing Linux Mint next to Ubuntu](Images/lcb2_0126.png)'
+  id: totrans-277
+  prefs: []
+  type: TYPE_IMG
+  zh: '![在 Ubuntu 旁边安装 Linux Mint](Images/lcb2_0126.png)'
+- en: Figure 1-26\. Installing Linux Mint next to Ubuntu
+  id: totrans-278
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-26\. 在 Ubuntu 旁边安装 Linux Mint
+- en: See Also
+  id: totrans-279
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 另请参阅
+- en: '[Recipe 8.9](ch08.xhtml#rec-shrink-partition)'
+  id: totrans-280
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 8.9 节](ch08.xhtml#rec-shrink-partition)'
+- en: '[Recipe 9.7](ch09.xhtml#rec-resize-partitions-gparted)'
+  id: totrans-281
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 9.7 节](ch09.xhtml#rec-resize-partitions-gparted)'
+- en: '[Recipe 19.12](ch19.xhtml#rec-partition-sysrescue)'
+  id: totrans-282
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第 19.12 节](ch19.xhtml#rec-partition-sysrescue)'
+- en: The installation documentation for your Linux distribution
+  id: totrans-283
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 你的 Linux 发行版的安装文档
+- en: 1.12 Dual-boot with Microsoft Windows
+  id: totrans-284
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.12 使用 Microsoft Windows 双启动
+- en: Problem
+  id: totrans-285
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to dual-boot Linux and Windows on your computer.
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你希望在计算机上双启动 Linux 和 Windows。
+- en: Solution
+  id: totrans-287
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Dual-booting Linux and Windows installs both systems on one computer, and then
+    you choose the one you want to use from your boot menu at startup.
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 双启动 Linux 和 Windows 会在一台计算机上安装两个系统，然后在启动时从引导菜单中选择要使用的系统。
+- en: It is best to install Windows first, if it is not already installed, and install
+    Linux second. Windows likes to control the bootloader, so installing Linux second
+    allows Linux to take control.
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果尚未安装 Windows，最好先安装 Windows，然后再安装 Linux。Windows 喜欢控制引导加载程序，因此先安装 Linux 可以让
+    Linux 控制引导加载程序。
+- en: As always, make sure you have fresh backups and Windows recovery media.
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请务必备份重要数据并准备好 Windows 恢复媒体。
+- en: 'After Windows is installed, start your Linux installation. You will install
+    Linux in whatever way you want: a simple installation or a customized installation
+    where you set up partitioning and package selection. There is an important option
+    specific to multibooting:'
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装完 Windows 后，开始 Linux 的安装。你可以按照自己的方式安装 Linux：简单安装或者自定义安装，在这里设置分区和软件包选择。对于多重引导有一个重要的选项：
+- en: If you have a single hard drive, then the “Device for boot loader installation”
+    is */dev/sda*.
+  id: totrans-292
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 如果只有一个硬盘，则“引导加载程序安装设备”是 */dev/sda*。
+- en: If you have Windows on one hard disk and are installing Linux to a second hard
+    disk, the “Device for boot loader installation” is the Linux disk. Use the device
+    name, for example */dev/sdb*, not a partition name, like */dev/sdb1*.
+  id: totrans-293
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 如果你在一块硬盘上有 Windows，而在第二块硬盘上安装 Linux，则“引导加载程序安装设备”是 Linux 硬盘。使用设备名称，例如 */dev/sdb*，而不是分区名称，比如
+    */dev/sdb1*。
+- en: In [Figure 1-27](#fig-dual-1), there are two hard drives, with Windows on */dev/sda*
+    and Linux on */dev/sdb*.
+  id: totrans-294
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [图 1-27](#fig-dual-1) 中，有两块硬盘，Windows 安装在 */dev/sda*，Linux 安装在 */dev/sdb*。
+- en: '![Installing Ubuntu next to Windows.](Images/lcb2_0127.png)'
+  id: totrans-295
+  prefs: []
+  type: TYPE_IMG
+  zh: '![在 Windows 旁边安装 Ubuntu。](Images/lcb2_0127.png)'
+- en: Figure 1-27\. Installing Ubuntu next to Windows
+  id: totrans-296
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-27\. 在 Windows 旁边安装 Ubuntu
+- en: Be very certain you are installing Linux to the correct location and not overwriting
+    Windows. You may partition for Linux just as you would if you were installing
+    it standalone, and again, be careful which partitions you change.
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请务必确认你正在正确的位置安装 Linux，而不是覆盖 Windows。如果要为 Linux 分区，就像单独安装一样，并且要小心更改哪些分区。
+- en: Once you have your partitioning set up and are satisfied with your installation
+    configuration, go ahead and complete your Linux installation. After it is finished
+    and you have rebooted, your GRUB menu will have entries for both systems ([Figure 1-28](#fig-dual-2)).
+  id: totrans-298
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你设置好分区并满意你的安装配置后，继续完成 Linux 的安装。安装完成并重新启动后，你的 GRUB 菜单将包含两个系统的条目（见 [图 1-28](#fig-dual-2)）。
+- en: '![openSUSE and Windows in the GRUB boot menu.](Images/lcb2_0128.png)'
+  id: totrans-299
+  prefs: []
+  type: TYPE_IMG
+  zh: '![openSUSE 和 Windows 在 GRUB 启动菜单中。](Images/lcb2_0128.png)'
+- en: Figure 1-28\. openSUSE and Windows in the GRUB boot menu
+  id: totrans-300
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 1-28\. openSUSE 和 Windows 在 GRUB 启动菜单中
+- en: Discussion
+  id: totrans-301
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You can install as many Linux and Windows systems on your system in a multiboot
+    setup as you have room for on your hard drives.
+  id: totrans-302
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在硬盘上为 Linux 和 Windows 安装多个系统，只要硬盘空间足够。
+- en: There are other ways to run Linux and Windows on the same machine. Windows 10
+    includes the Windows Subsystem for Linux 2 (WSL 2), which runs supported Linux
+    distributions in a virtual environment. You can run Windows in virtual machines
+    on Linux if you have Windows installation media. Virtual machines are lovely because
+    you can run multiple operating systems at the same time, though you need higher-end
+    CPUs and lots of memory.
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在同一台机器上运行 Linux 和 Windows 还有其他方法。Windows 10 包含了 Windows Subsystem for Linux
+    2（WSL 2），可以在虚拟环境中运行支持的 Linux 发行版。如果你有 Windows 安装媒体，你可以在 Linux 上运行 Windows 虚拟机。虚拟机非常好用，因为你可以同时运行多个操作系统，尽管这需要高端
+    CPU 和大量内存。
+- en: VirtualBox and QEMU/KVM/Virtual Machine Manager are good free virtual machine
+    hosts that run on Linux.
+  id: totrans-304
+  prefs: []
+  type: TYPE_NORMAL
+  zh: VirtualBox 和 QEMU/KVM/Virtual Machine Manager 是运行在 Linux 上的优秀的免费虚拟机主机。
+- en: See Also
+  id: totrans-305
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Windows Subsystem for Linux Documentation](https://oreil.ly/4cbnk)'
+  id: totrans-306
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Windows Subsystem for Linux 文档](https://oreil.ly/4cbnk)'
+- en: '[VirtualBox](https://oreil.ly/pI6J6)'
+  id: totrans-307
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[VirtualBox](https://oreil.ly/pI6J6)'
+- en: '[KVM](https://oreil.ly/gNdi9e)'
+  id: totrans-308
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[KVM](https://oreil.ly/gNdi9e)'
+- en: '[Virtual Machine Manager](https://oreil.ly/5vj6m)'
+  id: totrans-309
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Virtual Machine Manager](https://oreil.ly/5vj6m)'
+- en: '[QEMU](https://oreil.ly/VKBkf)'
+  id: totrans-310
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[QEMU](https://oreil.ly/VKBkf)'
+- en: 1.13 Recovering an OEM Windows 8 or 10 Product Key
+  id: totrans-311
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.13 恢复 OEM Windows 8 或 10 产品密钥
+- en: Problem
+  id: totrans-312
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You purchased a computer with Windows 8 or 10 preinstalled, and you can’t find
+    your product key.
+  id: totrans-313
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您购买了预装有Windows 8或10的计算机，但找不到您的产品密钥。
+- en: Solution
+  id: totrans-314
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Let Linux find it for you. Run the following command from a Linux system installed
+    on the same computer with Windows, or from SystemRescue:'
+  id: totrans-315
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让Linux为您找到它。从安装有Windows的同一台计算机上的Linux系统或从SystemRescue运行以下命令：
+- en: '[PRE8]'
+  id: totrans-316
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: And there it is on the last line.
+  id: totrans-317
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并且在最后一行就是它。
+- en: 'If you can log in to Windows, run the following command in Windows to retrieve
+    your product key:'
+  id: totrans-318
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您可以登录Windows，请在Windows中运行以下命令以检索您的产品密钥：
+- en: '[PRE9]'
+  id: totrans-319
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Discussion
+  id: totrans-320
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you have no recovery media, Windows 10 is a free download. You will need
+    your 25-digit OEM product key for a fresh installation.
+  id: totrans-321
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您没有恢复媒体，Windows 10是免费下载的。您将需要您的25位OEM产品密钥进行全新安装。
+- en: See Also
+  id: totrans-322
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Download Windows 10](https://oreil.ly/rz157)'
+  id: totrans-323
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[下载Windows 10](https://oreil.ly/rz157)'
+- en: 1.14 Mounting Your ISO Image on Linux
+  id: totrans-324
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 1.14 在Linux上挂载您的ISO镜像
+- en: Problem
+  id: totrans-325
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You have downloaded a Linux **.iso* file and are curious to see what it looks
+    like after it is unpacked. You could go ahead and create a bootable DVD or USB
+    stick, and then inspect the files, but you really want to unpack it without copying
+    it to another device.
+  id: totrans-326
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经下载了一个Linux **.iso*文件，并且很想知道它在解压后的样子。你可以继续创建一个可启动的DVD或USB驱动器，然后检查文件，但你真的想要在不复制到另一个设备的情况下解压它。
+- en: Solution
+  id: totrans-327
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Linux has a pseudodevice called the *loop* device. This makes your **.iso* image
+    accessible like any other filesystem. Follow these steps to mount your **.iso*
+    image file in a loop device.
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux有一个名为*loop*设备的伪设备。这使得您的**.iso*镜像文件像任何其他文件系统一样可访问。按照以下步骤将您的**.iso*镜像文件挂载到一个循环设备中。
+- en: 'First, create a mountpoint in your home directory, giving it whatever name
+    you want. In the example it is called *loopiso*:'
+  id: totrans-329
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，在您的家目录中创建一个挂载点，可以为其指定任何名称。在示例中，它称为*loopiso*：
+- en: '[PRE10]'
+  id: totrans-330
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'Mount your **.iso* in this new directory. In the example it is a Fedora Linux
+    installation image:'
+  id: totrans-331
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个新目录中挂载您的**.iso*。在示例中，它是一个Fedora Linux安装镜像：
+- en: '[PRE11]'
+  id: totrans-332
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: See the mounted filesystem in a file manager ([Figure 1-29](#fig-loopiso)).
+  id: totrans-333
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在文件管理器中查看已挂载的文件系统（[图1-29](#fig-loopiso)）。
+- en: '![.iso in Fedora Linux 34](Images/lcb2_0129.png)'
+  id: totrans-334
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Fedora Linux 34中的.iso](Images/lcb2_0129.png)'
+- en: Figure 1-29\. A mounted *.iso* in Fedora Linux 34
+  id: totrans-335
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图1-29\. Fedora Linux 34中的一个已挂载的*.iso*
+- en: You can enter the directories and read the files. You won’t be able to edit
+    any files because they are mounted read-only.
+  id: totrans-336
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以进入目录并阅读文件。您将无法编辑任何文件，因为它们是以只读方式挂载的。
+- en: 'When you are finished, unmount it:'
+  id: totrans-337
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成后，卸载它：
+- en: '[PRE12]'
+  id: totrans-338
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: Discussion
+  id: totrans-339
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The loop device maps a regular file to a virtual partition, and you can set
+    up a virtual filesystem in this file. If you want try to creating your own, a
+    little bit of web searching will find a lot of how-tos. Start with *man 8 losetup*.
+  id: totrans-340
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 循环设备将常规文件映射到虚拟分区，并且您可以在此文件中设置虚拟文件系统。如果您想尝试创建自己的文件，可以通过一些网络搜索找到很多方法。从*man 8 losetup*开始。
+- en: See Also
+  id: totrans-341
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 8 mount*'
+  id: totrans-342
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 mount*'
+- en: '*man 8 losetup*'
+  id: totrans-343
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 losetup*'

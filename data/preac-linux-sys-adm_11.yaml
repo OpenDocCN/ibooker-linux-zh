@@ -1,0 +1,812 @@
+- en: Chapter 11\. Deploying Samba for Windows Compatibility
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第11章。部署Samba以实现Windows兼容性
+- en: Interoperability is the capability for disparate systems such as Windows, Linux,
+    Unix, and macOS to coexist and work together. Interoperability is now a standard
+    and accepted feature of all data center operating systems, although some functionality
+    requires third-party software. Hardware, software, and operating systems can no
+    longer exist in a proprietary vacuum. In other words, vendors must ensure that
+    their products are cross-platform capable. Contemporary data centers are heterogenous—meaning
+    that Windows, Linux, and Unix systems occupy racks.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 互操作性是指诸如Windows、Linux、Unix和macOS等不同系统共存并协同工作的能力。互操作性现已成为所有数据中心操作系统的标准和被接受的特性，尽管某些功能需要第三方软件。硬件、软件和操作系统不再能够独立存在于专有的真空环境中。换句话说，厂商必须确保其产品具有跨平台的能力。当代的数据中心是异构的——这意味着Windows、Linux和Unix系统都占据机架。
+- en: 'Both native and third-party utilities make interoperability possible. From
+    Active Directory (AD) and LDAP to Samba/SMB to *nix utilities and applications,
+    systems can work together toward a common goal: serving customers.'
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本地和第三方工具使互操作性成为可能。从Active Directory（AD）和LDAP到Samba/SMB再到*nix工具和应用程序，系统可以共同努力实现一个共同的目标：为客户提供服务。
+- en: Note
+  id: totrans-3
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The generic wildcard designation “*nix” represents all Unix, Linux, and similar
+    operating systems and distributions.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 泛指符号“*nix”代表所有Unix、Linux和类似的操作系统及发行版。
+- en: Samba is a suite of utilities that enable Windows interoperability for Linux
+    and Unix. Samba provides secure, stable, file and print services for non-Windows
+    systems using the Server Message Block/Common Internet File System (SMB/CIFS)
+    protocol. Samba has its own authentication structure consisting of permissions
+    and passwords.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Samba是一套工具，为Linux和Unix提供Windows互操作性。Samba使用Server Message Block/Common Internet
+    File System（SMB/CIFS）协议为非Windows系统提供安全、稳定的文件和打印服务。Samba具有自己的身份验证结构，包括权限和密码。
+- en: 'Using Samba, Linux systems may do the following:'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用Samba，Linux系统可以执行以下操作：
+- en: Share directories, filesystems, and printers with Windows computers
+  id: totrans-7
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 与Windows计算机共享目录、文件系统和打印机
+- en: Mount Windows shares
+  id: totrans-8
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 挂载Windows共享
+- en: Browse the network for shares provided by Windows and other Linux computers
+  id: totrans-9
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 浏览由Windows和其他Linux计算机提供的共享网络
+- en: Participate in Windows domain authentication and authorization
+  id: totrans-10
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 参与Windows域身份验证和授权
+- en: Use Windows name resolution services
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用Windows名称解析服务
+- en: Use shared printers
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用共享打印机
+- en: 'With Samba installed on Linux servers, Windows computers may do the following:'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装了Samba的Linux服务器，Windows计算机可以执行以下操作：
+- en: Browse Linux shares
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 浏览Linux共享
+- en: Use shared printers
+  id: totrans-15
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用共享打印机
+- en: Map network drives to Linux shares
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 映射网络驱动器到Linux共享
+- en: This chapter explores some utilities and applications that enable Linux systems
+    to interoperate with Windows. The following section discusses the challenges of
+    interacting with Windows systems, and tools and configurations to make it work.
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章探讨一些工具和应用程序，使Linux系统能够与Windows互操作。下一节讨论与Windows系统交互的挑战，以及使其正常工作的工具和配置。
+- en: Planning Your Samba Environment
+  id: totrans-18
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 规划您的Samba环境
+- en: Requests for new file shares are commonplace in any business. Coworkers, often
+    separated by hundreds or thousands of miles, want a shared space to place files
+    such as documents, spreadsheets, text files, scripts, and images. As a system
+    administrator, there are some questions you must ask of your groups who want this
+    shared space.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在任何企业中，新文件共享请求都是司空见惯的。经常分布在数百或数千英里之外的同事，希望有一个共享空间来放置文件，如文档、电子表格、文本文件、脚本和图像。作为系统管理员，您必须询问您的团队一些问题，以便获得这个共享空间。
+- en: 'For this scenario, the Facilities department has requested the shared file
+    space. So, you will set up their Linux system as a Windows file server. The following
+    is a list of five important questions to ask:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于这种情况，设施部门请求共享文件空间。因此，您将其Linux系统设置为Windows文件服务器。以下是要询问的五个重要问题列表：
+- en: Should this space be restricted to your group only?
+  id: totrans-21
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 这个空间是否应该仅限于您的团队？
+- en: Do you want everyone in your group to be able to copy and create files in the
+    shared space?
+  id: totrans-22
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 您希望您组内的每个人都能够在共享空间中复制和创建文件吗？
+- en: Are there any default permissions you want to set on uploaded files?
+  id: totrans-23
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 您是否希望设置上传文件的默认权限？
+- en: Do you need any read-only folders for documents?
+  id: totrans-24
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 您是否需要任何只读文件夹用于文档？
+- en: Is this a permanent or a temporary shared space?
+  id: totrans-25
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 这是永久共享空间还是临时共享空间？
+- en: 'For this scenario, the facilities manager gave the following answers:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于这种情况，设施经理提供了以下答案：
+- en: Yes, restrict to facilities employees only.
+  id: totrans-27
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 是的，只限制给facilities员工。
+- en: Everyone needs to be able to copy and create files.
+  id: totrans-28
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 每个人都需要能够复制和创建文件。
+- en: Everyone in the group needs read and write access to all files.
+  id: totrans-29
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 组中的每个人都需要对所有文件具有读写权限。
+- en: Yes, we need a *Policies* folder from which no one can edit or remove files.
+  id: totrans-30
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 是的，我们需要一个*Policies*文件夹，任何人都不能编辑或删除文件。
+- en: This is a permanent space.
+  id: totrans-31
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 这是一个永久的空间。
+- en: The answers give you a starting place for the new shared space for the facilities
+    team. If a facilities group doesn’t exist, create one now and add facilities team
+    members as their primary group. The group member accounts are `atran`, `areed`,
+    and `akumar`.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 答案为facilities团队的新共享空间提供了一个起点。如果facilities组不存在，请立即创建一个，并将facilities团队成员添加为其主要组。组成员帐户是`atran`、`areed`和`akumar`。
+- en: Note
+  id: totrans-33
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Samba usernames and passwords must match exactly with those configured on Windows
+    systems.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Samba用户名和密码必须与在Windows系统上配置的完全匹配。
+- en: 'To demonstrate Samba’s functionality, perform the following tasks:'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了演示Samba的功能，执行以下任务：
+- en: '[PRE0]'
+  id: totrans-36
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'Create a directory such as */opt/facilities* that will be shared via Samba:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个目录，比如*/opt/facilities*，将通过Samba共享：
+- en: '[PRE1]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Change the group ownership and permissions of the */opt/facilities* directory
+    to reflect the requested permissions:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改*/opt/facilities*目录的组所有权和权限，以反映请求的权限：
+- en: '[PRE2]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Create a subdirectory under */opt/facilities* and name it *Policies*. Make
+    the *Policies* directory read-only for the facilities group:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在*/opt/facilities*目录下创建一个子目录，并命名为*Policies*。将*Policies*目录设置为facilities组的只读权限：
+- en: '[PRE3]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Now the shared space setup is complete and ready for Samba configuration.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在共享空间设置已完成，准备好进行Samba配置。
+- en: Installing Samba and Its Dependencies
+  id: totrans-44
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 安装Samba及其依赖项
+- en: 'Before configuring anything related to Samba, you must install it and its dependent
+    software:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在配置与Samba相关的任何内容之前，您必须安装它及其依赖软件：
+- en: '[PRE4]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: The process works similarly on other distributions. This transaction installs
+    everything you need to set up your Linux system as a Windows file server.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该过程在其他发行版上运行方式类似。此操作安装了您设置Linux系统作为Windows文件服务器所需的所有内容。
+- en: 'Enable and start the Samba services (`smb` and `nmb`):'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启用并启动Samba服务（`smb`和`nmb`）：
+- en: '[PRE5]'
+  id: totrans-49
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Samba services are now started and will start at boot time.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Samba服务现已启动，并将在启动时启动。
+- en: Adding Samba Users to Your System
+  id: totrans-51
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 将Samba用户添加到您的系统
+- en: 'Because Samba manages its own user list, you must add each user to the Samba
+    User Database. For demonstration purposes, I use `PaSSw0rd` for the Samba password:'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为Samba管理自己的用户列表，您必须将每个用户添加到Samba用户数据库中。为演示目的，我使用`PaSSw0rd`作为Samba密码：
+- en: '[PRE6]'
+  id: totrans-53
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: A configuration is available to sync Samba and Linux passwords. I cover this
+    later in the chapter.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有一个配置可用于同步Samba和Linux密码。我稍后会在本章中介绍这个配置。
+- en: Managing Samba Users as a Group
+  id: totrans-55
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 将Samba用户作为组进行管理
+- en: Groups make it easier to manage large numbers of users. Groups are easier to
+    manage because you can apply security to multiple users at once without the overhead
+    of tracking the security settings for each user. In other words, managing security
+    for 10 groups is much easier than managing it for 100 individual users.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 组使管理大量用户变得更容易。组更容易管理，因为您可以一次为多个用户应用安全性，而无需跟踪每个用户的安全设置的开销。换句话说，管理10个组的安全性比管理100个单独用户的安全性要容易得多。
+- en: You can create new Linux groups or use existing ones for Samba users and grant
+    group access to a share. You can also grant individual users access to a share,
+    but it’s much more labor-intensive.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以创建新的Linux组或使用现有组用于Samba用户，并授予组访问共享的权限。您也可以为单个用户授予共享的访问权限，但这需要更多的工作量。
+- en: Continuing with the example scenario where you have a facilities Linux group
+    containing three members, you can manage directory and file permissions for all
+    three group members for a particular directory (*/opt/facilities*). This is standard
+    Linux administration practice.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 继续使用示例场景，您有一个包含三名成员的facilities Linux组，您可以为特定目录（*/opt/facilities*）的所有三个组成员管理目录和文件权限。这是标准的Linux管理实践。
+- en: If you then share that same directory (*/opt/facilities*) via Samba, add `valid
+    users = @facilities` in the configuration file to allow the entire group access
+    to the shared directory. The `@facilities` declaration refers to the facilities
+    Linux group, and its group members are valid users of that share.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您通过Samba共享同一目录（*/opt/facilities*），请在配置文件中添加`valid users = @facilities`，以允许整个组访问共享目录。`@facilities`声明指的是facilities
+    Linux组，其组成员是该共享目录的有效用户。
+- en: Linux file and directory permissions are different from Samba permissions. A
+    Linux user might have write access permission to a directory, but the share might
+    be read-only for the same user. If you don’t add valid users to a share, it doesn’t
+    matter that the Linux file permissions allow the group to write to the directory;
+    group members won’t be able to access that directory via the share.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux文件和目录权限与Samba权限不同。 Linux用户可能对目录具有写入权限，但对于同一用户，共享可能是只读的。 如果不将有效用户添加到共享中，则Linux文件权限允许组写入目录也无济于事；
+    组成员将无法通过共享访问该目录。
+- en: One of the primary reasons for enabling Samba shares is to create compatibility
+    between Windows and Mac clients and Linux servers. The rest of this chapter deals
+    with configuring and supporting that interoperability.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启用Samba共享的主要原因之一是创建Windows和Mac客户端与Linux服务器之间的兼容性。 本章的其余部分涉及配置和支持该互操作性。
+- en: Providing Services to Mac and Windows Clients
+  id: totrans-62
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 为Mac和Windows客户端提供服务
+- en: As a Linux system administrator, you must realize that Linux is a great *server*
+    operating system. Some believe massive Linux desktop adoption is “just around
+    the corner.” However, realistically, Windows and Mac workstations are the corporate
+    standards, while Linux is still the outlier. Because Linux is a great server operating
+    system, sysadmins must provide services compatible with Windows and Mac clients.
+    macOS, having *nix roots, is generally Linux compatible, so less effort is required
+    to make Mac systems and Linux work together.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为Linux系统管理员，您必须意识到Linux是一种出色的*服务器*操作系统。 有些人认为大规模采用Linux桌面“就在拐角处”。 但是，现实情况是，Windows和Mac工作站是企业的标准，而Linux仍然是个例外。
+    因为Linux是一种出色的服务器操作系统，系统管理员必须提供与Windows和Mac客户端兼容的服务。 macOS由于有*nix的根源，通常与Linux兼容，因此在使Mac系统和Linux协同工作时需要的工作量较少。
+- en: Windows, however, is not so easy to integrate with Linux—at least, not right
+    out of the box. Windows systems require third-party tools and utilities, and Linux
+    systems require extra software packages and special configurations. But it’s possible
+    to make the two systems work together seamlessly, and the solutions are also quite
+    elegant and stable.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但是，要将Windows与Linux集成并不容易——至少不能直接。 Windows系统需要第三方工具和实用程序，而Linux系统则需要额外的软件包和特殊配置。
+    但是，可以使这两个系统无缝工作在一起，而且解决方案也相当优雅和稳定。
+- en: Serving Network Storage to Desktop Clients
+  id: totrans-65
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 为桌面客户端提供网络存储
+- en: Administrators provide network storage to Windows systems via mapped drives
+    and to Mac clients via mounted shares. A mapped drive, in Linux terms, is a mounted
+    remote shared directory. Windows labels these remote shares as drive letters,
+    such as *F:* through *Z:*. From the Linux system, sysadmins share directories
+    through Samba, which is somewhat analogous to *nix Network File System (NFS) shares.
+    macOS systems can also mount Samba shares by browsing the network using the Samba
+    protocol or by direct connection.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 管理员通过映射驱动器将网络存储提供给Windows系统，并通过挂载共享将其提供给Mac客户端。 在Linux术语中，映射驱动器是挂载的远程共享目录。 Windows将这些远程共享标识为驱动器字母，例如*F:*到*Z:*。
+    从Linux系统，系统管理员通过Samba共享目录，这在某种程度上类似于*nix网络文件系统（NFS）共享。 macOS系统也可以通过浏览使用Samba协议或直接连接来挂载Samba共享。
+- en: Samba shares are handy because users can drag and drop files onto a shared directory
+    without using file transfer software such as FTP, SFTP, SCP, or others. Samba
+    shares appear to be shared from a Windows server system, which further integrates
+    Linux into a Windows and Mac desktop environment.
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Samba共享非常方便，用户可以将文件拖放到共享目录中，而无需使用FTP、SFTP、SCP或其他文件传输软件。 Samba共享看起来是从Windows服务器系统共享出来的，这进一步将Linux整合到Windows和Mac桌面环境中。
+- en: Exploring global Samba settings
+  id: totrans-68
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 探索全局Samba设置
+- en: 'You can set dozens of “directives” in the `[global]` portion of your */etc/samba/smb.conf*
+    file. Still, in my opinion, the following directives are the ones you should set,
+    regardless of your use of domain controllers and AD, but they are best used as
+    a standalone Samba server. Many of the directives shown are defaults:'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在*/etc/samba/smb.conf*文件的*[global]*部分中设置数十个“指令”。 尽管如此，在我看来，无论您是否使用域控制器和AD，以下指令都应设置为最佳的独立Samba服务器使用。
+    所示的许多指令是默认值：
+- en: '[PRE7]'
+  id: totrans-70
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Change the settings to match your network and needs. The workgroup is usually
+    set to the same as your domain name or workgroup if you aren’t using a domain.
+    The NetBIOS name is the name of the Samba server that you’ll see in a network
+    browse list.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更改设置以匹配您的网络和需求。 工作组通常设置为域名或工作组相同。 NetBIOS名称是您将在网络浏览列表中看到的Samba服务器的名称。
+- en: Printing via Samba
+  id: totrans-72
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 通过 Samba 打印
+- en: 'You can also share printers, but because most systems print directly to printers
+    via their IP addresses, printer sharing isn’t covered here. There is a sample
+    configuration for sharing printers in the */etc/samba/smb.conf* file:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您也可以共享打印机，但因为大多数系统通过其 IP 地址直接打印到打印机，因此此处不涵盖打印机共享。在 */etc/samba/smb.conf* 文件中有一个共享打印机的示例配置：
+- en: '[PRE8]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: These configurations will get you started. I suggest that you change `browseable
+    = no` to `browseable = yes`. Remember to restart the `samba` service every time
+    you make a configuration change. The next two sections step you through sharing
+    a directory for user access.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些配置将帮助您入门。我建议您将 `browseable = no` 更改为 `browseable = yes`。每次进行配置更改时，请记得重新启动
+    `samba` 服务。接下来的两个部分将指导您如何共享用户访问目录。
+- en: Deploying the lmhosts file
+  id: totrans-76
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 部署 lmhosts 文件
+- en: 'Just as you have in Windows systems, Samba supports the *lmhosts* file. The
+    *lmhosts* file lists NetBIOS names and IP addresses of systems on your network.
+    I suggest you copy and paste the contents of a Windows *lmhosts* file to your
+    Linux systems that provide Samba services. Do not transfer the Windows *lmhosts*
+    file to your Linux servers because of text formatting differences between Windows
+    and Linux systems. The default *lmhosts* file in */etc/samba* only contains localhost
+    information:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就像在 Windows 系统中一样，Samba 支持 *lmhosts* 文件。 *lmhosts* 文件列出了网络上系统的 NetBIOS 名称和 IP
+    地址。我建议您将 Windows *lmhosts* 文件的内容复制粘贴到提供 Samba 服务的 Linux 系统上。不要将 Windows *lmhosts*
+    文件转移到 Linux 服务器，因为 Windows 和 Linux 系统之间存在文本格式差异。 */etc/samba* 中的默认 *lmhosts* 文件只包含本地主机信息：
+- en: '[PRE9]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'Think of the *lmhosts* file the same way you consider the */etc/hosts* file.
+    You can also set other directives in the *lmhosts* file shown in the following
+    list. Directives follow entries and use the `#`:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将 *lmhosts* 文件视为您考虑 */etc/hosts* 文件的方式相同。您还可以在以下列表中显示的 *lmhosts* 文件中设置其他指令。指令跟随条目并使用
+    `#`：
+- en: '`#PRE`'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`#PRE`'
+- en: 'Entries loaded into cache for name lookup and resolution:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了名称查找和解析加载到缓存中的条目：
+- en: '[PRE10]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: '`#DOM:*domain*`'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`#DOM:*domain*`'
+- en: 'Domain server entries. Use this directive with the `#PRE` directive:'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 域服务器条目。与 `#PRE` 指令一起使用：
+- en: '[PRE11]'
+  id: totrans-85
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: '`#INCLUDE \\*UNC Path*\*To File*`'
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`#INCLUDE \\*UNC Path*\*To File*`'
+- en: 'Includes a file from another system. This is often used to integrate *lmhosts*
+    files from frequently updated Windows systems:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包含来自另一个系统的文件。这通常用于集成经常更新的 Windows 系统中的 *lmhosts* 文件：
+- en: '[PRE12]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: '`#BEGIN_ALTERNATE`/`#END_ALTERNATE`'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`#BEGIN_ALTERNATE`/`#END_ALTERNATE`'
+- en: 'Groups multiple `#INCLUDE` directives together:'
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将多个 `#INCLUDE` 指令分组在一起：
+- en: '[PRE13]'
+  id: totrans-91
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: I always use *lmhosts* files on my Samba servers. I set up an automated script
+    to keep the local *lmhosts* file in sync with a single source of truth. However,
+    the `#INCLUDE` directive that points to another system’s *lmhosts* file is a good
+    alternative.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我在我的 Samba 服务器上始终使用 *lmhosts* 文件。我设置了一个自动化脚本，以保持本地 *lmhosts* 文件与真相的单一来源同步。然而，指向另一个系统
+    *lmhosts* 文件的 `#INCLUDE` 指令也是一个不错的选择。
+- en: The next few sections demonstrate how to set up and use a Samba share.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来的几个部分演示了如何设置和使用 Samba 共享。
+- en: Configuring a Shared Directory
+  id: totrans-94
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 配置共享目录
+- en: The */etc/samba/smb.conf* file is the Samba configuration file where you set
+    up shared directories. The `homes` share is a good place to start for your custom
+    shared directory configuration.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/samba/smb.conf* 文件是 Samba 配置文件，用于设置共享目录。 `homes` 共享是开始自定义共享目录配置的好地方。'
+- en: 'The following sample shared directory is from an */etc/samba/smb.conf.example*
+    file:'
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面是来自 */etc/samba/smb.conf.example* 文件的示例共享目录：
+- en: '[PRE14]'
+  id: totrans-97
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: The following is the facilities share configuration in my */etc/samba/smb.conf*
+    file. The bracketed portion, `[Facilities]`, is the share name. Remember to keep
+    share names to 15 characters or less, and avoid nonalphanumeric characters and
+    spaces.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面是我 */etc/samba/smb.conf* 文件中的设施共享配置。方括号部分 `[Facilities]` 是共享名称。请记住共享名称不超过
+    15 个字符，并避免非字母数字字符和空格。
+- en: 'The `create mode` and `directory mode` are set according to the facilities
+    manager’s needs from the previously mentioned five questions:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`create mode` 和 `directory mode` 根据设施经理从先前提到的五个问题的需求进行设置：'
+- en: '[PRE15]'
+  id: totrans-100
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: The `valid users` entry limits access to users listed in the facilities Linux
+    group. `browseable` means that if you perform a network browse, the system and
+    this share appear in the list of available shares. The `create mode` directive
+    (`0660`) is the default file creation permission for files in the share. When
+    you create a new file in the shared directory via the share, its permissions will
+    be `0660`. The directory mode is the permissions given to the share.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`valid users` 条目限制了只能访问设施 Linux 组中列出的用户。`browseable` 意味着如果执行网络浏览，系统和此共享将出现在可用共享列表中。`create
+    mode` 指令 (`0660`) 是共享文件的默认创建权限。当您通过共享在共享目录中创建新文件时，其权限将是 `0660`。目录模式是共享的权限。'
+- en: Browsing for Shared Directories
+  id: totrans-102
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 浏览共享目录
+- en: This section covers browsing for and connecting to Linux Samba shares from Mac,
+    Windows, and Linux computers. Refer to Figures [11-1](#a_samba_network_browse_on_a_macos_syste)
+    and [11-2](#the_macos_finder_app_displaying_samba_s) to see how a Mac system views
+    Samba shares on Linux systems. *server1* is the CentOS system I’ve used in the
+    examples, and *server2* is an Ubuntu system also used in this book.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本节介绍了如何从 Mac、Windows 和 Linux 计算机浏览和连接 Linux Samba 共享。参考图表[11-1](#a_samba_network_browse_on_a_macos_syste)和[11-2](#the_macos_finder_app_displaying_samba_s)，查看
+    Mac 系统如何查看 Linux 系统上的 Samba 共享。*server1* 是我在示例中使用的 CentOS 系统，*server2* 是本书中还使用的
+    Ubuntu 系统。
+- en: '![](assets/plsa_1101.png)'
+  id: totrans-104
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_1101.png)'
+- en: Figure 11-1\. A Samba network browse on a macOS system
+  id: totrans-105
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图表 11-1\. macOS 系统上的 Samba 网络浏览
+- en: Once connected, the mounted shares appear as resources in the macOS Finder application.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 连接后，挂载的共享将显示为 macOS Finder 应用程序中的资源。
+- en: '![](assets/plsa_1102.png)'
+  id: totrans-107
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_1102.png)'
+- en: Figure 11-2\. The macOS Finder app displaying Samba systems and shares
+  id: totrans-108
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图表 11-2\. macOS Finder 应用程序显示 Samba 系统和共享
+- en: On Windows systems, the view is similar, but to connect to a remote share, you
+    must map a drive. Mapping a drive means mounting the remote share and using it
+    as if it were local to the system. Recall the NFS reference from earlier. See
+    Figures [11-3](#mapping_a_drive_left_parenthesisgright) and [11-4](#the_mapped_drive_in_windows_file_explor).
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Windows系统上，视图类似，但要连接远程共享，您必须映射驱动器。映射驱动器意味着挂载远程共享并将其用作系统本地资源。请回顾前面提到的NFS参考。参见图表[11-3](#mapping_a_drive_left_parenthesisgright)和[11-4](#the_mapped_drive_in_windows_file_explor)。
+- en: '![](assets/plsa_1103.png)'
+  id: totrans-110
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_1103.png)'
+- en: Figure 11-3\. Mapping a drive (G:) to the remote share \\server1\Facilities
+  id: totrans-111
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图表 11-3\. 将驱动器 (G:) 映射到远程共享 \\server1\Facilities
+- en: Mapping the share makes it available as a drive letter on the client system.
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 映射共享会将其作为客户端系统上的驱动器字母显示。
+- en: '![](assets/plsa_1104.png)'
+  id: totrans-113
+  prefs: []
+  type: TYPE_IMG
+  zh: '![](assets/plsa_1104.png)'
+- en: Figure 11-4\. The mapped drive in Windows File Explorer
+  id: totrans-114
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图表 11-4\. Windows 文件资源管理器中的映射驱动器
+- en: With the drive mapped, the user, `ajones`, can freely access the *Facilities*
+    share, and this user can create, edit, and copy files to the shared directory.
+    The following section deals with how Linux systems view and connect to Windows
+    shares.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过映射驱动器，用户 `ajones` 可以自由访问 *Facilities* 共享，该用户可以在共享目录中创建、编辑和复制文件。接下来的部分介绍了 Linux
+    系统如何查看和连接到 Windows 共享。
+- en: Mounting Windows System’s Shares
+  id: totrans-116
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 挂载 Windows 系统的共享
+- en: 'You can also browse shares on a remote Windows (or other Linux) system from
+    a Linux computer using the Samba protocol:'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以使用 Samba 协议从 Linux 计算机浏览远程 Windows（或其他 Linux）系统上的共享：
+- en: '[PRE16]'
+  id: totrans-118
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: The message concerning `SMB1` can be ignored. It doesn’t affect functionality.
+    Depending on your Samba client and server versions on the systems you’re browsing,
+    you can receive different messages referring to SMB versions. All can be ignored.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于 `SMB1` 的消息可以忽略。这不会影响功能。根据您在浏览的系统上的 Samba 客户端和服务器版本，您可能会收到与 SMB 版本相关的不同消息。这些消息都可以忽略。
+- en: '`mount` the remote Windows share (`Files`) on the `WIN10` computer:'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 `WIN10` 计算机上挂载远程 Windows 共享（`Files`）：
+- en: '[PRE17]'
+  id: totrans-121
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'If you don’t use the filesystem type `cifs` as part of the `mount` command,
+    you’ll receive the following message:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果在 `mount` 命令中未使用文件系统类型 `cifs`，则会收到以下消息：
+- en: '[PRE18]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: Summary
+  id: totrans-124
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 概要
+- en: Linux interoperability everywhere from contemporary enterprise data centers
+    to small server rooms provides increased functionality, lowers costs, and offers
+    greater freedom of software choice. Regardless of which distribution you choose
+    to integrate into your business, providing services to Windows and Mac clients
+    is essential to Linux adoption and success. You must seamlessly duplicate standard
+    Windows Server services and demonstrate to users and management that Linux can
+    dispel skepticism with higher stability and lower maintenance than its costly
+    alternatives.
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 在当代企业数据中心到小型服务器房间的无缝互通性提供了增强功能，降低成本，并提供更大的软件选择自由。无论您选择将哪个发行版集成到您的业务中，向
+    Windows 和 Mac 客户端提供服务对于 Linux 的采纳和成功至关重要。您必须无缝复制标准的 Windows Server 服务，并向用户和管理层展示，Linux
+    可以通过比昂贵的替代方案更高的稳定性和更低的维护成本来消除怀疑。

@@ -1,0 +1,1159 @@
+- en: Chapter 3\. Rerunning Commands
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第三章 重新运行命令
+- en: 'Suppose you’ve just executed a lengthy command with a detailed pipeline, like
+    this one from [“Detecting Duplicate Files”](ch01.xhtml#sec_duplicate_files):'
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设您刚刚执行了一个包含详细管道的长命令，例如来自[“检测重复文件”](ch01.xhtml#sec_duplicate_files)的命令：
+- en: '[PRE0]'
+  id: totrans-2
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: and you want to run it a second time. Don’t retype it! Instead, ask the shell
+    to reach back into history and rerun the command. Behind the scenes, the shell
+    keeps a record of the commands you invoke so you can easily recall and rerun them
+    with a few keystrokes. This shell feature is called *command history*. Expert
+    Linux users make heavy use of command history to speed up their work and avoid
+    wasting time.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 而您希望再次运行它。不要重新输入！相反，请让Shell回溯历史记录并重新运行命令。在幕后，Shell会记录您调用的命令，因此您可以轻松地通过几个按键回忆并重新运行它们。这个Shell功能称为*命令历史*。熟练的Linux用户大量使用命令历史来加快工作速度，避免浪费时间。
+- en: 'Similarly, suppose you make a mistake typing the preceding command before you
+    run it, such as misspelling “jpg” as “jg”:'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 类似地，假设在运行之前您在输入前述命令时出现拼写错误，比如将“jpg”拼写为“jg”：
+- en: '[PRE1]'
+  id: totrans-5
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: To fix the mistake, don’t press the Backspace key dozens of times and retype
+    everything. Instead, change the command in place. The shell supports *command-line
+    editing* for fixing typos and performing all sorts of modifications like a text
+    editor can.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要修正错误，请不要按下退格键几十次并重新键入所有内容。相反，请在原地更改命令。Shell支持*命令行编辑*，用于修正拼写错误和执行各种修改，就像文本编辑器一样。
+- en: This chapter will show you how to save lots of time and typing by leveraging
+    command history and command-line editing. As usual, I won’t attempt to be comprehensive—I’ll
+    focus on the most practical and useful parts of these shell features. (If you
+    use a shell other than `bash`, see [Appendix B](app02.xhtml#appendix_shells) for
+    additional notes.)
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章将向您展示如何通过利用命令历史和命令行编辑来节省大量时间和输入。像往常一样，我不会试图面面俱到——我将专注于这些Shell功能中最实用和最有用的部分。（如果您使用的Shell不是`bash`，请参阅[附录
+    B](app02.xhtml#appendix_shells) 获取额外的注意事项。）
+- en: Learn to Touch-Type
+  id: totrans-8
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 学会盲打
+- en: All the advice in this book will serve you better if you can type quickly. No
+    matter how knowledgeable you are, if you type 40 words per minute and your equally
+    knowledgeable friend types 120, they’re set up to work three times as fast as
+    you. Search the web for “typing speed test” to measure your speed, then search
+    for “typing tutor” and build a lifelong skill. Try to reach 100 words per minute.
+    It’s worth the effort.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您能快速打字，本书中所有建议都会对您有所帮助。无论您有多么博学，如果您每分钟打字40个单词，而您的同样博学的朋友每分钟打字120个，他们的工作速度将比您快三倍。搜索“打字速度测试”以测量您的速度，然后搜索“打字教程”，培养一项终生技能。努力达到每分钟100个单词。这是值得努力的。
+- en: Viewing the Command History
+  id: totrans-10
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 查看命令历史
+- en: 'A *command history* is simply a list of previous commands that you’ve executed
+    in an interactive shell. To see a shell’s history, run the `history` command,
+    which is a shell builtin. The commands appear in chronological order with ID numbers
+    for easy reference. The output looks something like this:'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*命令历史*简单来说就是您在交互式Shell中执行的先前命令列表。要查看Shell的历史记录，请运行`history`命令，这是一个Shell内置命令。命令按时间顺序显示，并附有ID编号以便于参考。输出看起来类似于这样：'
+- en: '[PRE2]'
+  id: totrans-12
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'The output of `history` can be hundreds of lines long (or more). Limit it to
+    the most recent commands by adding an integer argument, which specifies the number
+    of lines to print:'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`history` 命令的输出可能有几百行长（或更多）。通过添加整数参数来限制它仅打印最近的命令行数，该参数指定要打印的行数：'
+- en: '[PRE3]'
+  id: totrans-14
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Since `history` writes to stdout, you also can process the output with pipes.
+    For example, view your history a screenful at a time:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于`history`输出到stdout，您也可以使用管道处理输出。例如，逐屏查看您的历史记录：
+- en: '[PRE4]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'or print only the historical commands containing the word `cd`:'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者仅打印包含单词`cd`的历史命令：
+- en: '[PRE5]'
+  id: totrans-18
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'To clear (delete) the history for the current shell, use the `-c` option:'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要清除（删除）当前Shell的历史记录，请使用 `-c` 选项：
+- en: '[PRE6]'
+  id: totrans-20
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: Recalling Commands from the History
+  id: totrans-21
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 从历史记录中召回命令
+- en: 'I’ll show you three time-saving ways to recall commands from a shell’s history:'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我将向您展示三种从Shell历史中召回命令的省时方法：
+- en: Cursoring
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 光标移动
+- en: Extremely simple to learn but often slow in practice
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 学起来极其简单，但在实践中通常较慢
+- en: History expansion
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 历史扩展
+- en: Harder to learn (frankly, it’s cryptic) but can be very fast
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更难学（坦白地说，它很神秘），但可以非常快速
+- en: Incremental search
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 渐进搜索
+- en: Both simple and fast
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简单而快速
+- en: Each method is best in particular situations, so I recommend learning all three.
+    The more techniques you know, the better you can choose the right one in any situation.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每种方法在特定情况下都是最好的，所以我建议学习所有三种。你掌握的技术越多，就能在任何情况下更好地选择合适的方法。
+- en: Cursoring Through History
+  id: totrans-30
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 历史记录浏览
+- en: To recall your previous command in a given shell, press the up arrow key. It’s
+    that simple. Keep pressing the up arrow to recall earlier commands in reverse
+    chronological order. Press the down arrow to head in the other direction (toward
+    more recent commands). When you reach the desired command, press Enter to run
+    it.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在给定shell中回忆你的上一个命令，按上箭头键。就是这么简单。继续按上箭头以逆时间顺序回忆较早的命令。按下箭头向另一个方向移动（向更近的命令）。当你到达想要的命令时，按Enter运行它。
+- en: Cursoring through the command history is one of the two most common speedups
+    that Linux users learn. (The other is pattern matching filenames with `*`, which
+    you saw in [Chapter 2](ch02.xhtml#ch_shell).) Cursoring is efficient if your desired
+    command is nearby in the history—no more than two or three commands in the past—but
+    it’s tedious to reach commands that are further away. Whacking the up arrow 137
+    times gets old quickly.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 浏览命令历史记录是Linux用户学习的两种最常见的加速方法之一。（另一种是使用`*`进行文件名模式匹配，如你在[第2章](ch02.xhtml#ch_shell)中看到的。）如果你想要的命令在历史中附近——最多是两三个命令之前——浏览是有效的，但是要达到更远的命令则很烦琐。连续按上箭头键137次很快就会令人厌倦。
+- en: The best use case for cursoring is recalling and running the immediately previous
+    command. On many keyboards, the up arrow key is near the Enter key, so you can
+    press the two keys in sequence with a quick flick of the fingers. On a full-sized
+    American QWERTY keyboard, I place my right ring finger on the up arrow and my
+    right index finger on Enter to tap both keys efficiently. (Try it.)
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 光标浏览的最佳用例是回忆和运行即时前一个命令。在许多键盘上，上箭头键靠近Enter键，因此您可以快速连续按这两个键。在标准美式QWERTY键盘上，我将右手的无名指放在上箭头上，食指放在Enter上，可以高效地轻敲这两个键。（试试看。）
+- en: History Expansion
+  id: totrans-34
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 历史扩展
+- en: 'History expansion is a shell feature that accesses the command history using
+    special expressions. The expressions begin with an exclamation point, which traditionally
+    is pronounced “bang.” For example, two exclamation points in a row (“bang bang”)
+    evaluates to the immediately previous command:'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 历史扩展是一种利用特殊表达式访问命令历史的shell特性。这些表达式以感叹号开头，传统上发音为“bang”。例如，两个感叹号连续使用（“bang bang”）将评估立即前一个命令：
+- en: '[PRE7]'
+  id: totrans-36
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'To refer to the most recent command that began with a certain string, place
+    an exclamation point in front of that string. So, to rerun the most recent `grep`
+    command, run “bang grep”:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要引用以特定字符串开头的最近命令，请在该字符串前面加上感叹号。因此，要重新运行最近的`grep`命令，请运行“bang grep”：
+- en: '[PRE8]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: To refer to the most recent command that contained a given string *somewhere*,
+    not just at the beginning of the command, surround the string with question marks
+    as well:^([1](ch03.xhtml#idm46586642237936))
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要引用包含给定字符串*任意位置*的最近命令，请将字符串用问号包围：^([1](ch03.xhtml#idm46586642237936))
+- en: '[PRE9]'
+  id: totrans-40
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'You can also retrieve a particular command from a shell’s history by its absolute
+    position—the ID number to its left in the output of `history`. For example, the
+    expression `!1203` (“bang 1023”) means “the command at position 1023 in the history”:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你还可以通过shell历史记录中命令的绝对位置来检索特定命令——在`history`输出中其左侧的ID号码。例如，表达式`!1203`（“bang 1023”）表示“历史记录中位置1023处的命令”：
+- en: '[PRE10]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'A negative value retrieves a command by its relative position in the history,
+    rather than absolute position. For example, `!-3` (“bang minus three”) means “the
+    command you executed three commands ago”:'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 负值通过历史记录中的相对位置检索命令，而不是绝对位置。例如，`!-3`（“bang minus three”）表示“你执行的三个命令前的命令”：
+- en: '[PRE11]'
+  id: totrans-44
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'History expansion is quick and convenient, if a bit cryptic. It can be risky,
+    however, if you provide a wrong value and execute it blindly. Look carefully at
+    the preceding example. If you miscounted and typed `!-4` instead of `!-3`, you’d
+    run `rm *` instead of the intended `head` command and delete files in your home
+    directory by mistake! To mitigate this risk, append the modifier `:p` to print
+    the command from your history but not execute it:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 历史扩展快速方便，虽然有点晦涩。但如果提供错误的值并盲目执行，可能会有风险。仔细看看前面的例子。如果计数错误，输入`!-4`而不是`!-3`，你会意外地运行`rm
+    *`而不是预期的`head`命令，从而删除家目录中的文件！为了减少这种风险，在命令后面附加修饰符`:p`以打印历史命令但不执行它：
+- en: '[PRE12]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'The shell appends the unexecuted command (`head`) to the history, so if it
+    looks good, you can run it conveniently with a quick “bang bang”:'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell将未执行的命令（`head`）附加到历史记录中，因此如果看起来没问题，您可以方便地使用快速的“叹号叹号”来运行它：
+- en: '[PRE13]'
+  id: totrans-48
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'Some people refer to history expansion as “bang commands,” but expressions
+    like `!!` and `!grep` are not commands. They are string expressions that you can
+    place *anywhere* in a command. As a demonstration, use `echo` to print the value
+    of `!!` on stdout without executing it, and count the number of words with `wc`:'
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有些人将历史扩展称为“叹号命令”，但像`!!`和`!grep`这样的表达式并不是命令。它们是您可以在*任何地方*放置的字符串表达式。作为演示，使用`echo`在标准输出上打印`!!`的值，而不执行它，并用`wc`计算单词数：
+- en: '[PRE14]'
+  id: totrans-50
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: This toy example demonstrates that history expansions have more uses than executing
+    commands. You’ll see a more practical, powerful technique in the next section.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个玩具例子演示了历史扩展比执行命令更有用途。在下一节中，您将看到一个更实用、更强大的技术。
+- en: I’ve covered only a few features of command history here. For full information,
+    run `man history`.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我在这里只介绍了命令历史的一些功能。要获取完整信息，请运行`man history`。
+- en: History Expressions Don’t Appear in the Command History
+  id: totrans-53
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 命令历史中没有历史表达式。
+- en: 'The shell appends commands to the history verbatim—unevaluated—as I mentioned
+    in [“Frequently Asked Questions About Command History”](#sb_history_faq). The
+    one exception to this rule is history expansion. Its expressions are always evaluated
+    before they’re added to the command history:'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如我在[“关于命令历史的常见问题”](#sb_history_faq)中所述，shell将命令原封不动地追加到历史中，不经过评估。唯一的例外是历史扩展。它的表达式总是在添加到命令历史之前进行评估：
+- en: '[PRE15]'
+  id: totrans-55
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: This exception makes sense. Imagine trying to understand a command history full
+    of expressions like `!-15` and `!-92` that refer to other history entries. You
+    might have to trace a path through the whole history by eye to understand a single
+    command.
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个例外情况是有道理的。想象一下，试图理解一个充满像`!-15`和`!-92`这样引用其他历史条目的表达式的命令历史。您可能不得不通过眼睛追踪整个历史记录路径，才能理解一个单独的命令。
+- en: Never Delete the Wrong File Again (Thanks to History Expansion)
+  id: totrans-57
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 再也不会因为误删错误文件（感谢历史扩展）。
+- en: 'Have you ever meant to delete files using a pattern, such as `*.txt`, but accidentally
+    mistyped the pattern and wiped out the wrong files? Here’s an example with an
+    accidental space character after the asterisk:'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您是否曾经打算使用模式（例如`*.txt`）删除文件，但却意外地错误输入了模式，导致删除了错误的文件？这里有一个带有星号后意外空格字符的示例：
+- en: '[PRE16]'
+  id: totrans-59
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'The most common solution to this hazard is to alias `rm` to run `rm -i` so
+    it prompts for confirmation before each deletion:'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 避免这种危险的最常见解决方案是将`rm`的别名设置为运行`rm -i`，这样在每次删除之前都会提示确认：
+- en: '[PRE17]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'As a result, an extra space character needn’t be fatal, because the prompts
+    from `rm -i` will warn that you’re removing the wrong files:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因此，多余的空格字符不会致命，因为来自`rm -i`的提示将警告您正在删除错误的文件：
+- en: '[PRE18]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'The alias solution is cumbersome, however, because most of the time you might
+    not want or need `rm` to prompt you. It also doesn’t work if you’re logged into
+    another Linux machine without your aliases. I’ll show you a better way to avoid
+    matching the wrong filenames with a pattern. The technique has two steps and relies
+    on history expansion:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然而，别名解决方案很麻烦，因为大多数时候您可能不想要或不需要`rm`提示您。如果您在另一台没有别名的Linux机器上登录，它也不起作用。我将向您展示一种更好的方法来避免使用模式匹配错误的文件名。该技术有两个步骤，并依赖于历史扩展：
+- en: '*Verify*. Before running `rm`, run `ls` with the desired pattern to see which
+    files match.'
+  id: totrans-65
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: '*验证*。在运行`rm`之前，使用所需模式运行`ls`以查看匹配的文件。'
+- en: '[PRE19]'
+  id: totrans-66
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: '*Delete*. If the output of `ls` looks correct, run `rm !$` to delete the same
+    files that were matched.^([2](ch03.xhtml#idm46586642165264))'
+  id: totrans-67
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: '*删除*。如果`ls`的输出看起来正确，请运行`rm !$`以删除匹配的相同文件[^2]。'
+- en: '[PRE20]'
+  id: totrans-68
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'The history expansion `!$` (“bang dollar”) means “the final word that you typed
+    in the previous command.” Therefore, `rm !$` here is shorthand for “delete whatever
+    I just listed with `ls`,” namely, `*.txt`. If you accidentally add a space after
+    the asterisk, the output of `ls` will make it obvious—safely—that something is
+    wrong:'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 历史扩展`!$`（“叹号美元”）表示“前一个命令中您键入的最后一个词”。因此，这里的`rm !$`是“删除我刚刚用`ls`列出的任何东西”的简写，即`*.txt`。如果您在星号后意外添加了一个空格，`ls`的输出将明确显示——安全地——出现了问题。
+- en: '[PRE21]'
+  id: totrans-70
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: It’s a good thing you ran `ls` first instead of `rm`! You can now modify the
+    command to remove the extra space and proceed safely. This two-command sequence—`ls`
+    followed by `rm !$`—is a great safety feature to incorporate into your Linux toolbox.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 很幸运你先运行了 `ls` 而不是 `rm`！现在你可以修改命令以去除多余的空格并安全进行。这个由`ls`后跟`rm !$`组成的两步命令序列是你 Linux
+    工具箱中很好的安全功能。
+- en: 'A related technique is peeking at a file’s contents with `head` before you
+    delete it, to make sure you’re targeting the right file, and then running `rm
+    !$`:'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个相关的技巧是在删除文件之前使用 `head` 查看文件内容，确保你操作的是正确的文件，然后运行 `rm !$`：
+- en: '[PRE22]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'The shell also provides a history expansion `!*` (“bang star”), which matches
+    all arguments you typed in the previous command, rather than just the final argument:'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell 还提供了一个历史扩展 `!*`（“bang star”），它匹配你在前一个命令中键入的所有参数，而不仅仅是最后一个参数：
+- en: '[PRE23]'
+  id: totrans-75
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: In practice, I use `!*` much less often than `!$`. Its asterisk carries the
+    same risk of being interpreted as a pattern-matching character for filenames (if
+    you mistype something), so it’s not much safer than typing a pattern like `*.txt`
+    by hand.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在实践中，我使用 `!*` 的频率要比 `!$` 少得多。它的星号与手动输入类似 `*.txt` 一样存在风险，因为如果你误输入了，它可能会被解释为文件名的模式匹配字符，所以并不比手动输入更安全。
+- en: Incremental Search of Command History
+  id: totrans-77
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 命令历史的增量搜索
+- en: 'Wouldn’t it be great if you could type a few characters of a command and the
+    rest would appear instantly, ready to run? Well, you can. This speedy feature
+    of the shell, called *incremental search*, is similar to the interactive suggestions
+    provided by web search engines. In most cases, incremental search is the easiest
+    and fastest technique to recall commands from history, even commands you ran long
+    ago. I highly recommend adding it to your toolbox:'
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你可以输入命令的几个字符，剩下的会立即显示并准备运行，那不是太棒了吗？事实上你可以。这个 shell 的快速功能，称为 *增量搜索*，类似于网页搜索引擎提供的交互式建议。在大多数情况下，增量搜索是从历史记录中召回命令的最简单和最快速的技术，即使是你很久以前运行的命令也是如此。我强烈建议将其添加到你的工具箱中：
+- en: At the shell prompt, press Ctrl-R (the *R* stands for reverse incremental search).
+  id: totrans-79
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在 shell 提示符下，按 Ctrl-R（*R* 表示反向增量搜索）。
+- en: Start typing *any part* of a previous command—beginning, middle, or end.
+  id: totrans-80
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 开始输入前一个命令的 *任意部分* ——开头、中间或结尾。
+- en: With each character you type, the shell displays the most recent historical
+    command that matches your typing so far.
+  id: totrans-81
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 每输入一个字符，shell 显示最近的匹配你输入的历史命令。
+- en: When you see the command you want, press Enter to run it.
+  id: totrans-82
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 当你看到想要的命令时，按 Enter 运行它。
+- en: 'Suppose you typed the command `cd $HOME/Finances/Bank` a while ago and you
+    want to rerun it. Press Ctrl-R at the shell prompt. The prompt changes to indicate
+    an incremental search:'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你一段时间前输入了命令 `cd $HOME/Finances/Bank` 并希望重新运行它。在 shell 提示符下按 Ctrl-R。提示符会改变以指示进行增量搜索：
+- en: '[PRE24]'
+  id: totrans-84
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'Start typing the desired command. For example, type `c`:'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 开始输入想要的命令。例如，输入 `c`：
+- en: '[PRE25]'
+  id: totrans-86
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'The shell displays its most recent command that contains the string `c`, highlighting
+    what you’ve typed:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell 显示最近包含字符串 `c` 的命令，突出显示你已输入的内容：
+- en: '[PRE26]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'Type the next letter, `d`:'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输入下一个字母 `d`：
+- en: '[PRE27]'
+  id: totrans-90
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'The shell displays its most recent command that contains the string `cd`, again
+    highlighting what you’ve typed:'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell 显示最近包含字符串 `cd` 的命令，再次突出显示你已输入的内容：
+- en: '[PRE28]'
+  id: totrans-92
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'Continue typing the command, adding a space and a dollar sign:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 继续输入命令，加上空格和美元符号：
+- en: '[PRE29]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'The command line becomes:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令行变成了：
+- en: '[PRE30]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: This is the command you want. Press Enter to run it, and you’re done in five
+    quick keystrokes.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这就是你想要的命令。按 Enter 运行它，你用了五个快捷键完成了。
+- en: 'I’ve assumed here that `cd $HOME/Finances/Bank` was the most recent matching
+    command in the history. What if it’s not? What if you typed a whole bunch of commands
+    that contain the same string? If so, the preceding incremental search would have
+    displayed a different match, such as:'
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我在这里假设 `cd $HOME/Finances/Bank` 是历史记录中最近的匹配命令。如果不是呢？如果你输入了一大堆包含相同字符串的命令？如果是这样，前面的增量搜索会显示另一个匹配项，比如：
+- en: '[PRE31]'
+  id: totrans-99
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'What now? You could type more characters to hone in on your desired command,
+    but instead, press Ctrl-R a second time. This keystroke causes the shell to jump
+    to the *next* matching command in the history:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在怎么办？你可以继续输入更多字符以精确到你想要的命令，但是，你可以再按一次 Ctrl-R。这个按键会导致 shell 跳转到历史记录中的 *下一个*
+    匹配命令：
+- en: '[PRE32]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'Keep pressing Ctrl-R until you reach the desired command:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 继续按 Ctrl-R 直到找到所需的命令：
+- en: '[PRE33]'
+  id: totrans-103
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: and press Enter to run it.
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并按 Enter 运行它。
+- en: 'Here are a few more tricks with incremental search:'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里有几个与增量搜索相关的小技巧：
+- en: To recall the most recent string that you searched for and executed, begin by
+    pressing Ctrl-R twice in a row.
+  id: totrans-106
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 要回忆最近搜索并执行的字符串，请从按两次 Ctrl-R 开始。
+- en: To stop an incremental search and continue working on the current command, press
+    the Escape key, or Ctrl-J, or any key for command-line editing (the next topic
+    in this chapter), such as the left or right arrow key.
+  id: totrans-107
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 要停止增量搜索并继续在当前命令上工作，请按 Escape 键，或 Ctrl-J，或任何用于命令行编辑的键（本章的下一个主题），例如左右箭头键。
+- en: To quit an incremental search and clear the command line, press Ctrl-G or Ctrl-C.
+  id: totrans-108
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 要退出增量搜索并清除命令行，请按 Ctrl-G 或 Ctrl-C。
+- en: Take the time to become expert with incremental search. You’ll soon be locating
+    commands with incredible speed.^([3](ch03.xhtml#idm46586642107296))
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 花时间精通增量搜索。您将很快以惊人的速度定位命令。^([3](ch03.xhtml#idm46586642107296))
+- en: Command-Line Editing
+  id: totrans-110
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 命令行编辑
+- en: 'There are all sorts of reasons to edit a command, either while you type it
+    or after you’ve run it:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 编辑命令有各种原因，无论是在输入时还是运行后：
+- en: To fix mistakes
+  id: totrans-112
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 修正错误
+- en: To create a command piece by piece, such as by typing the end of the command
+    first, then moving to the start of the line and typing the beginning
+  id: totrans-113
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 逐步创建命令，例如先输入命令的末尾，然后移动到行首输入开头部分
+- en: To construct a new command based on a previous one from your command history
+    (a key skill for building up complex pipelines, as you’ll see in [Chapter 8](ch08.xhtml#ch_one_liner))
+  id: totrans-114
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 要基于先前的命令历史创建新命令（这是构建复杂管道的关键技能，您将在[第 8 章](ch08.xhtml#ch_one_liner)中看到）
+- en: 'In this section, I’ll show you three ways to edit a command to build your skill
+    and speed:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我将向您展示三种编辑命令的方法，以提升您的技能和速度：
+- en: Cursoring
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 光标定位
+- en: Again, the slowest and least powerful method but simple to learn
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 再次强调，这是最慢且功能最弱的方法，但学习起来很简单。
+- en: Caret notation
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 插入符号表示法
+- en: A form of history expansion
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一种历史扩展形式
+- en: Emacs- or Vim-style keystrokes
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Emacs 或 Vim 风格的按键
+- en: To edit the command line in powerful ways
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以强大的方式编辑命令行
+- en: As before, I recommend that you learn all three techniques for flexibility.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与之前一样，我建议您学习所有三种技术以增强灵活性。
+- en: Cursoring Within a Command
+  id: totrans-123
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 光标在命令中的定位
+- en: Simply press the left arrow and right arrow keys to move back and forth on the
+    command line, one character at a time. Use the Backspace or Delete key to remove
+    text, and then type any corrections you need. [Table 3-1](#table_edit_cursor)
+    summarizes these and other standard keystrokes for editing the command line.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只需按下左箭头和右箭头键，在命令行上前后移动，逐个字符进行操作。使用退格键或删除键删除文本，然后输入所需的更正内容。[表 3-1](#table_edit_cursor)总结了这些以及其他标准编辑命令行的按键操作。
+- en: Cursoring back and forth is easy but inefficient. It’s best when the changes
+    are small and simple.
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 光标来回移动很简单但效率低下。在更改小而简单时效果最佳。
+- en: Table 3-1\. Cursor keys for simple command-line editing
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 3-1\. 简单命令行编辑的光标键
+- en: '| Keystroke | Action |'
+  id: totrans-127
+  prefs: []
+  type: TYPE_TB
+  zh: '| 按键 | 动作 |'
+- en: '| --- | --- |'
+  id: totrans-128
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| Left arrow | Move left by one character |'
+  id: totrans-129
+  prefs: []
+  type: TYPE_TB
+  zh: '| 左箭头 | 向左移动一个字符 |'
+- en: '| Right arrow | Move right by one character |'
+  id: totrans-130
+  prefs: []
+  type: TYPE_TB
+  zh: '| 右箭头 | 向右移动一个字符 |'
+- en: '| Ctrl + left arrow | Move left by one word |'
+  id: totrans-131
+  prefs: []
+  type: TYPE_TB
+  zh: '| Ctrl + 左箭头 | 向左移动一个单词 |'
+- en: '| Ctrl + right arrow | Move right by one word |'
+  id: totrans-132
+  prefs: []
+  type: TYPE_TB
+  zh: '| Ctrl + 右箭头 | 向右移动一个单词 |'
+- en: '| Home | Move to beginning of command line |'
+  id: totrans-133
+  prefs: []
+  type: TYPE_TB
+  zh: '| 起始 | 移动到命令行的开头 |'
+- en: '| End | Move to end of command line |'
+  id: totrans-134
+  prefs: []
+  type: TYPE_TB
+  zh: '| 结尾 | 移动到命令行的末尾 |'
+- en: '| Backspace | Delete one character before the cursor |'
+  id: totrans-135
+  prefs: []
+  type: TYPE_TB
+  zh: '| 退格 | 删除光标前的一个字符 |'
+- en: '| Delete | Delete one character beneath the cursor |'
+  id: totrans-136
+  prefs: []
+  type: TYPE_TB
+  zh: '| 删除 | 删除光标下的一个字符 |'
+- en: History Expansion with Carets
+  id: totrans-137
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用插入符号进行历史扩展
+- en: 'Suppose you’ve mistakenly run the following command by typing `jg` instead
+    of `jpg`:'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设您误运行了以下命令，输入`jg`而不是`jpg`：
+- en: '[PRE34]'
+  id: totrans-139
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'To run the command properly, you could recall it from the command history,
+    cursor over to the mistake and fix it, but there’s a quicker way to accomplish
+    your goal. Just type the old (wrong) text, the new (corrected) text, and a pair
+    of carets (`^`), like this:'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要正确运行命令，您可以从命令历史中调用它，将光标移到错误处并修复，但有一种更快的方法来实现您的目标。只需键入旧（错误的）文本、新（修正的）文本和一对插入符号（`^`），如下所示：
+- en: '[PRE35]'
+  id: totrans-141
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'Press Enter, and the correct command will appear and run:'
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按 Enter，正确的命令将显示并运行：
+- en: '[PRE36]'
+  id: totrans-143
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: The *caret syntax*, which is a type of history expansion, means, “In the previous
+    command, instead of `jg`, substitute `jpg`.” Notice that the shell helpfully prints
+    the new command before executing it, which is standard behavior for history expansion.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*插入符号语法*是历史扩展的一种类型，表示“在上一个命令中，将`jg`替换为`jpg`”。请注意，shell 会在执行之前打印新命令，这是历史扩展的标准行为。'
+- en: This technique changes only the first occurrence of the source string (`jg`)
+    in the command. If your original command contained `jg` more than once, only the
+    first instance would change to `jpg`.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此技术仅会更改命令中源字符串（`jg`）的第一次出现。如果原始命令中 `jg` 出现多次，只会将第一次更改为 `jpg`。
+- en: Emacs- or Vim-Style Command-Line Editing
+  id: totrans-146
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Emacs 或 Vim 风格的命令行编辑
+- en: The most powerful way to edit a command line is with familiar keystrokes inspired
+    by the text editors Emacs and Vim. If you’re already skilled with one of these
+    editors, you can jump into this style of command-line editing right away. If not,
+    [Table 3-2](#table_edit_emacs_vim) will get you started with the most common keystrokes
+    for movement and editing. Note that the Emacs “Meta” key is usually Escape (pressed
+    and released) or Alt (pressed and held).
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用受启发于文本编辑器 Emacs 和 Vim 的熟悉按键来编辑命令行是最强大的方法。如果你已经熟练掌握其中一种编辑器，你可以立即跳入这种风格的命令行编辑中。如果不熟悉，[Table 3-2](#table_edit_emacs_vim)
+    将帮助你开始使用最常见的移动和编辑按键。请注意，Emacs 的“Meta”键通常是 Escape（按下并释放）或 Alt（按住）。
+- en: 'The shell default is Emacs-style editing, and I recommend it as easier to learn
+    and use. If you prefer Vim-style editing, run the following command (or add it
+    to your *$HOME/.bashrc* file and source it):'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell 的默认编辑风格是 Emacs 风格，我推荐它因为更易学易用。如果你喜欢 Vim 风格的编辑，运行以下命令（或将其添加到你的 *$HOME/.bashrc*
+    文件并使其生效）：
+- en: '[PRE37]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'To edit a command using Vim keystrokes, press the Escape key to enter command-editing
+    mode, and then use keystrokes from the “Vim” column in [Table 3-2](#table_edit_emacs_vim).
+    To switch back to Emacs-style editing, run:'
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使用 Vim 按键编辑命令，请按 Escape 键进入命令编辑模式，然后使用 [Table 3-2](#table_edit_emacs_vim) 中的
+    Vim 按键。要切换回 Emacs 风格编辑，请执行以下操作：
+- en: '[PRE38]'
+  id: totrans-151
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: Now practice, practice, practice until the keystrokes (either Emacs’s or Vim’s)
+    are second nature. Trust me, you’ll quickly be paid back in saved time.
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，不断练习，直到这些按键（无论是 Emacs 的还是 Vim 的）成为你的第二天性。相信我，你很快就能因节省的时间而得到回报。
+- en: Table 3-2\. Keystrokes for Emacs- or Vim-style editing^([a](ch03.xhtml#idm46586642020000))
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Table 3-2\. Emacs 或 Vim 风格编辑的按键^([a](ch03.xhtml#idm46586642020000))
+- en: '| Action | Emacs | Vim |'
+  id: totrans-154
+  prefs: []
+  type: TYPE_TB
+  zh: '| 动作 | Emacs | Vim |'
+- en: '| --- | --- | --- |'
+  id: totrans-155
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| Move forward by one character | Ctrl-f | h |'
+  id: totrans-156
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向前移动一个字符 | Ctrl-f | h |'
+- en: '| Move backward by one character | Ctrl-b | l |'
+  id: totrans-157
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向后移动一个字符 | Ctrl-b | l |'
+- en: '| Move forward by one word | Meta-f | w |'
+  id: totrans-158
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向前移动一个单词 | Meta-f | w |'
+- en: '| Move backward by one word | Meta-b | b |'
+  id: totrans-159
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向后移动一个单词 | Meta-b | b |'
+- en: '| Move to beginning of line | Ctrl-a | 0 |'
+  id: totrans-160
+  prefs: []
+  type: TYPE_TB
+  zh: '| 移动到行首 | Ctrl-a | 0 |'
+- en: '| Move to end of line | Ctrl-e | $ |'
+  id: totrans-161
+  prefs: []
+  type: TYPE_TB
+  zh: '| 移动到行尾 | Ctrl-e | $ |'
+- en: '| Transpose (swap) two characters | Ctrl-t | xp |'
+  id: totrans-162
+  prefs: []
+  type: TYPE_TB
+  zh: '| 交换两个字符 | Ctrl-t | xp |'
+- en: '| Transpose (swap) two words | Meta-t | *n/a* |'
+  id: totrans-163
+  prefs: []
+  type: TYPE_TB
+  zh: '| 交换两个单词 | Meta-t | *n/a* |'
+- en: '| Capitalize first letter of next word | Meta-c | w~ |'
+  id: totrans-164
+  prefs: []
+  type: TYPE_TB
+  zh: '| 将下一个单词的首字母大写 | Meta-c | w~ |'
+- en: '| Uppercase entire next word | Meta-u | *n/a* |'
+  id: totrans-165
+  prefs: []
+  type: TYPE_TB
+  zh: '| 将下一个单词全部转换为大写 | Meta-u | *n/a* |'
+- en: '| Lowercase entire next word | Meta-l | *n/a* |'
+  id: totrans-166
+  prefs: []
+  type: TYPE_TB
+  zh: '| 将下一个单词全部转换为小写 | Meta-l | *n/a* |'
+- en: '| Change case of the current character | *n/a* | ~ |'
+  id: totrans-167
+  prefs: []
+  type: TYPE_TB
+  zh: '| 改变当前字符的大小写 | *n/a* | ~ |'
+- en: '| Insert the next character verbatim, including control characters | Ctrl-v
+    | Ctrl-v |'
+  id: totrans-168
+  prefs: []
+  type: TYPE_TB
+  zh: '| 直接插入下一个字符，包括控制字符 | Ctrl-v | Ctrl-v |'
+- en: '| Delete forward by one character | Ctrl-d | x |'
+  id: totrans-169
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向前删除一个字符 | Ctrl-d | x |'
+- en: '| Delete backward by one character | Backspace *or* Ctrl-h | X |'
+  id: totrans-170
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向后删除一个字符 | Backspace *或* Ctrl-h | X |'
+- en: '| Cut forward by one word | Meta-d | dw |'
+  id: totrans-171
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向前删除一个单词 | Meta-d | dw |'
+- en: '| Cut backward by one word | Meta-Backspace *or* Ctrl-w | db |'
+  id: totrans-172
+  prefs: []
+  type: TYPE_TB
+  zh: '| 向后删除一个单词 | Meta-Backspace *或* Ctrl-w | db |'
+- en: '| Cut from cursor to beginning of line | Ctrl-u | d^ |'
+  id: totrans-173
+  prefs: []
+  type: TYPE_TB
+  zh: '| 从光标处剪切到行首 | Ctrl-u | d^ |'
+- en: '| Cut from cursor to end of line | Ctrl-k | D |'
+  id: totrans-174
+  prefs: []
+  type: TYPE_TB
+  zh: '| 从光标处剪切到行尾 | Ctrl-k | D |'
+- en: '| Delete the entire line | Ctrl-e Ctrl-u | dd |'
+  id: totrans-175
+  prefs: []
+  type: TYPE_TB
+  zh: '| 删除整行 | Ctrl-e Ctrl-u | dd |'
+- en: '| Paste (yank) the most recently deleted text | Ctrl-y | p |'
+  id: totrans-176
+  prefs: []
+  type: TYPE_TB
+  zh: '| 粘贴（yank）最近删除的文本 | Ctrl-y | p |'
+- en: '| Paste (yank) the next deleted text (after a previous yank) | Meta-y | *n/a*
+    |'
+  id: totrans-177
+  prefs: []
+  type: TYPE_TB
+  zh: '| 粘贴（yank）下一个被删除的文本（在之前的粘贴后） | Meta-y | *n/a* |'
+- en: '| Undo the previous editing operation | Ctrl-_ | u |'
+  id: totrans-178
+  prefs: []
+  type: TYPE_TB
+  zh: '| 撤销上一个编辑操作 | Ctrl-_ | u |'
+- en: '| Undo all edits made so far | Meta-r | U |'
+  id: totrans-179
+  prefs: []
+  type: TYPE_TB
+  zh: '| 撤销所有编辑操作 | Meta-r | U |'
+- en: '| Switch from insertion mode to command mode | *n/a* | Escape |'
+  id: totrans-180
+  prefs: []
+  type: TYPE_TB
+  zh: '| 从插入模式切换到命令模式 | *n/a* | Escape |'
+- en: '| Switch from command mode to insertion mode | *n/a* | i |'
+  id: totrans-181
+  prefs: []
+  type: TYPE_TB
+  zh: '| 从命令模式切换到插入模式 | *n/a* | i |'
+- en: '| Abort an edit operation in progress | Ctrl-g | *n/a* |'
+  id: totrans-182
+  prefs: []
+  type: TYPE_TB
+  zh: '| 中止正在进行的编辑操作 | Ctrl-g | *n/a* |'
+- en: '| Clear the display | Ctrl-l | Ctrl-l |'
+  id: totrans-183
+  prefs: []
+  type: TYPE_TB
+  zh: '| 清除显示 | Ctrl-l | Ctrl-l |'
+- en: '| ^([a](ch03.xhtml#idm46586642020000-marker)) Actions marked *n/a* have no
+    simple keystroke but may be possible with longer sequences of keystrokes. |'
+  id: totrans-184
+  prefs: []
+  type: TYPE_TB
+  zh: '| ^([a](ch03.xhtml#idm46586642020000-marker)) 标记为*n/a*的操作没有简单的按键组合，但可能通过更长的按键序列实现。
+    |'
+- en: For more details on Emacs-style editing, see the section [“Bindable Readline
+    Commands”](https://oreil.ly/rAQ9g) in GNU’s `bash` manual. For Vim-style editing,
+    see the document [“Readline VI Editing Mode Cheat Sheet”](https://oreil.ly/Zv0ba).
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要了解更多关于Emacs风格编辑的细节，请参阅GNU的`bash`手册中的[“可绑定的Readline命令”](https://oreil.ly/rAQ9g)章节。要了解Vim风格编辑，请参阅文档[“Readline
+    VI编辑模式速查表”](https://oreil.ly/Zv0ba)。
+- en: Summary
+  id: totrans-186
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 总结
+- en: 'Practice the techniques in this chapter and you’ll speed up your command-line
+    use immensely. Three of the techniques in particular transformed the way I use
+    Linux, and I hope they will for you too:'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 练习本章中的技巧，你将大大加快命令行的使用速度。其中三项特别的技术彻底改变了我使用Linux的方式，希望它们也能对你有所帮助：
+- en: Deleting files with `!$` for safety
+  id: totrans-188
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 删除文件时使用`!$`以确保安全
+- en: Incremental search with Ctrl-R
+  id: totrans-189
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用Ctrl-R进行增量搜索
+- en: Emacs-style command-line editing
+  id: totrans-190
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Emacs风格命令行编辑
+- en: ^([1](ch03.xhtml#idm46586642237936-marker)) You can omit the trailing question
+    mark here—`!?grep`—but in some cases it’s required, such as sed-style history
+    expansion (see [“More Powerful Substitution with History Expansion”](#sidebar_sed_syntax)).
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([1](ch03.xhtml#idm46586642237936-marker)) 在这里你可以省略尾随的问号—`!?grep`—但在某些情况下它是必需的，比如sed风格的历史扩展（见[“使用历史扩展进行更强大的替换”](#sidebar_sed_syntax)）。
+- en: ^([2](ch03.xhtml#idm46586642165264-marker)) I’m assuming that no matching files
+    were added or removed behind your back after the `ls` step. Don’t rely on this
+    technique in rapidly changing directories.
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([2](ch03.xhtml#idm46586642165264-marker)) 我假设在`ls`步骤后你的背后没有添加或删除匹配的文件。不要依赖这种技术在快速变化的目录中。
+- en: ^([3](ch03.xhtml#idm46586642107296-marker)) While writing this book, I frequently
+    reran version-control commands such as `git add`, `git commit`, and `git push`.
+    Incremental search made rerunning these commands a breeze.
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([3](ch03.xhtml#idm46586642107296-marker)) 在撰写本书期间，我经常重新运行版本控制命令，如`git add`、`git
+    commit`和`git push`。增量搜索使重新运行这些命令变得轻而易举。

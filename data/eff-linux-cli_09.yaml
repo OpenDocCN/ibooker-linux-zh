@@ -1,0 +1,2063 @@
+- en: Chapter 7\. 11 More Ways to Run a Command
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第 7 章 11 种更多运行命令的方式
+- en: 'Now that you have lots of commands in your toolbox and a thorough understanding
+    of the shell, it’s time to learn…how to run commands. Wait a minute, haven’t you
+    been running commands since the beginning of the book? Well, yes, but only in
+    two ways. The first is the ordinary execution of a simple command:'
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你的工具箱中有很多命令，并且对 shell 有了深入的理解，是时候学习……如何运行命令了。等一下，你自本书开始就一直在运行命令吧？是的，但只有两种方式。第一种是普通执行简单命令：
+- en: '[PRE0]'
+  id: totrans-2
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'The second is a pipeline of simple commands, as covered in [Chapter 1](ch01.xhtml#ch_combining_commands):'
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第二种是简单命令的管道，如第1章中所述：
+- en: '[PRE1]'
+  id: totrans-4
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: In this chapter, I’ll show you 11 more ways to run a command and why you should
+    care to learn them. Each technique has pros and cons, and the more techniques
+    you know, the more flexibly and efficiently you can interact with Linux. I’ll
+    stick to the basics of each technique for now; you’ll see more intricate examples
+    in the next two chapters.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我将展示 11 种更多运行命令的方式以及为什么你应该学习它们。每种技术都有其利弊，你掌握的技术越多，与 Linux 的互动就越灵活、高效。我现在将专注于每种技术的基础知识；在接下来的两章中，你将看到更复杂的例子。
+- en: List Techniques
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 技术清单
+- en: 'A list is a sequence of commands on a single command line. You’ve already seen
+    one type of list—a pipeline—but the shell supports others with different behavior:'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个列表是单个命令行上的命令序列。你已经见过一种列表类型——管道，但 shell 支持其他具有不同行为的列表：
+- en: Conditional lists
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 条件列表
+- en: Each command depends on the success or failure of the previous one.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个命令依赖于前一个命令的成功或失败。
+- en: Unconditional lists
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无条件列表
+- en: Commands simply run one after the other.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令只是一个接着一个运行。
+- en: 'Technique #1: Conditional Lists'
+  id: totrans-12
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '技术 #1：条件列表'
+- en: 'Suppose you want to create a file *new.txt* in a directory *dir*. A typical
+    sequence of commands might be:'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你想在目录 *dir* 中创建一个文件 *new.txt*。一个典型的命令序列可能是：
+- en: '[PRE2]'
+  id: totrans-14
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Notice how the second command depends on the success of the first. If the directory
+    *dir* doesn’t exist, there is no point in running the `touch` command. The shell
+    lets you make this dependency explicit. If you place the operator `&&` (pronounced
+    “and”) between the two commands on a single line:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意第二个命令依赖于第一个命令的成功。如果目录 *dir* 不存在，则运行 `touch` 命令没有意义。Shell 允许你明确地表达这种依赖关系。如果在单行上的两个命令之间放置
+    `&&` 运算符（读作“and”）：
+- en: '[PRE3]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: then the second command (`touch`) runs only if the first command (`cd`) succeeds.
+    The preceding example is a *conditional list* of two commands. (To learn what
+    it means for a command to “succeed,” see [“Exit Codes Indicate Success or Failure”](#sidebar_exit_codes).)
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接着第二个命令（`touch`）只有在第一个命令（`cd`）成功后才会运行。上面的例子是两个命令的*条件列表*。（要了解命令“成功”的含义，请参见[“退出代码表示成功或失败”](#sidebar_exit_codes)。）
+- en: Very likely, you run commands every day that depend on previous ones. For example,
+    have you ever made a backup copy of a file for safekeeping, modified the original,
+    and deleted the backup when done?
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 很可能，你每天都在运行依赖于之前命令的命令。例如，你曾经为了备份文件而修改原文件并在完成后删除备份吗？
+- en: '[PRE4]'
+  id: totrans-19
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Each of these commands makes sense only if the preceding command succeeds.
+    Therefore, this sequence is a candidate for a conditional list:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个命令仅在前一个命令成功时才有意义。因此，这个序列适合作为条件列表：
+- en: '[PRE5]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'As another example, if you use the version-control system Git to maintain files,
+    you’re probably familiar with the following sequence of commands after you change
+    some files: run `git add` to prepare files for a commit, then `git commit`, and
+    finally `git push` to share your committed changes. If any of these commands failed,
+    you wouldn’t run the rest (until you fixed the cause of the failure). Therefore,
+    these three commands work well as a conditional list:'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 再举个例子，如果你使用版本控制系统 Git 来维护文件，你可能熟悉在修改文件后的以下命令序列：运行 `git add` 准备提交的文件，然后 `git
+    commit`，最后 `git push` 来分享你的提交变更。如果其中任何一个命令失败，你将不会运行余下的命令（直到修复失败的原因）。因此，这三个命令很好地作为一个条件列表：
+- en: '[PRE6]'
+  id: totrans-23
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: Just as the `&&` operator runs a second command only if the first succeeds,
+    the related operator `||` (pronounced “or”) runs a second command only if the
+    first fails. For example, the following command tries to enter *dir*, and if it
+    fails to do so, it creates *dir*:^([1](ch07.xhtml#idm46586639844176))
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就像 `&&` 运算符仅在第一个命令成功时运行第二个命令一样，相关的运算符 `||`（读作“or”）仅在第一个命令失败时运行第二个命令。例如，以下命令尝试进入
+    *dir*，如果失败，则创建 *dir*：^([1](ch07.xhtml#idm46586639844176))
+- en: '[PRE7]'
+  id: totrans-25
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'You’ll commonly see the `||` operator in scripts, causing the script to exit
+    if an error occurs:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你会经常在脚本中看到`||`运算符，如果发生错误，脚本会退出：
+- en: '[PRE8]'
+  id: totrans-27
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Combine the `&&` and `||` operators to set up more complicated actions for
+    success and failure. The following command tries to enter directory *dir*, and
+    if it fails, it creates the directory and enters it. If all fails, the command
+    prints a failure message:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 结合`&&`和`||`运算符来设置更复杂的成功和失败操作。以下命令尝试进入目录*dir*，如果失败，则创建该目录并进入。如果全部失败，则打印失败消息：
+- en: '[PRE9]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: The commands in a conditional list don’t have to be simple commands; they can
+    also be pipelines and other combined commands.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 条件列表中的命令不必是简单命令；它们也可以是管道和其他组合命令。
+- en: 'Technique #2: Unconditional Lists'
+  id: totrans-31
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '技巧 #2：无条件列表'
+- en: Commands in a list don’t have to depend on one another. If you separate the
+    commands with semicolons, they simply run in order. Success or failure of a command
+    does not affect later ones in the list.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列表中的命令不必彼此依赖。如果用分号分隔命令，它们只是顺序运行。命令的成功或失败不会影响后续的命令。
+- en: 'I like unconditional lists for launching ad hoc commands after I’ve left work
+    for the day. Here’s one that sleeps (does nothing) for two hours (7,200 seconds)
+    and then backs up my important files:'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我喜欢无条件列表，在我下班后启动临时命令。这是一个睡眠（什么都不做）两个小时（7,200秒），然后备份我的重要文件的例子：
+- en: '[PRE10]'
+  id: totrans-34
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: Here’s a similar command that functions as a primitive reminder system, sleeping
+    for five minutes and then sending me an email:^([3](ch07.xhtml#idm46586639789616))
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是一个类似的命令，作为一个简单的提醒系统，睡眠五分钟，然后发送给我一封电子邮件：^([3](ch07.xhtml#idm46586639789616))
+- en: '[PRE11]'
+  id: totrans-36
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Unconditional lists are a convenience feature: they produce the same results
+    (mostly) as typing the commands individually and pressing Enter after each. The
+    only significant difference relates to exit codes. In an unconditional list, the
+    exit codes of the individual commands are thrown away except the last one. Only
+    the exit code of the last command run in the list is assigned to the shell variable
+    `?`:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无条件列表是一个便利特性：它们产生与逐个输入命令并按Enter键相同的结果（大多数情况下）。唯一显著的区别与退出代码有关。在无条件列表中，单个命令的退出代码被丢弃，除了最后一个。只有列表中最后一个运行的命令的退出代码被分配给shell变量`?`：
+- en: '[PRE12]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: Substitution Techniques
+  id: totrans-39
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 替换技术
+- en: '*Substitution* means automatically replacing the text of a command with other
+    text. I’ll show you two types with powerful possibilities:'
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*替换*意味着自动用其他文本替换命令的文本。我将向你展示两种具有强大可能性的类型：'
+- en: Command substitution
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令替换
+- en: A command is replaced by its output.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个命令被其输出替换。
+- en: Process substitution
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程替换
+- en: A command is replaced by a file (sort of).
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个命令被一个文件（某种程度上）替换。
+- en: 'Technique #3: Command Substitution'
+  id: totrans-45
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '技巧 #3：命令替换'
+- en: 'Suppose you have a few thousand text files representing songs. Each file includes
+    a song title, artist name, album title, and the song lyrics:'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你有几千个文本文件，代表歌曲。每个文件包括歌曲标题，艺术家名，专辑标题和歌词：
+- en: '[PRE13]'
+  id: totrans-47
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'You’d like to organize the files into subdirectories by artist. To perform
+    this task by hand, you could search for all song files by Kansas using `grep`:'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想按艺术家将文件组织到子目录中。为了手动执行此任务，你可以使用`grep`搜索所有Kansas的歌曲文件：
+- en: '[PRE14]'
+  id: totrans-49
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'and then move each file to a directory *kansas*:'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后将每个文件移动到一个目录*kansas*中：
+- en: '[PRE15]'
+  id: totrans-51
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'Tedious, right? Wouldn’t be great if you could tell the shell, “Move all files
+    that contain the string *Artist: Kansas* to the directory *kansas*.” In Linux
+    terms, you’d like to take the list of names from the preceding `grep -l` command
+    and hand it to `mv`. Well, you can do this easily with the help of a shell feature
+    called *command substitution*:'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '很乏味，对吧？如果你能告诉Shell：“移动所有包含字符串*Artist: Kansas*的文件到目录*kansas*”，那不是很棒吗？用Linux术语来说，你想从前面的`grep
+    -l`命令中获取名称列表，并将其交给`mv`。好吧，你可以通过一个称为*命令替换*的Shell特性轻松地实现这一点：'
+- en: '[PRE16]'
+  id: totrans-53
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'The syntax:'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 语法：
+- en: '[PRE17]'
+  id: totrans-55
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'executes the command inside the parentheses and replaces the command by its
+    output. So on the preceding command line, the `grep -l` command is replaced by
+    the list of filenames that it prints, as if you had typed the filenames like this:'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 执行括号内的命令，并用其输出替换命令。因此，在前述命令行上，`grep -l`命令被打印的文件名列表替换，就好像你已经像这样输入文件名一样：
+- en: '[PRE18]'
+  id: totrans-57
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: Whenever you find yourself copying the output of one command into a later command
+    line, you can usually save time with command substitution. You can even include
+    aliases in command substitution, because its contents are run in a subshell, which
+    includes copies of its parent’s aliases.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每当你发现自己在将一个命令的输出复制到后续命令行中时，通常可以通过命令替换节省时间。甚至可以在命令替换中包含别名，因为它的内容在一个子shell中运行，其中包括其父shell的别名的副本。
+- en: Special Characters and Command Substitution
+  id: totrans-59
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 特殊字符和命令替换
+- en: The preceding example with `grep -l` works great for most Linux filenames, but
+    not for filenames that contain spaces or other special characters. The shell evaluates
+    these characters before the output is handed to `mv`, potentially producing unexpected
+    results. For example, if `grep -l` printed *dust in the wind.txt*, the shell would
+    treat the spaces as separators, and `mv` would attempt to move four nonexistent
+    files named *dust*, *in*, *the*, and *wind.txt*.
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 带有 `grep -l` 的前面的示例对大多数 Linux 文件名效果很好，但对包含空格或其他特殊字符的文件名则不适用。在输出交给 `mv` 之前，shell
+    会评估这些字符，可能会产生意外的结果。例如，如果 `grep -l` 打印了 *dust in the wind.txt*，shell 会将空格视为分隔符，`mv`
+    将尝试移动四个名为 *dust*、*in*、*the* 和 *wind.txt* 的不存在文件。
+- en: 'Here’s another example. Suppose you have several years’ worth of bank statements
+    downloaded in PDF format. The downloaded files have names that include the statement’s
+    year, month, and day, such as *eStmt_2021-08-26.pdf* for the date August 26, 2021.^([4](ch07.xhtml#idm46586639738208))
+    You’d like to view the most recent statement in the current directory. You could
+    do it manually: list the directory, locate the file with the most recent date
+    (which will be the final file in the listing), and display it with a Linux PDF
+    viewer such as `okular`. But why do all that manual work? Let command substitution
+    ease your way. Create a command that prints the name of the latest PDF file in
+    the directory:'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里是另一个例子。假设你有几年的银行对账单以 PDF 格式下载。下载的文件名包含对账单的年份、月份和日期，例如 *eStmt_2021-08-26.pdf*
+    表示 2021 年 8 月 26 日的对账单。^([4](ch07.xhtml#idm46586639738208)) 你想在当前目录中查看最近的对账单。你可以手动完成：列出目录，找到最新日期的文件（这将是列表中的最后一个文件），并使用
+    Linux PDF 查看器如 `okular` 显示它。但为什么要做所有这些手动工作呢？让命令替换为你省时。创建一个命令来打印目录中最新的 PDF 文件名：
+- en: '[PRE19]'
+  id: totrans-62
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'and provide it to `okular` using command substitution:'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并使用命令替换将其提供给 `okular`：
+- en: '[PRE20]'
+  id: totrans-64
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: The `ls` command lists all the statement files, and `tail` prints only the last
+    one, such as *eStmt_2021-08-26.pdf*. Command substitution places that single filename
+    right onto the command line, as if you’d typed `okular eStmt_2021-08-26.pdf`.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ls` 命令列出所有的声明文件，`tail` 仅打印最后一个，例如 *eStmt_2021-08-26.pdf*。命令替换将这个单个文件名直接放在命令行上，就像你输入了
+    `okular eStmt_2021-08-26.pdf`。'
+- en: Note
+  id: totrans-66
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'The original syntax for command substitution was backquotes (backticks). The
+    following two commands are equivalent:'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令替换的原始语法是反引号（backticks）。以下两个命令是等效的：
+- en: '[PRE21]'
+  id: totrans-68
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Backticks are supported by most shells. The `$()` syntax is simpler to nest,
+    however:'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 shell 支持反引号（backticks）。`$()` 语法更容易嵌套，然而：
+- en: '[PRE22]'
+  id: totrans-70
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'In scripts, a common use of command substitution is to store the output of
+    a command in a variable:'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在脚本中，命令替换的常见用途是将命令的输出存储在变量中：
+- en: '[PRE23]'
+  id: totrans-72
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'For example, to get the filenames containing Kansas songs and store them in
+    a variable, use command substitution like so:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，要获取包含 Kansas 歌曲的文件名并将它们存储在一个变量中，可以像这样使用命令替换：
+- en: '[PRE24]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'The output might have multiple lines, so to preserve any newline characters,
+    make sure you quote the value wherever you use it:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输出可能有多行，因此为了保留任何换行符，请确保在使用该值时引用它：
+- en: '[PRE25]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'Technique #4: Process Substitution'
+  id: totrans-77
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '技巧 #4：进程替换'
+- en: Command substitution, which you just saw, replaces a command with its output
+    in place, as a string. *Process substitution* also replaces a command with its
+    output, but it treats the output as if it were stored in a file. This powerful
+    difference may look confusing at first, so I’ll explain it step-by-step.
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如你刚刚看到的，命令替换将一个命令的输出直接替换成一个字符串。*进程替换* 也替换一个命令的输出，但它将输出视为存储在文件中。这个强大的区别一开始可能看起来令人困惑，所以我会一步步解释。
+- en: 'Suppose you’re in a directory of JPEG image files named *1.jpg* through *1000.jpg*,
+    but some files are mysteriously missing and you want to identify them. Produce
+    such a directory with the following commands:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你在一个包含 JPEG 图像文件的目录中，文件名从 *1.jpg* 到 *1000.jpg*，但某些文件神秘地丢失了，你想要识别它们。使用以下命令生成这样一个目录：
+- en: '[PRE26]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'A poor way to locate the missing files is to list the directory, sorted numerically,
+    and look for gaps by eye:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一种找到丢失文件的较差方法是列出目录并按数字排序，然后用肉眼查找间隙：
+- en: '[PRE27]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'A more robust, automated solution is to compare the existing filenames to a
+    complete list of names from *1.jpg* to *1000.jpg*, using the `diff` command. One
+    way to achieve this solution is with temporary files. Store the existing filenames,
+    sorted, in one temporary file, *original-list*:'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更健壮、自动化的解决方案是将现有文件名与从*1.jpg*到*1000.jpg*的完整列表进行比较，使用`diff`命令。实现此解决方案的一种方法是使用临时文件。将现有的按排序后的文件名存储在一个临时文件*original-list*中：
+- en: '[PRE28]'
+  id: totrans-84
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'Then print a complete list of filenames from *1.jpg* to *1000.jpg* to another
+    temporary file, *full-list*, by generating the integers 1 to 1000 with `seq`,
+    and appending “.jpg” to each line with `sed`:'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后使用`seq`生成整数1到1000，并将“.jpg”附加到每一行，将完整的文件名列表从*1.jpg*到*1000.jpg*打印到另一个临时文件*full-list*：
+- en: '[PRE29]'
+  id: totrans-86
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'Compare the two temporary files with the `diff` command to discover that *4.jpg*
+    and *981.jpg* are missing, then delete the temporary files:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`diff`命令比较两个临时文件，发现*4.jpg*和*981.jpg*丢失，然后删除这些临时文件：
+- en: '[PRE30]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'That’s a lot of steps. Wouldn’t it be grand to compare the two lists of names
+    directly and not bother with temporary files? The challenge is that `diff` can’t
+    compare two lists from stdin; it requires files as arguments.^([5](ch07.xhtml#idm46586639674432))
+    Process substitution solves the problem. It makes both lists appear to `diff`
+    as files. (The sidebar [“How Process Substitution Works”](#sidebar_process_substitution)
+    provides the technical details.) The syntax:'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是很多步骤。直接比较两个文件名列表并且不再使用临时文件，这岂不是一件了不起的事情吗？挑战在于`diff`无法比较来自标准输入的两个列表；它需要文件作为参数。^[5](ch07.xhtml#idm46586639674432)
+    进程替换解决了这个问题。它使得`diff`将这两个列表都看作是文件。（侧边栏 [“进程替换的工作原理”](#sidebar_process_substitution)
+    提供了技术细节。）语法：
+- en: '[PRE31]'
+  id: totrans-90
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'runs the command in a subshell and presents its output as if it were contained
+    in a file. For example, the following expression represents the output of `ls
+    -1 | sort -n` as if it were contained in a file:'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在子shell中运行命令并将其输出呈现为文件的形式。例如，以下表达式表示`ls -1 | sort -n`的输出，就像它被包含在一个文件中一样：
+- en: '[PRE32]'
+  id: totrans-92
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'You can `cat` the file:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用`cat`命令来查看文件：
+- en: '[PRE33]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'You can copy the file with `cp`:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用`cp`命令复制文件：
+- en: '[PRE34]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'and as you’ll now see, you can `diff` the file against another. Begin with
+    the two commands that generated your two temporary files:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如您现在所看到的，您可以将文件与另一个文件进行`diff`比较。从生成您的两个临时文件的两个命令开始：
+- en: '[PRE35]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'Apply process substitution so `diff` can treat them as files, and you get the
+    same output as before, but without using temporary files:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 应用进程替换，使得`diff`能够将它们视为文件，并获得与之前相同的输出，但不使用临时文件：
+- en: '[PRE36]'
+  id: totrans-100
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'Clean up the output by grepping for lines beginning with `>` and stripping
+    off the first two characters with `cut`, and you have your missing files report:'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过使用`grep`查找以`>`开头的行并使用`cut`去掉前两个字符来清理输出，您就得到了丢失文件的报告：
+- en: '[PRE37]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: Process substitution transformed how I use the command line. Commands that read
+    only from disk files suddenly could read from stdin. With practice, commands that
+    previously seemed impossible became easy.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程替换改变了我使用命令行的方式。只从磁盘文件读取的命令突然可以从标准输入读取。通过实践，以前看似不可能的命令变得很容易。
+- en: Command-as-String Techniques
+  id: totrans-104
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 命令作为字符串的技术
+- en: 'Every command is a string, but some commands are more “stringy” than others.
+    I’ll show you several techniques that construct a string, piece by piece, and
+    then run the string as a command:'
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个命令都是一个字符串，但有些命令比其他命令更“字符串化”。我将向您展示几种逐步构建字符串并作为命令运行的技术：
+- en: Passing a command to `bash` as an argument
+  id: totrans-106
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将命令作为参数传递给`bash`
+- en: Piping commands to `bash` on stdin
+  id: totrans-107
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将命令通过stdin管道传递给`bash`
+- en: Sending commands to another host with `ssh`
+  id: totrans-108
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用`ssh`将命令发送到另一台主机
+- en: Running a sequence of commands with `xargs`
+  id: totrans-109
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用`xargs`运行一系列命令
+- en: Warning
+  id: totrans-110
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: The following techniques can be risky because they send unseen text to a shell
+    for execution. Never do this blindly. Always understand the text (and trust its
+    origin) before executing it. You don’t want to execute the string `"rm -rf $HOME"`
+    by mistake and wipe out all your files.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下技术可能存在风险，因为它们将看不见的文本发送到shell以执行。绝对不要盲目执行这些命令。在执行之前，一定要理解文本（并信任其来源）。您不希望因错误执行字符串`"rm
+    -rf $HOME"`而删除所有文件。
+- en: 'Technique #5: Passing a Command as an Argument to bash'
+  id: totrans-112
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '技术 #5：将命令作为`bash`的参数传递'
+- en: '`bash` is a normal command like any other, as explained in [“Shells Are Executable
+    Files”](ch06.xhtml#section_shell_executable), so you can run it by name on the
+    command line. By default, running `bash` launches an interactive shell for typing
+    and executing commands, as you’ve seen. Alternatively, you can pass a command
+    to `bash` as a string, via the `-c` option, and `bash` will run that string as
+    a command and exit:'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bash` 是一个像其他任何普通命令一样的命令，正如在[“Shell 可执行文件”](ch06.xhtml#section_shell_executable)
+    中解释的那样，因此您可以在命令行上按名称运行它。默认情况下，运行 `bash` 会启动一个交互式 shell，用于输入和执行命令，就像您看到的那样。或者，您可以通过
+    `-c` 选项将命令作为字符串传递给 `bash`，`bash` 将运行该字符串作为命令并退出：'
+- en: '[PRE38]'
+  id: totrans-114
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'Why is this helpful? Because the new `bash` process is a child with its own
+    environment, including a current directory, variables with values, and so on.
+    Any changes to the child shell won’t affect your currently running shell. Here’s
+    a `bash -c` command that changes directory to */tmp* just long enough to delete
+    a file, then exits:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这为什么有用？因为新的 `bash` 进程是具有自己环境的子进程，包括当前目录、具有值的变量等等。对子 shell 的任何更改都不会影响您当前运行的 shell。以下是一个
+    `bash -c` 命令，它将目录更改为 */tmp*，只足够删除一个文件，然后退出：
+- en: '[PRE39]'
+  id: totrans-116
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: The most instructive and beautiful use of `bash -c`, however, arises when you
+    run certain commands as the superuser. Specifically, the combination of `sudo`
+    and input/output redirection produces an interesting (sometimes maddening) situation
+    in which `bash -c` is the key to success.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bash -c` 最具教育性和美丽的用法之一是在您以超级用户身份运行某些命令时产生的。具体来说，`sudo` 和输入/输出重定向的组合会产生一个有趣（有时是疯狂的）的情况，其中
+    `bash -c` 是成功的关键。'
+- en: 'Suppose you want to create a log file in the system directory */var/log*, which
+    is not writable by ordinary users. You run the following `sudo` command to gain
+    superuser privileges and create the log file, but it mysteriously fails:'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设您想在系统目录 */var/log* 中创建一个日志文件，这是普通用户无法写入的。您运行以下 `sudo` 命令以获得超级用户权限并创建日志文件，但它神秘地失败了：
+- en: '[PRE40]'
+  id: totrans-119
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: 'Wait a minute—`sudo` should give you permission to create any file anywhere.
+    How can this command possibly fail? Why didn’t `sudo` even prompt you for a password?
+    The answer is: because `sudo` didn’t run. You applied `sudo` to the `echo` command
+    but not to the output redirection, which ran first and failed. In detail:'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 等一下 — `sudo` 应该允许您在任何地方创建任何文件。这个命令为什么会失败呢？为什么 `sudo` 甚至没有提示您输入密码？答案是：因为 `sudo`
+    没有运行。您将 `sudo` 应用于 `echo` 命令，但没有应用于首先运行并失败的输出重定向。详细来看：
+- en: You pressed Enter.
+  id: totrans-121
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 您按下了Enter键。
+- en: The shell began to evaluate the whole command, including redirection (`>`).
+  id: totrans-122
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: shell 开始评估整个命令，包括重定向 (`>`).
+- en: The shell tried to create the file *custom.log* in a protected directory, */var/log*.
+  id: totrans-123
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: shell 尝试在受保护目录 */var/log* 中创建文件 *custom.log*。
+- en: You didn’t have permission to write to */var/log*, so the shell gave up and
+    printed the “Permission denied” message.
+  id: totrans-124
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 您没有权限写入 */var/log*，因此 shell 放弃并打印“权限被拒绝”消息。
+- en: 'That’s why `sudo` never ran. To solve this problem, you need to tell the shell,
+    “Run the entire command, including output redirection, as the superuser.” This
+    is exactly the kind of situation that `bash -c` solves so well. Construct the
+    command you want to run, as a string:'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这就是为什么 `sudo` 从未运行。要解决这个问题，您需要告诉 shell：“以超级用户身份运行整个命令，包括输出重定向。”这正是 `bash -c`
+    解决得很好的情况。构建您想要作为字符串运行的命令：
+- en: '[PRE41]'
+  id: totrans-126
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: 'and pass it as an argument to `sudo bash -c`:'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并将其作为参数传递给`sudo bash -c`：
+- en: '[PRE42]'
+  id: totrans-128
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: This time, you’ve run `bash`, not just `echo`, as the superuser, and `bash`
+    executes the entire string as a command. The redirection succeeds. Remember this
+    technique whenever you pair `sudo` with redirection.
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这一次，您已经以超级用户身份运行了 `bash`，而不仅仅是 `echo`，`bash` 执行整个字符串作为命令。重定向成功了。每当将 `sudo` 与重定向配对使用时，请记住这个技巧。
+- en: 'Technique #6: Piping a Command to bash'
+  id: totrans-130
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '技巧 #6：将命令管道传输到 bash'
+- en: 'The shell reads every command that you type on stdin. That means `bash` the
+    program can participate in pipelines. For example, print the string `"ls -l"`
+    and pipe it to `bash`, and `bash` will treat the string as a command and run it:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell 会读取您在 stdin 上键入的每个命令。这意味着 `bash` 程序可以参与管道。例如，打印字符串 `"ls -l"` 并将其管道到 `bash`，`bash`
+    将该字符串视为命令并运行它：
+- en: '[PRE43]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: Warning
+  id: totrans-133
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Remember, never blindly pipe text to `bash`. Be aware of what you’re executing.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请记住，永远不要盲目地将文本管道到 `bash`。要意识到您正在执行什么。
+- en: This technique is terrific when you need to run many similar commands in a row.
+    If you can print the commands as strings, then you can pipe the strings to `bash`
+    for execution. Suppose you’re in a directory with many files, and you want to
+    organize them into subdirectories by their first character. A file named *apple*
+    would be moved to subdirectory *a*, a file named *cantaloupe* would move to subdirectory
+    *c*, and so on.^([6](ch07.xhtml#idm46586639568448)) (For simplicity, we’ll assume
+    all the filenames begin with a lowercase letter and contain no spaces or special
+    characters.)
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你需要连续运行许多相似命令时，这种技术非常棒。如果可以将命令打印为字符串，那么可以将字符串通过管道传输到`bash`以执行。假设你在一个包含许多文件的目录中，并且想要按它们的第一个字符将它们组织到子目录中。一个名为*apple*的文件将被移动到子目录*a*，一个名为*cantaloupe*的文件将移动到子目录*c*，依此类推。^([6](ch07.xhtml#idm46586639568448))（为简单起见，我们假设所有文件名以小写字母开头且不包含空格或特殊字符。）
+- en: 'First, list the files, sorted. We’ll assume all the names are at least two
+    characters long (matching the pattern `??*`) so our commands don’t collide with
+    the subdirectories *a* through *z*:'
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，列出按排序的文件。我们假设所有名称至少为两个字符长（与模式`??*`匹配），因此我们的命令不会与子目录*a*到*z*发生冲突：
+- en: '[PRE44]'
+  id: totrans-137
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: 'Create the 26 subdirectories you need via brace expansion:'
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过大括号扩展创建你需要的26个子目录：
+- en: '[PRE45]'
+  id: totrans-139
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: 'Now generate the `mv` commands you’ll need, as strings. Start with a regular
+    expression for `sed` that captures the first character of the filename as expression
+    #1 (`\1`):'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在生成你需要的`mv`命令，作为字符串。从一个为`sed`设计的正则表达式开始，它捕获文件名的第一个字符作为表达式＃1（`\1`）：
+- en: '[PRE46]'
+  id: totrans-141
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: 'Capture the rest of the filename as expression #2 (`\2`):'
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 捕获剩余的文件名作为表达式＃2（`\2`）：
+- en: '[PRE47]'
+  id: totrans-143
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: 'Connect the two regular expressions:'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 连接这两个正则表达式：
+- en: '[PRE48]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE48]'
+- en: 'Now form an `mv` command with the word *mv* followed by a space, the full filename
+    (`\1\2`), another space, and the first character (`\1`):'
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在用单词*mv*后跟一个空格，完整的文件名（`\1\2`），再加一个空格和第一个字符（`\1`）来形成一个`mv`命令：
+- en: '[PRE49]'
+  id: totrans-147
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE49]'
+- en: 'The complete command generator is:'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完整的命令生成器是：
+- en: '[PRE50]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE50]'
+- en: 'Its output contains exactly the `mv` commands you need. Read the output to
+    convince yourself it’s correct, perhaps by piping it to `less` for page-by-page
+    viewing:'
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其输出包含你所需的确切`mv`命令。通过将其管道传输到`less`以进行逐页查看来确认它的正确性：
+- en: '[PRE51]'
+  id: totrans-151
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE51]'
+- en: 'When you’re satisfied that your generated commands are correct, pipe the output
+    to `bash` for execution:'
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您确信生成的命令正确时，请将输出通过管道传输到`bash`以执行：
+- en: '[PRE52]'
+  id: totrans-153
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE52]'
+- en: 'The steps you just completed are a repeatable pattern:'
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你刚刚完成的步骤是一个可重复的模式：
+- en: Print a sequence of commands by manipulating strings.
+  id: totrans-155
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 通过操作字符串来打印一系列命令。
+- en: View the results with `less` to check correctness.
+  id: totrans-156
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用`less`查看结果以检查正确性。
+- en: Pipe the results to `bash`.
+  id: totrans-157
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将结果管道传输到`bash`。
+- en: 'Technique #7: Executing a String Remotely with ssh'
+  id: totrans-158
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 技术＃7：使用ssh远程执行字符串
+- en: '*Disclaimer*: this technique will make sense only if you’re familiar with SSH,
+    the secure shell, for logging into remote hosts. Setting up SSH relationships
+    between hosts is beyond the scope of this book; to learn more about it, seek out
+    an SSH tutorial.'
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*免责声明*：仅当您熟悉用于登录远程主机的安全外壳SSH时，此技术才会有意义。建立主机之间的SSH关系超出了本书的范围；要了解更多信息，请寻找SSH教程。'
+- en: 'In addition to the usual way of logging into a remote host:'
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了通常的远程主机登录方式：
+- en: '[PRE53]'
+  id: totrans-161
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE53]'
+- en: 'you also can execute a single command on the remote host—by passing a string
+    to `ssh` on the command line. Simply append the string to the rest of the `ssh`
+    command line:'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以通过在命令行上将字符串附加到`ssh`的其余部分来在远程主机上执行单个命令。：
+- en: '[PRE54]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE54]'
+- en: 'This technique is generally quicker than logging in, running a command, and
+    logging out. If the command includes special characters, such as redirection symbols,
+    that need to be evaluated on the remote host, then quote or escape them. Otherwise,
+    they’ll be evaluated by your local shell. Both of the following commands run `ls`
+    remotely, but the output redirection occurs on different hosts:'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种技术通常比登录，运行命令和退出更快。如果命令包含特殊字符（例如需要在远程主机上评估的重定向符号），请引用或转义它们。否则，它们将由您的本地shell评估。以下两个命令都在远程运行`ls`，但输出重定向发生在不同的主机上：
+- en: '[PRE55]'
+  id: totrans-165
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE55]'
+- en: 'You can also pipe commands to `ssh` to run them on the remote host, much like
+    you pipe them to `bash` to run locally:'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您还可以通过管道将命令传输到`ssh`以在远程主机上运行它们，就像在本地运行它们时将它们传输到`bash`一样：
+- en: '[PRE56]'
+  id: totrans-167
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE56]'
+- en: 'When piping commands to `ssh`, the remote host might print diagnostic or other
+    messages. These generally do not affect the remote command, and you can suppress
+    them:'
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在将命令传输到`ssh`时，远程主机可能会打印诊断或其他消息。这些通常不会影响远程命令，并且您可以将它们抑制。
+- en: 'If you see messages about pseudo-terminals or pseudo-ttys, such as “Pseudo-terminal
+    will not be allocated because stdin is not a terminal,” run `ssh` with the `-T`
+    option to prevent the remote SSH server from allocating a terminal:'
+  id: totrans-169
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果您看到关于伪终端或伪tty的消息，例如“因为stdin不是终端，所以不会分配伪终端”，请使用`ssh`的`-T`选项运行，以防止远程SSH服务器分配终端：
+- en: '[PRE57]'
+  id: totrans-170
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+  zh: '[PRE57]'
+- en: 'If you see welcome messages that normally appear when you log in (“Welcome
+    to Linux!”) or other unwanted messages, try telling `ssh` explicitly to run `bash`
+    on the remote host, and the messages should disappear:'
+  id: totrans-171
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果您看到通常在登录时出现的欢迎消息（“欢迎使用Linux！”）或其他不需要的消息，请尝试显式告诉`ssh`在远程主机上运行`bash`，这些消息应该会消失：
+- en: '[PRE58]'
+  id: totrans-172
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+  zh: '[PRE58]'
+- en: 'Technique #8: Running a List of Commands with xargs'
+  id: totrans-173
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 技术＃8：使用xargs运行命令列表
+- en: Many Linux users have never heard of the command `xargs`, but it’s a powerful
+    tool for constructing and running multiple, similar commands. Learning `xargs`
+    was another transformative moment in my Linux education, and I hope yours as well.
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 许多Linux用户从未听说过`xargs`命令，但它是一个强大的工具，用于构建和运行多个相似的命令。学习`xargs`是我Linux教育中的又一个转折点，我也希望对您有帮助。
+- en: '`xargs` accepts two inputs:'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`xargs`接受两个输入：'
+- en: 'On stdin: A list of strings separated by whitespace. An example is file paths
+    produced by `ls` or `find`, but any strings will do. I’ll call them the *input
+    strings*.'
+  id: totrans-176
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在标准输入上：由空格分隔的字符串列表。例如由`ls`或`find`产生的文件路径，但任何字符串都可以。我将它们称为*输入字符串*。
+- en: 'On the command line: An incomplete command that’s missing some arguments, which
+    I’ll call the *command template*.'
+  id: totrans-177
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在命令行上：一个不完整的命令，缺少一些参数，我将其称为*命令模板*。
+- en: '`xargs` merges the input strings and the command template to produce and run
+    new, complete commands, which I’ll call the *generated commands*. I’ll demonstrate
+    this process with a toy example. Suppose you’re in a directory with three files:'
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`xargs`将输入字符串和命令模板合并，生成并运行新的完整命令，我将其称为*生成的命令*。我将通过一个玩具示例来演示这个过程。假设您在一个有三个文件的目录中：'
+- en: '[PRE59]'
+  id: totrans-179
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE59]'
+- en: 'Pipe the directory listing to `xargs` to serve as its input strings, and provide
+    `wc -l` to serve as the command template, like so:'
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将目录列表通过管道传递给`xargs`作为其输入字符串，并提供`wc -l`作为命令模板，如下所示：
+- en: '[PRE60]'
+  id: totrans-181
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE60]'
+- en: 'As promised, `xargs` applied the `wc -l` command template to the input strings
+    and counts lines in each file. To print the same three files with `cat`, simply
+    change the command template to “cat”:'
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如承诺的那样，`xargs`将`wc -l`命令模板应用于输入字符串，并计算每个文件的行数。要使用`cat`打印相同的三个文件，只需将命令模板更改为“cat”：
+- en: '[PRE61]'
+  id: totrans-183
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE61]'
+- en: My toy examples with `xargs` have two shortcomings, one fatal and one practical.
+    The fatal shortcoming is that `xargs` may do the wrong thing if an input string
+    contains special characters, such as spaces. A robust solution is in the sidebar
+    [“Safety with find and xargs”](#sidebar_find_xargs).
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我对`xargs`的玩具示例有两个缺点，一个是致命的，一个是实际的。致命的缺点是，如果输入字符串包含特殊字符（例如空格），`xargs`可能会执行错误的操作。在侧边栏[“使用find和xargs时的安全性”](#sidebar_find_xargs)中有一个健壮的解决方案。
+- en: 'The practical shortcoming is that you don’t need `xargs` here—you can accomplish
+    the same tasks more simply with file pattern matching:'
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 实际的缺点是，在这里您不需要`xargs`—您可以通过文件模式匹配更简单地完成相同的任务：
+- en: '[PRE62]'
+  id: totrans-186
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE62]'
+- en: 'Why use `xargs`, then? Its power becomes apparent when the input strings are
+    more interesting than a simple directory listing. Suppose you want to count lines
+    in all files in a directory *and all its subdirectories* (recursively), but only
+    for Python source files with names ending in *.py*. It’s easy to produce such
+    a list of file paths with `find`:'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 那么为什么要使用`xargs`呢？当输入字符串比简单的目录列表更有趣时，它的强大之处就显现出来了。假设您想递归地计算一个目录及其所有子目录中所有Python源文件（以*.py结尾）的行数。使用`find`轻松生成这样的文件路径列表：
+- en: '[PRE63]'
+  id: totrans-188
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE63]'
+- en: '`xargs` can now apply the command template `wc -l` to each file path, producing
+    a recursive result that would be difficult to obtain otherwise. For safety, I’ll
+    replace the option `-print` with `-print0`, and `xargs` with `xargs -0`, for reasons
+    explained in the sidebar [“Safety with find and xargs”](#sidebar_find_xargs):'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当前，`xargs`可以将命令模板`wc -l`应用于每个文件路径，生成一个递归的结果，否则将很难获得。为了安全起见，我将选项`-print`替换为`-print0`，并将`xargs`替换为`xargs
+    -0`，原因在侧边栏[“使用find和xargs时的安全性”](#sidebar_find_xargs)中有解释：
+- en: '[PRE64]'
+  id: totrans-190
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE64]'
+- en: By combining `find` and `xargs`, you can empower any command to run recursively
+    through the filesystem, affecting only files (and/or directories) that match your
+    stated criteria. (In some cases, you can produce the same effect with `find` alone,
+    using its option `-exec`, but `xargs` is often a cleaner solution.)
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过结合`find`和`xargs`，你可以使任何命令递归运行到文件系统中，仅影响符合你指定条件的文件（和/或目录）。在某些情况下，你可以仅使用`find`的`-exec`选项达到相同效果，但`xargs`通常是一个更干净的解决方案。
+- en: '`xargs` has numerous options (see `man xargs`) that control how it creates
+    and runs the generated commands. The most important ones in my view (other than
+    `-0`) are `-n` and `-I`. The `-n` option controls how many arguments are appended
+    by `xargs` onto each generated command. The default behavior is to append as many
+    arguments as will fit within the shell’s limits:^([7](ch07.xhtml#idm46586639466144))'
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`xargs`有许多选项（参见`man xargs`），用于控制它如何创建和运行生成的命令。在我看来，除了`-0`之外，最重要的选项是`-n`和`-I`。`-n`选项控制`xargs`在每个生成的命令中添加多少个参数。默认行为是尽可能添加适合shell限制的参数数目：^([7](ch07.xhtml#idm46586639466144))'
+- en: '[PRE65]'
+  id: totrans-193
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE65]'
+- en: 'The `-I` option controls where the input strings appear in the generated command.
+    By default, they’re appended to the command template, but you can make them appear
+    elsewhere. Follow `-I` with any string (of your choice), and that string becomes
+    a placeholder in the command template, indicating exactly where input strings
+    should be inserted:'
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-I`选项控制输入字符串在生成命令中的位置。默认情况下，它们附加到命令模板，但你可以将它们放置在其他位置。在`-I`后跟任意字符串（你选择的字符串），那个字符串将成为命令模板中的占位符，指示输入字符串应该插入的确切位置：'
+- en: '[PRE66]'
+  id: totrans-195
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE66]'
+- en: I chose “XYZ” arbitrarily as a placeholder for input strings and positioned
+    it immediately after `echo`, moving the input string to the beginning of each
+    output line. Note that the `-I` option limits `xargs` to one input string per
+    generated command. I recommend reading the `xargs` manpage thoroughly to learn
+    what else you can control.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我随意选择“XYZ”作为输入字符串的占位符，并将其放置在`echo`后面，将输入字符串移动到每个输出行的开头。请注意，`-I`选项限制`xargs`每个生成的命令只接受一个输入字符串。我建议仔细阅读`xargs`的手册，以了解你还能控制哪些内容。
+- en: Long Argument Lists
+  id: totrans-197
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 长参数列表
+- en: '`xargs` is a problem solver when command lines grow very long. Suppose your
+    current directory contains one million files named *file1.txt* through *file1000000.txt*
+    and you try to remove them by pattern matching:'
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当命令行变得非常长时，`xargs`是一个解决方案。假设当前目录包含100万个名为*file1.txt*至*file1000000.txt*的文件，如果你尝试通过模式匹配来删除它们：
+- en: '[PRE67]'
+  id: totrans-199
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE67]'
+- en: 'The pattern `*.txt` evaluates to a string of more than 14 million characters,
+    which is longer than Linux supports. To work around this limitation, pipe a list
+    of the files to `xargs` for deletion. `xargs` will split the list of files across
+    multiple `rm` commands. Form the list of files by piping a full directory listing
+    to `grep`, matching only filenames ending in *.txt*, then pipe to `xargs`:'
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 模式`*.txt`的评估结果是一个超过1400万字符的字符串，这比Linux支持的长度还长。要解决此限制，请将文件列表传输到`xargs`以便删除。`xargs`将文件列表分割成多个`rm`命令。通过将完整目录列表管道传输到`grep`，仅匹配以*.txt*结尾的文件名，然后管道传输给`xargs`：
+- en: '[PRE68]'
+  id: totrans-201
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE68]'
+- en: 'This solution is better than file pattern matching (`ls *.txt`), which will
+    produce the same “Argument list too long” error. Better yet, run `find -print0`
+    as described in [“Safety with find and xargs”](#sidebar_find_xargs):'
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种解决方案比文件模式匹配(`ls *.txt`)更好，后者会产生相同的“Argument list too long”错误。更好的方法是像[“使用find和xargs安全删除文件”](#sidebar_find_xargs)中描述的那样运行`find
+    -print0`：
+- en: '[PRE69]'
+  id: totrans-203
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE69]'
+- en: Process-Control Techniques
+  id: totrans-204
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 进程控制技术
+- en: 'So far, all commands I’ve discussed occupy the parent shell until they finish.
+    Let’s consider several techniques that forge a different relationship with the
+    parent shell:'
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到目前为止，我讨论的所有命令都占据父shell直到完成。让我们考虑几种与父shell建立不同关系的技术：
+- en: Background commands
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 后台命令
+- en: Immediately return the prompt and execute out of sight
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 立即返回提示符并在视线外执行
+- en: Explicit subshells
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 明确的子shell
+- en: Can be launched in the middle of a combined command
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可以在组合命令的中间启动
+- en: Process replacement
+  id: totrans-210
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程替换
+- en: Supersedes the parent shell
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 取代父shell
+- en: 'Technique #9: Backgrounding a Command'
+  id: totrans-212
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 技术#9：后台运行命令
+- en: So far, all our techniques run a command to completion while you wait, and then
+    present the next shell prompt. But you don’t have to wait, especially for commands
+    that take a long time. You can launch commands in a special way so they disappear
+    from sight (sort of) yet continue to run, freeing up the current shell immediately
+    to run further commands. This technique is called *backgrounding* a command or
+    *running a command in the background*. In contrast, commands that occupy the shell
+    are called *foreground* commands. A shell instance runs at most one foreground
+    command at a time plus any number of background commands.
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到目前为止，我们所有的技术都是等待命令完成，然后显示下一个 shell 提示符。但你不必等待，特别是对于执行时间长的命令。你可以以特殊的方式启动命令，让它们从视线中消失（或者说几乎消失），但继续运行，立即释放当前
+    shell 运行更多的命令。这个技术称为 *后台运行* 命令或 *在后台运行命令*。相比之下，占据 shell 的命令称为 *前台* 命令。一个 shell
+    实例最多同时运行一个前台命令，加上任意数量的后台命令。
+- en: Launching a command in the background
+  id: totrans-214
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 在后台启动一个命令
+- en: 'To run a command in the background, simply append an ampersand (`&`). The shell
+    responds with a cryptic-looking message indicating that the command is back­groun⁠ded
+    and presents the next prompt:'
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在后台运行一个命令，只需附加一个&符号。shell 会用一个看起来神秘的消息回应，指示命令已被后台运行，并显示下一个提示符：
+- en: '[PRE70]'
+  id: totrans-216
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE70]'
+- en: 'You can then continue running foreground commands (or more background commands)
+    in this shell. Output from backgrounded commands may appear at any time, even
+    while you are typing. If the backgrounded command finishes successfully, the shell
+    will inform you with a *Done* message:'
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以继续在这个 shell 中运行前台命令（或更多的后台命令）。后台命令的输出可能随时出现，甚至在你输入时也可能出现。如果后台命令成功完成，shell
+    将会用 *Done* 消息通知你：
+- en: '[PRE71]'
+  id: totrans-218
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE71]'
+- en: 'or if it fails, you’ll see an *Exit* message with an exit code:'
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者如果失败，你会看到一个带有退出码的 *Exit* 消息：
+- en: '[PRE72]'
+  id: totrans-220
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE72]'
+- en: Tip
+  id: totrans-221
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: 'The ampersand is also a list operator, like `&&` and `||`:'
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个&符号也是列表操作符，类似于 `&&` 和 `||`：
+- en: '[PRE73]'
+  id: totrans-223
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE73]'
+- en: Suspending a command and sending it to the background
+  id: totrans-224
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 暂停命令并发送到后台
+- en: A related technique is to run a foreground command, change your mind during
+    execution, and send it to the background. Press Ctrl-Z to stop the command temporarily
+    (called *suspending* the command) and return to the shell prompt; then type `bg`
+    to resume running the command in the background.
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个相关的技巧是运行前台命令，在执行过程中改变主意，并将其发送到后台。按下 Ctrl-Z 暂停命令（称为 *挂起* 命令）并返回到 shell 提示符；然后输入
+    `bg` 来恢复在后台运行该命令。
+- en: Jobs and job control
+  id: totrans-226
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 工作和作业控制
+- en: 'Background commands are part of a shell feature called *job control* that manipulates
+    running commands in various ways, like backgrounding, suspending, and resuming
+    them. A *job* is a shell’s unit of work: a single instance of a command running
+    in a shell. Simple commands, pipelines, and conditional lists are all examples
+    of jobs—basically anything you can run at the command line.'
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 后台命令是 shell 的一个特性，称为 *作业控制*，可以以各种方式操作正在运行的命令，如后台运行、挂起和恢复。一个 *作业* 是 shell 的工作单位：在
+    shell 中运行的命令的单个实例。简单命令、管道和条件列表都是作业的例子——基本上任何你可以在命令行运行的东西。
+- en: A job is more than a Linux process. A job may consist of one process, two processes,
+    or more. A pipeline of six programs, for example, is a single job that includes
+    (at least) six processes. Jobs are a construct of the shell. The Linux operating
+    system doesn’t keep track of jobs, just the underlying processes.
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个作业不仅仅是一个 Linux 进程。一个作业可以由一个进程、两个进程或更多进程组成。例如，一个包含六个程序的管道是一个单一的作业，其中至少包括六个进程。作业是
+    shell 的构造。Linux 操作系统并不跟踪作业，只跟踪底层的进程。
+- en: 'At any moment, a shell may have multiple jobs running. Each job in a given
+    shell has a positive integer ID, called the job ID or job number. When you run
+    a command in the background, the shell prints the job number and the ID of the
+    first process it runs within the job. In the following command, the job number
+    is 1 and the process ID is 74931:'
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在任何时刻，一个 shell 可能会有多个作业在运行。给定 shell 中的每个作业都有一个正整数 ID，称为作业 ID 或作业号。当你在后台运行命令时，shell
+    会打印作业号和作业内第一个进程的 ID。在以下命令中，作业号为 1，进程 ID 为 74931：
+- en: '[PRE74]'
+  id: totrans-230
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE74]'
+- en: Common job-control operations
+  id: totrans-231
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 常见的作业控制操作
+- en: The shell has built-in commands for controlling jobs, listed in [Table 7-1](#table_job_control).
+    I’ll demonstrate the most common job-control operations by running a bunch of
+    jobs and manipulating them. To keep the jobs simple and predictable, I’ll run
+    the command `sleep`, which just sits there doing nothing (“sleeping”) for a given
+    number of seconds and then exits. For example, `sleep 10` sleeps for 10 seconds.
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell 对控制作业有内置命令，列在[表 7-1](#table_job_control)中。我将通过运行一系列作业并对其进行操作来演示最常见的作业控制操作。为了保持作业简单和可预测性，我将运行命令`sleep`，它什么也不做（“睡眠”）一段时间，然后退出。例如，`sleep
+    10`表示休眠10秒。
+- en: Table 7-1\. Job control commands
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 7-1\. 作业控制命令
+- en: '| Command | Meaning |'
+  id: totrans-234
+  prefs: []
+  type: TYPE_TB
+  zh: '| Command | 含义 |'
+- en: '| --- | --- |'
+  id: totrans-235
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| bg | Move the current suspended job into the background |'
+  id: totrans-236
+  prefs: []
+  type: TYPE_TB
+  zh: '| bg | 将当前挂起的作业移到后台 |'
+- en: '| bg %*n* | Move suspended job number *n* into the background (example: `bg
+    %1`) |'
+  id: totrans-237
+  prefs: []
+  type: TYPE_TB
+  zh: '| bg %*n* | 将挂起的作业号*n*移至后台（例如：`bg %1`） |'
+- en: '| fg | Move the current background job into the foreground |'
+  id: totrans-238
+  prefs: []
+  type: TYPE_TB
+  zh: '| fg | 将当前后台作业移到前台 |'
+- en: '| fg %*n* | Move background job number *n* into the foreground (example: `fg
+    %2`) |'
+  id: totrans-239
+  prefs: []
+  type: TYPE_TB
+  zh: '| fg %*n* | 将后台作业号为*n*的作业移到前台（例如：`fg %2`） |'
+- en: '| kill %*n* | Terminate background job number *n* (example: `kill %3`) |'
+  id: totrans-240
+  prefs: []
+  type: TYPE_TB
+  zh: '| kill %*n* | 终止后台作业号为*n*的作业（例如：`kill %3`） |'
+- en: '| jobs | View a shell’s jobs |'
+  id: totrans-241
+  prefs: []
+  type: TYPE_TB
+  zh: '| jobs | 查看 shell 的作业 |'
+- en: 'Run a job in the background to completion:'
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将一个作业在后台运行至完成：
+- en: '[PRE75]'
+  id: totrans-243
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE75]'
+- en: Note
+  id: totrans-244
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: When jobs complete, the *Done* message might not appear until the next time
+    you press Enter.
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当作业完成时，“完成”消息可能不会立即显示，直到您再次按 Enter 键。
+- en: 'Run a background job and bring it into the foreground:'
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行一个后台作业并将其切换至前台：
+- en: '[PRE76]'
+  id: totrans-247
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE76]'
+- en: 'Run a foreground job, suspend it, and bring it back into the foreground:'
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行一个前台作业，将其暂停，然后将其切换回前台：
+- en: '[PRE77]'
+  id: totrans-249
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE77]'
+- en: 'Run a foreground job and send it to the background:'
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行前台作业并将其发送到后台：
+- en: '[PRE78]'
+  id: totrans-251
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE78]'
+- en: 'Work with multiple background jobs. Refer to a job by its job number preceded
+    by a percent sign (`%1`, `%2`, and so on):'
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 处理多个后台作业。通过作业号加上百分号（`%1`，`%2`等）进行引用：
+- en: '[PRE79]'
+  id: totrans-253
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE79]'
+- en: Output and input in the background
+  id: totrans-254
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 在后台进行输出和输入
+- en: 'A backgrounded command may write to stdout, sometimes at inconvenient or confusing
+    times. Notice what happens if you sort the Linux dictionary file (100,000 lines
+    long) and print the first two lines in the background. As expected, the shell
+    immediately prints the job number (1), a process ID (81089), and the next prompt:'
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 后台命令可能会在不方便或混乱的时间写入标准输出。如果按预期对 Linux 字典文件（有100,000行）进行排序并在后台打印前两行时，Shell 会立即打印作业号（1）、进程
+    ID（81089）和下一个提示符：
+- en: '[PRE80]'
+  id: totrans-256
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE80]'
+- en: 'If you wait until the job finishes, it prints two lines on stdout wherever
+    your cursor happens to be at the time. In this case, the cursor is sitting at
+    the second prompt, so you get this sloppy-looking output:'
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果等到作业完成再打印两行到标准输出，输出可能会显得杂乱无章。在此情况下，光标位于第二个提示符处，所以您会得到这种看起来不整齐的输出：
+- en: '[PRE81]'
+  id: totrans-258
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE81]'
+- en: 'Press Enter, and the shell will print a “job done” message:'
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按 Enter 键，Shell 将打印“作业完成”消息：
+- en: '[PRE82]'
+  id: totrans-260
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE82]'
+- en: 'Screen output from a background job can appear at any time while the job runs.
+    To avoid this sort of messiness, redirect stdout to a file, then examine the file
+    at your leisure:'
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 后台作业的屏幕输出可能会在作业运行时的任何时候出现。为避免这种混乱，将标准输出重定向到文件，然后在方便时检查文件内容：
+- en: '[PRE83]'
+  id: totrans-262
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE83]'
+- en: 'Other odd things happen when a background job attempts to read from stdin.
+    The shell suspends the job, prints a *Stopped* message, and waits for input in
+    the background. Demonstrate this by backgrounding `cat` with no arguments so it
+    reads stdin:'
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当后台作业尝试从标准输入读取时，会发生一些奇怪的事情。Shell 暂停该作业，打印*已停止*消息，并在后台等待输入。通过不带参数后台化`cat`来演示这一点：
+- en: '[PRE84]'
+  id: totrans-264
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE84]'
+- en: 'Jobs can’t read input in the background, so bring the job into the foreground
+    with `fg` and then supply the input:'
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 后台作业无法读取输入，因此使用`fg`将作业切换至前台，然后提供输入：
+- en: '[PRE85]'
+  id: totrans-266
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE85]'
+- en: 'After supplying all input, do any of the following:'
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 提供所有输入后，执行以下任何一项操作：
+- en: Continue running the command in the foreground until it completes.
+  id: totrans-268
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在前台继续运行命令，直到完成。
+- en: Suspend and background the command again by pressing Ctrl-Z followed by `bg`.
+  id: totrans-269
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 通过按 Ctrl-Z 然后 `bg`，将命令暂停并移到后台。
+- en: End the input with Ctrl-D, or kill the command with Ctrl-C.
+  id: totrans-270
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 用 Ctrl-D 结束输入，或用 Ctrl-C 终止命令。
+- en: Backgrounding tips
+  id: totrans-271
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 后台化提示
+- en: Backgrounding is ideal for commands that take a long time to run, such as text
+    editors during long editing sessions, or any program that opens its own windows.
+    For example, programmers can save a lot of time by suspending their text editor
+    rather than exiting. I’ve seen experienced engineers modify some code in their
+    text editor, save and quit the editor, test the code, then relaunch the editor
+    and hunt for the spot in the code where they’d left off. They lose 10–15 seconds
+    to job-switching every time they quit the editor. If they instead suspend the
+    editor (Ctrl-Z), test their code, and resume the editor (`fg`), they avoiding
+    wasting time unnecessarily.
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 后台运行非常适合那些需要长时间运行的命令，比如在长时间编辑会话期间的文本编辑器，或者任何打开自己窗口的程序。例如，程序员可以通过挂起他们的文本编辑器而不是退出来节省大量时间。我见过有经验的工程师修改他们文本编辑器中的一些代码，保存并退出编辑器，测试代码，然后重新启动编辑器并搜索他们离开的代码位置。他们每次退出编辑器都会损失10到15秒的工作切换时间。如果他们代替这样做挂起编辑器（Ctrl-Z），测试他们的代码，然后恢复编辑器（`fg`），他们避免了不必要的时间浪费。
+- en: Backgrounding is also great for running a sequence of commands in the background
+    using a conditional list. If any command within the list fails, the rest won’t
+    run and the job completes. (Just watch out for commands that read input, since
+    they’ll cause the job to suspend and wait for input.)
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 后台运行也非常适合使用条件列表在后台运行一系列命令。如果列表中的任何命令失败，其余命令将不会运行，作业完成。（只需注意读取输入的命令，因为它们会导致作业挂起并等待输入。）
+- en: '[PRE86]'
+  id: totrans-274
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE86]'
+- en: 'Technique #10: Explicit Subshells'
+  id: totrans-275
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '技巧 #10：显式子shell'
+- en: 'Each time you launch a simple command, it runs in a child process, as you saw
+    in [“Parent and Child Processes”](ch06.xhtml#section_parent_child_processes).
+    Command substitution and process substitution create subshells. There are times,
+    however, when it’s helpful to launch an extra subshell explicitly. To do so, simply
+    enclose a command in parentheses and it runs in a subshell:'
+  id: totrans-276
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每次启动简单命令时，它都在子进程中运行，就像你在[“父进程和子进程”](ch06.xhtml#section_parent_child_processes)中看到的那样。命令替换和进程替换创建子shell。然而，有时明确启动额外的子shell很有帮助。要做到这一点，只需将命令括在括号中，它就会在子shell中运行：
+- en: '[PRE87]'
+  id: totrans-277
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE87]'
+- en: 'When applied to a whole command, this technique isn’t super useful, except
+    maybe to save you from running a second `cd` command to return to your previous
+    directory. However, if you place parentheses around one piece of a combined command,
+    you can perform some useful tricks. A typical example is a pipeline that changes
+    directory in the middle of execution. Suppose you have downloaded a compressed
+    `tar` file, *package.tar.gz*, and you want to extract the files. A `tar` command
+    to extract the files is:'
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当应用于整个命令时，这种技巧并不是特别有用，除非也许可以帮助你避免运行第二个`cd`命令返回到先前的目录。但是，如果你在组合命令的一部分周围放置括号，你可以执行一些有用的技巧。一个典型的例子是在执行过程中更改目录的管道。假设你下载了一个压缩的`tar`文件，*package.tar.gz*，并且你想要提取文件。一个用于提取文件的`tar`命令是：
+- en: '[PRE88]'
+  id: totrans-279
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE88]'
+- en: The extraction occurs relative to the current directory.^([8](ch07.xhtml#idm46586639185696))
+    What if you want to extract them into a different directory? You could `cd` to
+    the other directory first and run `tar` (and then `cd` back), but you can also
+    perform this task with a single command. The trick is to pipe the tarred data
+    to a subshell that performs directory operations and runs `tar` as it reads from
+    stdin:^([9](ch07.xhtml#idm46586639182704))
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 提取发生在当前目录的相对位置。^([8](ch07.xhtml#idm46586639185696)) 如果你想将它们提取到另一个目录怎么办？你可以首先`cd`到其他目录，然后运行`tar`（然后再`cd`回来），但你也可以用一个命令完成这个任务。窍门在于将被打包的数据传输到一个执行目录操作并在从stdin读取时运行`tar`的子shell中：^([9](ch07.xhtml#idm46586639182704))
+- en: '[PRE89]'
+  id: totrans-281
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE89]'
+- en: 'This technique also works to copy files from one directory *dir1* to another
+    existing directory *dir2* using two `tar` processes, one writing to stdout and
+    one reading from stdin:'
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个技巧还适用于使用两个`tar`进程将文件从一个目录*dir1*复制到另一个现有目录*dir2*，一个写入stdout，另一个从stdin读取：
+- en: '[PRE90]'
+  id: totrans-283
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE90]'
+- en: 'The same technique can copy files to an existing directory on another host
+    via SSH:'
+  id: totrans-284
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 相同的技巧也可以通过SSH将文件复制到另一个主机上的现有目录：
+- en: '[PRE91]'
+  id: totrans-285
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE91]'
+- en: Warning
+  id: totrans-286
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: It’s tempting to view `bash` parentheses as if they simply group commands together,
+    like parentheses in arithmetic. They do not. Each pair of parentheses causes a
+    subshell to be launched.
+  id: totrans-287
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 看起来像是`bash`中的括号仅仅是将命令组合在一起，就像数学中的括号一样诱人。但实际上并不是这样。每一对括号都会启动一个子shell。
+- en: 'Technique #11: Process Replacement'
+  id: totrans-288
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '技巧 #11：进程替换'
+- en: Normally when you run a command, the shell runs it in a separate process that
+    is destroyed when the command exits, as described in [“Parent and Child Processes”](ch06.xhtml#section_parent_child_processes).
+    You can change this behavior with the `exec` command, which is a shell builtin.
+    It *replaces* the running shell (a process) with another command of your choice
+    (another process). When the new command exits, no shell prompt will follow because
+    the original shell is gone.
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常情况下，当你运行一个命令时，shell 会将其运行在一个单独的进程中，当命令退出时该进程被销毁，如[“父进程和子进程”](ch06.xhtml#section_parent_child_processes)中所述。你可以通过
+    shell 内置命令`exec`改变这种行为。它会将正在运行的 shell（一个进程）替换为你选择的另一个命令（另一个进程）。当新命令退出时，不会出现 shell
+    提示符，因为原始 shell 已经不存在。
+- en: 'To demonstrate this, run a new shell manually and change its prompt:'
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了演示这一点，手动运行一个新的 shell 并更改其提示符：
+- en: '[PRE92]'
+  id: totrans-291
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE92]'
+- en: 'Now `exec` a command and watch the new shell die:'
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在`exec`一个命令并观察新 shell 的关闭：
+- en: '[PRE93]'
+  id: totrans-293
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE93]'
+- en: Running exec May Be Fatal
+  id: totrans-294
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 运行 exec 可能是致命的
+- en: If you run `exec` in a shell, the shell exits afterward. If the shell was running
+    in a terminal window, the window closes. If the shell was a login shell, you will
+    be logged out.
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你在 shell 中运行`exec`，那么 shell 在此后会退出。如果 shell 是在终端窗口中运行的，窗口会关闭。如果 shell 是登录
+    shell，你会被注销。
+- en: Why would you ever run `exec`? One reason is to conserve resources by not launching
+    a second process. Shell scripts sometimes make use of this optimization by running
+    `exec` on the final command in the script. If the script is run many times (say,
+    millions or billions of executions), the savings might be worth it.
+  id: totrans-296
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为什么会运行`exec`？一个原因是通过不启动第二个进程来节省资源。Shell 脚本有时会利用这种优化，在脚本的最后一个命令上运行`exec`。如果脚本运行多次（比如，数百万或数十亿次执行），这种节省可能是值得的。
+- en: '`exec` has a second ability—it can reassign stdin, stdout, and/or stderr for
+    the current shell. This is most practical in a shell script, such as this toy
+    example that prints information to a file, */tmp/outfile*:'
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`exec` 还有第二个能力——它可以重新分配当前 shell 的 stdin、stdout 和/或 stderr。这在 shell 脚本中最实用，比如这个玩具示例，将信息打印到文件
+    */tmp/outfile*：'
+- en: '[PRE94]'
+  id: totrans-298
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE94]'
+- en: 'Instead of redirecting the output of each command to */tmp/outfile* individually,
+    use `exec` to redirect stdout to */tmp/outfile* for the entire script. Subsequent
+    commands can simply print to stdout:'
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不要单独将每个命令的输出重定向到 */tmp/outfile*，而是使用`exec`将整个脚本的 stdout 重定向到 */tmp/outfile*。随后的命令可以简单地输出到
+    stdout：
+- en: '[PRE95]'
+  id: totrans-300
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE95]'
+- en: 'Run this script and examine the file */tmp/outfile2* to see the results:'
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行这个脚本并检查文件 */tmp/outfile2* 以查看结果：
+- en: '[PRE96]'
+  id: totrans-302
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE96]'
+- en: You probably won’t use `exec` often, but it’s there when you need it.
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能不经常使用`exec`，但当你需要时它就在那里。
+- en: Summary
+  id: totrans-304
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 总结
+- en: Now you have 13 techniques for running a command—the 11 in this chapter plus
+    simple commands and pipelines. [Table 7-2](#table_umpteen_summary) reviews some
+    common use cases for different techniques.
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你掌握了运行命令的 13 种技术——本章的 11 种技术加上简单命令和管道。[表 7-2](#table_umpteen_summary) 概述了不同技术的常见用例。
+- en: Table 7-2\. Common idioms for running commands
+  id: totrans-306
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 7-2\. 运行命令的常见习惯用法
+- en: '| Problem | Solution |'
+  id: totrans-307
+  prefs: []
+  type: TYPE_TB
+  zh: '| 问题 | 解决方案 |'
+- en: '| --- | --- |'
+  id: totrans-308
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| Sending stdout from one program to stdin of another | Pipelines |'
+  id: totrans-309
+  prefs: []
+  type: TYPE_TB
+  zh: '| 将一个程序的 stdout 发送到另一个程序的 stdin | 管道传输 |'
+- en: '| Inserting output (stdout) into a command | Command substitution |'
+  id: totrans-310
+  prefs: []
+  type: TYPE_TB
+  zh: '| 将输出（stdout）插入到一个命令中 | 命令替换 |'
+- en: '| Providing output (stdout) to a command that doesn’t read from stdin, but
+    does read disk files | Process substitution |'
+  id: totrans-311
+  prefs: []
+  type: TYPE_TB
+  zh: '| 提供输出（stdout）给一个不读取 stdin，但读取磁盘文件的命令 | 进程替换 |'
+- en: '| Executing one string as a command | `bash -c`, or piping to `bash` |'
+  id: totrans-312
+  prefs: []
+  type: TYPE_TB
+  zh: '| 将一个字符串作为命令执行 | `bash -c`，或将其传输到`bash` |'
+- en: '| Printing multiple commands on stdout and executing them | Piping to `bash`
+    |'
+  id: totrans-313
+  prefs: []
+  type: TYPE_TB
+  zh: '| 在标准输出上打印多个命令并执行它们 | 管道传输至`bash` |'
+- en: '| Executing many similar commands in a row | `xargs`, or constructing the commands
+    as strings and piping them to `bash` |'
+  id: totrans-314
+  prefs: []
+  type: TYPE_TB
+  zh: '| 连续执行多个类似的命令 | 使用`xargs`，或构造命令字符串并将其传输到`bash` |'
+- en: '| Managing commands that depend on one other’s success | Conditional lists
+    |'
+  id: totrans-315
+  prefs: []
+  type: TYPE_TB
+  zh: '| 管理依赖于彼此成功的命令 | 条件列表 |'
+- en: '| Running several commands at a time | Backgrounding |'
+  id: totrans-316
+  prefs: []
+  type: TYPE_TB
+  zh: '| 同时运行多个命令 | 后台运行 |'
+- en: '| Running several commands at a time that depend on one another’s success |
+    Backgrounding a conditional list |'
+  id: totrans-317
+  prefs: []
+  type: TYPE_TB
+  zh: '| 同时运行多个依赖于彼此成功的命令 | 后台运行的条件列表 |'
+- en: '| Running one command on a remote host | Run `ssh` *`host command`* |'
+  id: totrans-318
+  prefs: []
+  type: TYPE_TB
+  zh: '| 在远程主机上运行一个命令 | 运行 `ssh` *`host command`* |'
+- en: '| Changing directory in the middle of a pipeline | Explicit subshells |'
+  id: totrans-319
+  prefs: []
+  type: TYPE_TB
+  zh: '| 在管道中间更改目录 | 显式子 shell |'
+- en: '| Running a command later | Unconditional list with `sleep` followed by the
+    command |'
+  id: totrans-320
+  prefs: []
+  type: TYPE_TB
+  zh: '| 以后执行一个命令 | 使用`sleep`延时后紧跟命令的无条件列表 |'
+- en: '| Redirecting to/from protected files | Run `sudo bash -c "`*`command`* `>`
+    *`file`*`"` |'
+  id: totrans-321
+  prefs: []
+  type: TYPE_TB
+  zh: '| 重定向到/从受保护文件 | 运行 `sudo bash -c "`*`command`* `>` *`file`*`"` |'
+- en: The next two chapters will teach you to combine techniques to achieve business
+    goals efficiently.
+  id: totrans-322
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下两章将教你如何结合技术以高效实现业务目标。
+- en: ^([1](ch07.xhtml#idm46586639844176-marker)) The command `mkdir -p dir`, which
+    creates a directory path only if it doesn’t already exist, would be a more elegant
+    solution here.
+  id: totrans-323
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([1](ch07.xhtml#idm46586639844176-marker)) 命令 `mkdir -p dir` 可以创建一个目录路径，仅在该路径不存在时才创建，这在这里是一个更优雅的解决方案。
+- en: ^([2](ch07.xhtml#idm46586639836000-marker)) This behavior is opposite of what
+    many programming languages do, where zero means failure.
+  id: totrans-324
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([2](ch07.xhtml#idm46586639836000-marker)) 这种行为与许多编程语言相反，其中零表示失败。
+- en: ^([3](ch07.xhtml#idm46586639789616-marker)) Alternatively, you could use `cron`
+    for the backup job and `at` for reminders, but Linux is all about flexibility—finding
+    multiple ways to achieve the same result.
+  id: totrans-325
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([3](ch07.xhtml#idm46586639789616-marker)) 或者，你可以使用`cron`进行备份作业和使用`at`设置提醒，但Linux注重灵活性——寻找实现同一目标的多种方法。
+- en: ^([4](ch07.xhtml#idm46586639738208-marker)) Bank of America’s downloadable statement
+    files are named this way at press time.
+  id: totrans-326
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([4](ch07.xhtml#idm46586639738208-marker)) 目前，美国银行的可下载对账单文件是这样命名的。
+- en: ^([5](ch07.xhtml#idm46586639674432-marker)) Technically, `diff` can read one
+    list from stdin if you provide a dash as a filename, but not two lists.
+  id: totrans-327
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([5](ch07.xhtml#idm46586639674432-marker)) 从技术上讲，如果你提供一个短划线作为文件名，`diff`可以从标准输入读取一个列表，但不能读取两个列表。
+- en: ^([6](ch07.xhtml#idm46586639568448-marker)) This directory structure is similar
+    to a hashtable with chaining.
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([6](ch07.xhtml#idm46586639568448-marker)) 这个目录结构类似于带有链表的哈希表。
+- en: ^([7](ch07.xhtml#idm46586639466144-marker)) The exact number depends on length
+    limits on your Linux system; see `man xargs`.
+  id: totrans-329
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([7](ch07.xhtml#idm46586639466144-marker)) 精确数字取决于你的Linux系统对长度限制；参见`man xargs`。
+- en: ^([8](ch07.xhtml#idm46586639185696-marker)) Assuming that the `tar` archive
+    was built with relative paths—which is typical for downloaded software—not absolute
+    paths.
+  id: totrans-330
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([8](ch07.xhtml#idm46586639185696-marker)) 假设`tar`归档是使用相对路径构建的——这在下载软件时很典型，而不是绝对路径。
+- en: ^([9](ch07.xhtml#idm46586639182704-marker)) This specific problem can be solved
+    more simply with the `tar` option `-C` or `--directory`, which specifies a target
+    directory. I’m just demonstrating the general technique of using a subshell.
+  id: totrans-331
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([9](ch07.xhtml#idm46586639182704-marker)) 可以更简单地使用`tar`选项`-C`或`--directory`解决这个具体问题，该选项指定目标目录。我只是演示了使用子shell的一般技巧。

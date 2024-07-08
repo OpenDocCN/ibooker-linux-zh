@@ -1,0 +1,1743 @@
+- en: Chapter 4\. Managing Services with systemd
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第四章：使用 systemd 管理服务
+- en: Every time you start your Linux computer, its initialization system launches
+    a batch of processes, from a few dozen to hundreds, depending on how the system
+    is set up. You can see this on your startup screen ([Figure 4-1](#fig-startup-messages);
+    press the Escape key to hide your graphical startup screen and see the startup
+    messages).
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每次启动 Linux 计算机时，它的初始化系统都会启动一批进程，从几十个到数百个不等，具体取决于系统设置。您可以在启动屏幕上看到这一过程（[Figure
+    4-1](#fig-startup-messages)）。按下 Escape 键隐藏图形启动屏幕，查看启动消息。
+- en: '![Linux startup messages](Images/lcb2_0401.png)'
+  id: totrans-2
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Linux 启动消息](Images/lcb2_0401.png)'
+- en: Figure 4-1\. Linux startup messages
+  id: totrans-3
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 4-1：Linux 启动消息
+- en: In olden times we had the Unix System V initialization system (SysV init), BSD
+    init, and Linux Standard Base (LSB) init for launching processes at startup. SysV
+    init was the most common. Those days are fading away, and now systemd is the shiny
+    new init system for Linux. It has been adopted by all the major Linux distributions,
+    though of course there are a number of distributions that still use the legacy
+    init systems.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在过去，我们有 Unix System V 初始化系统（SysV init）、BSD init 和 Linux Standard Base（LSB）初始化系统来启动进程。SysV
+    init 曾经最为常见。但那些日子已经逐渐过去，现在 systemd 是 Linux 的新光辉初始化系统。它已被所有主要的 Linux 发行版采纳，尽管当然仍有一些发行版仍在使用传统的初始化系统。
+- en: 'In this chapter you will learn if your Linux distribution uses systemd. You
+    will learn what processes, threads, services, and daemons are, and how to use
+    systemd to manage services: start, stop, enable, disable, and check status. You
+    will become acquainted with the *systemctl* command, which is the systemd system
+    and service manager.'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，您将了解您的 Linux 发行版是否使用 systemd。您将学习进程、线程、服务和守护程序是什么，并学习如何使用 systemd 管理服务：启动、停止、启用、禁用和检查状态。您将熟悉
+    *systemctl* 命令，这是 systemd 系统和服务管理器。
+- en: systemd is designed to provide functionality suited to modern complex server
+    and desktop systems, and it does considerably more than the legacy init systems.
+    It provides complete service management from startup to shutdown, starting processes
+    at boot, on-demand after boot, and shutting down services when they are not needed.
+    It manages functions such as system logging, automounting filesystems, automatic
+    service dependency resolution, name services, device management, network connection
+    management, login management, and a host of other tasks.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd 是为现代复杂的服务器和桌面系统设计的功能性软件，远比传统的初始化系统做得更多。它提供从启动到关闭的完整服务管理，启动进程在启动时、启动后按需启动，并在不需要时关闭服务。它管理诸如系统日志、自动挂载文件系统、自动解决服务依赖关系、名称服务、设备管理、网络连接管理、登录管理等功能。
+- en: This sounds like a lot until you realize that processes do everything on a computer,
+    and all of this functionality used to be provided by a large assortment of other
+    programs. systemd brings it all together in an integrated software suite that
+    should operate the same way on all Linux systems, though as always with Linux
+    there are some minor exceptions, such as file locations and service names. Be
+    aware that your particular Linux may have some differences from the examples in
+    this chapter.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你意识到进程在计算机上执行所有操作时，这听起来像是很多事情，而所有这些功能曾由大量其他程序提供。systemd 将所有这些功能集成在一个软件套件中，应在所有
+    Linux 系统上以相同方式运行，尽管像往常一样，Linux 存在一些细微的例外，如文件位置和服务名称。请注意，你的特定 Linux 可能与本章示例有所不同。
+- en: systemd attempts to decrease boot times and parcel out system resources more
+    efficiently by starting processes concurrently and in parallel, and starting only
+    necessary services, leaving other services to start after boot as needed. A service
+    that is dependent on other services no longer has to wait to start for those services
+    to become available because all it needs is a waiting Unix socket to become available.
+    [Recipe 4.9](#rec-slow-startups) shows how to find processes that are slowing
+    down your system startup.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd 尝试通过并行启动和仅启动必要的服务来减少启动时间并更有效地分配系统资源，其他服务可以在启动后按需启动。一个依赖于其他服务的服务不再需要等待这些服务可用，因为它所需的只是等待
+    Unix 套接字可用。[Recipe 4.9](#rec-slow-startups) 展示了如何找到拖慢系统启动的进程。
+- en: systemd binaries are written in C, which provides some performance enhancement.
+    The legacy inits are masses of shell scripts, and any compiled language operates
+    faster than shell scripts.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd 的二进制文件使用 C 语言编写，这提供了一些性能增强。传统的初始化系统则是大量的 shell 脚本，而任何编译语言都比 shell 脚本运行得更快。
+- en: systemd is backwards compatible with SysV init. Most Linux distributions retain
+    the legacy SysV configuration files and scripts, including */etc/inittab* and
+    the */etc/rc.d/* and */etc/init.d/* directories. When a service does not have
+    a systemd configuration file, systemd looks for a SysV configuration file. systemd
+    is also backward compatible with Linux Standard Base (LSB) init.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd 兼容 SysV 初始化。大多数 Linux 发行版保留了传统的 SysV 配置文件和脚本，包括 */etc/inittab*，以及 */etc/rc.d/*
+    和 */etc/init.d/* 目录。当服务没有 systemd 配置文件时，systemd 会寻找 SysV 配置文件。systemd 也与 Linux
+    标准基础（LSB）初始化兼容。
+- en: 'systemd service files are smaller and easier to understand than SysV init files.
+    Compare a SysV init file for sshd with its systemd service file. This is a snippet
+    of the sshd init file, */etc/init.d/ssh*, from MX Linux:'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd 服务文件比 SysV 初始化文件更小且更易于理解。比较一下 sshd 的 SysV 初始化文件和其 systemd 服务文件。这是来自
+    MX Linux 的 sshd 初始化文件片段 */etc/init.d/ssh*：
+- en: '[PRE0]'
+  id: totrans-12
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'This goes on for a total of 162 lines. This is a complete systemd service file
+    from Ubuntu 20.04, */lib/systemd/system/ssh.service*:'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从 Ubuntu 20.04 完整的 systemd 服务文件 */lib/systemd/system/ssh.service* 开始，总共有 162
+    行内容：
+- en: '[PRE1]'
+  id: totrans-14
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: Even without reading the documentation, or knowing anything about systemd, you
+    can understand some of what this file is supposed to do.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 即使没有阅读文档，或者不了解 systemd 的任何信息，您也可以理解此文件应该执行的一些功能。
+- en: See [Rethinking PID 1](https://oreil.ly/dFz4K) for a detailed introduction to
+    systemd by one of its inventors and maintainers, Lennart Poettering. Rethinking
+    PID 1 details the rationale behind building a new init system, its architecture,
+    advantages, and how it uses existing Linux kernel features in place of duplicating
+    existing functionality.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请查看 [Rethinking PID 1](https://oreil.ly/dFz4K) ，由 systemd 的发明者和维护者之一 Lennart
+    Poettering 提供了对 systemd 的详细介绍。《重新思考 PID 1》详细介绍了构建新的初始化系统的原因、其架构、优势，以及如何利用现有 Linux
+    内核功能来替代重复现有功能。
+- en: 4.1 Learning if Your Linux Uses systemd
+  id: totrans-17
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 4.1 查看 Linux 是否使用 systemd
+- en: Problem
+  id: totrans-18
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You need to know if your Linux distribution uses systemd or something else.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您需要知道您的 Linux 发行版是否使用 systemd 或其他系统。
+- en: Solution
+  id: totrans-20
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Look for the */run/systemd/system/* directory. If this exists, then your init
+    system is systemd.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查找 */run/systemd/system/* 目录。如果存在，则您的初始化系统是 systemd。
+- en: Discussion
+  id: totrans-22
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: The */run/systemd/* directory may be present on your system if your distribution
+    supports multiple init systems. But systemd is not the active init unless you
+    see */run/systemd/system/*.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的发行版支持多个初始化系统，可能会出现 */run/systemd/* 目录。但是除非您看到 */run/systemd/system/*，否则
+    systemd 不是当前的初始化系统。
+- en: 'There are several other ways to learn which init system your system is using.
+    Try querying */sbin/init*. Originally this was the SysV executable, and now most
+    Linux distributions preserve the name and symlink it to the systemd executable.
+    This example confirms that the init is systemd:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有其他几种方法可以了解您的系统使用的初始化系统。尝试查询 */sbin/init*。最初这是 SysV 可执行文件，现在大多数 Linux 发行版保留了该名称并将其链接到
+    systemd 可执行文件。此示例确认初始化是 systemd：
+- en: '[PRE2]'
+  id: totrans-25
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'On a system using SysV init, it has no symlink:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在使用 SysV 初始化的系统上，它没有符号链接：
+- en: '[PRE3]'
+  id: totrans-27
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'The */proc* pseudofilesystem is an interface to your Linux kernel, and contains
+    the current state of a running system. It is called a pseudofilesystem because
+    it exists only in memory and not on disk. In this example, */proc/1/exe* is symlinked
+    to the systemd executable:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/proc* 伪文件系统是您的 Linux 内核的接口，包含正在运行系统的当前状态。它被称为伪文件系统，因为它仅存在于内存中，而不在磁盘上。在此示例中，*/proc/1/exe*
+    符号链接到 systemd 可执行文件：'
+- en: '[PRE4]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'On a SysV system, it links to *init*:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 SysV 系统上，它链接到 *init*：
+- en: '[PRE5]'
+  id: totrans-31
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'The */proc/1/comm* file reports your active init system:'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/proc/1/comm* 文件报告您当前的启动初始化系统：'
+- en: '[PRE6]'
+  id: totrans-33
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'On a SysV system, it reports *init*:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 SysV 系统上，它报告 *init*：
+- en: '[PRE7]'
+  id: totrans-35
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'The command attached to process ID (PID) 1 is your init. PID 1 is the first
+    process launched at startup, which then starts all other processes. You can see
+    this with the *ps* command:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 附加到进程 ID（PID）1 的命令是您的初始化。PID 1 是在启动时启动的第一个进程，然后启动所有其他进程。您可以使用 *ps* 命令查看这一点：
+- en: '[PRE8]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'When the init is SysV, it looks like this:'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当使用 SysV 初始化时，看起来是这样的：
+- en: '[PRE9]'
+  id: totrans-39
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: See [Recipe 4.2](#rec-pid-1) for more information on PID 1.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看 [Recipe 4.2](#rec-pid-1) 以获取有关 PID 1 的更多信息。
+- en: Linux support for systemd varies. Most of the major Linux distributions have
+    adoped systemd, including Fedora, Red Hat, CentOS, openSUSE, SUSE Linux Enterprise,
+    Debian, Ubuntu, Linux Mint, Arch, Manjaro, Elementary, and Mageia Linux.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 对 systemd 的支持各不相同。大多数主要的 Linux 发行版都采用了 systemd，包括 Fedora、Red Hat、CentOS、openSUSE、SUSE
+    Linux Enterprise、Debian、Ubuntu、Linux Mint、Arch、Manjaro、Elementary 和 Mageia Linux。
+- en: Some popular distributions that do not support systemd, or include it but not
+    as the default init, are Slackware, PCLinuxOS, Gentoo Linux, MX Linux, and antiX.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些流行的发行版不支持 systemd，或者包含它但不作为默认的 init 程序，如 Slackware、PCLinuxOS、Gentoo Linux、MX
+    Linux 和 antiX。
+- en: See Also
+  id: totrans-43
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Distrowatch](https://distrowatch.com) for information on hundreds of Linux
+    distributions'
+  id: totrans-44
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Distrowatch](https://distrowatch.com) 提供了关于数百种 Linux 发行版的信息'
+- en: '*man 5 proc*'
+  id: totrans-45
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 proc*'
+- en: '*man 1 pstree*'
+  id: totrans-46
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 pstree*'
+- en: '*man 1 ps*'
+  id: totrans-47
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ps*'
+- en: 4.2 Understanding PID 1, the Mother of All Processes
+  id: totrans-48
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 4.2 理解 PID 1，所有进程的母体
+- en: Problem
+  id: totrans-49
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want a better understanding of services and processes on Linux.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想更好地理解 Linux 上的服务和进程。
+- en: Solution
+  id: totrans-51
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: PID 1 is the mother of all processes on Linux systems. This is the first process
+    to start, and then it launches all other processes.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: PID 1 是 Linux 系统上所有进程的母体。这是第一个启动的进程，然后它启动所有其他进程。
+- en: Processes are one or more running instances of a program. Every task in a Linux
+    system is performed by a process. Processes can create independent copies of themselves,
+    that is, they can *fork*. The forked copies are called *children*, and the original
+    is the *parent*. Each child has its own unique PID, and its own allocation of
+    system resources, such as CPU and memory. *Threads* are lightweight processes
+    that run in parallel and share system resources with their parents.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程是一个或多个程序的运行实例。Linux 系统中的每个任务都由进程执行。进程可以创建独立的副本，即它们可以 *fork*。复制的进程称为 *子进程*，原始进程称为
+    *父进程*。每个子进程都有自己独特的 PID，以及分配给它的系统资源，如 CPU 和内存。*线程* 是在并行中运行的轻量级进程，并与其父进程共享系统资源。
+- en: Some processes run in the background and do not interact with users. Linux calls
+    these processes *services* or *daemons*, and their names tend to end with the
+    letter D, such as httpd, sshd, and systemd.
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些进程在后台运行，不与用户交互。Linux 将这些进程称为 *服务* 或 *守护进程*，它们的名称通常以字母 D 结尾，如 httpd、sshd 和
+    systemd。
+- en: 'Every Linux system starts PID 1 first, which then launches all other processes.
+    Use the *ps* command to list all running processes in PID order:'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个 Linux 系统首先启动 PID 1，然后启动所有其他进程。使用 *ps* 命令按 PID 排序列出所有运行中的进程：
+- en: '[PRE10]'
+  id: totrans-56
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'The *pstree* command organizes this mass of information into a tree diagram.
+    This example shows all processes, their child processes, PIDs, and threads, which
+    are enclosed in curly braces:'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*pstree* 命令将这些大量信息组织成树形图。此示例显示所有进程及其子进程、PID 和线程，这些信息被包含在花括号中：'
+- en: '[PRE11]'
+  id: totrans-58
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'The full *pstree* output is quite large. You can view a single process, identified
+    by its PID, and its parents, children, and threads, like the following example
+    for the Kate text editor:'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完整的 *pstree* 输出非常庞大。您可以查看单个进程，通过其 PID 标识，并显示其父进程、子进程和线程，例如 Kate 文本编辑器的以下示例：
+- en: '[PRE12]'
+  id: totrans-60
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: This shows that `systemd(1)` is Kate’s parent, `bash(5218)` is Kate’s child,
+    and all the processes in curly braces are Kate’s threads.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这显示了 `systemd(1)` 是 Kate 的父进程，`bash(5218)` 是 Kate 的子进程，花括号中的所有进程都是 Kate 的线程。
+- en: Discussion
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Processes always exist in one of several states, and these states change according
+    to system activity. The following *pstree* example displays the PID, user, state,
+    and command fields:'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程始终处于多种状态之一，并根据系统活动而更改。下面的 *pstree* 示例显示 PID、用户、状态和命令字段：
+- en: '[PRE13]'
+  id: totrans-64
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: '*R* is either currently running or waiting in the run queue.'
+  id: totrans-65
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*R* 表示当前正在运行或在运行队列中等待。'
+- en: '*l* means the process is multithreaded.'
+  id: totrans-66
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*l* 表示进程是多线程的。'
+- en: '*S* is interruptable sleep; the process is waiting for an event to complete.'
+  id: totrans-67
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*S* 是可中断睡眠状态；进程正在等待事件完成。'
+- en: '*s* is a session leader. Sessions are related processes managed as a unit.'
+  id: totrans-68
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*s* 是一个会话领导者。会话是作为一个单元管理的相关进程。'
+- en: '*I* is an idle kernel thread.'
+  id: totrans-69
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*I* 是空闲的内核线程。'
+- en: '*<* means high priority.'
+  id: totrans-70
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*<* 表示高优先级。'
+- en: '*N* is low priority.'
+  id: totrans-71
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*N* 表示低优先级。'
+- en: There are several rarely used states you can read about in *man 1 ps*.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*man 1 ps* 中还有几种不常用的状态，您可以在其中阅读。'
+- en: See Also
+  id: totrans-73
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 4.7](#rec-kill-processes)'
+  id: totrans-74
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 4.7](#rec-kill-processes)'
+- en: '*man 5 proc*'
+  id: totrans-75
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 proc*'
+- en: '*man 1 pstree*'
+  id: totrans-76
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 pstree*'
+- en: '*man 1 ps*'
+  id: totrans-77
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 ps*'
+- en: 4.3 Listing Services and Their States with systemctl
+  id: totrans-78
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 4.3 使用 systemctl 列出服务及其状态
+- en: Problem
+  id: totrans-79
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: 'You want to list all services installed on your system, and you want to know
+    the states of the services: whether they are running, not running, or in an error
+    state.'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想要列出系统中安装的所有服务，并了解服务的状态：正在运行、未运行或错误状态。
+- en: Solution
+  id: totrans-81
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*systemctl*, the systemd manager command, tells all. Run it with no options
+    to see a detailed list of all loaded units. A systemd unit is any related batch
+    of processes defined in a unit configuration file and managed by systemd:'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*systemctl*，systemd管理器命令，告诉所有信息。无选项运行它以查看所有加载单元的详细列表。systemd单元是任何在单元配置文件中定义并由systemd管理的相关进程批处理：'
+- en: '[PRE14]'
+  id: totrans-83
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'This prints a giant pile of information: 177 active loaded units on my test
+    system with the full unit names, status, and long descriptions. Redirect the the
+    output to a text file for easier study:'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这将打印出大量信息：在我的测试系统上，共有 177 个活动加载的单元，包括完整的单元名称、状态和长描述。将输出重定向到文本文件以便更轻松地学习：
+- en: '[PRE15]'
+  id: totrans-85
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'Treat yourself to more information overload by listing all units, active and
+    inactive:'
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过列出所有单位（包括活动和非活动状态），使信息超载：
+- en: '[PRE16]'
+  id: totrans-87
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'This results in 349 loaded units listed on my test system, including *not-found*
+    and *inactive* units. How many total unit files? The following example shows 5
+    out of 322:'
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这导致在我的测试系统上列出了 349 个加载的单元，包括 *not-found* 和 *inactive* 单元。总共有多少个单元文件？以下示例显示了
+    5 个其中的 322 个：
+- en: '[PRE17]'
+  id: totrans-89
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'We are interested in service files because Linux users and administrators interact
+    mainly with service files and rarely need to bother with any other type of unit
+    file. How many are installed? Let’s see:'
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们对服务文件感兴趣，因为Linux用户和管理员主要与服务文件交互，并且很少需要处理其他类型的单元文件。安装了多少个？让我们来看看：
+- en: '[PRE18]'
+  id: totrans-91
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'The preceding example displays the four most common states that a service can
+    be in: enabled, disabled, static, or masked.'
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 前面的示例展示了服务可能处于的四种最常见状态：已启用、已禁用、静态或屏蔽。
+- en: 'List only enabled services:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只列出已启用的服务：
+- en: '[PRE19]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'List only disabled services:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只列出已禁用的服务：
+- en: '[PRE20]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'List only static services:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只列出静态服务：
+- en: '[PRE21]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'List only masked services:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只列出已屏蔽的服务：
+- en: '[PRE22]'
+  id: totrans-100
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: Discussion
+  id: totrans-101
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Service unit files are in */usr/lib/systemd/system/* or */lib/systemd/system/*,
+    according to where your Linux distribution puts them. These are plain-text files
+    you can read.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 服务单元文件位于 */usr/lib/systemd/system/* 或 */lib/systemd/system/*，具体位置取决于您的Linux发行版。这些是您可以阅读的纯文本文件。
+- en: enabled
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 已启用
+- en: This shows that the service has become available and is managed by systemd.
+    When a service is enabled, systemd creates a symlink in */etc/systemd/system/*
+    from the unit file in */lib/systemd/system/*. It can be started, stopped, reloaded,
+    and disabled by the user with the *systemctl* command.
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这显示服务已变为可用，并由systemd管理。当服务已启用时，systemd会在 */etc/systemd/system/* 中从 */lib/systemd/system/*
+    的单元文件创建符号链接。用户可以使用 *systemctl* 命令启动、停止、重新加载和禁用它。
+- en: Note
+  id: totrans-105
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Enabling a service does not immediately start it, and disabling a service does
+    not immediately stop it (see [Recipe 4.6](#rec-enable-services)).
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启用服务并不会立即启动它，而禁用服务也不会立即停止它（参见[配方 4.6](#rec-enable-services)）。
+- en: disabled
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 禁用
+- en: Diabled means that there is no symlink in */etc/systemd/system/*, and it will
+    not start automatically at boot. You can stop and start it manually.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 禁用意味着在 */etc/systemd/system/* 中没有符号链接，它不会在启动时自动启动。您可以手动停止和启动它。
+- en: masked
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 屏蔽
+- en: This means the service is linked to */dev/null/*. It is completely disabled
+    and cannot be started by any means.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这意味着服务已链接到 */dev/null/*。它完全被禁用，并且无法通过任何方式启动。
+- en: static
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 静态
+- en: This means that the unit file is a dependency of other unit files, and cannot
+    be started or stopped by the user.
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这意味着单元文件是其他单元文件的依赖项，用户无法启动或停止它。
+- en: 'Some less-common service states you will see:'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将看到一些不常见的服务状态：
+- en: indirect
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 间接
+- en: Indirect states belong to services that are not meant to be managed by users,
+    but are meant to be used by other services.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 间接状态属于不适合由用户管理的服务，而是由其他服务使用。
+- en: generated
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 生成
+- en: Generated states indicate that the service has been converted from a nonnative
+    systemd initialization configuration file, either SysV or LSB init.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 生成状态表示服务已从非本地systemd初始化配置文件（SysV或LSB init）转换而来。
+- en: See Also
+  id: totrans-118
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 systemctl*'
+  id: totrans-119
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 systemctl*'
+- en: 4.4 Querying the Status of Selected Services
+  id: totrans-120
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 4.4 查询所选服务的状态
+- en: Problem
+  id: totrans-121
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know the status of one service or a few specific services.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想知道一个或几个特定服务的状态。
+- en: Solution
+  id: totrans-123
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: '*systemctl status* provides a nice little bundle of useful status information.
+    The following example queries the CUPS service. CUPS, the Common Unix Printing
+    System, should be on all Linux systems:'
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*systemctl status* 提供了一小段有用的状态信息。以下示例查询了 CUPS 服务。CUPS，即通用Unix打印系统，应该在所有Linux系统上存在：'
+- en: '[PRE23]'
+  id: totrans-125
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'Query multiple services with a space-delimited list:'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用以空格分隔的列表查询多个服务：
+- en: '[PRE24]'
+  id: totrans-127
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: Discussion
+  id: totrans-128
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: There is a lot of useful information in this little bit of output ([Figure 4-2](#fig-startup-1)).
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这少量输出中有大量有用信息（[图4-2](#fig-startup-1)）。
+- en: '![systemctl status output for the CUPS printer service.](Images/lcb2_0402.png)'
+  id: totrans-130
+  prefs: []
+  type: TYPE_IMG
+  zh: '![CUPS打印机服务的systemctl状态输出。](Images/lcb2_0402.png)'
+- en: Figure 4-2\. systemctl status output for the CUPS printer service
+  id: totrans-131
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图4-2\. CUPS打印机服务的systemctl状态输出
+- en: 'The dot next to the service name is a quick status indicator. It appears in
+    colors on most terminals. White is an *inactive* or *deactivating* state. Red
+    is a *failed* or *error* state. Green indicates an *active*, *reloading*, or *activating*
+    state. The rest of the information in the output is described in the following:'
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 服务名字旁边的点是快速状态指示器。它在大多数终端上显示颜色。白色是*非活动*或*正在停用*状态。红色是*失败*或*错误*状态。绿色表示*活动*，*重新加载*或*正在激活*状态。输出中的其余信息如下描述：
+- en: Loaded
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 已加载
+- en: 'Verifies that the unit file has been loaded into memory, displays its full
+    path, the service is enabled (see the Discussion about states in [Recipe 4.3](#rec-list-services)),
+    and `vendor preset: disabled/enabled` indicates if the installation default is
+    to start at boot or not. When it is disabled, the vendor default is to not start
+    at boot. This only shows the vendor preference and does not indicate if it is
+    currently enabled or disabled.'
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '验证单元文件是否已加载到内存中，显示其完整路径，服务是否已启用（参见[4.3节](#rec-list-services)中关于状态的讨论），`vendor
+    preset: disabled/enabled`指示安装默认是否在启动时启动。当它被禁用时，供应商默认不会在启动时启动。这仅显示供应商的首选项，不表示当前是否启用或禁用。'
+- en: Active
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 活动
+- en: Tells you if the service is active or inactive, and how long it has been in
+    that state.
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 告诉您服务是活动还是非活动，并且在该状态中已经多长时间。
+- en: Process
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程
+- en: Reports the PIDs and their commands and daemons.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 报告PID及其命令和守护程序。
+- en: Main PID
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 主PID
+- en: This is the process number for the cgroup slice.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是cgroup切片的进程号。
+- en: Tasks
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任务
+- en: Reports how many tasks the service has started. Tasks are PIDs.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 报告服务启动了多少个任务。任务是PID。
+- en: CGroup
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CGroup
+- en: Shows which unit slice the service belongs to and its PID. The three default
+    unit slices are *user.slice*, *system.slice*, and *machine.slice*.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示服务属于哪个单元切片及其PID。三个默认单元切片是*user.slice*、*system.slice*和*machine.slice*。
+- en: Linux control groups (cgroups) are sets of related processes and all of their
+    future children. In systemd, a *slice* is a subdivision of a cgroup, and each
+    slice manages a particular group of processes. Run *systemctl status* to see a
+    diagram of the cgroup hierarchy.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux控制组（cgroups）是一组相关进程及其所有未来子进程。在systemd中，*slice*是cgroup的一个子分区，每个slice管理特定组的进程。运行*systemctl
+    status*查看cgroup层次结构的图表。
+- en: By default, service and scope units are grouped in */lib/systemd/system/system.slice*.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认情况下，服务和范围单元被分组在*/lib/systemd/system/system.slice*中。
+- en: User sessions are grouped in */lib/systemd/system/user.slice*.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户会话分组在*/lib/systemd/system/user.slice*中。
+- en: Virtual machines and containers registered with systemd are grouped in */lib/systemd/system/machine.slice*.
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与systemd注册的虚拟机和容器分组在*/lib/systemd/system/machine.slice*中。
+- en: The remaining lines are the most recent log entries from *journalctl*, the systemd
+    log manager.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 剩余的行是来自*journalctl*，systemd日志管理器的最新日志条目。
+- en: See Also
+  id: totrans-150
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 systemctl*'
+  id: totrans-151
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 systemctl*'
+- en: '*man 5 systemd.slice*'
+  id: totrans-152
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 systemd.slice*'
+- en: '*man 1 journalctl*'
+  id: totrans-153
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 journalctl*'
+- en: '[Kernel cgroups documentation](https://oreil.ly/FfUb3)'
+  id: totrans-154
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[内核cgroups文档](https://oreil.ly/FfUb3)'
+- en: 4.5 Starting and Stopping Services
+  id: totrans-155
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 4.5 启动和停止服务
+- en: Problem
+  id: totrans-156
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to stop and start services with systemd.
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您希望使用systemd停止和启动服务。
+- en: Solution
+  id: totrans-158
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: This is a job for *systemctl*. The following examples use the SSH service to
+    demonstrate service management.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是一个 *systemctl* 的任务。以下示例使用SSH服务演示服务管理。
+- en: 'Start a service:'
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动服务：
+- en: '[PRE25]'
+  id: totrans-161
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'Stop a service:'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 停止服务：
+- en: '[PRE26]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'Stop and then restart a service:'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 停止然后重新启动服务：
+- en: '[PRE27]'
+  id: totrans-165
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'Reload the service’s configuration. For example, you made a change to *sshd_config*
+    and want to load the new configuration without restarting the service:'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新加载服务的配置。例如，您更改了*sshd_config*并希望加载新配置而不重新启动服务：
+- en: '[PRE28]'
+  id: totrans-167
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: Discussion
+  id: totrans-168
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'All of these commands also work with multiple services, space-delimited, for
+    example:'
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有这些命令也适用于多个服务，以空格分隔，例如：
+- en: '[PRE29]'
+  id: totrans-170
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'If you’re curious about the commands that systemd runs behind the scenes to
+    start, reload, or stop the individual daemons, look in their unit files. Some
+    services have start, reload, stop, and other instructions in their unit files,
+    like this example for httpd:'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您对systemd在后台运行的命令好奇，以启动、重新加载或停止各个守护程序，查看它们的单元文件。一些服务在其单元文件中具有启动、重新加载、停止和其他指令，例如此httpd的示例：
+- en: '[PRE30]'
+  id: totrans-172
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: You don’t have to do anything special with this information; it is there when
+    you want to know how *systemctl* is managing a particular service.
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于这些信息，你不需要特别处理；当你想了解*systemctl*如何管理特定服务时，它会有所帮助。
+- en: See Also
+  id: totrans-174
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 4.6](#rec-enable-services)'
+  id: totrans-175
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 4.6](#rec-enable-services)'
+- en: '*man 1 systemctl*'
+  id: totrans-176
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 systemctl*'
+- en: 4.6 Enabling and Disabling Services
+  id: totrans-177
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 4.6 启用和禁用服务
+- en: Problem
+  id: totrans-178
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want a service or services to automatically start at boot, or you want to
+    prevent a service from starting at boot, or to disable it completely.
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你希望某个服务或多个服务在启动时自动启动，或者你希望阻止某个服务在启动时启动，或者完全禁用它。
+- en: Solution
+  id: totrans-180
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Enabling a service configures it to automatically start at boot.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启用服务会配置它在启动时自动启动。
+- en: Disabling a service stops it from starting at boot, but it can be started and
+    stopped manually.
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 禁用服务会阻止它在启动时启动，但可以手动启动和停止。
+- en: Masking a service disables it so that it cannot be started at all.
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 屏蔽服务会禁用它，因此根本无法启动。
+- en: 'The following example enables the *sshd* service:'
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下示例启用了*sshd*服务：
+- en: '[PRE31]'
+  id: totrans-185
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'The output shows that enabling a service means creating a symlink from the
+    service file in */lib/systemd/system/* to */etc/systemd/system/*. This does not
+    start the service. You can start the service with *systemctl start*, or enable
+    and start the service in one command with the *--now* option:'
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 输出显示，启用服务意味着在*/lib/systemd/system/*中的服务文件和*/etc/systemd/system/*中创建符号链接。这不会启动服务。你可以使用*systemctl
+    start*启动服务，或者使用*--now*选项一条命令启用并启动服务：
+- en: '[PRE32]'
+  id: totrans-187
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'This command disables the *sshd* service. It does not stop the service, so
+    you must stop it manually after disabling it:'
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此命令禁用*sshd*服务。它不会停止服务，所以你必须在禁用后手动停止它：
+- en: '[PRE33]'
+  id: totrans-189
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'Or, disable and stop it with one command:'
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，用一条命令禁用并停止它：
+- en: '[PRE34]'
+  id: totrans-191
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'This command reenables the *mariadb* service, which disables and then enables
+    it. If you have created the symlinks manually for a service, this is useful for
+    quickly resetting them to the defaults:'
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此命令重新启用*mariadb*服务，先禁用然后再启用它。如果你已经手动为服务创建了符号链接，则可以快速将它们重置为默认状态：
+- en: '[PRE35]'
+  id: totrans-193
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'The following command disables the *bluetooth* service completely by masking
+    it, so that it cannot be started at all:'
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下命令通过屏蔽完全禁用了*bluetooth*服务，因此它无法启动：
+- en: '[PRE36]'
+  id: totrans-195
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'Unmasking the *bluetooth* service does not enable it, so it must be started
+    manually:'
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 解除*mariadb*服务的屏蔽并不会启用它，所以必须手动启动它：
+- en: '[PRE37]'
+  id: totrans-197
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: Discussion
+  id: totrans-198
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: When you enable, disable, mask, or unmask a service, it remains in its current
+    state unless you use the *--now* option. The *--now* option works with *enable*,
+    *disable*, and *mask* to immediately stop or start the service, but it does not
+    work with *unmask*.
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你启用、禁用、屏蔽或取消屏蔽一个服务时，它会保持当前状态，除非你使用*--now*选项。*--now*选项与*enable*、*disable*和*mask*一起使用，可以立即停止或启动服务，但不适用于*unmask*。
+- en: See the Discussion in [Recipe 4.3](#rec-list-services) to learn more about how
+    systemd uses symlinks to manage services.
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见[配方 4.3](#rec-list-services)中的讨论，了解更多关于systemd如何使用符号链接管理服务的信息。
+- en: See Also
+  id: totrans-201
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 systemctl*'
+  id: totrans-202
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 systemctl*'
+- en: The Discussion in [Recipe 4.3](#rec-list-services) to learn how systemd uses
+    symlinks to manage services
+  id: totrans-203
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 参见[配方 4.3](#rec-list-services)中的讨论，了解systemd如何使用符号链接管理服务
+- en: 4.7 Stopping Troublesome Processes
+  id: totrans-204
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 4.7 停止问题进程
+- en: Problem
+  id: totrans-205
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to know how to stop troublesome processes. A certain service may be
+    unresponsive or running away, spawning forks and causing your system to hang.
+    Your normal stop command is not working. What do you do?
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想知道如何停止问题进程。某个服务可能无响应或者在运行中，生成分支并导致系统挂起。你正常的停止命令不起作用。你该怎么办？
+- en: Solution
+  id: totrans-207
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Stopping a process is called killing the process. On Linux systems with systemd,
+    you should use *systemctl kill*. On systems without systemd, use the legacy *kill*
+    command.
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Linux系统中，停止进程称为杀死进程。对于带有systemd的Linux系统，你应该使用*systemctl kill*。对于没有systemd的系统，请使用传统的*kill*命令。
+- en: '*systemctl kill* is preferable because it stops all processes that belong to
+    a service and leaves no orphan processes, nor any processes that might restart
+    the service and continue to make trouble. First, try it with no options other
+    than the service name, then check the status:'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*systemctl kill*更好，因为它停止所有属于服务的进程，并且不会留下孤儿进程，也不会重新启动服务并继续造成麻烦。首先尝试不带除服务名称外的任何选项，然后检查状态：'
+- en: '[PRE38]'
+  id: totrans-210
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: 'The service has cleanly stopped. If this does not work, then try the nuclear
+    option:'
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 服务已干净地停止。如果这样做不起作用，那么尝试核心选项：
+- en: '[PRE39]'
+  id: totrans-212
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: 'The legacy *kill* command does not recognize service or command names, but
+    rather requires the PID of the offending process:'
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传统的*kill*命令不识别服务或命令名称，而是需要问题进程的PID：
+- en: '[PRE40]'
+  id: totrans-214
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: 'If this does not stop it, use the nuclear option:'
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果这不能停止它，使用核心选项：
+- en: '[PRE41]'
+  id: totrans-216
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: Discussion
+  id: totrans-217
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Use the *top* command to identify runaway processes. Run it with no options,
+    and the processes using up the most CPU resources are listed at the top. Press
+    the q key to exit *top*.
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *top* 命令识别失控的进程。无选项运行它，使用最多 CPU 资源的进程将显示在顶部。按下 q 键退出 *top*。
+- en: '[PRE42]'
+  id: totrans-219
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: '*kill* sends signals to processes, and the default signal is SIGTERM (signal
+    terminate). SIGTERM is gentle, allowing processes to shut down cleanly. SIGTERM
+    is also ignorable, and processes don’t have to pay attention to it. Signals can
+    be identified by name or number; for most folks the numbers are easier to remember,
+    so spelling out the default looks like this:'
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*kill* 向进程发送信号，默认信号是 SIGTERM（信号终止）。SIGTERM 是温和的，允许进程清理地关闭。SIGTERM 也可以被忽略，进程不必理会它。信号可以通过名称或数字来标识；对大多数人来说，数字更容易记住，因此默认的拼写方式如下：'
+- en: '[PRE43]'
+  id: totrans-221
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: '*kill -9* is SIGKILL. SIGKILL stops processes immediately and uncleanly, and
+    also attempts to stop all child processes.'
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*kill -9* 是 SIGKILL。SIGKILL 立即且不干净地停止进程，并尝试停止所有子进程。'
+- en: Killing services with *systemctl kill* is easier than with *kill*, and more
+    reliable. You only need the service name, and you don’t have to hunt down PIDs.
+    It ensures that all processes belonging to the service are stopped, which *kill*
+    cannot ensure.
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 *systemctl kill* 杀死服务比使用 *kill* 更简单且更可靠。你只需要服务名称，不必寻找 PID。它确保停止属于服务的所有进程，而
+    *kill* 不能保证这一点。
+- en: There are a ton of signals that have accumulated over the years, and you can
+    read all about them in *man 7 signal*. In my experience, the most relevant signals
+    are SIGTERM and SIGKILL, but don’t let that stop you from learning more about
+    the others.
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 多年来积累了大量信号，你可以在 *man 7 signal* 中了解全部内容。根据我的经验，最相关的信号是 SIGTERM 和 SIGKILL，但不要因此停止了解其他信号。
+- en: If you are uncomfortable with terminology like kill, parents, children, and
+    orphans, so am I. Maybe someday it will change.
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你对术语如 kill、parent、child 和 orphan 感到不舒服，我也是。也许总有一天会改变。
+- en: See Also
+  id: totrans-226
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 5 systemd.kill*'
+  id: totrans-227
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 5 systemd.kill*'
+- en: '*man 1 systemctl*'
+  id: totrans-228
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 systemctl*'
+- en: '*man 1 kill*'
+  id: totrans-229
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 kill*'
+- en: '*man 7 signal*'
+  id: totrans-230
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 7 signal*'
+- en: 4.8 Managing Runlevels with systemd
+  id: totrans-231
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 4.8 使用 systemd 管理运行级别
+- en: Problem
+  id: totrans-232
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to reboot to different system states in a manner similar to using SysV
+    runlevels.
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你希望以类似于使用 SysV 运行级别的方式重启到不同的系统状态。
+- en: Solution
+  id: totrans-234
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: systemd *targets* are similar to SysV runlevels. These are boot profiles that
+    start your system with different options, such as multiuser mode with a graphical
+    desktop, multiuser mode with no graphical desktop, and emergency and rescue modes
+    to use when your current target will not boot. (See the Discussion for more information
+    on runlevels.)
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd *targets* 类似于 SysV 运行级别。这些是引导配置文件，根据不同选项启动系统，例如具有图形桌面的多用户模式、无图形桌面的多用户模式以及紧急和救援模式，用于当前目标无法引导时使用（有关运行级别的更多信息，请参见讨论）。
+- en: 'The following command checks if the system is running and reports its state:'
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下命令检查系统是否正在运行并报告其状态：
+- en: '[PRE44]'
+  id: totrans-237
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: What is the default target?
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认目标是什么？
+- en: '[PRE45]'
+  id: totrans-239
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: 'Get the current runlevel:'
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 获取当前运行级别：
+- en: '[PRE46]'
+  id: totrans-241
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: 'Reboot to rescue mode:'
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重启到救援模式：
+- en: '[PRE47]'
+  id: totrans-243
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: 'Reboot to emergency mode:'
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重启到紧急模式：
+- en: '[PRE48]'
+  id: totrans-245
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE48]'
+- en: 'Reboot to the default mode:'
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重启到默认模式：
+- en: '[PRE49]'
+  id: totrans-247
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE49]'
+- en: 'Reboot to a different target without changing the default:'
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在不改变默认设置的情况下重启到不同的目标：
+- en: '[PRE50]'
+  id: totrans-249
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE50]'
+- en: 'Set a different default runlevel:'
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置不同的默认运行级别：
+- en: '[PRE51]'
+  id: totrans-251
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE51]'
+- en: 'List the runlevel target files and their symlinks on your system:'
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出系统上运行级别目标文件及其符号链接：
+- en: '[PRE52]'
+  id: totrans-253
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE52]'
+- en: 'List the dependencies in a runlevel target:'
+  id: totrans-254
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出运行级别目标中的依赖项：
+- en: '[PRE53]'
+  id: totrans-255
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE53]'
+- en: Discussion
+  id: totrans-256
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: SysV runlevels are different states that your system can boot to, for example,
+    with a graphical desktop, without a graphical desktop, and with emergency runlevels
+    to use when your default runlevel has problems and will not boot.
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: SysV 运行级别是系统可以引导到的不同状态，例如具有图形桌面、无图形桌面以及在默认运行级别出现问题时使用的紧急运行级别。
+- en: 'systemd *targets* approximately correspond to the legacy SysV runlevels:'
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd *targets* 大致对应传统的 SysV 运行级别：
+- en: '*runlevel0.target*, *poweroff.target*, halt'
+  id: totrans-259
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*runlevel0.target*，*poweroff.target*，关机'
+- en: '*runlevel1.target*, *rescue.target*, single-user text mode, all local filesystems
+    mounted, root user only, no networking'
+  id: totrans-260
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*runlevel1.target*，*rescue.target*，单用户文本模式，所有本地文件系统已挂载，仅 root 用户，无网络连接'
+- en: '*runlevel3.target*, *multi-user.target*, multiuser text mode (no graphical
+    environment)'
+  id: totrans-261
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*runlevel3.target*，*multi-user.target*，多用户文本模式（无图形环境）'
+- en: '*runlevel5.target*, *graphical.target*, multiuser graphical mode'
+  id: totrans-262
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*runlevel5.target*，*graphical.target*，多用户图形模式'
+- en: '*runlevel6.target*, *reboot.target*, reboot'
+  id: totrans-263
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*runlevel6.target*、*reboot.target*、重新启动'
+- en: '*systemctl emergency* is a special target that is more restricted than *rescue*
+    mode: no services, no mount points other than the root filesystem, no networking,
+    root user only. It is the most minimal running system for debugging problems.
+    You may see options to boot into a rescue or emergency mode in your GRUB2 bootloader
+    screen.'
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*systemctl emergency* 是一个特殊的目标，比 *rescue* 模式更受限：没有服务、没有挂载点，除了根文件系统外，没有网络，只有
+    root 用户可以使用。它是用于调试问题的最小运行系统。你可能在 GRUB2 引导加载器屏幕上看到启动到救援或紧急模式的选项。'
+- en: '*systemctl is-system-running* reports various system states:'
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*systemctl is-system-running* 报告各种系统状态：'
+- en: '*initializing* means the system has not completed startup.'
+  id: totrans-266
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*initializing* 表示系统尚未完成启动。'
+- en: '*starting* means the system is in the final stages of startup.'
+  id: totrans-267
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*starting* 表示系统处于启动的最后阶段。'
+- en: '*running* is fully operational, and all processes are started.'
+  id: totrans-268
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*running* 完全运行，并且所有进程已启动。'
+- en: '*degraded* means the system is operational, but one or more systemd units have
+    failed. Run *systemctl | grep failed* to see which units failed.'
+  id: totrans-269
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*degraded* 表示系统正常运行，但一个或多个 systemd 单元失败了。运行 *systemctl | grep failed* 查看哪些单元失败了。'
+- en: '*maintenance* means that either the *rescue* or *emergency* target is active.'
+  id: totrans-270
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*maintenance* 表示要么 *rescue* 要么 *emergency* 目标处于活动状态。'
+- en: '*stopping* means that systemd is shutting down.'
+  id: totrans-271
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*stopping* 表示 systemd 正在关闭。'
+- en: '*offline* means that systemd is not running.'
+  id: totrans-272
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*offline* 表示 systemd 未运行。'
+- en: '*unknown* means that there is a problem preventing systemd from determining
+    the operational state.'
+  id: totrans-273
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*unknown* 表示 systemd 无法确定操作状态存在问题。'
+- en: See Also
+  id: totrans-274
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 systemctl*'
+  id: totrans-275
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 systemctl*'
+- en: '*man 8 systemd-halt.service*'
+  id: totrans-276
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 8 systemd-halt.service*'
+- en: 4.9 Diagnosing Slow Startups
+  id: totrans-277
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 4.9 诊断慢启动
+- en: Problem
+  id: totrans-278
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: systemd promises faster startups, but your system starts up slowly, and you
+    want to find out why.
+  id: totrans-279
+  prefs: []
+  type: TYPE_NORMAL
+  zh: systemd 承诺更快的启动，但是你的系统启动缓慢，你想找出原因。
+- en: Solution
+  id: totrans-280
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'You want *systemd-analyze blame*. Run it with no options to see a list of system
+    processes and how long they took to start:'
+  id: totrans-281
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你想要执行 *systemd-analyze blame*。运行它时不加选项，可以看到系统进程列表及其启动所花费的时间：
+- en: '[PRE54]'
+  id: totrans-282
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE54]'
+- en: 'Analyze only user processes:'
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 仅分析用户进程：
+- en: '[PRE55]'
+  id: totrans-284
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE55]'
+- en: Discussion
+  id: totrans-285
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: It is useful to review everything that starts at boot and perhaps find services
+    you don’t want starting at boot. My favorite to disable is Bluetooth because I
+    don’t use it on my servers or PCs, but many Linux distros enable it by default.
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 审查每次启动时启动的所有内容很有用，也许可以找到不希望在启动时启动的服务。我最喜欢禁用的是蓝牙，因为我在服务器或个人电脑上不使用它，但许多 Linux
+    发行版默认启用它。
+- en: See Also
+  id: totrans-287
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '*man 1 systemd-analyze*'
+  id: totrans-288
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*man 1 systemd-analyze*'

@@ -1,0 +1,1640 @@
+- en: Chapter 2\. The Linux Kernel
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第二章。Linux内核
+- en: In [“Why an Operating System at All?”](ch01.xhtml#intro-os-overiew), we learned
+    that the main function of an operating system is to abstract over different hardware
+    and provide us with an API. Programming against this API allows us to write applications
+    without having to worry about where and how they are executed. In a nutshell,
+    the kernel provides such an API to programs.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在["为什么需要操作系统？"](ch01.xhtml#intro-os-overiew)中，我们了解到操作系统的主要功能是在不同的硬件之上提供抽象，并为我们提供API。通过编程调用这个API，我们可以编写应用程序，而不必担心它们在何处以及如何执行。简而言之，内核为程序提供了这样的API。
+- en: In this chapter, we discuss what the Linux kernel is and how you should be thinking
+    about it as a whole as well as about its components. You will learn about the
+    overall Linux architecture and the essential role the Linux kernel plays. One
+    main takeaway of this chapter is that while the kernel provides all the core functionality,
+    on its own it is not the operating system but only a very central part of it.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们将讨论Linux内核是什么，以及您应该如何整体思考它及其组成部分。您将了解Linux整体架构以及Linux内核的基本作用。本章的一个主要要点是，虽然内核提供了所有核心功能，但它本身并不是操作系统，而只是其中非常核心的一部分。
+- en: First, we take a bird’s-eye view, looking at how the kernel fits in and interacts
+    with the underlying hardware. Then, we review the computational core, discussing
+    different CPU architectures and how they relate to the kernel. Next, we zoom in
+    on the individual kernel components and discuss the API the kernel provides to
+    programs you can run. Finally, we look at how to customize and extend the Linux
+    kernel.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我们俯瞰全局，看看内核如何适应并与底层硬件交互。然后，我们回顾计算核心，讨论不同的CPU架构及其与内核的关系。接下来，我们放大内核的各个组件，并讨论内核为您可以运行的程序提供的API。最后，我们看看如何定制和扩展Linux内核。
+- en: The purpose of this chapter is to equip you with the necessary terminology,
+    make you aware of the interfacing between programs and the kernel, and give you
+    a basic idea what the functionality is. The chapter does not aim to turn you into
+    a kernel developer or even a sysadmin configuring and compiling kernels. If, however,
+    you want to dive into that, I’ve put together some pointers at the end of the
+    chapter.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章的目的是为您提供必要的术语，让您了解程序与内核之间的接口，并让您基本了解功能是什么。本章的目标不是让您成为内核开发人员，甚至不是系统管理员配置和编译内核。但是，如果您有兴趣深入研究，我在章节末尾提供了一些指引。
+- en: 'Now, let’s jump into the deep end: the Linux architecture and the central role
+    the kernel plays in this context.'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，让我们深入探讨：Linux架构及内核在这一背景下的中心作用。
+- en: Linux Architecture
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Linux架构
+- en: 'At a high level, the Linux architecture looks as depicted in [Figure 2-1](#fig-linux-arch).
+    There are three distinct layers you can group things into:'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在高层次上，Linux架构看起来如[图2-1](#fig-linux-arch)所示。您可以将事物分为三个不同的层次：
+- en: Hardware
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 硬件
+- en: From CPUs and main memory to disk drives, network interfaces, and peripheral
+    devices such as keyboards and monitors.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从CPU和主存储器到磁盘驱动器、网络接口和诸如键盘和显示器等外围设备。
+- en: The kernel
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核
+- en: The focus of the rest of this chapter. Note that there are a number of components
+    that sit between the kernel and user land, such as the init system and system
+    services (networking, etc.), but that are, strictly speaking, not part of the
+    kernel.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章剩余部分的重点。请注意，还有一些组件位于内核和用户空间之间，如初始化系统和系统服务（网络等），但严格来说，它们不是内核的一部分。
+- en: User land
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用户空间
+- en: Where the majority of apps are running, including operating system components
+    such as shells (discussed in [Chapter 3](ch03.xhtml#shells-scripting)), utilities
+    like `ps` or `ssh`, and graphical user interfaces such as X Window System–based
+    desktops.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数应用程序运行的地方，包括操作系统组件如shell（在[第三章](ch03.xhtml#shells-scripting)中讨论）、诸如`ps`或`ssh`之类的实用程序，以及基于X
+    Window系统的图形用户界面桌面。
+- en: We focus in this book on the upper two layers of [Figure 2-1](#fig-linux-arch),
+    that is, the kernel and user land. We only touch on the hardware layer in this
+    and a few other chapters, where relevant.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书重点讨论[图2-1](#fig-linux-arch)中的上两层，即内核和用户空间。在这本书的本章和其他几章中，我们只会涉及硬件层面，涉及相关内容。
+- en: The interfaces between the different layers are well defined and part of the
+    Linux operating system package. Between the kernel and user land is the interface
+    called *system calls* (*syscalls* for short). We will explore this in detail in
+    [“syscalls”](#kernel-syscalls).
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不同层次之间的接口已经明确定义，并且是 Linux 操作系统包的一部分。在内核和用户空间之间的接口称为*系统调用*（简称*syscalls*）。我们将在[“系统调用”](#kernel-syscalls)中详细探讨这一点。
+- en: 'The interface between the hardware and the kernel is, unlike the syscalls,
+    not a single one. It consists of a collection of individual interfaces, usually
+    grouped by hardware:'
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与系统调用不同，硬件与内核之间的接口不是单一的。它由多个个体接口组成，通常按硬件分组：
+- en: The CPU interface (see [“CPU Architectures”](#kernel-cpu-arch))
+  id: totrans-17
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: CPU 接口（见[“CPU 架构”](#kernel-cpu-arch)）
+- en: The interface with the main memory, covered in [“Memory Management”](#kernel-memory-management)
+  id: totrans-18
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 与主存储器的接口，详见[“内存管理”](#kernel-memory-management)
+- en: Network interfaces and drivers (wired and wireless; see [“Networking”](#kernel-networking))
+  id: totrans-19
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 网络接口和驱动程序（有线和无线；见[“网络”](#kernel-networking)）
+- en: Filesystem and block devices driver interfaces (see [“Filesystems”](#kernel-filesystems))
+  id: totrans-20
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 文件系统和块设备驱动程序接口（见[“文件系统”](#kernel-filesystems)）
+- en: Character devices, hardware interrupts, and device drivers, for input devices
+    like keyboards, terminals, and other I/O (see [“Device Drivers”](#kernel-drivers))
+  id: totrans-21
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 字符设备、硬件中断和设备驱动程序，适用于键盘、终端和其他 I/O 输入设备（见[“设备驱动程序”](#kernel-drivers)）
+- en: '![lmlx 0201](Images/lmlx_0201.png)'
+  id: totrans-22
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0201](Images/lmlx_0201.png)'
+- en: Figure 2-1\. A high-level view of the Linux architecture
+  id: totrans-23
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-1\. Linux 架构的高级视图
+- en: As you can see, many of the things we usually consider part of the Linux operating
+    system, such as shell or utilities such as `grep`, `find`, and `ping`, are in
+    fact not part of the kernel but, very much like an app you download, part of user
+    land.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您所见，许多我们通常认为属于 Linux 操作系统一部分的东西，比如 shell 或诸如 `grep`、`find` 和 `ping` 等实用程序，实际上并不是内核的一部分，而更像是您下载的应用程序，属于用户空间。
+- en: On the topic of user land, you will often read or hear about user versus kernel
+    mode. This effectively refers to how privileged the access to hardware is and
+    how restricted the abstractions available are.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在用户空间的讨论中，您经常会读到或听到用户与内核模式的区别。这实际上指的是对硬件访问的特权以及可用的抽象受到的限制程度。
+- en: In general, *kernel mode* means fast execution with limited abstraction, whereas
+    *user mode* means comparatively slower but safer and more convenient abstractions.
+    Unless you are a [kernel developer](https://oreil.ly/AhAm6), you can almost always
+    ignore kernel mode, since all your apps will run in user land. Knowing how to
+    interact with the kernel ([“syscalls”](#kernel-syscalls)), on the other hand,
+    is vital and part of our considerations.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一般而言，*内核模式*意味着快速执行但抽象化程度有限，而*用户模式*则意味着相对较慢但更安全和更便捷的抽象化。除非您是[内核开发者](https://oreil.ly/AhAm6)，否则几乎可以忽略内核模式，因为所有应用程序都将在用户空间运行。然而，了解如何与内核交互（见[“系统调用”](#kernel-syscalls)）对我们的考虑至关重要。
+- en: With this Linux architecture overview out of the way, let’s work our way up
+    from the hardware.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在 Linux 架构概述已经介绍完毕，让我们从硬件开始逐步深入。
+- en: CPU Architectures
+  id: totrans-28
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: CPU 架构
+- en: 'Before we discuss the kernel components, let’s review a basic concept: computer
+    architectures or CPU families, which we will use interchangeably. The fact that
+    Linux runs on a large number of different CPU architectures is arguably one of
+    the reasons it is so popular.'
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在讨论内核组件之前，让我们回顾一个基本概念：计算机体系结构或 CPU 家族，我们将这两个术语视为同义词使用。Linux 可以运行在众多不同的 CPU 架构上，这无疑是其如此受欢迎的原因之一。
+- en: Next to generic code and drivers, the Linux kernel contains architecture-specific
+    code. This separation allows it to port Linux and make it available on new hardware
+    quickly.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了通用代码和驱动程序，Linux 内核还包含特定于体系结构的代码。这种分离使得能够迅速将 Linux 移植并应用于新硬件。
+- en: There are a number of ways to figure out what CPU your Linux is running. Let’s
+    have a look at a few in turn.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有多种方法可以确定您的 Linux 运行在哪种 CPU 上。让我们依次看看几种。
+- en: 'One way is a dedicated tool called `dmidecode` that interacts with the BIOS.
+    If this doesn’t yield results, you could try the following (output shortened):'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一种方法是使用称为 `dmidecode` 的专用工具与 BIOS 进行交互。如果这不起作用，您可以尝试以下方法（输出已缩短）：
+- en: '[PRE0]'
+  id: totrans-33
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: '[![1](Images/1.png)](#co_the_linux_kernel_CO1-1)'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_the_linux_kernel_CO1-1)'
+- en: The architecture we’re looking at here is `x86_64`.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们所关注的架构是 `x86_64`。
+- en: '[![2](Images/2.png)](#co_the_linux_kernel_CO1-2)'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_the_linux_kernel_CO1-2)'
+- en: It looks like there are four CPUs available.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 看起来有四个可用的 CPU。
+- en: '[![3](Images/3.png)](#co_the_linux_kernel_CO1-3)'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_the_linux_kernel_CO1-3)'
+- en: The CPU model name is Intel Core Processor (Haswell).
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CPU 型号名称是英特尔酷睿处理器（Haswell）。
+- en: In the previous command, we saw that the CPU architecture was reported to be
+    `x86_64`, and the model was reported as “Intel Core Processor (Haswell).” We will
+    learn more about how to decode this in a moment.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在前面的命令中，我们看到 CPU 架构被报告为 `x86_64`，型号报告为“英特尔酷睿处理器（Haswell）”。我们稍后将更多了解如何解码这些信息。
+- en: Another way to glean similar architecture information is by using `cat /proc/cpuinfo`,
+    or, if you’re only interested in the architecture, by simply calling `uname -m`.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种获取类似架构信息的方式是使用 `cat /proc/cpuinfo`，或者，如果你只关心架构，可以简单地调用 `uname -m`。
+- en: Now that we have a handle on querying the architecture information on Linux,
+    let’s see how to decode it.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们掌握了如何在Linux上查询架构信息，让我们看看如何解码它。
+- en: x86 Architecture
+  id: totrans-43
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: x86 架构
+- en: '[x86](https://oreil.ly/PoQOT) is an instruction set family originally developed
+    by Intel and later licensed to Advanced Micro Devices (AMD). Within the kernel,
+    `x64` refers to the Intel 64-bit processors, and `x86` stands for Intel 32-bit.
+    Further, `amd64` refers to AMD 64-bit processors.'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[x86](https://oreil.ly/PoQOT) 是最初由英特尔开发并后来许可给了 AMD 的指令集系列。在内核中，`x64` 指的是英特尔的
+    64 位处理器，`x86` 表示英特尔的 32 位处理器。此外，`amd64` 指的是 AMD 的 64 位处理器。'
+- en: Today, you’ll mostly find the x86 CPU family in desktops and laptops, but it’s
+    also widely used in servers. Specifically, `x86` forms the basis of the public
+    cloud. It is a powerful and widely available architecture but isn’t very energy
+    efficient. Partially due to its heavy reliance on out-of-order execution, it recently
+    received a lot of attention around security issues such as [Meltdown](https://oreil.ly/nkEVB).
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如今，在桌面和笔记本电脑中主要使用x86 CPU家族，但它也广泛用于服务器。具体来说，`x86` 架构构成了公共云的基础。它是一种强大且广泛可用的架构，但能效不高。部分原因是它严重依赖乱序执行，最近因安全问题（如[Meltdown](https://oreil.ly/nkEVB)）而受到广泛关注。
+- en: For further details, for example the Linux/x86 boot protocol or Intel and AMD
+    specific background, see the [x86-specific kernel documentation](https://oreil.ly/CBvRQ).
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 欲了解更多详细信息，例如Linux/x86引导协议或英特尔和AMD特定的背景，请参阅[x86特定的内核文档](https://oreil.ly/CBvRQ)。
+- en: ARM Architecture
+  id: totrans-47
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: ARM 架构
+- en: More than 30 years old, [ARM](https://oreil.ly/E9HIN) is a family of Reduced
+    Instruction Set Computing (RISC) architectures. RISC usually consists of many
+    generic CPU registers along with a small set of instructions that can be executed
+    faster.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 超过30年历史的[ARM](https://oreil.ly/E9HIN) 是一系列精简指令集计算（RISC）架构。RISC通常包括许多通用CPU寄存器以及可以更快执行的一小组指令。
+- en: Because the designers at Acorn—the original company behind ARM—focused from
+    the get-go on minimal power consumption, you find ARM-based chips in a number
+    of portable devices such as iPhones. They are also in most Android-based phones
+    and in embedded systems found in IoT, such as in the Raspberry Pi.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于Acorn公司——ARM背后的原始公司——从一开始就专注于最小功耗，你可以在许多便携设备中找到基于ARM的芯片，如iPhone。它们也广泛用于大多数基于Android的手机和嵌入式系统中的物联网设备，如树莓派。
+- en: Given that they are fast, cheap, and produce less heat than x86 chips, you shouldn’t
+    be surprised to increasingly find ARM-based CPUs—such as [AWS Graviton](https://oreil.ly/JpgdQ)—in
+    the data center. While simpler than x86, ARM is not immune to vulnerabilities,
+    such as [Spectre](https://oreil.ly/M79Yu). For further details, see the [ARM-specific
+    kernel documentation](https://oreil.ly/i7kj4).
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 考虑到它们快速、廉价且产热量比x86芯片少，你不应对在数据中心中越来越多地发现基于ARM的CPU（例如[AWS Graviton](https://oreil.ly/JpgdQ)）感到意外。虽然比x86简单，但ARM并非不受漏洞影响，例如[Spectre](https://oreil.ly/M79Yu)。有关详细信息，请参阅[ARM特定的内核文档](https://oreil.ly/i7kj4)。
+- en: RISC-V Architecture
+  id: totrans-51
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: RISC-V 架构
+- en: An up-and-coming player, [RISC-V (pronounced *risk five*)](https://oreil.ly/wwnIA)
+    is an open RISC standard that was originally developed by the University of California,
+    Berkeley. As of 2021, a number of implementations exist, ranging from Alibaba
+    Group and Nvidia to start-ups such as SiFive. While exciting, this is a relatively
+    new and not widely used (yet) CPU family, and to get an idea how it look and feels,
+    you may want to research it a little—a good start is Shae Erisson’s article [“Linux
+    on RISC-V”](https://oreil.ly/6senY).
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个新兴的玩家，[RISC-V（发音为 *risk five*）](https://oreil.ly/wwnIA) 是一个开放的 RISC 标准，最初由加州大学伯克利分校开发。截至
+    2021 年，已存在多种实现，从阿里巴巴集团和英伟达到初创公司如 SiFive。尽管令人兴奋，这是一个相对新的且尚未广泛使用的 CPU 家族，想要了解其外观和感觉，你可能需要进行一些研究——一个好的开始是
+    Shae Erisson 的文章 [“Linux on RISC-V”](https://oreil.ly/6senY)。
+- en: For further details, see the [RISC-V kernel documentation](https://oreil.ly/LA1Oq).
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要获取更多详细信息，请参阅[RISC-V 内核文档](https://oreil.ly/LA1Oq)。
+- en: Kernel Components
+  id: totrans-54
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 内核组件
+- en: Now that you know the basics of CPU architectures, it’s time to dive into the
+    kernel. While the Linux kernel is a monolithic one—that is, all the components
+    discussed are part of a single binary—there are functional areas in the code base
+    that we can identify and ascribe dedicated responsibilities.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经了解了 CPU 架构的基础知识，是时候深入研究内核了。尽管 Linux 内核是一个单体内核，也就是说，所有讨论的组件都是单个二进制文件的一部分，但我们可以在代码库中识别并分配专门的功能区域。
+- en: 'As we’ve discussed in [“Linux Architecture”](#kernel-architecture), the kernel
+    sits between the hardware and the apps you want to run. The main functional blocks
+    you find in the kernel code base are as follows:'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如我们在[“Linux 架构”](#kernel-architecture)中讨论过的那样，内核位于硬件和您想要运行的应用程序之间。内核代码库中的主要功能模块如下：
+- en: Process management, such as starting a process based on an executable file
+  id: totrans-57
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 进程管理，例如基于可执行文件启动进程
+- en: Memory management, such as allocating memory for a process or map a file into
+    memory
+  id: totrans-58
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 内存管理，例如为进程分配内存或将文件映射到内存中
+- en: Networking, like managing network interfaces or providing the network stack
+  id: totrans-59
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 网络，如管理网络接口或提供网络栈
+- en: Filesystems providing file management and supporting the creation and deletion
+    of files
+  id: totrans-60
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 提供文件管理并支持文件的创建和删除的文件系统
+- en: Management of character devices and device drivers
+  id: totrans-61
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 字符设备和设备驱动程序的管理
+- en: These functional components often come with interdependencies, and it’s a truly
+    challenging task to make sure that the [kernel developer motto](https://oreil.ly/6YDeF)
+    “Kernel never breaks user land” holds true.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些功能组件通常伴随着相互依赖关系，并确保“内核永不破坏用户空间”的[内核开发者格言](https://oreil.ly/6YDeF)是一项真正具有挑战性的任务。
+- en: With that, let’s have a closer look at the kernel components.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了这些了解之后，让我们更仔细地看看内核组件。
+- en: Process Management
+  id: totrans-64
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 进程管理
+- en: There are a number of process management–related parts in the kernel. Some of
+    them deal with CPU architecture–specific things, such as interrupts, and others
+    focus on the launching and scheduling of programs.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核中有许多与进程管理相关的部分。其中一些部分处理与 CPU 架构特定的事务，例如中断，而其他部分专注于程序的启动和调度。
+- en: Before we get to Linux specifics, let’s note that commonly, a process is the
+    user-facing unit, based on an executable program (or binary). A thread, on the
+    other hand, is a unit of execution in the context of a process. You might have
+    come across the term *multithreading*, which means that a process has a number
+    of parallel executions going on, potentially running on different CPUs.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在深入了解 Linux 具体细节之前，让我们注意到，通常情况下，一个进程是用户界面单元，基于可执行程序（或二进制文件）。另一方面，线程是在进程上下文中的执行单元。您可能听说过
+    *多线程* 这个术语，它意味着一个进程有多个并行执行，可能在不同的 CPU 上运行。
+- en: 'With this general view out of the way, let’s see how Linux goes about it. From
+    most granular to smallest unit, Linux has the following:'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了这个总体视图之后，让我们看看 Linux 是如何实现的。从最精细到最小单元，Linux 有以下几个方面：
+- en: Sessions
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 会话
+- en: Contain one or more process groups and represent a high-level user-facing unit
+    with optional `tty` attached. The kernel identifies a session via a number called
+    *session ID* (SID).
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包含一个或多个进程组，并代表一个高级用户界面单元，可以选择连接 `tty`。内核通过称为 *会话 ID*（SID）的数字标识会话。
+- en: Process groups
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程组
+- en: Contain one or more processes, with at most one process group in a session as
+    the foreground process group. The kernel identifies a process group via a number
+    called *process group ID* (PGID).
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包含一个或多个进程，会话中至多有一个作为前台进程组的进程组。内核通过称为 *进程组 ID*（PGID）的数字标识进程组。
+- en: Processes
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程
+- en: Abstractions that group multiple resources (address space, one or more threads,
+    sockets, etc.), which the kernel exposes to you via */proc/self* for the current
+    process. The kernel identifies a process via a number called *process ID* (PID).
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 抽象出多个资源（地址空间、一个或多个线程、套接字等），内核通过 */proc/self* 为当前进程向您公开。内核通过称为 *进程 ID*（PID）的数字标识进程。
+- en: Threads
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 线程
+- en: Implemented by the kernel as processes. That is, there are no dedicated data
+    structures representing threads. Rather, a thread is a process that shares certain
+    resources (such as memory or signal handlers) with other processes. The kernel
+    identifies a thread via *thread IDs* (TID) and *thread group IDs* (TGID), with
+    the semantics that a shared TGID value means a multithreaded process (in user
+    land; there are also kernel threads, but that’s beyond our scope).
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由内核实现为进程。也就是说，没有专门表示线程的数据结构。相反，线程是与其他进程共享某些资源（如内存或信号处理程序）的进程。内核通过*线程 ID*（TID）和*线程组
+    ID*（TGID）来识别线程，共享 TGID 值意味着一个多线程的进程（在用户空间；还有内核线程，但这超出了我们的范围）。
+- en: Tasks
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任务
+- en: In the kernel there is a data structure called `task_struct`—defined in [*sched.h*](https://oreil.ly/nIgz8)—that
+    forms the basis of implementing processes and threads alike. This data structure
+    captures scheduling-related information, identifiers (such as PID and TGID), and
+    signal handlers, as well as other information, such as that related to performance
+    and security. In a nutshell, all of the aforementioned units are derived and/or
+    anchored in tasks; however, tasks are not exposed as such outside of the kernel.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在内核中有一个称为`task_struct`的数据结构——在[*sched.h*](https://oreil.ly/nIgz8)中定义——它是实现进程和线程的基础。该数据结构包含调度相关信息、标识符（如
+    PID 和 TGID）、信号处理程序，以及与性能和安全性相关的其他信息。简而言之，所有前述的单元都源自和/或锚定在任务中；然而，在内核外部并没有直接暴露任务。
+- en: We will see sessions, process groups, and processes in action and learn how
+    to manage them in [Chapter 6](ch06.xhtml#running-apps), and they’ll appear again
+    in the context of containers in [Chapter 9](ch09.xhtml#advanced).
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将在[第 6 章](ch06.xhtml#running-apps)中看到会话、进程组和进程的实际运作方式，并学习如何管理它们，并且它们将再次出现在[第
+    9 章](ch09.xhtml#advanced)中，关于容器的上下文中。
+- en: 'Let’s see some of these concepts in action:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看这些概念如何实际运作：
+- en: '[PRE1]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: '[![1](Images/1.png)](#co_the_linux_kernel_CO2-1)'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_the_linux_kernel_CO2-1)'
+- en: The `bash` shell process has PID, PGID, and SID of 6756\. From `ls -al /proc/6756/task/6756/`,
+    we can glean the task-level information.
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bash` shell 进程的 PID、PGID 和 SID 是 6756。从`ls -al /proc/6756/task/6756/`可以获取任务级别的信息。'
+- en: '[![2](Images/2.png)](#co_the_linux_kernel_CO2-2)'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_the_linux_kernel_CO2-2)'
+- en: The `ps` process has PID/PGID 6790 and the same SID as the shell.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ps` 进程的 PID/PGID 是 6790，与 shell 相同的 SID。'
+- en: We mentioned earlier on that in Linux the task data structure has some scheduling-related
+    information at the ready. This means that at any given time a process is in a
+    certain state, as shown in [Figure 2-2](#fig-process-states).
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们之前提到在 Linux 中任务数据结构中随时可获得一些与调度相关的信息。这意味着在任何给定时间，进程处于特定状态，如[图 2-2](#fig-process-states)所示。
+- en: '![lmlx 0202](Images/lmlx_0202.png)'
+  id: totrans-86
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0202](Images/lmlx_0202.png)'
+- en: Figure 2-2\. Linux process states
+  id: totrans-87
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-2\. Linux 进程状态
+- en: Note
+  id: totrans-88
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注
+- en: Strictly speaking, the process states are a little more complicated; for example,
+    Linux distinguishes between interruptible and uninterruptible sleep, and there
+    is also the zombie state (in which it has lost its parent process). If you’re
+    interested in the details, check out the article [“Process States in Linux”](https://oreil.ly/XBXbU).
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 严格来说，进程状态稍微复杂一些；例如，Linux 区分可中断和不可中断的睡眠状态，还有僵尸状态（失去父进程）。如果你对细节感兴趣，请查阅文章[“Linux
+    中的进程状态”](https://oreil.ly/XBXbU)。
+- en: Different events cause state transitions. For example, a running process might
+    transition to the waiting state when it carries out some I/O operation (such as
+    reading from a file) and can’t proceed with execution (off CPU).
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 不同的事件会导致状态转换。例如，运行中的进程在执行一些 I/O 操作（如从文件中读取）时可能会转换到等待状态，无法继续执行（离开 CPU）。
+- en: 'Having taken a quick look at process management, let’s examine a related topic:
+    memory.'
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简单浏览了一下进程管理之后，让我们来看一个相关的话题：内存。
+- en: Memory Management
+  id: totrans-92
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 内存管理
+- en: 'Virtual memory makes your system appear as if it has more memory than it physically
+    has. In fact, every process gets a lot of (virtual) memory. This is how it works:
+    both physical memory and virtual memory are divided into fixed-length chunks we
+    call *pages*.'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虚拟内存使得您的系统看起来比实际拥有更多的内存。事实上，每个进程都获得了大量（虚拟）内存。工作原理如下：物理内存和虚拟内存都被划分为我们称为*页*的固定长度块。
+- en: '[Figure 2-3](#fig-virtual-memory-management) shows the virtual address spaces
+    of two processes, each with its own page table. These page tables map virtual
+    pages of the process into physical pages in main memory (aka RAM).'
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[图 2-3](#fig-virtual-memory-management)展示了两个进程的虚拟地址空间，每个进程都有自己的页表。这些页表将进程的虚拟页面映射到主内存（即RAM）中的物理页面。'
+- en: '![lmlx 0203](Images/lmlx_0203.png)'
+  id: totrans-95
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0203](Images/lmlx_0203.png)'
+- en: Figure 2-3\. Virtual memory management overview
+  id: totrans-96
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-3\. 虚拟内存管理概述
+- en: 'Multiple virtual pages can point to the same physical page via their respective
+    process-level page tables. This is, in a sense, the core of memory management:
+    how to effectively provide each process with the illusion that its page actually
+    exists in RAM while using the existing space optimally.'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 多个虚拟页面可以通过各自的进程级页表指向同一个物理页面。从某种意义上说，这是内存管理的核心：如何在有效地为每个进程提供其页面实际存在于RAM中的幻觉的同时，最优地使用现有空间。
+- en: Every time the CPU accesses a process’s virtual page, the CPU would in principle
+    have to translate the virtual address a process uses to the corresponding physical
+    address. To speed up this process—which can be multilevel and hence slow—modern
+    CPU architectures support a lookup on-chip called [translation lookaside buffer
+    (TLB)](https://oreil.ly/y3xy0). The TLB is effectively a small cache that, in
+    case of a miss, causes the CPU to go via the process page table(s) to calculate
+    the physical address of a page and update the TLB with it.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每当CPU访问一个进程的虚拟页时，CPU原则上需要将进程使用的虚拟地址转换为相应的物理地址。为了加速这一过程——这可能是多级的，因此很慢——现代CPU架构支持芯片上的查找，称为[翻译后备缓冲区（TLB）](https://oreil.ly/y3xy0)。TLB实际上是一个小缓存，如果未命中，则导致CPU通过进程的页表计算页面的物理地址，并将其更新到TLB中。
+- en: Traditionally, Linux had a default page size of 4 KB, but since kernel v2.6.3,
+    it supports [huge pages](https://oreil.ly/7rqLO), to better support modern architectures
+    and workloads. For example, 64-bit Linux allows you to use up to 128 TB of virtual
+    address space (with virtual being the theoretical addressable number of memory
+    addresses) per process, with an approximate 64 TB of physical memory (with physical
+    being the amount of RAM you have in your machine) in total.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传统上，Linux的默认页面大小为4 KB，但自内核v2.6.3以来，它支持[大页面](https://oreil.ly/7rqLO)，以更好地支持现代架构和工作负载。例如，64位Linux允许每个进程使用高达128
+    TB的虚拟地址空间（虚拟是指理论上可寻址的内存地址数），总共约64 TB的物理内存（物理是指机器上实际的RAM量）。
+- en: 'OK, that was a lot of theoretical information. Let’s have a look at it from
+    a more practical point of view. A very useful tool to figure out memory-related
+    information such as how much RAM is available to you is the */proc/meminfo* interface:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 好的，这是大量的理论信息。让我们从更实际的角度来看待它。一个非常有用的工具，用于查找诸如可用RAM量等与内存相关的信息，是*/proc/meminfo*接口：
+- en: '[PRE2]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: '[![1](Images/1.png)](#co_the_linux_kernel_CO3-1)'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_the_linux_kernel_CO3-1)'
+- en: List details on physical memory (RAM); that’s 4 GB there.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出物理内存（RAM）的详细信息；那里有4 GB。
+- en: '[![2](Images/2.png)](#co_the_linux_kernel_CO3-2)'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_the_linux_kernel_CO3-2)'
+- en: List details on virtual memory; that’s a bit more than 34 TB there.
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出虚拟内存的详细信息；那里有超过34 TB。
+- en: '[![3](Images/3.png)](#co_the_linux_kernel_CO3-3)'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_the_linux_kernel_CO3-3)'
+- en: List huge pages information; apparently here the page size is 2 MB.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出大页面的信息；显然这里的页面大小为2 MB。
+- en: 'With that, we move on to the next kernel function: networking.'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们进入下一个内核函数：网络。
+- en: Networking
+  id: totrans-109
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 网络
+- en: One important function of the kernel is to provide networking functionality.
+    Whether you want to browse the web or copy data to a remote system, you depend
+    on the network.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核的一个重要功能是提供网络功能。无论您想浏览网页还是将数据复制到远程系统，您都依赖网络。
+- en: 'The Linux network stack follows a layered architecture:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux网络堆栈遵循分层架构：
+- en: Sockets
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 套接字
+- en: For abstracting communication
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于抽象通信
+- en: Transmission Control Protocol (TCP) and User Datagram Protocol (UDP)
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传输控制协议（TCP）和用户数据报协议（UDP）
+- en: For connection-oriented communication and connectionless communication, respectively
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 分别用于面向连接的通信和无连接的通信
+- en: Internet Protocol (IP)
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 互联网协议（IP）
+- en: For addressing machines
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于处理机器地址
+- en: These three actions are all that the kernel takes care of. The application layer
+    protocols such as HTTP or SSH are, usually, implemented in user land.
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核负责这三个动作。应用层协议（例如HTTP或SSH）通常是在用户空间中实现的。
+- en: 'You can get an overview of your network interfaces using (output edited):'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用以下命令获取您的网络接口概述（输出已编辑）：
+- en: '[PRE3]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Further, `ip route` provides you with routing information. Since we have a dedicated
+    networking chapter ([Chapter 7](ch07.xhtml#networking)) where we will dive deep
+    into the networking stack, the supported protocols, and typical operations, we
+    keep it at this and move on to the next kernel component, block devices and filesystems.
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，`ip route`提供了路由信息。因为我们有一个专门的网络章节（[第7章](ch07.xhtml#networking)），我们将深入研究网络堆栈、支持的协议和典型操作，我们将在此保持这样的状态，并转向下一个内核组件，即块设备和文件系统。
+- en: Filesystems
+  id: totrans-122
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 文件系统
+- en: Linux uses filesystems to organize files and directories on storage devices
+    such as hard disk drives (HDDs) and solid-state drives (SSDs) or flash memory.
+    There are many types of filesystems, such as `ext4` and `btrfs` or NTFS, and you
+    can have multiple instances of the same filesystem in use.
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux使用文件系统来组织存储设备（如硬盘驱动器（HDD）和固态硬盘（SSD）或闪存内存）上的文件和目录。有许多类型的文件系统，如`ext4`和`btrfs`或NTFS，并且您可以同时使用多个相同的文件系统实例。
+- en: Virtual File System (VFS) was originally introduced to support multiple filesystem
+    types and instances. The highest layer in VFS provides a common API abstraction
+    of functions such as open, close, read, and write. At the bottom of VFS are filesystem
+    abstractions called *plug-ins* for the given filesystem.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虚拟文件系统（VFS）最初是引入以支持多种文件系统类型和实例。在VFS的最高层提供了诸如打开、关闭、读取和写入等函数的通用API抽象。在VFS的底部是称为给定文件系统的*插件*的文件系统抽象。
+- en: We will go into greater detail on filesystems and file operations in [Chapter 5](ch05.xhtml#files).
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将在[第5章](ch05.xhtml#files)中详细讨论文件系统和文件操作。
+- en: Device Drivers
+  id: totrans-126
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 设备驱动程序
+- en: A *driver* is a bit of code that runs in the kernel. Its job is to manage a
+    device, which can be actual hardware—like a keyboard, a mouse, or hard disk drives—or
+    it can be a pseudo-device such as a pseudo-terminal under */dev/pts/* (which is
+    not a physical device but can be treated like one).
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*驱动程序*是在内核中运行的一小段代码。它的工作是管理设备，可以是实际的硬件，如键盘、鼠标或硬盘驱动器，也可以是伪设备，例如*/dev/pts/*下的伪终端（它不是物理设备，但可以像一个物理设备一样对待）。'
+- en: Another interesting class of hardware are [*graphics processing units* (GPUs)](https://oreil.ly/os7pu),
+    which traditionally were used to accelerate graphics output and ease the load
+    on the CPU. In recent years, GPUs have found a new use case in the context of
+    [machine learning](https://oreil.ly/qrVcY), and hence they are not exclusively
+    relevant in desktop environments.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个有趣的硬件类别是[*图形处理单元*（GPU）](https://oreil.ly/os7pu)，传统上用于加速图形输出并减轻CPU负担。近年来，GPU在[机器学习](https://oreil.ly/qrVcY)领域找到了新的用例，因此它们不仅在桌面环境中具有相关性。
+- en: The driver may be built statically into the kernel, or it can be built as a
+    kernel module (see [“Modules”](#kernel-modules)) so that it can be dynamically
+    loaded when needed.
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 驱动程序可以静态构建到内核中，也可以作为内核模块构建（参见[“模块”](#kernel-modules)），以便在需要时动态加载。
+- en: Tip
+  id: totrans-130
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: If you’re interested in an interactive way to explore device drivers and how
+    kernel components interact, check out the [Linux kernel map](https://oreil.ly/voBtR).
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你对交互式探索设备驱动程序及内核组件如何交互感兴趣，请查看[Linux内核地图](https://oreil.ly/voBtR)。
+- en: The kernel [driver model](https://oreil.ly/Cb6mw) is complicated and out of
+    scope for this book. However, following are a few hints for interacting with it,
+    just enough so that you know where to find what.
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核[驱动程序模型](https://oreil.ly/Cb6mw)复杂且超出了本书的范围。但是，以下是一些与之交互的提示，仅足够让您知道在哪里找到需要的内容。
+- en: 'To get an overview of the devices on your Linux system, you can use the following:'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要获取Linux系统上设备的概述，您可以使用以下方法：
+- en: '[PRE4]'
+  id: totrans-134
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Further, you can use the following to list mounted devices:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，您可以使用以下方法列出已挂载的设备：
+- en: '[PRE5]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: With this, we have covered the Linux kernel components and move to the interface
+    between the kernel and user land.
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过这一部分，我们已经涵盖了Linux内核组件，并转向内核与用户空间之间的接口。
+- en: syscalls
+  id: totrans-138
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 系统调用
+- en: Whether you sit in front of a terminal and type `touch test.txt` or whether
+    one of your apps wants to download the content of a file from a remote system,
+    at the end of the day you ask Linux to turn the high-level instruction, such as
+    “create a file” or “read all bytes from address so and so,” into a set of concrete,
+    architecture-dependent steps. In other words, the service interface the kernel
+    exposes and that user land entities call is the set of system calls, or [syscalls](https://oreil.ly/UF09U)
+    for short.
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论您是坐在终端前输入`touch test.txt`，还是您的应用程序想要从远程系统下载文件的内容，归根结底，您都要求Linux将高级指令（例如“创建文件”或“从某处地址读取所有字节”）转换为一组具体的、与体系结构相关的步骤。换句话说，内核公开的服务接口及用户空间实体调用的即是系统调用集合，或简称为[syscalls](https://oreil.ly/UF09U)。
+- en: 'Linux has hundreds of syscalls: around three hundred or more, depending on
+    the CPU family. However, you and your programs don’t usually invoke these syscalls
+    directly but via what we call the *C standard library*. The standard library provides
+    wrapper functions and is available in various implementations, such as [glibc](https://oreil.ly/mZPRy)
+    or [musl](https://oreil.ly/jnTCA).'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux有数百种系统调用：大约三百个或更多，具体取决于CPU系列。然而，您和您的程序通常不会直接调用这些系统调用，而是通过我们称之为*C标准库*来调用。标准库提供了包装函数，并以各种实现形式提供，如[glibc](https://oreil.ly/mZPRy)或[musl](https://oreil.ly/jnTCA)。
+- en: 'These wrapper libraries perform an important task. They take care of the repetitive
+    low-level handling of the execution of a syscall. System calls are implemented
+    as software interrupts, causing an exception that transfers the control to an
+    exception handler. There are a number of steps to take care of every time a syscall
+    is invoked, as depicted in [Figure 2-4](#fig-syscall-seq):'
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些包装库执行了一个重要的任务。它们处理了系统调用执行的重复低级别处理。系统调用实现为软件中断，导致传输控制到异常处理程序。每次调用系统调用时都需要处理一些步骤，如[图2-4](#fig-syscall-seq)所示：
+- en: '![lmlx 0204](Images/lmlx_0204.png)'
+  id: totrans-142
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0204](Images/lmlx_0204.png)'
+- en: Figure 2-4\. syscall execution steps in Linux
+  id: totrans-143
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图2-4\. Linux中的系统调用执行步骤
+- en: Defined in *syscall.h* and architecture-dependent files, the kernel uses a so-called
+    *syscall table*, effectively an array of function pointers in memory (stored in
+    a variable called `sys_call_table`) to keep track of syscalls and their corresponding
+    handlers.
+  id: totrans-144
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 定义在*syscall.h*和与体系结构相关的文件中，内核使用所谓的*syscall表*，实际上是内存中的函数指针数组（存储在名为`sys_call_table`的变量中），用于跟踪系统调用及其对应的处理程序。
+- en: With the `system_call()` function acting like a syscall multiplexer, it first
+    saves the hardware context on the stack, then performs checks (like if tracing
+    is performed), and then jumps to the function pointed to by the respective syscall
+    number index in the `sys_call_table`.
+  id: totrans-145
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: '`system_call()`函数充当系统调用复用器，它首先将硬件上下文保存在堆栈上，然后执行检查（例如是否执行跟踪），然后跳转到`sys_call_table`中相应系统调用编号索引指向的函数。'
+- en: After the syscall is completed with `sysexit`, the wrapper library restores
+    the hardware context, and the program execution resumes in user land.
+  id: totrans-146
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在使用`sysexit`完成系统调用后，包装库将恢复硬件上下文，程序执行将在用户空间继续。
+- en: Notable in the previous steps is the switching between kernel mode and user
+    land mode, an operation that costs time.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 值得注意的是前面步骤中内核模式和用户空间模式之间的切换，这是一个耗时的操作。
+- en: OK, that was a little dry and theoretical, so to better appreciate how syscalls
+    look and feel in practice, let’s have a look at a concrete example. We will use
+    [`strace`](https://oreil.ly/ksV9B) to look behind the curtain, a tool useful for
+    troubleshooting, for example, if you don’t have the source code of an app but
+    want to learn what it does.
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 好的，刚才那些都有点枯燥和理论化，为了更好地理解系统调用在实践中的外观和感觉，让我们看一个具体的例子。我们将使用[`strace`](https://oreil.ly/ksV9B)来窥探一下幕后，这是一个用于故障排除的工具，例如，如果您没有应用程序的源代码但想了解它的工作原理。
+- en: 'Let’s assume you wonder what syscalls are involved when you execute the innocent-looking
+    `ls` command. Here’s how you can find it out using `strace`:'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设您想知道在执行看似无害的`ls`命令时涉及哪些系统调用。以下是您可以使用`strace`找出答案的方式：
+- en: '[PRE6]'
+  id: totrans-150
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '[![1](Images/1.png)](#co_the_linux_kernel_CO4-1)'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_the_linux_kernel_CO4-1)'
+- en: With `strace ls`, we ask `strace` to capture the syscall that `ls` uses. Note
+    that I edited the output since `strace` generates some 162 lines on my system
+    (this number varies between different distros, architectures, and other factors).
+    Further, the output you see there comes via `stderr`, so if you want to redirect
+    it, you have to use `2>` here. You’ll learn more about this in [Chapter 3](ch03.xhtml#shells-scripting).
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过 `strace ls`，我们要求 `strace` 捕获 `ls` 使用的系统调用。请注意，我编辑了输出，因为在我的系统上 `strace` 生成大约
+    162 行（这个数字因不同发行版、架构和其他因素而异）。此外，你看到的输出是通过 `stderr`，如果要重定向它，你需要在此处使用 `2>`。在[第 3
+    章](ch03.xhtml#shells-scripting)你将更多地了解这些。
+- en: '[![2](Images/2.png)](#co_the_linux_kernel_CO4-2)'
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_the_linux_kernel_CO4-2)'
+- en: The syscall [`execve`](https://oreil.ly/iasHW) executes */usr/bin/ls*, causing
+    the shell process to be replaced.
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统调用 [`execve`](https://oreil.ly/iasHW) 执行 */usr/bin/ls*，导致 shell 进程被替换。
+- en: '[![3](Images/3.png)](#co_the_linux_kernel_CO4-3)'
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_the_linux_kernel_CO4-3)'
+- en: The [`brk`](https://oreil.ly/HRuNj) syscall is an outdated way to allocate memory;
+    it’s safer and more portable to use `malloc`. Note that `malloc` is not a syscall
+    but a function that in turn uses `mallocopt` to decide if it needs to use the
+    `brk` syscall or the `mmap` syscall based on the amount of memory accessed.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`brk`](https://oreil.ly/HRuNj) 系统调用是分配内存的过时方式；更安全和更可移植的做法是使用 `malloc`。请注意，`malloc`
+    并非系统调用，而是一个函数，它又使用 `mallocopt` 来决定是使用 `brk` 系统调用还是基于内存访问量使用 `mmap` 系统调用。'
+- en: '[![4](Images/4.png)](#co_the_linux_kernel_CO4-4)'
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_the_linux_kernel_CO4-4)'
+- en: The `access` syscall checks if the process is allowed to access a certain file.
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`access` 系统调用检查进程是否被允许访问某个特定文件。'
+- en: '[![5](Images/5.png)](#co_the_linux_kernel_CO4-5)'
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_the_linux_kernel_CO4-5)'
+- en: Syscall `openat` opens the file */etc/ld.so.cache* relative to a directory file
+    descriptor (here the first argument, `AT_FDCWD`, which stands for the current
+    directory) and using flags `O_RDONLY|O_CLOEXEC` (last argument).
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统调用 `openat` 打开文件 */etc/ld.so.cache* 相对于目录文件描述符（这里第一个参数 `AT_FDCWD`，表示当前目录），并使用标志
+    `O_RDONLY|O_CLOEXEC`（最后一个参数）。
+- en: '[![6](Images/6.png)](#co_the_linux_kernel_CO4-6)'
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](Images/6.png)](#co_the_linux_kernel_CO4-6)'
+- en: The `read` syscall reads from a file descriptor (first argument, `3`) 832 bytes
+    (last argument) into a buffer (second argument).
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`read` 系统调用从文件描述符（第一个参数 `3`）读取 832 字节（最后一个参数）到一个缓冲区（第二个参数）。'
+- en: '`strace` is useful to see exactly what syscalls have been called—in which order
+    and with which arguments—effectively hooking into the live stream of events between
+    user land and kernel. It’s also good for performance diagnostics. Let’s see where
+    a `curl` command spends most of its time (output shortened):'
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`strace` 很有用，可以准确查看已调用的系统调用——包括顺序和参数——有效地连接到用户空间和内核之间的实时事件流。它也适用于性能诊断。让我们看看
+    `curl` 命令大部分时间花在哪里（输出已缩短）：'
+- en: '[PRE7]'
+  id: totrans-164
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: '[![1](Images/1.png)](#co_the_linux_kernel_CO5-1)'
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_the_linux_kernel_CO5-1)'
+- en: Use the `-c` option to generate overview stats of the syscalls used.
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `-c` 选项生成使用的系统调用的概览统计数据。
+- en: '[![2](Images/2.png)](#co_the_linux_kernel_CO5-2)'
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_the_linux_kernel_CO5-2)'
+- en: Discard all output of `curl`.
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 丢弃 `curl` 的所有输出。
+- en: Interestingly, the `curl` command here spends almost half of its time with `mmap`
+    and `read` syscalls, and the `connect` syscall takes 0.3 ms—not bad.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有趣的是，`curl` 命令在这里几乎一半的时间用于 `mmap` 和 `read` 系统调用，而 `connect` 系统调用耗时 0.3 毫秒——还不错。
+- en: To help you get a feeling for the coverage, I’ve put together [Table 2-1](#table-sycalls-examples),
+    which lists examples of widely used syscalls across kernel components as well
+    as system-wide ones. You can look up details of syscalls, including their parameters
+    and return values, via [section 2 of the man pages](https://oreil.ly/qLOA3).
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了帮助你对覆盖范围有所感觉，我已经整理了[表 2-1](#table-sycalls-examples)，其中列出了内核组件和系统级别广泛使用的系统调用示例。你可以通过[man
+    手册第 2 章节](https://oreil.ly/qLOA3)查找系统调用的详细信息，包括它们的参数和返回值。
+- en: Table 2-1\. Example syscalls
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 2-1\. 示例系统调用
+- en: '| Category | Example syscalls |'
+  id: totrans-172
+  prefs: []
+  type: TYPE_TB
+  zh: '| 类别 | 示例系统调用 |'
+- en: '| --- | --- |'
+  id: totrans-173
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| Process management | `clone`, `fork`, `execve`, `wait`, `exit`, `getpid`,
+    `setuid`, `setns`, `getrusage`, `capset`, `ptrace` |'
+  id: totrans-174
+  prefs: []
+  type: TYPE_TB
+  zh: '| 进程管理 | `clone`, `fork`, `execve`, `wait`, `exit`, `getpid`, `setuid`, `setns`,
+    `getrusage`, `capset`, `ptrace` |'
+- en: '| Memory management | `brk`, `mmap`, `munmap`, `mremap`, `mlock`, `mincore`
+    |'
+  id: totrans-175
+  prefs: []
+  type: TYPE_TB
+  zh: '| 内存管理 | `brk`, `mmap`, `munmap`, `mremap`, `mlock`, `mincore` |'
+- en: '| Networking | `socket`, `setsockopt`, `getsockopt`, `bind`, `listen`, `accept`,
+    `connect`, `shutdown`, `recvfrom`, `recvmsg`, `sendto`, `sethostname`, `bpf` |'
+  id: totrans-176
+  prefs: []
+  type: TYPE_TB
+  zh: '| 网络 | `socket`, `setsockopt`, `getsockopt`, `bind`, `listen`, `accept`, `connect`,
+    `shutdown`, `recvfrom`, `recvmsg`, `sendto`, `sethostname`, `bpf` |'
+- en: '| Filesystems | `open`, `openat`, `close`, `mknod`, `rename`, `truncate`, `mkdir`,
+    `rmdir`, `getcwd`, `chdir`, `chroot`, `getdents`, `link`, `symlink`, `unlink`,
+    `umask`, `stat`, `chmod`, `utime`, `access`, `ioctl`, `flock`, `read`, `write`,
+    `lseek`, `sync`, `select`, `poll`, `mount`, |'
+  id: totrans-177
+  prefs: []
+  type: TYPE_TB
+  zh: '| 文件系统 | `open`, `openat`, `close`, `mknod`, `rename`, `truncate`, `mkdir`,
+    `rmdir`, `getcwd`, `chdir`, `chroot`, `getdents`, `link`, `symlink`, `unlink`,
+    `umask`, `stat`, `chmod`, `utime`, `access`, `ioctl`, `flock`, `read`, `write`,
+    `lseek`, `sync`, `select`, `poll`, `mount`, |'
+- en: '| Time | `time`, `clock_settime`, `timer_create`, `alarm`, `nanosleep` |'
+  id: totrans-178
+  prefs: []
+  type: TYPE_TB
+  zh: '| 时间 | `time`, `clock_settime`, `timer_create`, `alarm`, `nanosleep` |'
+- en: '| Signals | `kill`, `pause`, `signalfd`, `eventfd`, |'
+  id: totrans-179
+  prefs: []
+  type: TYPE_TB
+  zh: '| 信号 | `kill`, `pause`, `signalfd`, `eventfd`, |'
+- en: '| Global | `uname`, `sysinfo`, `syslog`, `acct`, `_sysctl`, `iopl`, `reboot`
+    |'
+  id: totrans-180
+  prefs: []
+  type: TYPE_TB
+  zh: '| 全局 | `uname`, `sysinfo`, `syslog`, `acct`, `_sysctl`, `iopl`, `reboot` |'
+- en: Tip
+  id: totrans-181
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: There is a nice interactive [syscall table](https://oreil.ly/HKu6Y) available
+    online with source code references.
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有一个很好的互动[系统调用表](https://oreil.ly/HKu6Y)在线提供源代码参考。
+- en: Now that you have a basic idea of the Linux kernel, its main components, and
+    interface, let’s move on to the question of how to extend it.
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你对Linux内核、其主要组件和接口有了基本的了解，让我们继续探讨如何扩展它的问题。
+- en: Kernel Extensions
+  id: totrans-184
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 内核扩展
+- en: In this section, we will focus on how to extend the kernel. In a sense, the
+    content here is advanced and optional. You won’t need it for your day-to-day work,
+    in general.
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我们将重点讨论如何扩展内核。在某种意义上，这里的内容是高级和可选的。一般情况下，你不需要它来进行日常工作。
+- en: Note
+  id: totrans-186
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Configuring and compiling your own Linux kernel is out of scope for this book.
+    For information on how to do it, I recommend [*Linux Kernel in a Nutshell*](https://oreil.ly/jzFCj)
+    (O’Reilly) by Greg Kroah-Hartman, one of the main Linux maintainers and project
+    lead. He covers the entire range of tasks, from downloading the source code to
+    configuration and installation steps, to kernel options at runtime.
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 配置和编译自己的Linux内核超出了本书的范围。关于如何做到这一点的信息，我推荐[*Linux Kernel in a Nutshell*](https://oreil.ly/jzFCj)（O’Reilly）由主要的Linux维护者和项目负责人Greg
+    Kroah-Hartman撰写。他涵盖了从下载源代码到配置和安装步骤，再到运行时内核选项的整个任务范围。
+- en: 'Let’s start with something easy: how do you know what kernel version you’re
+    using? You can use the following command to determine this:'
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们从一些简单的东西开始：你如何知道你正在使用哪个内核版本？你可以使用以下命令来确定这一点：
+- en: '[PRE8]'
+  id: totrans-189
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: '[![1](Images/1.png)](#co_the_linux_kernel_CO6-1)'
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_the_linux_kernel_CO6-1)'
+- en: From the `uname` output here, you can tell that at the time of writing, I’m
+    using a [5.11 kernel](https://oreil.ly/FJdA1) on an `x86_64` machine (see also
+    [“x86 Architecture”](#cpu-arch-x86)).
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从这里的`uname`输出可以看出，我在写作时正在使用[5.11内核](https://oreil.ly/FJdA1)在一个`x86_64`机器上（另见[“x86架构”](#cpu-arch-x86)）。
+- en: Now that we know the kernel version, we can address the question of how to extend
+    the kernel out-of-tree—that is, without having to add features to the kernel source
+    code and then build it. For this extension we can use modules, so let’s have a
+    look at that.
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们知道内核版本，我们可以解决如何扩展内核的问题，即如何在不必添加功能到内核源代码然后构建它的情况下扩展内核。对于这种扩展，我们可以使用模块，让我们来看看。
+- en: Modules
+  id: totrans-193
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 模块
+- en: 'In a nutshell, a *module* is a program that you can load into a kernel on demand.
+    That is, you do not necessarily have to recompile the kernel and/or reboot the
+    machine. Nowadays, Linux detects most of the hardware automatically, and with
+    it Linux loads its modules automatically. But there are cases where you want to
+    manually load a module. Consider the following case: the kernel detects a video
+    card and loads a generic module. However, the video card manufacturer offers a
+    better third-party module (not available in the Linux kernel) that you may choose
+    to use instead.'
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简而言之，*模块*是一个可以按需加载到内核中的程序。也就是说，你不一定需要重新编译内核和/或重新启动机器。如今，Linux自动检测大多数硬件，并且Linux自动加载其模块。但也有一些情况下你想手动加载一个模块。考虑以下情况：内核检测到一个视频卡并加载一个通用模块。然而，视频卡制造商提供了一个更好的第三方模块（不在Linux内核中可用），你可能选择使用它。
+- en: 'To list available modules, run the following command (output has been edited
+    down, as there are over one thousand lines on my system):'
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要列出可用的模块，请运行以下命令（输出已经被编辑，因为在我的系统上有一千多行）：
+- en: '[PRE9]'
+  id: totrans-196
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'That’s great! But which modules did the kernel actually load? Let’s take a
+    look (output shortened):'
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 太棒了！但内核实际加载了哪些模块？让我们来看一下（输出已经缩短）：
+- en: '[PRE10]'
+  id: totrans-198
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: Note that the preceding information is available via */proc/modules*. This is
+    thanks to the kernel exposing this information via a pseudo-filesystem interface;
+    more on this topic is presented in [Chapter 6](ch06.xhtml#running-apps).
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意，前述信息可以通过 */proc/modules* 获得。这要归功于内核通过伪文件系统接口公开这些信息；更多关于这个主题的信息见 [第 6 章](ch06.xhtml#running-apps)。
+- en: 'Want to learn more about a module or have a nice way to manipulate kernel modules?
+    Then `modprobe` is your friend. For example, to list the dependencies:'
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 想了解某个模块或有一种方便的方式来操作内核模块？那么 `modprobe` 就是你的好朋友。例如，列出依赖项：
+- en: '[PRE11]'
+  id: totrans-201
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Next up: an alternative, modern way to extend the kernel.'
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来：一种替代的、现代化的扩展内核方式。
+- en: 'A Modern Way to Extend the Kernel: eBPF'
+  id: totrans-203
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 现代化扩展内核的一种方式：eBPF
+- en: An increasingly popular way to extend kernel functionality is eBPF. Originally
+    known as *Berkeley Packet Filter* (BPF), nowadays the kernel project and technology
+    is commonly known as *eBPF* (a term that does not stand for anything).
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 扩展内核功能的一种越来越流行的方式是 eBPF。最初被称为 *Berkeley Packet Filter* (BPF)，如今这个内核项目和技术通常被称为
+    *eBPF*（这个术语并不代表任何东西）。
+- en: Technically, eBPF is a feature of the Linux kernel, and you’ll need the Linux
+    kernel version 3.15 or above to benefit from it. It enables you to safely and
+    efficiently extend the Linux kernel functions by using the [`bpf`](https://oreil.ly/cltxg)
+    syscall. eBPF is implemented as an in-kernel virtual machine using a custom 64-bit
+    RISC instruction set.
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从技术角度来说，eBPF 是 Linux 内核的一个特性，您需要 Linux 内核版本为 3.15 或更高版本才能从中受益。它通过使用 [`bpf`](https://oreil.ly/cltxg)
+    系统调用安全有效地扩展 Linux 内核功能。eBPF 作为一个内核虚拟机实现，使用自定义的 64 位 RISC 指令集。
+- en: Tip
+  id: totrans-206
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 小贴士
+- en: If you want to learn more about what is enabled in which kernel version for
+    eBPF, you can use the [iovisor/bcc docs on GitHub](https://oreil.ly/HtKO8).
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想了解更多关于 eBPF 在哪个内核版本中启用的信息，可以查阅 [iovisor/bcc GitHub 文档](https://oreil.ly/HtKO8)。
+- en: 'In [Figure 2-5](#fig-bpf-overview) you see a high-level overview taken from
+    Brendan Gregg’s book [*BPF Performance Tools: Linux System and Application Observability*](https://oreil.ly/sfYKK)
+    (Addison Wesley).'
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '在 [*BPF Performance Tools: Linux System and Application Observability*](https://oreil.ly/sfYKK)
+    (Addison Wesley) 书中，从 Brendan Gregg 的高层概述中看到的图 2-5 概述。'
+- en: '![lmlx 0205](Images/lmlx_0205.png)'
+  id: totrans-209
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0205](Images/lmlx_0205.png)'
+- en: Figure 2-5\. eBPF overview in the Linux kernel
+  id: totrans-210
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-5\. Linux 内核中的 eBPF 概述
+- en: 'eBPF is already used in a number of places and for use cases such as the following:'
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF 已经在许多地方和用例中使用，例如以下情况：
+- en: As a CNI plug-in to enable pod networking in Kubernetes
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为 Kubernetes 中启用 Pod 网络的 CNI 插件
+- en: For example, in [Cilium](https://oreil.ly/BS0iz) and Project Calico. Also, for
+    service scalability.
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，在 [Cilium](https://oreil.ly/BS0iz) 和 Project Calico 中。此外，用于服务可伸缩性。
+- en: For observability
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于可观测性
+- en: For Linux kernel tracing, such as with [iovisor/bpftrace](https://oreil.ly/0M0oV),
+    as well as in a clustered setup with [Hubble](https://oreil.ly/7yzhq) (see [Chapter 8](ch08.xhtml#observability)).
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于 Linux 内核跟踪，例如与 [iovisor/bpftrace](https://oreil.ly/0M0oV) 以及在集群设置中的应用 [Hubble](https://oreil.ly/7yzhq)
+    (见 [第 8 章](ch08.xhtml#observability))。
+- en: As a security control
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为安全控制
+- en: For example, to perform container runtime scanning as you can use with projects
+    such as [CNCF Falco](https://falco.org).
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，用于与项目如 [CNCF Falco](https://falco.org) 一起执行容器运行时扫描。
+- en: For network load balancing
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于网络负载均衡
+- en: Such as in Facebook’s L4 [katran](https://oreil.ly/HqMZg) library.
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，在Facebook的L4 [katran](https://oreil.ly/HqMZg) 库中。
+- en: In mid-2021, the Linux Foundation announced that Facebook, Google, Isovalent,
+    Microsoft, and Netflix joined together to [create the eBPF Foundation](https://oreil.ly/g2buM),
+    and with it giving the eBPF project a vendor-neutral home. Stay tuned!
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 2021 年中期，Linux 基金会宣布 Facebook、Google、Isovalent、Microsoft 和 Netflix 联合成立 [eBPF
+    Foundation](https://oreil.ly/g2buM)，为 eBPF 项目提供了一个供应商中立的家园。敬请关注！
+- en: If you want to stay on top of things, have a look at [*ebpf.io*](https://ebpf.io/).
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想保持最新，可以看看[*ebpf.io*](https://ebpf.io/)。
+- en: Conclusion
+  id: totrans-222
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: The Linux kernel is the core of the Linux operating system, and no matter what
+    distribution or environment you are using Linux in—be it on your desktop or in
+    the cloud—you should have a basic idea of its components and functionality.
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 内核是 Linux 操作系统的核心，无论您在哪个发行版或环境中使用 Linux——无论是在桌面还是云端——您都应该对其组件和功能有一个基本的了解。
+- en: In this chapter, we reviewed the overall Linux architecture, the role of the
+    kernel, and its interfaces. Most importantly, the kernel abstracts away the differences
+    of the hardware—CPU architectures and peripheral devices—and makes Linux very
+    portable. The most important interface is the syscall interface, through which
+    the kernel exposes its functionality—be it opening a file, allocating memory,
+    or listing network interfaces.
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们回顾了整体Linux架构、内核的角色及其接口。最重要的是，内核抽象化了硬件的差异——CPU架构和外设，并使Linux非常可移植。最重要的接口是系统调用接口，通过这个接口，内核暴露其功能，无论是打开文件、分配内存还是列出网络接口。
+- en: We have also looked a bit at the inner workings of the kernel, including modules
+    and eBPF. If you want to extend the kernel functionality or implement performant
+    tasks in the kernel (controlled from the user space), then eBPF is definitely
+    worth taking a closer look at.
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们还稍微了解了内核的内部工作原理，包括模块和eBPF。如果您想扩展内核功能或在内核中实现高性能任务（从用户空间控制），那么eBPF绝对值得更深入地研究。
+- en: 'If you want to learn more about certain aspects of the kernel, the following
+    resources should provide you with some starting points:'
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您想了解内核的某些方面，请参考以下资源，这些资源应该为您提供一些起点：
+- en: General
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通用
+- en: '[*The Linux Programming Interface*](https://oreil.ly/HCLmX) by Michael Kerrisk
+    (No Starch Press).'
+  id: totrans-228
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*Linux编程接口*](https://oreil.ly/HCLmX) 由Michael Kerrisk（No Starch Press）撰写。'
+- en: '[Linux Kernel Teaching](https://oreil.ly/lMzbW) provides a nice introduction
+    with deep dives across the board.'
+  id: totrans-229
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Linux内核教学](https://oreil.ly/lMzbW) 提供了一个全面深入的介绍。'
+- en: '[“Anatomy of the Linux Kernel”](https://oreil.ly/it2jK) gives a quick high-level
+    intro.'
+  id: totrans-230
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux内核解剖”](https://oreil.ly/it2jK) 提供了一个快速的高层介绍。'
+- en: '[“Operating System Kernels”](https://oreil.ly/9d93Y) has a nice overview and
+    comparison of kernel design approaches.'
+  id: totrans-231
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“操作系统内核”](https://oreil.ly/9d93Y) 提供了内核设计方法的概述和比较。'
+- en: '[KernelNewbies](https://oreil.ly/OSfbA) is a great resource if you want to
+    dive deeper into hands-on topics.'
+  id: totrans-232
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[KernelNewbies](https://oreil.ly/OSfbA) 是一个很好的资源，如果您想深入了解实践性话题。'
+- en: '[kernelstats](https://oreil.ly/kSov7) shows some interesting distributions
+    over time.'
+  id: totrans-233
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[kernelstats](https://oreil.ly/kSov7) 显示了随时间变化的一些有趣的分布。'
+- en: '[The Linux Kernel Map](https://oreil.ly/G55tF) is a visual representation of
+    kernel components and dependencies.'
+  id: totrans-234
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Linux内核地图](https://oreil.ly/G55tF) 是内核组件和依赖关系的视觉表示。'
+- en: Memory management
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内存管理
+- en: '[*Understanding the Linux Virtual Memory Manager*](https://oreil.ly/uKjtQ)'
+  id: totrans-236
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*理解Linux虚拟内存管理器*](https://oreil.ly/uKjtQ)'
+- en: '[“The Slab Allocator in the Linux Kernel”](https://oreil.ly/dBLkt)'
+  id: totrans-237
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux内核中的Slab分配器”](https://oreil.ly/dBLkt)'
+- en: '[Kernel docs](https://oreil.ly/sTBhM)'
+  id: totrans-238
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[内核文档](https://oreil.ly/sTBhM)'
+- en: Device drivers
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设备驱动程序
+- en: '[*Linux Device Drivers*](https://oreil.ly/Kn7CZ) by Jonathan Corbet'
+  id: totrans-240
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*Linux设备驱动程序*](https://oreil.ly/Kn7CZ) 由Jonathan Corbet撰写'
+- en: '[“How to Install a Device Driver on Linux”](https://oreil.ly/a0chO)'
+  id: totrans-241
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“如何在Linux上安装设备驱动程序”](https://oreil.ly/a0chO)'
+- en: '[Character Device Drivers](https://oreil.ly/EGXIh)'
+  id: totrans-242
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[字符设备驱动程序](https://oreil.ly/EGXIh)'
+- en: '[*Linux Device Drivers: Tutorial for Linux Driver Development*](https://oreil.ly/jkiwB)'
+  id: totrans-243
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*Linux设备驱动程序：Linux驱动程序开发教程*](https://oreil.ly/jkiwB)'
+- en: syscalls
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统调用
+- en: '[“Linux Interrupts: The Basic Concepts”](https://oreil.ly/yCdTi)'
+  id: totrans-245
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux中断：基本概念”](https://oreil.ly/yCdTi)'
+- en: '[The Linux Kernel: System Calls](https://oreil.ly/A3XMT)'
+  id: totrans-246
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Linux内核：系统调用](https://oreil.ly/A3XMT)'
+- en: '[Linux System Call Table](https://oreil.ly/mezjr)'
+  id: totrans-247
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Linux系统调用表](https://oreil.ly/mezjr)'
+- en: '[*syscalls.h* source code](https://oreil.ly/tf6CW)'
+  id: totrans-248
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[*syscalls.h* 源代码](https://oreil.ly/tf6CW)'
+- en: '[syscall lookup for x86 and x86_64](https://oreil.ly/K7Zid)'
+  id: totrans-249
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[x86和x86_64的系统调用查找](https://oreil.ly/K7Zid)'
+- en: eBPF
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF
+- en: '[“Introduction to eBPF”](https://oreil.ly/Afdsx) by Matt Oswalt'
+  id: totrans-251
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“介绍eBPF”](https://oreil.ly/Afdsx) 由Matt Oswalt编写'
+- en: '[eBPF maps documentation](https://oreil.ly/Fnj5t)'
+  id: totrans-252
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[eBPF映射文档](https://oreil.ly/Fnj5t)'
+- en: 'Equipped with this knowledge, we’re now ready to climb up the abstraction ladder
+    a bit and move to the primary user interface we consider in this book: the shell,
+    both in manual usage as well as automation through scripts.'
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 掌握了这些知识后，我们现在准备在抽象梯级中上升一步，并移至本书中考虑的主要用户界面：shell，无论是手动使用还是通过脚本自动化。

@@ -1,0 +1,1286 @@
+- en: Chapter 10\. Efficiency at the Keyboard
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第十章：键盘效率
+- en: 'On a typical day, on a typical Linux workstation, you might have many application
+    windows open: web browsers, text editors, software development environments, music
+    players, video editors, virtual machines, and so on. Some applications are GUI-focused,
+    such as a paint program, and tailored to a pointing device like a mouse or trackball.
+    Others are more keyboard-focused, like a shell inside a terminal program. A typical
+    Linux user might shift between keyboard and mouse dozens (or even hundreds) of
+    times per hour. Each switch takes time. It slows you down. If you can reduce the
+    number of switches, you can work more efficiently.'
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在典型的 Linux 工作站上，一天之中，您可能会打开许多应用程序窗口：网页浏览器、文本编辑器、软件开发环境、音乐播放器、视频编辑器、虚拟机等等。一些应用程序专注于
+    GUI，例如绘图程序，并且专为鼠标或轨迹球等指针设备设计。其他应用程序则更注重键盘操作，例如终端程序中的 Shell。典型的 Linux 用户可能每小时要在键盘和鼠标之间切换数十次（甚至数百次）。每次切换都需要时间。它会减慢您的工作效率。如果能减少切换次数，您将能够更高效地工作。
+- en: 'This chapter is about spending more time at the keyboard and less with a pointing
+    device. Ten fingers tapping one hundred keys are often more nimble than a couple
+    of fingers on a mouse. I’m not just talking about using keyboard shortcuts—I’m
+    confident you can look them up without needing this book (though I present a few).
+    I’m talking about a different approach to speed up some everyday tasks that seem
+    inherently “mousey”: working with windows, retrieving information from the web,
+    and copying and pasting with the clipboard.'
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章讨论如何在键盘上花费更多时间，少用指针设备。十根手指敲击一百个键通常比两根手指在鼠标上更灵活。我不只是在谈论使用键盘快捷键 —— 我相信您可以在不需要本书的情况下查找它们（尽管我会提供一些）。我谈论的是加快一些看似天生适合“鼠标操作”的日常任务的不同方法：操作窗口、从网络检索信息以及使用剪贴板复制和粘贴。
+- en: Working with Windows
+  id: totrans-3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用 Windows
+- en: In this section, I share tips for launching windows efficiently, particularly
+    shell windows (terminals) and browser windows.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我分享了如何高效启动窗口的技巧，特别是 Shell 窗口（终端）和浏览器窗口。
+- en: Instant Shells and Browsers
+  id: totrans-5
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 即时 Shell 和浏览器
+- en: 'Most Linux desktop environments, such as GNOME, KDE Plasma, Unity, and Cinnamon,
+    provide some way to define hotkeys or custom keyboard shortcuts—special keystrokes
+    that launch commands or perform other operations. I strongly recommend that you
+    define keyboard shortcuts for these common operations:'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数 Linux 桌面环境，如 GNOME、KDE Plasma、Unity 和 Cinnamon，都提供某种方式来定义热键或自定义键盘快捷键 ——
+    特殊的按键组合，可以启动命令或执行其他操作。我强烈建议您为这些常见操作定义键盘快捷键：
+- en: Opening a new shell window (a terminal program)
+  id: totrans-7
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 打开一个新的 Shell 窗口（终端程序）
+- en: Opening a new web browser window
+  id: totrans-8
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 打开一个新的网页浏览器窗口
+- en: 'With these shortcuts defined, you can open a terminal or browser anytime in
+    an instant, no matter what other application you’re in the middle of using.^([1](ch10.xhtml#idm46586637526832))
+    To set this up, you need to know the following:'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了这些定义好的快捷键，您可以随时即刻打开终端或浏览器，而不管您正在使用的是哪个其他应用程序。^([1](ch10.xhtml#idm46586637526832))
+    要设置这些快捷键，您需要了解以下内容：
+- en: The command that launches your preferred terminal program
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动您偏爱的终端程序的命令
+- en: Some popular ones are `gnome-terminal`, `konsole`, and `xterm`.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些流行的是 `gnome-terminal`、`konsole` 和 `xterm`。
+- en: The command that launches your preferred browser
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动您偏爱的浏览器的命令
+- en: Some popular ones are `firefox`, `google-chrome`, and `opera`.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些流行的是 `firefox`、`google-chrome` 和 `opera`。
+- en: How to define a custom keyboard shortcut
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如何定义自定义键盘快捷键
+- en: The instructions differ for each desktop environment and may change from version
+    to version, so it’s better if you look them up on the web. Search for the name
+    of your desktop environment followed by “define keyboard shortcut.”
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个桌面环境的说明略有不同，并且可能会随版本变化而变化，因此最好您在网上查找相关信息。搜索您的桌面环境名称，后面跟上“定义键盘快捷键”。
+- en: On my desktop, I assign the keyboard shortcut Ctrl-Windows-T to run `konsole`
+    and Ctrl-Windows-C to run `google-chrome`.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我的桌面上，我将键盘快捷键 Ctrl-Windows-T 分配给运行 `konsole`，将 Ctrl-Windows-C 分配给运行 `google-chrome`。
+- en: Working Directories
+  id: totrans-17
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 工作目录
+- en: When you launch a shell via a keyboard shortcut in your desktop environment,
+    it’s a child of your login shell. Its current directory is your home directory
+    (unless you’ve somehow configured it to be different).
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您通过桌面环境的键盘快捷键启动一个 Shell 时，它是您登录 Shell 的子进程。其当前目录是您的主目录（除非您已经以某种方式配置为不同目录）。
+- en: Contrast this with opening a new shell from within your terminal program—by
+    explicitly running (say) `gnome-terminal` or `xterm` at the command line or using
+    your terminal program’s menu to open a new window. In this case, the new shell
+    is a child of *that terminal’s shell*. Its current directory is the same as its
+    parent’s, which might not be your home directory.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将此与从终端程序内部打开新 shell 进行对比——通过在命令行中显式运行（比如）`gnome-terminal` 或 `xterm`，或使用终端程序的菜单打开一个新窗口。在这种情况下，新
+    shell 是*该终端的 shell*的子进程。其当前目录与其父进程相同，这可能不是你的主目录。
+- en: One-Shot Windows
+  id: totrans-20
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 一次性窗口
+- en: Suppose you’re in the middle of using several applications when suddenly you
+    need a shell to run one command. Many users would grab the mouse and hunt through
+    their open windows for a running terminal. Don’t do this—you’re wasting time.
+    Just pop open a new terminal with your hotkey, run your command, and exit the
+    terminal right afterward.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你正在同时使用几个应用程序，突然需要一个 shell 来运行一个命令。许多用户会抓起鼠标，并在他们打开的窗口中搜索运行的终端。不要这样做——这是在浪费时间。只需用你的快捷键快速打开一个新的终端，运行你的命令，然后立即退出终端。
+- en: Once you have hotkeys assigned to launch terminal programs and browser windows,
+    go ahead and open and close these windows in great numbers with wild abandon.
+    I recommend it! Create and destroy terminals and browser windows on a regular
+    basis, rather than leaving them open for a long time. I call these short-lived
+    windows *one-shot windows*. You pop them open quickly, use them for a few moments,
+    and close them.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦你为启动终端程序和浏览器窗口分配了快捷键，放心地随意打开和关闭这些窗口。我推荐这样做！定期创建和销毁终端和浏览器窗口，而不是长时间保持它们开放。我称这些短暂存在的窗口为*一次性窗口*。你快速地打开它们，使用几分钟，然后关闭它们。
+- en: You might leave a few shells open for a long time if you’re developing software
+    or performing other lengthy work, but one-shot terminal windows are perfect for
+    other random commands throughout the day. *It’s often quicker to pop up a new
+    terminal than to search your screen for an existing terminal.* Don’t ask yourself,
+    “Where’s that terminal window I need?” and poke around the desktop looking for
+    it. Make a new one and close it after it has served its purpose.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你正在开发软件或执行其他长时间的工作，可能会保留几个终端窗口很长时间，但一次性终端窗口非常适合在一天中的其他时间执行一些随机命令。*弹出一个新终端通常比在屏幕上搜索现有终端更快。*
+    不要问自己：“我需要的那个终端窗口在哪里？” 然后在桌面上四处查找。创建一个新的，并在其完成任务后关闭它。
+- en: Likewise for web browser windows. Do you ever lift your head after a long day
+    of Linux hacking to discover that your browser has just one window and 83 open
+    tabs? That’s a symptom of too few one-shot windows. Pop one open, view whatever
+    web page you need to view, and close it. Need to revisit the page later? Locate
+    it in your browser history.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 同样适用于 Web 浏览器窗口。在经过一整天的 Linux 黑客工作后，你是否会抬头发现你的浏览器只有一个窗口，但却有 83 个打开的标签页？这是使用一次性窗口太少的一个症状。弹出一个窗口，查看你需要查看的网页，然后关闭它。需要稍后再访问页面吗？在浏览器历史记录中找到它。
+- en: Browser Keyboard Shortcuts
+  id: totrans-25
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 浏览器键盘快捷键
+- en: While we’re on the topic of browser windows, make sure you know the most important
+    keyboard shortcuts in [Table 10-1](#table_browser_shortcuts). If your hands are
+    already on the keyboard and you want to browse to a new website, it’s often faster
+    to press Ctrl-L to jump to the address bar or Ctrl-T to open a tab than to point
+    and click.
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 谈到浏览器窗口，确保你知道 [表 10-1](#table_browser_shortcuts) 中最重要的键盘快捷键。如果你的手已经在键盘上，并且你想浏览新网站，通常按下
+    Ctrl-L 跳到地址栏或 Ctrl-T 打开一个标签页比使用鼠标更快。
+- en: Table 10-1\. The most important keyboard shortcuts for Firefox, Google Chrome,
+    and Opera
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 10-1\. Firefox、Google Chrome 和 Opera 的最重要的键盘快捷键
+- en: '| Action | Keyboard shortcut |'
+  id: totrans-28
+  prefs: []
+  type: TYPE_TB
+  zh: '| 动作 | 键盘快捷键 |'
+- en: '| --- | --- |'
+  id: totrans-29
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| Open new window | Ctrl-N |'
+  id: totrans-30
+  prefs: []
+  type: TYPE_TB
+  zh: '| 打开新窗口 | Ctrl-N |'
+- en: '| Open new private/incognito window | Ctrl-Shift-P (Firefox), Ctrl-Shift-N
+    (Chrome and Opera) |'
+  id: totrans-31
+  prefs: []
+  type: TYPE_TB
+  zh: '| 打开新的隐私/无痕窗口 | Ctrl-Shift-P (Firefox), Ctrl-Shift-N (Chrome 和 Opera) |'
+- en: '| Open new tab | Ctrl-T |'
+  id: totrans-32
+  prefs: []
+  type: TYPE_TB
+  zh: '| 打开新标签页 | Ctrl-T |'
+- en: '| Close tab | Ctrl-W |'
+  id: totrans-33
+  prefs: []
+  type: TYPE_TB
+  zh: '| 关闭标签页 | Ctrl-W |'
+- en: '| Cycle through browser tabs | Ctrl-Tab (cycle forward) and Ctrl-Shift-Tab
+    (cycle backward) |'
+  id: totrans-34
+  prefs: []
+  type: TYPE_TB
+  zh: '| 在浏览器标签页之间切换 | Ctrl-Tab（向前切换）和 Ctrl-Shift-Tab（向后切换） |'
+- en: '| Jump to address bar | Ctrl-L (or Alt-D or F6) |'
+  id: totrans-35
+  prefs: []
+  type: TYPE_TB
+  zh: '| 跳转到地址栏 | Ctrl-L（或 Alt-D 或 F6） |'
+- en: '| Find (search) for text in current page | Ctrl-F |'
+  id: totrans-36
+  prefs: []
+  type: TYPE_TB
+  zh: '| 查找（搜索）当前页面的文本 | Ctrl-F |'
+- en: '| Display your browsing history | Ctrl-H |'
+  id: totrans-37
+  prefs: []
+  type: TYPE_TB
+  zh: '| 显示你的浏览历史记录 | Ctrl-H |'
+- en: Switching Windows and Desktops
+  id: totrans-38
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 切换窗口和桌面
+- en: When your busy desktop is filled with windows, how do you find the window you
+    want quickly? You could point and click your way through the morass, but it’s
+    often quicker to use the keyboard shortcut Alt-Tab. Keep pressing Alt-Tab and
+    you cycle through all windows on the desktop, one at a time. When you reach the
+    window you want, release the keys and that window is in focus and ready to use.
+    To cycle in the reverse direction, press Alt-Shift-Tab.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你繁忙的桌面上充满窗口时，如何快速找到想要的窗口？你可以通过指点和点击的方式在混乱中寻找，但通常使用键盘快捷键 Alt-Tab 更快。持续按下 Alt-Tab
+    键，你将逐个循环浏览桌面上的所有窗口。当到达你想要的窗口时，释放键，该窗口即处于焦点并准备好使用。要反向循环，请按 Alt-Shift-Tab 键。
+- en: To cycle through all windows on the desktop that belong to the same application,
+    such as all Firefox windows, press Alt-` (Alt-backquote, or Alt plus the key above
+    Tab). To cycle backward, add the Shift key (Alt-Shift-backquote).
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在桌面上循环浏览属于同一应用程序的所有窗口，例如所有 Firefox 窗口，请按下 Alt-`（Alt-backquote，或 Alt 加上 Tab
+    键上方的键）。要向后循环，请加上 Shift 键（Alt-Shift-backquote）。
+- en: Once you can switch windows, it’s time to talk about switching desktops. If
+    you do serious work on Linux and you’re using just one desktop, you’re missing
+    out on a great way to organize your work. Multiple desktops, also called workspaces
+    or virtual desktops, are just what they sound like. Instead of a single desktop,
+    you might have four or six or more, each with its own windows, and you can switch
+    between them.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦能够切换窗口，现在是时候谈论切换桌面了。如果你在 Linux 上进行严肃工作，而且只使用一个桌面，那么你会错过一个很好的组织工作的方式。多个桌面，也称为工作区或虚拟桌面，正如它们听起来的那样。你可能不只有一个桌面，而是有四个、六个或更多，每个都有自己的窗口，你可以在它们之间切换。
+- en: 'On my workstation running Ubuntu Linux with KDE Plasma, I run six virtual desktops
+    and assign them different purposes. Desktop #1 is my main workspace with email
+    and browsing, #2 is for family-related tasks, #3 is where I run VMware virtual
+    machines, #4 is for writing books like this one, and #5–6 are for any ad hoc tasks.
+    These consistent assignments make it quick and easy to locate my open windows
+    from different applications.'
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在运行 KDE Plasma 的 Ubuntu Linux 工作站上，我运行六个虚拟桌面，并为它们分配不同的目的。第一个桌面是我的主工作区，用于电子邮件和浏览，第二个是家庭相关任务，第三个是运行
+    VMware 虚拟机，第四个用于撰写书籍等工作，第五和第六个则用于任何临时任务。这些一致的分配使得从不同应用程序中快速轻松地找到我的打开窗口。
+- en: 'Each Linux desktop environment such as GNOME, KDE Plasma, Cinnamon, and Unity
+    has its own way to implement virtual desktops, and they all provide a graphical
+    “switcher” or “pager” to switch between them. I recommend defining keyboard shortcuts
+    in your desktop environment to jump speedily to each desktop. On my computer,
+    I defined Windows + F1 through Windows + F6 to jump to desktops #1 through #6,
+    respectively.'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个 Linux 桌面环境如 GNOME、KDE Plasma、Cinnamon 和 Unity 都有自己实现虚拟桌面的方式，并且它们都提供一个图形化的“切换器”或“分页器”来在它们之间切换。我建议在你的桌面环境中定义键盘快捷键，以便快速跳转到每个桌面。在我的电脑上，我定义了
+    Windows + F1 到 Windows + F6 分别跳转到第 1 到第 6 个桌面。
+- en: 'There are many other styles of working with desktops and windows. Some people
+    use one desktop per application: a desktop for shells, a desktop for web browsing,
+    a desktop for word processing, and so on. Some people with small laptop screens
+    open just one window on each desktop, full-screen, instead of multiple windows
+    per desktop. Find a style that works for you, as long as it’s speedy and efficient.'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有许多其他与桌面和窗口工作方式相关的风格。有些人每个应用程序使用一个桌面：一个用于 shell，一个用于网页浏览，一个用于文字处理等等。有些人在小型笔记本屏幕上每个桌面只打开一个全屏窗口，而不是每个桌面上打开多个窗口。找到适合你的风格，只要它既快速又高效即可。
+- en: Web Access from the Command Line
+  id: totrans-45
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 从命令行访问网页
+- en: Point-and-click browsers are almost synonymous with the web, but you can also
+    access websites from the Linux command line to great effect.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 点击浏览器几乎已成为网页的代名词，但是你也可以通过 Linux 命令行高效访问网站。
+- en: Launching Browser Windows from the Command Line
+  id: totrans-47
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 从命令行启动浏览器窗口
+- en: 'You may be accustomed to launching a web browser by clicking or tapping an
+    icon, but you can also do it from the Linux command line. If the browser isn’t
+    running yet, add an ampersand to run it in the background so you get your shell
+    prompt back:'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可能习惯于通过点击或触摸图标来启动网页浏览器，但你也可以通过 Linux 命令行来完成。如果浏览器尚未运行，请添加一个“&”以使其在后台运行，这样你就可以恢复到
+    shell 提示符：
+- en: '[PRE0]'
+  id: totrans-49
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: If a given browser is already running, omit the ampersand. The command tells
+    an existing browser instance to open a new window or tab. The command immediately
+    exits and gives you the shell prompt back.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果已经有一个浏览器在运行，请省略 ampersand 符号。该命令会告诉现有的浏览器实例打开一个新窗口或选项卡。命令会立即退出并返回 shell 提示符。
+- en: Tip
+  id: totrans-51
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: 'A backgrounded browser command might print diagnostic messages and clutter
+    up your shell window. To prevent this, redirect all output to */dev/null* when
+    you first launch the browser. For example:'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 后台运行的浏览器命令可能会输出诊断消息并混乱你的 shell 窗口。为了防止这种情况发生，在首次启动浏览器时将所有输出重定向到 */dev/null*。例如：
+- en: '[PRE1]'
+  id: totrans-53
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'To open a browser and visit a URL from the command line, provide the URL as
+    an argument:'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要从命令行打开浏览器并访问 URL，请将 URL 作为参数提供：
+- en: '[PRE2]'
+  id: totrans-55
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'By default, the preceding commands open a new tab and bring it into focus.
+    To force them to open a new window instead, add an option:'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认情况下，上述命令会打开一个新选项卡并将其置于焦点。要强制它们打开一个新窗口，请添加一个选项：
+- en: '[PRE3]'
+  id: totrans-57
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'To open a private or incognito browser window, add the appropriate command-line
+    option:'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要打开私密或隐身浏览器窗口，请添加相应的命令行选项：
+- en: '[PRE4]'
+  id: totrans-59
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'The preceding commands might seem like a lot of typing and effort, but you
+    can be efficient by defining aliases for sites you visit often:'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 上述命令可能会让你觉得输入和努力都很多，但你可以通过为经常访问的网站定义别名来提高效率：
+- en: '[PRE5]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Likewise, if you have a file that contains a URL of interest, extract the URL
+    with `grep`, `cut`, or other Linux commands and pass it to the browser on the
+    command line with command substitution. Here’s an example with a tab-separated
+    file with two columns:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 同样地，如果有一个包含感兴趣 URL 的文件，请使用 `grep`、`cut` 或其他 Linux 命令提取 URL，并将其传递给命令行上的浏览器。这里有一个带有两列的制表符分隔文件的示例：
+- en: '[PRE6]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'Or, suppose you keep track of packages you’re expecting with a file of tracking
+    numbers:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，假设你通过一个包含跟踪号的文件来跟踪你正在等待的包裹：
+- en: '[PRE7]'
+  id: totrans-65
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: The shell script in [Example 10-1](#ex_ups) opens the tracking pages for the
+    appropriate shippers (UPS, FedEx, or the US Postal Service) by appending tracking
+    numbers to the appropriate URLs.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[示例 10-1](#ex_ups) 中的 shell 脚本打开适当承运商（UPS、FedEx 或美国邮政服务）的追踪页面，并将追踪号追加到相应的 URL
+    中。'
+- en: Example 10-1\. `track-it` script that hits the tracking page of shippers
+  id: totrans-67
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+  zh: 示例 10-1\. `track-it` 脚本，访问承运商的追踪页面
+- en: '[PRE8]'
+  id: totrans-68
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: Retrieving HTML with curl and wget
+  id: totrans-69
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 `curl` 和 `wget` 检索 HTML 页面
+- en: 'Web browsers aren’t the only Linux programs that visit websites. The programs
+    `curl` and `wget` can download web pages and other web content with a single command,
+    without touching a browser. By default, `curl` prints its output to stdout, and
+    `wget` saves its output to a file (after printing lots of diagnostic messages):'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Web 浏览器不是唯一可以访问网站的 Linux 程序。程序 `curl` 和 `wget` 可以通过单个命令下载网页和其他网络内容，而不需使用浏览器。默认情况下，`curl`
+    将其输出打印到标准输出，而 `wget` 则将其输出保存到文件中（之前会输出大量诊断消息）：
+- en: '[PRE9]'
+  id: totrans-71
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Tip
+  id: totrans-72
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: 'Some sites don’t support retrieval by `wget` and `curl`. Both commands can
+    masquerade as another browser in such cases. Just tell each program to change
+    its user agent—the string that identifies a web client to a web server. A convenient
+    user agent is “Mozilla”:'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有些网站不支持 `wget` 和 `curl` 下载。在这种情况下，这两个命令可以伪装成另一个浏览器。只需告诉每个程序更改其用户代理（标识向 web 服务器表明其身份的字符串）。一个方便的用户代理是“Mozilla”：
+- en: '[PRE10]'
+  id: totrans-74
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'Both `wget` and `curl` have tons of options and features that you can discover
+    on their manpages. For now, let’s see how to incorporate these commands into brash
+    one-liners. Suppose the website *efficientlinux.com* has a directory, *images*,
+    containing files *1.jpg* through *20.jpg*, and you’d like to download them. Their
+    URLs are:'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`wget` 和 `curl` 都有大量的选项和功能，你可以在它们的 man 手册中了解到。现在，让我们看看如何将这些命令整合到简洁的单行命令中。假设网站
+    *efficientlinux.com* 有一个包含文件 *1.jpg* 到 *20.jpg* 的目录 *images*，你想下载它们。它们的 URL 是：'
+- en: '[PRE11]'
+  id: totrans-76
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'An inefficient method would be to visit each URL in a web browser, one at a
+    time, and download each image. (Raise your hand if you’ve ever done this!) A better
+    method is to use `wget`. Generate the URLs with `seq` and `awk`:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个低效的方法是逐个在 web 浏览器中访问每个 URL 并下载每个图像。（如果你曾这样做，请举手！）更好的方法是使用 `wget`。使用 `seq`
+    和 `awk` 生成 URL：
+- en: '[PRE12]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'Then add the string “wget” into the awk program and pipe the resulting commands
+    to `bash` for execution:'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后将字符串“wget”添加到 awk 程序中，并将生成的命令通过管道传递给 `bash` 执行：
+- en: '[PRE13]'
+  id: totrans-80
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'Alternatively, use `xargs` to create and execute the `wget` commands:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，使用 `xargs` 创建和执行 `wget` 命令：
+- en: '[PRE14]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: The `xargs` solution is superior if your `wget` commands contain any special
+    characters. The “pipe to bash” solution would cause the shell to evaluate those
+    characters (which you don’t want to happen) whereas `xargs` would not.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的`wget`命令包含任何特殊字符，则`xargs`解决方案更好。而“管道到 bash”解决方案会导致 shell 评估这些字符（这是您不希望发生的），而`xargs`则不会。
+- en: 'My example was a bit contrived because the image filenames are so uniform.
+    In a more realistic example, you could download all the images on a web page by
+    retrieving the page with `curl`, piping it through a clever sequence of commands
+    to isolate the image URLs, one per line, and then applying one of the techniques
+    I just showed you:'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我的示例有点牵强，因为图像文件名如此统一。在一个更现实的示例中，您可以通过使用`curl`检索页面，通过一系列巧妙的命令来隔离图像 URL（每行一个），然后应用我刚刚向您展示的技术之一来下载网页上的所有图像：
+- en: '[PRE15]'
+  id: totrans-85
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Processing HTML with HTML-XML-utils
+  id: totrans-86
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 HTML-XML-utils 处理 HTML
+- en: 'If you know some HTML and CSS, you can parse the HTML source of web pages from
+    the command line. It’s sometimes more efficient than copying and pasting chunks
+    of a web page from a browser window by hand. A handy suite of tools for this purpose
+    is HTML-XML-utils, which is available in many Linux distros and from the [World
+    Wide Web Consortium](https://oreil.ly/81yM2). A general recipe is:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您了解一些 HTML 和 CSS，您可以从命令行解析网页的 HTML 源代码。有时这比手动从浏览器窗口复制和粘贴网页的片段更有效。用于此目的的一套方便的工具是
+    HTML-XML-utils，在许多 Linux 发行版和[万维网联盟](https://oreil.ly/81yM2)上都可以找到。一个通用的步骤是：
+- en: Use `curl` (or `wget`) to capture the HTML source.
+  id: totrans-88
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用`curl`（或`wget`）捕获 HTML 源代码。
+- en: Use `hxnormalize` to help ensure that the HTML is well-formed.
+  id: totrans-89
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用`hxnormalize`来帮助确保 HTML 格式正确。
+- en: Identify CSS selectors for the values you want to capture.
+  id: totrans-90
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 识别要捕获的值的 CSS 选择器。
+- en: Use `hxselect` to isolate the values, and pipe the output to further commands
+    for processing.
+  id: totrans-91
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用`hxselect`来隔离这些值，并将输出导向进一步处理的命令。
+- en: Let’s extend the example from [“Building an Area Code Database”](ch09.xhtml#sec_areacodes)
+    to grab area code data from the web and produce the *areacodes.txt* file used
+    in that example. For your convenience, I’ve created an HTML table of area codes
+    for you to download and process, shown in [Figure 10-1](#fig_areacodes).
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们扩展[“构建区号数据库”](ch09.xhtml#sec_areacodes)的示例，从网上获取区号数据并生成在该示例中使用的*areacodes.txt*文件。为了方便起见，我已经为您创建了一个区号的
+    HTML 表格供您下载和处理，如[图 10-1](#fig_areacodes)所示。
+- en: '![A table of area codes, US states, and US cities](Images/elcl_1001.png)'
+  id: totrans-93
+  prefs: []
+  type: TYPE_IMG
+  zh: '![一个区号、美国州和美国城市的表格](Images/elcl_1001.png)'
+- en: Figure 10-1\. A table of area codes at [*https://efficientlinux.com/areacodes.html*](https://efficientlinux.com/areacodes.html)
+  id: totrans-94
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 10-1\. 一个区号表格，位于[*https://efficientlinux.com/areacodes.html*](https://efficientlinux.com/areacodes.html)
+- en: 'First, grab the HTML source with `curl`, using the `-s` option to suppress
+    on-screen messages. Pipe the output to `hxnormalize -x` to clean it up a bit.
+    Pipe it to `less` to view the output one screenful at a time:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，使用`curl`获取 HTML 源代码，使用`-s`选项来抑制屏幕消息。将输出导向`hxnormalize -x`以稍微清理一下。将其导向`less`以逐屏查看输出：
+- en: '[PRE16]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: The HTML table on that page, shown in [Example 10-2](#ex_areacodes_html), has
+    CSS ID `#ac`, and its three columns (area code, state, and location) use CSS classes
+    `ac`, `state`, and `cities`, respectively.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该页面上的 HTML 表格，如[示例 10-2](#ex_areacodes_html)所示，具有 CSS ID `#ac`，其三列（区号、州和位置）分别使用
+    CSS 类`ac`、`state`和`cities`。
+- en: Example 10-2\. Partial HTML source of the table in [Figure 10-1](#fig_areacodes)
+  id: totrans-98
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+  zh: 示例 10-2\. [图 10-1](#fig_areacodes)中表格的部分 HTML 源代码
+- en: '[PRE17]'
+  id: totrans-99
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'Run `hxselect` to extract the area code data from each table cell, supplying
+    the `-c` option to omit the `td` tags from the output. Print the results as one
+    long line, with fields separated by a character of your choice (using the `-s`
+    option).^([2](ch10.xhtml#idm46586637066128)) I chose the character `@` for its
+    easy visibility on the page:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行`hxselect`来从每个表格单元格中提取区号数据，提供`-c`选项以省略输出中的`td`标签。将结果打印为一行，用您选择的字符分隔字段（使用`-s`选项）。^([2](ch10.xhtml#idm46586637066128))
+    我选择字符`@`是因为在页面上易于看到：
+- en: '[PRE18]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'Finally, pipe the output to `sed` to turn this long line into three tab-separated
+    columns. Write a regular expression to match the following strings:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，将输出导向`sed`，将这一长行转换为三个以制表符分隔的列。编写一个正则表达式来匹配以下字符串：
+- en: An area code, which consists of digits, `[0-9]*`
+  id: totrans-103
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 区号，由数字组成，`[0-9]*`
+- en: An `@` symbol
+  id: totrans-104
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 一个`@`符号
+- en: A state abbreviation, which is two capital letters, `[A-Z][A-Z]`
+  id: totrans-105
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 州缩写，即两个大写字母，`[A-Z][A-Z]`
+- en: An `@` symbol
+  id: totrans-106
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 一个`@`符号
+- en: The cities, which is any text that doesn’t include an `@` symbol, `[^@]*`
+  id: totrans-107
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 城市，即不包含`@`符号的任何文本，`[^@]*`
+- en: An `@` symbol
+  id: totrans-108
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 一个`@`符号
+- en: 'Combine the parts to produce the following regular expression:'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 组合部分以生成以下正则表达式：
+- en: '[PRE19]'
+  id: totrans-110
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'Capture the area code, state, and cities as three subexpressions by surrounding
+    them with `\(` and `\)`. You now have a complete regular expression for `sed`:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过将区号、州和城市括在`\(`和`\) `中，捕获三个子表达式。您现在拥有了`sed`的完整正则表达式：
+- en: '[PRE20]'
+  id: totrans-112
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'For `sed`’s replacement string, provide the three subexpressions separated
+    by tabs and terminated by newlines, which produces the format of the *areacodes.txt*
+    file:'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于`sed`的替换字符串，提供由制表符分隔并以换行符终止的三个子表达式，这会生成*areacodes.txt*文件的格式：
+- en: '[PRE21]'
+  id: totrans-114
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Combine the preceding regular expression and replacement string to make this
+    sed script:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将前述正则表达式和替换字符串组合，以制作此sed脚本：
+- en: '[PRE22]'
+  id: totrans-116
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'The finished command produces the needed data for the *areacodes.txt* file:'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 完成的命令会生成*areacodes.txt*文件所需的数据：
+- en: '[PRE23]'
+  id: totrans-118
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: Retrieving Rendered Web Content with a Text-Based Browser
+  id: totrans-119
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用基于文本的浏览器检索渲染的Web内容
+- en: Sometimes when you retrieve data from the web at the command line, you might
+    not want the HTML source of a web page, but a rendered version of the page in
+    text. The rendered text might be easier to parse. To accomplish this task, use
+    a text-based browser such as `lynx` or `links`. Text-based browsers display web
+    pages in a stripped-down format without images or other fancy features. [Figure 10-2](#fig_lynx)
+    displays the area codes page from the previous section as rendered by `lynx`.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有时，当您在命令行检索网页数据时，您可能不希望获取网页的HTML源码，而是希望获取页面的文本渲染版本。渲染后的文本可能更容易解析。要完成此任务，请使用文本浏览器如`lynx`或`links`。文本浏览器以简化格式显示网页，没有图像或其他花哨功能。[图 10-2](#fig_lynx)
+    显示了由`lynx`渲染的前一节中的区号页面。
+- en: '![lynx renders the page https://efficientlinux.com/areacodes.html](Images/elcl_1002.png)'
+  id: totrans-121
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lynx渲染页面 https://efficientlinux.com/areacodes.html](Images/elcl_1002.png)'
+- en: Figure 10-2\. `lynx` renders the page [*https://efficientlinux.com/areacodes.html*](https://efficientlinux.com/areacodes.html)
+  id: totrans-122
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 10-2\. `lynx`渲染页面 [*https://efficientlinux.com/areacodes.html*](https://efficientlinux.com/areacodes.html)
+- en: Both `lynx` and `links` download a rendered page with the `-dump` option. Use
+    whichever program you prefer.
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论您更喜欢哪个程序，`lynx`和`links`都使用`-dump`选项下载渲染后的页面。
+- en: '[PRE24]'
+  id: totrans-124
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: Tip
+  id: totrans-125
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: '`lynx` and `links` are also great for checking out a suspicious-looking link
+    when you’re unsure if it’s legitimate or malicious. These text-based browsers
+    don’t support JavaScript or render images, so they are less vulnerable to attack.
+    (They can’t promise complete security, of course, so use your best judgment.)'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`lynx`和`links`也非常适合检查看起来可疑的链接，以确定它们是否合法或恶意。这些文本浏览器不支持JavaScript或渲染图像，因此它们不太容易受到攻击。（当然，它们无法完全保证安全性，所以请慎重使用。）'
+- en: Clipboard Control from the Command Line
+  id: totrans-127
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 命令行剪贴板控制
+- en: Every modern software application with an Edit menu includes the operations
+    cut, copy, and paste to transfer content in and out of the system clipboard. You
+    might also know keyboard shortcuts for these operations. But did you know that
+    you can process the clipboard directly from the command line?
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个带有编辑菜单的现代软件应用程序都包括剪切、复制和粘贴操作，以在系统剪贴板中传输内容。您可能还知道这些操作的键盘快捷键。但您是否知道您可以直接从命令行处理剪贴板？
+- en: 'A bit of background first: copy and paste operations on Linux are part of a
+    more general mechanism called *X selections*. A selection is a destination for
+    copied content, such as the system clipboard. “X” is just the name of the Linux
+    windowing software.'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先稍微背景：Linux上的复制和粘贴操作是称为*X选择*的更一般机制的一部分。选择是复制内容的目的地，如系统剪贴板。 “X”只是Linux窗口软件的名称。
+- en: Most Linux desktop environments that are built on X, such as GNOME, Unity, Cinnamon,
+    and KDE Plasma, support two selections.^([3](ch10.xhtml#idm46586636889712)) The
+    first is the *clipboard*, and it works just like clipboards on other operating
+    systems. When you run cut or copy operations in an application, the content goes
+    to the clipboard, and you retrieve the content with a paste operation. A less
+    familiar X selection is called the *primary selection*. When you select text in
+    certain applications, it’s written to the primary selection even if you don’t
+    run a copy operation. An example is highlighting text in a terminal window with
+    the mouse. That text is automatically written to the primary selection.
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 大多数基于 X 构建的 Linux 桌面环境，如 GNOME、Unity、Cinnamon 和 KDE Plasma，支持两种选择。^([3](ch10.xhtml#idm46586636889712))
+    第一种是*剪贴板*，它的工作方式与其他操作系统上的剪贴板相似。当您在应用程序中执行剪切或复制操作时，内容将存储在剪贴板中，并且您可以通过粘贴操作检索内容。一个较少见的
+    X 选择称为*主要选择*。在某些应用程序中选择文本时，即使您没有运行复制操作，它也会被写入主要选择。例如，在终端窗口中用鼠标突出显示文本。该文本会自动写入主要选择。
+- en: Note
+  id: totrans-131
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: If you connect to a Linux host remotely by SSH or similar programs, copy/paste
+    generally is handled by the local computer, not by X selections on the remote
+    Linux host.
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果通过 SSH 或类似程序远程连接到 Linux 主机，则通常由本地计算机处理复制/粘贴，而不是远程 Linux 主机上的 X 选择。
+- en: '[Table 10-2](#table_clipboards) lists mouse and keyboard operations to access
+    X selections in GNOME’s Terminal (`gnome-terminal`) and KDE’s Konsole (`konsole`).
+    If you use a different terminal program, check its Edit menu for keyboard equivalents
+    for Copy and Paste.'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表格 10-2](#table_clipboards) 列出了在 GNOME 终端 (`gnome-terminal`) 和 KDE 的 Konsole
+    (`konsole`) 中访问 X 选择的鼠标和键盘操作。如果您使用不同的终端程序，请检查其编辑菜单以获取复制和粘贴的键盘等效操作。'
+- en: Table 10-2\. Accessing X selections in common terminal programs
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 10-2\. 在常见终端程序中访问 X 选择
+- en: '| Operation | Clipboard | Primary selection |'
+  id: totrans-135
+  prefs: []
+  type: TYPE_TB
+  zh: '| 操作 | 剪贴板 | 主要选择 |'
+- en: '| --- | --- | --- |'
+  id: totrans-136
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| Copy (mouse) | Open the right button menu and select Copy | Click and drag;
+    or double-click to select the current word; or triple-click to select the current
+    line |'
+  id: totrans-137
+  prefs: []
+  type: TYPE_TB
+  zh: '| 复制（鼠标） | 打开右键菜单并选择复制 | 点击并拖动；或双击选择当前单词；或三次单击选择当前行 |'
+- en: '| Paste (mouse) | Open the right button menu and select Paste | Press the middle
+    mouse button (usually the scroll wheel) |'
+  id: totrans-138
+  prefs: []
+  type: TYPE_TB
+  zh: '| 粘贴（鼠标） | 打开右键菜单并选择粘贴 | 按下中间鼠标按钮（通常是滚轮） |'
+- en: '| Copy (keyboard) | Ctrl-Shift-C | *n/a* |'
+  id: totrans-139
+  prefs: []
+  type: TYPE_TB
+  zh: '| 复制（键盘） | Ctrl-Shift-C | *n/a* |'
+- en: '| Paste (keyboard), `gnome-terminal` | Ctrl-Shift-V or Ctrl-Shift-Insert |
+    Shift-Insert |'
+  id: totrans-140
+  prefs: []
+  type: TYPE_TB
+  zh: '| 粘贴（键盘），`gnome-terminal` | Ctrl-Shift-V 或 Ctrl-Shift-Insert | Shift-Insert
+    |'
+- en: '| Paste (keyboard), `konsole` | Ctrl-Shift-V or Shift-Insert | Ctrl-Shift-Insert
+    |'
+  id: totrans-141
+  prefs: []
+  type: TYPE_TB
+  zh: '| 粘贴（键盘），`konsole` | Ctrl-Shift-V 或 Shift-Insert | Ctrl-Shift-Insert |'
+- en: Connecting Selections to stdin and stdout
+  id: totrans-142
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 将选择连接到标准输入和输出
+- en: 'Linux provides a command, `xclip`, that connects X selections to stdin and
+    stdout. You can therefore insert copy and paste operations into pipelines and
+    other combined commands. For example, you may have copied text into an application
+    like this:'
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 提供了一个命令，`xclip`，它将 X 选择连接到标准输入和输出。因此，您可以将复制和粘贴操作插入到管道和其他组合命令中。例如，您可以像这样将文本复制到应用程序中：
+- en: Run a Linux command and redirect its output to a file.
+  id: totrans-144
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 运行 Linux 命令并将其输出重定向到文件。
+- en: View the file.
+  id: totrans-145
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 查看文件。
+- en: Use your mouse to copy the file’s content to the clipboard.
+  id: totrans-146
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用鼠标将文件内容复制到剪贴板。
+- en: Paste the content into another application.
+  id: totrans-147
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将内容粘贴到另一个应用程序中。
+- en: 'With `xclip`, you can shorten the process considerably:'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `xclip`，您可以大大简化这个过程：
+- en: Pipe a Linux command’s output to `xclip`.
+  id: totrans-149
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将 Linux 命令的输出管道到 `xclip`。
+- en: Paste the content into another application.
+  id: totrans-150
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将内容粘贴到另一个应用程序中。
+- en: 'Conversely, you may have pasted text into a file to process it with Linux commands
+    like this:'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 相反，您可能已经将文本粘贴到文件中，以便使用 Linux 命令处理它，例如：
+- en: Use your mouse to copy a bunch of text in an application program.
+  id: totrans-152
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用鼠标在应用程序中复制一大段文本。
+- en: Paste it into a text file.
+  id: totrans-153
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将其粘贴到文本文件中。
+- en: Process the text file with Linux commands.
+  id: totrans-154
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用 Linux 命令处理文本文件。
+- en: 'With `xclip -o`, you can skip the intermediate text file:'
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `xclip -o`，您可以跳过中间文本文件：
+- en: Use your mouse to copy a bunch of text in an application program.
+  id: totrans-156
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用鼠标在应用程序中复制一大段文本。
+- en: Pipe the output of `xclip -o` to other Linux commands for processing.
+  id: totrans-157
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将 `xclip -o` 的输出管道到其他 Linux 命令以进行处理。
+- en: Warning
+  id: totrans-158
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: If you’re reading this book digitally on a Linux device and want to try some
+    of the `xclip` commands in this section, *don’t copy and paste the commands* into
+    a shell window. Type the commands by hand. Why? Because your copy operation may
+    overwrite the same X selection that the commands access with `xclip`, causing
+    the commands to produce unexpected results.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你在Linux设备上以数字方式阅读本书，并且想尝试本节中的一些`xclip`命令，请*不要将命令*复制并粘贴到shell窗口中。手动输入命令。为什么？因为你的复制操作可能会覆盖`xclip`访问的同一X选择，导致命令产生意外结果。
+- en: 'By default, `xclip` reads stdin and writes the primary selection. It can read
+    from a file:'
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 默认情况下，`xclip`从标准输入读取并写入主选择。它可以从文件中读取：
+- en: '[PRE25]'
+  id: totrans-161
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'or from a pipe:'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者来自管道：
+- en: '[PRE26]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'Now print the text to stdout, or pipe the selection contents to other commands,
+    such as `wc`:'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在将文本打印到标准输出，或将选择内容管道化到其他命令，例如`wc`：
+- en: '[PRE27]'
+  id: totrans-165
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'Any combined command that writes to stdout can pipe its results to `xclip`,
+    like this one from [“Command #6: uniq”](ch01.xhtml#section_uniq):'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '任何将结果写入标准输出的组合命令都可以将其结果通过`xclip`管道化，就像来自[“命令 #6: uniq”](ch01.xhtml#section_uniq)的这个例子：'
+- en: '[PRE28]'
+  id: totrans-167
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'Clear the primary selection by setting its value to the empty string with `echo
+    -n`:'
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`echo -n`将主选择清空设置为空字符串：
+- en: '[PRE29]'
+  id: totrans-169
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: The `-n` option is important; otherwise, `echo` prints a newline character on
+    stdout that ends up in the primary selection.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-n`选项很重要；否则，`echo`会在标准输出中打印一个换行符，最终会出现在主选择中。'
+- en: 'To copy text to the clipboard instead of the primary selection, run `xclip`
+    with the option `-selection clipboard`:'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要将文本复制到剪贴板而不是主选择中，请使用`xclip`选项`-selection clipboard`运行：
+- en: '[PRE30]'
+  id: totrans-172
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: '`xclip` options may be abbreviated as long as they’re unambiguous:'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`xclip`选项可以缩写，只要它们不引起歧义：'
+- en: '[PRE31]'
+  id: totrans-174
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'Launch a Firefox browser window to visit the preceding URL, using command substitution:'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动Firefox浏览器窗口访问前述URL，使用命令替换：
+- en: '[PRE32]'
+  id: totrans-176
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: Linux offers another command, `xsel`, that also reads and writes X selections.
+    It has a few extra features, like clearing a selection (`xsel -c`) and appending
+    to a selection (`xsel -a`). Feel free to read the manpage and experiment with
+    `xsel`.
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux提供另一种命令`xsel`，它也可以读取和写入X选择。它还有一些额外的功能，如清除选择(`xsel -c`)和追加到选择(`xsel -a`)。请随意阅读man页并尝试使用`xsel`。
+- en: Improving the Password Manager
+  id: totrans-178
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 改进密码管理器
+- en: Let’s use your newfound knowledge of `xclip` to integrate X selections into
+    the password manager `pman` from [“Building a Password Manager”](ch09.xhtml#section_pman).
+    When the modified `pman` script matches a single line in the *vault.gpg* file,
+    it writes the username to the clipboard and the password to the primary selection.
+    Afterward, you can fill out a login page on the web, for example, by pasting the
+    username with Ctrl-V and pasting the password with the middle mouse button.
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们利用你对`xclip`的新知识，将X选择集成到密码管理器`pman`中，来自[“构建密码管理器”](ch09.xhtml#section_pman)。修改后的`pman`脚本匹配*vault.gpg*文件中的单行，将用户名写入剪贴板，将密码写入主选择。之后，你可以通过Ctrl-V粘贴用户名，通过中键粘贴密码来填写网页上的登录页。
+- en: Warning
+  id: totrans-180
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 警告
+- en: Ensure that you are *not* running a clipboard manager or any other applications
+    that keep track of X selections and their contents. Otherwise, usernames and/or
+    passwords become visible in the clipboard manager, which is a security risk.
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确保你*没有*运行剪贴板管理器或其他跟踪X选择及其内容的应用程序。否则，用户名和/或密码会在剪贴板管理器中可见，这是一个安全风险。
+- en: 'The new version of `pman` is in [Example 10-3](#ex_pman_clip). `pman`’s behavior
+    has changed in the following ways:'
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 新版本的`pman`在[示例 10-3](#ex_pman_clip)中。`pman`的行为已以下列方式发生了变化：
+- en: A new function, `load_password`, loads the associated username and password
+    into X selections.
+  id: totrans-183
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 新功能`load_password`加载相关的用户名和密码到X选择中。
+- en: If `pman` locates a single match for the search string, either by key (field
+    3) or by any other part of a line, it runs `load_password`.
+  id: totrans-184
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果`pman`找到一个与搜索字符串匹配的单个结果，无论是按键（字段3）还是按行中的任何其他部分，它都会运行`load_password`。
+- en: If `pman` locates multiple matches, it prints all the keys and notes (fields
+    3 and 4) from the matching lines so the user can search again by key.
+  id: totrans-185
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 如果`pman`找到多个匹配项，它会打印所有匹配行中的键和注释（字段3和字段4），以便用户可以再次按键搜索。
+- en: Example 10-3\. An improved `pman` script that loads username and password as
+    selections
+  id: totrans-186
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+  zh: 示例 10-3。一个改进的`pman`脚本，将用户名和密码加载为选择项
+- en: '[PRE33]'
+  id: totrans-187
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'Run the script:'
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行脚本：
+- en: '[PRE34]'
+  id: totrans-189
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: Passwords hang around in the primary selection until it’s overwritten. To automatically
+    clear the password after (say) 30 seconds, append the following line to the `load_password`
+    function. The line launches a subshell in the background that waits 30 seconds
+    and then clears the primary selection (by setting it to the empty string). Adjust
+    the number 30 as you see fit.
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 密码会一直保存在主要选择中，直到它被覆盖。要在（比如）30 秒后自动清除密码，请在`load_password`函数的末尾添加以下行。该行在后台启动一个子
+    shell，等待 30 秒然后清除主要选择（设置为空字符串）。根据需要调整数字 30。
+- en: '[PRE35]'
+  id: totrans-191
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: If you defined a custom keyboard shortcut to launch terminal windows in [“Instant
+    Shells and Browsers”](#section_popup), you now have a quick way to access your
+    passwords. Pop up a terminal by hotkey, run `pman`, and close the terminal.
+  id: totrans-192
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你已经定义了一个自定义的键盘快捷方式来启动终端窗口在[“即时外壳和浏览器”](#section_popup)，现在你有一个快速访问密码的方法。通过热键弹出一个终端，运行`pman`，然后关闭终端。
+- en: Summary
+  id: totrans-193
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 总结
+- en: I hope this chapter has encouraged you to try some new techniques that keep
+    your hands on the keyboard. They may seem effortful at first, but with practice
+    they become quick and automatic. Soon you’ll be the envy of your Linux friends
+    as you smoothly manipulate desktop windows, web content, and X selections in ways
+    that the mouse-bound masses cannot.
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 希望本章节鼓励你尝试一些新技巧，使你能保持双手在键盘上。起初可能需要付出努力，但随着练习，它们会变得快速和自动化。很快你会成为 Linux 朋友羡慕的对象，因为你能够顺利地操作桌面窗口、网络内容和
+    X 选择，而这是鼠标绑定的群众所不能及的。
+- en: ^([1](ch10.xhtml#idm46586637526832-marker)) Unless you’re working in an application
+    that captures all keystrokes, such as a virtual machine in a window.
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([1](ch10.xhtml#idm46586637526832-marker)) 除非你在捕获所有按键的应用程序中工作，比如一个窗口中的虚拟机。
+- en: ^([2](ch10.xhtml#idm46586637066128-marker)) This example uses three CSS selectors,
+    but some old versions of `hxselect` can handle only two. If your version of `hxselect`
+    is afflicted by this shortcoming, download the latest version from the [World
+    Wide Web Consortium](https://oreil.ly/81yM2) and build it with the command `configure
+    && make`.
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([2](ch10.xhtml#idm46586637066128-marker)) 这个例子使用了三个 CSS 选择器，但是一些旧版本的`hxselect`只能处理两个。如果你的版本受到这个缺陷的影响，从[万维网联盟](https://oreil.ly/81yM2)下载最新版本，并使用命令`configure
+    && make`进行构建。
+- en: ^([3](ch10.xhtml#idm46586636889712-marker)) Really there are three X selections,
+    but one of them, called the *secondary selection*, is rarely exposed by modern
+    desktop environments.
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([3](ch10.xhtml#idm46586636889712-marker)) 实际上有三个 X 选择，但其中一个称为*次要选择*，在现代桌面环境中很少暴露。

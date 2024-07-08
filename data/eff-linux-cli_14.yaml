@@ -1,0 +1,864 @@
+- en: Chapter 11\. Final Time-Savers
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第11章。最终节省时间
+- en: I’ve had a lot of fun writing this book, and I hope you’ve had fun reading it
+    too. For the last act, let’s cover a bunch of smaller topics that didn’t quite
+    fit into the earlier chapters. These topics have made me a better Linux user,
+    and maybe they’ll help you as well.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 写这本书非常有趣，希望你们读起来也很愉快。在最后一个章节中，让我们涵盖一些前几章中没有完全适合的小主题。这些主题让我成为一个更好的Linux用户，也许它们也会帮助到你。
+- en: Quick Wins
+  id: totrans-2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 快速胜利
+- en: The following time-savers are simple to learn in a few minutes.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下时间节省方法，几分钟内就能轻松掌握。
+- en: Jumping Into Your Editor from less
+  id: totrans-4
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 从`less`跳转到您的编辑器
+- en: When you’re viewing a text file with `less` and want to edit the file, don’t
+    exit `less`. Just press `v` to launch your preferred text editor. It loads the
+    file and places the cursor right at the spot you were viewing in `less`. Exit
+    the editor and you’re back in `less` at the original location.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你使用`less`查看文本文件并想要编辑文件时，不要退出`less`。只需按`v`键启动你喜欢的文本编辑器。它会加载文件并将光标放在你在`less`中查看的位置。退出编辑器后，你将回到原来在`less`中的位置。
+- en: 'For this trick to work best, set the environment variable `EDITOR` and/or `VISUAL`
+    to an editing command. These environment variables represent your default Linux
+    text editor that may be launched by various commands, including `less`, `lynx`,
+    `git`, `crontab`, and numerous email programs. For example, to set `emacs` as
+    your default editor, place either of the following lines (or both) in a shell
+    configuration file and source it:'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使此技巧发挥最佳效果，请将环境变量`EDITOR`和/或`VISUAL`设置为编辑命令。这些环境变量代表你的默认Linux文本编辑器，可以通过各种命令启动，包括`less`、`lynx`、`git`、`crontab`和众多电子邮件程序。例如，要将`emacs`设置为默认编辑器，请在shell配置文件中添加以下任一行（或两行），然后执行：
+- en: '[PRE0]'
+  id: totrans-7
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: If you don’t set these variables, your default editor is whatever your Linux
+    system sets it to be, which is usually `vim`. If you end up inside of `vim` and
+    you don’t know how to use it, don’t panic. Quit `vim` by pressing the Escape key
+    and typing `:q!` (a colon, the letter *q*, and an exclamation point), then press
+    Enter. To quit `emacs`, press Ctrl-X followed by Ctrl-C.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你没有设置这些变量，你的默认编辑器将是你的Linux系统通常设置的`vim`。如果你进入`vim`而不知道如何使用它，请不要惊慌。按下Escape键，输入`:q!`（冒号、字母*q*和感叹号），然后按Enter键退出`vim`。要退出`emacs`，按Ctrl-X，然后按Ctrl-C。
+- en: Editing Files That Contain a Given String
+  id: totrans-9
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 编辑包含特定字符串的文件
+- en: 'Want to edit every file in the current directory that contains a certain string
+    (or regular expression)? Generate a list of filenames with `grep -l` and pass
+    them to your editor with command substitution. Assuming your editor is `vim`,
+    the command is as follows:'
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 想要编辑当前目录中包含特定字符串（或正则表达式）的每个文件？使用`grep -l`生成文件名列表，并通过命令替换将它们传递给你的编辑器。假设你的编辑器是`vim`，命令如下：
+- en: '[PRE1]'
+  id: totrans-11
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Edit all files containing *string* in an entire directory tree (current directory
+    and all subdirectories) by adding the `-r` option (recursive) to `grep` and beginning
+    in the current directory (the dot):'
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过将`-r`选项（递归）添加到`grep`并从当前目录（点）开始，编辑所有包含*string*的文件：
+- en: '[PRE2]'
+  id: totrans-13
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'For faster searches of large directory trees, use `find` with `xargs` instead
+    of `grep -r`:'
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于大型目录树的快速搜索，使用`find`和`xargs`而不是`grep -r`：
+- en: '[PRE3]'
+  id: totrans-15
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: '[“Technique #3: Command Substitution”](ch07.xhtml#section_cmd_sub) touched
+    on this technique, but I wanted to emphasize it since it’s so useful. Remember
+    to watch out for filenames containing spaces and other characters special to the
+    shell, since they may disrupt the results as explained in [“Special Characters
+    and Command Substitution”](ch07.xhtml#warn_command_substitution).'
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[“技巧＃3：命令替换”](ch07.xhtml#section_cmd_sub)提到了这种技术，但我想强调一下，因为它非常有用。记得要注意文件名中包含空格和其他特殊字符，因为它们可能会影响到结果，就像[“特殊字符和命令替换”](ch07.xhtml#warn_command_substitution)中解释的那样。'
+- en: Embracing Typos
+  id: totrans-17
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 接受拼写错误
+- en: 'If you consistently misspell a command, define aliases for your most common
+    mistakes so the correct command runs anyway:'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你经常拼错命令，请为你最常见的错误定义别名，以便正确的命令仍然运行：
+- en: '[PRE4]'
+  id: totrans-19
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Be careful not to shadow (override) an existing Linux command accidentally
+    by defining an alias with the same name. Search for your proposed alias first
+    with the command `which` or `type` (see [“Locating Programs to Be Run”](ch02.xhtml#section_path)),
+    and run the `man` command to be extra sure there’s no other same-named command:'
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意不要意外地通过定义具有相同名称的别名来覆盖现有的Linux命令。首先使用`which`或`type`命令搜索你提议的别名，然后运行`man`命令，确保没有其他同名的命令：
+- en: '[PRE5]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Creating Empty Files Quickly
+  id: totrans-22
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 快速创建空文件
+- en: 'There are several ways to create empty files in Linux. The `touch` command,
+    which updates the timestamp on a file, also creates a file if one doesn’t already
+    exist:'
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Linux中有几种创建空文件的方法。`touch`命令用于更新文件的时间戳，如果文件不存在，则也会创建文件：
+- en: '[PRE6]'
+  id: totrans-24
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '`touch` is great for creating large numbers of empty files for testing:'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`touch`非常适合用于创建大量空文件进行测试：'
+- en: '[PRE7]'
+  id: totrans-26
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'The `echo` command creates an empty file if you redirect its output to a file,
+    but only if you supply the `-n` option:'
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`echo`命令如果将其输出重定向到文件，则会创建一个空文件，但仅当提供`-n`选项时：'
+- en: '[PRE8]'
+  id: totrans-28
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: If you forget the `-n` option, the resulting file contains one character, a
+    newline, so it’s not empty.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果忘记了`-n`选项，则生成的文件包含一个字符，即换行符，因此不是空文件。
+- en: Processing a File One Line at a Time
+  id: totrans-30
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 逐行处理文件
+- en: 'When you need to process a file one line at a time, `cat` the file into a `while
+    read` loop:'
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您需要逐行处理文件时，将文件`cat`到`while read`循环中：
+- en: '[PRE9]'
+  id: totrans-32
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'For example, to compute the length of each line of a file, such as */etc/hosts*,
+    pipe each line to `wc -c`:'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，要计算文件每行的长度，例如*/etc/hosts*，将每行管道传递给`wc -c`：
+- en: '[PRE10]'
+  id: totrans-34
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: A more practical example of this technique is in [Example 9-3](ch09.xhtml#ex_check_expiry_all).
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此技术的一个更实际的示例见[示例 9-3](ch09.xhtml#ex_check_expiry_all)。
+- en: Identifying Commands That Support Recursion
+  id: totrans-36
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 辨识支持递归的命令
+- en: 'In [“The find Command”](ch05.xhtml#section_find), I introduced `find -exec`,
+    which applies any Linux command to a whole directory tree recursively:'
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[“find命令”](ch05.xhtml#section_find)中，我介绍了`find -exec`，它可以递归地对整个目录树应用任何Linux命令：
+- en: '[PRE11]'
+  id: totrans-38
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Certain other commands support recursion themselves, and if you’re aware of
+    them, you can save typing time by using their native recursion instead of constructing
+    a `find` command:'
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有其他一些命令本身支持递归，如果您知道它们，可以节省时间，而不是构建一个`find`命令来实现递归。
+- en: '`ls -R`'
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ls -R`'
+- en: To list directories and their contents recursively
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 递归列出目录及其内容
+- en: '`cp -r` or `cp -a`'
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cp -r`或`cp -a`'
+- en: To copy directories and their contents recursively
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 递归复制目录及其内容
+- en: '`rm -r`'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`rm -r`'
+- en: To delete directories and their contents recursively
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 递归删除目录及其内容
+- en: '`grep -r`'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`grep -r`'
+- en: To search by regular expression throughout a directory tree
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过正则表达式在整个目录树中搜索
+- en: '`chmod -R`'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`chmod -R`'
+- en: To change file protections recursively
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 递归更改文件保护
+- en: '`chown -R`'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`chown -R`'
+- en: To change file ownership recursively
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 递归更改文件所有权
+- en: '`chgrp -R`'
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`chgrp -R`'
+- en: To change file group ownership recursively
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 递归更改文件组所有权
+- en: Read a Manpage
+  id: totrans-54
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 阅读一个手册页
+- en: Pick a common command, such as `cut` or `grep`, and read its manpage thoroughly.
+    You’ll probably discover an option or two that you’ve never used and will find
+    valuable. Repeat this activity every so often to polish and extend your Linux
+    toolbox.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选择一个常用命令，如`cut`或`grep`，并彻底阅读其手册页。您可能会发现一两个从未使用过但很有价值的选项。定期重复此活动可完善并扩展您的Linux工具箱。
+- en: Longer Learning
+  id: totrans-56
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 长期学习
+- en: The following techniques require real effort to learn, but you’ll be paid back
+    in time saved. I provide just a taste of each topic, not to teach you the details
+    but to entice you to discover more on your own.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下面的技术需要真正的努力学习，但您将在节省时间方面得到回报。我提供了每个主题的一点点味道，不是为了教授详细内容，而是为了激励您自己去发现更多。
+- en: Read the bash Manpage
+  id: totrans-58
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 阅读bash手册页
+- en: 'Run `man bash` to display the full, official documentation on `bash`, and read
+    the whole thing—yes, all 46,318 words of it:'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行`man bash`以显示`bash`的完整官方文档，并阅读所有内容——是的，全部46318字：
+- en: '[PRE12]'
+  id: totrans-60
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: Take a few days. Work through it slowly. You’ll definitely learn a lot to make
+    your daily Linux use easier.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 花几天时间，慢慢来。您肯定会学到很多，使您的日常Linux使用更加轻松。
+- en: Learn cron, crontab, and at
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 学习cron、crontab和at
+- en: 'In [“A First Example: Finding Files”](ch09.xhtml#section_finding_files), there’s
+    a brief note about scheduling commands to run automatically in the future at regular
+    intervals. I recommend learning the program `crontab` to set up scheduled commands
+    for yourself. For example, you could back up files to an external drive on a schedule,
+    or send yourself reminders by email for a monthly event.'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[“第一个示例：查找文件”](ch09.xhtml#section_finding_files)中，有一段简短的关于如何安排命令在未来定期自动运行的说明。我建议学习`crontab`程序为自己设置定期命令。例如，您可以按计划备份文件到外部驱动器，或通过电子邮件为月度事件发送提醒。
+- en: Before running `crontab`, define your default editor as shown in [“Jumping Into
+    Your Editor from less”](#section_less). Then run `crontab -e` to edit your personal
+    file of scheduled commands. `crontab` launches your default editor and opens an
+    empty file to specify the commands. That file is called your *crontab*.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在运行`crontab`之前，请按照[“从less跳转到编辑器”](#section_less)中所示的方式定义您的默认编辑器。然后运行`crontab
+    -e`来编辑您的个人定时命令文件。`crontab`会启动您的默认编辑器并打开一个空文件来指定命令。该文件称为您的*crontab*。
+- en: 'Briefly, a scheduled command in a crontab file, often called a *cron job*,
+    consists of six fields, all on a single (possibly long) line. The first five fields
+    determine the job’s schedule by minute, hour, day of month, month, and day of
+    week, respectively. The sixth field is the Linux command to run. You can launch
+    a command hourly, daily, weekly, monthly, yearly, at certain days or times, or
+    in other more complex arrangements. Some examples are:'
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简而言之，在crontab文件中的计划命令，通常称为*cron作业*，由六个字段组成，全部位于单个（可能很长的）行上。前五个字段确定作业的调度时间，依次为分钟、小时、每月的日期、月份和星期几。第六个字段是要运行的Linux命令。您可以按小时、每天、每周、每月、每年的某些特定日期或时间或其他更复杂的安排来启动命令。一些示例包括：
+- en: '[PRE13]'
+  id: totrans-66
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Once you’ve created all six fields, saved the file, and exited your editor,
+    the command is launched automatically (by a program called `cron`) according to
+    the schedule you defined. The syntax for schedules is short and cryptic but well-documented
+    on the manpage (`man 5 crontab`) and numerous online tutorials (search for *cron
+    tutorial*).
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦创建了所有六个字段，保存了文件并退出了编辑器，该命令会根据您定义的时间表自动启动（由一个称为`cron`的程序执行）。计划的语法短而难懂，但在man页面（`man
+    5 crontab`）和许多在线教程（搜索*cron教程*）中都有详细说明。
+- en: 'I also recommend learning the `at` command, which schedules commands to run
+    once, rather than repeatedly, at a specified date and time. Run `man at` for details.
+    Here’s a command that sends you an email reminder tomorrow at 10 p.m. to brush
+    your teeth:'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我还建议学习`at`命令，该命令可安排命令在指定的日期和时间运行一次，而不是重复运行。运行`man at`获取详细信息。以下是一个命令，它会在明天晚上10点向您发送一封电子邮件提醒刷牙：
+- en: '[PRE14]'
+  id: totrans-69
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'To list your pending `at` jobs, run `atq`:'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要列出您待定的`at`作业，请运行`atq`：
+- en: '[PRE15]'
+  id: totrans-71
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: 'To view the commands in an `at` job, run `at -c` with the job number, and print
+    the final few lines:'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查看`at`作业中的命令，请使用作业号运行`at -c`，并打印最后几行：
+- en: '[PRE16]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'To remove a pending job before it’s executed, run `atrm` with the job number:'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在执行之前移除待定作业，请使用作业号运行`atrm`：
+- en: '[PRE17]'
+  id: totrans-75
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: Learn rsync
+  id: totrans-76
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 学习rsync
+- en: 'To copy a full directory, including its subdirectories, from one disk location
+    to another, many Linux users turn to the command `cp -r` or `cp -a`:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要从一个磁盘位置复制完整目录及其子目录到另一个位置，许多Linux用户会使用命令`cp -r`或`cp -a`：
+- en: '[PRE18]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: '`cp` does the job fine the first time, but if you later modify a few files
+    in directory *dir1* and perform the copy again, `cp` is wasteful. It dutifully
+    copies all files and directories from *dir1* all over again, even if identical
+    copies already exist in *dir2*.'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cp`第一次可以完成工作，但如果稍后在目录*dir1*中修改了几个文件并再次执行复制，`cp`会浪费资源。它会忠实地再次复制*dir1*中的所有文件和目录，即使在*dir2*中已经存在完全相同的副本。'
+- en: The command `rsync` is a smarter copy program. It copies only the *differences*
+    between the first and second directories.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令`rsync`是一个更智能的复制程序。它只复制第一个和第二个目录之间的*差异*。
+- en: '[PRE19]'
+  id: totrans-81
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: Note
+  id: totrans-82
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The forward slash in the preceding command means to copy the files inside *dir1*.
+    Without the slash, `rsync` would copy *dir1* itself, creating *dir2/dir1*.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 前述命令中的斜杠表示复制*dir1*内的文件。如果没有斜杠，`rsync`会复制*dir1*本身，从而创建*dir2/dir1*。
+- en: If you later add a file to directory *dir1*, `rsync` copies just that one file.
+    If you change one *line* inside a file in *dir1*, `rsync` copies that one line!
+    It’s a huge time-saver when copying large directory trees multiple times. `rsync`
+    can even copy to a remote server over an SSH connection.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果稍后向目录*dir1*添加一个文件，`rsync`只会复制那一个文件。如果在*dir1*中的文件内修改一行，`rsync`只会复制那一行！在多次复制大型目录树时，这可以节省大量时间。`rsync`甚至可以通过SSH连接复制到远程服务器。
+- en: '`rsync` has dozens of options. These are some particularly useful ones:'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`rsync`有几十个选项。以下是一些特别有用的选项：'
+- en: '`-v` (meaning “verbose”)'
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-v`（表示“详细模式”）'
+- en: To print the names of files as they’re copied
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在文件被复制时打印文件名
+- en: '`-n`'
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-n`'
+- en: To pretend to copy; combine with `-v` to see which files *would* be copied
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假装复制；结合`-v`以查看*将要*被复制的文件
+- en: '`-x`'
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`-x`'
+- en: To tell `rsync` not to cross filesystem boundaries
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 告诉`rsync`不要跨越文件系统边界
+- en: I highly recommend getting comfortable with `rsync` for more efficient copying.
+    Read the manpage and view examples in the article [“Rsync Examples in Linux”](https://oreil.ly/7gHCi)
+    by Korbin Brown.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我强烈推荐熟悉`rsync`以进行更高效的复制。阅读man页并查看Korbin Brown的文章[“Rsync Examples in Linux”](https://oreil.ly/7gHCi)中的示例。
+- en: Learn Another Scripting Language
+  id: totrans-93
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 学习另一种脚本语言
+- en: 'Shell scripts are convenient and powerful but have some serious shortcomings.
+    For example, they’re terrible at handling filenames that contain whitespace characters.
+    Consider this short `bash` script that attempts to remove a file:'
+  id: totrans-94
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell脚本方便且功能强大，但也有一些严重的缺陷。例如，它们无法处理文件名中包含空白字符的情况。考虑这个试图删除文件的简短`bash`脚本：
+- en: '[PRE20]'
+  id: totrans-95
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'It looks like the second line removes a file named *Slow Inefficient Linux*,
+    but it doesn’t. It attempts to remove three files named *Slow*, *Inefficient*,
+    and *Linux*. The shell expands the variable `$BOOKTITLE` before calling `rm`,
+    and its expansion is three words separated by whitespace, as if you had typed
+    the following:'
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第二行看起来是在删除一个名为*Slow Inefficient Linux*的文件，但实际上并不是。它尝试删除三个名为*Slow*、*Inefficient*和*Linux*的文件。在调用`rm`之前，shell会展开变量`$BOOKTITLE`，其展开结果是由空白分隔的三个单词，就像你输入了以下内容一样：
+- en: '[PRE21]'
+  id: totrans-97
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'The shell then invokes `rm` with three arguments, and potential disaster ensues
+    as it removes the wrong files. A correct removal command would surround `$BOOKTITLE`
+    with double quotes:'
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后shell使用三个参数调用`rm`，结果可能是错误的文件被删除了。正确的删除命令应该用双引号括起`$BOOKTITLE`：
+- en: '[PRE22]'
+  id: totrans-99
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'which the shell expands to:'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell会将其展开为：
+- en: '[PRE23]'
+  id: totrans-101
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: This sort of subtle, potentially destructive quirk is just one example of how
+    unsuitable shell scripting is for serious projects. So, I recommend learning a
+    second scripting language, such as Perl, PHP, Python, or Ruby. They all handle
+    whitespace properly. They all support real data structures. They all have powerful
+    string-handling functions. They all do math easily. The list of benefits goes
+    on.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种微妙且潜在破坏性的怪癖只是表明了shell脚本在严肃项目中的不适用性之一。因此，我建议学习第二种脚本语言，如Perl、PHP、Python或Ruby。它们都能正确处理空白字符。它们都支持真实的数据结构。它们都拥有强大的字符串处理函数。它们都能轻松进行数学计算。其优势不胜枚举。
+- en: Use the shell to launch complex commands and create simple scripts, but for
+    more substantial tasks, turn to another language. Try one of the many language
+    tutorials online.
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用shell启动复杂命令和创建简单脚本，但对于更重要的任务，请转向另一种语言。尝试在线的许多语言教程之一。
+- en: Use make for Nonprogramming Tasks
+  id: totrans-104
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 用于非编程任务的make
+- en: The program `make` automatically updates files based on rules. It’s designed
+    to speed up software development, but with a little effort, `make` can simplify
+    other aspects of your Linux life.
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 程序`make`会根据规则自动更新文件。它设计用于加快软件开发，但稍加努力，`make`也可以简化Linux生活的其他方面。
+- en: 'Suppose you have three files named *chapter1.txt*, *chapter2.txt*, and *chapter3.txt*
+    that you work on separately. You also have a fourth file, *book.txt*, that’s a
+    combination of the three chapter files. Anytime a chapter changes, you need to
+    recombine them and update *book.txt*, perhaps with a command like this:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设您有三个文件分别命名为*chapter1.txt*、*chapter2.txt*和*chapter3.txt*，分开处理。还有第四个文件*book.txt*，它是这三个章节文件的组合。每当章节发生变化时，您需要重新组合它们并更新*book.txt*，可能会使用如下命令：
+- en: '[PRE24]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'This situation is perfect for using `make`. You have:'
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种情况非常适合使用`make`。
+- en: A bunch of files
+  id: totrans-109
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一堆文件
+- en: A rule that relates the files, namely, that *book.txt* needs an update whenever
+    any chapter file changes
+  id: totrans-110
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 规则涉及文件，即*book.txt*在任何章节文件更改时都需要更新
+- en: A command that performs the update
+  id: totrans-111
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 执行更新的命令
+- en: '`make` operates by reading a configuration file, usually named *Makefile*,
+    that is full of rules and commands. For example, the following *Makefile* rule
+    states that *book.txt* depends on the three chapter files:'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`make`通过读取一个配置文件（通常命名为*Makefile*），该文件中充满了规则和命令来操作。例如，以下*Makefile*规则说明*book.txt*依赖于三个章节文件：'
+- en: '[PRE25]'
+  id: totrans-113
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'If the target of the rule (in this case *book.txt*) is older than any of its
+    dependencies (the chapter files), then `make` considers the target to be out-of-date.
+    If you supply a command on the line after the rule, `make` runs the command to
+    update the target:'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果规则的目标（在本例中为*book.txt*）比其任何依赖项（章节文件）都要旧，则`make`认为目标已过期。如果在规则后的行上提供了命令，`make`将运行该命令以更新目标：
+- en: '[PRE26]'
+  id: totrans-115
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'To apply the rule, simply run the command `make`:'
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要应用规则，只需运行命令`make`：
+- en: '[PRE27]'
+  id: totrans-117
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: '`make` was developed for programmers, but with a little study, you can use
+    it for nonprogramming tasks. Anytime you need to update files that depend on other
+    files, you can likely simplify your work by writing a *Makefile*.'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`make`是为程序员开发的，但是通过一点学习，您可以将其用于非编程任务。每当您需要更新依赖其他文件的文件时，编写一个*Makefile*通常可以简化您的工作。'
+- en: '`make` helped me write and debug this book. I wrote the book in a typesetting
+    language called AsciiDoc and regularly converted chapters to HTML to view in a
+    browser. Here’s a `make` rule to convert any AsciiDoc file to an HTML file:'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`make`帮助我编写和调试这本书。我用一种称为AsciiDoc的排版语言写作，并定期将章节转换为HTML以在浏览器中查看。以下是一个`make`规则，将任何AsciiDoc文件转换为HTML文件：'
+- en: '[PRE28]'
+  id: totrans-120
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'It means: to create a file with the extension *.html* (`%.html`), look for
+    a corresponding file with the extension *.asciidoc* (`%.asciidoc`). If the HTML
+    file is older than the AsciiDoc file, regenerate the HTML file by running the
+    command `asciidoctor` on the dependent file (`$<`), sending the output to the
+    target HTML file (`-o $@`). With this slightly cryptic but short rule in place,
+    I type a simple `make` command to create the HTML version of the chapter you’re
+    reading now. `make` launches `asciidoctor` to perform the update:'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它的意思是：要创建一个扩展名为*.html*的文件（`%.html`），请查找扩展名为*.asciidoc*的相应文件（`%.asciidoc`）。如果HTML文件比AsciiDoc文件旧，通过在依赖文件（`$<`）上运行`asciidoctor`命令并将输出发送到目标HTML文件（`-o
+    $@`）来重新生成HTML文件。有了这个略微神秘但简短的规则，我只需输入一个简单的`make`命令，就可以创建您现在正在阅读的章节的HTML版本。`make`启动`asciidoctor`来执行更新：
+- en: '[PRE29]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: It takes less than an hour to become reasonably proficient with `make` for small
+    tasks. It’s worth the effort. A helpful guide is at [makefiletutorial.com](https://makefiletutorial.com/).
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于小任务，学习`make`通常不到一个小时就可以掌握基本技能。这是值得的。有一个有用的指南在[makefiletutorial.com](https://makefiletutorial.com/)上。
+- en: Apply Version Control to Day-to-Day Files
+  id: totrans-124
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 将版本控制应用于日常文件
+- en: 'Have you ever wanted to edit a file but were afraid that your changes might
+    mess it up? Perhaps you made a backup copy for safekeeping and edited the original,
+    knowing you could restore the backup if you make a mistake:'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您是否曾经想过编辑一个文件，但又担心您的更改可能会弄乱它？也许您制作了一个备份副本进行保管，并编辑了原始副本，知道如果出错可以恢复备份：
+- en: '[PRE30]'
+  id: totrans-126
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: This solution isn’t scalable. What if you have dozens or hundreds of files and
+    dozens or hundreds of people working on them? Version control systems such as
+    Git and Subversion were invented to solve this problem in general by tracking
+    multiple versions of a file conveniently.
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种解决方案不具有可扩展性。如果您有几十个甚至几百个文件以及数十个甚至数百个人在处理它们，会怎么样？像Git和Subversion这样的版本控制系统通常可以解决这一问题，方便地跟踪多个版本的文件。
+- en: Git is widespread for maintaining software source code, but I recommend learning
+    and using it for any important text files where your changes matter. Perhaps they’re
+    personal files, or operating system files in */etc*. [“Traveling with Your Environment”](ch06.xhtml#section_traveling)
+    suggests maintaining your `bash` configuration files with version control.
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Git在维护软件源代码中非常广泛，但我建议无论是个人文件还是操作系统文件，都学习并使用它，因为您的更改很重要。《“随环境旅行”》建议使用版本控制来维护您的`bash`配置文件。
+- en: I used Git while writing this book so I could try different ways of presenting
+    the material. Without too much effort, I created and maintained three different
+    versions of the book—one for the full manuscript so far, one containing only the
+    chapters I’d submitted to my editor for review, and one for experimental work
+    where I tried out new ideas. If I didn’t like what I wrote, a single command would
+    restore a previous version.
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在写这本书时，我使用了Git，这样可以尝试不同的呈现材料的方式。几乎不费力气，我创建并维护了书的三个不同版本：一个是迄今为止的完整手稿，一个只包含我提交给编辑审查的章节，另一个用于实验性工作，尝试新的想法。如果我不喜欢自己写的东西，一个简单的命令就可以恢复以前的版本。
+- en: 'Teaching Git is beyond the scope of this book, but here are some example commands
+    to show you the basic workflow and whet your appetite. Convert the current directory
+    (and all its subdirectories) into a Git repository:'
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 教授Git超出了本书的范围，但这里有一些示例命令，展示基本的工作流程并激发您的兴趣。将当前目录（及其所有子目录）转换为Git存储库：
+- en: '[PRE31]'
+  id: totrans-131
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'Edit some files. Afterward, add the changed files to an invisible “staging
+    area,” an operation that declares your intent to create a new version:'
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 编辑一些文件。之后，将更改的文件添加到一个不可见的“暂存区”，这一操作声明了您创建新版本的意图：
+- en: '[PRE32]'
+  id: totrans-133
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: 'Create the new version, providing a comment to describe your changes to the
+    files:'
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建新版本时，请提供注释以描述您对文件的更改：
+- en: '[PRE33]'
+  id: totrans-135
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'View your version history:'
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看您的版本历史：
+- en: '[PRE34]'
+  id: totrans-137
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: There’s much more to it, like retrieving old versions of files and saving (*pushing*)
+    versions to another server. Grab a [`git` tutorial](https://oreil.ly/0AlOu), and
+    get started!
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此过程中还有更多内容，比如检索旧版本的文件和将版本保存（*推送*）到另一个服务器上。获取一个[`git`教程](https://oreil.ly/0AlOu)，然后开始吧！
+- en: Farewell
+  id: totrans-139
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 再见
+- en: Thank you so much for following along with me through this book. I hope it has
+    fulfilled the promise I made in the preface to take your Linux command-line skills
+    to the next level. Tell me about your experience at [dbarrett@oreilly.com](mailto:dbarrett@oreilly.com).
+    Happy computing.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 非常感谢你通过这本书与我同行。我希望它能实现我在前言中对提升你的Linux命令行技能的承诺。请告诉我你在[dbarrett@oreilly.com](mailto:dbarrett@oreilly.com)的体验。祝你计算愉快。

@@ -1,0 +1,1748 @@
+- en: Chapter 2\. Managing the GRUB Bootloader
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第二章。管理GRUB引导加载程序
+- en: The *bootloader* is the software that loads your operating system after you
+    power up your computer. The GRUB (GRand Unified Bootloader) bootloader is the
+    most commonly used bootloader on Linux.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*引导加载程序*是在您打开计算机后加载操作系统的软件。GRUB（GRand Unified Bootloader）引导加载程序是Linux上最常用的引导加载程序。'
+- en: 'GRUB supports a number of useful features: boot multiple operating systems
+    on a single PC, live configuration editing, themeable interface, and rescue modes.
+    In this chapter you will learn about all of these.'
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GRUB支持许多有用的功能：在单个PC上引导多个操作系统、实时配置编辑、可主题化界面和救援模式。在本章中，您将了解所有这些内容。
+- en: GRUB versus GRUB 2
+  id: totrans-3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: GRUB与GRUB 2
+- en: There are two major GRUB releases, legacy GRUB and GRUB 2\. GRUB 2 is version
+    1.99 and up. Legacy GRUB ended at version 0.97 in 2005\. A lot of GRUB how-tos
+    still reference legacy GRUB and compare it with GRUB 2\. In this chapter I’m not
+    going to talk about legacy GRUB. It’s been retired for a long time and has little
+    relevance to using GRUB 2, so this chapter will focus exclusively on GRUB 2.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GRUB有两个主要版本，传统的GRUB和GRUB 2。GRUB 2的版本是1.99及以上。传统的GRUB在2005年版本0.97结束。许多GRUB如何文档仍然参考传统的GRUB并将其与GRUB
+    2进行比较。在本章中，我不会讨论传统的GRUB。它已经退役很久了，与使用GRUB 2几乎没有关系，因此本章将专门讨论GRUB 2。
+- en: Some Linux distros use plain GRUB naming, some use GRUB 2\. For example, Ubuntu
+    has the */boot/grub/* directory and *grub-mkconfig* command, and Fedora calls
+    them */boot/grub2/* and *grub2-mkconfig*. Check your filepaths and names. In this
+    chapter I use the Ubuntu naming scheme, except in distro-specific examples.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些Linux发行版使用纯GRUB命名，一些使用GRUB 2。例如，Ubuntu有*/boot/grub/*目录和*grub-mkconfig*命令，而Fedora称之为*/boot/grub2/*和*grub2-mkconfig*。请检查您的文件路径和名称。在本章中，我使用Ubuntu的命名方案，除了特定于发行版的例子。
+- en: Starting a computer hasn’t changed all that much since UNIVAC was first built,
+    back in the 1940s in the last millennium. Starting a computer is called *bootstrapping*,
+    a reference to “pulling yourself up by your own bootstraps,” which is impossible.
+    The difficulty with a programmable computer is it needs software instructions
+    to tell it what to do, but where will those instructions come from before the
+    operating system is loaded?
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 自从UNIVAC在上个千年40年代首次建造以来，计算机的启动方式并没有多大改变。启动计算机被称为*引导*，这是一个“靠自己的靴带拉自己起来”的参考，这是不可能的。可编程计算机的困难在于它需要软件指令来告诉它该做什么，在操作系统加载之前这些指令从哪里来呢？
+- en: The solution for the modern x86_64 PC architecture is to store the initial startup
+    instructions on a chip on the motherboard and program the CPU with the address
+    of these instructions. You could say the CPU is hardwired to receive the startup
+    instructions. This address is the same on all x86_64 machines, and that is why
+    you can mix and match motherboards and CPUs. (This address is called the *reset
+    vector*, if you feel like doing some research.)
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现代x86_64 PC架构的解决方案是将初始启动指令存储在主板上的芯片上，并使用这些指令的地址来编程CPU。您可以说CPU是硬连接接收启动指令的。这个地址在所有x86_64机器上都是相同的，这就是为什么您可以混合和匹配主板和CPU的原因。（如果您想进行一些研究，这个地址被称为*复位向量*。）
+- en: 'This is a simplified description of how it all works:'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是关于它们如何运作的简化描述：
+- en: The first stage is launched when the system is powered up. The CPU fetches instructions
+    from the BIOS/UEFI firmware, and then initializes CPU caches and system memory.
+    When the system memory is initialized, the Power On Self-Test (POST) runs, testing
+    the memory and testing connectivity with other hardware such as keyboard, mouse,
+    display, and disk drives. You have probably noticed the LEDs on your keyboard
+    and mouse lighting up and heard the noises from inside your computer’s case as
+    your disk drives are probed.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一阶段在系统上电时启动。CPU从BIOS/UEFI固件获取指令，然后初始化CPU缓存和系统内存。当系统内存初始化时，会运行自检（POST），测试内存并测试与键盘、鼠标、显示器和磁盘驱动器等其他硬件的连接。您可能已经注意到键盘和鼠标上的LED灯亮起，并听到计算机箱内部的声音，因为您的磁盘驱动器正在被探测。
+- en: After the POST, the BIOS/UEFI firmware launches the second stage of startup
+    and looks for the boot files on your hard disk. The GRUB bootloader loads the
+    necessary files to launch your operating system and complete system startup.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在POST之后，BIOS/UEFI固件启动启动的第二阶段，并在硬盘上查找引导文件。GRUB引导加载程序加载必要的文件以启动您的操作系统并完成系统启动。
+- en: When your boot screen appears ([Figure 2-1](#fig-grub-2)), GRUB waits a configured
+    amount of time for your input, usually 5–10 seconds, then boots the default if
+    you do nothing. Navigate the boot menu with your arrow keys. When you press any
+    key, it stops the countdown, and then you can explore your boot options at your
+    leisure.
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当启动屏幕出现（[图 2-1](#fig-grub-2)）时，GRUB 会等待预先配置的时间以等待您的输入，通常为 5–10 秒，如果您不进行任何操作，则会启动默认设置。使用箭头键导航启动菜单。按任意键停止倒计时，然后您可以随意探索启动选项。
+- en: In [Figure 2-1](#fig-grub-2), the first entry boots the system. The next two
+    entries open submenus with more boot options. When you are exploring submenus,
+    press the Esc key to get back to the main menu.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [图 2-1](#fig-grub-2) 中，第一项启动系统。接下来的两个条目打开带有更多启动选项的子菜单。在探索子菜单时，按 Esc 键返回主菜单。
+- en: Some Linux distros, such as Fedora and Ubuntu, do not display the boot screen
+    when there is only one installed operating system. In this case, press the Shift
+    key at startup to see the boot screen. There is a configuration option to always
+    display the boot screen.
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 某些 Linux 发行版（如 Fedora 和 Ubuntu）在计算机上只安装一个操作系统时不会显示启动屏幕。在这种情况下，按下 Shift 键可查看启动屏幕。有一个配置选项可以始终显示启动屏幕。
+- en: You may wish to customize the appearance and behavior of your GRUB menu by adjusting
+    a few options in the GRUB configuration files.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过调整 GRUB 配置文件中的几个选项来自定义 GRUB 菜单的外观和行为。
+- en: If you prefer a graphical tool for customizing your GRUB menu, try GRUB Customizer
+    ([Figure 2-2](#fig-grub-customizer)). This is available in most Linux distributions
+    as the *grub-customizer* package, except openSUSE, which has a GRUB module (labeled
+    Boot Loader) in the YaST system configuration utility.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您希望使用图形工具自定义 GRUB 菜单，请尝试 GRUB 自定义工具（[图 2-2](#fig-grub-customizer)）。这在大多数 Linux
+    发行版中都作为 *grub-customizer* 软件包提供，但 openSUSE 则在 YaST 系统配置实用程序中有一个标记为“引导加载程序”的 GRUB
+    模块。
+- en: '![openSUSE GRUB boot screen](Images/lcb2_0201.png)'
+  id: totrans-16
+  prefs: []
+  type: TYPE_IMG
+  zh: '![openSUSE GRUB 启动屏幕](Images/lcb2_0201.png)'
+- en: Figure 2-1\. openSUSE GRUB boot screen
+  id: totrans-17
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-1\. openSUSE GRUB 启动屏幕
+- en: '![GRUB Customizer](Images/lcb2_0202.png)'
+  id: totrans-18
+  prefs: []
+  type: TYPE_IMG
+  zh: '![GRUB 自定义工具](Images/lcb2_0202.png)'
+- en: Figure 2-2\. GRUB Customizer
+  id: totrans-19
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-2\. GRUB 自定义工具
+- en: 2.1 Rebuilding Your GRUB Configuration File
+  id: totrans-20
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.1 重新构建您的 GRUB 配置文件
+- en: Problem
+  id: totrans-21
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Whenever you change your GRUB configuration, you need to rebuild it.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每当更改 GRUB 配置时，都需要重新构建它。
+- en: Solution
+  id: totrans-23
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'The command to rebuild your GRUB configuration varies. On Fedora and openSUSE,
+    use this command:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重新构建 GRUB 配置的命令因发行版而异。在 Fedora 和 openSUSE 中，使用此命令：
+- en: '[PRE0]'
+  id: totrans-25
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'Some distros, such as Ubuntu, use:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些发行版（如 Ubuntu）使用：
+- en: '[PRE1]'
+  id: totrans-27
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'Ubuntu Linux also has a script that runs *grub-mkconfig*, *update-grub*:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ubuntu Linux 还有一个脚本可以运行 *grub-mkconfig*，*update-grub*：
+- en: '[PRE2]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: Discussion
+  id: totrans-30
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Some Linux distributions helpfully provide the correct command at the top of
+    */etc/default/grub*.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些 Linux 发行版贴心地在 */etc/default/grub* 的顶部提供了正确的命令。
+- en: Remember to always verify your correct filenames and paths when you edit your
+    GRUB configuration because they vary on the different Linuxes.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在编辑 GRUB 配置文件时，请始终验证正确的文件名和路径，因为它们在不同的 Linux 发行版上可能会有所不同。
+- en: See Also
+  id: totrans-33
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: Your motherboard documentation, to learn about your system’s BIOS/UEFI
+  id: totrans-34
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 要了解您系统的 BIOS/UEFI，请参阅您的主板文档
+- en: '[GNU GRUB Manual](https://oreil.ly/szAiR)'
+  id: totrans-35
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB 手册](https://oreil.ly/szAiR)'
+- en: GRUB has multiple single-purpose man pages; run *man -k grub* to see all of
+    them
+  id: totrans-36
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: GRUB 有多个单一用途的手册页面；运行 *man -k grub* 可查看所有内容。
+- en: '*info grub* or *info grub2*'
+  id: totrans-37
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*info grub* 或 *info grub2*'
+- en: 2.2 Unhiding a Hidden GRUB Menu
+  id: totrans-38
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.2 取消隐藏的 GRUB 菜单
+- en: Problem
+  id: totrans-39
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your favorite Linux distribution hides the GRUB menu when you have only one
+    operating system installed on your computer, and you want it to appear every time
+    you boot up.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您的Linux发行版在计算机上只安装了一个操作系统时，默认会隐藏 GRUB 菜单，如果您希望每次启动时都显示它，请进行如下设置。
+- en: Solution
+  id: totrans-41
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Several Linux distros do this, including Ubuntu and Fedora. You can unhide your
+    GRUB menu temporarily by pressing and holding the Shift key at startup.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 几个 Linux 发行版包括 Ubuntu 和 Fedora 在内的一些发行版会执行此操作。您可以通过在启动时按住 Shift 键来临时取消隐藏 GRUB
+    菜单。
+- en: 'Edit */etc/default/grub* to unhide it permanently with the following options:'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 编辑 */etc/default/grub*，使用以下选项永久取消隐藏：
+- en: '[PRE3]'
+  id: totrans-44
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: If the lines `GRUB_HIDDEN_TIMEOUT=0` and `GRUB_HIDDEN_TIMEOUT_QUIET=true` are
+    in your file, comment them out.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您的文件中包含 `GRUB_HIDDEN_TIMEOUT=0` 和 `GRUB_HIDDEN_TIMEOUT_QUIET=true` 这两行，请将其注释掉。
+- en: After changing */etc/default/grub*, rebuild your GRUB configuration ([Recipe
+    2.1](#rec-rebuild-grub)).
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 修改 */etc/default/grub* 后，重新构建您的 GRUB 配置（[配方 2.1](#rec-rebuild-grub)）。
+- en: Discussion
+  id: totrans-47
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: '`GRUB_HIDDEN_TIMEOUT=0` means do not display the GRUB menu, while `GRUB_HIDDEN_TIMEOUT_QUIET=true`
+    means do not display the countdown timer.'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`GRUB_HIDDEN_TIMEOUT=0`表示不显示GRUB菜单，而`GRUB_HIDDEN_TIMEOUT_QUIET=true`表示不显示倒计时计时器。'
+- en: If you install another operating system in a multiboot configuration, then the
+    GRUB menu should unhide itself.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果在多引导配置中安装另一个操作系统，则GRUB菜单应该自动显示。
+- en: See Also
+  id: totrans-50
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 2.1](#rec-rebuild-grub)'
+  id: totrans-51
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 2.1](#rec-rebuild-grub)'
+- en: '[GNU GRUB Manual](https://oreil.ly/DqiwS)'
+  id: totrans-52
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB手册](https://oreil.ly/DqiwS)'
+- en: GRUB has multiple single-purpose man pages; run *man -k grub* to see all of
+    them
+  id: totrans-53
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: GRUB有多个专用于单个功能的手册页；运行*man -k grub*查看所有手册页。
+- en: '*info grub* or *info grub2*'
+  id: totrans-54
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*info grub*或*info grub2*'
+- en: 2.3 Booting to a Different Linux Kernel
+  id: totrans-55
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.3 引导到不同的Linux内核
+- en: Problem
+  id: totrans-56
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You are wondering about the extra entries in your GRUB menu that reference specific
+    Linux kernel versions, like in [Figure 2-3](#fig-grub-15). You want to know what
+    they are for and what to do with them.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能对GRUB菜单中引用特定Linux内核版本的额外条目感到困惑，例如[图 2-3](#fig-grub-15)中的条目。您想知道它们的用途以及如何处理它们。
+- en: '![GRUB kernel boot options](Images/lcb2_0203.png)'
+  id: totrans-58
+  prefs: []
+  type: TYPE_IMG
+  zh: '![GRUB内核引导选项](Images/lcb2_0203.png)'
+- en: Figure 2-3\. GRUB kernel boot options
+  id: totrans-59
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-3\. GRUB内核引导选项
+- en: Solution
+  id: totrans-60
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: Over time, as you update your Linux system, older Linux kernels are retained
+    and added to your GRUB menu. This provides an easy way to boot to a known good
+    older kernel if something goes awry with a newer kernel. You don’t have to keep
+    the older kernels and can remove them with your package manager.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 随着时间的推移，当您更新您的Linux系统时，旧的Linux内核会保留并添加到您的GRUB菜单中。如果新内核出现问题，这为您提供了一个轻松的方法引导到已知良好的旧内核。您不必保留旧内核，可以使用包管理器将它们删除。
+- en: Discussion
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: In olden times kernel updates were a big deal, because they often meant bug
+    fixes, additional support for hardware, such as video, network, and audio interfaces,
+    and support for software features, such as proprietary file formats and new protocols.
+    The rate of change was rapid, and it was not unusual for a new kernel to not work
+    correctly, so keeping the option to boot to an older kernel was routine. These
+    days such troubles are less common, and kernel updates are generally undramatic.
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在过去，内核更新是一件大事，因为它们通常意味着错误修复，对硬件（如视频、网络和音频接口）的额外支持，以及对软件功能（如专有文件格式和新协议）的支持。变化速度很快，新内核不正常工作并不罕见，因此保留引导到旧内核的选项是常规操作。如今这类问题较少见，内核更新通常不会引起轰动。
+- en: See Also
+  id: totrans-64
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNU GRUB Manual](https://oreil.ly/qxk2m)'
+  id: totrans-65
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB手册](https://oreil.ly/qxk2m)'
+- en: '[The Linux Kernel Archives](https://oreil.ly/l5xyK)'
+  id: totrans-66
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Linux内核档案](https://oreil.ly/l5xyK)'
+- en: 2.4 Understanding GRUB Configuration Files
+  id: totrans-67
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.4 理解GRUB配置文件
+- en: Problem
+  id: totrans-68
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You know that configuring GRUB is done a little differently than most programs,
+    and you want to know where the GRUB configuration files are and which ones you
+    use to manage GRUB.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您知道与大多数程序不同，配置GRUB有些不同，想知道GRUB配置文件在哪里以及哪些文件用于管理GRUB。
+- en: Solution
+  id: totrans-70
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: GRUB configuration files are in */boot/grub/*, */etc/default/grub*, and */etc/grub.d/*.
+    The GRUB configuration is complex, with many scripts and modules.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GRUB配置文件位于*/boot/grub/*、*/etc/default/grub*和*/etc/grub.d/*中。GRUB配置非常复杂，包含许多脚本和模块。
+- en: GRUB versus GRUB 2
+  id: totrans-72
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: GRUB与GRUB 2的区别
+- en: Remember, as discussed in the introduction to this chapter, some Linux distros
+    use plain GRUB naming, and some use GRUB2 in filenames and commands. In this chapter
+    I use plain GRUB naming, except in distro-specific examples.
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请记住，正如本章介绍中所讨论的，一些Linux发行版使用普通的GRUB命名，而一些在文件名和命令中使用GRUB2。在本章中，我使用普通的GRUB命名，除了特定于发行版的示例。
+- en: '*/etc/default/grub* is for configuring the appearance of the GRUB menu you
+    see at startup, such as hiding or showing the boot menu, applying themes and background
+    images, menu timeout, and kernel options.'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/default/grub*用于配置启动时显示的GRUB菜单的外观，例如隐藏或显示引导菜单、应用主题和背景图像、菜单超时和内核选项。'
+- en: The files in */etc/grub.d/* support more complex configurations, and */boot/grub/*
+    stores image and theme files for customizing the appearance of your GRUB menu.
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/grub.d/*中的文件支持更复杂的配置，*/boot/grub/*存储用于自定义GRUB菜单外观的映像和主题文件。'
+- en: The main GRUB configuration file is */boot/grub/grub.cfg*, which GRUB reads
+    at startup. You do not edit this file because it is built from */etc/grub.d/*
+    and */etc/default/grub*; every time you make configuration changes you must rebuild
+    the GRUB configuration.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 主要的GRUB配置文件是*/boot/grub/grub.cfg*，GRUB在启动时读取此文件。您不应编辑此文件，因为它是从*/etc/grub.d/*和*/etc/default/grub*构建的；每次进行配置更改时，您必须重新构建GRUB配置。
+- en: The GRUB configuration is automatically rebuilt when you install any updates
+    that affect the boot process, such as installing newer kernels and removing older
+    kernels.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您安装任何影响引导过程的更新（例如安装更新的内核和删除旧内核）时，GRUB 配置会自动重新构建。
+- en: Discussion
+  id: totrans-78
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: If you are interested in scripting, studying the GRUB files is an excellent
+    course in organizing large numbers of interdependent scripts.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您对脚本编写感兴趣，研究 GRUB 文件是组织大量相互依赖脚本的一个极好的课程。
+- en: 'The files in */etc/grub.d/* are called *drop-in* files. Rather than dealing
+    with a giant single configuration file, each drop-in file contains a configuration
+    for a specific task. These files are numbered in the order that GRUB should read
+    them, with lower numbers indicating higher priority. The following example is
+    from Fedora 32:'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/grub.d/* 中的文件称为 *drop-in* 文件。与处理一个巨大的单一配置文件不同，每个 drop-in 文件包含特定任务的配置。这些文件按
+    GRUB 应该读取它们的顺序编号，较低的数字表示较高的优先级。以下示例来自 Fedora 32：'
+- en: '[PRE4]'
+  id: totrans-81
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'Each of these files is a script, and each must have the executable bit set.
+    You can disable any of them by clearing the executable bit, like this:'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些文件都是脚本，每个都必须设置可执行位。您可以通过清除可执行位来禁用其中任何一个，例如：
+- en: '[PRE5]'
+  id: totrans-83
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'Re-enable a script by adding the executable bit:'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过添加可执行位重新启用脚本：
+- en: '[PRE6]'
+  id: totrans-85
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: See Also
+  id: totrans-86
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNU GRUB Manual](https://oreil.ly/RWh6k)'
+  id: totrans-87
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB 手册](https://oreil.ly/RWh6k)'
+- en: GRUB has numerous man pages; run *man -k grub* to see all of them
+  id: totrans-88
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: GRUB 有许多 man 手册页；运行 *man -k grub* 可查看所有手册页。
+- en: '*info grub* or *info grub2*'
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*info grub* 或 *info grub2*'
+- en: '[Chapter 6](ch06.xhtml#cha-files-directories)'
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第六章](ch06.xhtml#cha-files-directories)'
+- en: 2.5 Writing a Minimal GRUB Configuration File
+  id: totrans-91
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.5 编写最小化的 GRUB 配置文件
+- en: Problem
+  id: totrans-92
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You want to write the most minimal working GRUB configuration.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您想编写最小工作的 GRUB 配置。
+- en: Solution
+  id: totrans-94
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'This is the most basic */etc/default/grub* file, with only the necessary entries
+    to boot a Linux system and show the GRUB menu. The following example is for openSUSE
+    Leap 15.2:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是最基本的 */etc/default/grub* 文件，只包含启动 Linux 系统并显示 GRUB 菜单所需的必要条目。以下示例适用于 openSUSE
+    Leap 15.2：
+- en: '[PRE7]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Remember [Figure 2-1](#fig-grub-2)? [Figure 2-4](#fig-grub-16) is the same system,
+    but with a minimal GRUB configuration.
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还记得 [图 2-1](#fig-grub-2) 吗？[图 2-4](#fig-grub-16) 是相同系统，但带有最小化的 GRUB 配置。
+- en: '![Minimal GRUB menu](Images/lcb2_0204.png)'
+  id: totrans-98
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Minimal GRUB 菜单](Images/lcb2_0204.png)'
+- en: Figure 2-4\. Minimal GRUB menu
+  id: totrans-99
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-4\. 最小化的 GRUB 菜单
+- en: There are more options you can try, such as different ways to set the default
+    boot option, change background images and themes, change the colors, and change
+    the screen resolution. See the Discussion to learn about these.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以尝试更多选项，例如不同的设置默认引导选项的方式，更改背景图像和主题，更改颜色，以及更改屏幕分辨率。请参阅讨论以了解更多信息。
+- en: Discussion
+  id: totrans-101
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'There are numerous options you can use in */etc/default/grub*, and you can
+    ignore most of them. These are the options that I think are the most useful:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 */etc/default/grub* 中有许多可以使用的选项，您可以忽略大多数。以下是我认为最有用的选项：
+- en: '`GRUB_DEFAULT=`'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`GRUB_DEFAULT=`'
+- en: 'Sets the default boot entry. The boot entries are counted from 0 in *grub.cfg*,
+    but not numbered. How do you know what numbers each boot option has? There is
+    no obvious way to figure this out; you have to count your boot options manually.
+    Count the “menuentry” sections to figure out the numbering. A menu entry looks
+    like this:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置默认引导条目。在 *grub.cfg* 中，引导条目从 0 开始计数，但没有编号。如何知道每个引导选项的编号？没有明显的方法来弄清楚这一点；您必须手动计算引导选项。通过计算“menuentry”部分来确定编号。菜单条目看起来像这样：
+- en: '[PRE8]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'Or use the *awk* command to list them for you, like this example for Ubuntu
+    20.04:'
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者使用 *awk* 命令为您列出它们，例如适用于 Ubuntu 20.04 的以下示例：
+- en: '[PRE9]'
+  id: totrans-107
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: You probably don’t want to use a recovery mode entry as the default, or a memory
+    test, though it doesn’t hurt anything if you do. UEFI Firmware Settings is a shortcut
+    to your system’s BIOS/UEFI.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可能不希望将恢复模式条目作为默认条目，或者内存测试条目，尽管如果您这样做也不会有任何问题。UEFI 固件设置是到您系统的 BIOS/UEFI 的快捷方式。
+- en: '`GRUB_TIMEOUT=10`'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`GRUB_TIMEOUT=10`'
+- en: Sets the number of seconds the GRUB menu waits before booting the default, and
+    `GRUB_TIMEOUT_STYLE=menu` displays the menu during the countdown. `GRUB_TIMEOUT=0`
+    boots immediately without displaying the menu, and `GRUB_TIMEOUT=-1` disables
+    automatic booting and waits for the user to select a boot entry.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置 GRUB 菜单等待启动默认条目的秒数，`GRUB_TIMEOUT_STYLE=menu` 在倒计时期间显示菜单。`GRUB_TIMEOUT=0`
+    立即启动而不显示菜单，`GRUB_TIMEOUT=-1` 禁用自动启动并等待用户选择引导条目。
+- en: '`GRUB_DEFAULT=saved`'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`GRUB_DEFAULT=saved`'
+- en: Together with `GRUB_SAVEDEFAULT=true`, `GRUB_DEFAULT=saved` makes the last menu
+    entry that you booted the default for the next boot.
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与 `GRUB_SAVEDEFAULT=true` 配合使用，`GRUB_DEFAULT=saved` 将上次引导的菜单项设为下次引导的默认项。
+- en: '`GRUB_CMDLINE_LINUX=`'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`GRUB_CMDLINE_LINUX=`'
+- en: Adds Linux kernel options for all menu entries.
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为所有菜单项添加 Linux 内核选项。
+- en: '`GRUB_CMDLINE_LINUX_DEFAULT=`'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`GRUB_CMDLINE_LINUX_DEFAULT=`'
+- en: Passes kernel options only to the default menu entries. `G⁠R⁠U⁠B⁠_⁠C⁠M⁠D⁠L⁠I⁠N⁠E⁠_⁠L⁠I⁠N​U⁠X⁠_⁠D⁠E⁠F⁠A⁠U⁠L⁠T⁠=⁠"⁠q⁠u⁠i⁠e⁠t⁠
+    ⁠s⁠p⁠l⁠a⁠s⁠h⁠"` is a common default option that disables the verbose output at
+    startup and displays a graphical splash screen. [Figure 2-5](#fig-grub-17) shows
+    what the verbose output looks like. If you have `G⁠R⁠U⁠B⁠_⁠C⁠M⁠D⁠L⁠I⁠N⁠E⁠_⁠L⁠I⁠N⁠U⁠X⁠_⁠D⁠E⁠F​A⁠U⁠L⁠T⁠=⁠"⁠q⁠u⁠i⁠e⁠t⁠
+    ⁠s⁠p⁠l⁠a⁠s⁠h⁠"` configured, you can see this output without changing your configuration
+    by pressing the Esc key during startup.
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 仅将内核选项传递给默认的菜单项。`GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"` 是一个常见的默认选项，它在启动时禁用详细输出并显示一个图形启动画面。[Figure
+    2-5](#fig-grub-17) 展示了详细输出的外观。如果已配置 `GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"`，你可以通过在启动时按
+    Esc 键来查看此输出，而不需要更改配置。
+- en: '`GRUB_TERMINAL=gfxterm`'
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`GRUB_TERMINAL=gfxterm`'
+- en: Sets the your GRUB screen to a graphical mode that supports colors and images.
+    `GRUB_TERMINAL=console` disables graphical mode.
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将你的 GRUB 屏幕设置为支持颜色和图像的图形模式。`GRUB_TERMINAL=console` 禁用了图形模式。
+- en: '`GRUB_GFXMODE=`'
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`GRUB_GFXMODE=`'
+- en: Sets the screen resolution for the graphical mode, for example, `GRUB_GFXMODE=1024x768`.
+    Run the *set pager=1* command, and then run *videoinfo* from your GRUB command
+    line to see your supported modes ([Figure 2-6](#fig-grub-18)). *set pager=1* lets
+    you use the arrow keys to page up and down long command output. `GRUB_GFXMODE=auto`
+    calculates a reasonable default.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置图形模式的屏幕分辨率，例如，`GRUB_GFXMODE=1024x768`。运行 *set pager=1* 命令，然后从你的 GRUB 命令行运行
+    *videoinfo*，查看支持的模式（[Figure 2-6](#fig-grub-18)）。*set pager=1* 允许你使用箭头键上下翻页查看长命令输出。`GRUB_GFXMODE=auto`
+    会计算一个合理的默认值。
+- en: '![Startup messages](Images/lcb2_0205.png)'
+  id: totrans-121
+  prefs: []
+  type: TYPE_IMG
+  zh: '![启动消息](Images/lcb2_0205.png)'
+- en: Figure 2-5\. Startup messages
+  id: totrans-122
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-5 启动消息
+- en: '![Supported video modes](Images/lcb2_0206.png)'
+  id: totrans-123
+  prefs: []
+  type: TYPE_IMG
+  zh: '![支持的视频模式](Images/lcb2_0206.png)'
+- en: Figure 2-6\. Supported video modes
+  id: totrans-124
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-6 支持的视频模式
+- en: '`GRUB_BACKGROUND=`'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`GRUB_BACKGROUND=`'
+- en: Sets a background image on the GRUB menu, using the image of your choice (see
+    [Recipe 2.6](#rec-grub-menu-background)).
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置 GRUB 菜单的背景图片，使用你选择的图像（参见 [Recipe 2.6](#rec-grub-menu-background)）。
+- en: '`GRUB_THEME=`'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`GRUB_THEME=`'
+- en: Decorates your GRUB menu with a complete theme (see [Recipe 2.8](#rec-theme-grub)).
+  id: totrans-128
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用一个完整的主题装饰你的 GRUB 菜单（参见 [Recipe 2.8](#rec-theme-grub)）。
+- en: See Also
+  id: totrans-129
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[Recipe 2.6](#rec-grub-menu-background)'
+  id: totrans-130
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 2.6](#rec-grub-menu-background)'
+- en: '[Recipe 2.8](#rec-theme-grub)'
+  id: totrans-131
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Recipe 2.8](#rec-theme-grub)'
+- en: '[GNU GRUB Manual](https://oreil.ly/zIbDg)'
+  id: totrans-132
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB 手册](https://oreil.ly/zIbDg)'
+- en: GRUB has multiple single-purpose man pages; run *man -k grub* to see all of
+    them
+  id: totrans-133
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: GRUB 有多个单一用途的手册页；运行 *man -k grub* 查看所有内容。
+- en: '*info grub* or *info grub2*'
+  id: totrans-134
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*info grub* 或 *info grub2*'
+- en: 2.6 Setting a Custom Background for Your GRUB Menu
+  id: totrans-135
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.6 设置自定义背景图片作为你的 GRUB 菜单背景
+- en: Problem
+  id: totrans-136
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You don’t care for the appearance of your GRUB menu, and you want to pretty
+    it up.
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你不喜欢你的 GRUB 菜单的外观，想要美化它。
+- en: Solution
+  id: totrans-138
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: You need an image in PNG, 8-bit JPG, or TFA format. It can be any size, and
+    GRUB will scale it to fit. In the following example, a photo of Duchess enjoying
+    the bookshelves graces our GRUB menu.
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要一个 PNG、8 位 JPG 或 TFA 格式的图像。它可以是任何大小，GRUB 会按比例缩放。在以下示例中，我们在 GRUB 菜单上展示了梅奇斯享受书架的照片。
+- en: 'Copy your image to */boot/grub/*, and add the full filepath of your image to
+    */etc/default/grub*. The photo of Duchess is */boot/grub/duchess-books.jpg*:'
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将你的图像复制到 */boot/grub/*，并将你的图像的完整文件路径添加到 */etc/default/grub*。梅奇斯的照片是 */boot/grub/duchess-books.jpg*：
+- en: '[PRE10]'
+  id: totrans-141
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: If there is a `GRUB_THEME=` line, make sure it is commented out, then rebuild
+    your GRUB configuration ([Recipe 2.1](#rec-rebuild-grub)).
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果有 `GRUB_THEME=` 行，请确保已注释掉，然后重新构建你的 GRUB 配置（[Recipe 2.1](#rec-rebuild-grub)）。
+- en: 'You should see a line like “Found background: /boot/grub/duchess-books.jpg”
+    in the output of your rebuild command. If you do not see this, there is an error
+    in your configuration.'
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在重建命令的输出中应该看到类似“找到背景：/boot/grub/duchess-books.jpg”的行。如果没有看到这个，那么你的配置有错误。
+- en: When it looks correct, rebuild, reboot, and enjoy your new GRUB menu background
+    ([Figure 2-7](#fig-grub-7)).
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当看起来正确时，重新构建、重新启动，享受你的新的 GRUB 菜单背景（[Figure 2-7](#fig-grub-7)）。
+- en: '![Duchess the literacy cat gracing the GRUB menu](Images/lcb2_0207.png)'
+  id: totrans-145
+  prefs: []
+  type: TYPE_IMG
+  zh: '![梅奇斯读物猫装饰的 GRUB 菜单](Images/lcb2_0207.png)'
+- en: Figure 2-7\. Duchess the literacy cat gracing the GRUB menu
+  id: totrans-146
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-7 梅奇斯读物猫装饰的 GRUB 菜单
+- en: The fonts in the example are barely readable, so jump ahead to [Recipe 2.7](#rec-change-font-color)
+    to learn how to change their colors.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例中的字体几乎无法阅读，因此请跳转至[配方 2.7](#rec-change-font-color)以了解如何更改它们的颜色。
+- en: Discussion
+  id: totrans-148
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: You may use any image on your system; it does not have to be in */boot/grub/*.
+    Putting your image files in */boot/grub/* keeps all your GRUB customizations in
+    one place and makes them available to all installed Linux systems on a multiboot
+    setup.
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以使用系统上的任何图像；它不必位于*/boot/grub/*中。将图像文件放在*/boot/grub/*中可以将所有GRUB自定义集中在一个地方，并使它们在多重引导设置上对所有安装的Linux系统可用。
+- en: See Also
+  id: totrans-150
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNU GRUB Manual](https://oreil.ly/xv9AE)'
+  id: totrans-151
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB 手册](https://oreil.ly/xv9AE)'
+- en: GRUB has multiple single-purpose man pages; run *man -k grub* to see all of
+    them
+  id: totrans-152
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: GRUB有多个单用途手册页；运行*man -k grub*查看所有手册页。
+- en: '*info grub* or *info grub2*'
+  id: totrans-153
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*info grub*或*info grub2*'
+- en: 2.7 Changing Font Colors in the GRUB Menu
+  id: totrans-154
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.7 更改GRUB菜单中的字体颜色
+- en: Problem
+  id: totrans-155
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: Your new background is lovely ([Figure 2-7](#fig-grub-7)), but your fonts are
+    barely visible, and you need to change the colors so you can read your GRUB menu.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您的新背景很漂亮（[图 2-7](#fig-grub-7)），但您的字体几乎不可见，因此您需要更改颜色以便读取您的GRUB菜单。
+- en: Solution
+  id: totrans-157
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: This is fun because you can quickly preview colors from the GRUB command line.
+    Then, when you know what colors you want, edit */etc/default/grub* and create
+    a new file in */etc/grub.d/* to load your colors, then rebuild */boot/grub/grub/cfg*.
+    Reboot to enjoy your background image with pretty colored fonts.
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这很有趣，因为您可以快速从GRUB命令行预览颜色。然后，当您知道您想要的颜色时，编辑*/etc/default/grub*并在*/etc/grub.d/*中创建一个新文件以加载您的颜色，然后重建*/boot/grub/grub/cfg*。重新启动以享受带有漂亮彩色字体的背景图像。
+- en: Start up your computer, and when the GRUB menu appears, press C to open the
+    GRUB command line ([Figure 2-8](#fig-grub-9)).
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动计算机，当GRUB菜单出现时，按C打开GRUB命令行（[图 2-8](#fig-grub-9)）。
+- en: '![The GRUB command line](Images/lcb2_0208.png)'
+  id: totrans-160
+  prefs: []
+  type: TYPE_IMG
+  zh: '![GRUB命令行](Images/lcb2_0208.png)'
+- en: Figure 2-8\. The GRUB command line
+  id: totrans-161
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-8\. GRUB命令行
+- en: 'The following two commands set the colors in [Figure 2-9](#fig-grub-10):'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下两个命令设置了[图 2-9](#fig-grub-10)中的颜色：
+- en: '[PRE11]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: '![Setting GRUB menu colors from the GRUB command line](Images/lcb2_0209.png)'
+  id: totrans-164
+  prefs: []
+  type: TYPE_IMG
+  zh: '![从GRUB命令行设置GRUB菜单颜色](Images/lcb2_0209.png)'
+- en: Figure 2-9\. Setting GRUB menu colors from the GRUB command line
+  id: totrans-165
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-9\. 从GRUB命令行设置GRUB菜单颜色
+- en: You may set and test each color pair one pair at a time. From the GRUB menu,
+    press C to open the GRUB command shell. Type your command (sorry, no copy-paste),
+    press Enter, then press Esc to return to the menu to see how it looks. You can
+    list your previous commands with the up and down arrow keys, and edit and reuse
+    them rather than retyping everything.
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以逐对设置和测试每个颜色对。从GRUB菜单中，按C打开GRUB命令行。输入您的命令（抱歉，无法复制粘贴），按Enter，然后按Esc返回菜单以查看其效果。您可以使用上下箭头键列出之前的命令，并编辑和重复使用它们，而不是重新键入所有内容。
+- en: 'You must specify two colors in this order: foreground/background. All the colors
+    are solid, with no transparency, with one exception: when you select *black* as
+    a background color it is transparent. That is why `menu_color_normal=` must have
+    black as the background color, when you have a background image. If you use any
+    other color, your image will be covered by the background color. The `menu_color_highlight=`
+    background color only applies to whatever line is currently selected.'
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您必须按照以下顺序指定两种颜色：前景/背景。所有颜色均为实心，没有透明度，只有一种例外：当您选择*黑色*作为背景颜色时，它是透明的。这就是为什么在具有背景图像时`menu_color_normal=`必须将黑色作为背景颜色的原因。如果使用其他任何颜色，则您的图像将被背景颜色覆盖。`menu_color_highlight=`背景颜色仅适用于当前选择的行。
+- en: 'When you figure out your colors, make them permanent. Boot up and create a
+    new script in */etc/grub.d/*. In the following example, it is called *07_font_colors*.
+    Copy this exactly:'
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您确定了您的颜色后，使它们保持永久。启动并在*/etc/grub.d/*中创建一个新的脚本。在以下示例中，它称为*07_font_colors*。精确复制如下内容：
+- en: '[PRE12]'
+  id: totrans-169
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: 'Then make it executable:'
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后使其可执行：
+- en: '[PRE13]'
+  id: totrans-171
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'Now add these lines to your */etc/default/grub* file, using your colors:'
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在将以下行添加到您的*/etc/default/grub*文件中，使用您的颜色：
+- en: '[PRE14]'
+  id: totrans-173
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: Rebuild your GRUB configuration ([Recipe 2.1](#rec-rebuild-grub)) and reboot
+    to see if it worked.
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 重建您的GRUB配置（[配方 2.1](#rec-rebuild-grub)），然后重新启动以查看是否有效。
+- en: Discussion
+  id: totrans-175
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'See [Recipe 2.4](#rec-grub-config-files) to learn about the files in */etc/grub.d/*
+    and why the filenames must start with numbers. In my experience it doesn’t matter
+    if your fonts script starts early or late, but if it doesn’t work for you, try
+    changing the priority. Make sure it is executable. The options are as follows:'
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参见[配方 2.4](#rec-grub-config-files)了解*/etc/grub.d/*中文件及其必须以数字开头的原因。根据我的经验，如果你的字体脚本起得早晚并不重要，但如果它对你不起作用，请尝试更改优先级。确保它是可执行的。选项如下：
+- en: '*menu_color_highlight* controls the colors of the highlighted lines inside
+    the menu box.'
+  id: totrans-177
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*menu_color_highlight*控制菜单框内高亮行的颜色。'
+- en: '*menu_color_normal* controls the colors of the not-highlighted lines.'
+  id: totrans-178
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*menu_color_normal*控制未高亮行的颜色。'
+- en: Use these colors exactly as they are written in [Table 2-1](#ch2-color-table),
+    all lowercase and with this exact spelling.
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请确保按照[表格 2-1](#ch2-color-table)中写的方式使用这些颜色，全部小写且拼写一致。
+- en: Table 2-1\. GRUB color options
+  id: totrans-180
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表格 2-1\. GRUB颜色选项
+- en: '| Color options |'
+  id: totrans-181
+  prefs: []
+  type: TYPE_TB
+  zh: '| 颜色选项 |'
+- en: '| --- |'
+  id: totrans-182
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- |'
+- en: '| black | dark-gray | light-green | magenta |'
+  id: totrans-183
+  prefs: []
+  type: TYPE_TB
+  zh: '| 黑色 | 深灰色 | 浅绿色 | 品红色 |'
+- en: '| blue | green | light-gray | red |'
+  id: totrans-184
+  prefs: []
+  type: TYPE_TB
+  zh: '| 蓝色 | 绿色 | 浅灰色 | 红色 |'
+- en: '| brown | light-cyan | light-magenta | white |'
+  id: totrans-185
+  prefs: []
+  type: TYPE_TB
+  zh: '| 棕色 | 浅青色 | 浅品红色 | 白色 |'
+- en: '| cyan | light-blue | light-red | yellow |'
+  id: totrans-186
+  prefs: []
+  type: TYPE_TB
+  zh: '| 青色 | 浅蓝色 | 浅红色 | 黄色 |'
+- en: See Also
+  id: totrans-187
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNU GRUB Manual](https://oreil.ly/BZHWt)'
+  id: totrans-188
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB 手册](https://oreil.ly/BZHWt)'
+- en: GRUB has multiple single-purpose man pages; run *man -k grub* to see all of
+    them
+  id: totrans-189
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: GRUB有多个单一用途的手册页面；运行*man -k grub*来查看所有页面。
+- en: '*info grub* or *info grub2*'
+  id: totrans-190
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*info grub*或*info grub2*'
+- en: '[Recipe 2.4](#rec-grub-config-files)'
+  id: totrans-191
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[配方 2.4](#rec-grub-config-files)'
+- en: 2.8 Applying a Theme to Your GRUB Menu
+  id: totrans-192
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.8 将主题应用于你的GRUB菜单
+- en: Problem
+  id: totrans-193
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You like prettying up your GRUB menu, and you want to know if there are themes
+    for the GRUB menu and how to install them.
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你喜欢美化你的GRUB菜单，并且想知道是否有适用于GRUB菜单的主题以及如何安装它们。
+- en: Solution
+  id: totrans-195
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'You are in luck, for there are many themes for GRUB. Start by using your package
+    manager with the **`grep`** command to search for package names. This example
+    is for Ubuntu Linux:'
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你很幸运，因为GRUB有很多主题可用。首先使用你的软件包管理器和**`grep`**命令来搜索包名。这是Ubuntu Linux的一个例子：
+- en: '[PRE15]'
+  id: totrans-197
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Using *theme | grep grub* to filter your results will find all relevant packages,
+    like *grub-theme-breeze*, *grub2-themes-ubuntu-mate*, and *grub-breeze-theme*.
+    Install themes just as you would any package.
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用*theme | grep grub*来过滤你的结果，将找到所有相关的包，如*grub-theme-breeze*、*grub2-themes-ubuntu-mate*和*grub-breeze-theme*。安装主题的方法与安装任何包一样。
+- en: Discussion
+  id: totrans-199
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: 'Your new theme should be installed in */boot/grub/themes*. Find your new theme,
+    for example */boot/grub/themes/ubuntu-mate*, and look for the *theme.txt* file.
+    Enter the full path in */etc/default/grub*, like this example for the *ubuntu-mate*
+    theme:'
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你的新主题应该安装在*/boot/grub/themes*中。找到你的新主题，例如*/boot/grub/themes/ubuntu-mate*，并查找*theme.txt*文件。在*/etc/default/grub*中输入完整路径，就像这个*ubuntu-mate*主题的示例一样：
+- en: '[PRE16]'
+  id: totrans-201
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Be sure to comment out any other configuration lines pertaining to appearance
+    that you may have, such as `GRUB_BACKGROUND=`, any custom font colors, and any
+    other themes. Then rebuild your GRUB configuration ([Recipe 2.1](#rec-rebuild-grub)).
+    You should see a line like “Found theme: /boot/grub/themes/ubuntu-mate/theme.txt”
+    in your command output.'
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '请务必注释掉任何其他与外观相关的配置行，例如`GRUB_BACKGROUND=`、任何自定义字体颜色和其他主题。然后重建你的GRUB配置（[配方 2.1](#rec-rebuild-grub)）。你应该会在命令输出中看到类似“Found
+    theme: /boot/grub/themes/ubuntu-mate/theme.txt”的行。'
+- en: If all goes well, reboot and you will be rewarded with a screen like [Figure 2-10](#fig-grub-mate-theme).
+    If it does not display correctly, recheck your configuration and commands.
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果一切顺利，重新启动，你将看到像[图 2-10](#fig-grub-mate-theme)一样的屏幕。如果显示不正确，请重新检查你的配置和命令。
+- en: '![The Ubuntu MATE GRUB theme](Images/lcb2_0210.png)'
+  id: totrans-204
+  prefs: []
+  type: TYPE_IMG
+  zh: '![Ubuntu MATE GRUB 主题](Images/lcb2_0210.png)'
+- en: Figure 2-10\. The Ubuntu MATE GRUB theme
+  id: totrans-205
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-10\. Ubuntu MATE GRUB 主题
+- en: See Also
+  id: totrans-206
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNOME Themes](https://oreil.ly/oLJtx)'
+  id: totrans-207
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNOME 主题](https://oreil.ly/oLJtx)'
+- en: '[KDE Themes](https://oreil.ly/SLdkp)'
+  id: totrans-208
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[KDE 主题](https://oreil.ly/SLdkp)'
+- en: '[GNU GRUB Manual](https://oreil.ly/LeIHu)'
+  id: totrans-209
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB 手册](https://oreil.ly/LeIHu)'
+- en: 2.9 Rescuing a Nonbooting System from the grub> Prompt
+  id: totrans-210
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.9 从grub>提示符中救援无法启动的系统
+- en: Problem
+  id: totrans-211
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: When you start your system, it stops at a GRUB prompt, `grub>`, and does not
+    boot. You need to know how to boot your system and then repair your configuration.
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你启动系统时，它停在GRUB提示符`grub>`处，不能启动。你需要知道如何启动你的系统，然后修复你的配置。
+- en: Solution
+  id: totrans-213
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: When the boot process stops at the `grub>` prompt ([Figure 2-11](#fig-grub-13)),
+    this means it found */boot/grub/* but cannot find the root filesystem.
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当引导过程停在`grub>`提示符时（[图 2-11](#fig-grub-13)），这意味着它找到了*/boot/grub/*但找不到根文件系统。
+- en: '![The GRUB command shell](Images/lcb2_0211.png)'
+  id: totrans-215
+  prefs: []
+  type: TYPE_IMG
+  zh: '![GRUB 命令 shell](Images/lcb2_0211.png)'
+- en: Figure 2-11\. The GRUB command shell
+  id: totrans-216
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图2-11\. GRUB 命令 shell
+- en: You need to find the root filesystem, the Linux kernel, and its matching *initrd*
+    file. When you are in the GRUB command shell, the entire filesystem is open to
+    you.
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要找到根文件系统、Linux 内核及其匹配的 *initrd* 文件。当你在 GRUB 命令 shell 中时，整个文件系统对你是开放的。
+- en: 'The first command you should run is to invoke the pager, so that you can page
+    up and down long output:'
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一个命令应该运行的是调用分页器，这样你就可以向上和向下翻页长输出：
+- en: '[PRE17]'
+  id: totrans-219
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: List your disks and partitions. GRUB has its own way of identifying hard disks
+    and partitions. It numbers disks from 0, partitions from 1, and labels all hard
+    disks as *hd*. On a running Linux system, hard disks are identified as */dev/sda*,
+    */dev/sdb*, and so on.
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出你的磁盘和分区。GRUB 有自己的方法来标识硬盘和分区。它从0开始编号硬盘，从1开始编号分区，并将所有硬盘标记为 *hd*。在运行中的 Linux
+    系统中，硬盘被标识为 */dev/sda*、*/dev/sdb* 等等。
+- en: 'In the following example, GRUB lists two hard disks, *hd0* and *hd1*, which
+    are the same as */dev/sda* and */dev/sdb*. *hd0,gpt5* is the same as */dev/sda5*,
+    and *hd1,msdos1* is the same as */dev/sdb1*:'
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下面的例子中，GRUB 列出了两个硬盘 *hd0* 和 *hd1*，它们与 */dev/sda* 和 */dev/sdb* 相同。*hd0,gpt5*
+    相当于 */dev/sda5*，而 *hd1,msdos1* 相当于 */dev/sdb1*：
+- en: '[PRE18]'
+  id: totrans-222
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: This output shows that *hd0* has a *gpt* partition table, and *hd1* has the
+    old-fashioned *msdos* partition table. It is not necessary to use the *gpt* and
+    *msdos* labels when you are listing partitions and files.
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此输出显示 *hd0* 有一个 *gpt* 分区表，而 *hd1* 有一个老式的 *msdos* 分区表。在列出分区和文件时，不必使用 *gpt* 和
+    *msdos* 标签。
+- en: 'GRUB tells you the filesystem types, universally unique identifiers (UUIDs),
+    and other information on the partitions:'
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GRUB 告诉你关于分区的文件系统类型、通用唯一标识符 (UUID) 和其他信息：
+- en: '[PRE19]'
+  id: totrans-225
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: 'You need to find */boot*. Suppose you remember that it is in the root filesystem
+    on the second partition; start looking there. A forward slash following the partition
+    name means list all files and directories on the partition:'
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要找到 */boot*。假设你记得它在第二个分区的根文件系统中；从那里开始查找。在分区名称后面的斜杠表示列出该分区上的所有文件和目录：
+- en: '[PRE20]'
+  id: totrans-227
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: 'All boot files are in the */boot* directory:'
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有启动文件都在 */boot* 目录中：
+- en: '[PRE21]'
+  id: totrans-229
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Everything you need to boot your system is there. Set the root filesystem partition,
+    kernel, and initrd image:'
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要的一切来启动你的系统都在那里。设置根文件系统分区、内核和 initrd 镜像：
+- en: '[PRE22]'
+  id: totrans-231
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: Tab Completion
+  id: totrans-232
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 制表符自动补全
+- en: Just like the Bash shell, the GRUB command shell supports tab completion. This
+    means you can start typing */boot/vml*, for example, then press the Tab key to
+    autocomplete the line, or display a list of possibilities.
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 就像 Bash shell 一样，GRUB 命令 shell 支持制表符自动补全。这意味着你可以开始输入 */boot/vml*，然后按 Tab 键来自动完成该行，或者显示可能的选项列表。
+- en: If there are multiple *vmlinuz* and *initrd* files, use the two with the newest
+    matching version numbers. If all the commands are correct, your system will boot
+    and you can fix your GRUB configuration ([Recipe 2.11](#rec-grub-restore)).
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果有多个 *vmlinuz* 和 *initrd* 文件，请使用版本号匹配最新的两个。如果所有命令都正确，系统将启动，你可以修复你的 GRUB 配置
+    ([Recipe 2.11](#rec-grub-restore))。
+- en: Discussion
+  id: totrans-235
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: When */boot* is in its own partition, you won’t see any other directories because
+    it is not in the root filesystem.
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当 */boot* 在自己的分区中时，你将看不到任何其他目录，因为它不在根文件系统中。
+- en: '*vmlinuz-5.3.18-lp152.57-default* is the compressed Linux kernel.'
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*vmlinuz-5.3.18-lp152.57-default* 是压缩的 Linux 内核。'
+- en: '*initrd-5.3.18-lp152.57-default* is the initial ramdisk, a temporary root filesystem
+    used only to start up your system.'
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*initrd-5.3.18-lp152.57-default* 是初始 RAM 磁盘，仅用于启动系统的临时根文件系统。'
+- en: Boot failures are caused by corrupted files; adding, removing, or moving hard
+    disks; installing or removing operating systems; or repartitioning. If you can’t
+    get to a GRUB prompt, see [Chapter 19](Images/ch19.html#cha-rescue-recovery) to
+    learn how to rescue your system with SystemRescue.
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 引导失败是由于文件损坏、添加、删除或移动硬盘、安装或卸载操作系统或重新分区。如果你无法进入 GRUB 提示符，请参阅 [第19章](Images/ch19.html#cha-rescue-recovery)
+    以学习如何使用 SystemRescue 来拯救你的系统。
+- en: You can practice using the `grub>` shell by pressing C when your GRUB menu appears.
+    This is safe because changes you make do not survive a reboot.
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以在 GRUB 菜单出现时按下 C 键来练习使用 `grub>` shell。这是安全的，因为你所做的更改不会在重新启动后生效。
+- en: See Also
+  id: totrans-241
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNU GRUB Manual](https://oreil.ly/8SdwS)'
+  id: totrans-242
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB 手册](https://oreil.ly/8SdwS)'
+- en: 2.10 Rescuing a Nonbooting System from the grub rescue> Prompt
+  id: totrans-243
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.10 从 grub rescue> 提示符中抢救无法引导的系统
+- en: Problem
+  id: totrans-244
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: When you start your system, it stops at a GRUB prompt, `grub rescue>`, and does
+    not boot. You need to know how to boot your system and then repair your configuration.
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你启动系统时，它停在一个 GRUB 提示符 `grub rescue>` 处，并且无法启动。你需要知道如何引导系统，然后修复配置。
+- en: Solution
+  id: totrans-246
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: The `grub rescue>` prompt ([Figure 2-12](#fig-grub-14)) is the rescue shell,
+    which means GRUB could not find */boot*. Not to worry, you can find it from the
+    GRUB prompt, boot your system, and then make a permanent fix.
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`grub rescue>` 提示符（[图 2-12](#fig-grub-14)）是救援 shell，意味着 GRUB 找不到 */boot*。别担心，你可以从
+    GRUB 提示符找到它，引导系统，然后进行永久修复。'
+- en: '![The GRUB rescue shell](Images/lcb2_0212.png)'
+  id: totrans-248
+  prefs: []
+  type: TYPE_IMG
+  zh: '![GRUB 恢复 shell](Images/lcb2_0212.png)'
+- en: Figure 2-12\. The GRUB rescue shell
+  id: totrans-249
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 2-12\. GRUB 恢复 shell
+- en: 'List your partitions:'
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出你的分区：
+- en: '[PRE23]'
+  id: totrans-251
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: At this point there is no tab-completion or paging, so you have to type everything.
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一点上，没有制表符补全或分页功能，所以你必须输入所有内容。
+- en: 'GRUB tells you the filesystem types, UUIDs, and other information on the partitions:'
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: GRUB 告诉你分区的文件系统类型、UUID 和其他信息：
+- en: '[PRE24]'
+  id: totrans-254
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'If you don’t know which partition contains */boot*, you will have to list the
+    files and directories in each one until you find it. You do not have to use the
+    *gpt* and *msdos* labels. A forward slash following the device name means list
+    all files and directories:'
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你不知道哪个分区包含 */boot*，你将不得不列出每个分区中的文件和目录，直到找到它。你不必使用 *gpt* 和 *msdos* 标签。设备名后面跟着一个斜杠表示列出所有文件和目录：
+- en: '[PRE25]'
+  id: totrans-256
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'Hurrah, there it is in the root filesystem. List the files in */boot*:'
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 哇，它就在根文件系统中。列出 */boot* 中的文件：
+- en: '[PRE26]'
+  id: totrans-258
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'There are a few additional commands for `grub rescue>`. You have to tell it
+    where */boot/grub* is, and then load the *normal* and *linux* kernel modules,
+    which are in */boot/grub/i386-pc* (along with many other kernel modules that GRUB
+    uses at startup). *normal* changes the boot mode from rescue to normal, and *linux*
+    starts the system loader:'
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`grub rescue>` 还有一些额外的命令。你必须告诉它 */boot/grub* 的位置，然后加载 *normal* 和 *linux* 内核模块，它们位于
+    */boot/grub/i386-pc* 中（以及 GRUB 启动时使用的许多其他内核模块）。*normal* 将引导模式从救援切换到正常，*linux*
+    启动系统加载器：'
+- en: '[PRE27]'
+  id: totrans-260
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'After loading *normal* and *linux*, you have tab completion. You could also
+    turn on paging, *set pager=1*, to enable using the arrow keys to scroll to your
+    previous commands. Now tell GRUB where to find the *kernel* and *initrd* file:'
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 加载 *normal* 和 *linux* 后，你可以使用制表符补全。你也可以打开分页功能，*set pager=1*，以使用箭头键滚动到以前的命令。现在告诉
+    GRUB 在哪里找到 *kernel* 和 *initrd* 文件：
+- en: '[PRE28]'
+  id: totrans-262
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: If there are multiple *vmlinuz* and *initrd* files, use the two with the newest
+    matching version numbers. If all the commands are correct, your system will boot
+    and you can fix your GRUB configuration ([Recipe 2.11](#rec-grub-restore)).
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果有多个 *vmlinuz* 和 *initrd* 文件，请使用版本号匹配最新的两个。如果所有命令都正确，系统将会启动并可以修复 GRUB 配置（[Recipe
+    2.11](#rec-grub-restore)）。
+- en: Discussion
+  id: totrans-264
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: When */boot* is on its own partition, you won’t see any other directories because
+    it is in its own filesystem.
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当 */boot* 单独存在于一个分区时，你将看不到任何其他目录，因为它位于自己的文件系统中。
+- en: See Also
+  id: totrans-266
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNU GRUB Manual](https://oreil.ly/6REHG)'
+  id: totrans-267
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB 手册](https://oreil.ly/6REHG)'
+- en: 2.11 Reinstalling Your GRUB Configuration
+  id: totrans-268
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 2.11 重新安装你的 GRUB 配置
+- en: Problem
+  id: totrans-269
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 问题
+- en: You were able to boot your system from the GRUB prompt, and now you need to
+    know how to make a permanent repair.
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你已经能够从 GRUB 提示符引导系统，现在需要知道如何进行永久修复。
+- en: Solution
+  id: totrans-271
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 解决方案
+- en: 'Check your GRUB configuration carefully for errors. When it looks correct,
+    rebuild your GRUB configuration ([Recipe 2.1](#rec-rebuild-grub)). Then you need
+    to reinstall GRUB. In the following example, it is reinstalled to */dev/sda*:'
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 仔细检查你的 GRUB 配置是否有误。当它看起来正确时，重新构建你的 GRUB 配置（[Recipe 2.1](#rec-rebuild-grub)）。然后你需要重新安装
+    GRUB。在以下示例中，它重新安装到 */dev/sda*：
+- en: '[PRE29]'
+  id: totrans-273
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: Using the Correct Rebuild Command
+  id: totrans-274
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用正确的重建命令
+- en: As discussed in [Recipe 2.1](#rec-rebuild-grub) and [“GRUB versus GRUB 2”](#grubvgrub2),
+    you must check your filepaths to ensure you are using the correct rebuild command.
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如[Recipe 2.1](#rec-rebuild-grub)和[“GRUB versus GRUB 2”](#grubvgrub2)中所讨论的，你必须检查文件路径以确保使用正确的重建命令。
+- en: Be sure to install it to the correct disk, if you have more than one, and use
+    only the device name (for example, */dev/sda* ) and not a partition (such as */dev/sda1*).
+  id: totrans-276
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确保将其安装到正确的磁盘上，如果有多个磁盘，请仅使用设备名（例如 */dev/sda* ），而不是分区（例如 */dev/sda1*）。
+- en: Discussion
+  id: totrans-277
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 讨论
+- en: Be sure to have good current backups. If your rescue efforts fail, try reinstalling
+    GRUB from SystemRescue ([Recipe 19.9](ch19.xhtml#rec-repair-grub)).
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 确保有良好的当前备份。如果你的救援努力失败，尝试从 SystemRescue 重新安装 GRUB（[Recipe 19.9](ch19.xhtml#rec-repair-grub)）。
+- en: See Also
+  id: totrans-279
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 参见
+- en: '[GNU GRUB Manual](https://oreil.ly/zkwke)'
+  id: totrans-280
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[GNU GRUB 手册](https://oreil.ly/zkwke)'
+- en: '[Chapter 19](Images/ch19.html#cha-rescue-recovery)'
+  id: totrans-281
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第19章](Images/ch19.html#cha-rescue-recovery)'

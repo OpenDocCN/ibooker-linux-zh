@@ -1,0 +1,430 @@
+- en: Appendix B. If You Use a Different Shell
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 附录 B. 如果你使用不同的 Shell
+- en: This book assumes your login shell is `bash`, but if it’s not, [Table B-1](#table_shells)
+    may help you adapt the book’s examples for other shells. The checkmark symbol
+    ✓ indicates compatibility—the given feature is similar enough to `bash`’s that
+    examples in the book should run correctly. However, the feature’s behavior may
+    differ from `bash`’s in other ways. Read any footnotes carefully.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书假设您的登录 Shell 是`bash`，但如果不是，[表 B-1](#table_shells) 可能会帮助您调整本书中其他 Shell 的示例。勾号
+    ✓ 表示兼容性——给定特性与`bash`相似到足以正确运行本书示例。但是，该特性的行为可能在其他方面与`bash`不同，请仔细阅读任何脚注。
+- en: Note
+  id: totrans-2
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注
+- en: Regardless of which shell is your login shell, scripts that begin with `#!/bin/bash`
+    are processed by `bash`.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论您的登录 Shell 是哪个，以 `#!/bin/bash` 开头的脚本都将由 `bash` 处理。
+- en: To experiment with another shell installed on your system, simply run it by
+    name (e.g., `ksh`) and press Ctrl-D when finished. To change your login shell,
+    read `man chsh`.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在系统上安装的另一个 Shell 上进行实验，只需按其名称运行它（例如，`ksh`），完成后按 Ctrl-D。要更改登录 Shell，请阅读`man
+    chsh`。
+- en: Table B-1\. `bash` features supported by other shells, in alphabetical order
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 B-1\. 其他 Shell 支持的`bash`特性，按字母顺序排列
+- en: '| bash feature | dash | fish | ksh | tcsh | zsh |'
+  id: totrans-6
+  prefs: []
+  type: TYPE_TB
+  zh: '| `bash`特性 | dash | fish | ksh | tcsh | zsh |'
+- en: '| --- | --- | --- | --- | --- | --- |'
+  id: totrans-7
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- | --- |'
+- en: '| `alias` builtin | ✓ | ✓, but `alias` *`name`* does not print the alias |
+    ✓ | No equals sign: `alias g grep` | ✓ |'
+  id: totrans-8
+  prefs: []
+  type: TYPE_TB
+  zh: '| `alias`内建命令 | ✓ | ✓，但`alias` *`name`* 不打印别名 | ✓ | 没有等号：`alias g grep` | ✓
+    |'
+- en: '| Backgrounding with `&` | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-9
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`&`进行后台化 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| `bash -c` | `dash -c` | `fish -c` | `ksh -c` | `tcsh -c` | `zsh -c` |'
+  id: totrans-10
+  prefs: []
+  type: TYPE_TB
+  zh: '| `bash -c` | `dash -c` | `fish -c` | `ksh -c` | `tcsh -c` | `zsh -c` |'
+- en: '| `bash` command | `dash` | `fish` | `ksh` | `tcsh` | `zsh` |'
+  id: totrans-11
+  prefs: []
+  type: TYPE_TB
+  zh: '| `bash`命令 | `dash` | `fish` | `ksh` | `tcsh` | `zsh` |'
+- en: '| `bash` location in */bin/bash* | */bin/dash* | */bin/fish* | */bin/ksh* |
+    */bin/tcsh* | */bin/zsh* |'
+  id: totrans-12
+  prefs: []
+  type: TYPE_TB
+  zh: '| `bash`在 */bin/bash* 的位置 | */bin/dash* | */bin/fish* | */bin/ksh* | */bin/tcsh*
+    | */bin/zsh* |'
+- en: '| `BASH_SUBSHELL` variable |  |  |  |  |  |'
+  id: totrans-13
+  prefs: []
+  type: TYPE_TB
+  zh: '| `BASH_SUBSHELL`变量 |  |  |  |  |  |'
+- en: '| Brace expansion with `{}` | Use `seq` | Only `{a,b,c}`, not `{a..c}` | ✓
+    | Use `seq` | ✓ |'
+  id: totrans-14
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用 `{}` 进行大括号展开 | 使用 `seq` | 仅支持 `{a,b,c}`，不支持 `{a..c}` | ✓ | 使用 `seq` |
+    ✓ |'
+- en: '| `cd -` (toggling directories) | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-15
+  prefs: []
+  type: TYPE_TB
+  zh: '| `cd -`（切换目录） | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| `cd` builtin | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-16
+  prefs: []
+  type: TYPE_TB
+  zh: '| `cd`内建命令 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| `CDPATH` variable | ✓ | `set CDPATH` *`value`* | ✓ | `set cdpath =` (*`dir1
+    dir2 …`*`)` | ✓ |'
+  id: totrans-17
+  prefs: []
+  type: TYPE_TB
+  zh: '| `CDPATH`变量 | ✓ | `set CDPATH` *`value`* | ✓ | `set cdpath =` (*`dir1 dir2
+    …`*`)` | ✓ |'
+- en: '| Command substitution with `$()` | ✓ | Use `()` | ✓ | Use backquotes | ✓ |'
+  id: totrans-18
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用 `$()` 进行命令替换 | ✓ | 使用 `()` | ✓ | 使用反引号 | ✓ |'
+- en: '| Command substitution with backquotes | ✓ | Use `()` | ✓ | ✓ | ✓ |'
+  id: totrans-19
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用反引号进行命令替换 | ✓ | 使用 `()` | ✓ | ✓ | ✓ |'
+- en: '| Command-line editing with arrow keys |  | ✓ | ✓^([a](app02.xhtml#cle)) |
+    ✓ | ✓ |'
+  id: totrans-20
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用箭头键进行命令行编辑 |  | ✓ | ✓^([a](app02.xhtml#cle)) | ✓ | ✓ |'
+- en: '| Command-line editing with Emacs keys |  | ✓ | ✓^([a](app02.xhtml#cle)) |
+    ✓ | ✓ |'
+  id: totrans-21
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用 Emacs 键进行命令行编辑 |  | ✓ | ✓^([a](app02.xhtml#cle)) | ✓ | ✓ |'
+- en: '| Command-line editing with Vim keys with `set -o vi` |  |  | ✓ | Run `bindkey
+    -v` | ✓ |'
+  id: totrans-22
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`set -o vi`启用 Vim 键的命令行编辑 |  |  | ✓ | 运行`bindkey -v` | ✓ |'
+- en: '| `complete` builtin |  | different syntax^([b](app02.xhtml#complete)) | different
+    syntax^([b](app02.xhtml#complete)) | different syntax^([b](app02.xhtml#complete))
+    | `compdef`^([b](app02.xhtml#complete)) |'
+  id: totrans-23
+  prefs: []
+  type: TYPE_TB
+  zh: '| `complete`内建命令 |  | 不同的语法^([b](app02.xhtml#complete)) | 不同的语法^([b](app02.xhtml#complete))
+    | 不同的语法^([b](app02.xhtml#complete)) | `compdef`^([b](app02.xhtml#complete)) |'
+- en: '| Conditional lists with `&&` and `&#124;&#124;` | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-24
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`&&`和`&#124;&#124;`进行条件列表 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| Configuration files in `$HOME` (read manpage for details) | *.profile* |
+    *.config/fish/config.fish* | *.profile*, *.kshrc* | *.cshrc* | *.zshenv*, *.zprofile*,
+    *.zshrc*, *.zlogin*, *.zlogout* |'
+  id: totrans-25
+  prefs: []
+  type: TYPE_TB
+  zh: '| `$HOME`中的配置文件（详细信息请参阅 manpage） | *.profile* | *.config/fish/config.fish*
+    | *.profile*, *.kshrc* | *.cshrc* | *.zshenv*, *.zprofile*, *.zshrc*, *.zlogin*,
+    *.zlogout* |'
+- en: '| Control structures: `for` loops, `if` statements, etc. | ✓ | different syntax
+    | ✓ | different syntax | ✓ |'
+  id: totrans-26
+  prefs: []
+  type: TYPE_TB
+  zh: '| 控制结构：`for`循环，`if`语句等 | ✓ | 不同的语法 | ✓ | 不同的语法 | ✓ |'
+- en: '| `dirs` builtin |  | ✓ |  | ✓ | ✓ |'
+  id: totrans-27
+  prefs: []
+  type: TYPE_TB
+  zh: '| `dirs`内建命令 |  | ✓ |  | ✓ | ✓ |'
+- en: '| `echo` builtin | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-28
+  prefs: []
+  type: TYPE_TB
+  zh: '| `echo`内建命令 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| Escape alias with `\` | ✓ |  | ✓ | ✓ | ✓ |'
+  id: totrans-29
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用 `\` 转义别名 | ✓ |  | ✓ | ✓ | ✓ |'
+- en: '| Escape with `\` | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-30
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`\`进行转义 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| `exec` builtin | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-31
+  prefs: []
+  type: TYPE_TB
+  zh: '| `exec`内建命令 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| Exit code with `$?` | ✓ | `$status` | ✓ | ✓ | ✓ |'
+  id: totrans-32
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`$?`获取退出代码 | ✓ | `$status` | ✓ | ✓ | ✓ |'
+- en: '| `export` builtin | ✓ | `set -x` *`name value`* | ✓ | `setenv` *`name value`*
+    | ✓ |'
+  id: totrans-33
+  prefs: []
+  type: TYPE_TB
+  zh: '| `export`内建命令 | ✓ | `set -x` *`name value`* | ✓ | `setenv` *`name value`*
+    | ✓ |'
+- en: '| Functions | ✓^([c](app02.xhtml#idm46586635362048)) | different syntax | ✓
+    |  | ✓ |'
+  id: totrans-34
+  prefs: []
+  type: TYPE_TB
+  zh: '| 函数 | ✓^([c](app02.xhtml#idm46586635362048)) | 不同的语法 | ✓ |  | ✓ |'
+- en: '| `HISTCONTROL` variable |  |  |  |  | See variables with names beginning in
+    `HIST_` on the manpage |'
+  id: totrans-35
+  prefs: []
+  type: TYPE_TB
+  zh: '| `HISTCONTROL`变量 |  |  |  |  | 在man页上查看以`HIST_`开头的变量名 |'
+- en: '| `HISTFILE` variable |  | `set` `fish_history` *`path`* | ✓ | `set` `histfile`
+    `=` *`path`* | ✓ |'
+  id: totrans-36
+  prefs: []
+  type: TYPE_TB
+  zh: '| `HISTFILE`变量 |  | `set` `fish_history` *`path`* | ✓ | `set` `histfile` `=`
+    *`path`* | ✓ |'
+- en: '| `HISTFILESIZE` variable |  |  |  | `set` `savehist` `=` *`value`* | +SAVEHIST
+    |'
+  id: totrans-37
+  prefs: []
+  type: TYPE_TB
+  zh: '| `HISTFILESIZE`变量 |  |  |  | `set` `savehist` `=` *`value`* | +SAVEHIST |'
+- en: '| `history` builtin |  | ✓, but commands are not numbered | `history` is an
+    alias for `hist` `-l` | ✓ | ✓ |'
+  id: totrans-38
+  prefs: []
+  type: TYPE_TB
+  zh: '| `history`内置命令 |  | 有`history`，但命令没有编号 | `history`是`hist` `-l`的别名 | ✓ | ✓
+    |'
+- en: '| `history -c` |  | `history clear` | Delete *~/.sh_history* and restart `ksh`
+    | ✓ | `history` `-p` |'
+  id: totrans-39
+  prefs: []
+  type: TYPE_TB
+  zh: '| `history -c` |  | `history clear` | 删除*~/.sh_history*并重新启动`ksh` | ✓ | `history`
+    `-p` |'
+- en: '| History expansion with `!` and `^` |  |  |  | ✓ | ✓ |'
+  id: totrans-40
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`!`和`^`进行历史扩展 |  |  |  | ✓ | ✓ |'
+- en: '| History incremental search with Ctrl-R |  | Type beginning of command, then
+    press up arrow to search, right arrow to select | ✓^([a](app02.xhtml#cle)) ^([d](app02.xhtml#idm46586635324032))
+    | ✓^([e](app02.xhtml#idm46586635322480)) | ✓^([f](app02.xhtml#idm46586635319472))
+    |'
+  id: totrans-41
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用Ctrl-R进行历史增量搜索 |  | 输入命令的开头，然后按向上箭头搜索，右箭头选择 | ✓^([a](app02.xhtml#cle)) ^([d](app02.xhtml#idm46586635324032))
+    | ✓^([e](app02.xhtml#idm46586635322480)) | ✓^([f](app02.xhtml#idm46586635319472))
+    |'
+- en: '| `history` *`number`* |  | `history` `-`*`number`* | `history -N` *`number`*
+    | ✓ | `history` `-*number*` |'
+  id: totrans-42
+  prefs: []
+  type: TYPE_TB
+  zh: '| `history` *`number`* |  | `history` `-`*`number`* | `history -N` *`number`*
+    | ✓ | `history` `-*number*` |'
+- en: '| History with arrow keys |  | ✓ | ✓^([a](app02.xhtml#cle)) | ✓ | ✓ |'
+  id: totrans-43
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用箭头键的历史记录 |  | ✓ | ✓^([a](app02.xhtml#cle)) | ✓ | ✓ |'
+- en: '| History with Emacs keys |  | ✓ | ✓^([a](app02.xhtml#cle)) | ✓ | ✓ |'
+  id: totrans-44
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用Emacs键进行历史记录 |  | ✓ | ✓^([a](app02.xhtml#cle)) | ✓ | ✓ |'
+- en: '| History with Vim keys with `set -o vi` |  |  | ✓ | Run `bindkey -v` | ✓ |'
+  id: totrans-45
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`set -o vi`的Vim键进行历史记录 |  |  | ✓ | 运行`bindkey -v` | ✓ |'
+- en: '| `HISTSIZE` variable |  |  | ✓ |  | ✓ |'
+  id: totrans-46
+  prefs: []
+  type: TYPE_TB
+  zh: '| `HISTSIZE`变量 |  |  | ✓ |  | ✓ |'
+- en: '| Job control with `fg`, `bg`, Ctrl-Z, `jobs` | ✓ | ✓ | ✓ | ✓^([g](app02.xhtml#idm46586635288896))
+    | ✓ |'
+  id: totrans-47
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`fg`、`bg`、Ctrl-Z、`jobs`进行作业控制 | ✓ | ✓ | ✓ | ✓^([g](app02.xhtml#idm46586635288896))
+    | ✓ |'
+- en: '| Pattern matching with `*`, `?`, `[]` | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-48
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`*`、`?`、`[]`进行模式匹配 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| Pipes | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-49
+  prefs: []
+  type: TYPE_TB
+  zh: '| 管道 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| `popd` builtin |  | ✓ |  | ✓ | ✓ |'
+  id: totrans-50
+  prefs: []
+  type: TYPE_TB
+  zh: '| `popd`内置命令 |  | ✓ |  | ✓ | ✓ |'
+- en: '| Process substitution with `<()` |  |  | ✓ |  | ✓ |'
+  id: totrans-51
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`<()`进行进程替换 |  |  | ✓ |  | ✓ |'
+- en: '| `PS1` variable | ✓ | `set PS1` *`value`* | ✓ | `set prompt =` *`value`* |
+    ✓ |'
+  id: totrans-52
+  prefs: []
+  type: TYPE_TB
+  zh: '| `PS1`变量 | ✓ | `set PS1` *`value`* | ✓ | `set prompt =` *`value`* | ✓ |'
+- en: '| `pushd` builtin |  | ✓ |  | ✓, but no negative arguments | ✓ |'
+  id: totrans-53
+  prefs: []
+  type: TYPE_TB
+  zh: '| `pushd`内置命令 |  | ✓ |  | 有`pushd`，但没有负参数 | ✓ |'
+- en: '| Quotes, double | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-54
+  prefs: []
+  type: TYPE_TB
+  zh: '| 双引号 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| Quotes, single | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-55
+  prefs: []
+  type: TYPE_TB
+  zh: '| 单引号 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| Redirection of stderr (`2>`) | ✓ | ✓ | ✓ |  | ✓ |'
+  id: totrans-56
+  prefs: []
+  type: TYPE_TB
+  zh: '| 将stderr重定向（`2>`） | ✓ | ✓ | ✓ |  | ✓ |'
+- en: '| Redirection of stdin (`<`), stdout (`>`, `>>`) | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-57
+  prefs: []
+  type: TYPE_TB
+  zh: '| 将stdin（`<`）、stdout（`>`、`>>`）重定向 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| Redirection of stdout + stderr (`&>`) | Append `2>&1`^([h](app02.xhtml#stdouterr))
+    | ✓ | Append `2>&1`^([h](app02.xhtml#stdouterr)) | `>&` | ✓ |'
+  id: totrans-58
+  prefs: []
+  type: TYPE_TB
+  zh: '| 将stdout和stderr重定向（`&>`） | 追加 `2>&1`^([h](app02.xhtml#stdouterr)) | ✓ | 追加
+    `2>&1`^([h](app02.xhtml#stdouterr)) | `>&` | ✓ |'
+- en: '| Sourcing a file with `source` or `.` (dot) | dot only^([i](app02.xhtml#sourcing))
+    | ✓ | ✓^([i](app02.xhtml#sourcing)) | `source` only | ✓^([i](app02.xhtml#sourcing))
+    |'
+  id: totrans-59
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`source`或`.`（点号）来源化文件 | 只有点号^([i](app02.xhtml#sourcing)) | ✓ | ✓^([i](app02.xhtml#sourcing))
+    | 只有`source` | ✓^([i](app02.xhtml#sourcing)) |'
+- en: '| Subshell with `()` | ✓ |  | ✓ | ✓ | ✓ |'
+  id: totrans-60
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`()`创建子shell | ✓ |  | ✓ | ✓ | ✓ |'
+- en: '| Tab completion for filenames |  | ✓ | ✓^([a](app02.xhtml#cle)) | ✓ | ✓ |'
+  id: totrans-61
+  prefs: []
+  type: TYPE_TB
+  zh: '| 文件名的制表完成 |  | ✓ | ✓^([a](app02.xhtml#cle)) | ✓ | ✓ |'
+- en: '| `type` builtin | ✓ | ✓ | `type` is an alias for `whence -v` | No, but `which`
+    is a builtin | ✓ |'
+  id: totrans-62
+  prefs: []
+  type: TYPE_TB
+  zh: '| `type`内置命令 | ✓ | ✓ | `type`是`whence -v`的别名 | 不是，但`which`是内置命令 | ✓ |'
+- en: '| `unalias` builtin | ✓ | `functions` `--erase` | ✓ | ✓ | ✓ |'
+  id: totrans-63
+  prefs: []
+  type: TYPE_TB
+  zh: '| `unalias`内置命令 | ✓ | `functions` `--erase` | ✓ | ✓ | ✓ |'
+- en: '| Variable definition with `name=value` | ✓ | `set` *`name value`* | ✓ | `set`
+    *`name`* `=` *`value`* | ✓ |'
+  id: totrans-64
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`name=value`定义变量 | ✓ | `set` *`name value`* | ✓ | `set` *`name`* `=` *`value`*
+    | ✓ |'
+- en: '| Variable evaluation with `$name` | ✓ | ✓ | ✓ | ✓ | ✓ |'
+  id: totrans-65
+  prefs: []
+  type: TYPE_TB
+  zh: '| 使用`$name`进行变量评估 | ✓ | ✓ | ✓ | ✓ | ✓ |'
+- en: '| ^([a](app02.xhtml#cle-marker)) This feature is disabled by default. Run `set
+    -o emacs` to enable it. Older versions of `ksh` may behave differently.^([b](app02.xhtml#complete-marker))
+    Custom command completion, using the `complete` command or similar, differs significantly
+    from shell to shell; read the shell’s manpage.^([c](app02.xhtml#idm46586635362048-marker))
+    Functions: This shell does not support newer-style definitions that begin with
+    the `function` keyword.^([d](app02.xhtml#idm46586635324032-marker)) Incremental
+    search of history works differently in `ksh`. Press Ctrl-R, type a string, and
+    press Enter to recall the most recent command containing that string. Press Ctrl-R
+    and Enter again to search backward for the next matching command, and so on. Press
+    Enter to execute.^([e](app02.xhtml#idm46586635322480-marker)) To enable incremental
+    history search with Ctrl-R in `tcsh`, run the command `bindkey ^R i-search-back`
+    (and add it to a shell configuration file). The search behavior is a bit different
+    from `bash`’s; see `man tcsh`.^([f](app02.xhtml#idm46586635319472-marker)) In
+    `vi` mode, type `/` followed by the search string, then press Enter. Press `n`
+    to jump to the next search result.^([g](app02.xhtml#idm46586635288896-marker))
+    Job control: `tcsh` does not track the default job number as intelligently as
+    other shells, so you may need to supply the job number, such as `%1`, as an argument
+    to `fg` and `bg` more often.^([h](app02.xhtml#stdouterr-marker)) Redirection of
+    stdout and stderr: The syntax in this shell is: *`command`* `>` *`file`* `2>&1`.
+    The final term `2>&1` means “redirect stderr, which is file descriptor 2, to stdout,
+    which is file descriptor 1.”^([i](app02.xhtml#sourcing-marker)) Sourcing in this
+    shell requires an explicit path to the sourced file, such as `./myfile` for a
+    file in the current directory, or the shell won’t locate the file. Alternatively,
+    place the file into a directory in the shell’s search path. |'
+  id: totrans-66
+  prefs: []
+  type: TYPE_TB
+  zh: '| ^([a](app02.xhtml#cle-marker)) 此功能默认禁用。运行 `set -o emacs` 可以启用它。旧版本的 `ksh`
+    可能有不同的行为。^([b](app02.xhtml#complete-marker)) 自定义命令补全，使用 `complete` 命令或类似命令，在不同的
+    shell 中可能有显著不同；请参阅相应 shell 的 man 手册。^([c](app02.xhtml#idm46586635362048-marker))
+    函数：此 shell 不支持以 `function` 关键字开头的新式定义。^([d](app02.xhtml#idm46586635324032-marker))
+    在 `ksh` 中，历史记录的增量搜索方式有所不同。按 Ctrl-R 键，输入字符串，然后按 Enter 键可以调出包含该字符串的最近命令。再次按 Ctrl-R
+    键和 Enter 键可以向后搜索下一个匹配的命令，依此类推。按 Enter 键执行命令。^([e](app02.xhtml#idm46586635322480-marker))
+    要在 `tcsh` 中启用 Ctrl-R 的增量历史搜索功能，请运行命令 `bindkey ^R i-search-back`（并将其添加到 shell 配置文件）。搜索行为与
+    `bash` 有所不同；参阅 `man tcsh`。^([f](app02.xhtml#idm46586635319472-marker)) 在 `vi`
+    模式下，输入 `/` 后跟搜索字符串，然后按 Enter 键。按 `n` 跳转到下一个搜索结果。^([g](app02.xhtml#idm46586635288896-marker))
+    作业控制：`tcsh` 不像其他 shell 那样智能地跟踪默认作业号，因此您可能经常需要将作业号（例如 `%1`）作为 `fg` 和 `bg` 的参数提供。^([h](app02.xhtml#stdouterr-marker))
+    stdout 和 stderr 的重定向：此 shell 的语法是：*`command`* `>` *`file`* `2>&1`。最后的术语 `2>&1`
+    意味着“重定向 stderr，即文件描述符 2，到 stdout，即文件描述符 1”。^([i](app02.xhtml#sourcing-marker))
+    在此 shell 中进行源文件时，需要明确指定源文件的路径，例如对于当前目录中的文件使用 `./myfile`，否则 shell 将无法找到文件。或者，将文件放入
+    shell 搜索路径中的一个目录中。 |'

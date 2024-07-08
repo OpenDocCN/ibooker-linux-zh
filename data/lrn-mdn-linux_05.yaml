@@ -1,0 +1,2179 @@
+- en: Chapter 5\. Filesystems
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第五章 文件系统
+- en: In this chapter, we focus on files and filesystems. The UNIX concept of “everything
+    is a file” lives on in Linux, and while that’s not true 100% of the time, most
+    resources in Linux are indeed files. Files can be everything from the content
+    of the letter you write to your school to the funny GIF you download (from an
+    obviously safe and trusted site).
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们专注于文件和文件系统。UNIX的“一切皆文件”的概念在Linux中继续存在，尽管这并非始终如此，但Linux中的大多数资源确实是文件。文件可以是您写给学校的信件内容，也可以是您从显然安全和受信任的网站下载的有趣的GIF图像。
+- en: There are other things that are also exposed as files in Linux—for example,
+    devices and pseudo-devices such as in `echo "Hello modern Linux users" > /dev/pts/0`,
+    which prints “Hello modern Linux users” to the screen. While you may not associate
+    these resources with files, you can access them with the same methods and tools
+    you know from regular files. For example, the kernel exposes certain runtime information
+    (as discussed in [“Process Management”](ch02.xhtml#kernel-process-management))
+    about a process, such as its PID or the binary used to run the process.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在Linux中，还有其他一些东西被公开为文件，例如设备和伪设备，比如在`echo "Hello modern Linux users" > /dev/pts/0`中，它会将“Hello
+    modern Linux users”打印到屏幕上。虽然您可能不会将这些资源与文件关联起来，但您可以使用与常规文件相同的方法和工具访问它们。例如，内核公开了有关进程的某些运行时信息（如在[“进程管理”](ch02.xhtml#kernel-process-management)中讨论的那样），如其PID或用于运行进程的二进制文件。
+- en: 'What all these things have in common is a standardized, uniform interface:
+    opening a file, gathering information about a file, writing to a file, and so
+    forth. In Linux, [filesystems](https://oreil.ly/9CEdn) provide this uniform interface.
+    This interface, together with the fact that Linux treats files as a stream of
+    bytes, without any expectations about the structure, enables us to build tools
+    that work with a range of different file types.'
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有这些事物的共同之处在于标准化的统一接口：打开文件、收集有关文件的信息、向文件写入等等。在Linux中，[文件系统](https://oreil.ly/9CEdn)提供了这种统一接口。这种接口与Linux将文件视为一系列字节流而无需关注结构的事实一起，使我们能够构建可以处理各种不同文件类型的工具。
+- en: In addition, the uniform interface that filesystems provide reduces your cognitive
+    load, making it faster for you to learn how to use Linux.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，文件系统提供的统一接口减少了您的认知负荷，使您能够更快地学习如何使用Linux。
+- en: In this chapter, we first define some relevant terms. Then, we look at how Linux
+    implements the “everything is a file” abstraction. Next, we review special-purpose
+    filesystems the kernel uses to expose information about processes or devices.
+    We then move on to regular files and filesystems, something you would typically
+    associate with documents, data, and programs. We compare filesystem options and
+    discuss common operations.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一章中，我们首先定义了一些相关术语。然后，我们看看Linux如何实现“一切皆文件”的抽象概念。接下来，我们回顾了内核用于公开有关进程或设备信息的特定用途文件系统。然后，我们转向普通文件和文件系统，这些通常与文档、数据和程序相关联。我们比较文件系统选项并讨论常见操作。
+- en: Basics
+  id: totrans-6
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 基础知识
+- en: 'Before we get into the filesystem terminology, let’s first make some implicit
+    assumptions and expectations about filesystems more explicit:'
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们深入讨论文件系统术语之前，让我们先明确一些关于文件系统的隐含假设和期望：
+- en: While there are exceptions, most of the widely used filesystems today are hierarchical.
+    That is, they provide the user with a single filesystem tree, starting at the
+    root (`/`).
+  id: totrans-8
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 尽管有例外情况，但今天大多数广泛使用的文件系统都是分层的。也就是说，它们为用户提供了一个以根目录（`/`）开始的单一文件系统树。
+- en: 'In the filesystem tree, you find two different types of objects: directories
+    and files. Think of directories as an organizational unit, allowing you to group
+    files. If you’d like to apply the tree analogy, directories are the nodes in the
+    tree, whereas the leaves are either files or directories.'
+  id: totrans-9
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在文件系统树中，您会找到两种不同类型的对象：目录和文件。将目录视为一个组织单元，允许您对文件进行分组。如果您想应用树的类比，目录就是树中的节点，而叶子可以是文件或目录。
+- en: You can navigate a filesystem by listing the content of a directory (`ls`),
+    changing into that directory (`cd`), and printing the current working directory
+    (`pwd`).
+  id: totrans-10
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 您可以通过列出目录内容（`ls`）、切换到该目录（`cd`）以及打印当前工作目录（`pwd`）来导航文件系统。
+- en: 'Permissions are built-in: as discussed in [“Permissions”](ch04.xhtml#permissions),
+    one of the attributes a filesystem captures is ownership. Consequently, ownership
+    enforces access to files and directories via the assigned permissions.'
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 权限是内建的：正如在[“权限”](ch04.xhtml#permissions)中讨论的那样，文件系统捕获的属性之一是所有权。因此，所有权通过分配的权限强制访问文件和目录。
+- en: Generally, filesystems are implemented in the kernel.
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一般来说，文件系统是在内核中实现的。
+- en: Note
+  id: totrans-13
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: While filesystems are usually, for performance reasons, implemented in the kernel
+    space, there’s also an option to implement them in user land. See the [Filesystem
+    in Userspace (FUSE) documentation](https://oreil.ly/hIVgq) and the [libfuse project
+    site](https://oreil.ly/cEZyY).
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然出于性能原因，文件系统通常是在内核空间中实现的，但也有在用户空间中实现它们的选项。请参阅[用户空间文件系统（FUSE）文档](https://oreil.ly/hIVgq)和[libfuse项目网站](https://oreil.ly/cEZyY)。
+- en: 'With this informal high-level explanation out of the way, we now focus on some
+    more crisp definitions of terms that you’ll need to understand:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个非正式的高层解释之后，我们现在专注于一些更清晰的术语定义，你需要理解：
+- en: Drive
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 驱动器
+- en: A (physical) block device such as a hard disk drive (HDD) or a solid-state drive
+    (SSD). In the context of virtual machines, a drive also can be emulated—for example,
+    */dev/sda* (SCSI device) or */dev/sdb* (SATA device) or */dev/hda* (IDE device).
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个（物理）块设备，如硬盘驱动器（HDD）或固态硬盘（SSD）。在虚拟机的上下文中，驱动器也可以被模拟，例如*/dev/sda*（SCSI设备）或*/dev/sdb*（SATA设备）或*/dev/hda*（IDE设备）。
+- en: Partition
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 分区
+- en: You can logically split up drives into partitions, a set of storage sectors.
+    For example, you may decide to create two partitions on your HDD, which then would
+    show up as */dev/sdb1* and */dev/sdb2*.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以将驱动器逻辑地分割成分区，一组存储扇区。例如，您可以决定在您的HDD上创建两个分区，然后它们将显示为*/dev/sdb1*和*/dev/sdb2*。
+- en: Volume
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 卷
+- en: A volume is somewhat similar to a partition, but it is more flexible, and it
+    is also formatted for a specific filesystem. We’ll discuss volumes in detail in
+    [“Logical Volume Manager”](#lvm).
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 卷与分区有些相似，但更灵活，也为特定文件系统格式化。我们将在[“逻辑卷管理器”](#lvm)中详细讨论卷。
+- en: Super block
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 超级块
+- en: When formatted, filesystems have a special section in the beginning that captures
+    the metadata of the filesystem. This includes things like filesystem type, blocks,
+    state, and how many inodes per block.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 格式化后，文件系统在开头有一个特殊的部分，用于捕获文件系统的元数据。这包括文件系统类型、块、状态以及每个块中的索引节点数。
+- en: Inodes
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 索引节点
+- en: In a filesystem, inodes store metadata about files, such as size, owner, location,
+    date, and permissions. However, inodes do not store the filename and the actual
+    data. This is kept in directories, which really are just a special kind of regular
+    file, mapping inodes to filenames.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在文件系统中，索引节点存储关于文件的元数据，如大小、所有者、位置、日期和权限。然而，索引节点不存储文件名和实际数据。这些信息保存在目录中，实际上目录只是一种特殊类型的常规文件，将索引节点映射到文件名。
+- en: 'That was a lot of theory, so let’s see these concepts in action. First, here’s
+    how to see what drives, partitions, and volumes are present in your system:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 那是很多理论，让我们看看这些概念是如何应用的。首先，这里是如何查看系统中存在的驱动器、分区和卷：
+- en: '[PRE0]'
+  id: totrans-27
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: '[![1](Images/1.png)](#co_filesystems_CO1-1)'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_filesystems_CO1-1)'
+- en: List all block devices but exclude pseudo (loop) devices.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出所有块设备，但排除伪（循环）设备。
+- en: '[![2](Images/2.png)](#co_filesystems_CO1-2)'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_filesystems_CO1-2)'
+- en: We have a disk drive called *sda* with some 223 GB overall.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们有一个名为*sda*的磁盘驱动器，总共有223 GB。
+- en: '[![3](Images/3.png)](#co_filesystems_CO1-3)'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_filesystems_CO1-3)'
+- en: There are two partitions here, with *sda1* being the boot partition.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里有两个分区，其中*sda1*是引导分区。
+- en: '[![4](Images/4.png)](#co_filesystems_CO1-4)'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_filesystems_CO1-4)'
+- en: The second partition, called *sda2*, contains two volumes (see [“Logical Volume
+    Manager”](#lvm) for details).
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第二个分区，名为*sda2*，包含两个卷（详细信息请参阅[“逻辑卷管理器”](#lvm)）。
+- en: 'Now that we have an overall idea of the physical and logical setup, let’s have
+    a closer look at the filesystems in use:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们已经对物理和逻辑设置有了一个整体的概念，让我们更仔细地看看正在使用的文件系统：
+- en: '[PRE1]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: '[![1](Images/1.png)](#co_filesystems_CO2-1)'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_filesystems_CO2-1)'
+- en: List filesystems but exclude [squashfs types](https://oreil.ly/vS88y) (specialized
+    read-only compressed filesystem originally developed for CDs, now also for snapshots).
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出文件系统，但排除[squashfs类型](https://oreil.ly/vS88y)（专门用于CD的只读压缩文件系统，现在也用于快照）。
+- en: 'We can go a step further and look at individual filesystem objects such as
+    directories or files:'
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们可以进一步查看单个文件系统对象，如目录或文件：
+- en: '[PRE2]'
+  id: totrans-41
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: '[![1](Images/1.png)](#co_filesystems_CO3-1)'
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_filesystems_CO3-1)'
+- en: File type information
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件类型信息
+- en: '[![2](Images/2.png)](#co_filesystems_CO3-2)'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_filesystems_CO3-2)'
+- en: Information about device and inode
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设备和索引节点的信息
+- en: In the previous command, if we used `stat .` (note the dot), we would have gotten
+    the respective directory file information, including its inode, number of blocks
+    used, and so forth.
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在前面的命令中，如果我们使用了`stat .`（注意点号），我们会得到相应目录文件的信息，包括其inode、使用的块数等。
+- en: '[Table 5-1](#tab-fsbasics) lists some basic filesystem commands that allow
+    you to explore the concepts we introduced earlier.'
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表5-1](#tab-fsbasics)列出了一些基本的文件系统命令，可以帮助你探索我们之前介绍的概念。'
+- en: Table 5-1\. Selection of low-level filesystem and block device commands
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表5-1\. 选择低级文件系统和块设备命令
+- en: '| Command | Use case |'
+  id: totrans-49
+  prefs: []
+  type: TYPE_TB
+  zh: '| Command | Use case |'
+- en: '| --- | --- |'
+  id: totrans-50
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| `lsblk` | List all block devices |'
+  id: totrans-51
+  prefs: []
+  type: TYPE_TB
+  zh: '| `lsblk` | 列出所有块设备 |'
+- en: '| `fdisk`, `parted` | Manage disk partitions |'
+  id: totrans-52
+  prefs: []
+  type: TYPE_TB
+  zh: '| `fdisk`, `parted` | 管理磁盘分区 |'
+- en: '| `blkid` | Show block device attributes such as UUID |'
+  id: totrans-53
+  prefs: []
+  type: TYPE_TB
+  zh: '| `blkid` | 显示块设备属性，如UUID |'
+- en: '| `hwinfo` | Show hardware information |'
+  id: totrans-54
+  prefs: []
+  type: TYPE_TB
+  zh: '| `hwinfo` | 显示硬件信息 |'
+- en: '| `file -s` | Show filesystem and partition information |'
+  id: totrans-55
+  prefs: []
+  type: TYPE_TB
+  zh: '| `file -s` | 显示文件系统和分区信息 |'
+- en: '| `stat`, `df -i`, `ls -i` | Show and list inode-related information |'
+  id: totrans-56
+  prefs: []
+  type: TYPE_TB
+  zh: '| `stat`, `df -i`, `ls -i` | 显示和列出与inode相关的信息 |'
+- en: 'Another term you’ll come across in the context of filesystems is that of *links*.
+    Sometimes you want to refer to files with different names or provide shortcuts.
+    There are two types of links in Linux:'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在文件系统的上下文中，你会经常遇到*链接*这个术语。有时你想用不同的名称引用文件或提供快捷方式。在Linux中有两种类型的链接：
+- en: Hard links
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 硬链接
+- en: Reference inodes and can’t refer to directories. They also do not work across
+    filesystems.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 引用inode，并且不能引用目录。它们也不跨文件系统工作。
+- en: Symbolic links, or [symlinks](https://oreil.ly/yRWYA)
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 符号链接，或[symlinks](https://oreil.ly/yRWYA)
+- en: Special files with their content being a string representing the path of another
+    file.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 特殊文件，其内容是表示另一个文件路径的字符串。
+- en: 'Now let’s see links in action (some outputs shortened):'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看链接的实际应用（一些输出被缩短）：
+- en: '[PRE3]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: '[![1](Images/1.png)](#co_filesystems_CO4-1)'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_filesystems_CO4-1)'
+- en: Create a hard link to *myfile*.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个指向*myfile*的硬链接。
+- en: '[![2](Images/2.png)](#co_filesystems_CO4-2)'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_filesystems_CO4-2)'
+- en: Create a soft link to the same file (notice the `-s` option).
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建一个指向同一文件的软链接（注意使用了`-s`选项）。
+- en: '[![3](Images/3.png)](#co_filesystems_CO4-3)'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_filesystems_CO4-3)'
+- en: List the files. Notice the different file types and the rendering of the name.
+    We could also have used `ls -ali *alias`, which would show that the inodes were
+    the same on the two names associated with the hard link.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出文件。注意不同的文件类型和名称的渲染。我们也可以使用`ls -ali *alias`，这将显示关联到硬链接上的两个名称具有相同的inode。
+- en: '[![4](Images/4.png)](#co_filesystems_CO4-4)'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_filesystems_CO4-4)'
+- en: Show the file details of the hard link.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示硬链接的文件详细信息。
+- en: '[![5](Images/5.png)](#co_filesystems_CO4-5)'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#co_filesystems_CO4-5)'
+- en: Show the file details of the soft link.
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示软链接的文件详细信息。
+- en: Now that you’re familiar with filesystem terminology let’s explore how Linux
+    makes it possible to treat any kind of resource as a file.
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你对文件系统术语已经很熟悉了，让我们探索Linux如何使任何类型的资源都可以作为文件对待。
+- en: The Virtual File System
+  id: totrans-75
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 虚拟文件系统
+- en: Linux manages to provide a file-like access to many sorts of resources (in-memory,
+    locally attached, or networked storage) through an abstraction called the [virtual
+    file system (VFS)](https://oreil.ly/3sZQ1). The basic idea is to introduce a layer
+    of indirection between the clients (syscalls) and the individual filesystems implementing
+    operations for a concrete device or other kind of resource. This means that VFS
+    separates the generic operation (open, read, seek) from the actual implementation
+    details.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux通过一种称为[virtual file system (VFS)](https://oreil.ly/3sZQ1)的抽象来管理许多资源（内存中的、本地附加的或网络存储中的），实现了类似文件的访问。其基本思想是在客户端（系统调用）和实现具体设备或其他资源操作的各个文件系统之间引入一层间接层。这意味着VFS将通用操作（打开、读取、寻找）与实际实现细节分离开来。
+- en: 'VFS is an abstraction layer in the kernel that provides clients a common way
+    to access resources, based on the file paradigm. A file, in Linux, doesn’t have
+    any prescribed structure; it’s just a stream of bytes. It’s up to the client to
+    decide what the bytes mean. As shown in [Figure 5-1](#fig-vfs-overview), VFS abstracts
+    access to different kinds of filesystems:'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: VFS是内核中的一个抽象层，为客户端提供了一种基于文件范例的通用访问资源的方式。在Linux中，文件没有任何规定的结构；它只是一串字节流。客户端决定这些字节的含义。正如[图5-1](#fig-vfs-overview)所示，VFS抽象了对不同类型文件系统的访问：
+- en: Local filesystems, such as `ext3`, XFS, FAT, and NTFS
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本地文件系统，如`ext3`、XFS、FAT和NTFS
+- en: These filesystems use drivers to access local block devices such as HDDs or
+    SSDs.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些文件系统使用驱动程序访问本地块设备，如硬盘驱动器或固态驱动器。
+- en: In-memory filesystems, such as `tmpfs`, that are not backed by long-term storage
+    devices but live in main memory (RAM)
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内存中的文件系统，如`tmpfs`，不依赖于长期存储设备，而是存在于主存储器（RAM）中
+- en: We’ll cover these and the previous category in [“Regular Files”](#regular-files).
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将在[“普通文件”](#regular-files)中讨论这些以及之前的类别。
+- en: Pseudo filesystems like `procfs`, as discussed in [“Pseudo Filesystems”](#pseudo-fs)
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 伪文件系统如`procfs`，如[“伪文件系统”](#pseudo-fs)所述
+- en: These filesystems are also in-memory in nature. They’re used for kernel interfacing
+    and device abstractions.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些文件系统也是内存中的。它们用于内核接口和设备抽象。
+- en: Networked filesystems, such as NFS, Samba, Netware (nee Novell), and others
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 诸如NFS、Samba、Netware（前身为Novell）等网络文件系统
+- en: These filesystems also use a driver; however, the storage devices where the
+    actual data resides is not locally attached but remote. This means that the driver
+    involves network operations. For this reason, we’ll cover them in [Chapter 7](ch07.xhtml#networking).
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些文件系统也使用驱动程序；然而，实际数据所在的存储设备不是本地附加的而是远程的。这意味着驱动程序涉及网络操作。因此，我们将在[第7章](ch07.xhtml#networking)中进行介绍。
+- en: '![lmlx 0501](Images/lmlx_0501.png)'
+  id: totrans-86
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0501](Images/lmlx_0501.png)'
+- en: Figure 5-1\. Linux VFS overview
+  id: totrans-87
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 5-1\. Linux VFS 概述
+- en: Describing the makeup of the VFS isn’t easy. There are over 100 syscalls related
+    to files; however, in its core, the operations can be grouped into a handful of
+    categories, as listed in [Table 5-2](#tab-vfsinterface).
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 描述VFS的构成并不容易。与文件相关的系统调用超过100个；然而，其核心操作可以分为几类，如[表5-2](#tab-vfsinterface)中所列。
+- en: Table 5-2\. Select syscalls making up the VFS interface
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表5-2\. 构成VFS接口的选择性系统调用
+- en: '| Category | Example syscalls |'
+  id: totrans-90
+  prefs: []
+  type: TYPE_TB
+  zh: '| 类别 | 示例系统调用 |'
+- en: '| --- | --- |'
+  id: totrans-91
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| Inodes | `chmod`, `chown`, `stat` |'
+  id: totrans-92
+  prefs: []
+  type: TYPE_TB
+  zh: '| Inodes | `chmod`, `chown`, `stat` |'
+- en: '| Files | `open`, `close`, `seek`, `truncate`, `read`, `write` |'
+  id: totrans-93
+  prefs: []
+  type: TYPE_TB
+  zh: '| 文件 | `open`, `close`, `seek`, `truncate`, `read`, `write` |'
+- en: '| Directories | `chdir`, `getcwd`, `link`, `unlink`, `rename`, `symlink` |'
+  id: totrans-94
+  prefs: []
+  type: TYPE_TB
+  zh: '| 目录 | `chdir`, `getcwd`, `link`, `unlink`, `rename`, `symlink` |'
+- en: '| Filesystems | `mount`, `flush`, `chroot` |'
+  id: totrans-95
+  prefs: []
+  type: TYPE_TB
+  zh: '| 文件系统 | `mount`, `flush`, `chroot` |'
+- en: '| Others | `mmap`, `poll`, `sync`, `flock` |'
+  id: totrans-96
+  prefs: []
+  type: TYPE_TB
+  zh: '| 其他 | `mmap`, `poll`, `sync`, `flock` |'
+- en: 'Many VFS syscalls dispatch to the filesystem-specific implementation. For other
+    syscalls, there are VFS default implementations. Further, the Linux kernel defines
+    relevant VFS data structures—see [*include/linux/fs.h*](https://oreil.ly/Fkq8i)—such
+    as the following:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 许多VFS系统调用会分派到特定于文件系统的实现。对于其他系统调用，存在VFS的默认实现。此外，Linux内核定义了相关的VFS数据结构—参见[*include/linux/fs.h*](https://oreil.ly/Fkq8i)—如下：
+- en: '`inode`'
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`inode`'
+- en: The core filesystem object, capturing type, ownership, permissions, links, pointers
+    to blocks containing the file data, creation and access statistics, and more
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 核心文件系统对象，包括类型、所有权、权限、链接、指向包含文件数据的块的指针、创建和访问统计信息等
+- en: '`file`'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`file`'
+- en: Representing an open file (including path, current position, and inode)
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表示一个打开的文件（包括路径、当前位置和inode）
+- en: '`dentry` (directory entry)'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`dentry`（目录条目）'
+- en: Stores its parent and children
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 存储其父项和子项
+- en: '`super_block`'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`super_block`'
+- en: Representing a filesystem including mount information
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表示包括挂载信息的文件系统
+- en: Others
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其他
+- en: Including `vfsmount` and `file_system_type`
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包括`vfsmount`和`file_system_type`
+- en: With the VFS overview done, let’s have a closer look at the details, including
+    volume management, filesystem operations, and common file system layouts.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: VFS概述完成后，让我们更详细地查看细节，包括卷管理、文件系统操作和常见文件系统布局。
+- en: Logical Volume Manager
+  id: totrans-109
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 逻辑卷管理器
+- en: We previously talked about carving up drives using partitions. While doing this
+    is possible, partitions are hard to use, especially when resizing (changing the
+    amount of storage space) is necessary.
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们之前讨论过如何使用分区划分驱动器。尽管这是可能的，但特别是在需要调整大小（更改存储空间量）时，分区使用起来很困难。
+- en: Logical volume manager (LVM) uses a layer of indirection between physical entities
+    (such as drives or partitions) and the file system. This yields a setup that allows
+    for risk-free, zero-downtime expanding and automatic storage extension through
+    the pooling of resources. The way LVM works is depicted in [Figure 5-2](#fig-lvm-overview),
+    with key concepts explained in the passage that follows.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 逻辑卷管理器（LVM）在物理实体（如驱动器或分区）与文件系统之间使用一层间接，这样可以通过资源池化实现零风险、零停机时间的扩展和自动存储扩展。LVM的工作方式如[图5-2](#fig-lvm-overview)所示，关键概念在接下来的段落中解释。
+- en: '![lmlx 0502](Images/lmlx_0502.png)'
+  id: totrans-112
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0502](Images/lmlx_0502.png)'
+- en: Figure 5-2\. Linux LVM overview
+  id: totrans-113
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 5-2\. Linux LVM 概述
+- en: Physical volumes (PV)
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 物理卷（PV）
+- en: Can be a disk partition, an entire disk drive, and other devices.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 可能是磁盘分区、整个磁盘驱动器或其他设备。
+- en: Logical volumes (LV)
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 逻辑卷（LV）
+- en: Are block devices created from VGs. These are conceptually comparable to partitions.
+    You have to create a filesystem on an LV before you can use it. You can easily
+    resize LVs while in use.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是从VG创建的块设备。在概念上类似于分区。在使用中可以轻松调整LV的大小。
+- en: Volume groups (VG)
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 卷组（VG）
+- en: Are a go-between between a set of PVs and LVs. Think of a VG as pools of PVs
+    collectively providing resources.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是一组PV和LV之间的中介。将VG视为共同提供资源的PV池。
+- en: 'To [manage volumes with LVM](https://oreil.ly/rYXVI), a number of tools are
+    required; however, they are consistently named and relatively easy to use:'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使用LVM来[管理卷](https://oreil.ly/rYXVI)，需要一些工具；然而，它们的名称一致且相对易于使用：
+- en: PV management tools
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: PV管理工具
+- en: '`lvmdiskscan`'
+  id: totrans-122
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`lvmdiskscan`'
+- en: '`pvdisplay`'
+  id: totrans-123
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pvdisplay`'
+- en: '`pvcreate`'
+  id: totrans-124
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pvcreate`'
+- en: '`pvscan`'
+  id: totrans-125
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pvscan`'
+- en: VG management tools
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: VG管理工具
+- en: '`vgs`'
+  id: totrans-127
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`vgs`'
+- en: '`vgdisplay`'
+  id: totrans-128
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`vgdisplay`'
+- en: '`vgcreate`'
+  id: totrans-129
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`vgcreate`'
+- en: '`vgextend`'
+  id: totrans-130
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`vgextend`'
+- en: LV management tools
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: LV管理工具
+- en: '`lvs`'
+  id: totrans-132
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`lvs`'
+- en: '`lvscan`'
+  id: totrans-133
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`lvscan`'
+- en: '`lvcreate`'
+  id: totrans-134
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`lvcreate`'
+- en: 'Let’s see some LVM commands in action, using a concrete setup:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看一些LVM命令的实际应用，使用一个具体的设置：
+- en: '[PRE4]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: '[![1](Images/1.png)](#co_filesystems_CO5-1)'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_filesystems_CO5-1)'
+- en: List logical volumes; we have two here (*root* and *swap_1*) using volume group
+    *elementary-vg*.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出逻辑卷；我们有两个（*root* 和 *swap_1*），使用卷组 *elementary-vg*。
+- en: '[![2](Images/2.png)](#co_filesystems_CO5-2)'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_filesystems_CO5-2)'
+- en: Display volume groups; we have one here called *elementary-vg*.
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示卷组；我们有一个名为 *elementary-vg*。
+- en: '[![3](Images/3.png)](#co_filesystems_CO5-3)'
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_filesystems_CO5-3)'
+- en: Display physical volumes; we have one here (*/dev/sda2*) that’s assigned to
+    the volume group *elementary-vg*.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示物理卷；我们有一个（*/dev/sda2*），分配给卷组 *elementary-vg*。
+- en: Whether you use a partition or an LV, two more steps, which we’ll cover next,
+    are necessary to use a filesystem.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 无论您使用分区还是LV，接下来需要进行两个步骤才能使用文件系统。
+- en: Filesystem Operations
+  id: totrans-144
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 文件系统操作
+- en: 'In the following section, we’ll discuss how to create a filesystem, given a
+    partition or a logical volume (created using LVM). There are two steps involved:
+    creating the filesystem—in other non-Linux operating systems, this step is sometimes
+    called *formatting*—and then mounting it, or inserting it into the filesystem
+    tree.'
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一节中，我们将讨论如何在给定分区或使用LVM创建的逻辑卷上创建文件系统。涉及两个步骤：创建文件系统——在其他非Linux操作系统中，此步骤有时称为*格式化*——然后将其挂载或插入到文件系统树中。
+- en: Creating filesystems
+  id: totrans-146
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 创建文件系统
+- en: In order to use a filesystem, the first step is to create one. This means that
+    you’re setting up the management pieces that make up a filesystem, taking a partition
+    or a volume as the input. Consult [Table 5-1](#tab-fsbasics) if you’re unsure
+    how to gather the necessary information about the input, and once you have everything
+    together, use [`mkfs`](https://oreil.ly/uqI57) to create a filesystem.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使用文件系统，第一步是创建一个。这意味着您正在设置组成文件系统的管理部件，以分区或卷作为输入。如果您不确定如何收集有关输入的必要信息，请参考[表 5-1](#tab-fsbasics)，一旦准备就绪，使用[`mkfs`](https://oreil.ly/uqI57)创建文件系统。
+- en: '`mkfs` takes two primary inputs: the type of filesystem you want to create
+    (see one of the options we discuss in [“Common Filesystems”](#common-regular-fs))
+    and the device you want to create the filesystem on (for example, a logical volume):'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`mkfs`有两个主要输入：您想要创建的文件系统类型（查看我们在[“常见文件系统”](#common-regular-fs)讨论的选项之一）和要在其上创建文件系统的设备（例如，逻辑卷）：'
+- en: '[PRE5]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: '[![1](Images/1.png)](#co_filesystems_CO6-1)'
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_filesystems_CO6-1)'
+- en: Create a filesystem of type `ext4`.
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建类型为`ext4`的文件系统。
+- en: '[![2](Images/2.png)](#co_filesystems_CO6-2)'
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_filesystems_CO6-2)'
+- en: Create the filesystem on the logical volume */dev/some_vg/some_lv*.
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在逻辑卷*/dev/some_vg/some_lv*上创建文件系统。
+- en: As you can see from the previous command, there’s not much to it to create a
+    filesystem, so the main work for you is to figure out what filesystem type to
+    use.
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如前所述，要创建文件系统并没有太多工作，因此您主要的工作是弄清楚要使用的文件系统类型。
+- en: Once you have created the filesystem with `mkfs`, you can then make it available
+    in the filesystem tree.
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`mkfs`创建了文件系统后，您可以将其在文件系统树中可用。
+- en: Mounting filesystems
+  id: totrans-156
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 挂载文件系统
+- en: 'Mounting a filesystem means attaching it to the filesystem tree (which starts
+    at */*). Use the [`mount` command](https://oreil.ly/c6ryR) to attach a filesystem.
+    `mount` takes two main inputs: the device you want to attach and the place in
+    the filesystem tree. In addition, you can provide other inputs, including mount
+    options (via `-o`) such as read-only, and bind mounts—via [`--bind`](https://oreil.ly/C2QuV)—for
+    mounting directories into the filesystem tree. We’ll revisit this latter option
+    in the context of containers.'
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 挂载文件系统意味着将其附加到文件系统树（从根目录开始）。使用[`mount`命令](https://oreil.ly/c6ryR)来附加文件系统。`mount`有两个主要输入：你想要附加的设备和文件系统树中的位置。此外，你还可以提供其他输入，包括挂载选项（通过`-o`），如只读，以及通过[`--bind`](https://oreil.ly/C2QuV)进行绑定挂载，用于将目录挂载到文件系统树中。我们将在容器的背景下重新讨论后者。
+- en: 'You can use `mount` on its own as well. Here’s how to list existing mounts:'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你也可以单独使用`mount`。以下是如何列出现有挂载点的方法：
+- en: '[PRE6]'
+  id: totrans-159
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '[![1](Images/1.png)](#co_filesystems_CO7-1)'
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_filesystems_CO7-1)'
+- en: List mounts but only show certain filesystem types (`ext4` and `tmpfs` here).
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出挂载点，但只显示特定的文件系统类型（这里是`ext4`和`tmpfs`）。
+- en: '[![2](Images/2.png)](#co_filesystems_CO7-2)'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_filesystems_CO7-2)'
+- en: 'An example mount: the LVM VG */dev/mapper/elementary--vg-root* of type `ext4`
+    is mounted at the root.'
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个挂载的示例：LVM VG */dev/mapper/elementary--vg-root* 类型为`ext4`，挂载在根目录。
+- en: You must make sure that you mount a filesystem using the type it has been created
+    with. For example, if you’re trying to mount an SD card using `mount -t vfat /dev/sdX2
+    /media`, you have to know the SD card is formatted using `vfat`. You can let `mount`
+    try all filesystems until one works using the `-a` option.
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你必须确保使用与其创建时相同的类型挂载文件系统。例如，如果你试图使用`mount -t vfat /dev/sdX2 /media`挂载SD卡，你必须知道SD卡是用`vfat`格式化的。你可以使用`-a`选项让`mount`尝试所有文件系统，直到找到一个可用的。
+- en: 'Further, the mounts are valid only for as long as the system is running, so
+    in order to make it permanent, you need to use the [fstab file (*/etc/fstab*)](https://oreil.ly/zoSE1).
+    For example, here is mine (output slightly edited to fit):'
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，挂载只在系统运行时有效，因此要使其永久，你需要使用[fstab文件（*/etc/fstab*）](https://oreil.ly/zoSE1)。例如，这是我的（输出略作编辑以适应）：
+- en: '[PRE7]'
+  id: totrans-166
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Now you know how to manage partitions, volumes, and filesystems. Next up, we
+    review common ways to organize filesystems.
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你知道如何管理分区，卷和文件系统了。接下来，我们将审查组织文件系统常见方法。
+- en: Common Filesystem Layouts
+  id: totrans-168
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 常见的文件系统布局
+- en: Once you have a filesystem in place, an obvious challenge is to come up with
+    a way to organize its content. You may want to organize things like where programs
+    are stored, configuration data, system data, and user data. We will refer to this
+    organization of directories and their content as the *filesystem layout*. Formally,
+    the layout is called the [Filesystem Hierarchy Standard (FHS)](https://oreil.ly/q0c4a).
+    It defines directories, including their structure and recommended content. The
+    Linux Foundation maintains the FHS, and it’s a good starting point for Linux distributions
+    to follow.
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦你有了一个文件系统，显而易见的挑战就是想出一种组织其内容的方法。你可能想要组织诸如存储程序的位置，配置数据，系统数据和用户数据的东西。我们将把这些目录及其内容的组织称为*文件系统布局*。正式地说，布局被称为[文件系统层次结构标准（FHS）](https://oreil.ly/q0c4a)。它定义目录，包括它们的结构和推荐内容。Linux基金会维护FHS，这是Linux发行版遵循的良好起点。
+- en: The idea behind FHS is laudable. However, in practice you will find that the
+    filesystem layout very much depends on the Linux distribution you’re using. Thus,
+    I strongly recommend you use the `man hier` command to learn about your concrete
+    setup.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: FHS的理念是值得赞扬的。然而，在实际应用中，你会发现文件系统布局在很大程度上取决于你使用的Linux发行版。因此，我强烈建议你使用`man hier`命令来了解你具体的设置。
+- en: To provide you with a high-level idea of what you can expect when you see certain
+    top-level directories, I compiled a list of common ones in [Table 5-3](#tab-fslayouts).
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了给你提供在看到特定顶级目录时可以期待什么的高级概念，我编制了一个常见顶级目录的列表，详见[Table 5-3](#tab-fslayouts)。
+- en: Table 5-3\. Common top-level directories
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Table 5-3\. 常见的顶级目录
+- en: '| Directory | Semantics |'
+  id: totrans-173
+  prefs: []
+  type: TYPE_TB
+  zh: '| Directory | Semantics |'
+- en: '| --- | --- |'
+  id: totrans-174
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| *bin*, *sbin* | System programs and commands (usually links to */usr/bin*
+    and */usr/sbin*) |'
+  id: totrans-175
+  prefs: []
+  type: TYPE_TB
+  zh: '| *bin*, *sbin* | 系统程序和命令（通常是到*/usr/bin*和*/usr/sbin*的链接） |'
+- en: '| *boot* | Kernel images and related components |'
+  id: totrans-176
+  prefs: []
+  type: TYPE_TB
+  zh: '| *boot* | 内核映像和相关组件 |'
+- en: '| *dev* | Devices (terminals, drives, etc.) |'
+  id: totrans-177
+  prefs: []
+  type: TYPE_TB
+  zh: '| *dev* | 设备（终端，驱动器等） |'
+- en: '| *etc* | System configuration files |'
+  id: totrans-178
+  prefs: []
+  type: TYPE_TB
+  zh: '| *etc* | 系统配置文件 |'
+- en: '| *home* | User home directories |'
+  id: totrans-179
+  prefs: []
+  type: TYPE_TB
+  zh: '| *home* | 用户主目录 |'
+- en: '| *lib* | Shared system libraries |'
+  id: totrans-180
+  prefs: []
+  type: TYPE_TB
+  zh: '| *lib* | 共享系统库 |'
+- en: '| *mnt*, *media* | Mount points for removable media (e.g., USB sticks) |'
+  id: totrans-181
+  prefs: []
+  type: TYPE_TB
+  zh: '| *mnt*, *media* | 可移动媒体的挂载点（例如 USB 存储设备） |'
+- en: '| *opt* | Distro specific; can host package manager files |'
+  id: totrans-182
+  prefs: []
+  type: TYPE_TB
+  zh: '| *opt* | 特定于发行版；可以存放包管理器文件 |'
+- en: '| *proc*, *sys* | Kernel interfaces; see also [“Pseudo Filesystems”](#pseudo-fs)
+    |'
+  id: totrans-183
+  prefs: []
+  type: TYPE_TB
+  zh: '| *proc*, *sys* | 内核接口；参见 [“伪文件系统”](#pseudo-fs) |'
+- en: '| *tmp* | For temporary files |'
+  id: totrans-184
+  prefs: []
+  type: TYPE_TB
+  zh: '| *tmp* | 用于临时文件 |'
+- en: '| *usr* | User programs (usually read-only) |'
+  id: totrans-185
+  prefs: []
+  type: TYPE_TB
+  zh: '| *usr* | 用户程序（通常为只读） |'
+- en: '| *var* | User programs (logs, backups, network caches, etc.) |'
+  id: totrans-186
+  prefs: []
+  type: TYPE_TB
+  zh: '| *var* | 用户程序（日志、备份、网络缓存等） |'
+- en: With that, let’s move on to some special kinds of filesystems.
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，让我们来看看一些特殊类型的文件系统。
+- en: Pseudo Filesystems
+  id: totrans-188
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 伪文件系统
+- en: Filesystems are a great way to structure and access information. By now you
+    have likely already internalized the Linux motto that “everything is a file.”
+    We looked at how Linux provides a uniform interface via VFS in [“The Virtual File
+    System”](#vfs). Now, let’s take a closer look at how an interface is provided
+    in cases where the VFS implementor is not a block device (such as an SD card or
+    an SSD drive).
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 文件系统是组织和访问信息的一个好方法。到现在为止，你可能已经内化了 Linux 的口号“一切皆文件”。我们已经看过 Linux 如何通过 VFS 提供统一的接口，在
+    [“虚拟文件系统”](#vfs) 中。现在，让我们更仔细地看看在 VFS 实现不是块设备（如 SD 卡或 SSD 驱动器）的情况下提供接口的方式。
+- en: 'Meet pseudo filesystems: they only pretend to be filesystems so that we can
+    interact with them in the usual manner (`ls`, `cd`, `cat`), but really they are
+    wrapping some kernel interface. The interface can be a range of things, including
+    the following:'
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 认识伪文件系统：它们只是假装是文件系统，以便我们可以像平常一样与它们交互（`ls`、`cd`、`cat`），但实际上它们是在封装一些内核接口。这些接口可以是多种形式，包括以下内容：
+- en: Information about a process
+  id: totrans-191
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 关于进程的信息
+- en: An interaction with devices such as keyboards
+  id: totrans-192
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 与键盘等设备的交互
+- en: Utilities such as special devices you can use as data sources or sinks
+  id: totrans-193
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 实用工具，如可以用作数据源或接收器的特殊设备
+- en: Let’s have a closer look at the three major pseudo filesystems Linux has, starting
+    with the oldest.
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们更仔细地看一下 Linux 拥有的三个主要伪文件系统，从最古老的开始。
+- en: procfs
+  id: totrans-195
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: '`procfs`'
+- en: 'Linux inherited the [*/proc*](https://oreil.ly/QEdmm) filesystem (`procfs`)
+    from UNIX. The original intention was to publish process-related information from
+    the kernel, to make it consumable for system commands such as `ps` or `free`.
+    It has very few rules around structure, allows read-write access, and over time
+    many things found their way into it. In general, you find two types of information
+    there:'
+  id: totrans-196
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 从 UNIX 继承了 [*/proc*](https://oreil.ly/QEdmm) 文件系统（`procfs`）。最初的目的是从内核发布与进程相关的信息，以便系统命令如
+    `ps` 或 `free` 可以使用。它的结构几乎没有规则，允许读写访问，随着时间的推移，许多内容都被加入其中。一般来说，你会在这里找到两种类型的信息：
+- en: Per-process information in */proc/PID/*. This is process-relevant information
+    that the kernel exposes via directories with the PID as the directory name. Details
+    concerning the information available there are listed in [Table 5-4](#tab-procfsprocess).
+  id: totrans-197
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '*/proc/PID/* 中的每个进程信息。这是内核通过目录以 PID 作为目录名公开的与进程相关的信息。有关那里可用信息的详细内容列在 [表 5-4](#tab-procfsprocess)
+    中。'
+- en: Other information such as mounts, networking-related information, TTY drivers,
+    memory information, system version, and uptime.
+  id: totrans-198
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 其他信息，如挂载信息、与网络相关的信息、TTY 驱动程序、内存信息、系统版本和运行时间。
+- en: You can glean per-process information as listed in [Table 5-4](#tab-procfsprocess)
+    simply by using commands like `cat`. Note that most are read-only; the write semantics
+    depend on the underlying resource.
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以通过像 `cat` 这样的命令轻松获取 [表 5-4](#tab-procfsprocess) 中列出的每个进程信息。请注意，大多数是只读的；写入语义取决于底层资源。
+- en: Table 5-4\. Per-process information in procfs (most notable)
+  id: totrans-200
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 5-4\. `procfs` 中的每个进程信息（最显著的）
+- en: '| Entry | Type | Information |'
+  id: totrans-201
+  prefs: []
+  type: TYPE_TB
+  zh: 条目 | 类型 | 信息 |
+- en: '| --- | --- | --- |'
+  id: totrans-202
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| `attr` | Directory | Security attributes |'
+  id: totrans-203
+  prefs: []
+  type: TYPE_TB
+  zh: '| `attr` | 目录 | 安全属性 |'
+- en: '| `cgroup` | File | Control groups |'
+  id: totrans-204
+  prefs: []
+  type: TYPE_TB
+  zh: '| `cgroup` | 文件 | 控制组 |'
+- en: '| `cmdline` | File | Command line |'
+  id: totrans-205
+  prefs: []
+  type: TYPE_TB
+  zh: '| `cmdline` | 文件 | 命令行 |'
+- en: '| `cwd` | Link | Current working directory |'
+  id: totrans-206
+  prefs: []
+  type: TYPE_TB
+  zh: '| `cwd` | 链接 | 当前工作目录 |'
+- en: '| `environ` | File | Environment variables |'
+  id: totrans-207
+  prefs: []
+  type: TYPE_TB
+  zh: '| `environ` | 文件 | 环境变量 |'
+- en: '| `exe` | Link | Executable of the process |'
+  id: totrans-208
+  prefs: []
+  type: TYPE_TB
+  zh: '| `exe` | 链接 | 进程的可执行文件 |'
+- en: '| `fd` | Directory | File descriptors |'
+  id: totrans-209
+  prefs: []
+  type: TYPE_TB
+  zh: '| `fd` | 目录 | 文件描述符 |'
+- en: '| `io` | File | Storage I/O (bytes/char read and written) |'
+  id: totrans-210
+  prefs: []
+  type: TYPE_TB
+  zh: '| `io` | 文件 | 存储 I/O（读取和写入的字节/字符） |'
+- en: '| `limits` | File | Resource limits |'
+  id: totrans-211
+  prefs: []
+  type: TYPE_TB
+  zh: '| `limits` | 文件 | 资源限制 |'
+- en: '| `mem` | File | Memory used |'
+  id: totrans-212
+  prefs: []
+  type: TYPE_TB
+  zh: '| `mem` | 文件 | 已使用内存 |'
+- en: '| `mounts` | File | Mounts used |'
+  id: totrans-213
+  prefs: []
+  type: TYPE_TB
+  zh: '| `mounts` | 文件 | 已使用的挂载点 |'
+- en: '| `net` | Directory | Network stats |'
+  id: totrans-214
+  prefs: []
+  type: TYPE_TB
+  zh: '| `net` | 目录 | 网络统计信息 |'
+- en: '| `stat` | File | Process status |'
+  id: totrans-215
+  prefs: []
+  type: TYPE_TB
+  zh: '| `stat` | 文件 | 进程状态 |'
+- en: '| `syscall` | File | Syscall usage |'
+  id: totrans-216
+  prefs: []
+  type: TYPE_TB
+  zh: '| `系统调用` | 文件 | 系统调用使用情况 |'
+- en: '| `task` | Directory | Per-task (thread) information |'
+  id: totrans-217
+  prefs: []
+  type: TYPE_TB
+  zh: '| `任务` | 目录 | 每个任务（线程）的信息 |'
+- en: '| `timers` | File | Timers information |'
+  id: totrans-218
+  prefs: []
+  type: TYPE_TB
+  zh: '| `定时器` | 文件 | 定时器信息 |'
+- en: 'To see this in action, let’s inspect the process status. We’re using `status`
+    here rather than `stat`, which doesn’t come with human-readable labels:'
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要查看这个过程，请检查进程状态。我们在这里使用`status`而不是`stat`，后者没有人类可读的标签：
+- en: '[PRE8]'
+  id: totrans-220
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: '[![1](Images/1.png)](#co_filesystems_CO8-1)'
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_filesystems_CO8-1)'
+- en: Get the process status about the currently running command, showing only the
+    first 10 lines.
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 获取关于当前运行命令的进程状态，仅显示前10行。
+- en: '[![2](Images/2.png)](#co_filesystems_CO8-2)'
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_filesystems_CO8-2)'
+- en: The current state (running, on-CPU).
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当前状态（运行中，在CPU上）。
+- en: '[![3](Images/3.png)](#co_filesystems_CO8-3)'
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_filesystems_CO8-3)'
+- en: The PID of the current process.
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当前进程的PID。
+- en: '[![4](Images/4.png)](#co_filesystems_CO8-4)'
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_filesystems_CO8-4)'
+- en: The process ID of the parent process of the command; in this case, it’s the
+    shell where I ran the `cat` command in.
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令的父进程的进程ID；在本例中，它是我运行`cat`命令的Shell。
+- en: 'Here is one more example of using `procfs` to glean information, this time
+    from the networking space:'
+  id: totrans-229
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里是使用`procfs`从网络空间获取信息的另一个示例：
+- en: '[PRE9]'
+  id: totrans-230
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: As shown in the previous command, we can glean ARP information about the current
+    process from this special */proc/self/net/arp*.
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如前所示的命令，我们可以从此特殊的*/proc/self/net/arp*获取当前进程的ARP信息。
+- en: '`procfs` is very useful if you’re [low-level debugging](https://oreil.ly/nJ01w)
+    or developing system tooling. It is relatively messy, so you’ll need the kernel
+    docs or, even better, the kernel source code at hand to understand what each file
+    represents and how to interpret the information in it.'
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您正在进行[低级调试](https://oreil.ly/nJ01w)或开发系统工具，则`procfs`非常有用。它相对混乱，因此您需要内核文档，甚至更好的是内核源代码，以了解每个文件代表什么以及如何解释其中的信息。
+- en: Let’s move on to a more recent, more orderly way the kernel exposes information.
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们来看看内核以更近期、更有条理的方式暴露信息。
+- en: sysfs
+  id: totrans-234
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: sysfs
+- en: Where `procfs` is pretty Wild West, the [*/sys*](https://oreil.ly/EHJEJ) filesystem
+    (`sysfs`) is a Linux-specific, structured way for the kernel to expose select
+    information (such as about devices) using a standardized layout.
+  id: totrans-235
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在`procfs`非常混乱的地方，[*/sys*](https://oreil.ly/EHJEJ)文件系统（`sysfs`）是Linux特有的一种结构化方式，内核使用标准化布局选择性地暴露信息（如关于设备的信息）。
+- en: 'Here are the directories in `sysfs`:'
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里是`sysfs`中的目录：
+- en: '*block/*'
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*块/*'
+- en: This directory symbolic links to discovered block devices.
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个目录是已发现的块设备的符号链接。
+- en: '*bus/*'
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*总线/*'
+- en: In this directory, you find one subdirectory for each physical bus type supported
+    in the kernel.
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个目录中，您会找到内核支持的每种物理总线类型的一个子目录。
+- en: '*class/*'
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*类别/*'
+- en: This directory contains device classes.
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个目录包含设备类。
+- en: '*dev/*'
+  id: totrans-243
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*设备/*'
+- en: 'This directory contains two subdirectories: *block/* for block devices and
+    *char/* for character devices on the system, structured with `major-ID:minor-ID`.'
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此目录包含两个子目录：*块/* 用于系统上的块设备和 *字符/* 用于字符设备，使用`major-ID:minor-ID`结构。
+- en: '*devices/*'
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*设备/*'
+- en: In this directory, the kernel provides a representation of the device tree.
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此目录中，内核提供了设备树的表示。
+- en: '*firmware/*'
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*固件/*'
+- en: Via these directories, you can manage firmware-specific attributes.
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过这些目录，您可以管理特定于固件的属性。
+- en: '*fs/*'
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*文件系统/*'
+- en: This directory contains subdirectories for some filesystems.
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此目录包含一些文件系统的子目录。
+- en: '*module/*'
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*模块/*'
+- en: In these directories you find subdirectories for each module loaded in the kernel.
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这些目录中，您会找到每个加载到内核中的模块的子目录。
+- en: There are more subdirectories in `sysfs`, but some are newish and/or would benefit
+    from better documentation. You’ll find certain information duplicated in `sysfs`
+    that is also available in `procfs`, but other information (such as memory information)
+    is only available in `procfs`.
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在`sysfs`中还有更多子目录，但有些是较新的和/或需要更好的文档。您会发现`sysfs`中的某些信息重复出现在`procfs`中，但其他信息（如内存信息）只能在`procfs`中找到。
+- en: 'Let’s see `sysfs` in action (output edited to fit):'
+  id: totrans-254
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看`sysfs`的工作方式（输出已编辑以适合）。
+- en: '[PRE10]'
+  id: totrans-255
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: '[![1](Images/1.png)](#co_filesystems_CO9-1)'
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_filesystems_CO9-1)'
+- en: List information about block device `sda`, showing only the first seven lines.
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出关于块设备`sda`的信息，仅显示前七行。
+- en: '[![2](Images/2.png)](#co_filesystems_CO9-2)'
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_filesystems_CO9-2)'
+- en: The `backing_dev_info` link using `MAJOR:MINOR` format.
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`MAJOR:MINOR`格式的`backing_dev_info`链接。
+- en: '[![3](Images/3.png)](#co_filesystems_CO9-3)'
+  id: totrans-260
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_filesystems_CO9-3)'
+- en: Captures device [capabilities](https://oreil.ly/GFUid), such as if it is removable.
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 捕获设备的[功能](https://oreil.ly/GFUid)，例如它是否可移动。
+- en: '[![4](Images/4.png)](#co_filesystems_CO9-4)'
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_filesystems_CO9-4)'
+- en: Contains the device major and minor number (`8:0`); see also the [block device
+    drivers reference](https://oreil.ly/DK9GT) for what the numbers mean.
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包含设备主要和次要编号（`8:0`）；另请参阅[块设备驱动程序参考](https://oreil.ly/DK9GT)以了解这些数字的含义。
+- en: Next up in our little pseudo filesystem review are devices.
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来在我们的伪文件系统评论中是设备。
+- en: devfs
+  id: totrans-265
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: devfs
+- en: The [*/dev*](https://oreil.ly/EkO8V) filesystem (`devfs`) hosts device special
+    files, representing devices ranging from physical devices to things like a random
+    number generator or a write-only data sink.
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/dev*（https://oreil.ly/EkO8V）文件系统（`devfs`）托管设备特殊文件，代表从物理设备到像随机数生成器或仅写数据接收器等内容的设备。'
+- en: 'The devices available and managed via `devfs` are:'
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过`devfs`可用和管理的设备包括：
+- en: Block devices
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 块设备
+- en: Handle data in blocks—for example, storage devices (drives)
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按块处理数据，例如存储设备（驱动器）
+- en: Character devices
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 字符设备
+- en: Handle things character by character, such as a terminal, a keyboard, or a mouse
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 按字符处理，比如终端、键盘或鼠标
+- en: Special devices
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 特殊设备
+- en: Generate data or allow you to manipulate it, including the famous */dev/null*
+    or */dev/random*
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 生成数据或允许您操作数据，包括著名的*/dev/null*或*/dev/random*
+- en: 'Let’s now see `devfs` in action. For example, assume you want to get a random
+    string. You could do something like the following:'
+  id: totrans-274
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们看看`devfs`的实际运行。例如，假设您想要获取一个随机字符串。您可以做类似以下的操作：
+- en: '[PRE11]'
+  id: totrans-275
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: The previous command generates a 42-character random sequence containing uppercase
+    and lowercase as well as numerical characters. And while */dev/urandom* looks
+    like a file and can be used like one, it indeed is a special file that, using
+    a number of sources, generates (more or less) random output.
+  id: totrans-276
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 前述命令生成一个包含大写字母、小写字母和数字字符的42字符随机序列。而*/dev/urandom*看起来像一个文件，也可以像一个文件一样使用，但实际上它是一个特殊文件，利用多种来源生成（或多或少）随机的输出。
+- en: 'What do you think about the following command:'
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您认为以下命令怎么样：
+- en: '[PRE12]'
+  id: totrans-278
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: That’s right! The string “something” appeared on your display, and that is by
+    design. */dev/tty* stands for the terminal, and with that command we sent something
+    (quite literally) to it.
+  id: totrans-279
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 是的！字符串“something”出现在您的显示器上，这是有意设计的。*/dev/tty*代表终端，使用这个命令我们确实向它发送了（非常字面的）内容。
+- en: With a good understanding of filesystems and their features, let’s now turn
+    our attention to filesystems that you want to use to manage regular files such
+    as documents and data files.
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 了解了文件系统及其特性后，现在让我们关注管理诸如文档和数据文件之类的常规文件所需使用的文件系统。
+- en: Regular Files
+  id: totrans-281
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 常规文件
+- en: 'In this section, we focus on regular files and [filesystems](https://oreil.ly/LOuvP)
+    for such file types. Most of the day-to-day files we’re dealing with when working
+    fall into this category: office documents, YAML and JSON configuration files,
+    images (PNG, JPEG, etc.), source code, plain text files, and so on.'
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一节中，我们专注于常规文件以及适用于这些文件类型的[文件系统](https://oreil.ly/LOuvP)。在工作中，我们处理的大多数日常文件都属于这个类别：办公文档、YAML和JSON配置文件、图像（PNG、JPEG等）、源代码、纯文本文件等等。
+- en: Linux comes with a wealth of options. We’ll focus on local filesystems, both
+    those native for Linux as well as those in other operating systems (such as Windows/DOS)
+    that Linux allows you to use. First, let’s have a look at some common filesystems.
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 提供了丰富的选择。我们将重点关注本地文件系统，包括Linux原生支持的以及Linux允许使用的其他操作系统（如Windows/DOS）的文件系统。首先，让我们看一些常见的文件系统。
+- en: Common Filesystems
+  id: totrans-284
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 常见文件系统
+- en: The term *common filesystem* doesn’t have a formal definition. It’s simply an
+    umbrella term for filesystems that are either the defaults used in Linux distributions
+    or widely used in storage devices such as removable devices (USB sticks and SD
+    cards) or read-only devices, like CDs and DVDs.
+  id: totrans-285
+  prefs: []
+  type: TYPE_NORMAL
+  zh: “常见文件系统”这个术语没有正式定义。它只是一个文件系统的总称，可以是Linux发行版中的默认文件系统，也可以是存储设备（如可移动设备如USB闪存和SD卡）或只读设备（如CD和DVD）中广泛使用的文件系统。
+- en: In [Table 5-5](#tab-fstypesregular) I provide a quick overview and comparison
+    of some common filesystems that enjoy in-kernel support. Later in this section,
+    we’ll review some popular filesystems in greater detail.
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[表5-5](#tab-fstypesregular)中，我提供了一些常见文件系统的快速概述和比较，这些文件系统都享有内核级支持。在本节的后面，我们将更详细地审视一些流行的文件系统。
+- en: Table 5-5\. Common filesystems for regular files
+  id: totrans-287
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表5-5\. 常见的常规文件系统
+- en: '| Filesystem | Linux support since | File size | Volume size | Number of files
+    | Filename length |'
+  id: totrans-288
+  prefs: []
+  type: TYPE_TB
+  zh: '| 文件系统 | Linux支持自 | 文件大小 | 卷大小 | 文件数 | 文件名长度 |'
+- en: '| --- | --- | --- | --- | --- | --- |'
+  id: totrans-289
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- | --- |'
+- en: '| [`ext2`](https://oreil.ly/cL9W7) | 1993 | 2 TB | 32 TB | 10^(18) | 255 characters
+    |'
+  id: totrans-290
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`ext2`](https://oreil.ly/cL9W7) | 1993 | 2 TB | 32 TB | 10^(18) | 255 字符
+    |'
+- en: '| [`ext3`](https://oreil.ly/IEnxW) | 2001 | 2 TB | 32 TB | variable | 255 characters
+    |'
+  id: totrans-291
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`ext3`](https://oreil.ly/IEnxW) | 2001 | 2 TB | 32 TB | 可变 | 255 字符 |'
+- en: '| [`ext4`](https://oreil.ly/482ku) | 2008 | 16 TB | 1 EB | 4 billion | 255
+    characters |'
+  id: totrans-292
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`ext4`](https://oreil.ly/482ku) | 2008 | 16 TB | 1 EB | 40 亿 | 255 字符 |'
+- en: '| [`btrfs`](https://oreil.ly/gJQex) | 2009 | 16 EB | 16 EB | 2^(18) | 255 characters
+    |'
+  id: totrans-293
+  prefs: []
+  type: TYPE_TB
+  zh: '| [`btrfs`](https://oreil.ly/gJQex) | 2009 | 16 EB | 16 EB | 2^(18) | 255 字符
+    |'
+- en: '| [XFS](https://oreil.ly/5LHGl) | 2001 | 8 EB | 8 EB | 2^(64) | 255 characters
+    |'
+  id: totrans-294
+  prefs: []
+  type: TYPE_TB
+  zh: '| [XFS](https://oreil.ly/5LHGl) | 2001 | 8 EB | 8 EB | 2^(64) | 255 字符 |'
+- en: '| [ZFS](https://oreil.ly/HH1Lb) | 2006 | 16 EB | 2^(128) Bytes | 10^(14) files
+    per directory | 255 characters |'
+  id: totrans-295
+  prefs: []
+  type: TYPE_TB
+  zh: '| [ZFS](https://oreil.ly/HH1Lb) | 2006 | 16 EB | 2^(128) 字节 | 10^(14) 每目录的文件
+    | 255 字符 |'
+- en: '| NTFS | 1997 | 16 TB | 256 TB | 2^(32) | 255 characters |'
+  id: totrans-296
+  prefs: []
+  type: TYPE_TB
+  zh: '| NTFS | 1997 | 16 TB | 256 TB | 2^(32) | 255 字符 |'
+- en: '| `vfat` | 1995 | 2 GB | N/A | 2^(16) per directory | 255 characters |'
+  id: totrans-297
+  prefs: []
+  type: TYPE_TB
+  zh: '| `vfat` | 1995 | 2 GB | 不适用 | 每目录2^(16) | 255 字符 |'
+- en: Note
+  id: totrans-298
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: The information provided in [Table 5-5](#tab-fstypesregular) is meant to give
+    you a rough idea about the filesystems. Sometimes it’s hard to pinpoint the exact
+    time a filesystem would be officially considered part of Linux; sometimes the
+    numbers make sense only with the relevant context applied. For example, there
+    are differences between theoretical limits and implementation.
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表格 5-5](#tab-fstypesregular) 中提供的信息旨在让您对文件系统有一个大致的了解。有时很难确定文件系统何时会被正式视为Linux的一部分；有时仅在应用相关上下文时，数字才有意义。例如，理论极限与实现之间存在差异。'
+- en: 'Now let’s take a closer look at some widely used filesystems for regular files:'
+  id: totrans-300
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们更仔细地看一些常用于普通文件的文件系统：
+- en: '[`ext4`](https://oreil.ly/Ot9DI)'
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`ext4`](https://oreil.ly/Ot9DI)'
+- en: 'A widely used filesystem, used by default in many distributions nowadays. It’s
+    a backward-compatible evolution of `ext3`. Like `ext3`, it offers journaling—that
+    is, changes are recorded in a log so that in the worst-case scenario (think: power
+    outage), the recovery is fast. It’s a great general-purpose choice. See the [`ext4`
+    manual](https://oreil.ly/9kSXn) for usage.'
+  id: totrans-302
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一种广泛使用的文件系统，现在许多发行版默认使用它。它是`ext3`的向后兼容进化版本。像`ext3`一样，它提供了日志功能，即更改记录在日志中，以便在最坏的情况下（例如：停电）快速恢复。它是一个非常好的通用选择。详细使用方法请参见[`ext4`手册](https://oreil.ly/9kSXn)。
+- en: '[XFS](https://oreil.ly/WzHIZ)'
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[XFS](https://oreil.ly/WzHIZ)'
+- en: A journaling filesystem that was originally designed by Silicon Graphics (SGI)
+    for their workstations in the early 1990s. Offering support for large files and
+    high-speed I/O, it’s now used, for example, in the Red Hat distributions family.
+  id: totrans-304
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一种日志文件系统，最初由Silicon Graphics（SGI）在1990年代初为其工作站设计。支持大文件和高速IO，例如在Red Hat发行版系列中使用。
+- en: '[ZFS](https://oreil.ly/ApA2z)'
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[ZFS](https://oreil.ly/ApA2z)'
+- en: Originally developed by Sun Microsystems in 2001, ZFS combines filesystem and
+    volume manager functionality. While now there is the [OpenZFS project](https://oreil.ly/7itzs),
+    offering a path forward in an open source context, there are some concerns about
+    [ZFS’s integration with Linux](https://oreil.ly/mM8du).
+  id: totrans-306
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最初由Sun Microsystems于2001年开发，ZFS结合了文件系统和卷管理器功能。现在有[OpenZFS项目](https://oreil.ly/7itzs)，在开源环境中提供了一种前进的路径，但是关于[ZFS与Linux集成](https://oreil.ly/mM8du)还存在一些问题。
+- en: '[FAT](https://oreil.ly/sfUa3)'
+  id: totrans-307
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[FAT](https://oreil.ly/sfUa3)'
+- en: This is really a family of FAT filesystems for Linux, with `vfat` being used
+    most often. The main use case is interoperability with Windows systems, as well
+    as removable media that uses FAT. Many of the native considerations around volumes
+    do not apply.
+  id: totrans-308
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这实际上是Linux的一系列FAT文件系统，其中最常用的是`vfat`。其主要用途是与Windows系统的互操作性以及使用FAT的可移动媒体。许多关于卷的本机考虑不适用。
+- en: Drives are not the only place one can store data, so let’s have a look at in-memory
+    options.
+  id: totrans-309
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 驱动器不是唯一存储数据的地方，所以让我们看看内存选项。
+- en: In-Memory Filesystems
+  id: totrans-310
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 内存文件系统
+- en: 'There are a number of in-memory filesystems available; some are general purpose
+    and others have very specific use cases. In the following, we list some widely
+    used in-memory filesystems (in alphabetical order):'
+  id: totrans-311
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有许多内存文件系统可用；有些是通用目的，而其他一些则有非常具体的用例。以下我们列出一些广泛使用的内存文件系统（按字母顺序排列）：
+- en: '[`debugfs`](https://oreil.ly/j30dd)'
+  id: totrans-312
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`debugfs`](https://oreil.ly/j30dd)'
+- en: A special-purpose filesystem used for debugging; usually mounted with `mount
+    -t debugfs none /sys/kernel/debug`.
+  id: totrans-313
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于调试的专用文件系统；通常使用`mount -t debugfs none /sys/kernel/debug`挂载。
+- en: '[`loopfs`](https://oreil.ly/jZi4I)'
+  id: totrans-314
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`loopfs`](https://oreil.ly/jZi4I)'
+- en: Allows mapping a filesystem to blocks rather than devices. See also a [mail
+    thread on the background](https://oreil.ly/kMZ7j).
+  id: totrans-315
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许将文件系统映射到块而不是设备。请参阅关于背景的 [邮件线程](https://oreil.ly/kMZ7j)。
+- en: '`pipefs`'
+  id: totrans-316
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`pipefs`'
+- en: A special (pseudo) filesystem mounted on `pipe:` that enables pipes.
+  id: totrans-317
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个安装在 `pipe:` 上的特殊（伪）文件系统，使管道可用。
+- en: '`sockfs`'
+  id: totrans-318
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`sockfs`'
+- en: Another special (pseudo) filesystem that makes network sockets look like files,
+    sitting between the syscalls and the [sockets](https://oreil.ly/ANDjr).
+  id: totrans-319
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个特殊的（伪）文件系统，使网络套接字看起来像文件，位于系统调用和 [sockets](https://oreil.ly/ANDjr) 之间。
+- en: '[`swapfs`](https://oreil.ly/g1WsU)'
+  id: totrans-320
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`swapfs`](https://oreil.ly/g1WsU)'
+- en: Used to realize swapping (not mountable).
+  id: totrans-321
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于实现交换（不可挂载）。
+- en: '[`tmpfs`](https://oreil.ly/ICkgj)'
+  id: totrans-322
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`tmpfs`](https://oreil.ly/ICkgj)'
+- en: A general-purpose filesystem that keeps file data in kernel caches. It’s fast
+    but nonpersistent (power off means data is lost).
+  id: totrans-323
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个通用的文件系统，将文件数据保留在内核缓存中。它速度快但不持久（断电意味着数据丢失）。
+- en: Let’s move on to a special category of filesystems, specifically relevant in
+    the context of [“Containers”](ch06.xhtml#containers).
+  id: totrans-324
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们继续讨论一类特殊的文件系统，特别是在 [“容器”](ch06.xhtml#containers) 的背景下相关的文件系统。
+- en: Copy-on-Write Filesystems
+  id: totrans-325
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Copy-on-Write 文件系统
+- en: Copy-on-write (CoW) is a nifty concept to increase I/O speed and at the same
+    time use less space. The way it works is depicted in [Figure 5-3](#fig-cow-concept),
+    with further explanation in the passage that follows.
+  id: totrans-326
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Copy-on-write（CoW）是一个巧妙的概念，可以提高 I/O 速度，同时使用更少的空间。它的工作方式如 [图 5-3](#fig-cow-concept)
+    所示，并在接下来的段落中进一步解释。
+- en: '![lmlx 0503](Images/lmlx_0503.png)'
+  id: totrans-327
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0503](Images/lmlx_0503.png)'
+- en: Figure 5-3\. The CoW principle in action
+  id: totrans-328
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 5-3\. CoW 原理的实际应用
+- en: The original file, File 1, consisting of blocks A, B, and C, is copied to a
+    file called File 2\. Rather than copying the actual blocks, only the metadata
+    (pointers to the blocks) is copied. This is fast and doesn’t use up much space
+    since only metadata is created.
+  id: totrans-329
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 原始文件 File 1，由块 A、B 和 C 组成，被复制到一个名为 File 2 的文件中。与其复制实际块不同，只复制了元数据（指向块的指针）。这样做快速且不占用太多空间，因为只创建了元数据。
+- en: 'When File 2 is modified (let’s say something in block C is changed), only then
+    is block C copied: a new block called C′ is created, and while File 2 still points
+    to (uses) the unmodified blocks A and B, it now uses a new block (C′) to capture
+    new data.'
+  id: totrans-330
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 当文件 2 被修改（比如说块 C 中的某些内容被改变）时，只有块 C 被复制：创建了一个新块称为 C′，虽然文件 2 仍然指向（使用）未修改的块 A 和
+    B，但现在它使用一个新块（C′）来捕获新数据。
+- en: 'Before we get to implementations, we need to understand a second concept relevant
+    in this context: [union mounts](https://oreil.ly/dh6vW). This is the idea that
+    you can combine (mount) multiple directories into one location so that, to the
+    user of the resulting directory, it appears that said directory contains the combined
+    content (or: union) of all the participating directories. With union mounts, you
+    often come across the terms *upper filesystem* and *lower filesystem*, hinting
+    at the layering order of the mounts. You’ll find more details in the article [“Unifying
+    Filesystems with Union Mounts”](https://oreil.ly/yqV9H).'
+  id: totrans-331
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们讨论实现之前，我们需要了解在这种情况下相关的第二个概念：[联合挂载](https://oreil.ly/dh6vW)。这是一个概念，您可以将（挂载）多个目录合并到一个位置，以便对于最终目录的用户来说，该目录看起来包含所有参与目录的组合内容（或者说：联合）。使用联合挂载时，您经常会遇到“上层文件系统”和“下层文件系统”这样的术语，暗示了挂载顺序的分层。您可以在文章
+    [“使用联合挂载统一文件系统”](https://oreil.ly/yqV9H) 中找到更多详细信息。
+- en: With union mounts, the devil is in the details. You have to come up with rules
+    around what happens when a file exists in multiple places or what writing to or
+    removing files means.
+  id: totrans-332
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用联合挂载时，细节决定成败。您必须制定规则，规定当文件存在于多个位置时发生什么，或者写入或删除文件意味着什么。
+- en: Let’s have a quick look at implementations of CoW in the context of Linux filesystems.
+    We’ll have a closer look at some of these in the context of [Chapter 6](ch06.xhtml#running-apps),
+    when we discuss their use as a building block for container images.
+  id: totrans-333
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们在 Linux 文件系统的上下文中快速看一下 CoW 的实现。在我们讨论它们作为容器映像构建块的用途时，我们将更详细地研究其中一些内容，见 [第
+    6 章](ch06.xhtml#running-apps)。
+- en: '[Unionfs](https://oreil.ly/rWKZO)'
+  id: totrans-334
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Unionfs](https://oreil.ly/rWKZO)'
+- en: Originally developed at Stony Brook University, Unionfs implements a union mount
+    for CoW filesystems. It allows you to transparently overlay files and directories
+    from different filesystems using priorities at mount time. It was widely popular
+    and used in the context of CD-ROMs and DVDs.
+  id: totrans-335
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最初由斯托尼布鲁克大学开发，Unionfs 实现了 CoW 文件系统的联合挂载。它允许您在挂载时通过优先级透明地叠加来自不同文件系统的文件和目录。它曾在
+    CD-ROM 和 DVD 的背景下广泛使用。
+- en: '[OverlayFS](https://oreil.ly/5HzmC)'
+  id: totrans-336
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[OverlayFS](https://oreil.ly/5HzmC)'
+- en: A union mount filesystem implementation for Linux introduced in 2009 and added
+    to the kernel in 2014\. With OverlayFS, once a file is opened, all operations
+    are directly handled by the underlying (lower or upper) filesystems.
+  id: totrans-337
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 2009 年引入的 Linux 联合挂载文件系统实现，并于 2014 年添加到内核中。使用 OverlayFS，一旦打开文件，所有操作都由底层或上层文件系统直接处理。
+- en: '[AUFS](https://oreil.ly/kdjge)'
+  id: totrans-338
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[AUFS](https://oreil.ly/kdjge)'
+- en: Another attempt to implement an in-kernel union mount, AUFS (short for advanced
+    multilayered unification filesystem; originally AnotherUnionFS) has not been merged
+    into the kernel yet. It is used to default in Docker (see [“Docker”](ch06.xhtml#docker);
+    nowadays Docker defaults to OverlayFS with storage driver `overlay2`).
+  id: totrans-339
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种尝试实现内核内联挂载的方法，AUFS（高级多层统一文件系统；最初称为AnotherUnionFS），尚未合并到内核中。它曾经是 Docker 的默认选项（参见
+    [“Docker”](ch06.xhtml#docker)；现在 Docker 默认使用带有存储驱动程序 `overlay2` 的 OverlayFS）。
+- en: '[`btrfs`](https://oreil.ly/z1uxq)'
+  id: totrans-340
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`btrfs`](https://oreil.ly/z1uxq)'
+- en: Short for b-tree filesystem (and pronounced *butterFS* or *betterFS*), `btrfs`
+    is a CoW initially designed by Oracle Corporation. Today, a number of companies
+    contribute to the `btrfs` development, including Facebook, Intel, SUSE, and Red
+    Hat.
+  id: totrans-341
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简称为 B 树文件系统（并发音为 *butterFS* 或 *betterFS*），`btrfs` 是最初由 Oracle 公司设计的 CoW 文件系统。今天，许多公司参与了
+    `btrfs` 的开发，包括 Facebook、Intel、SUSE 和 Red Hat。
+- en: It comes with a number of features such as snapshots (for software-based RAID)
+    and automatic detection of silent data corruptions. This makes `btrfs` very suitable
+    for professional environments—for example, on a server.
+  id: totrans-342
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 它具有多种功能，如快照（用于软件 RAID）和静默数据损坏的自动检测。这使得 `btrfs` 非常适合专业环境，例如在服务器上。
+- en: Conclusion
+  id: totrans-343
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: In this chapter, we discussed files and filesystems in Linux. Filesystems are
+    a great and flexible way to organize access to information in a hierarchical manner.
+    Linux has many technologies and projects around filesystems. Some are open source
+    based, but there is also a range of commercial offerings.
+  id: totrans-344
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们讨论了 Linux 中的文件和文件系统。文件系统是以分层方式组织信息访问的一种出色且灵活的方式。Linux 在文件系统周围有许多技术和项目。一些是基于开源的，但也有一系列商业产品。
+- en: We discussed the basic building blocks, from drives to partitions and volumes.
+    Linux realizes the “everything is a file” abstraction using VFS, supporting virtually
+    any kind of filesystem, local or remote.
+  id: totrans-345
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们讨论了从驱动器到分区和卷的基本构建模块。Linux 使用 VFS 实现“一切皆文件”的抽象，支持几乎任何类型的文件系统，无论是本地的还是远程的。
+- en: The kernel uses pseudo filesystems such as */proc* and */sys* to expose information
+    about processes or devices. You can interact with these (in-memory) filesystems
+    that represent kernel APIs just like with filesystems such as `ext4` (that you
+    use to store files).
+  id: totrans-346
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核使用伪文件系统，如 */proc* 和 */sys*，来公开有关进程或设备的信息。您可以与这些（内存中的）代表内核 API 的文件系统进行交互，就像与
+    `ext4`（用于存储文件的文件系统）一样。
+- en: We then moved on to regular files and filesystems, where we compared common
+    local filesystem options, as well as in-memory and CoW filesystem basics. Linux’s
+    filesystem support is comprehensive, allowing you to use (at least read) a range
+    of fil⁠e­systems, including those originating from other operating systems such
+    as Windows.
+  id: totrans-347
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后我们转向常规文件和文件系统，比较了常见的本地文件系统选项以及内存中和 CoW 文件系统的基础知识。Linux 的文件系统支持非常全面，允许您使用（至少读取）一系列文件系统，包括源自其他操作系统（如
+    Windows）的文件系统。
+- en: 'You can dive deeper into the topics covered in this chapter with the following
+    resources:'
+  id: totrans-348
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过以下资源深入了解本章涵盖的主题：
+- en: Basics
+  id: totrans-349
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基础知识
+- en: '[“UNIX File Systems: How UNIX Organizes and Accesses Files on Disk”](https://oreil.ly/8a3Zr)'
+  id: totrans-350
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“UNIX 文件系统：UNIX 如何组织和访问磁盘上的文件”](https://oreil.ly/8a3Zr)'
+- en: '[“KHB: A Filesystems Reading List”](https://oreil.ly/aFqjg)'
+  id: totrans-351
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“KHB：文件系统阅读列表”](https://oreil.ly/aFqjg)'
+- en: VFS
+  id: totrans-352
+  prefs: []
+  type: TYPE_NORMAL
+  zh: VFS
+- en: '[“Overview of the Linux Virtual File System”](https://oreil.ly/pnvQ4)'
+  id: totrans-353
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 虚拟文件系统概述”](https://oreil.ly/pnvQ4)'
+- en: '[“Introduction to the Linux Virtual Filesystem (VFS)”](https://oreil.ly/sqSHK)'
+  id: totrans-354
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 虚拟文件系统（VFS）简介”](https://oreil.ly/sqSHK)'
+- en: '[“LVM” on ArchWiki](https://oreil.ly/kOfU1)'
+  id: totrans-355
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[ArchWiki 上的“LVM”页面](https://oreil.ly/kOfU1)'
+- en: '[“LVM2 Resource Page”](https://oreil.ly/Ds7me)'
+  id: totrans-356
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“LVM2 资源页面”](https://oreil.ly/Ds7me)'
+- en: '[“How to Use GUI LVM Tools”](https://oreil.ly/UTFpL)'
+  id: totrans-357
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“如何使用 GUI LVM 工具”](https://oreil.ly/UTFpL)'
+- en: '[“Linux Filesystem Hierarchy”](https://oreil.ly/osXbo)'
+  id: totrans-358
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 文件系统层次结构”](https://oreil.ly/osXbo)'
+- en: '[“Persistent BPF Objects”](https://oreil.ly/sFdVo)'
+  id: totrans-359
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“持久性 BPF 对象”](https://oreil.ly/sFdVo)'
+- en: Regular files
+  id: totrans-360
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 常规文件
+- en: '[“Filesystem Efficiency—Comparison of EXT4, XFS, BTRFS, and ZFS” thread on
+    reddit](https://oreil.ly/Y3rAh)'
+  id: totrans-361
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[reddit 上的“文件系统效率——EXT4、XFS、BTRFS 和 ZFS 的比较”主题](https://oreil.ly/Y3rAh)'
+- en: '[“Linux Filesystem Performance Tests”](https://oreil.ly/ZrPci)'
+  id: totrans-362
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 文件系统性能测试”](https://oreil.ly/ZrPci)'
+- en: '[“Comparison of File Systems for an SSD” thread on Linux.org](https://oreil.ly/DBboM)'
+  id: totrans-363
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Linux.org 上关于 SSD 文件系统比较的讨论](https://oreil.ly/DBboM)'
+- en: '[“Kernel Korner—Unionfs: Bringing Filesystems Together”](https://oreil.ly/Odkls)'
+  id: totrans-364
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“内核角落—Unionfs: 文件系统的整合”](https://oreil.ly/Odkls)'
+- en: '[“Getting Started with btrfs for Linux”](https://oreil.ly/TLylF)'
+  id: totrans-365
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 下开始使用 btrfs”](https://oreil.ly/TLylF)'
+- en: Equipped with knowledge around filesystems, we’re now ready to bring things
+    together and focus on how to manage and launch applications.
+  id: totrans-366
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 装备了关于文件系统的知识，我们现在可以把一切整合起来，专注于如何管理和启动应用程序。

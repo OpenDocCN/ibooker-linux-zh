@@ -1,0 +1,1271 @@
+- en: Chapter 4\. Cruising the Filesystem
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第四章\. 浏览文件系统
+- en: 'In the movie *The Adventures of Buckaroo Banzai Across the 8th Dimension*,
+    a classic cult comedy from 1984, the swashbuckling title character offers the
+    following Zen-like words of wisdom: “Remember, no matter where you go…there you
+    are.” Buckaroo could very well have been talking about the Linux filesystem:'
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 1984 年的经典文化喜剧电影《八维空间的巴克路·班赛历险记》中，英雄主角提供了以下类似禅宗的智慧言论：“记住，无论你走到哪里……那里就是你自己。”
+    巴克路也可能在谈论 Linux 文件系统：
+- en: '[PRE0]'
+  id: totrans-2
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: It’s also the case that wherever you are in the Linux filesystem—your current
+    directory—you will eventually go somewhere else (to another directory). The faster
+    and more efficiently you can perform this navigation, the more productive you
+    can be.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 同样的情况也适用于 Linux 文件系统中的任何位置——你当前的目录——最终都会去别的地方（到另一个目录）。你能够更快速、更高效地执行这种导航，你的生产力也就越高。
+- en: 'The techniques in this chapter will help you navigate the filesystem more quickly
+    with less typing. They look deceptively simple but have *enormous* bang for the
+    buck, with small learning curves and big payoffs. These techniques fall into two
+    broad categories:'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章中的技术将帮助你以更少的输入更快速地导航文件系统。它们看起来简单，但是带来的回报却非常大，学习曲线很小，收益很高。这些技术可以分为两大类：
+- en: Moving quickly to a specific directory
+  id: totrans-5
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 快速移动到特定目录
+- en: Returning rapidly to a directory you’ve visited before
+  id: totrans-6
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 快速返回到以前访问过的目录
+- en: For a quick refresher on Linux directories, see [Appendix A](app01.xhtml#appendix_linux).
+    If you use a shell other than `bash`, see [Appendix B](app02.xhtml#appendix_shells)
+    for additional notes.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你需要快速查看 Linux 目录，请参阅附录 A([Linux](app01.xhtml#appendix_linux))。如果你使用的是除 `bash`
+    外的 shell，请参阅附录 B([Shells](app02.xhtml#appendix_shells))获取额外的注意事项。
+- en: Visiting Specific Directories Efficiently
+  id: totrans-8
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 高效访问特定目录
+- en: If you ask 10 Linux experts what is the most tedious aspect of the command line,
+    seven of them will say, “Typing long directory paths.”^([1](ch04.xhtml#idm46586641926592))
+    After all, if your work files are in */home/smith/Work/Projects/Apps/Neutron-Star/src/include*,
+    your financial documents are in */home/smith/Finances/Bank/Checking/Statements*,
+    and your videos are in */data/Arts/Video/Collection*, it’s no fun to retype these
+    paths over and over. In this section, you’ll learn techniques to navigate to a
+    given directory efficiently.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你问 10 位 Linux 专家命令行中最乏味的部分是什么，其中 7 位会说：“输入长长的目录路径。”^([1](ch04.xhtml#idm46586641926592))
+    毕竟，如果你的工作文件在 */home/smith/Work/Projects/Apps/Neutron-Star/src/include*，你的财务文件在
+    */home/smith/Finances/Bank/Checking/Statements*，你的视频在 */data/Arts/Video/Collection*，重复输入这些路径肯定不是一件有趣的事情。在本节中，你将学习如何高效地导航到指定目录。
+- en: Jump to Your Home Directory
+  id: totrans-10
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 跳转到你的主目录
+- en: 'Let’s begin with the basics. No matter where you go in the filesystem, you
+    can return to your home directory by running `cd` with no arguments:'
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们从基础知识开始。无论你在文件系统的哪个位置，通过运行 `cd` 命令不带参数，都可以返回到你的主目录：
+- en: '[PRE1]'
+  id: totrans-12
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'To jump to subdirectories within your home directory from anywhere in the filesystem,
+    refer to your home directory with a shorthand rather than an absolute path such
+    as */home/smith*. One shorthand is the shell variable `HOME`:'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从任何文件系统中跳转到你的主目录的子目录时，使用简写而不是绝对路径，比如 */home/smith*。一个简写是 shell 变量 `HOME`：
+- en: '[PRE2]'
+  id: totrans-14
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'Another is a tilde:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个是波浪号（tilde）：
+- en: '[PRE3]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Both `$HOME` and `~` are expressions expanded by the shell, a fact that you
+    can verify by echoing them to stdout:'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`$HOME` 和 `~` 都是 shell 扩展的表达式，你可以通过将它们输出到标准输出来验证这一点：'
+- en: '[PRE4]'
+  id: totrans-18
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'The tilde can also refer to another user’s home directory if you place it immediately
+    in front of their username:'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 波浪号也可以在用户名前面直接表示另一个用户的主目录：
+- en: '[PRE5]'
+  id: totrans-20
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Move Faster with Tab Completion
+  id: totrans-21
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 Tab 键更快地移动
+- en: 'When you’re entering `cd` commands, save typing by pressing the Tab key to
+    produce directory names automatically. As a demonstration, visit a directory that
+    contains subdirectories, such as */usr*:'
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你输入 `cd` 命令时，通过按 Tab 键自动产生目录名称来节省输入。作为演示，访问一个包含子目录的目录，比如 */usr*：
+- en: '[PRE6]'
+  id: totrans-23
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'Suppose you want to visit the subdirectory *share*. Type `sha` and press the
+    Tab key once:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你想访问子目录 *share*。输入 `sha` 并按一次 Tab 键：
+- en: '[PRE7]'
+  id: totrans-25
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: 'The shell completes the directory name for you:'
+  id: totrans-26
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell 会自动完成目录名：
+- en: '[PRE8]'
+  id: totrans-27
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: 'This handy shortcut is called *tab completion*. It works immediately when the
+    text that you’ve typed matches a single directory name. When the text matches
+    multiple directory names, your shell needs more information to complete the desired
+    name. Suppose you had typed only `s` and pressed Tab:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个方便的快捷方式称为*选项卡完成*。当您输入的文本匹配单个目录名称时，它立即生效。当文本匹配多个目录名称时，您的shell需要更多信息才能完成所需的名称。假设您只输入了`s`并按了Tab键：
+- en: '[PRE9]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'The shell cannot complete the name *share* (yet) because other directory names
+    begin with `s` too: *sbin* and *src*. Press Tab a second time and the shell prints
+    all possible completions to guide you:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell无法完成名称*share*（尚未完成），因为其他目录名称也以`s`开头：*sbin*和*src*。再次按Tab键，shell会打印出所有可能的完成以指导您：
+- en: '[PRE10]'
+  id: totrans-31
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'and waits for your next action. To resolve the ambiguity, type another character,
+    `h`, and press Tab once:'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并等待您的下一步操作。为了解决歧义，请输入另一个字符`h`，然后按一次Tab键：
+- en: '[PRE11]'
+  id: totrans-33
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'The shell completes the name of the directory for you, from *sh* to *share*:'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell会为您完成目录名称，从*sh*到*share*：
+- en: '[PRE12]'
+  id: totrans-35
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: In general, press Tab once to perform as much completion as possible, or press
+    twice to print all possible completions. The more characters you type, the less
+    ambiguity and the better the match.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常按一次Tab键执行尽可能多的完成，或按两次打印所有可能的完成。您输入的字符越多，歧义就越少，匹配效果就越好。
+- en: Tab completion is great for speeding up navigation. Instead of typing a lengthy
+    path like */home/smith/Projects/Web/src/include*, type as little as you want and
+    keep pressing the Tab key. You’ll get the hang of it quickly with practice.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选项卡完成非常适合加快导航速度。不必输入长路径如*/home/smith/Projects/Web/src/include*，只需输入尽可能少的内容并不断按Tab键。通过练习，您很快就能掌握这个技巧。
+- en: Tab Completion Varies by Program
+  id: totrans-38
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 选项卡完成根据程序而异
+- en: Tab completion isn’t just for `cd` commands. It works for most commands, though
+    its behavior may differ. When the command is `cd`, the Tab key completes directory
+    names. For other commands that operate on files, such as `cat`, `grep`, and `sort`,
+    tab completion expands filenames too. If the command is `ssh` (secure shell),
+    it completes hostnames. If the command is `chown` (change the owner of a file),
+    it completes usernames. You can even create your own completion rules for speed,
+    as we’ll see in [Example 4-1](#ex_qcd). Also see `man bash` and read its topic
+    “programmable completion.”
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 选项卡完成不仅适用于`cd`命令。对于大多数命令，它也适用，尽管行为可能有所不同。当命令是`cd`时，Tab键会完成目录名称。对于操作文件的其他命令，如`cat`、`grep`和`sort`，选项卡完成还会扩展文件名。如果命令是`ssh`（安全外壳），它会完成主机名。如果命令是`chown`（更改文件所有者），它会完成用户名。您甚至可以为速度创建自己的完成规则，正如我们将在[示例
+    4-1](#ex_qcd)中看到的那样。还请参阅`man bash`并阅读其“可编程完成”主题。
+- en: Hop to Frequently Visited Directories Using Aliases or Variables
+  id: totrans-40
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用别名或变量跳转到频繁访问的目录
+- en: 'If you visit a faraway directory frequently, such as */home/smith/Work/⁠Projects​/Web/src/include*,
+    create an alias that performs the `cd` operation:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您经常访问远程目录，例如*/home/smith/Work/⁠Projects​/Web/src/include*，请创建一个执行`cd`操作的别名：
+- en: '[PRE13]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'Simply run the alias anytime to reach your destination:'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 只需随时运行别名即可到达目的地：
+- en: '[PRE14]'
+  id: totrans-44
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'Alternatively, create a variable to hold the directory path:'
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，创建一个变量来保存目录路径：
+- en: '[PRE15]'
+  id: totrans-46
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Edit Frequently Edited Files with an Alias
+  id: totrans-47
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 使用别名编辑经常编辑的文件
+- en: 'Sometimes, the reason for visiting a directory frequently is to edit a particular
+    file. If that’s the case, consider defining an alias to edit that file by absolute
+    path without changing directory. The following alias definition lets you edit
+    *$HOME/.bashrc*, no matter where you are in the filesystem, by running `rcedit`.
+    No `cd` is required:'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有时经常访问目录的原因是编辑特定文件。如果是这种情况，请考虑定义一个别名来通过绝对路径编辑该文件，而不必更改目录。以下别名定义允许您通过运行`rcedit`编辑*$HOME/.bashrc*，无论您在文件系统的哪个位置，都不需要`cd`：
+- en: '[PRE16]'
+  id: totrans-49
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'If you regularly visit lots of directories with long paths, you can create
+    aliases or variables for each of them. This approach has some disadvantages, however:'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您经常访问路径很长的许多目录，可以为每个目录创建别名或变量。然而，这种方法也有一些缺点：
+- en: It’s hard to remember all those aliases/variables.
+  id: totrans-51
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 很难记住所有这些别名/变量。
+- en: You might accidentally create an alias with the same name as an existing command,
+    causing a conflict.
+  id: totrans-52
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 您可能会意外地创建与现有命令同名的别名，从而引起冲突。
+- en: An alternative is to create a shell function like the one in [Example 4-1](#ex_qcd),
+    which I’ve named `qcd` (“quick cd”). This function accepts a string key as an
+    argument, such as `work` or `recipes`, and runs `cd` to a selected directory path.
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一种方法是创建一个像[示例 4-1](#ex_qcd)中的shell函数，我称之为`qcd`（“快速cd”）。这个函数接受一个字符串键作为参数，比如`work`或`recipes`，然后运行`cd`到选定的目录路径。
+- en: Example 4-1\. A function for `cd`-ing to faraway directories
+  id: totrans-54
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+  zh: 示例 4-1\. 一个用于`cd`到远程目录的函数
+- en: '[PRE17]'
+  id: totrans-55
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'Store the function in a shell configuration file such as *$HOME/.bashrc* (see
+    [“Environments and Initialization Files, the Short Version”](ch02.xhtml#section_environments1)),
+    source it, and it’s ready to run. Type `qcd` followed by one of the supported
+    keys to quickly visit the associated directory:'
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 把这个函数存储在一个像*$HOME/.bashrc*这样的shell配置文件中（参见[“环境和初始化文件，简明版”](ch02.xhtml#section_environments1)），然后source它，就可以运行了。输入`qcd`再加上一个支持的键，可以快速访问相关目录：
+- en: '[PRE18]'
+  id: totrans-57
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'As a bonus, the script’s final line runs the command `complete`, a shell builtin
+    that sets up customized tab completion for `qcd`, so it completes the four supported
+    keys. Now you don’t have to remember `qcd`’s arguments! Just type `qcd` followed
+    by a space and press the Tab key twice, and the shell will print all the keys
+    for your reference, and you can complete any of them in the usual way:'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为奖励，脚本的最后一行运行命令`complete`，这是一个shell内置命令，为`qcd`设置自定义的制表符补全，以便完成这四个支持的键。现在你不必记住`qcd`的参数！只需输入`qcd`，后面加一个空格，然后按两次Tab键，shell将打印出所有键供参考，你可以像往常一样完成其中任何一个：
+- en: '[PRE19]'
+  id: totrans-59
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: Make a Big Filesystem Feel Smaller with CDPATH
+  id: totrans-60
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用CDPATH让大型文件系统变得更小
+- en: The `qcd` function handles only the directories that you specify. The shell
+    provides a more general `cd`-ing solution without this shortcoming, called a *cd
+    search path*. This shell feature transformed how I navigate the Linux filesystem.
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`qcd`函数只处理你指定的目录。shell提供了一个更通用的解决方案来进行`cd`，没有这种缺陷，称为*cd搜索路径*。这个shell特性改变了我在Linux文件系统中导航的方式。'
+- en: 'Suppose you have an important subdirectory that you visit often, named *Photos*.
+    It’s located at */home/smith/Family/Memories/Photos*. As you cruise around the
+    filesystem, anytime you want to get to the *Photos* directory, you may have to
+    type a long path, such as:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你有一个重要的子目录，经常要访问，名为*Photos*。它位于*/home/smith/Family/Memories/Photos*。当你在文件系统中穿梭时，每次想要进入*Photos*目录，可能需要输入一个长路径，比如：
+- en: '[PRE20]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: Wouldn’t it be great if you could shorten this path to just *Photos*, no matter
+    where you are in the filesystem, and reach your subdirectory?
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你能把这个路径缩短到只是*Photos*，无论你在文件系统的哪个位置，都能到达你的子目录，那不是很棒吗？
+- en: '[PRE21]'
+  id: totrans-65
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'Normally, this command would fail:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常情况下，这个命令会失败：
+- en: '[PRE22]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'unless you happen to be in the correct parent directory (*~/Family/Memories*)
+    or some other directory with a *Photos* subdirectory by coincidence. Well, with
+    a little setup, you can instruct `cd` to search for your *Photos* subdirectory
+    in locations other than your current directory. The search is lightning fast and
+    looks only in parent directories that you specify. For example, you could instruct
+    `cd` to search *$HOME/Family/Memories* in addition to the current directory. Then,
+    when you type `cd Photos` from elsewhere in the filesystem, `cd` will succeed:'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除非你碰巧在正确的父目录（*~/Family/Memories*）或其他含有*Photos*子目录的目录中。好吧，通过一点设置，你可以指示`cd`在除了当前目录之外的其他位置搜索你的*Photos*子目录。搜索速度非常快，只在你指定的父目录中查找。例如，你可以指示`cd`在当前目录之外，还搜索*$HOME/Family/Memories*。然后，当你从文件系统的其他位置输入`cd
+    Photos`时，`cd`会成功：
+- en: '[PRE23]'
+  id: totrans-69
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'A cd search path works like your command search path, `$PATH`, but instead
+    of finding commands, it finds subdirectories. Configure it with the shell variable
+    `CDPATH`, which has the same format as `PATH`: a list of directories separated
+    by colons. If your `CDPATH` consists of these four directories, for example:'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: cd搜索路径工作原理类似于命令搜索路径`$PATH`，但不是找命令，而是找子目录。用shell变量`CDPATH`配置它，格式与`PATH`相同：用冒号分隔的目录列表。例如，如果你的`CDPATH`由这四个目录组成：
+- en: '[PRE24]'
+  id: totrans-71
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'and you type:'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并且你输入：
+- en: '[PRE25]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: 'then `cd` will check the existence of the following directories in order, until
+    it finds one or it fails entirely:'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后`cd`将按顺序检查以下目录的存在，直到找到一个或完全失败：
+- en: '*Photos* in the current directory'
+  id: totrans-75
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 当前目录中的*Photos*
+- en: '*$HOME/Photos*'
+  id: totrans-76
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: '*$HOME/Photos*'
+- en: '*$HOME/Projects/Photos*'
+  id: totrans-77
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: '*$HOME/Projects/Photos*'
+- en: '*$HOME/Family/Memories/Photos*'
+  id: totrans-78
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: '*$HOME/Family/Memories/Photos*'
+- en: '*/usr/local/Photos*'
+  id: totrans-79
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: '*/usr/local/Photos*'
+- en: In this case, `cd` succeeds on its fourth try and changes directory to *$HOME/Family/Memories/Photos*.
+    If two directories in `$CDPATH` have a subdirectory named *Photos*, the earlier
+    parent wins.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这种情况下，`cd`在第四次尝试成功，并且将目录更改为*$HOME/Family/Memories/Photos*。如果`$CDPATH`中有两个子目录命名为*Photos*，则较早的父目录胜出。
+- en: Note
+  id: totrans-81
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: 'Ordinarily, a successful `cd` prints no output. When `cd` locates a directory
+    using your `CDPATH`, however, it prints the absolute path on stdout to inform
+    you of your new current directory:'
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通常，成功的`cd`不会打印任何输出。但是，当`cd`使用你的`CDPATH`定位到一个目录时，它会在标准输出上打印绝对路径，以通知你新的当前目录：
+- en: '[PRE26]'
+  id: totrans-83
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: Fill `CDPATH` with your most important or frequently used parent directories,
+    and you can `cd` into any of their subdirectories from anywhere in the filesystem,
+    no matter how deep they are, without typing most of the path. Trust me, this is
+    *awesome*, and the following case study should prove it.
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 填充`CDPATH`以包含你最重要或最频繁使用的父目录，你可以在文件系统的任何地方进入它们的任何子目录，无论其深度有多深，几乎不用输入路径的大部分。相信我，这很*棒*，下面的案例研究应该可以证明它。
+- en: Organize Your Home Directory for Fast Navigation
+  id: totrans-85
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 组织你的主目录以快速导航
+- en: Let’s use `CDPATH` to simplify the way you navigate your home directory. With
+    a little configuration, you can make many directories within your home directory
+    easily accessible with minimal typing, no matter where you are in the filesystem.
+    This technique works best if your home directory is well organized with at least
+    two levels of subdirectories. [Figure 4-1](#fig_cs_cdpath) shows an example of
+    a well-organized directory layout.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们使用`CDPATH`来简化你导航主目录的方式。通过一点配置，你可以使主目录中的许多目录在任何文件系统中的任何地方易于访问，减少输入，效果显著。如果你的主目录组织良好，至少有两个级别的子目录，这种技术效果最佳。[图 4-1](#fig_cs_cdpath)展示了一个组织良好的目录布局示例。
+- en: '![Two levels of subdirectories in the directory /home/smith](Images/elcl_0401.png)'
+  id: totrans-87
+  prefs: []
+  type: TYPE_IMG
+  zh: '![目录/home/smith中的两级子目录](Images/elcl_0401.png)'
+- en: Figure 4-1\. Two levels of subdirectories in the directory */home/smith*
+  id: totrans-88
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 4-1\. */home/smith*目录中的两级子目录
+- en: 'The trick is to set up your `CDPATH` to include, in order:'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置你的`CDPATH`的技巧是按顺序包含以下内容：
+- en: '`$HOME`'
+  id: totrans-90
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: '`$HOME`'
+- en: Your choice of subdirectories of `$HOME`
+  id: totrans-91
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 你的主目录的子目录选择
+- en: The relative path for a parent directory, indicated by two dots (`..`)
+  id: totrans-92
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 一个父目录的相对路径，用两个点（`..`）表示
+- en: 'By including `$HOME`, you can jump immediately to any of its subdirectories
+    (*Family*, *Finances*, *Linux*, *Music*, and *Work*) from anywhere else in the
+    filesystem without typing a leading path:'
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过包含`$HOME`，你可以立即跳转到任何它的子目录（*Family*、*Finances*、*Linux*、*Music*和*Work*）而不用在文件系统中的任何地方输入前导路径：
+- en: '[PRE27]'
+  id: totrans-94
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: 'By including subdirectories of `$HOME` in your `CDPATH`, you can jump into
+    *their* subdirectories in one shot:'
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过在你的`CDPATH`中包含主目录的子目录，你可以一次跳转到它们的子目录：
+- en: '[PRE28]'
+  id: totrans-96
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'All the directories in your `CDPATH` so far are absolute paths in `$HOME` and
+    its subdirectories. By including the relative path `..` however, you empower new
+    `cd` behavior in *every* directory. No matter where you are in the filesystem,
+    you can jump to any *sibling* directory (*../`sibling`*) by name without typing
+    the two dots, because `cd` will search your current parent. For example, if you’re
+    in */usr/bin* and want to move to */usr/lib*, all you need is `cd lib`:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到目前为止，你的`CDPATH`中的所有目录都是主目录和其子目录中的绝对路径。然而，通过包含相对路径`..`，你可以在*每个*目录中赋予新的`cd`行为。无论你在文件系统中的哪个位置，你都可以通过名称跳转到任何*同级*目录（../`sibling`）而不用输入两个点，因为`cd`将搜索你当前的父目录。例如，如果你在*/usr/bin*中，想要移动到*/usr/lib*，你只需要`cd
+    lib`：
+- en: '[PRE29]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: 'Or, if you’re a programmer working on code that has subdirectories *src*, *include*,
+    and *docs*:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 或者，如果你是一个在*src*、*include*和*docs*子目录上工作代码的程序员：
+- en: '[PRE30]'
+  id: totrans-100
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: 'you can jump between the subdirectories concisely:'
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以简洁地在子目录之间跳转：
+- en: '[PRE31]'
+  id: totrans-102
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: 'A `CDPATH` for the tree in [Figure 4-1](#fig_cs_cdpath) might contain six items:
+    your home directory, four of its subdirectories, and the relative path for a parent
+    directory:'
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个用于图[图 4-1](#fig_cs_cdpath)中的树的`CDPATH`可能包含六个项目：你的主目录、其四个子目录以及父目录的相对路径：
+- en: '[PRE32]'
+  id: totrans-104
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: After sourcing the configuration file, you can `cd` to a large number of important
+    directories without typing long directory paths, just short directory names. Hooray!
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在配置文件中载入后，你可以在不输入长目录路径的情况下`cd`到许多重要目录，只需输入短目录名称。太棒了！
+- en: This technique works best if all subdirectories beneath the `CDPATH` directories
+    have unique names. If you have duplicate names, such as *$HOME/Music* and *$HOME/Linux/Music*,
+    you might not get the behavior you want. The command `cd Music` will always check
+    *$HOME* before *$HOME/Linux* and consequently will not locate *$HOME/Linux/Music*
+    by search.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果所有 `CDPATH` 目录下的子目录都有唯一的名称，则此技术效果最佳。如果有重复的名称，例如 *$HOME/Music* 和 *$HOME/Linux/Music*，你可能无法获得想要的行为。命令
+    `cd Music` 将始终先检查 *$HOME*，而不是 *$HOME/Linux*，因此无法找到 *$HOME/Linux/Music*。
+- en: 'To check for duplicate subdirectory names in the first two levels of `$HOME`,
+    try this brash one-liner. It lists all subdirectories and sub-subdirectories of
+    `$HOME`, isolates the sub-subdirectory names with `cut`, sorts the list, and counts
+    occurrences with `uniq`:'
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要检查 `$HOME` 的前两级目录中是否存在重复的子目录名称，请尝试这个大胆的单行命令。它列出 `$HOME` 的所有子目录和子子目录，用 `cut`
+    隔离子子目录名称，排序列表，并用 `uniq` 计算出现次数：
+- en: '[PRE33]'
+  id: totrans-108
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: 'You may recognize this duplicate-checking technique from [“Detecting Duplicate
+    Files”](ch01.xhtml#sec_duplicate_files). If the output displays any counts greater
+    than 1, you have duplicates. I realize this command includes a few features I
+    haven’t covered yet. You’ll learn double ampersand (`&&`) in [“Technique #1: Conditional
+    Lists”](ch07.xhtml#section_conditional_lists) and the parentheses in [“Technique
+    #10: Explicit Subshells”](ch07.xhtml#section_explicit_subshells).'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '你可能会从 [“检测重复文件”](ch01.xhtml#sec_duplicate_files) 中认识到这种重复检查技术。如果输出显示任何大于 1
+    的计数，则存在重复项。我意识到这个命令包含了一些我尚未介绍的功能。您将在 [“技巧 #1：条件列表”](ch07.xhtml#section_conditional_lists)
+    中了解到双与符号 (`&&`)，以及在 [“技巧 #10：显式子 shell”](ch07.xhtml#section_explicit_subshells)
+    中的括号。'
+- en: Returning to Directories Efficiently
+  id: totrans-110
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 高效返回目录
+- en: You’ve just seen how to visit a directory efficiently. Now I’ll show you how
+    to revisit a directory quickly when you need to go back.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你刚刚看到如何有效访问目录。现在我将向你展示，当你需要返回时如何快速重新访问目录。
+- en: Toggle Between Two Directories with “cd -”
+  id: totrans-112
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 “cd -” 在两个目录之间切换
+- en: 'Suppose you’re working in a deep directory and you run `cd` to go somewhere
+    else:'
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你在一个深层目录中工作，然后运行 `cd` 去其他地方：
+- en: '[PRE34]'
+  id: totrans-114
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: 'and then think, “No, wait, I want to go back to the *Statements* directory
+    where I just was.” Don’t retype the long directory path. Just run `cd` with a
+    dash as an argument:'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后想着，“不，等等，我想回到我刚才所在的 *Statements* 目录。” 不要重新输入长目录路径。只需运行带有破折号作为参数的 `cd`：
+- en: '[PRE35]'
+  id: totrans-116
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: This command returns your shell to its previous directory and helpfully prints
+    its absolute path so you know where you are.
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此命令将您的 shell 返回到其先前的目录，并帮助打印其绝对路径，以便您知道自己在哪里。
+- en: 'To jump back and forth between a pair of directories, run `cd -` repeatedly.
+    This is a time-saver when you’re doing focused work in two directories in a single
+    shell. There’s a catch, however: the shell remembers just one previous directory
+    at a time. For example, if you are toggling between */usr/local/bin* and */etc*:'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在一对目录之间来回跳转，重复运行 `cd -`。当你在单个 shell 中专注于两个目录时，这将节省时间。然而，有一个注意事项：shell 一次只记住一个上一个目录。例如，如果你在
+    */usr/local/bin* 和 */etc* 之间切换：
+- en: '[PRE36]'
+  id: totrans-119
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: 'and you run `cd` without arguments to jump to your home directory:'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 并且当你运行 `cd` 而不带参数跳转到你的主目录时：
+- en: '[PRE37]'
+  id: totrans-121
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE37]'
+- en: 'the shell has now forgotten */usr/local/bin* as a previous directory:'
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: shell 现在忘记了 */usr/local/bin* 作为上一个目录：
+- en: '[PRE38]'
+  id: totrans-123
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE38]'
+- en: The next technique overcomes this limitation.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一个技巧克服了这个限制。
+- en: Toggle Among Many Directories with pushd and popd
+  id: totrans-125
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 pushd 和 popd 在多个目录之间切换
+- en: 'The `cd -` command toggles between two directories, but what if you have three
+    or more to keep track of? Suppose you’re creating a local website on your Linux
+    computer. This task often involves four or more directories:'
+  id: totrans-126
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cd -` 命令在两个目录之间切换，但是如果你有三个或更多需要跟踪的目录怎么办？假设你在 Linux 计算机上创建一个本地网站。这通常涉及四个或更多目录：'
+- en: The location of live, deployed web pages, such as */var/www/html*
+  id: totrans-127
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 部署的现场网页的位置，例如 */var/www/html*
+- en: The web-server configuration directory, often */etc/apache2*
+  id: totrans-128
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Web 服务器配置目录，通常位于 */etc/apache2*
+- en: The location of SSL certificates, often */etc/ssl/certs*
+  id: totrans-129
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: SSL 证书的位置，通常位于 */etc/ssl/certs*
+- en: Your work directory, such as *~/Work/Projects/Web/src*
+  id: totrans-130
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 你的工作目录，例如 *~/Work/Projects/Web/src*
+- en: 'Believe me, it’s tedious to keep typing:'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 相信我，反复输入以下内容非常乏味：
+- en: '[PRE39]'
+  id: totrans-132
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE39]'
+- en: If you have a large, windowing display, you can ease the burden by opening a
+    separate shell window for each directory. But if you’re working in a single shell
+    (say, over an SSH connection), take advantage of a shell feature called a *directory
+    stack*. It lets you quickly travel among multiple directories with ease, using
+    the built-in shell commands `pushd`, `popd`, and `dirs`. The learning curve is
+    maybe 15 minutes, and the huge payoff in speed lasts a lifetime.^([2](ch04.xhtml#idm46586641478816))
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您有大型窗口显示器，可以通过为每个目录打开单独的shell窗口来减轻负担。但是，如果您在单个shell中工作（比如通过SSH连接），可以利用一个称为*目录堆栈*的shell特性。它让您可以轻松快速地在多个目录之间移动，使用内置的shell命令`pushd`、`popd`和`dirs`。学习曲线可能只需15分钟，但速度上的巨大回报将持续一生。^([2](ch04.xhtml#idm46586641478816))
+- en: A *directory stack* is a list of directories that you’ve visited in the current
+    shell and decided to keep track of. You manipulate the stack by performing two
+    operations called *pushing* and *popping*. Pushing a directory adds it to the
+    beginning of the list, which is traditionally called the *top* of the stack. Popping
+    removes the topmost directory from the stack.^([3](ch04.xhtml#idm46586641470176))
+    Initially, the stack contains only your current directory, but you can add (push)
+    and remove (pop) directories and rapidly `cd` among them.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*目录堆栈*是您在当前shell中访问并决定跟踪的目录列表。您通过执行称为*推入*和*弹出*的两个操作来操作堆栈。推入目录将其添加到列表的开头，传统上称为堆栈的*顶部*。弹出则从堆栈中移除顶部目录。^([3](ch04.xhtml#idm46586641470176))
+    最初，堆栈仅包含当前目录，但您可以添加（推入）和移除（弹出）目录，并快速使用`cd`在它们之间切换。'
+- en: Note
+  id: totrans-135
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Every running shell maintains its own directory stack.
+  id: totrans-136
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 每个正在运行的shell都维护其自己的目录堆栈。
+- en: I’ll begin with the basic operations (pushing, popping, viewing) and then get
+    to the good stuff.
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我将从基本操作（推入、弹出、查看）开始，然后进入精彩内容。
+- en: Push a directory onto the stack
+  id: totrans-138
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 推送目录到堆栈
+- en: 'The command `pushd` (short for “push directory”) does all of the following:'
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 命令`pushd`（“推入目录”缩写）执行以下所有操作：
+- en: Adds a given directory to the top of the stack
+  id: totrans-140
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将给定目录添加到堆栈的顶部
+- en: Performs a `cd` to that directory
+  id: totrans-141
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 执行`cd`到该目录
+- en: Prints the stack from top to bottom for your reference
+  id: totrans-142
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 打印堆栈，从顶部到底部，以便您参考。
+- en: 'I’ll build a directory stack of four directories, pushing them onto the stack
+    one at a time:'
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我将构建一个包含四个目录的目录堆栈，逐个将它们推入堆栈：
+- en: '[PRE40]'
+  id: totrans-144
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE40]'
+- en: The shell prints the stack after each `pushd` operation. The current directory
+    is the leftmost (top) directory.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Shell在每个`pushd`操作后打印堆栈。当前目录是最左边（顶部）的目录。
+- en: View a directory stack
+  id: totrans-146
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 查看目录堆栈
+- en: 'Print a shell’s directory stack with the `dirs` command. It does not modify
+    the stack:'
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`dirs`命令打印shell的目录堆栈。它不会修改堆栈：
+- en: '[PRE41]'
+  id: totrans-148
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE41]'
+- en: 'If you prefer to print the stack from top to bottom, use the `-p` option:'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您喜欢从顶部到底部打印堆栈，请使用`-p`选项：
+- en: '[PRE42]'
+  id: totrans-150
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE42]'
+- en: 'and even pipe the output to the command `nl` to number the lines from zero
+    onward:'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 甚至将输出管道到命令`nl`以从零开始为行编号：
+- en: '[PRE43]'
+  id: totrans-152
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE43]'
+- en: 'Even simpler, run `dirs -v` to print the stack with numbered lines:'
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 更简单的方法是运行`dirs -v`以打印带有编号行的堆栈：
+- en: '[PRE44]'
+  id: totrans-154
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE44]'
+- en: 'If you prefer this top-down format, consider making an alias:'
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您喜欢这种自顶向下的格式，请考虑创建一个别名：
+- en: '[PRE45]'
+  id: totrans-156
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE45]'
+- en: Pop a directory from the stack
+  id: totrans-157
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 从堆栈中弹出一个目录
+- en: 'The `popd` command (“pop directory”) is the reverse of `pushd`. It does all
+    of the following:'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`popd`命令（“弹出目录”）是`pushd`的反向操作。它执行以下所有操作：'
+- en: Removes one directory from the top of the stack
+  id: totrans-159
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 从堆栈顶部删除一个目录
+- en: Performs a `cd` to the new top directory
+  id: totrans-160
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 执行`cd`到新的顶部目录
+- en: Prints the stack from top to bottom for your reference
+  id: totrans-161
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 打印堆栈，从顶部到底部，以便您参考。
+- en: 'For example, if your stack has four directories:'
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，如果您的堆栈有四个目录：
+- en: '[PRE46]'
+  id: totrans-163
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE46]'
+- en: 'then repeatedly running `popd` will traverse these directories from top to
+    bottom:'
+  id: totrans-164
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后重复运行`popd`将从顶部到底部遍历这些目录：
+- en: '[PRE47]'
+  id: totrans-165
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE47]'
+- en: Tip
+  id: totrans-166
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: 'The `pushd` and `popd` commands are such time-savers that I recommend creating
+    two-character aliases that are as quick to type as `cd`:'
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`pushd`和`popd`命令是如此节省时间，我建议创建两个字符的别名，可以像输入`cd`一样快速输入：'
+- en: '[PRE48]'
+  id: totrans-168
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE48]'
+- en: Swap directories on the stack
+  id: totrans-169
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 交换堆栈上的目录
+- en: 'Now that you can build and empty the directory stack, let’s focus on practical
+    use cases. `pushd` with no arguments swaps the top two directories in the stack
+    and navigates to the new top directory. Let’s jump between */etc/apache2* and
+    your work directory several times by simply running `pushd`. See how the third
+    directory */var/www/html* remains in the stack as the first two directories swap
+    positions:'
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你可以构建和清空目录栈了，让我们专注于实际应用场景。没有参数的`pushd`交换栈中的前两个目录，并导航到新的顶部目录。通过简单运行`pushd`在*/etc/apache2*和你的工作目录之间多次跳转。看看第三个目录*/var/www/html*作为栈的第一个两个目录交换位置：
+- en: '[PRE49]'
+  id: totrans-171
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE49]'
+- en: Notice that `pushd` behaves similarly to the `cd -` command, toggling between
+    two directories, but it does not have the limitation of remembering just one directory.
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 注意，`pushd`的行为类似于`cd -`命令，可以在两个目录之间切换，但它没有记住仅一个目录的限制。
+- en: Turn a mistaken cd into a pushd
+  id: totrans-173
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 将一个错误的`cd`转变为`pushd`
+- en: 'Suppose you are jumping among several directories with `pushd` and you accidentally
+    run `cd` instead and lose a directory:'
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 假设你在几个目录之间使用`pushd`跳转，意外运行`cd`而不是`pushd`丢失了一个目录：
+- en: '[PRE50]'
+  id: totrans-175
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE50]'
+- en: 'Oops, the accidental `cd` command replaced *~/Work/Projects/Web/src* in the
+    stack with */etc/ssl/certs*. But don’t worry. You can add the missing directory
+    back to the stack without typing its long path. Just run `pushd` twice, once with
+    a dash argument and once without:'
+  id: totrans-176
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 糟糕，意外的`cd`命令用*/etc/ssl/certs*替换了栈中的*~/Work/Projects/Web/src*。但不要担心。你可以将丢失的目录添加回栈中，而不需要输入其长路径。只需运行两次`pushd`，一次带有破折号参数，一次没有：
+- en: '[PRE51]'
+  id: totrans-177
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE51]'
+- en: 'Let’s dissect why this works:'
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们解析为什么这样能行：
+- en: The first `pushd` returns to your shell’s previous directory, *~/Work/Projects/Web/src*,
+    and pushes it onto the stack. `pushd`, like `cd`, accepts a dash as an argument
+    to mean “go back to my previous directory.”
+  id: totrans-179
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 第一个`pushd`返回到你的shell的上一个目录*~/Work/Projects/Web/src*，并将其推送到栈上。`pushd`和`cd`一样，接受破折号作为参数表示“返回到我的上一个目录”。
+- en: The second `pushd` command swaps the top two directories, bringing you back
+    to */etc/ssl/certs*. The end result is that you’ve restored *~/Work/Projects/Web/src*
+    to the second position in the stack, exactly where it would have been if you hadn’t
+    made your mistake.
+  id: totrans-180
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 第二个`pushd`命令交换了栈中的前两个目录，带你回到*/etc/ssl/certs*。最终结果是，你将*~/Work/Projects/Web/src*恢复到栈中的第二位置，就像如果你没有犯错一样。
+- en: 'This “oops, I forgot a pushd” command is useful enough that it’s worth an alias.
+    I call it `slurp` because in my mind, it “slurps back” a directory that I lost
+    by mistake:'
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个“oops, I forgot a pushd”命令非常有用，值得设置一个别名。我称之为`slurp`，因为在我看来，它可以“吸回”我误操作丢失的目录：
+- en: '[PRE52]'
+  id: totrans-182
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE52]'
+- en: Go deeper into the stack
+  id: totrans-183
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 深入了解栈
+- en: 'What if you want to `cd` between directories in the stack other than the top
+    two? `pushd` and `popd` accept a positive or negative integer argument to operate
+    further into the stack. The command:'
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想要在栈中除了顶部两个之外的目录之间进行`cd`，`pushd`和`popd`接受一个正整数或负整数参数以进一步操作栈中的目录。命令：
+- en: '[PRE53]'
+  id: totrans-185
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE53]'
+- en: shifts *`N`* directories from the top of the stack to the bottom and then performs
+    a `cd` to the new top directory. A negative argument (*`-N`*) shifts directories
+    in the opposite direction, from the bottom to the top, before performing the `cd`.^([4](ch04.xhtml#idm46586641309520))
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 将*`N`*个目录从栈的顶部移到底部，然后执行`cd`到新的顶部目录。负数参数（*`-N`*）在执行`cd`之前将目录从底部移到顶部。^([4](ch04.xhtml#idm46586641309520))
+- en: '[PRE54]'
+  id: totrans-187
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE54]'
+- en: 'In this manner, you can jump to any other directory in the stack with a simple
+    command. If your stack is long, however, it may be difficult to judge a directory’s
+    numeric position by eye. So, print the numeric position of each directory with
+    `dirs -v`, as you did in [“View a directory stack”](#sec_viewing_directory_stack):'
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以这种方式，你可以用简单的命令跳转到栈中的任何其他目录。然而，如果你的栈很长，可能很难凭眼睛判断目录的数字位置。因此，像在[“查看目录栈”](#sec_viewing_directory_stack)中那样打印每个目录的数字位置，使用`dirs
+    -v`命令：
+- en: '[PRE55]'
+  id: totrans-189
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE55]'
+- en: To shift */var/www/html* to the top of the stack (and make it your current directory),
+    run `pushd +3`.
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要将*/var/www/html*移到栈的顶部（并使其成为当前目录），运行`pushd +3`。
+- en: 'To jump to the directory at the bottom of the stack, run `pushd -0` (dash zero):'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要跳转到栈底的目录，请运行`pushd -0`（减零）：
+- en: '[PRE56]'
+  id: totrans-192
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE56]'
+- en: 'You also can remove directories from the stack beyond the top directory, using
+    `popd` with a numeric argument. The command:'
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你还可以使用带有数值参数的`popd`从栈中移除顶部目录之外的目录。命令：
+- en: '[PRE57]'
+  id: totrans-194
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE57]'
+- en: 'removes the directory in position *N* from the stack, counting down from the
+    top. A negative argument (*`-N`*) counts up from the bottom of the stack instead.
+    Counting begins at zero, so `popd +1` removes the second directory from the top:'
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从堆栈中移除位置为*N*的目录，从顶部开始计数。负参数（*`-N`*）则从堆栈底部开始计数。计数从零开始，因此`popd +1`将移除第二个顶部目录：
+- en: '[PRE58]'
+  id: totrans-196
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE58]'
+- en: Summary
+  id: totrans-197
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 总结
+- en: 'All of the techniques in this chapter are easy to grasp with a bit of practice
+    and will save you lots of time and typing. The techniques I’ve found particularly
+    life changing are:'
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这一章中的所有技巧只需稍加练习即可轻松掌握，能够节省大量时间和输入。我发现特别改变生活的技巧有：
+- en: '`CDPATH` for rapid navigation'
+  id: totrans-199
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 用于快速导航的`CDPATH`
+- en: '`pushd` and `popd` for rapid returns'
+  id: totrans-200
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 用于快速返回的`pushd`和`popd`
+- en: The occasional `cd -` command
+  id: totrans-201
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 偶尔使用的`cd -`命令
+- en: ^([1](ch04.xhtml#idm46586641926592-marker)) I made this up, but it’s surely
+    true.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([1](ch04.xhtml#idm46586641926592-marker)) 我虽然是编造的，但这肯定是真实的。
+- en: ^([2](ch04.xhtml#idm46586641478816-marker)) An alternative is to open multiple
+    virtual displays using command-line programs like `screen` and `tmux`, which are
+    called *terminal multiplexers*. They’re more effort to learn than directory stacks
+    but worth a look.
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([2](ch04.xhtml#idm46586641478816-marker)) 另一种方法是使用`screen`和`tmux`等命令行程序打开多个虚拟显示，它们被称为*终端复用器*。学习成本比目录堆栈更高，但也值得一试。
+- en: ^([3](ch04.xhtml#idm46586641470176-marker)) If you know stacks from computer
+    science, a directory stack is precisely a stack of directory names.
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([3](ch04.xhtml#idm46586641470176-marker)) 如果你了解计算机科学中的堆栈，目录堆栈正是一组目录名的堆栈。
+- en: ^([4](ch04.xhtml#idm46586641309520-marker)) Programmers may recognize these
+    operations as rotating the stack.
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ^([4](ch04.xhtml#idm46586641309520-marker)) 程序员可能会认出这些操作是堆栈的旋转。

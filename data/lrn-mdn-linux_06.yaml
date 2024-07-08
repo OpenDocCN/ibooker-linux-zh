@@ -1,0 +1,2710 @@
+- en: Chapter 6\. Applications, Package Management, and Containers
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第6章 应用程序、软件包管理和容器
+- en: In this chapter, we talk about applications in Linux. Sometimes, the term *application*
+    (or simply *app*) is used interchangeably with *program*, *binary*, or *executable*.
+    We’ll explain the differences between these terms and initially will be focusing
+    on terminology, including the definition of applications and packages.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们讨论 Linux 中的应用程序。有时，“应用程序”（或简称“应用”）这个术语与“程序”、“二进制文件”或“可执行文件”是可以互换使用的。我们将解释这些术语之间的区别，并且最初将集中讨论术语，包括应用程序和软件包的定义。
+- en: We discuss how Linux starts up and brings all the services we depend on into
+    being. This is also known as the *boot process*. We will focus on init systems,
+    specifically on the de-facto standard, the `systemd` ecosystem.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们讨论 Linux 如何启动并启动我们所依赖的所有服务。这也被称为*引导过程*。我们将重点介绍初始化系统，特别是事实上的标准——`systemd` 生态系统。
+- en: We then move on to package management, where we first review the application
+    supply chain in general terms and see what the different moving parts are about.
+    Then, to give you some context about existing mechanisms and challenges, we focus
+    on how apps were traditionally distributed and installed. We discuss package management
+    in traditional Linux distros, from Red Hat to Debian-based systems, and also have
+    a peek at programming language–specific package managers such as Python or Rust.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 然后，我们转向软件包管理，首先在一般术语中回顾应用程序供应链，看看不同的运动部件是如何运作的。然后，为了让您了解现有机制和挑战，我们重点讨论了传统 Linux
+    发行版中的软件包管理，从红帽到基于 Debian 的系统，还瞥见了特定编程语言的软件包管理器，例如 Python 或 Rust。
+- en: 'In the next part of the chapter, we focus on containers: what they are and
+    how they work. We’ll review the building blocks of containers, what tooling you
+    have available, and good practices around using containers.'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章的下一部分，我们将关注容器：它们是什么以及它们如何工作。我们将回顾容器的构建模块，您可以使用的工具，以及使用容器的良好实践。
+- en: To round off this chapter, we look at modern ways to manage Linux apps, especially
+    in desktop environments. Most of those modern package manager solutions are also
+    making use of containers in some form or another.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了结束本章，我们将看看在桌面环境中管理 Linux 应用程序的现代方法。大多数现代软件包管理解决方案也以某种形式利用容器。
+- en: And now, without further ado, let’s see what an application is and what other
+    related terms there are.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在，让我们看看应用程序是什么，以及还有哪些相关术语，不再拖泥带水。
+- en: Basics
+  id: totrans-7
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 基础知识
+- en: 'Before we get into the nitty-gritty details of application management, init
+    systems, and containers, let’s start with relevant definitions for this chapter
+    and beyond. The reason why we only now go into details concerning apps is that
+    there are a number of prerequisites (such as the Linux kernel, shell, filesystems,
+    and security aspects) that you need to fully understand apps, and now that we’re
+    in a position to build on what we’ve learned so far, we can tackle apps:'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在我们深入应用程序管理、初始化系统和容器的细节之前，让我们先从本章及更深远的定义开始。我们现在才详细讨论应用程序的原因是，有一些先决条件（例如 Linux
+    内核、Shell、文件系统和安全方面）您需要充分理解应用程序，现在我们可以建立在迄今所学的基础上，进一步深入了解应用程序：
+- en: Program
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 程序
+- en: This is usually either a binary file or a shell script that Linux can load into
+    memory and execute. Another way to refer to this entity is *executable*. The type
+    of the executable determines what exactly takes care of running it—for example,
+    a shell (see [“Shells”](ch03.xhtml#shells)) would interpret and execute a shell
+    script.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这通常是 Linux 可以加载到内存并执行的二进制文件或 Shell 脚本。另一种称呼这个实体的方式是*可执行文件*。可执行文件的类型决定了如何运行它——例如，一个
+    shell（参见[“Shell”](ch03.xhtml#shells)）会解释和执行一个 Shell 脚本。
+- en: Process
+  id: totrans-11
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程
+- en: A running entity based on a program, loaded into main memory and either using
+    the CPU or I/O, when not sleeping. See also [“Process Management”](ch02.xhtml#kernel-process-management)
+    and [Chapter 3](ch03.xhtml#shells-scripting).
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基于程序的运行实体，加载到主存储器中，并在不休眠时使用 CPU 或 I/O。详见[“进程管理”](ch02.xhtml#kernel-process-management)和[第3章](ch03.xhtml#shells-scripting)。
+- en: Daemon
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 守护进程
+- en: Short for *daemon process*, sometimes called *service*, this is a background
+    process that provides a certain function to other processes. For example, a printer
+    daemon allows you to print. There are also daemons for web services, logging,
+    time, and many more utilities you rely on on a daily basis.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 简称为*守护进程*，有时也称为*服务*，这是一个后台进程，为其他进程提供某种功能。例如，打印守护进程允许您打印。还有用于 Web 服务、日志记录、时间等等您日常所依赖的许多其他实用程序的守护进程。
+- en: Application
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 应用程序
+- en: 'A program including its dependencies. Usually a substantial program, including
+    a user interface. We usually associate the term *application* with the entire
+    life cycle of a program, its configuration, and its data: from finding and installing
+    to upgrading to removing it.'
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包括其依赖关系的程序。通常是一个重要的程序，包括用户界面。我们通常将术语 *应用程序* 与程序的整个生命周期、其配置和数据相关联：从查找和安装到升级再到删除。
+- en: Package
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 软件包
+- en: A file that contains programs and configurations; used to distribute software
+    applications.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包含程序和配置的文件；用于分发软件应用程序。
+- en: Package manager
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包管理器
+- en: A program that takes a package as an input and, based on its content and the
+    user instruction, installs it, upgrades it, or removes it from a Linux environment.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个程序，以软件包作为输入，并根据其内容和用户指令安装、升级或从 Linux 环境中删除它。
+- en: Supply Chain
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 供应链
+- en: A collection of software producers and distributors that enable you to find
+    and use applications based on packages; see [“Linux Application Supply Chains”](#supply-chain)
+    for details.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个由软件生产商和分发商组成的集合，使您能够基于软件包找到并使用应用程序；详细信息请参阅 [“Linux 应用程序供应链”](#supply-chain)。
+- en: Booting
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 引导
+- en: The startup sequence in Linux that involves hardware and operating system initialization
+    steps, including loading the kernel and launching service (or daemon) programs
+    with the goal to bring Linux into a state that it can be used; see [“The Linux
+    Startup Process”](#linux-boot) for details.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 的启动序列涉及硬件和操作系统初始化步骤，包括加载内核和启动服务（或守护程序），目的是将 Linux 系统带入可用状态；详细内容请参阅 [“Linux
+    启动过程”](#linux-boot)。
+- en: 'Equipped with these high-level definitions, we quite literally start at the
+    beginning: let’s have a look at how Linux starts up and how all the daemons get
+    launched so that we can use Linux to do our work.'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 借助这些高级定义，我们从字面上来看确实是从头开始：让我们看看 Linux 是如何启动的，以及如何启动所有守护进程，以便我们可以使用 Linux 来完成工作。
+- en: The Linux Startup Process
+  id: totrans-26
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Linux 启动过程
+- en: The Linux [boot process](https://oreil.ly/fbnk3) is typically a multiphase effort
+    in which hardware and the kernel work together.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 的 [引导过程](https://oreil.ly/fbnk3) 通常是一个多阶段的工作，涉及硬件和内核的协同工作。
+- en: 'In [Figure 6-1](#fig-boot-process), you can see the boot process end to end,
+    with the following five steps:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [图 6-1](#fig-boot-process) 中，您可以看到完整的引导过程，包括以下五个步骤：
+- en: '![lmlx 0601](Images/lmlx_0601.png)'
+  id: totrans-29
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0601](Images/lmlx_0601.png)'
+- en: Figure 6-1\. The Linux startup process
+  id: totrans-30
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 6-1\. Linux 启动过程
+- en: In modern environments, the [Unified Extensible Firmware Interface](https://uefi.org)
+    (UEFI) spec defines the boot configuration (stored in NVRAM) and the boot loader.
+    In older systems, in this step, after the Power On Self Test (POST) is completed,
+    the Basic I/O System (BIOS; see [“The BIOS and UEFI”](ch02.xhtml#def-bios)) would
+    initialize hardware (managing I/O ports and interrupts) and hand over control
+    to the boot loader.
+  id: totrans-31
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在现代环境中，[统一可扩展固件接口](https://uefi.org)（UEFI）规范定义了存储在 NVRAM 中的引导配置和引导加载程序。在旧系统中，在完成自检（POST）之后，基本输入输出系统（BIOS；参见
+    [“BIOS 和 UEFI”](ch02.xhtml#def-bios)）会初始化硬件（管理 I/O 端口和中断），并将控制权交给引导加载程序。
+- en: 'The boot loader has one goal: to bootstrap the kernel. Depending on the boot
+    medium, the details may differ slightly. There are a range of boot loader options,
+    both current (e.g., GRUB 2, systemd-boot, SYSLINUX, rEFInd) and legacy (e.g.,
+    LILO, GRUB 1).'
+  id: totrans-32
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 引导加载程序的一个目标是引导内核。根据引导介质的不同，细节可能略有不同。现代有多种引导加载程序选择（例如，GRUB 2、systemd-boot、SYSLINUX、rEFInd），还有一些传统的选择（例如，LILO、GRUB
+    1）。
+- en: The kernel is usually located in the */boot* directory in a compressed form.
+    That means the first step is to extract and load the kernel into main memory.
+    After the initialization of its subsystems, filesystems, and drivers (as discussed
+    in [Chapter 2](ch02.xhtml#kernel) and [“Mounting filesystems”](ch05.xhtml#fs-mount)),
+    the kernel hands over control to the init system, and with that the boot process
+    proper ends.
+  id: totrans-33
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 内核通常位于 */boot* 目录中以压缩形式存在。这意味着第一步是将内核提取并加载到主内存中。在初始化其子系统、文件系统和驱动程序之后（如第二章讨论的和
+    [“挂载文件系统”](ch05.xhtml#fs-mount)），内核将控制权交给 init 系统，引导过程正式结束。
+- en: The init system is responsible for launching daemons (service processes) system-wide.
+    This init process is the root of the process hierarchy and with it has the process
+    ID (PID) 1\. In other words, the process with PID 1 runs until you power off the
+    system. Besides being responsible for launching other daemons, the PID 1 process
+    traditionally also takes care of orphaned processes (processes that don’t have
+    a parent process anymore).
+  id: totrans-34
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 初始化系统负责在整个系统范围内启动守护程序（服务进程）。这个 init 进程是进程层次结构的根，并且具有进程 ID（PID）1。换句话说，PID 1 的进程会一直运行，直到系统关机。除了负责启动其他守护程序外，PID
+    1 进程传统上还负责处理孤立进程（即没有父进程的进程）。
+- en: 'Usually, some other user-space-level initialization takes place after this,
+    depending on the environment:'
+  id: totrans-35
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 通常，这之后会发生一些其他的用户空间初始化，具体取决于环境：
+- en: There is usually a terminal, environment, and shell initialization going on,
+    as discussed in [Chapter 3](ch03.xhtml#shells-scripting).
+  id: totrans-36
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 通常会有终端、环境和 shell 初始化，如 [第 3 章](ch03.xhtml#shells-scripting) 中讨论的那样。
+- en: Display manager, graphical server, and the like, for desktop environments with
+    a GUI are launched, taking user preferences and configurations into account.
+  id: totrans-37
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 启动显示管理器、图形服务器等桌面环境的 GUI 组件，考虑用户的偏好和配置。
+- en: 'With this high-level overview of the Linux startup process, we conclude our
+    introductory section and focus on a vital, user-facing component: the init systems.
+    This part (the preceding steps 4 and 5) is the most relevant for you, in the context
+    of this book, allowing you to customize and extend your Linux installation.'
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过这个对 Linux 启动过程的高层概述，我们结束了我们的介绍性部分，并关注一个重要的、面向用户的组件：init 系统。在这本书的上下文中，这部分（前面的第
+    4 和第 5 步）对您来说最为重要，可以帮助您定制和扩展 Linux 安装。
+- en: There is a good [comparison of init systems](https://oreil.ly/Vn6pu) available
+    via the Gentoo wiki. We’ll restrict our discussion to `systemd`, which almost
+    all current Linux distributions are using.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有一个关于 [init 系统的比较](https://oreil.ly/Vn6pu) 可以在 Gentoo wiki 上找到。我们将限制我们的讨论在 `systemd`
+    上，几乎所有当前的 Linux 发行版都在使用它。
+- en: systemd
+  id: totrans-40
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: systemd
+- en: '[`systemd`](https://systemd.io) was initially an init system, a replacement
+    for `initd`, but today it’s a powerful supervisor that includes functions such
+    as logging, network configuration, and network time synchronization. It provides
+    for a flexible, portable way to define daemons and their dependencies, and a uniform
+    interface to control the configuration.'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`systemd`](https://systemd.io) 最初是一个 init 系统，用来替代 `initd`，但今天它是一个功能强大的管理程序，包括日志记录、网络配置和网络时间同步等功能。它提供了一种灵活、便携的方式来定义守护程序及其依赖关系，并统一接口来控制配置。'
+- en: Almost all current Linux distributions are using `systemd`, including Fedora
+    since May 2011, openSUSE since September 2012, CentOS since April 2014, RHEL since
+    June 2014, SUSE Linux since October 2014, Debian since April 2015, and Ubuntu
+    since April 2015.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 几乎所有当前的 Linux 发行版都在使用 `systemd`，包括自 2011 年 5 月以来的 Fedora，自 2012 年 9 月以来的 openSUSE，自
+    2014 年 4 月以来的 CentOS，自 2014 年 6 月以来的 RHEL，自 2014 年 10 月以来的 SUSE Linux，自 2015 年
+    4 月以来的 Debian 和 Ubuntu。
+- en: 'In particular, `systemd` addresses the shortcomings of previous init systems
+    by doing the following:'
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 特别是，`systemd` 通过以下方式解决了以前 init 系统的缺点：
+- en: Providing a uniform way to manage startup across distros
+  id: totrans-44
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 提供一种跨发行版管理启动的统一方式。
+- en: Implementing a faster, more comprehensible service configuration
+  id: totrans-45
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 实施更快、更易理解的服务配置。
+- en: Offering a modern management suite including monitoring, resource usage control
+    (via cgroups), and built-in auditing
+  id: totrans-46
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 提供一个现代管理套件，包括监控、资源使用控制（通过 cgroups）和内置审计。
+- en: Additionally, `init` starts services at initialization time in sequence (that
+    is, in alphanumeric order), while `systemd` can start any service that has had
+    its dependencies met, potentially speeding up the startup time.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，`init` 在初始化时按顺序（即按字母数字顺序）启动服务，而 `systemd` 则可以启动任何已满足其依赖关系的服务，可能加快启动时间。
+- en: The way you tell `systemd` what to run, when to run, and how to run is via units.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 告诉 `systemd` 何时运行、如何运行的方法就是通过单元。
+- en: Units
+  id: totrans-49
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 单元
+- en: 'A unit in `systemd` is a logical grouping with different semantics depending
+    on its function and/or the resource it targets. `systemd` distinguishes a number
+    of units, depending on the target resource:'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 `systemd` 中，单元是具有不同语义的逻辑分组，具体取决于其功能和/或其所针对的资源。`systemd` 区分了许多类型的单元，具体取决于目标资源：
+- en: '`service` units'
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`service` 单元'
+- en: Describe how to manage a service or application
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 描述如何管理服务或应用程序。
+- en: '`target` units'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`target` 单元'
+- en: Capture dependencies
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 捕获依赖关系
+- en: '`mount` units'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`mount` 单元'
+- en: Define a mountpoint
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义一个挂载点。
+- en: '`timer` units'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`timer` 单元'
+- en: Define timers for cron jobs and the like
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为 cron 作业等定义定时器
+- en: 'Other, less important unit types include the following:'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 其他不太重要的单元类型包括以下内容：
+- en: '`socket`'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`套接字`'
+- en: Describes a network or IPC socket
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 描述网络或 IPC 套接字
+- en: '`device`'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`设备`'
+- en: For `udev` or `sysfs` filesystems
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于 `udev` 或 `sysfs` 文件系统
+- en: '`automount`'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`自动挂载`'
+- en: Configures automatic mountpoints
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 配置自动挂载点
+- en: '`swap`'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`交换`'
+- en: Describes swap space
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 描述交换空间
+- en: '`path`'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`路径`'
+- en: For path-based activation
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于基于路径的激活
+- en: '`snapshot`'
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`快照`'
+- en: Allows for reconstructing the current state of the system after changes
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许在更改后重建系统的当前状态
+- en: '`slice`'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`切片`'
+- en: Associated with cgroups (see [“Linux cgroups”](#cgroups))
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与 cgroups 相关（参见 [“Linux cgroups”](#cgroups)）
+- en: '`scope`'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`范围`'
+- en: Manages sets of system processes created externally
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 管理通过外部创建的系统进程集合
+- en: 'To be known to `systemd`, a unit needs to be serialized into a file. `systemd`
+    looks for unit files in multiple locations. The three most important filepaths
+    are the following:'
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要使 `systemd` 知道单元，必须将其序列化为文件。 `systemd` 在多个位置查找单元文件。最重要的三个文件路径如下：
+- en: '*/lib/systemd/system*'
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/lib/systemd/system*'
+- en: Package-installed units
+  id: totrans-78
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包安装的单元
+- en: '*/etc/systemd/system*'
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/etc/systemd/system*'
+- en: System admin–configured units
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统管理员配置的单元
+- en: '*/run/systemd/system*'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*/run/systemd/system*'
+- en: Nonpersistent runtime modifications
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 非持久运行时修改
+- en: With the basic unit of work (no pun intended) in `systemd` defined, let’s move
+    on to how you control it via the command line.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了 `systemd` 定义的基本工作单位（别有用心）之后，让我们继续学习如何通过命令行控制它。
+- en: Management with systemctl
+  id: totrans-84
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 systemctl 进行管理
+- en: The tool you use to interact with `systemd` to manage services is [`systemctl`](https://oreil.ly/kigFH).
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于与 `systemd` 交互以管理服务的工具是 [`systemctl`](https://oreil.ly/kigFH)。
+- en: In [Table 6-1](#table-systemctl-commands) I’ve compiled a list of often-used
+    `systemctl` commands.
+  id: totrans-86
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 [表 6-1](#table-systemctl-commands) 中，我列出了常用的 `systemctl` 命令列表。
+- en: Table 6-1\. Useful `systemd` commands
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表 6-1\. 有用的 `systemd` 命令
+- en: '| Command | Use case |'
+  id: totrans-88
+  prefs: []
+  type: TYPE_TB
+  zh: '| 命令 | 用途 |'
+- en: '| --- | --- |'
+  id: totrans-89
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- |'
+- en: '| `systemctl enable XXXXX.service` | Enable the service; ready to be started
+    |'
+  id: totrans-90
+  prefs: []
+  type: TYPE_TB
+  zh: '| `systemctl enable XXXXX.service` | 启用服务；准备启动 |'
+- en: '| `systemctl daemon-reload` | Reload all unit files and re-create entire dependency
+    tree |'
+  id: totrans-91
+  prefs: []
+  type: TYPE_TB
+  zh: '| `systemctl daemon-reload` | 重新加载所有单元文件并重新创建整个依赖树 |'
+- en: '| `systemctl start XXXXX.service` | Start the service |'
+  id: totrans-92
+  prefs: []
+  type: TYPE_TB
+  zh: '| `systemctl start XXXXX.service` | 启动服务 |'
+- en: '| `systemctl stop XXXXX.service` | Stop the service |'
+  id: totrans-93
+  prefs: []
+  type: TYPE_TB
+  zh: '| `systemctl stop XXXXX.service` | 停止服务 |'
+- en: '| `systemctl restart XXXXX.service` | Stop and then start the service |'
+  id: totrans-94
+  prefs: []
+  type: TYPE_TB
+  zh: '| `systemctl restart XXXXX.service` | 停止然后启动服务 |'
+- en: '| `systemctl reload XXXXX.service` | Issue `reload` command to service; falls
+    back to `restart` |'
+  id: totrans-95
+  prefs: []
+  type: TYPE_TB
+  zh: '| `systemctl reload XXXXX.service` | 向服务发出 `reload` 命令；如果失败，则退回到 `restart`
+    |'
+- en: '| `systemctl kill XXXXX.service` | Stop service execution |'
+  id: totrans-96
+  prefs: []
+  type: TYPE_TB
+  zh: '| `systemctl kill XXXXX.service` | 停止服务执行 |'
+- en: '| `systemctl status XXXXX.service` | Get a short summary of service state including
+    some log lines |'
+  id: totrans-97
+  prefs: []
+  type: TYPE_TB
+  zh: '| `systemctl status XXXXX.service` | 获取服务状态的简短摘要，包括一些日志行 |'
+- en: Note that there are many more commands that `systemctl` offers, from dependency
+    management and query to controlling the overall system (`reboot`, for example).
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，`systemctl` 还提供了许多其他命令，从依赖管理和查询到控制整个系统（例如 `reboot`）。
+- en: 'The `systemd` ecosystem has a number of other command-line tools you may find
+    handy and that you should at least be aware of. This includes but is not limited
+    to the following:'
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`systemd` 生态系统还有许多其他命令行工具，你可能会觉得方便，至少应该了解一下。这包括但不限于以下内容：'
+- en: '[`bootctl`](https://oreil.ly/WNKjd)'
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`bootctl`](https://oreil.ly/WNKjd)'
+- en: Allows you to check the boot loader status and manage available boot loaders.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您检查引导加载程序状态并管理可用的引导加载程序。
+- en: '`timedatectl`'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`timedatectl`'
+- en: Allows you to set and view [time- and date-related information](https://oreil.ly/hmgxb).
+  id: totrans-103
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您设置和查看与时间和日期相关的信息。
+- en: '`coredumpctl`'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`coredumpctl`'
+- en: Enables you to process saved core dumps. Consider this tool when you’re troubleshooting.
+  id: totrans-105
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您处理保存的核心转储。在故障排除时，请考虑使用此工具。
+- en: Monitoring with journalctl
+  id: totrans-106
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用 journalctl 进行监控
+- en: The journal is a component of `systemd`; technically it is a binary file managed
+    by the `systemd-journald` daemon, providing a centralized location for all messages
+    logged by `systemd` components. We’ll cover it in detail in [“journalctl”](ch08.xhtml#journalctl).
+    All you need to know for now is that this is the tool that allows you to view
+    `systemd`-managed logs.
+  id: totrans-107
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 日志是 `systemd` 的一个组件；从技术上讲，它是由 `systemd-journald` 守护程序管理的二进制文件，提供了由 `systemd`
+    组件记录的所有消息的集中位置。我们将在 [“journalctl”](ch08.xhtml#journalctl) 中详细介绍它。现在你只需要知道的是，这是一个允许查看
+    `systemd` 管理的日志的工具。
+- en: 'Example: scheduling greeter'
+  id: totrans-108
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 示例：调度问候者
+- en: 'After all that theory, let’s see `systemd` in action. As a simple use case
+    example, let’s assume we want to launch our greeter app (see [“Running Example:
+    greeter”](#app-greeter)) every hour.'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '经过所有这些理论，让我们看看`systemd`的实际运行情况。作为一个简单的用例示例，假设我们想每小时启动我们的登录应用（参见[“Running Example:
+    greeter”](#app-greeter)）。'
+- en: 'First, we define a `systemd` unit file of type `service`. This tells `systemd`
+    how to start the greeter app; store the following in a file called *greeter.service*
+    (in any directory, could be a temporary one):'
+  id: totrans-110
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我们定义一个`systemd`服务单元文件。这告诉`systemd`如何启动登录应用程序；将以下内容存储在名为*greeter.service*的文件中（可以是任何目录，可以是临时目录）：
+- en: '[PRE0]'
+  id: totrans-111
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO1-1)'
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO1-1)'
+- en: The description of our services, shown when we use `systemctl status`
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们服务的描述，在使用`systemctl status`时显示
+- en: '[![2](Images/2.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO1-2)'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO1-2)'
+- en: The location of our app
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们应用程序的位置
+- en: 'Next, we define a [timer unit](https://oreil.ly/Qv8qt) to launch the greeter
+    service every hour. Store the following in a file called *greeter.timer*:'
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们定义一个[timer unit](https://oreil.ly/Qv8qt)，每小时启动登录服务。将以下内容存储在名为*greeter.timer*的文件中：
+- en: '[PRE1]'
+  id: totrans-117
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO2-1)'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO2-1)'
+- en: Defines the schedule using the [systemd time and date format](https://oreil.ly/pinVc)
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用[systemd时间和日期格式](https://oreil.ly/pinVc)定义时间表
+- en: 'Now we copy both unit files to */run/systemd/system* so that `systemd` recognizes
+    them:'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们将两个单元文件复制到*/run/systemd/system*，这样`systemd`就能识别它们：
+- en: '[PRE2]'
+  id: totrans-121
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: We’re now in a position to use the greeter timer, since `systemd` automatically
+    picked it up when we copied it into the respective directory.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当我们将它复制到相应目录时，`systemd`自动接收了我们的登录计时器。
+- en: Note
+  id: totrans-123
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Debian-based systems such as Ubuntu enable and start service units by default.
+    Red Hat family systems won’t start the service without an explicit `systemctl
+    start greeter.timer`. This is also true for enabling services on boot, where Debian-based
+    distros enable services by default, whereas Red Hat distros require an explicit
+    confirmation in the form of `systemctl enable`.
+  id: totrans-124
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基于Debian的系统如Ubuntu默认启用并启动服务单元。红帽家族的系统不会在没有显式`systemctl start greeter.timer`的情况下启动服务。这也适用于在启动时启用服务，其中Debian-based发行版默认启用服务，而Red
+    Hat发行版则需要通过`systemctl enable`来确认。
+- en: 'Let’s check the status of our greeter timer:'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们检查我们的登录程序计时器的状态：
+- en: '[PRE3]'
+  id: totrans-126
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'So `systemd` confirms that it knows about our greeter and that it’s scheduled
+    to run. But how do you know if it worked? Let’s check the logs (note that the
+    output was edited and that the `stdout` output is going directly to the logs):'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`systemd`确认已知道我们的登录程序，并已计划运行。但是如何知道它是否成功？让我们检查日志（请注意输出已经编辑，`stdout`输出直接进入日志）：'
+- en: '[PRE4]'
+  id: totrans-128
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO3-1)'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO3-1)'
+- en: Using `journalctl` to look at and follow (`-f`) the logs of the *greeter.service*
+    unit (selected with `-u`)
+  id: totrans-130
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用`journalctl`查看和跟踪（`-f`）*greeter.service*单元的日志（用`-u`选择）
+- en: 'With this high-level `systemd` overview, let’s move on to how to manage applications
+    the traditional way, with general-purpose package managers. But before we get
+    into the technicalities of packages, let’s step back a bit and discuss apps, packages,
+    and package managers in the context of a broader concept: supply chains.'
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过这个高级`systemd`概述，让我们继续以传统方式管理应用程序，即使用通用的软件包管理器。但在深入讨论包的技术细节之前，让我们稍微退后一步，讨论应用程序、包和包管理器的概念，这些概念属于更广泛的供应链范畴。
+- en: Linux Application Supply Chains
+  id: totrans-132
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Linux应用程序供应链
+- en: 'Let’s start with what we mean by [*supply chain*](https://oreil.ly/EegdU):
+    a system of organizations and individuals supplying a product to a consumer. While
+    you may not think about supply chains a lot, you’re dealing with them on a daily
+    basis—for example, when you buy food or fuel your car. In our discussion, the
+    products are applications made up of software artifacts, and you can think of
+    the consumer as either yourself as the person using an app or as a tool that manages
+    the apps for you.'
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们从我们所说的[*供应链*](https://oreil.ly/EegdU)开始：一个向消费者供应产品的组织和个人系统。虽然您可能不经常考虑供应链，但您每天都在处理它们——例如，当您购买食品或为汽车加油时。在我们的讨论中，产品是由软件成果组成的应用程序，您可以将消费者视为使用应用程序的自己，或者作为管理应用程序的工具。
+- en: On a conceptual level, [Figure 6-2](#fig-supply-chain) shows the main actors
+    and phases of a typical Linux application supply chain.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在概念层面上，[图6-2](#fig-supply-chain)显示了典型 Linux 应用程序供应链的主要参与者和阶段。
+- en: '![lmlx 0602](Images/lmlx_0602.png)'
+  id: totrans-135
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0602](Images/lmlx_0602.png)'
+- en: Figure 6-2\. Linux app supply chain
+  id: totrans-136
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图6-2\. Linux 应用程序供应链
+- en: 'The three distinct areas in a Linux application supply are as follows:'
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Linux 应用程序供应链中的三个明显领域如下：
+- en: Software maintainers
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 软件维护者
+- en: These include individual developers, open source projects, and companies, such
+    as independent software vendors (ISVs), that produce software artifacts and publish
+    them, for example, as packages to a repository (repo).
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些包括个人开发者、开源项目以及像独立软件供应商（ISV）这样的公司，他们生产软件成果并将其发布为包到存储库（repo），例如。
+- en: Repository
+  id: totrans-140
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 存储库
+- en: This lists the package that contains all or part of an app together with metadata.
+    The package usually captures the dependencies of an app. Dependencies are other
+    packages that an app needs in order to function. This can be a library, some kind
+    of exporters or importers, or other service programs. Keeping these dependencies
+    up to date is hard.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这列出了包含应用程序全部或部分内容以及元数据的包。包通常捕获应用程序的依赖关系。依赖关系是应用程序需要的其他包，以便其正常运行。这可以是库、某种类型的导入或导出程序或其他服务程序。保持这些依赖关系的最新状态很困难。
+- en: Tooling (a package manager)
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 工具（一个包管理器）
+- en: On the target-system side, this can look up packages in the repository and install,
+    update, and remove apps as instructed by the human user. Note that one or more
+    packages can represent the app and its dependencies.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在目标系统方面，可以在存储库中查找包并按照人类用户的指示安装、更新和删除应用程序。请注意，一个或多个包可以代表应用程序及其依赖关系。
+- en: While the details may differ from distribution to distribution and depend on
+    the environment (server, desktop, etc.), the app supply chains all have the elements
+    shown in [Figure 6-2](#fig-supply-chain) in common.
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然细节可能因发行版而异并依赖于环境（服务器、桌面等），但所有应用程序供应链都具有[图6-2](#fig-supply-chain)中显示的元素。
+- en: There are many options available for package and dependency management, such
+    as traditional package managers, container-based solutions, and more recent approaches.
+  id: totrans-145
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有许多选项可用于包和依赖项管理，例如传统的包管理器、基于容器的解决方案以及更近期的方法。
+- en: In [Figure 6-3](#fig-package-man-universe), I’ve tried to give you a high-level
+    overview, without claiming this is a complete picture.
+  id: totrans-146
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在[图6-3](#fig-package-man-universe)中，我试图为您提供一个高层次的概述，不过并不宣称这是一个完整的画面。
+- en: '![lmlx 0603](Images/lmlx_0603.png)'
+  id: totrans-147
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0603](Images/lmlx_0603.png)'
+- en: Figure 6-3\. The Linux package management and application dependency management
+    universe
+  id: totrans-148
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图6-3\. Linux 包管理和应用程序依赖管理的宇宙
+- en: 'A few notes on the three primary categories of options for package and dependency
+    management:'
+  id: totrans-149
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于包和依赖项管理的三个主要选项类别的几点说明：
+- en: Traditional package managers
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 传统包管理器
+- en: Within this category, we usually differentiate between low-level and high-level
+    tooling. If a package manager can resolve dependencies and provides a high-level
+    interface (install, update, remove), we call it a *high-level* package manager.
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个类别中，我们通常区分低级和高级工具。如果一个包管理器可以解决依赖关系并提供高级接口（安装、更新、删除），我们称其为*高级*包管理器。
+- en: Container-based solutions
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基于容器的解决方案
+- en: These initially came out of the server and cloud computing realm. Given their
+    capabilities, one use case, but not necessarily their primary one, is application
+    management. In other words, as a developer you’ll love containers since they enable
+    you to easily test things and make it straightforward to ship your production-ready
+    app. See also [“Containers”](#containers).
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些最初来自服务器和云计算领域。鉴于它们的功能，一个用例是应用程序管理，但并非其主要用途。换句话说，作为开发人员，您会喜欢容器，因为它们使您能够轻松测试和直接部署您的生产就绪应用程序。另请参阅
+    [“容器”](#containers)。
+- en: Modern package managers
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现代软件包管理器
+- en: These have their roots in desktop environments, and the main goal here is to
+    make it as easy as possible for the end user to consume apps. See also [“Modern
+    Package Managers”](#modern-package-man).
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些软件包源自桌面环境，主要目标是尽可能地使最终用户轻松使用应用程序。另请参阅 [“现代软件包管理器”](#modern-package-man)。
+- en: Packages and Package Managers
+  id: totrans-156
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 软件包和软件包管理器
+- en: 'In this section, we discuss package formats and package managers that have
+    been in use for a long time, in some cases decades. These usually stem from two
+    major Linux distribution families: Red Hat (RHEL, Fedora, CentOS, etc.) and Debian-based
+    systems (Debian, Ubuntu, etc.).'
+  id: totrans-157
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我们讨论了长期以来一直在使用的软件包格式和软件包管理器，有些甚至已有几十年历史。这些通常源自两大 Linux 发行版系列：红帽（RHEL、Fedora、CentOS
+    等）和基于 Debian 的系统（Debian、Ubuntu 等）。
+- en: 'The two concepts relevant to our discussions here are the following:'
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里讨论的两个相关概念如下：
+- en: The packages themselves
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些软件包本身
+- en: Technically a file that usually is zipped and may contain metadata.
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 从技术上讲，通常是一个压缩文件，可能包含元数据。
+- en: The tooling (called *package managers*)
+  id: totrans-161
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 工具（称为 *软件包管理器*）
+- en: Deals with those packages on the target system, to install and maintain apps.
+    A package manager usually interacts with the repo on your behalf and maintains
+    a local cache of packages.
+  id: totrans-162
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 处理目标系统上的这些软件包，以安装和维护应用程序。软件包管理器通常代表您与仓库进行交互，并维护本地软件包缓存。
+- en: The target system may be a desktop environment on your laptop or a server VM
+    instance in the cloud, for example. Depending on the environment, packages may
+    be more or less applicable—for example, a GUI app on a server is not necessarily
+    something that makes sense.
+  id: totrans-163
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 目标系统可能是您笔记本电脑上的桌面环境，也可能是云中的服务器虚拟机实例，例如。根据环境不同，软件包可能更或少适用——例如，在服务器上的 GUI 应用程序不一定是有意义的。
+- en: RPM Package Manager
+  id: totrans-164
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: RPM 软件包管理器
+- en: '[RPM Package Manager](https://oreil.ly/Ef2FC) (for which the recursive acronym
+    RPM is used) was originally created by Red Hat but is now widely used in various
+    distros. The *.rpm* file format is used in Linux Standard Base and can contain
+    binary or source files. The packages can be cryptographically verified and support
+    delta updates via patch files.'
+  id: totrans-165
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[RPM 软件包管理器](https://oreil.ly/Ef2FC)（使用递归缩写 RPM）最初由红帽创建，但现在广泛用于各种发行版。*.rpm*
+    文件格式用于 Linux 标准基础，并可以包含二进制或源文件。这些软件包可以通过补丁文件进行密码验证和支持增量更新。'
+- en: 'Package managers that use RPM include the following:'
+  id: totrans-166
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 RPM 的软件包管理器包括以下内容：
+- en: '[`yum`](https://oreil.ly/sPb2H)'
+  id: totrans-167
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`yum`](https://oreil.ly/sPb2H)'
+- en: In Amazon Linux, CentOS, Fedora, and RHEL
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Amazon Linux、CentOS、Fedora 和 RHEL 中
+- en: '[DNF](https://oreil.ly/0Pcod)'
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[DNF](https://oreil.ly/0Pcod)'
+- en: In CentOS, Fedora, and RHEL
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 CentOS、Fedora 和 RHEL 中
+- en: '[Zypper](https://oreil.ly/OVize)'
+  id: totrans-171
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Zypper](https://oreil.ly/OVize)'
+- en: In openSUSE and SUSE Linux Enterprise
+  id: totrans-172
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 openSUSE 和 SUSE Linux Enterprise
+- en: 'Let’s see RPM in action: let’s say we have a fresh developer environment and
+    want to install the Go programming language tool chain using `yum`.'
+  id: totrans-173
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看看 RPM 的实际运行情况：假设我们有一个新的开发者环境，并希望使用 `yum` 安装 Go 编程语言工具链。
+- en: Note that the output in the following shell sessions has been edited and shortened
+    to fit the space (there are many lines in the output that are not relevant to
+    understanding the usage).
+  id: totrans-174
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，以下 shell 会话的输出已被编辑和缩短，以适应空间（输出中有许多与理解使用方式无关的行）。
+- en: 'First off, we need to find the package for Go:'
+  id: totrans-175
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我们需要找到 Go 的软件包：
+- en: '[PRE5]'
+  id: totrans-176
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO4-1)'
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO4-1)'
+- en: Search for the Go package. Note the `#` prompt, suggesting we’re logged in as
+    root. Perhaps a better way would be to use `sudo yum`.
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 搜索 Go 软件包。请注意 `#` 提示，表明我们以 root 用户登录。也许更好的方式是使用 `sudo yum`。
+- en: 'Equipped with this info about the package, we can now install it using the
+    following:'
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了关于软件包的这些信息，我们现在可以使用以下方法安装它：
+- en: '[PRE6]'
+  id: totrans-180
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO5-1)'
+  id: totrans-181
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO5-1)'
+- en: Install the Go package.
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装 Go 包。
+- en: '[![2](Images/2.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO5-2)'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO5-2)'
+- en: '`yum`’s first step is to determine Go’s dependencies.'
+  id: totrans-184
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`yum` 的第一步是确定 Go 的依赖项。'
+- en: '[![3](Images/3.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO5-3)'
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO5-3)'
+- en: Here `yum` provides us with a summary of what it found in terms of dependencies
+    and tells us what it plans to do. I need to confirm here interactively by entering
+    a `y`. However, in a script I would use the `yum install golang -y` form of the
+    command to automatically accept this.
+  id: totrans-186
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里 `yum` 提供了关于依赖项的摘要，并告诉我们它计划执行什么操作。我需要在这里通过输入 `y` 进行交互确认。然而，在脚本中，我会使用 `yum
+    install golang -y` 形式的命令来自动接受这个操作。
+- en: '[![4](Images/4.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO5-4)'
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO5-4)'
+- en: After verifying that all dependencies and the main package are installed, `yum`
+    reports success.
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在确认所有依赖项和主要包都安装好之后，`yum` 报告安装成功。
+- en: 'Last but not least, we want to verify the package, checking exactly what we
+    have installed and where:'
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后但同样重要的是，我们想要验证包，检查我们确切安装了什么及其位置：
+- en: '[PRE7]'
+  id: totrans-190
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Next, let’s have a look at the other widely used package manager using Debian
+    packages.
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，让我们看看另一个广泛使用的包管理器，使用 Debian 包。
+- en: Debian deb
+  id: totrans-192
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Debian deb
+- en: '[deb](https://oreil.ly/sctS1) packages and the *.deb* file format originate
+    from the Debian distro. The deb packages can also contain binary or source files.
+    Multiple package managers use deb, including low-level, no-dependency-management
+    ones such as `dpkg`, and high-level ones such as `apt-get`, `apt`, and `aptitude`.
+    Given that Ubuntu is a Debian-based distro, deb packages are widely used, on the
+    desktop and server alike.'
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[deb](https://oreil.ly/sctS1) 包和 *.deb* 文件格式源自 Debian 发行版。deb 包也可以包含二进制或源文件。多个包管理器使用
+    deb，包括低级别、无依赖管理的 `dpkg`，以及高级别的 `apt-get`、`apt` 和 `aptitude`。鉴于 Ubuntu 是基于 Debian
+    的发行版，deb 包在桌面和服务器上都被广泛使用。'
+- en: To see deb packages in action, let’s assume we want to install the `curl` utility
+    with `apt`. This is a useful tool to interact with HTTP APIs and to download files
+    from a range of locations. Note that we again edited the output to make it fit.
+  id: totrans-194
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要看看 deb 包如何工作，假设我们想要使用 `apt` 安装 `curl` 实用程序。这是一个用于与 HTTP API 交互和从多个位置下载文件的实用工具。请注意，我们再次编辑了输出以使其适应。
+- en: 'First, we search for the `curl` package:'
+  id: totrans-195
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我们搜索 `curl` 包：
+- en: '[PRE8]'
+  id: totrans-196
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO6-1)'
+  id: totrans-197
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO6-1)'
+- en: Search for the `curl` package with `apt`. Note that there were overall dozens
+    of more search results shown, most of them libraries and language-specific bindings
+    (Python, Ruby, Go, Rust, etc.).
+  id: totrans-198
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `apt` 搜索 `curl` 包。请注意，总共显示了几十个搜索结果，其中大多数是库和特定语言的绑定（Python、Ruby、Go、Rust等）。
+- en: 'Next, we install the `curl` package like so:'
+  id: totrans-199
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们安装 `curl` 包如下：
+- en: '[PRE9]'
+  id: totrans-200
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO7-1)'
+  id: totrans-201
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO7-1)'
+- en: Install the `curl` package.
+  id: totrans-202
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 安装 `curl` 包。
+- en: '[![2](Images/2.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO7-2)'
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO7-2)'
+- en: '`apt`’s first step is to determine the dependencies.'
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`apt` 的第一步是确定依赖关系。'
+- en: '[![3](Images/3.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO7-3)'
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO7-3)'
+- en: Here `apt` provides us with a dependencies summary and tells us what it will
+    install. Interactive confirmation is needed here; in a script I would use `apt
+    install curl -y` to automatically accept it.
+  id: totrans-206
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这里 `apt` 提供了一个依赖项摘要，并告诉我们它将安装什么。这里需要交互确认；在脚本中，我会使用 `apt install curl -y` 来自动接受。
+- en: '[![4](Images/4.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO7-4)'
+  id: totrans-207
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO7-4)'
+- en: After verifying that all dependencies and the main package are installed, `apt`
+    reports success.
+  id: totrans-208
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在确认所有依赖项和主要包已安装后，`apt` 报告成功。
+- en: 'And finally we verify the `curl` package:'
+  id: totrans-209
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，我们验证 `curl` 包：
+- en: '[PRE10]'
+  id: totrans-210
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: Let’s now move on to programming language–specific package managers.
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们转向特定于编程语言的包管理器。
+- en: Language-Specific Package Managers
+  id: totrans-212
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 特定语言的包管理器
+- en: 'There are also programming language–specific package managers, such as the
+    following:'
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有特定于编程语言的包管理器，比如以下几种：
+- en: C/C++
+  id: totrans-214
+  prefs: []
+  type: TYPE_NORMAL
+  zh: C/C++
+- en: Have [many different package managers](https://oreil.ly/ibEK2), including Conan
+    and vcpkg
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有 [许多不同的包管理器](https://oreil.ly/ibEK2)，包括 Conan 和 vcpkg
+- en: Go
+  id: totrans-216
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Go
+- en: Has package management built in (`go get`, `go mod`)
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内置包管理（`go get`、`go mod`）
+- en: Node.js
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Node.js
+- en: Has `npm` and others
+  id: totrans-219
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有 `npm` 和其他的
+- en: Java
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Java
+- en: Has `maven` and `nuts` and others
+  id: totrans-221
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有 `maven` 和 `nuts` 等其他的
+- en: Python
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Python
+- en: Has `pip` and PyPM
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有 `pip` 和 PyPM
+- en: Ruby
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Ruby
+- en: Has `rubygems` and Rails
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有 `rubygems` 和 Rails
+- en: Rust
+  id: totrans-226
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Rust
+- en: Has `cargo`
+  id: totrans-227
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有 `cargo`
+- en: With that, let’s look at containers and how you can manage applications with
+    them.
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，让我们看看容器以及如何通过它们来管理应用程序。
+- en: Containers
+  id: totrans-229
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 容器
+- en: In the context of this book, we understand a *container* as a Linux process
+    group that uses Linux namespaces, cgroups, and optionally CoW filesystems to provide
+    application-level dependency management. Use cases for containers range from local
+    [testing and development](https://oreil.ly/6RPcT) to working with distributed
+    systems—for example, working with containerized microservices in [Kubernetes](https://kubernetes.io).
+  id: totrans-230
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本书的背景下，我们将*容器*理解为使用 Linux 命名空间、cgroups 和可选的 CoW 文件系统来提供应用程序级别的依赖管理的 Linux 进程组。容器的用途从本地的[测试和开发](https://oreil.ly/6RPcT)到与分布式系统一起工作——例如，在
+    [Kubernetes](https://kubernetes.io) 中使用容器化的微服务。
+- en: While containers are very useful for developers and sys admins, as an end user
+    you will more likely be comfortable using higher-level tooling to manage applications—for
+    example, the ones discussed in [“Modern Package Managers”](#modern-package-man).
+  id: totrans-231
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然容器对开发人员和系统管理员非常有用，但作为最终用户，您更可能倾向于使用更高级别的工具来管理应用程序——例如，在[“现代包管理器”](#modern-package-man)中讨论的工具。
+- en: 'Containers are, per se, nothing new in Linux. However, they’ve enjoyed mainstream
+    adoption only due to Docker, starting in roughly 2014\. Before that, we had a
+    number of attempts to introduce containers, often targeting system administrators
+    rather than developers, including the following:'
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 容器在 Linux 中并不新鲜。然而，它们直到 Docker 开始在大约 2014 年左右得到主流采用才如此。在此之前，我们有多次尝试引入容器的努力，通常是面向系统管理员而不是开发人员，包括以下几种：
+- en: '[Linux-VServer (2001)](https://oreil.ly/A5Uri)'
+  id: totrans-233
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Linux-VServer (2001)](https://oreil.ly/A5Uri)'
+- en: '[OpenVZ (2005)](https://oreil.ly/yM3Tm)'
+  id: totrans-234
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[OpenVZ (2005)](https://oreil.ly/yM3Tm)'
+- en: '[LXC (2008)](https://oreil.ly/BDSjL)'
+  id: totrans-235
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[LXC (2008)](https://oreil.ly/BDSjL)'
+- en: '[Let Me Contain That for You (lmctfy) (2013)](https://oreil.ly/xpmMx)'
+  id: totrans-236
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Let Me Contain That for You (lmctfy) (2013)](https://oreil.ly/xpmMx)'
+- en: What all of these approaches have in common is that they use the basic building
+    blocks the Linux kernel provides, such as namespaces or cgroups, to allow users
+    to run applications.
+  id: totrans-237
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有这些方法的共同之处在于它们使用 Linux 内核提供的基本构建模块，比如命名空间或 cgroups，允许用户运行应用程序。
+- en: 'Docker innovated on the concept and introduced two groundbreaking elements:
+    a standardized way to define the packaging via container images and a human-friendly
+    user interface (for example, `docker run`). The way container images are defined
+    and distributed, as well as how containers are executed, formed the basis for
+    what is now known as the [Open Container Initiative (OCI)](https://opencontainers.org)
+    core specifications. When we talk about containers here, we focus on OCI-compliant
+    implementations.'
+  id: totrans-238
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Docker 在概念上进行了创新，并引入了两个开创性的元素：通过容器镜像定义包装的标准化方式，以及人性化的用户界面（例如 `docker run`）。容器镜像的定义和分发方式，以及容器的执行方式，形成了现在被称为[开放容器倡议（OCI）](https://opencontainers.org)核心规范的基础。在这里讨论容器时，我们关注符合
+    OCI 的实现。
+- en: 'The three core OCI container specifications are as follows:'
+  id: totrans-239
+  prefs: []
+  type: TYPE_NORMAL
+  zh: OCI 容器规范的三个核心是：
+- en: '[Runtime specification](https://oreil.ly/vrN0V)'
+  id: totrans-240
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[运行时规范](https://oreil.ly/vrN0V)'
+- en: Defines what a runtime needs to support, including operations and life-cycle
+    phases
+  id: totrans-241
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义了运行时需要支持的内容，包括操作和生命周期阶段
+- en: '[Image format specification](https://oreil.ly/p0WCY)'
+  id: totrans-242
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[镜像格式规范](https://oreil.ly/p0WCY)'
+- en: Defines how container images are constructed, based on metadata and layers
+  id: totrans-243
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义了如何构建容器镜像，基于元数据和层次
+- en: '[Distribution specification](https://oreil.ly/kNNeA)'
+  id: totrans-244
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[分发规范](https://oreil.ly/kNNeA)'
+- en: Defines how container images are shipped, effectively the way repositories work
+    in the context of containers
+  id: totrans-245
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义容器镜像的发布方式，实际上是在容器仓库工作的方式
+- en: Another idea associated with containers is *immutability*. This means that once
+    a configuration is put together, you cannot change it during its usage. In other
+    words, changes require creating a new (static) configuration and a new resource
+    (such as a process) with it. We will revisit this in the context of container
+    images.
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与容器相关的另一个概念是*不可变性*。这意味着一旦配置完成，您在使用过程中不能更改它。换句话说，变更需要创建一个新的（静态）配置和一个新的资源（如进程）。我们将在容器镜像的上下文中重新讨论这一点。
+- en: Now that you’re aware of what containers are on a conceptual level, let’s have
+    a closer look at the building blocks of OCI-compliant containers.
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经对容器在概念上的了解有所了解，让我们更详细地看一下符合OCI标准的容器的构建块。
+- en: Linux Namespaces
+  id: totrans-248
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Linux命名空间
+- en: As we discussed in [Chapter 1](ch01.xhtml#intro-to-linux), Linux initially had
+    a global view on resources. To allow processes to have a local view on a resource
+    (such as a filesystem, networking, or even users), Linux introduced namespaces.
+  id: totrans-249
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如我们在[第1章](ch01.xhtml#intro-to-linux)中讨论的，Linux最初对资源有全局视图。为了让进程能够对资源（如文件系统、网络甚至用户）有局部视图，Linux引入了命名空间。
+- en: In other words, [Linux namespaces](https://oreil.ly/3SvR1) are all about resource
+    visibility and can be used to isolate different aspects of the operating system
+    resources. Isolation in this context is mostly about what a process sees, not
+    necessarily a hard boundary (from a security perspective).
+  id: totrans-250
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 换句话说，[Linux命名空间](https://oreil.ly/3SvR1)关注的是资源的可见性，并可用于隔离操作系统资源的不同方面。在这个上下文中，隔离主要是指进程看到的内容，而不一定是严格的边界（从安全角度来看）。
+- en: 'To create namespaces, you have three relevant syscalls at your disposal:'
+  id: totrans-251
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要创建命名空间，您可以利用三个相关的系统调用：
+- en: '[`clone`](https://oreil.ly/JNot8)'
+  id: totrans-252
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`clone`](https://oreil.ly/JNot8)'
+- en: Used to create a child process that can share parts of its execution context
+    with the parent process
+  id: totrans-253
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于创建能够与父进程共享部分执行上下文的子进程
+- en: '[`unshare`](https://oreil.ly/9BXiz)'
+  id: totrans-254
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`unshare`](https://oreil.ly/9BXiz)'
+- en: Used to remove a shared execution context from an existing process
+  id: totrans-255
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于从现有进程中移除共享的执行上下文
+- en: '[`setns`](https://oreil.ly/PKGHm)'
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`setns`](https://oreil.ly/PKGHm)'
+- en: Used to join an existing process to an existing namespace
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于将现有进程加入到现有命名空间中
+- en: 'The preceding syscalls take a range of flags as parameters, enabling you to
+    have fine-grained control over the namespaces you want to create, join, or leave:'
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 上述系统调用采用一系列标志作为参数，使您能够对要创建、加入或离开的命名空间进行精细控制。
+- en: '`CLONE_NEWNS`'
+  id: totrans-259
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`CLONE_NEWNS`'
+- en: Use for [filesystem mount points](https://oreil.ly/i1Igl). Visible via */proc/$PID/mounts*.
+    Supported since Linux 2.4.19.
+  id: totrans-260
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于[文件系统挂载点](https://oreil.ly/i1Igl)。可通过*/proc/$PID/mounts*可见。自Linux 2.4.19开始支持。
+- en: '`CLONE_NEWUTS`'
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`CLONE_NEWUTS`'
+- en: Use to create [hostname and (NIS) domain name](https://oreil.ly/7lB3U) isolation.
+    Visible via `uname -n` and `hostname -f`. Supported since Linux 2.6.19.
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于创建[主机名和（NIS）域名](https://oreil.ly/7lB3U)隔离。通过`uname -n`和`hostname -f`可见。自Linux
+    2.6.19开始支持。
+- en: '`CLONE_NEWIPC`'
+  id: totrans-263
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`CLONE_NEWIPC`'
+- en: Use to do [interprocess communication (IPC)](https://oreil.ly/h9tlW) resource
+    isolation like System V IPC objects or POSIX message queues. Visible via */proc/sys/fs/mqueue*,
+    */proc/sys/kernel*, and */proc/sysvipc*. Supported since Linux 2.6.19.
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于执行[进程间通信（IPC）](https://oreil.ly/h9tlW)资源隔离，如System V IPC对象或POSIX消息队列。可通过*/proc/sys/fs/mqueue*、*/proc/sys/kernel*和*/proc/sysvipc*可见。自Linux
+    2.6.19开始支持。
+- en: '`CLONE_NEWPID`'
+  id: totrans-265
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`CLONE_NEWPID`'
+- en: Use for [PID number space isolation](https://oreil.ly/Czzu7) (PID inside/PID
+    outside the namespace). You can gather details about it via */proc/$PID/status*.
+    Supported since Linux 2.6.24.
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于[PID号空间隔离](https://oreil.ly/Czzu7)（命名空间内部/PID号空间外部）。您可以通过*/proc/$PID/status*收集相关信息。自Linux
+    2.6.24开始支持。
+- en: '`CLONE_NEWNET`'
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`CLONE_NEWNET`'
+- en: Use to control visibility of [network system resources](https://oreil.ly/X9klx)
+    such as network devices, IP addresses, IP routing tables, and port numbers. You
+    can view it via `ip netns list`, */proc/net*, and */sys/class/net*. Supported
+    since Linux 2.6.29.
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于控制[网络系统资源](https://oreil.ly/X9klx)，例如网络设备、IP地址、IP路由表和端口号。您可以通过`ip netns list`、*/proc/net*和*/sys/class/net*查看。自Linux
+    2.6.29开始支持。
+- en: '`CLONE_NEWUSER`'
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`CLONE_NEWUSER`'
+- en: Use to map [UID+GIDs](https://oreil.ly/uClq3) inside/outside the namespace.
+    You can query UIDs and GIDs and their mappings via the `id` command and */proc/$PID/uid_map*
+    and */proc/$PID/gid_map*. Supported since Linux 3.8.
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于在命名空间内外映射[UID+GID](https://oreil.ly/uClq3)。您可以通过`id`命令和*/proc/$PID/uid_map*和*/proc/$PID/gid_map*查询UID和GID及其映射。自Linux
+    3.8开始支持。
+- en: '`CLONE_NEWCGROUP`'
+  id: totrans-271
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`CLONE_NEWCGROUP`'
+- en: Use to manage [cgroups in a namespace](https://oreil.ly/YAGGb). You can see
+    it via */sys/fs/cgroup*, */proc/cgroups*, and */proc/$PID/cgroup*. Supported since
+    Linux 4.6.
+  id: totrans-272
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用以在命名空间中管理[cgroups](https://oreil.ly/YAGGb)。您可以通过*/sys/fs/cgroup*、*/proc/cgroups*和*/proc/$PID/cgroup*来查看。自Linux
+    4.6起支持。
+- en: 'One way to view namespaces in use on your system is as follows (output edited
+    to fit):'
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 查看系统中正在使用的命名空间的一种方法如下（输出经过编辑以适应）：
+- en: '[PRE11]'
+  id: totrans-274
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: The next container building block focuses on resource consumption limits and
+    reporting on resource usage.
+  id: totrans-275
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一个容器构建块专注于资源消耗限制和资源使用报告。
+- en: Linux cgroups
+  id: totrans-276
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Linux cgroups
+- en: 'Where namespaces are about visibility, [*cgroups*](https://oreil.ly/m4wBr)
+    provide a different kind of functionality: they are a mechanism to organize process
+    groups. Along with the hierarchical organization, you can use cgroups to control
+    system resources usage. In addition, cgroups provide resource usage tracking;
+    for example, they show how much RAM or CPU seconds a process (group) is using.
+    Think of cgroups as the declarative unit and the controller as a piece of kernel
+    code that enforces a certain resource limitation or reports on its usage.'
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果说命名空间关注可见性，[*cgroups*](https://oreil.ly/m4wBr)则提供了一种不同的功能：它们是组织进程组的机制。除了层次化组织外，您可以使用cgroups来控制系统资源的使用。此外，cgroups还提供资源使用跟踪；例如，它们显示进程（组）使用了多少RAM或CPU秒数。将cgroups视为声明单元，控制器作为内核代码的一部分，强制执行特定的资源限制或报告其使用情况。
+- en: 'At this time of writing, there are two versions of cgroups available in the
+    kernel: cgroups v1 and v2\. cgroup v1 is still widely used, but v2 will eventually
+    replace v1, so you should focus on v2.'
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在撰写本文时，内核中有两个版本的cgroups可用：cgroups v1和v2。cgroup v1仍然广泛使用，但v2最终将取代v1，因此您应专注于v2。
+- en: cgroup v1
+  id: totrans-279
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: cgroup v1
+- en: 'With [cgroup v1](https://oreil.ly/iOEcV), the community had an ad hoc approach,
+    adding new cgroups and controllers as needed. The following v1 cgroups and controllers
+    exist (ordered from oldest to newest; note that the docs are all over the place
+    and inconsistent):'
+  id: totrans-280
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用[cgroup v1](https://oreil.ly/iOEcV)，社区采用了即兴的方法，根据需要添加新的cgroups和控制器。存在以下v1
+    cgroups和控制器（按年龄排序；请注意文档分散且不一致）：
+- en: '[CFS bandwidth control](https://oreil.ly/vGu0Y)'
+  id: totrans-281
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[CFS带宽控制](https://oreil.ly/vGu0Y)'
+- en: Used via the `cpu` cgroup. Supported since Linux 2.6.24.
+  id: totrans-282
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过`cpu` cgroup使用。自Linux 2.6.24起支持。
+- en: '[CPU accounting controller](https://oreil.ly/7NSLN)'
+  id: totrans-283
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[CPU计费控制器](https://oreil.ly/7NSLN)'
+- en: Used via the `cpuacct` cgroup. Supported since Linux 2.6.24.
+  id: totrans-284
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过`cpuacct` cgroup使用。自Linux 2.6.24起支持。
+- en: '[`cpusets` cgroup](https://oreil.ly/sJp4X)'
+  id: totrans-285
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`cpusets` cgroup](https://oreil.ly/sJp4X)'
+- en: Allows you to assign CPU and memory to a task. Supported since Linux 2.6.24.
+  id: totrans-286
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您为任务分配CPU和内存。自Linux 2.6.24起支持。
+- en: '[Memory resource controller](https://oreil.ly/VjsXY)'
+  id: totrans-287
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[内存资源控制器](https://oreil.ly/VjsXY)'
+- en: Allows you to isolate the memory behavior of tasks. Supported since Linux 2.6.25.
+  id: totrans-288
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您隔离任务的内存行为。自Linux 2.6.25起支持。
+- en: '[Device whitelist controller](https://oreil.ly/DklEJ)'
+  id: totrans-289
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[设备白名单控制器](https://oreil.ly/DklEJ)'
+- en: Allows you to control device file usage. Supported since Linux 2.6.26.
+  id: totrans-290
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您控制设备文件的使用。自Linux 2.6.26起支持。
+- en: '[`freezer` cgroup](https://oreil.ly/waLVz)'
+  id: totrans-291
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`freezer` cgroup](https://oreil.ly/waLVz)'
+- en: Used for batch job management. Supported since Linux 2.6.28.
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于批处理作业管理。自Linux 2.6.28起支持。
+- en: '[Network classifier cgroup](https://oreil.ly/fGcWg)'
+  id: totrans-293
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[网络分类器cgroup](https://oreil.ly/fGcWg)'
+- en: Used to assign different priorities to packets. Supported since Linux 2.6.29.
+  id: totrans-294
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于为数据包分配不同的优先级。自Linux 2.6.29起支持。
+- en: '[Block IO controller](https://oreil.ly/V3Zto)'
+  id: totrans-295
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[块IO控制器](https://oreil.ly/V3Zto)'
+- en: Allows you to throttle block I/D. Supported since Linux 2.6.33.
+  id: totrans-296
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您限制块I/D的速度。自Linux 2.6.33起支持。
+- en: '[`perf_event` command](https://oreil.ly/AMWei)'
+  id: totrans-297
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`perf_event`命令](https://oreil.ly/AMWei)'
+- en: Allows you to collect performance data. Supported since Linux 2.6.39.
+  id: totrans-298
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您收集性能数据。自Linux 2.6.39起支持。
+- en: '[Network priority cgroup](https://oreil.ly/4e9f2)'
+  id: totrans-299
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[网络优先级cgroup](https://oreil.ly/4e9f2)'
+- en: Allows you to dynamically set the priority of network traffic. Supported since
+    Linux 3.3.
+  id: totrans-300
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您动态设置网络流量的优先级。自Linux 3.3起支持。
+- en: '[HugeTLB controller](https://oreil.ly/dzl7L)'
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[HugeTLB控制器](https://oreil.ly/dzl7L)'
+- en: Allows you to limit HugeTLB usage. Supported since Linux 3.5.
+  id: totrans-302
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您限制HugeTLB的使用。自Linux 3.5起支持。
+- en: '[Process number controller](https://oreil.ly/WkBss)'
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[进程数控制器](https://oreil.ly/WkBss)'
+- en: Used to allow a cgroup hierarchy to create new processes after a certain limit
+    is reached. Supported since Linux 4.3.
+  id: totrans-304
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于在达到某一限制后允许cgroup层次结构创建新进程。自Linux 4.3起支持。
+- en: cgroup v2
+  id: totrans-305
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: cgroup v2
+- en: '[cgroup v2](https://oreil.ly/YWCEi) is a total rewrite of cgroups with the
+    lessons learned from v1\. This is true both in terms of consistent configuration
+    and use of the cgroups as well as the (centralized and uniform) documentation.
+    Unlike the per-process cgroup v1 design, cgroup v2 has only single hierarchy,
+    and all controllers are managed the same way. Here are the v2 controllers:'
+  id: totrans-306
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[cgroup v2](https://oreil.ly/YWCEi) 是 cgroups 的全新版本，吸取了从 v1 中学到的经验教训。无论是在一致的配置还是在
+    cgroups 的使用上，以及（集中和统一的）文档使用上都是如此。与 v1 的每进程 cgroup 设计不同，v2 只有单一层次结构，并且所有控制器都以相同的方式管理。以下是
+    v2 的控制器：'
+- en: CPU controller
+  id: totrans-307
+  prefs: []
+  type: TYPE_NORMAL
+  zh: CPU 控制器
+- en: Regulates distribution of CPU cycles, supporting different models (weight, max)
+    and includes usage reporting
+  id: totrans-308
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 调节 CPU 周期的分配，支持不同的模型（权重、最大），并包括使用报告
+- en: Memory controller
+  id: totrans-309
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内存控制器
+- en: Regulates distribution of memory with a range of control parameters, supporting
+    user-space memory, kernel data structures such as dentries and inodes, and TCP
+    socket buffers
+  id: totrans-310
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 调节内存分配，支持用户空间内存，内核数据结构如 dentries 和 inodes，以及 TCP socket 缓冲区
+- en: I/O controller
+  id: totrans-311
+  prefs: []
+  type: TYPE_NORMAL
+  zh: I/O 控制器
+- en: Regulates the distribution of I/O resources with both weight-based and absolute
+    bandwidth or I/O operations per second (IOPS) limits, reporting on bytes and IOPS
+    read/writes
+  id: totrans-312
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 调节 I/O 资源的分配，包括基于权重和绝对带宽或每秒 I/O 操作（IOPS）限制，报告字节和读/写的 IOPS
+- en: Process number (PID) controller
+  id: totrans-313
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 进程编号（PID）控制器
+- en: Is similar to the v1 version
+  id: totrans-314
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与 v1 版本类似
+- en: '`cpuset` controller'
+  id: totrans-315
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`cpuset` 控制器'
+- en: Is similar to the v1 version
+  id: totrans-316
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与 v1 版本类似
+- en: '`device` controller'
+  id: totrans-317
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`device` 控制器'
+- en: Manages access to device files, implemented on top of eBPF
+  id: totrans-318
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 管理设备文件的访问，基于 eBPF 实现
+- en: '`rdma` controller'
+  id: totrans-319
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`rdma` 控制器'
+- en: Regulates the distribution and accounting of [remote direct memory access (RDMA)
+    resources](https://oreil.ly/a5Wk3)
+  id: totrans-320
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 调节 [远程直接内存访问（RDMA）资源](https://oreil.ly/a5Wk3) 的分配和核算
+- en: HugeTLB controller
+  id: totrans-321
+  prefs: []
+  type: TYPE_NORMAL
+  zh: HugeTLB 控制器
+- en: Is similar to the v1 version
+  id: totrans-322
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与 v1 版本类似
+- en: There are also miscellaneous cgroups in v2 that allow resource limits and tracking
+    mechanisms for scalar resources (which can’t be abstracted like other cgroup resources).
+  id: totrans-323
+  prefs: []
+  type: TYPE_NORMAL
+  zh: cgroups v2 中还有其他杂项 cgroups，允许对标量资源进行资源限制和跟踪机制（无法像其他 cgroup 资源那样抽象化）。
+- en: 'You can view all of the v2 cgroups in your Linux system in a nice tree rendering
+    via the `systemctl` command, as shown in the following example (output shortened
+    and edited to fit):'
+  id: totrans-324
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过 `systemctl` 命令以漂亮的树形图查看 Linux 系统中所有 v2 cgroups，如下例所示（输出已简化和编辑以适应）：
+- en: '[PRE12]'
+  id: totrans-325
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO8-1)'
+  id: totrans-326
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO8-1)'
+- en: Using the `systemctl` tool to render cgroups
+  id: totrans-327
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `systemctl` 工具渲染 cgroups
+- en: '[![2](Images/2.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO8-2)'
+  id: totrans-328
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO8-2)'
+- en: An example of a specific cgroup that `systemd` manages
+  id: totrans-329
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`systemd` 管理的一个具体 cgroup 的示例'
+- en: 'Another useful view on cgroups is interactive resource usage, as shown in the
+    following (output edited to fit):'
+  id: totrans-330
+  prefs: []
+  type: TYPE_NORMAL
+  zh: cgroups 的另一个有用视角是交互式资源使用，如下所示（输出已编辑以适应）：
+- en: '[PRE13]'
+  id: totrans-331
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Going forward, you can expect that, as modern kernel versions are more widely
+    used, the cgroups v2 will become the standard. There are indeed certain distros,
+    such as [Arch](https://oreil.ly/rxFF2), Fedora 31+, and Ubuntu 21.10, that already
+    have v2 by default.
+  id: totrans-332
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 展望未来，随着现代内核版本的广泛应用，cgroups v2 将成为标准。确实有某些发行版，如 [Arch](https://oreil.ly/rxFF2)，Fedora
+    31+ 和 Ubuntu 21.10，默认已经支持 v2。
+- en: Copy-on-Write Filesystems
+  id: totrans-333
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Copy-on-Write 文件系统
+- en: The third building block of containers are CoW filesystems, as discussed in
+    greater detail in [“Copy-on-Write Filesystems”](ch05.xhtml#cowfs). These are used
+    at build time. They package the application and all of its dependencies into a
+    single, self-contained file that you can distribute. Usually the CoW filesystems
+    are used in combination with [bind mounts](https://oreil.ly/BS4nK) to layer the
+    content of the different dependencies on top of each other in an efficient manner.
+  id: totrans-334
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 容器的第三个构建块是 Copy-on-Write 文件系统，详细讨论见 [“Copy-on-Write Filesystems”](ch05.xhtml#cowfs)。这些在构建时使用，将应用程序及其所有依赖项打包成单个、自包含的文件，可以分发。通常与
+    [bind mounts](https://oreil.ly/BS4nK) 结合使用，以高效方式将不同依赖项的内容层叠在一起。
+- en: Docker
+  id: totrans-335
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Docker
+- en: Docker is a human-friendly container implementation developed and popularized
+    by Docker Inc. in 2014\. With Docker, it’s easy to package up programs and their
+    dependencies and launch them in a range of environments, from desktops to the
+    cloud. What’s so unique about Docker is not the building blocks (namespaces, cgroups,
+    CoW filesystems, and bind mounts). These existed a while before Docker came into
+    being. What’s so special is that Docker combined these building blocks in a way
+    that makes them easy to use by hiding the complexity of managing the low-level
+    bits like namespaces and cgroups.
+  id: totrans-336
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Docker 是由 Docker Inc. 在 2014 年开发并普及的人性化容器实现。借助 Docker，轻松地打包程序及其依赖项，并在从桌面到云端的各种环境中启动它们。Docker
+    的独特之处不在于构建模块（命名空间、cgroups、CoW 文件系统和绑定挂载）。在 Docker 诞生之前，这些构建模块就已存在。特殊之处在于 Docker
+    将这些构建模块组合起来，以一种易于使用的方式，通过隐藏管理命名空间和 cgroups 等底层细节的复杂性。
+- en: 'As shown in [Figure 6-4](#fig-docker-arch) and described in the passage that
+    follows, there are two main concepts in Docker: the image and the running container.'
+  id: totrans-337
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如 [图 6-4](#fig-docker-arch) 所示，并在随后的段落中描述，Docker 中有两个主要概念：镜像和运行中的容器。
+- en: '![lmlx 0604](Images/lmlx_0604.png)'
+  id: totrans-338
+  prefs: []
+  type: TYPE_IMG
+  zh: '![lmlx 0604](Images/lmlx_0604.png)'
+- en: Figure 6-4\. High-level Docker architecture
+  id: totrans-339
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图 6-4\. Docker 高级架构
+- en: The container image
+  id: totrans-340
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 容器镜像
+- en: A compressed archive file that contains metadata in JSON files and the layers,
+    which are effectively directories. The Docker daemon pulls the container images
+    as needed from a container registry.
+  id: totrans-341
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包含 JSON 文件中的元数据和有效目录（即层）的压缩归档文件。Docker 守护程序会根据需要从容器注册表拉取容器镜像。
+- en: The container as the runtime artifact (for example, app A/B/C)
+  id: totrans-342
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为运行时产物的容器（例如，应用程序 A/B/C）
+- en: You can start, stop, kill, and remove it. You interact with the Docker daemon
+    using a client CLI tool (`docker`). This CLI tool sends commands to the daemon,
+    which in turn executes the respective operation, such as building or running a
+    container.
+  id: totrans-343
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以启动、停止、杀死和删除它。您可以使用客户端 CLI 工具 (`docker`) 与 Docker 守护进程进行交互。此 CLI 工具发送命令给守护程序，后者执行相应的操作，如构建或运行容器。
+- en: '[Table 6-2](#tab-dockercmds) presents a short reference of often-used Docker
+    CLI commands, covering both the build-time and the runtime phases. To get the
+    full reference, including use cases, refer to the [Docker docs](https://oreil.ly/y1c1W).'
+  id: totrans-344
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[表格 6-2](#tab-dockercmds) 提供了常用 Docker CLI 命令的简要参考，涵盖了构建时和运行时阶段。要获取完整的参考资料，包括使用案例，请参阅
+    [Docker 文档](https://oreil.ly/y1c1W)。'
+- en: Table 6-2\. Often-used Docker commands
+  id: totrans-345
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表格 6-2\. 常用 Docker 命令
+- en: '| Command | Description | Example |'
+  id: totrans-346
+  prefs: []
+  type: TYPE_TB
+  zh: '| 命令 | 描述 | 示例 |'
+- en: '| --- | --- | --- |'
+  id: totrans-347
+  prefs: []
+  type: TYPE_TB
+  zh: '| --- | --- | --- |'
+- en: '| `run` | Launch a container | Run NGINX as a daemon and remove container on
+    exit: `docker run -d --rm nginx:1.21` |'
+  id: totrans-348
+  prefs: []
+  type: TYPE_TB
+  zh: '| `run` | 启动容器 | 作为守护进程运行 NGINX 并在退出时删除容器：`docker run -d --rm nginx:1.21` |'
+- en: '| `ps` | List containers | List all containers (including nonrunning): `docker
+    ps -a` |'
+  id: totrans-349
+  prefs: []
+  type: TYPE_TB
+  zh: '| `ps` | 列出容器 | 列出所有容器（包括非运行中的）：`docker ps -a` |'
+- en: '| `inspect` | Display low-level info | To query the container IP: `docker inspect
+    -f ''{{.Network​Set⁠tings.IPAddress}}''` |'
+  id: totrans-350
+  prefs: []
+  type: TYPE_TB
+  zh: '| `inspect` | 显示低级信息 | 查询容器 IP：`docker inspect -f ''{{.Network​Set⁠tings.IPAddress}}''`
+    |'
+- en: '| `build` | Generate a container image locally | Build image based on current
+    directory and tag: `docker build -t some:tag .` |'
+  id: totrans-351
+  prefs: []
+  type: TYPE_TB
+  zh: '| `build` | 本地生成容器镜像 | 基于当前目录构建镜像并打标签：`docker build -t some:tag .` |'
+- en: '| `push` | Upload a container image to a registry | Push to AWS registry: `docker
+    push public.ecr.aws/some:tag` |'
+  id: totrans-352
+  prefs: []
+  type: TYPE_TB
+  zh: '| `push` | 将容器镜像上传到注册表 | 推送到 AWS 注册表：`docker push public.ecr.aws/some:tag`
+    |'
+- en: '| `pull` | Download a container image from a registry | Pull from AWS registry:
+    `docker pull public.ecr.aws/some:tag` |'
+  id: totrans-353
+  prefs: []
+  type: TYPE_TB
+  zh: '| `pull` | 从注册表下载容器镜像 | 从 AWS 注册表拉取：`docker pull public.ecr.aws/some:tag` |'
+- en: '| `images` | List local container images | List images from a certain registry:
+    `docker images ubuntu` |'
+  id: totrans-354
+  prefs: []
+  type: TYPE_TB
+  zh: '| `images` | 列出本地容器镜像 | 列出特定注册表的镜像：`docker images ubuntu` |'
+- en: '| `image` | Manage container images | Remove all unused images: `docker image
+    prune -all` |'
+  id: totrans-355
+  prefs: []
+  type: TYPE_TB
+  zh: '| `image` | 管理容器镜像 | 删除所有未使用的镜像：`docker image prune -all` |'
+- en: 'Let’s now have a closer look at the build-time artifact: the container image
+    that Docker uses.'
+  id: totrans-356
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们仔细看一下构建时的产物：Docker 使用的容器镜像。
+- en: Container Images
+  id: totrans-357
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 容器镜像
+- en: To define the instructions on how to build a container image, you use a plain
+    text file format called [Dockerfile](https://oreil.ly/dM8LO).
+  id: totrans-358
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要定义如何构建容器镜像的指令，您可以使用名为 [Dockerfile](https://oreil.ly/dM8LO) 的纯文本文件格式。
+- en: 'There are different directives you can have in a Dockerfile:'
+  id: totrans-359
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Dockerfile 中可以有不同的指令：
+- en: Base images
+  id: totrans-360
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 基础镜像
+- en: '`FROM`; can be multiple for build/run phases'
+  id: totrans-361
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`FROM`；可以在构建/运行阶段中有多个'
+- en: Metadata
+  id: totrans-362
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 元数据
+- en: '`LABEL` for lineage'
+  id: totrans-363
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`LABEL` 用于血统'
+- en: Arguments and environment variables
+  id: totrans-364
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数和环境变量
+- en: '`ARGS`, `ENV`'
+  id: totrans-365
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ARGS`、`ENV`'
+- en: Build-time specifications
+  id: totrans-366
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 构建时的规格
+- en: '`COPY`, `RUN`, etc., which define how the image is constructed, layer for layer'
+  id: totrans-367
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`COPY`、`RUN` 等命令，它们定义了镜像的构建方式，一层一层地构建'
+- en: Runtime specifications
+  id: totrans-368
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 运行时的规格
+- en: '`CMD` and `ENTRYPOINT`, which define how the container can be run'
+  id: totrans-369
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`CMD` 和 `ENTRYPOINT`，它们定义了容器的运行方式。'
+- en: Using the `docker build` command, you turn a collection of files that represent
+    your application (either as source or in binary format), along with the Dockerfile,
+    into a container image. This container image is the artifact that you can then
+    run or push to a registry, in order to distribute it for others to pull and eventually
+    run.
+  id: totrans-370
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用 `docker build` 命令，您可以将代表应用程序的一组文件（无论是源码还是二进制格式）以及 Dockerfile 转换为容器镜像。这个容器镜像是您可以运行或推送到注册表的工件，以便其他人拉取并最终运行。
+- en: Running containers
+  id: totrans-371
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 运行容器
+- en: You can run containers with interactive input (terminal attached) or as daemons
+    (background). The [`docker run`](https://oreil.ly/87YZq) command takes a container
+    image and a set of runtime inputs, such as environment variables, ports to expose,
+    and volumes to mount. With this information, Docker creates the necessary namespaces
+    and cgroups and launches the application defined in the container image (`CMD`
+    or `ENTRYPOINT`).
+  id: totrans-372
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以以交互式输入（附加终端）或作为守护进程（后台运行）方式运行容器。[`docker run`](https://oreil.ly/87YZq) 命令接受一个容器镜像和一组运行时输入，例如环境变量、要暴露的端口和要挂载的卷。有了这些信息，Docker
+    就会创建必要的命名空间和 cgroups，并启动容器镜像中定义的应用程序（`CMD` 或 `ENTRYPOINT`）。
+- en: With the Docker theory out of the way, let’s see it in action.
+  id: totrans-373
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，让我们看看 Docker 理论如何应用。
+- en: 'Example: containerized greeter'
+  id: totrans-374
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 示例：容器化的 greeter 应用
+- en: 'Let’s now put our `greeter` app (see [“Running Example: greeter”](#app-greeter))
+    into a container and run it.'
+  id: totrans-375
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在让我们把我们的 `greeter` 应用程序（参见 [“运行示例：greeter”](#app-greeter)）放入容器并运行它。
+- en: 'First off, we need to define the Dockerfile, which contains the instructions
+    to build the container image:'
+  id: totrans-376
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我们需要定义 Dockerfile，其中包含构建容器镜像的指令：
+- en: '[PRE14]'
+  id: totrans-377
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: '[![1](Images/1.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-1)'
+  id: totrans-378
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-1)'
+- en: Define the base image using an explicit tag (`20.04`).
+  id: totrans-379
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用显式标签（`20.04`）定义基础镜像。
+- en: '[![2](Images/2.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-2)'
+  id: totrans-380
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-2)'
+- en: Assign some metadata via a [label](https://oreil.ly/eYWVo).
+  id: totrans-381
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 通过 [标签](https://oreil.ly/eYWVo) 分配一些元数据。
+- en: '[![3](Images/3.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-3)'
+  id: totrans-382
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![3](Images/3.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-3)'
+- en: Copy shell script. This could be a binary, a JAR file, or a Python script.
+  id: totrans-383
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 复制 shell 脚本。这可以是二进制文件、JAR 文件或 Python 脚本。
+- en: '[![4](Images/4.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-4)'
+  id: totrans-384
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![4](Images/4.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-4)'
+- en: Set the working directory.
+  id: totrans-385
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 设置工作目录。
+- en: '[![5](Images/5.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-5)'
+  id: totrans-386
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![5](Images/5.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-5)'
+- en: This and the next line define the user running the app. If you don’t do this,
+    it will unnecessarily run as `root`.
+  id: totrans-387
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这行及其下一行定义运行应用程序的用户。如果不这样做，它将不必要地以 `root` 身份运行。
+- en: '[![6](Images/6.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-6)'
+  id: totrans-388
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![6](Images/6.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-6)'
+- en: Define what to run, in our case the shell script. The way we defined it, using
+    `ENTRYPOINT`, it is possible to pass a parameter by running `docker run greeter:1
+    _SOME_PARAMETER_`.
+  id: totrans-389
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 定义要运行的内容，在我们的情况下是 shell 脚本。通过使用 `ENTRYPOINT` 定义方式，可以通过运行 `docker run greeter:1
+    _SOME_PARAMETER_` 传递参数。
+- en: 'Next, we build the container image:'
+  id: totrans-390
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们构建容器镜像：
+- en: '[PRE15]'
+  id: totrans-391
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: '[![1](Images/1.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO9-1)'
+  id: totrans-392
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![1](Images/1.png)](#custom_co_applications__package_management____span_class__keep_together__and_containers__span__CO9-1)'
+- en: Build the container image and label it (with `-t greeter:1`). The `.` means
+    that it uses the current directory and assumes that a Dockerfile is present there.
+  id: totrans-393
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 构建容器镜像并加标签（使用 `-t greeter:1`）。`.` 表示它使用当前目录，并假定那里有一个 Dockerfile。
+- en: '[![2](Images/2.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO9-2)'
+  id: totrans-394
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[![2](Images/2.png)](#co_applications__package_management____span_class__keep_together__and_containers__span__CO9-2)'
+- en: This and the next lines pull the base image and build it layer by layer.
+  id: totrans-395
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些以及接下来的行，逐层拉取基础镜像并构建它。
+- en: 'Let’s check if the container image is there:'
+  id: totrans-396
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们检查一下容器镜像是否存在：
+- en: '[PRE16]'
+  id: totrans-397
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Now we can run a container based on the `greeter:1` image, like so:'
+  id: totrans-398
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们可以基于`greeter:1`镜像运行一个容器，如下所示：
+- en: '[PRE17]'
+  id: totrans-399
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: That wraps up our Docker 101\. We’ll now take a quick look at related tooling.
+  id: totrans-400
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这样我们就结束了Docker 101。现在让我们快速查看相关的工具。
+- en: Other Container Tooling
+  id: totrans-401
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 其他容器工具
+- en: 'You don’t have to use Docker to work with OCI containers; as an alternative,
+    you can use a Red Hat–led and –sponsored combo: [`podman`](https://podman.io)
+    and [`buildah`](https://buildah.io). These daemon-less tools allow you to build
+    OCI container images (`buildah`) and run them (`podman`).'
+  id: totrans-402
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您不必使用Docker来处理OCI容器；作为替代方案，您可以使用由Red Hat主导和赞助的组合：[`podman`](https://podman.io)和[`buildah`](https://buildah.io)。这些无守护进程的工具允许您构建OCI容器镜像（`buildah`）并运行它们（`podman`）。
+- en: 'In addition, there are a number of tools that make working with OCI containers,
+    namespaces, and cgroups easier, including but not limited to the following:'
+  id: totrans-403
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此外，还有许多工具可以更轻松地处理OCI容器、命名空间和cgroups，包括但不限于以下内容：
+- en: '[`containerd`](https://oreil.ly/mIKkm)'
+  id: totrans-404
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`containerd`](https://oreil.ly/mIKkm)'
+- en: A daemon that manages the OCI container life cycle, from image transfer and
+    storage to container runtime supervision
+  id: totrans-405
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个管理OCI容器生命周期的守护程序，从镜像传输和存储到容器运行时的监督。
+- en: '[`skopeo`](https://oreil.ly/UAom6)'
+  id: totrans-406
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`skopeo`](https://oreil.ly/UAom6)'
+- en: For container image manipulation (copying, inspecting manifest, etc.)
+  id: totrans-407
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于容器镜像操作（复制、检查清单等）
+- en: '[`systemd-cgtop`](https://oreil.ly/aDgBa)'
+  id: totrans-408
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`systemd-cgtop`](https://oreil.ly/aDgBa)'
+- en: A kind of cgroups-aware variant of `top` that shows resource usage interactively
+  id: totrans-409
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一种支持cgroups的`top`变种，可以交互式地显示资源使用情况。
+- en: '[`nsenter`](https://oreil.ly/D0Gbc)'
+  id: totrans-410
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`nsenter`](https://oreil.ly/D0Gbc)'
+- en: Allows you to execute a program in a specified, existing namespace
+  id: totrans-411
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您在指定的现有命名空间中执行程序。
+- en: '[`unshare`](https://oreil.ly/oOigx)'
+  id: totrans-412
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`unshare`](https://oreil.ly/oOigx)'
+- en: Allows you to run a program with specific namespaces (opt in via flags)
+  id: totrans-413
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 允许您使用特定命名空间运行程序（通过标志进行选择）。
+- en: '[`lsns`](https://oreil.ly/jY7Q6)'
+  id: totrans-414
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`lsns`](https://oreil.ly/jY7Q6)'
+- en: Lists information about Linux namespaces
+  id: totrans-415
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出有关Linux命名空间的信息。
+- en: '[`cinf`](https://oreil.ly/yaiMo)'
+  id: totrans-416
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[`cinf`](https://oreil.ly/yaiMo)'
+- en: Lists information about Linux namespaces and cgroups associated with process
+    IDs
+  id: totrans-417
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 列出与进程ID相关联的Linux命名空间和cgroups的信息。
+- en: With this we end our containers tour. Let’s now look at modern package managers
+    and how they utilize containers to isolate applications from each other.
+  id: totrans-418
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这样我们结束了容器之旅。现在让我们看看现代包管理器以及它们如何利用容器来隔离应用程序。
+- en: Modern Package Managers
+  id: totrans-419
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 现代包管理器
+- en: In addition to the more traditional package managers that often are distribution-specific,
+    there is a new sort of package manager. These modern solutions often make use
+    of containers and aim to be cross-distribution or target specific environments.
+    For example, they can make it easy for Linux desktop users to install GUI apps.
+  id: totrans-420
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了传统的通常特定于发行版的包管理器外，还有一种新型的包管理器。这些现代解决方案通常利用容器，并旨在跨发行版或针对特定环境。例如，它们可以让Linux桌面用户轻松安装GUI应用程序。
+- en: '[Snap](https://oreil.ly/n4fe6)'
+  id: totrans-421
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Snap](https://oreil.ly/n4fe6)'
+- en: A Canonical Ltd.–designed and –promoted software packaging and deployment system.
+    It comes with a refined [sandboxing](https://oreil.ly/ImWPH) setup and can be
+    used in desktop, cloud, and IoT environments.
+  id: totrans-422
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由Canonical Ltd.设计和推广的软件打包和部署系统。它配备了一个精细的[sandboxing](https://oreil.ly/ImWPH)设置，并可在桌面、云和物联网环境中使用。
+- en: '[Flatpak](https://oreil.ly/sEEu1)'
+  id: totrans-423
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Flatpak](https://oreil.ly/sEEu1)'
+- en: Optimized for Linux desktop environments, using cgroups, namespaces, bind mounts,
+    and seccomp as its building blocks. While initially from the Red Hat part of the
+    Linux distro universe, it is now available for dozens of distros, including Fedora,
+    Mint, Ubuntu, Arch, Debian, openSUSE, and Chrome OS.
+  id: totrans-424
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 针对Linux桌面环境进行优化，使用cgroups、命名空间、绑定挂载和seccomp作为其构建基础。尽管最初来自Linux发行版宇宙的Red Hat部分，现在已经适用于数十个发行版，包括Fedora、Mint、Ubuntu、Arch、Debian、openSUSE和Chrome
+    OS。
+- en: '[AppImage](https://oreil.ly/76Uhu)'
+  id: totrans-425
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[AppImage](https://oreil.ly/76Uhu)'
+- en: Has been around for years and promotes the idea that one app equals one file;
+    that is, it requires no dependencies other than what is included in the targeted
+    Linux system. Over time, a number of interesting features have found their way
+    into AppImage, from efficient updates to desktop integration to software catalogs.
+  id: totrans-426
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 已经存在多年，并推广了一个应用程序等于一个文件的理念；也就是说，除了目标 Linux 系统中包含的内容外，它不需要任何依赖关系。随着时间的推移，AppImage
+    逐渐引入了许多有趣的功能，从高效更新到桌面集成再到软件目录。
+- en: '[Homebrew](https://oreil.ly/XegIz)'
+  id: totrans-427
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Homebrew](https://oreil.ly/XegIz)'
+- en: Originally from the macOS world but available for Linux and enjoying increasing
+    popularity. It’s written in Ruby and has a powerful yet intuitive user interface.
+  id: totrans-428
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 起源于 macOS 世界，但可在 Linux 上使用并越来越受欢迎。它是用 Ruby 编写的，具有强大而直观的用户界面。
+- en: Conclusion
+  id: totrans-429
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: In this chapter, we covered a wide range of topics, all related to how to install,
+    maintain, and use applications on Linux.
+  id: totrans-430
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们涵盖了与如何在 Linux 上安装、维护和使用应用程序相关的广泛主题。
+- en: We first defined basic application terms, then we looked at the Linux startup
+    process, discussing `systemd`, the now standard way of managing startup and components.
+  id: totrans-431
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们首先定义了基本的应用程序术语，然后讨论了 Linux 启动过程，探讨了 `systemd`，这是管理启动和组件的现行标准方式。
+- en: To distribute applications, Linux uses packages and package managers. We discussed
+    various managers in this context and how you can use containers for development
+    and testing as well as dependency management. Docker containers use Linux primitives
+    (cgroups, namespaces, CoW filesystems) to provide you with application-level dependency
+    management (via container images).
+  id: totrans-432
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了分发应用程序，Linux 使用包和包管理器。我们在这个背景下讨论了各种管理器，以及如何在开发和测试中使用容器以及依赖管理。Docker 容器利用 Linux
+    原语（cgroups，命名空间，CoW 文件系统）提供应用级依赖管理（通过容器镜像）。
+- en: Finally, we looked at custom solutions for app management, including Snap and
+    others.
+  id: totrans-433
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，我们探讨了应用程序管理的定制解决方案，包括 Snap 和其他方案。
+- en: 'If you’re interested in further reading on the topics in this chapter, have
+    a look at the following resources:'
+  id: totrans-434
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您对本章中的主题感兴趣，并希望进一步阅读，请查看以下资源：
+- en: Startup process and init systems
+  id: totrans-435
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启动过程和初始化系统
+- en: '[“Analyzing the Linux Boot Process”](https://oreil.ly/bYPw5)'
+  id: totrans-436
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“分析 Linux 引导过程”](https://oreil.ly/bYPw5)'
+- en: '[“Stages of Linux Booting Process”](https://oreil.ly/k90in)'
+  id: totrans-437
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 引导过程的各个阶段”](https://oreil.ly/k90in)'
+- en: '[“How to Configure a Linux Service to Start Automatically After a Crash or
+    Reboot”](https://oreil.ly/tvaMe)'
+  id: totrans-438
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“如何配置 Linux 服务在崩溃或重新启动后自动启动”](https://oreil.ly/tvaMe)'
+- en: Package management
+  id: totrans-439
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 包管理
+- en: '[“2021 State of the Software Supply Chain”](https://oreil.ly/66mo5)'
+  id: totrans-440
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“2021年软件供应链现状”](https://oreil.ly/66mo5)'
+- en: '[“Linux Package Management”](https://oreil.ly/MFGlL)'
+  id: totrans-441
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“Linux 包管理”](https://oreil.ly/MFGlL)'
+- en: '[“Understanding RPM Package Management Tutorial”](https://oreil.ly/jiRj8)'
+  id: totrans-442
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“理解 RPM 包管理教程”](https://oreil.ly/jiRj8)'
+- en: '[Debian packages](https://oreil.ly/DmAvc)'
+  id: totrans-443
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[Debian 包](https://oreil.ly/DmAvc)'
+- en: Containers
+  id: totrans-444
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 容器
+- en: '[“A Practical Introduction to Container Terminology”](https://oreil.ly/zn69i)'
+  id: totrans-445
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“容器术语实用入门”](https://oreil.ly/zn69i)'
+- en: '[“From Docker to OCI: What Is a Container?”](https://oreil.ly/NUxrE)'
+  id: totrans-446
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“从 Docker 到 OCI：什么是容器？”](https://oreil.ly/NUxrE)'
+- en: '[“Building Containers Without Docker”](https://oreil.ly/VofA0)'
+  id: totrans-447
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“在不使用Docker的情况下构建容器”](https://oreil.ly/VofA0)'
+- en: '[“Why Red Hat Is Investing in CRI-O and Podman”](https://oreil.ly/KJB9O)'
+  id: totrans-448
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“为什么 Red Hat 投资于 CRI-O 和 Podman”](https://oreil.ly/KJB9O)'
+- en: '[“Demystifying Containers”](https://oreil.ly/Anvty)'
+  id: totrans-449
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“揭秘容器技术”](https://oreil.ly/Anvty)'
+- en: '[“Rootless Containers”](https://oreil.ly/FLTHf)'
+  id: totrans-450
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“无根容器”](https://oreil.ly/FLTHf)'
+- en: '[“Docker Storage Drivers Deep Dive”](https://oreil.ly/8QPPh)'
+  id: totrans-451
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“深入了解 Docker 存储驱动程序”](https://oreil.ly/8QPPh)'
+- en: '[“The Hunt for a Better Dockerfile”](https://oreil.ly/MLAom)'
+  id: totrans-452
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[“寻找更好的 Dockerfile”](https://oreil.ly/MLAom)'
+- en: 'Now that you know all the basics around applications let’s move on from the
+    scope of a single Linux system to an interconnected setup and its necessary precondition:
+    networking.'
+  id: totrans-453
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经了解了关于应用程序的所有基础知识，让我们从单个 Linux 系统的范围转移到互联设置及其必要的前提条件：网络。

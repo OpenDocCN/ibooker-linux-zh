@@ -1,0 +1,923 @@
+- en: Chapter 2\. Running Your First BPF Programs
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第二章 运行您的第一个BPF程序
+- en: The BPF VM is capable of running instructions in response to events triggered
+    by the kernel. However, not all BPF programs have access to all events triggered
+    by the kernel. When you load a program into the BPF VM, you need to decide which
+    type of program you’re running. This informs the kernel about where your program
+    is going to be triggered. It also tells the BPF verifier which helpers are going
+    to be allowed in your program. When you choose the program type, you’re also choosing
+    the interface that your program is implementing. This interface ensures that you
+    have access to the appropriate type of data, and whether your program can access
+    network packets directly or not.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF虚拟机能够响应内核触发的事件运行指令。然而，并非所有BPF程序都能访问内核触发的所有事件。当您将程序加载到BPF虚拟机时，您需要决定正在运行的程序类型。这告知内核您的程序将在何处被触发。它还告诉BPF验证器，您的程序中将允许哪些辅助功能。选择程序类型还意味着选择您的程序正在实现的接口。此接口确保您可以访问适当类型的数据，以及您的程序是否可以直接访问网络数据包。
+- en: In this chapter, we show you how to write your first BPF programs. We also guide
+    you around the different types of BPF programs that you can create (as of the
+    writing of this book). Over the years, the kernel developers have been adding
+    different entry points to which you can attach BPF programs. This work is not
+    complete yet, and they are finding new ways to take advantage of BPF every day.
+    We’re going to focus on some of the most useful types of programs in this chapter,
+    with the intention of giving you a taste of what you can do with BPF. We go over
+    many additional examples in future chapters on how to write BPF programs.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们向您展示如何编写您的第一个BPF程序。我们还将指导您了解您可以创建的不同类型的BPF程序（截至本书编写时）。多年来，内核开发人员一直在添加可以附加BPF程序的不同入口点。这项工作尚未完成，他们正在每天发现利用BPF的新方法。在本章中，我们将专注于一些最有用的程序类型，并试图让您领略BPF的潜力。在未来的章节中，我们还会介绍许多其他的BPF程序示例。
+- en: This chapter will also cover the role that the BPF verifier plays in running
+    your programs. This component validates that your code is safe to execute and
+    helps you to write programs that won’t cause unexpected results, such as memory
+    exhaustion or sudden kernel crashes. But let’s begin with the basics of writing
+    your own BPF programs from scratch.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章还将介绍BPF验证器在运行您的程序中所起的作用。此组件验证您的代码是否安全执行，并帮助您编写不会导致意外结果的程序，例如内存耗尽或突然的内核崩溃。但让我们从头开始讲述编写您自己的BPF程序的基础知识。
+- en: Writing BPF Programs
+  id: totrans-4
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 编写BPF程序
+- en: The most common way to write BPF programs is by using a subset of C compiled
+    with LLVM. LLVM is a general-purpose compiler that can emit different types of
+    bytecode. In this case, LLVM will output BPF assembly code that we will load into
+    the kernel later. We’re not going to show you much BPF assembly in this book.
+    After a long discussion, we decided that it’s better to show you examples of how
+    to use it in specific circustances, but you can easily find several references
+    online or in the BPF man pages. We do show short examples of BPF assembly in future
+    chapters, where writing assembly is more appropriate than C, like Seccomp filters
+    to control incoming system calls in the kernel. We talk more about Seccomp in
+    [Chapter 8](ch08.html#kernel_security).
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 编写BPF程序的最常见方法是使用LLVM编译的C语言子集。LLVM是一个通用编译器，可以生成不同类型的字节码。在本例中，LLVM将生成BPF汇编代码，稍后我们将加载到内核中。我们不会在本书中展示太多BPF汇编代码。经过长时间的讨论，我们决定更好地向您展示如何在特定情况下使用它的示例，但您可以轻松在网上或BPF手册中找到多个参考资料。在未来的章节中，我们会展示BPF汇编的简短示例，在这些章节中，使用汇编比C更合适，例如在内核中控制入站系统调用的Seccomp过滤器中。我们在第8章中更详细地讨论Seccomp。
+- en: 'The kernel provides the syscall `bpf` to load programs into the BPF VM after
+    they are compiled. This syscall is used for other operations besides loading programs,
+    and you’ll see more usage examples in later chapters. The kernel also provides
+    several utilities that abstract the loading of BPF programs for you. In this first
+    code example we use those helpers to show you the “Hello World” example of BPF:'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 内核提供了`bpf`系统调用，用于在编译后将程序加载到BPF虚拟机中。此系统调用除了加载程序外，还用于其他操作，在后续章节中会有更多的使用示例。内核还提供了几种实用工具，用于为您抽象加载BPF程序的过程。在本书的第一个代码示例中，我们使用这些辅助工具向您展示了BPF的“Hello
+    World”示例：
+- en: '[PRE0]'
+  id: totrans-7
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: There are a few interesting concepts in this first program. We’re using the
+    attribute `SEC` to inform the BPF VM when we want to run this program. In this
+    case, we will run this BPF program when a tracepoint in an `execve` system call
+    is detected. Tracepoints are static marks in the kernel’s binary code that allow
+    developers to inject code to inspect the kernel’s execution. We talk in detail
+    about tracepoints in [Chapter 4](ch04.html#tracing_with_bpf), but for now you
+    need to know only that `execve` is an instruction that executes other programs.
+    So we’re going to see the message `Hello, BPF World!` every time the kernel detects
+    that a program executes another program.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个第一个程序中有一些有趣的概念。我们使用属性`SEC`来告知BPF VM何时运行这个程序。在这种情况下，当检测到`execve`系统调用的跟踪点时，我们将运行这个BPF程序。跟踪点是内核二进制代码中的静态标记，允许开发人员注入代码以检查内核的执行过程。我们在[第4章](ch04.html#tracing_with_bpf)中详细讨论了跟踪点，但现在你只需要知道`execve`是一个执行其他程序的指令。因此，每当内核检测到程序执行另一个程序时，我们将看到消息`Hello,
+    BPF World!`。
+- en: At the end of this example we also specify the license for this program. Because
+    the Linux kernel is licensed under GPL, it can load only programs licensed as
+    GPL too. If we set the license to something else, the kernel will refuse to load
+    our program. We’re using `bpf_trace_printk` to print a message in the kernel tracing
+    log; you can find this log in */sys/kernel/debug/tracing/trace_pipe*.
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个示例的结尾，我们还指定了这个程序的许可证。因为Linux内核使用GPL许可证，所以只能加载同样以GPL许可证发布的程序。如果我们将许可证设置为其他类型，内核将拒绝加载我们的程序。我们使用`bpf_trace_printk`在内核跟踪日志中打印消息；你可以在*/sys/kernel/debug/tracing/trace_pipe*中找到这个日志。
+- en: 'We’re going to use `clang` to compile this first program into a valid ELF binary
+    file. This is the format that the kernel expects to load. We’re going to save
+    our first program in a file called `bpf_program.c` so we can compile it:'
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将使用`clang`将这个第一个程序编译成一个有效的ELF二进制文件。这是内核期望加载的格式。我们将把我们的第一个程序保存在一个叫做`bpf_program.c`的文件中以便编译它：
+- en: '[PRE1]'
+  id: totrans-11
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: You’ll find some scripts to compile these programs in the [GitHub repository
+    with the code example for the book](https://oreil.ly/lbpf-repo), so you don’t
+    need to memorize this `clang` command.
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你会在[书中代码示例的GitHub存储库](https://oreil.ly/lbpf-repo)中找到一些编译这些程序的脚本，因此你不需要记住这个`clang`命令。
+- en: 'Now that we have compiled our first BPF program, we need to load it in the
+    kernel. As we mentioned, we use a special helper that the kernel provides to abstract
+    the boilerplate of compiling and loading the program. This helper is called `load_bpf_file`,
+    and it takes a binary file and tries to load it in the kernel. You can find this
+    helper in the [GitHub repository with all the examples in the book](https://oreil.ly/lbpf-repo),
+    in the *bpf_load.h* file, as shown here:'
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们已经编译出了我们的第一个BPF程序，接下来需要将其加载到内核中。正如我们提到的，我们使用内核提供的特殊助手来抽象编译和加载程序的样板代码。这个助手叫做`load_bpf_file`，它接受一个二进制文件并尝试将其加载到内核中。你可以在[书中所有示例的GitHub存储库](https://oreil.ly/lbpf-repo)中找到这个助手，位于*bpf_load.h*文件中，如下所示：
+- en: '[PRE2]'
+  id: totrans-14
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'We’re going to use a script to compile this program and link it as an ELF binary.
+    In this case, we don’t need to specify a target, because this program won’t be
+    loaded in the BPF VM. We need to use an external library, and writing a script
+    makes it easier to put it all together:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将使用一个脚本来编译这个程序，并将其链接为一个ELF二进制文件。在这种情况下，我们不需要指定一个目标，因为这个程序不会被加载到BPF VM中。我们需要使用一个外部库，并编写一个脚本可以很方便地将所有内容整合在一起：
+- en: '[PRE3]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'If you want to run this program, you can execute this final binary by using
+    `sudo`: `sudo ./loader`. `sudo` is a Linux command that’s going to give you root
+    privileges in your computer. If you don’t run this program with `sudo`, you’ll
+    get an error message because most BPF programs can be loaded in the kernel only
+    by a user who has root privileges.'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想运行这个程序，你可以使用`sudo`来执行这个最终的二进制文件：`sudo ./loader`。`sudo`是一个Linux命令，它会让你在计算机上获得root权限。如果你不使用`sudo`来运行这个程序，你将会收到一个错误消息，因为大多数BPF程序只能由拥有root权限的用户加载到内核中。
+- en: When you run this program, you’ll start to see our `Hello, BPF World!` message
+    after a few seconds, even if you’re not doing anything with your computer. This
+    is because programs running behind the scenes in your computer might be executing
+    other programs.
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你运行这个程序时，即使你的电脑上什么也不做，几秒钟后你也会开始看到我们的`Hello, BPF World!`消息。这是因为在你的计算机后台运行的程序可能正在执行其他程序。
+- en: When you stop this program, the message will stop showing up in your terminal.
+    BPF programs are unloaded from the VM as soon as the programs that load them terminate.
+    In the coming chapters, we explore how to make BPF programs persistent, even after
+    their loaders terminate, but we don’t want to introduce too many concepts just
+    yet. This is an important concept to keep in mind because in many situations,
+    you’ll want your BPF programs to run in the background, collecting data from your
+    system, regardless of whether other processes are running.
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你停止这个程序时，消息将不再显示在你的终端上。BPF 程序在加载它们的程序终止后立即从虚拟机中卸载。在接下来的章节中，我们将探讨如何使 BPF 程序持久化，即使它们的加载程序已经终止，但目前我们不打算引入太多的概念。这是一个重要的概念要记住，因为在许多情况下，你会希望你的
+    BPF 程序在后台运行，收集系统数据，而不管其他进程是否在运行。
+- en: Now that you’ve seen the basic structure for a BPF program, we can dive into
+    which types of programs you can write, which will give you access to different
+    subsystems within the Linux kernel.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在你已经看到了 BPF 程序的基本结构，我们可以深入探讨你可以编写的各种类型的程序，这将使你能够访问 Linux 内核中的不同子系统。
+- en: BPF Program Types
+  id: totrans-21
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPF 程序类型
+- en: Although there is no clear categorization within programs, you’ll quickly realize
+    that all the types covered in this section are divided in two categories, depending
+    on what their main purpose is.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管在程序内没有明确的分类，你很快会意识到，本节中涵盖的所有类型都根据它们的主要目的分为两类。
+- en: The first category is *tracing*. Many of the programs that you can write will
+    help you better understand what’s happening in your system. They give you direct
+    information about the behavior of your system and the hardware it’s running on.
+    They can access memory regions related to specific programs, and extract execution
+    traces from running processes. They also give you direct access to the resources
+    allocated for each specific process, from file descriptors to CPU and memory usage.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第一个类别是*跟踪*。你可以编写的许多程序将帮助你更好地了解系统中正在发生的事情。它们直接提供有关系统行为和其运行的硬件的信息。它们可以访问与特定程序相关的内存区域，并从运行中的进程中提取执行跟踪。它们还直接提供访问分配给每个特定进程的资源，从文件描述符到
+    CPU 和内存使用情况。
+- en: The second category is *networking*. These types of programs allow you to inspect
+    and manipulate the network traffic in your system. They let you filter packets
+    coming from the network interface, or even reject those packets completely. Different
+    types of programs can be attached to different stages of network processing within
+    the kernel. This has advantages and disadvantages. For example, you can attach
+    BPF programs to network events as soon as your network driver receives a packet,
+    but this program will have access to less information about the packet, because
+    the kernel doesn’t have enough information to offer you yet. On the other end
+    of the spectrum, you can attach BPF programs to network events immediately before
+    they are passed to user-space. In this case, you’ll have much more information
+    about the packet, which will help you make better-informed decisions, but you’ll
+    need to pay the cost of completely processing the packet.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第二类别是*网络*。这些类型的程序允许你检查和操作系统中的网络流量。它们允许你过滤从网络接口接收到的数据包，甚至完全拒绝这些数据包。不同类型的程序可以附加到内核中网络处理的不同阶段。这既有优势也有劣势。例如，你可以将
+    BPF 程序附加到网络事件，即在你的网络驱动程序接收到数据包时，但这个程序将只能访问关于数据包的较少信息，因为内核目前没有足够的信息提供给你。另一方面，你可以将
+    BPF 程序附加到网络事件，即将它们传递给用户空间之前的立即阶段。在这种情况下，你将获得关于数据包的更多信息，这将帮助你做出更为明智的决策，但你需要付出完全处理数据包的成本。
+- en: The list of program types that we show next is not divided into categories;
+    we’re introducing these types in the chronological order in which they were added
+    to the kernel. We’ve moved the least used of these programs to the end of this
+    section, and we’ll focus for now on the ones that will be more useful for you.
+    If you’re curious about any program that we’re not covering in detail here, you
+    can learn more about all of them in [`man 2 bpf`](https://oreil.ly/qXl0F).
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们接下来展示的程序类型列表没有划分成类别；我们按照它们被添加到内核中的时间顺序介绍这些类型。我们将这一部分中最少使用的程序移至末尾，并且目前我们将重点放在对你更有用的程序上。如果你对我们在这里没有详细介绍的任何程序感兴趣，你可以在[`man
+    2 bpf`](https://oreil.ly/qXl0F)中了解更多信息。
+- en: Socket Filter Programs
+  id: totrans-26
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 套接字过滤程序
+- en: '`BPF_PROG_TYPE_SOCKET_FILTER` was the first program type to be added to the
+    Linux kernel. When you attach a BPF program to a raw socket, you get access to
+    all the packets processed by that socket. Socket filter programs don’t allow you
+    to modify the contents of those packets or to change the destination for those
+    packets; they give you access to them for observability purposes only. The metadata
+    that your program receives contains information related to the network stack such
+    as the protocol type that’s being used to deliver the packet.'
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_PROG_TYPE_SOCKET_FILTER` 是添加到 Linux 内核的第一个程序类型。当您将 BPF 程序附加到原始套接字时，您可以访问该套接字处理的所有数据包。套接字过滤程序不允许您修改这些数据包的内容或更改这些数据包的目的地；它们仅允许您观察这些数据包。您的程序接收到的元数据包含与网络堆栈相关的信息，例如用于传递数据包的协议类型。'
+- en: We cover socket filtering and other network programs in more detail in [Chapter 6](ch06.html#linux_networking).
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们将在[第六章](ch06.html#linux_networking)中更详细地介绍套接字过滤和其他网络程序。
+- en: Kprobe Programs
+  id: totrans-29
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Kprobe 程序
+- en: As you’ll see in [Chapter 4](ch04.html#tracing_with_bpf), in which we talk about
+    tracing, kprobes are functions that you can attach dynamically to certain call
+    points in the kernel. BPF kprobe program types allow you to use BPF programs as
+    kprobe handlers. They are defined with the type `BPF_PROG_TYPE_KPROBE`. The BPF
+    VM ensures that your kprobe programs are always safe to run, which is an advantage
+    from traditional kprobe modules. You still need to remember that kprobes are not
+    considered stable entry points in the kernel, so you’ll need to ensure that your
+    kprobe BPF programs are compatible with the specific kernel versions that you’re
+    using.
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您将在[第四章](ch04.html#tracing_with_bpf)中看到的那样，在我们讨论跟踪时，kprobe 是您可以动态附加到内核中某些调用点的函数。BPF
+    kprobe 程序类型允许您将 BPF 程序用作 kprobe 处理程序。它们使用类型 `BPF_PROG_TYPE_KPROBE` 定义。BPF VM 确保您的
+    kprobe 程序始终安全运行，这是传统 kprobe 模块的优势。您仍然需要记住，kprobe 不被视为内核的稳定入口点，因此您需要确保您的 kprobe
+    BPF 程序与您使用的特定内核版本兼容。
+- en: When you write a BPF program that’s attached to a kprobe, you need to decide
+    whether it will be executed as the first instruction in the function call or when
+    the call completes. You need to declare this behavior in the section header of
+    your BPF program. For example, if you want to inspect the arguments when the kernel
+    invokes an `exec` syscall, you’ll attach the program at the beginning of the call.
+    In this case, you need to set the section header `SEC("kprobe/sys_exec")`. If
+    you want to inspect the returned value of invoking an `exec` syscall, you need
+    to set the section header `SEC("kretprobe/sys_exec")`.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您编写附加到 kprobe 的 BPF 程序时，您需要决定它是在函数调用的第一条指令执行还是在调用完成时执行。您需要在 BPF 程序的节头中声明此行为。例如，如果您希望在内核调用
+    `exec` 系统调用时检查参数，则需要将程序附加到调用的开始位置。在这种情况下，您需要设置节头 `SEC("kprobe/sys_exec")`。如果您希望检查调用
+    `exec` 系统调用的返回值，则需要设置节头 `SEC("kretprobe/sys_exec")`。
+- en: We talk a lot more about kprobes in later chapters of this book. They are a
+    fundamental piece to understanding tracing with BPF.
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于 kprobe，我们在本书的后续章节中会详细讨论。它们是理解使用 BPF 进行跟踪的基本组成部分。
+- en: Tracepoint Programs
+  id: totrans-33
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 跟踪点程序
+- en: This type of program allows you to attach BPF programs to the tracepoint handler
+    provided by the kernel. Tracepoint programs are defined with the type `BPF_PROG_TYPE_TRACEPOINT`.
+    As you’ll see in [Chapter 4](ch04.html#tracing_with_bpf), tracepoints are static
+    marks in the kernel’s codebase that allow you to inject arbitrary code for tracing
+    and debugging purposes. They are less flexible than kprobes, because they need
+    to be defined by the kernel beforehand, but they are guaranteed to be stable after
+    their introduction in the kernel. This gives you a much higher level of predictability
+    when you want to debug your system.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种类型的程序允许您将 BPF 程序附加到内核提供的跟踪点处理程序上。跟踪点程序使用类型 `BPF_PROG_TYPE_TRACEPOINT` 定义。正如您将在[第四章](ch04.html#tracing_with_bpf)中看到的那样，跟踪点是内核代码库中的静态标记，允许您为跟踪和调试目的注入任意代码。它们比
+    kprobe 不太灵活，因为它们需要在内核中预先定义，但是在其引入内核后保证稳定。这在您想要调试系统时提供了更高的可预测性水平。
+- en: All tracepoints in your system are defined within the directory */sys/kernel/debug/tracing/events*.
+    There you’ll find each subsystem that includes any tracepoints and that you can
+    attach a BPF program to. One interesting fact is that BPF declares its own tracepoints,
+    so you can write BPF programs that inspect the behavior of other BPF programs.
+    The BPF tracepoints are defined in */sys/kernel/debug/tracing/events/bpf*. There,
+    for example, you can find the tracepoint definition for *bpf_prog_load*. This
+    means you can write a BPF program that inspects when other BPF programs are loaded.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 系统中的所有跟踪点都在目录 */sys/kernel/debug/tracing/events* 中定义。在那里，您会找到包含任何跟踪点的每个子系统，您可以将
+    BPF 程序附加到这些跟踪点上。一个有趣的事实是，BPF 声明了自己的跟踪点，因此您可以编写检查其他 BPF 程序行为的 BPF 程序。BPF 跟踪点在 */sys/kernel/debug/tracing/events/bpf*
+    中定义。例如，您可以在那里找到 *bpf_prog_load* 的跟踪点定义。这意味着您可以编写一个 BPF 程序，检查其他 BPF 程序何时被加载。
+- en: Like kprobes, tracepoints are another fundamental piece to understand tracing
+    with BPF. We talk more about them in the coming chapters and show you how to write
+    programs to take advantage of them.
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与 kprobes 类似，跟踪点是理解使用 BPF 进行跟踪的另一个基本组成部分。我们将在接下来的章节中更详细地讨论它们，并向您展示如何编写程序以利用它们。
+- en: XDP Programs
+  id: totrans-37
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: XDP 程序
+- en: XDP programs allow you to write code that’s executed very early on when a network
+    packet arrives at the kernel. They are defined with the type `BPF_PROG_TYPE_XDP`.
+    It exposes only a limited set of information from the packet given that the kernel
+    has not had much time to process the information itself. Because the packet is
+    executed early on, you have a much higher level of control over how to handle
+    that packet.
+  id: totrans-38
+  prefs: []
+  type: TYPE_NORMAL
+  zh: XDP 程序允许您编写在网络数据包到达内核时非常早期执行的代码。它们使用类型 `BPF_PROG_TYPE_XDP` 进行定义。它仅公开来自数据包的有限信息，因为内核尚未处理这些信息。由于数据包在早期被执行，您对如何处理该数据包具有更高的控制水平。
+- en: XDP programs define several actions that you can control and that allow you
+    to decide what to do with the packet. You can return `XDP_PASS` from your XDP
+    program, which means that the packet should be passed to the next subsystem in
+    the kernel. You can also return `XDP_DROP`, which means that the kernel should
+    ignore this packet completely and do nothing else with it. You can also return
+    `XDP_TX`, which means that the packet should be forwarded back to the network
+    interface card (NIC) that received the packet in the first place.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: XDP 程序定义了几种您可以控制的操作，这些操作允许您决定如何处理数据包。您可以从您的 XDP 程序返回 `XDP_PASS`，这意味着数据包应该传递给内核中的下一个子系统。您也可以返回
+    `XDP_DROP`，这意味着内核应完全忽略这个数据包，不做任何其他操作。您还可以返回 `XDP_TX`，这意味着数据包应该转发回首次接收该数据包的网络接口卡（NIC）。
+- en: This level of control opens the door to many interesting programs in the networking
+    layer. XDP has become one of the main components in BPF, which is why we’ve included
+    a specific chapter about it in this book. In [Chapter 7](ch07.html#express_data_path_XDP),
+    we discuss many powerful use cases for XDP, like implementing programs to protect
+    your network against distributed denial-of-service (DDoS) attacks.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种控制水平为网络层中许多有趣的程序打开了大门。XDP 已成为 BPF 的主要组成部分之一，这也是为什么我们在本书中专门讨论它的一个章节。在[第 7 章](ch07.html#express_data_path_XDP)中，我们讨论了
+    XDP 的许多强大用例，如实施程序以保护您的网络免受分布式拒绝服务（DDoS）攻击。
+- en: Perf Event Programs
+  id: totrans-41
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Perf 事件程序
+- en: These types of BPF programs allow you to attach your BPF code to *Perf events*.
+    They are defined with the type `BPF_PROG_TYPE_PERF_EVENT`. Perf is an internal
+    profiler in the kernel that emits performance data events for hardware and software.
+    You can use it to monitor many things, from your computer’s CPU to any software
+    running on your system. When you attach a BPF program to Perf events, your code
+    will be executed every time Perf generates data for you to analyze.
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些类型的 BPF 程序允许您将您的 BPF 代码附加到 *Perf 事件* 上。它们使用类型 `BPF_PROG_TYPE_PERF_EVENT` 进行定义。Perf
+    是内核中的内部性能分析器，用于发出硬件和软件的性能数据事件。您可以使用它监视许多内容，从计算机的 CPU 到系统上运行的任何软件。当您将一个 BPF 程序附加到
+    Perf 事件时，每次 Perf 生成数据以供分析时，您的代码将被执行。
+- en: Cgroup Socket Programs
+  id: totrans-43
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Cgroup Socket 程序
+- en: These types of programs allow you to attach BPF logic to control groups (cgroups).
+    They are defined with the type `BPF_PROG_TYPE_CGROUP_SKB`. They allow cgroups
+    to control network traffic within the processes that they contain. With these
+    programs, you can decide what to do with a network packet before it’s delivered
+    to a process in the cgroup. Any packet that the kernel tries to deliver to any
+    process in the same cgroup will pass through one of these filters. At the same
+    time, you can decide what to do when a process in the cgroup sends a network packet
+    through that interface.
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此类程序允许您将BPF逻辑附加到控制组（cgroups）上。它们使用类型`BPF_PROG_TYPE_CGROUP_SKB`进行定义。它们允许cgroups在其包含的进程中控制网络流量。通过这些程序，您可以在传递到cgroup中的进程之前决定对网络数据包采取何种操作。内核试图将任何数据包传递到同一cgroup中的任何进程时，都将通过这些过滤器。同时，您还可以决定当cgroup中的进程通过该接口发送网络数据包时采取何种操作。
+- en: As you can see, their behavior is similar to `BPF_PROG_TYPE_SOCKET_FILTER` programs.
+    The main difference is that `BPF_PROG_TYPE_CGROUP_SKB` programs are attached to
+    all processes within a cgroup, rather than specific processes; this behavior applies
+    to current and future sockets created in the given cgroup. BPF programs attached
+    to cgroups become useful in container environments where groups of processes are
+    constrained by cgroups and where you can apply the same policies to all of them
+    without having to identify each one independently. [Cillium](https://github.com/cilium/cilium),
+    a popular open source project that provides load balancing and security capabilities
+    for Kubernetes, uses cgroup socket programs extensively to apply its policies
+    in groups rather than in isolated containers.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您所见，它们的行为类似于`BPF_PROG_TYPE_SOCKET_FILTER`程序。主要区别在于`BPF_PROG_TYPE_CGROUP_SKB`程序附加到cgroup中的所有进程，而不是特定进程；这种行为适用于给定cgroup中创建的当前和未来套接字。附加到cgroups的BPF程序在容器环境中特别有用，其中进程组受cgroups约束，并且您可以在所有进程上应用相同的策略，而无需单独识别每个进程。[Cillium](https://github.com/cilium/cilium)是一个流行的开源项目，为Kubernetes提供负载均衡和安全功能，广泛使用cgroup套接字程序来应用其策略，而不是在孤立的容器中。
+- en: Cgroup Open Socket Programs
+  id: totrans-46
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Cgroup Open Socket Programs
+- en: These types of programs allow you to execute code when any process in a cgroup
+    opens a network socket. This behavior is similar to the programs attached to cgroup
+    socket buffers, but instead of giving you access to the packets as they come through
+    the network, they allow you to control what happens when a process opens a new
+    socket. They are defined with the type `BPF_PROG_TYPE_CGROUP_SOCK`. This is useful
+    to provide security and access control over groups of programs that can open sockets
+    without having to restrict capabilities per process individually.
+  id: totrans-47
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此类程序允许您在cgroup中的任何进程打开网络套接字时执行代码。这类行为与附加到cgroup套接字缓冲区的程序类似，但不是在网络数据包通过时提供访问权限，而是在进程打开新套接字时控制操作。它们使用类型`BPF_PROG_TYPE_CGROUP_SOCK`进行定义。这对于在不需要单独限制每个进程能力的情况下，提供安全性和访问控制非常有用。
+- en: Socket Option Programs
+  id: totrans-48
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Socket Option Programs
+- en: These types of programs allow you to modify socket connection options at runtime,
+    while a packet transits through several stages in the kernel’s networking stack.
+    They are attached to cgroups, much like `BPF_PROG_TYPE_CGROUP_SOCK` and `BPF_PROG_TYPE_CGROUP_SKB`,
+    but unlike those program types, they can be invoked several times during the connection’s
+    lifecycle. These programs are defined with the type `BPF_PROG_TYPE_SOCK_OPS`.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此类程序允许您在运行时修改套接字连接选项，而数据包通过内核网络堆栈的多个阶段。它们与cgroups附加，类似于`BPF_PROG_TYPE_CGROUP_SOCK`和`BPF_PROG_TYPE_CGROUP_SKB`，但与这些程序类型不同的是，在连接生命周期中可以多次调用它们。这些程序使用类型`BPF_PROG_TYPE_SOCK_OPS`进行定义。
+- en: When you create a BPF program with this type, your function call receives an
+    argument called `op` that represents the operation that the kernel is about to
+    execute with the socket connection; therefore, you know at which point the program
+    is invoked in the connection’s lifecycle. With this information in hand, you can
+    access data such as network IP addresses and connection ports, and you can modify
+    the connection options to set timeouts and alter the round-trip delay time for
+    a given packet.
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您使用此类型创建BPF程序时，您的函数调用将接收一个名为`op`的参数，该参数表示内核即将执行的与套接字连接相关的操作；因此，您可以知道程序在连接生命周期中的哪个点被调用。有了这些信息，您可以访问诸如网络IP地址和连接端口之类的数据，并可以修改连接选项以设置超时并改变给定数据包的往返延迟时间。
+- en: For example, Facebook uses this to set short recovery time objectives (RTOs)
+    for connections within the same datacenter. The RTO is the time that a system,
+    or network connection in this case, is expected to be recovered after a failure.
+    This objective also represents how long the system can be unavailable before suffering
+    from unacceptable consequences. In Facebook’s case, it assumes that machines in
+    the same datacenter should have a short RTO, and Facebook modifies this threshold
+    by using a BPF program.
+  id: totrans-51
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，Facebook 使用这种方式为同一数据中心内的连接设置短恢复时间目标（RTO）。RTO 是系统在失败后预计恢复的时间，或者在这种情况下，是网络连接。该目标还代表系统在遭受不可接受后果之前可以不可用的时间。在
+    Facebook 的情况下，它假设同一数据中心中的机器应具有较短的 RTO，并通过使用 BPF 程序修改此阈值。
+- en: Socket Map Programs
+  id: totrans-52
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 套接字映射程序
+- en: '`BPF_PROG_TYPE_SK_SKB` programs give you access to socket maps and socket redirects.
+    As you’ll learn in the next chapter, socket maps allow you to keep references
+    to several sockets. When you have these references, you can use special helpers
+    to redirect an incoming packet from a socket to a different socket. This is interesting
+    when you want to implement load-balancing capabilities with BPF. By keeping track
+    of several sockets, you can forward network packets between them without leaving
+    the kernel-space. Projects like Cillium and [Facebook’s Katran](https://oreil.ly/wDtfR)
+    make extensive use of these types of programs for network traffic control.'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_PROG_TYPE_SK_SKB`程序让你可以访问套接字映射和套接字重定向。正如你将在下一章中学到的那样，套接字映射允许你保持对多个套接字的引用。当你拥有这些引用时，你可以使用特殊的帮助程序将从一个套接字收到的数据包重定向到另一个套接字。当你希望使用
+    BPF 实现负载均衡能力时，这非常有趣。通过跟踪多个套接字，你可以在内核空间中转发网络数据包。像 Cillium 和 [Facebook''s Katran](https://oreil.ly/wDtfR)
+    这样的项目大量使用这些类型的程序来进行网络流量控制。'
+- en: Cgroup Device Programs
+  id: totrans-54
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: cgroup 设备程序
+- en: This type of program allows you to decide whether an operation within a cgroup
+    can be executed for a given device. These programs are defined with the type `BPF_PROG_TYPE_CGROUP_DEVICE`.
+    The first implementation of cgroups (v1) has a mechanism that allows you to set
+    permissions for specific devices; however, the second iteration of cgroups lacks
+    this feature. This type of program was introduced to supply that functionality.
+    At the same time, being able to write a BPF program gives you more flexibility
+    to set those permissions when you need them.
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种类型的程序允许你决定 cgroup 内的操作是否可以针对特定设备执行。这些程序的类型定义为`BPF_PROG_TYPE_CGROUP_DEVICE`。cgroups
+    的第一个实现（v1）具有一种机制，允许你为特定设备设置权限；然而，cgroups 的第二次迭代缺乏此功能。引入这种类型的程序是为了提供该功能。同时，编写 BPF
+    程序使你在需要时能够更灵活地设置这些权限。
+- en: Socket Message Delivery Programs
+  id: totrans-56
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 套接字消息传递程序
+- en: 'These types of programs let you control whether a message sent to a socket
+    should be delivered. They are defined with the type `BPF_PROG_TYPE_SK_MSG`. When
+    the kernel creates a socket, it stores the socket in the aforementioned socket
+    map. This map gives the kernel quick access to specific groups of sockets. When
+    you attach a socket message BPF program to a socket map, all messages sent to
+    those sockets will be filtered by the program before delivering them. Before filtering
+    messages, the kernel copies the data in the message so that you can read it and
+    decide what to do with it. These programs have two possible return values: `SK_PASS`
+    and `SK_DROP`. You use the first one if you want the kernel to send the message
+    to the socket, and you use the latter one if you want the kernel to ignore the
+    message and not deliver it to the socket.'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些类型的程序让你控制是否应将发送到套接字的消息传递。它们的类型定义为`BPF_PROG_TYPE_SK_MSG`。当内核创建套接字时，它将套接字存储在上述套接字映射中。该映射使内核能够快速访问特定组的套接字。当你将套接字消息
+    BPF 程序附加到套接字映射时，在将消息传递给套接字之前，所有发送到这些套接字的消息都将通过程序进行过滤。在过滤消息之前，内核会复制消息中的数据，以便你可以读取并决定如何处理它。这些程序有两种可能的返回值：`SK_PASS`和`SK_DROP`。如果你希望内核将消息发送到套接字，则使用第一个值；如果你希望内核忽略消息并且不将其传递到套接字，则使用后者。
+- en: Raw Tracepoint Programs
+  id: totrans-58
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 原始跟踪点程序
+- en: We talked earlier about a type of program that accesses tracepoints in the kernel.
+    The kernel developers added a new tracepoint program to address the need of accessing
+    the tracepoint arguments in the raw format held by the kernel. This format gives
+    you access to more detailed information about the task that the kernel is executing;
+    however, it has a small performance overhead. Most of the time, you’ll want to
+    use regular tracepoints in your programs to avoid that performance overhead, but
+    it’s good to keep in mind that you can also access the raw arguments when needed
+    by using raw tracepoints. These programs are defined with the type `BPF_PROG_TYPE_RAW_TRACEPOINT`.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们之前谈到过一种程序类型，该程序访问内核中的跟踪点。内核开发人员添加了一个新的跟踪点程序，以满足访问内核保存的跟踪点参数的需求。此格式使您可以访问内核正在执行的任务的更详细信息；但是，它会带来小的性能开销。大多数情况下，您会希望在程序中使用常规的跟踪点以避免性能开销，但是需要时可以使用原始跟踪点访问原始参数是一个好主意。这些程序使用类型
+    `BPF_PROG_TYPE_RAW_TRACEPOINT` 进行定义。
+- en: Cgroup Socket Address Programs
+  id: totrans-60
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Cgroup Socket Address 程序
+- en: 'This type of program allows you to manipulate the IP addresses and port numbers
+    that user-space programs are attached to when they are controlled by specific
+    cgroups. There are use cases when your system uses several IP addresses when you
+    want to ensure that a specific set of user-space programs use the same IP address
+    and port. These BPF programs give you the flexibility to manipulate those bindings
+    when you put those user-space programs in the same cgroup. This ensures that all
+    incoming and outgoing connections from those applications use the IP and port
+    that the BPF program provides. These programs are defined with the following type:
+    `BPF_PROG_TYPE_CGROUP_SOCK_ADDR`.'
+  id: totrans-61
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这种类型的程序允许您在特定 cgroup 控制的情况下操作用户空间程序附加到的 IP 地址和端口号。当您的系统使用多个 IP 地址时，希望确保特定的用户空间程序使用相同的
+    IP 地址和端口时，存在使用案例。这些 BPF 程序使您能够在将这些用户空间程序放入同一 cgroup 时操作这些绑定。这确保了所有进入和离开这些应用程序的连接使用
+    BPF 程序提供的 IP 和端口。这些程序使用以下类型进行定义：`BPF_PROG_TYPE_CGROUP_SOCK_ADDR`。
+- en: Socket Reuseport Programs
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Socket Reuseport 程序
+- en: '`SO_REUSEPORT` is an option in the kernel that allows multiple processes in
+    the same host to be bound to the same port. This option allows higher performance
+    in accepted network connections when you want to distribute load across multiple
+    threads.'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`SO_REUSEPORT` 是内核中的一个选项，允许同一主机上的多个进程绑定到同一个端口。当您希望在多个线程之间分布负载时，此选项可以提高接受网络连接的性能。'
+- en: The `BPF_PROG_TYPE_SK_REUSEPORT` program type allows you to write BPF programs
+    that hook into the logic that the kernel uses to decide whether it’s going to
+    reuse a port. You can prevent programs from reusing the same port if your BPF
+    program returns `SK_DROP`, and you also can inform the kernel to follow its own
+    reuse routine when you return `SK_PASS` from these BPF programs.
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_PROG_TYPE_SK_REUSEPORT` 程序类型允许您编写 BPF 程序，以钩入内核用于决定是否重新使用端口的逻辑。如果您的 BPF
+    程序返回 `SK_DROP`，则可以防止程序重新使用相同的端口；如果返回 `SK_PASS`，则可以通知内核继续按照其自身的重用例程操作。'
+- en: Flow Dissection Programs
+  id: totrans-65
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 流解剖程序
+- en: The flow dissector is a component of the kernel that keeps track of the different
+    layers that a network packet needs to go through, from when it arrives to your
+    system to when it’s delivered to a user-space program. It allows you to control
+    the flow of the packet using different classification methods. The built-in dissector
+    in the kernel is called the *Flower classifier*, and it’s used by firewalls and
+    other filtering devices to decide what to do with specific packets.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 流解剖器是内核的一个组件，跟踪网络数据包需要通过的不同层次，从其抵达系统到交付给用户空间程序的过程。它允许您使用不同的分类方法控制数据包的流向。内核中的内置解剖器称为*Flower
+    分类器*，被防火墙和其他过滤设备用于决定如何处理特定的数据包。
+- en: '`BPF_PROG_TYPE_FLOW_DISSECTOR` programs are designed to hook logic in the flow
+    dissector path. They provide security guarantees that the built-in dissector cannot
+    provide, such as ensuring that the program always terminates, which might not
+    be guaranteed in the built-in dissector. These BPF programs can modify the flow
+    that network packets follow within the kernel.'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_PROG_TYPE_FLOW_DISSECTOR` 程序旨在钩入流解剖路径中的逻辑。它们提供了内置解剖器无法提供的安全保证，例如始终保证程序终止，这在内置解剖器中可能无法保证。这些
+    BPF 程序可以修改网络数据包在内核内部遵循的流程。'
+- en: Other BPF Programs
+  id: totrans-68
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 其他 BPF 程序
+- en: 'We’ve talked about program types that we’ve seen used in different environments,
+    but it’s worth noting that there are a few other additional BPF program types
+    that we haven’t covered yet. These are programs that we mention only briefly here:'
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们已经讨论了在不同环境中使用的程序类型，但值得注意的是，还有一些其他额外的BPF程序类型我们尚未涵盖。以下是我们在这里仅简要提及的几种程序：
+- en: Traffic classifier programs
+  id: totrans-70
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 流量分类器程序
+- en: '`BPF_PROG_TYPE_SCHED_CLS` and `BPF_PROG_TYPE_SCHED_ACT` are two types of BPF
+    programs that allow you to classify network traffic and modify some properties
+    of the packets in the socket buffer.'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_PROG_TYPE_SCHED_CLS`和`BPF_PROG_TYPE_SCHED_ACT`是两种BPF程序类型，允许您对网络流量进行分类并修改套接字缓冲区中数据包的某些属性。'
+- en: Lightweight tunnel programs
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 轻量级隧道程序
+- en: '`BPF_PROG_TYPE_LWT_IN`, `BPF_PROG_TYPE_LWT_OUT`, `BPF_PROG_TYPE_LWT_XMIT` and
+    `BPF_PROG_TYPE_LWT_SEG6LOCAL` are types of BPF programs that allow you to attach
+    code to the kernel’s lightweight tunnel infrastructure.'
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_PROG_TYPE_LWT_IN`、`BPF_PROG_TYPE_LWT_OUT`、`BPF_PROG_TYPE_LWT_XMIT`和`BPF_PROG_TYPE_LWT_SEG6LOCAL`是允许您将代码附加到内核轻量级隧道基础设施的BPF程序类型。'
+- en: Infrared device programs
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 红外设备程序
+- en: '`BPF_PROG_TYPE_LIRC_MODE2` programs allow you to attach BPF programs via connections
+    to infrared devices, such as remote controllers, for fun.'
+  id: totrans-75
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`BPF_PROG_TYPE_LIRC_MODE2`程序允许您通过连接到红外设备（例如遥控器）来附加BPF程序，以增加乐趣。'
+- en: These programs are specialized, and their usage has not been widely adopted
+    for the community.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些程序是专业化的，它们的使用尚未被社区广泛采纳。
+- en: Next, we talk about how BPF guarantees that your programs won’t cause a catastrophic
+    failure in your system after the kernel loads them. This is an important topic
+    because understanding how a program loads also influences how to write those programs.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 接下来，我们将讨论BPF如何确保在内核加载后您的程序不会导致系统灾难性故障。这是一个重要的主题，因为理解程序加载的方式也影响到如何编写这些程序。
+- en: The BPF Verifier
+  id: totrans-78
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPF验证程序
+- en: Allowing anyone to execute arbitrary code inside the Linux kernel always sounds
+    like a terrible idea at first. The risk of running BPF programs in production
+    systems would be too high if it weren’t for the BPF verifier. In the words of
+    Dave S. Miller, one of the kernel networking maintainers, “The only thing sitting
+    between our eBPF programs and a deep dark chasm of destruction is the eBPF verifier.”
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果没有BPF验证程序，任何人都可以在Linux内核中执行任意代码，这听起来一开始就像一个糟糕的主意。如果不是因为BPF验证程序，运行BPF程序在生产系统中的风险将会太高。用内核网络维护者之一Dave
+    S. Miller的话来说，“我们的eBPF程序与毁灭的深渊之间仅有的东西就是eBPF验证程序。”
+- en: Obviously, the BPF verifier is also a program running on your system, and it’s
+    the object of high scrutiny to ensure that it does its job correctly. In the past
+    years, security researchers have discovered some vulnerabilities in the verifier
+    that allowed attackers to access random memory in the kernel, even as unprivileged
+    users. You can read more about vulnerabilities like that one in the Common Vulnerabilities
+    and Exposures (CVE) catalog, a list of known security threads sponsored by the
+    United States Department of Homeland Security. For example, CVE-2017-16995 describes
+    how any user could read and write kernel memory and bypass the BPF verifier.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 很显然，BPF验证程序也是在您的系统上运行的程序，并且它是受到高度审查的对象，以确保其正确执行其职能。在过去的几年中，安全研究人员已经发现了验证程序中的一些漏洞，这些漏洞允许攻击者在内核中访问随机内存，即使是作为非特权用户也可以。您可以在美国国土安全部赞助的公共漏洞和暴露目录（CVE）中了解更多类似的漏洞信息，这是已知安全威胁的列表。例如，CVE-2017-16995描述了任何用户如何读取和写入内核内存以及绕过BPF验证器的详细信息。
+- en: In this section we guide you through the measures that the verifier takes to
+    prevent problems like the one just described.
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本节中，我们将指导您了解验证程序采取的措施，以防止类似刚刚描述的问题。
+- en: The first check that the verifier performs is a static analysis of the code
+    that the VM is going to load. The objective of this first check is to ensure that
+    the program has an expected end. To do this, the verifier creates a direct acyclic
+    graph (DAG) with the code. Each instruction that the verifier analyzes becomes
+    a node in the graph, and each node is linked to the next instruction. After the
+    verifier generates this graph, it performs a depth first search (DFS) to ensure
+    that the program finishes and the code doesn’t include dangerous paths. This means
+    it will traverse each branch of the graph, all the way to the bottom of the branch,
+    to guarantee that there are no recursive cycles.
+  id: totrans-82
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 审核程序执行的第一个检查是对VM即将加载的代码的静态分析。这个首次检查的目标是确保程序有一个预期的结束。为了做到这一点，审核程序创建一个直接无环图（DAG）来表示代码。审核程序分析的每个指令都成为图中的一个节点，并且每个节点链接到下一个指令。审核程序生成此图后，执行深度优先搜索（DFS）以确保程序能够完成并且代码不包含危险路径。这意味着它将遍历图的每个分支，一直到分支的底部，以确保没有递归循环。
+- en: 'These are the conditions why the verifier might reject your code during this
+    first check:'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些是审核程序在首次检查期间可能拒绝你的代码的条件：
+- en: The program doesn’t include control loops. To ensure that the program doesn’t
+    get stuck in an infinite loop, the verifier rejects any kind of control loop.
+    There have been proposals to allow loops in BPF programs, but as of this writing,
+    none of them has been adopted.
+  id: totrans-84
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 程序不包含控制循环。为了确保程序不会陷入无限循环，审核程序拒绝任何类型的控制循环。已经有提案允许BPF程序中的循环，但截至目前尚未采纳。
+- en: The program doesn’t try to execute more instructions than the maximum allowed
+    by the kernel. At this time, the maximum number of instructions to execute is
+    4,096\. This limitation is in place to prevent BPF from running forever. In [Chapter 3](ch03.html#bpf_maps),
+    we discuss how to nest different BPF programs to work around this limitation in
+    a safe way.
+  id: totrans-85
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 程序不能尝试执行超过内核允许的最大指令数。目前，允许执行的最大指令数为4,096。这个限制是为了防止BPF程序无限运行。在[第三章](ch03.html#bpf_maps)中，我们讨论了如何嵌套不同的BPF程序以安全方式绕过这个限制。
+- en: The program doesn’t include any unreachable instruction, such as conditions
+    or functions that are never executed. This prevents loading dead code in the VM,
+    which would also delay the termination of the BPF program.
+  id: totrans-86
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 程序不包含任何无法访问的指令，例如永远不会执行的条件或函数。这可以防止在虚拟机中加载死代码，这也会延迟BPF程序的终止。
+- en: The program doesn’t try to jump outside its bounds.
+  id: totrans-87
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 程序不能尝试跳出其界限。
+- en: The second check that the verifier performs is a dry run of the BPF program.
+    This means that the verifier will try to analyze every instruction that the program
+    is going to execute to ensure that it doesn’t execute any invalid instruction.
+    This execution also checks that all memory pointers are accessed and dereferenced
+    correctly. Finally, the dry run informs the verifier about the control flows in
+    the program to ensure that no matter which control path the program takes, it
+    arrives to the `BPF_EXIT` instruction. To do this, the verifier keeps track of
+    all visited branch paths in a stack, which it evaluates before taking a new path
+    to ensure that it doesn’t visit a specific path more than once. After these two
+    checks pass, the verifier considers the program to be safe to execute.
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 审核程序执行的第二个检查是对BPF程序的干行检查。这意味着审核程序将尝试分析程序将要执行的每个指令，以确保它不执行任何无效的指令。此外，此执行还检查所有内存指针是否被正确访问和解引用。最后，干行检查还通知审核程序有关程序控制流的信息，以确保无论程序采用哪种控制路径，它最终都会到达`BPF_EXIT`指令。为了做到这一点，审核程序在一个栈中跟踪所有访问的分支路径，在采用新路径之前评估这些路径，以确保不会多次访问特定路径。这两个检查通过后，审核程序认为程序可以安全执行。
+- en: 'The `bpf` syscall allows you to debug the verifier’s checks if you’re interested
+    in seeing how your programs are analyzed. When you load a program with this syscall,
+    you can set several attributes that will make the verifier print its operation
+    log:'
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`bpf`系统调用允许你调试审核程序的检查，如果你有兴趣查看程序的分析过程。使用这个系统调用加载程序时，你可以设置多个属性，这些属性将使审核程序打印其操作日志：'
+- en: '[PRE4]'
+  id: totrans-90
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: The `log_level` field tells the verifier whether to print any log. It will print
+    its log when you set it to 1, and it won’t print anything if you set it to 0\.
+    If you want to print the verifier log, you also need to provide a log buffer and
+    its size. This buffer is a multiline string that you can print to inspect the
+    decisions that the verifier took.
+  id: totrans-91
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`log_level` 字段告诉验证器是否打印任何日志。当您将其设置为1时，它将打印其日志；如果设置为0，则不打印任何内容。如果您想要打印验证器日志，则还需要提供日志缓冲区及其大小。此缓冲区是一个多行字符串，您可以打印以检查验证器所做的决策。'
+- en: The BPF verifier plays a big role in keeping your system secure and available
+    while you run arbitrary programs within the kernel, although it might be difficult
+    to understand why it makes some decisions sometimes. Don’t despair if you bump
+    into verification issues trying to load your programs. During the rest of this
+    book, we guide you through safe examples that will help you understand how to
+    write your own programs in a secure way too.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF 验证器在您在内核中运行任意程序时发挥着重要作用，以确保系统安全和可用性，尽管有时候它的某些决策可能难以理解。如果在尝试加载您的程序时遇到验证问题，请不要绝望。本书的其余部分将通过安全示例指导您，这将帮助您了解如何以安全的方式编写自己的程序。
+- en: The next section covers how BPF structures program information in memory. The
+    way a program structured will help make clear how to access the BPF internals,
+    helping you debug and understand how programs behave.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一节将介绍 BPF 如何在内存中结构化程序信息。程序结构化的方式将有助于清楚地访问 BPF 内部，帮助您调试和了解程序的行为方式。
+- en: BPF Type Format
+  id: totrans-94
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPF 类型格式
+- en: The BPF Type Format (BTF) is a collection of metadata structures that enhances
+    the debug information for BPF programs, maps, and functions. BTF includes source
+    information, so tools like BPFTool, which we talk about in [Chapter 5](ch05.html#bpf_utilities),
+    can show you a much richer interpretation of BPF data. This metadata is stored
+    in the binary program under a special “.BFT” metadata section. BTF information
+    is useful to make your programs easier to debug, but it increases the size of
+    binary files significantly because it needs to keep track of type information
+    for everything declared in your program. The BPF verifier also uses this information
+    to ensure that the structure types defined by your program are correct.
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF 类型格式（BTF）是一组元数据结构，用于增强 BPF 程序、映射和函数的调试信息。BTF 包括源信息，因此像我们在[第5章](ch05.html#bpf_utilities)中讨论的
+    BPFTool 这样的工具可以为您展示更丰富的 BPF 数据解释。这些元数据存储在二进制程序的特殊“.BFT”元数据部分下。BTF 信息有助于使您的程序更易于调试，但会显著增加二进制文件的大小，因为它需要跟踪程序中声明的所有类型信息。BPF
+    验证器还使用此信息来确保程序定义的结构类型是正确的。
+- en: BTF is used exclusively to annotate C types. BPF compilers like LLVM know how
+    to include that information for you, so you don’t need to go through the cumbersome
+    task of adding that information to each structure. However, in some cases, the
+    toolchain still needs some annotations to enhance your programs. In later chapters
+    we describe how those annotations come into play and how tools like BPFTool display
+    this information.
+  id: totrans-96
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BTF 专门用于注释 C 类型。像 LLVM 这样的 BPF 编译器知道如何为您包含这些信息，因此您不需要通过耗时的任务向每个结构添加信息。然而，在某些情况下，工具链仍然需要一些注释来增强您的程序。在后续章节中，我们将描述这些注释的作用以及像
+    BPFTool 这样的工具如何显示这些信息。
+- en: BPF Tail Calls
+  id: totrans-97
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPF 尾调用
+- en: BPF programs can call other BPF programs by using *tail calls*. This is a powerful
+    feature because it allows you to assemble more complex programs by combining smaller
+    BPF functions. Kernel versions prior to 5.2 have a hard limit on the number of
+    machine instructions that a BPF program can generate. This limit was set to 4,096
+    to ensure that programs can terminate in a reasonable amount of time. However,
+    as people built more complex BPF programs, they needed a way to extend the instruction
+    limit imposed by the kernel, and this is where tail calls come into play. The
+    instruction limit increases to one million instructions starting in version 5.2
+    of the kernel. Tail call nesting is also limited, to 32 calls in this case, which
+    means that you can combine up to 32 programs in a chain to generate a more complex
+    solution to your problems.
+  id: totrans-98
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF 程序可以使用*尾调用*来调用其他 BPF 程序。这是一个强大的特性，因为它允许您通过组合较小的 BPF 函数来组装更复杂的程序。在 5.2 版本之前的内核版本中，BPF
+    程序可以生成的机器指令数有一个硬限制。为了确保程序能够在合理的时间内终止，这个限制被设置为 4,096 条。然而，随着人们构建更复杂的 BPF 程序，他们需要一种扩展内核所施加的指令限制的方法，这就是尾调用发挥作用的地方。从内核
+    5.2 版本开始，指令限制增加到一百万条指令。在这种情况下，尾调用嵌套也受到限制，最多可以组合 32 个程序形成一个链条，以生成更复杂的问题解决方案。
+- en: When you call a BPF program from another BPF program, the kernel resets the
+    program context completely. It’s important to keep this in mind because you’ll
+    probably need a way to share information between programs. The context object
+    that each BPF program receives as its argument won’t help us with this data sharing
+    problem. In the next chapter, we talk about BPF maps as a way to share information
+    between programs. There we also show you an example of how to use tail calls to
+    jump from one BPF program to another.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您从另一个 BPF 程序调用 BPF 程序时，内核会完全重置程序上下文。记住这一点很重要，因为您可能需要一种在程序之间共享信息的方式。每个 BPF 程序作为其参数接收的上下文对象将无法帮助我们解决这个数据共享问题。在接下来的章节中，我们将讨论
+    BPF 映射作为在程序之间共享信息的一种方式。在那里，我们还会向您展示如何使用尾调用从一个 BPF 程序跳转到另一个程序。
+- en: Conclusion
+  id: totrans-100
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: In this chapter we guided you through the first code examples to understand
+    BPF programs. We also described all the types of programs that you can write with
+    BPF. Don’t worry if some of the concepts presented here don’t make sense yet;
+    as we advance through the book, we show you more examples of those programs. We
+    also covered the important verification steps that BPF takes to ensure that your
+    programs are safe to run.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们引导您通过第一个代码示例来理解 BPF 程序。我们还描述了您可以使用 BPF 编写的所有类型的程序。如果这里介绍的一些概念还不清楚，不要担心；随着我们在本书中的进展，我们会向您展示更多这些程序的示例。我们还介绍了
+    BPF 所采取的重要验证步骤，以确保您的程序可以安全运行。
+- en: In the next chapter we dive a little bit more into those programs and show more
+    examples. We also talk about how BPF programs communicate with their counterparts
+    in user-space and how they share information.
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接下来的章节中，我们将更深入地探讨这些程序并展示更多示例。我们还将讨论 BPF 程序如何与用户空间中的对应程序进行通信，以及它们如何共享信息。

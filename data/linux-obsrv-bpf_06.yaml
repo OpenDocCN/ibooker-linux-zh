@@ -1,0 +1,1182 @@
+- en: Chapter 5\. BPF Utilities
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第5章 BPF实用工具
+- en: So far, we’ve talked about how you can write BPF programs to get more visibility
+    within your systems. Over the years, many developers have built tools with BPF
+    for that same purpose. In this chapter we talk about several of the off-the-shelf
+    tools that you can use every day. Many of these tools are advanced versions of
+    some BPF programs that you’ve already seen. Others are tools that will help you
+    gain direct visibility into your own BPF programs.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 迄今为止，我们已经讨论了如何编写BPF程序来提高系统内的可见性。多年来，许多开发人员使用BPF构建了同样目的的工具。在本章中，我们讨论了几种您可以每天使用的现成工具。其中许多工具是您已经见过的某些BPF程序的高级版本。其他工具将帮助您直接查看自己的BPF程序。
+- en: This chapter covers some tools that will help you in your day-to-day work with
+    BPF. We begin by covering BPFTool, a command-line utility to get more information
+    about your BPF programs. We cover BPFTrace and `kubectl-trace`, which will help
+    you write BPF programs more efficiently with a concise domain-specific language
+    (DSL). Finally, we talk about eBPF Exporter, an open source project to integrate
+    BPF with Prometheus.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章涵盖了一些工具，这些工具将帮助您在日常工作中使用BPF。我们首先介绍了BPFTool，这是一个命令行实用程序，可提供有关您的BPF程序更多信息。我们还介绍了BPFTrace和`kubectl-trace`，这些工具将帮助您使用简洁的特定领域语言（DSL）更有效地编写BPF程序。最后，我们讨论了eBPF
+    Exporter，这是一个将BPF与Prometheus集成的开源项目。
+- en: BPFTool
+  id: totrans-3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPFTool
+- en: BPFTool is a kernel utility for inspecting of BPF programs and maps. This tool
+    doesn’t come installed by default on any Linux distribution, and it’s in heavy
+    development, so you’ll want to compile the version that best supports your Linux
+    kernel. We cover the version of BPFTool distributed with version 5.1 of the Linux
+    kernel.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTool是一个内核实用程序，用于检查BPF程序和映射。此工具不会默认安装在任何Linux发行版上，并且正在大力开发中，因此您需要编译最适合您的Linux内核的版本。我们涵盖了与Linux内核版本5.1分发的BPFTool版本。
+- en: In the next sections we discuss how to install BPFTool onto your system and
+    how to use it to observe and change the behavior of your BPF programs and maps
+    from the terminal.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在接下来的章节中，我们将讨论如何将BPFTool安装到您的系统上，并如何使用它从终端观察和更改您的BPF程序和映射的行为。
+- en: Installation
+  id: totrans-6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 安装
+- en: To install BPFTool, you need to download a copy of the kernel’s source code.
+    There might be some packages for your specific Linux distribution online, but
+    we’re going to cover how to install it from the source because it’s not too complicated.
+  id: totrans-7
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要安装BPFTool，您需要下载内核源代码的副本。您的特定Linux发行版可能有一些在线包，但我们将介绍如何从源代码安装，因为这并不太复杂。
+- en: Use Git to clone the repository from GitHub with **`git clone https://github.com/torvalds/linux`**.
+  id: totrans-8
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用**`git clone https://github.com/torvalds/linux`**命令从GitHub克隆存储库。
+- en: Check out the specific kernel version tag with `git checkout v5.1`.
+  id: totrans-9
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用`git checkout v5.1`命令检出特定的内核版本标签。
+- en: Within the kernel’s source, navigate to the directory where BPFTool’s source
+    is stored with `cd tools/bpf/bpftool`.
+  id: totrans-10
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在内核源代码中，使用`cd tools/bpf/bpftool`命令导航到存储BPFTool源代码的目录。
+- en: Compile and install this tool with `make && sudo make install`.
+  id: totrans-11
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 使用`make && sudo make install`命令编译并安装此工具。
+- en: 'You can check that BPFTool is correctly installed by checking its version:'
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 检查BPFTool是否正确安装，可以通过检查其版本来确认：
+- en: '[PRE0]'
+  id: totrans-13
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: Feature Display
+  id: totrans-14
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 特性展示
+- en: 'One of the basic operations that you can perform with BPFTool is scanning your
+    system to know which BPF features you have access to. This is great when you don’t
+    remember which version of the kernel introduced which kind of programs or whether
+    the BPF JIT compiler is enabled. To find out the answer to those questions, and
+    many others, run this command:'
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用BPFTool的基本操作之一是扫描系统，以了解您可以访问哪些BPF特性。当您不记得内核的哪个版本引入了哪种程序类型或BPF JIT编译器是否已启用时，这非常有用。要找出这些问题的答案及其他问题，请运行以下命令：
+- en: '[PRE1]'
+  id: totrans-16
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: 'You’ll get some long output with details about all the supported BPF features
+    in your systems. For brevity, we show you a cropped version of that output here:'
+  id: totrans-17
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您将获得有关系统中所有支持的BPF特性的详细信息的长输出。为了简洁起见，我们在此展示了其剪裁版本：
+- en: '[PRE2]'
+  id: totrans-18
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: 'In this output you can see that our system allows unprivileged users to execute
+    the syscall `bpf`, this call is restricted to certain operations. You can also
+    see that the JIT is enabled. Newer versions of the kernel enable this JIT by default,
+    and it helps greatly in compiling BPF programs. If your system doesn’t have it
+    enabled, you can run this command to enable it:'
+  id: totrans-19
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在此输出中，您可以看到我们的系统允许非特权用户执行`bpf`系统调用，此调用受限于某些操作。您还可以看到JIT已启用。内核的新版本默认启用此JIT，在编译BPF程序时非常有用。如果您的系统未启用此功能，可以运行以下命令来启用它：
+- en: '[PRE3]'
+  id: totrans-20
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: The feature output also shows you which program types and map types are enabled
+    in your system. This command exposes much more information than what we’re showing
+    you here, like BPF helpers supported by program type and many other configuration
+    directives. Feel free to dive into them while exploring your system.
+  id: totrans-21
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 特性输出还显示了在你的系统中启用了哪些程序类型和映射类型。该命令公开的信息比我们这里展示的要多得多，例如，程序类型支持的BPF助手及许多其他配置指令。在探索系统时，可以随意深入了解它们。
+- en: Knowing what features you have at your disposal can be useful, especially if
+    you need to dive into an unknown system. With that, we’re ready to move on to
+    other interesting BPFTool features, like inspecting loaded programs.
+  id: totrans-22
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 知道你可以使用哪些功能非常有用，尤其是当你需要深入了解一个未知的系统时。接下来，我们准备介绍其他有趣的BPFTool功能，比如检查已加载的程序。
+- en: Inspecting BPF Programs
+  id: totrans-23
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 检查BPF程序
+- en: BPFTool gives you direct information about BPF programs on the kernel. It allows
+    you to investigate what’s already running in your system. It also allows you to
+    load and pin new BPF programs that have been previously compiled from your command
+    line.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTool直接提供有关内核中BPF程序的信息。它允许你调查系统中已经运行的内容。它还允许你加载和固定之前从命令行编译的新BPF程序。
+- en: 'The best starting point to learn how to use BPFTool to work with programs is
+    by inspecting what you have running in your system. To do that, you can run the
+    command `bpftool prog show`. If you’re using Systemd as your init system, you
+    probably already have a few BPF programs loaded and attached to some cgroups;
+    we talk about these a little later. The output of running that command will look
+    like this:'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 学习如何使用BPFTool与程序一起工作的最佳起点是检查系统中正在运行的内容。为此，你可以运行`bpftool prog show`命令。如果你使用Systemd作为启动系统，你可能已经加载了一些BPF程序并将其附加到一些cgroups上；我们稍后会详细讨论这些。运行该命令的输出如下所示：
+- en: '[PRE4]'
+  id: totrans-26
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: The numbers on the left side, before the colon, are the program identifiers;
+    we use them later to investigate what these programs are all about. From this
+    output you can also learn which kinds of programs your system is running. In this
+    case, the system is running three BPF programs attached to cgroup socket buffers.
+    The loading time will likely match when you booted your system if those programs
+    were actually started by Systemd. You can also see how much memory those programs
+    are currently using and the identifiers for the maps associated with them. All
+    of this is useful at first glance, and because we have the program identifiers,
+    we can dive a little bit deeper.
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 冒号前面的左侧数字是程序标识符；稍后我们会使用它们来调查这些程序的具体内容。从这个输出中，你还可以了解你的系统正在运行哪些类型的程序。在这种情况下，系统正在运行附加到cgroup套接字缓冲区的三个BPF程序。如果这些程序确实是由Systemd启动的，加载时间可能与你启动系统时相匹配。你还可以看到这些程序当前正在使用多少内存以及与它们相关联的映射的标识符。所有这些信息一目了然，并且因为我们有程序标识符，所以我们可以进一步深入了解。
+- en: 'You can add the program identifier to the previous command as an extra argument:
+    `bpftool prog show id 52`. With that, BPFTool will show you the same information
+    you saw before, but only for the program identified by the ID 52; that way, you
+    can filter out information that you don’t need. This command also supports a `--json`
+    flag to generate some JSON output. This JSON output is very convenient if you
+    want to manipulate the output. For example, tools like `jq` will give you a more
+    structured formatting for this data:'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以将程序标识符作为额外参数添加到前一个命令中：`bpftool prog show id 52`。这样，BPFTool会显示与ID 52对应的相同信息，这样你就可以过滤掉不需要的信息。此命令还支持`--json`标志以生成一些JSON输出。如果你想操作输出，这个JSON输出非常方便。例如，像`jq`这样的工具可以为这些数据提供更结构化的格式化：
+- en: '[PRE5]'
+  id: totrans-29
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: 'You can also perform more advanced manipulations and filter only the information
+    that you’re interested in. In the next example, we’re interested only in knowing
+    the BPF program identifier, which type of program it is, and when it was loaded
+    in the kernel:'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你还可以执行更高级的操作，并且仅筛选你感兴趣的信息。在下一个例子中，我们只关心知道BPF程序标识符、程序类型以及它何时加载到内核中：
+- en: '[PRE6]'
+  id: totrans-31
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: 'When you know a program identifier, you can also get a dump of the whole program
+    using BPFTool; this can be handy when you need to debug the BPF bytecode generated
+    by a compiler:'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当你知道一个程序标识符时，你还可以使用BPFTool获取整个程序的转储；当你需要调试编译器生成的BPF字节码时，这可能会很方便：
+- en: '[PRE7]'
+  id: totrans-33
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: This program loaded in our kernel by Systemd is inspecting packet data by using
+    the helper `bpf_skb_load_bytes`.
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们的Systemd加载的这个程序正在使用`bpf_skb_load_bytes`助手检查数据包数据。
+- en: 'If you want a more visual representation of this program, including instruction
+    jumps, you can use the `visual` keyword in this command. That will generate the
+    output in a format that you can convert to a graph representation with tools like
+    `dotty`, or any other program that can draw graphs:'
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您希望以更直观的方式表示此程序，包括指令跳转，可以在此命令中使用`visual`关键字。这将以一种可以使用`dotty`等工具转换为图形表示的格式生成输出：
+- en: '[PRE8]'
+  id: totrans-36
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: You can see the visual representation for a small Hello World program in [Figure 5-1](#prog_dump_visual).
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以在[图5-1](#prog_dump_visual)中看到一个小型Hello World程序的可视表示。
+- en: '![Visual representation of a BPF program](assets/lbpf_0501.png)'
+  id: totrans-38
+  prefs: []
+  type: TYPE_IMG
+  zh: '![BPF程序的可视表示](assets/lbpf_0501.png)'
+- en: Figure 5-1\. Visual representation of a BPF program
+  id: totrans-39
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 图5-1\. BPF程序的可视表示
+- en: 'If you’re running version 5.1 or newer of the kernel, you’ll also have access
+    to runtime statistics. They tell you how long the kernel is spending on your BPF
+    programs. This feature might not be enabled in your system by default; you’ll
+    need to run this command first to let the kernel know that it needs to show you
+    that data:'
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您正在运行内核的5.1版本或更新版本，您还可以访问运行时统计信息。这些信息告诉您内核在运行您的BPF程序时花费了多少时间。此功能可能不会在您的系统中默认启用；您需要先运行此命令，让内核知道需要显示这些数据：
+- en: '[PRE9]'
+  id: totrans-41
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: 'When the stats are enabled, you’ll get two more pieces of information when
+    you run BPFTool: the total amount of time that the kernel has spent running that
+    program (`run_time_ns`), and how many times it has run it (`run_cnt`):'
+  id: totrans-42
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 启用统计信息后，运行BPFTool时，您将获得两个额外的信息片段：内核运行该程序所花费的总时间(`run_time_ns`)以及运行次数(`run_cnt`)：
+- en: '[PRE10]'
+  id: totrans-43
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: 'But BPFTool doesn’t only allow you to inspect how your programs are doing;
+    it also lets you load new programs into the kernel and attach some of them to
+    sockets and cgroups. For example, we can load one of our previous programs and
+    pin it to the BPF file system, with this command:'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 但是BPFTool不仅允许您检查程序的执行情况；它还允许您将新程序加载到内核中，并将其中一些程序附加到套接字和cgroups。例如，我们可以加载先前的程序之一并将其固定到BPF文件系统中，使用以下命令：
+- en: '[PRE11]'
+  id: totrans-45
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'Because the program is pinned to the filesystem, it won’t terminate after running,
+    and we can see that it’s still loaded with the previous `show` command:'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 因为程序被固定到文件系统，运行后不会终止，我们可以看到它仍然加载在前面的`show`命令中：
+- en: '[PRE12]'
+  id: totrans-47
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: As you can see, BPFTool gives you a lot of information about the programs loaded
+    in your kernel without having to write and compile any code. Let’s see how to
+    work with BPF maps next.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您所见，BPFTool为您提供了有关加载在内核中的程序的大量信息，而无需编写和编译任何代码。接下来让我们看看如何使用BPF映射。
+- en: Inspecting BPF Maps
+  id: totrans-49
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 检查BPF映射
+- en: 'Besides giving you access to inspect and manipulate BPF programs, BPFTool can
+    give you access to the BPF maps that those programs are using. The command to
+    list all maps and filter maps by their identifiers is similar to the `show` command
+    that you saw previously. Instead of asking BPFTool to display information for
+    `prog`, let’s ask it to show us information for `map`:'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了让您访问检查和操作BPF程序外，BPFTool还可以让您访问这些程序正在使用的BPF映射。列出所有映射并按其标识符过滤的命令类似于您之前看到的`show`命令。而不是要求BPFTool显示`prog`的信息，让我们要求它显示`map`的信息：
+- en: '[PRE13]'
+  id: totrans-51
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Those maps match the identifiers that you saw earlier attached to your programs.
+    You can also filter maps by their ID, in the same way we filtered programs by
+    their ID earlier.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这些映射与您早期在程序中看到的标识符匹配。您还可以按照它们的ID过滤映射，就像我们早期按照程序的ID过滤程序一样。
+- en: 'You can use BPFTool to create and update maps and to list all the elements
+    within a map. Creating a new map requires the same information that you provide
+    when you initialize a map along with one of your programs. We need to specify
+    which type of map we want to create, the size of the keys and values, and its
+    name. Because we’re not initializing the map along with a program, we also need
+    to pin it to the BPF filesystem so that we can use it later:'
+  id: totrans-53
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用BPFTool可以创建和更新映射，并列出映射中的所有元素。创建新映射需要与初始化映射时提供的相同信息，以及您的程序之一。我们需要指定要创建的映射类型、键和值的大小以及其名称。因为我们没有与程序一起初始化映射，所以我们还需要将其固定到BPF文件系统，以便稍后使用：
+- en: '[PRE14]'
+  id: totrans-54
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: 'If you list the maps in the system after running that command, you’ll see the
+    new map at the bottom of the list:'
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在运行该命令后，如果列出系统中的映射，您将在列表底部看到新映射：
+- en: '[PRE15]'
+  id: totrans-56
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: After you’ve created the map, you can update and delete elements like we’d do
+    inside a BPF program.
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 创建映射后，您可以更新和删除元素，就像我们在BPF程序内部所做的那样。
+- en: Tip
+  id: totrans-58
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+  zh: 提示
+- en: Remember that you cannot remove elements from fixed-size arrays; you can only
+    update them. But you can totally delete elements from other maps, like hash maps.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请记住，你不能从固定大小的数组中删除元素；你只能更新它们。但是你可以完全删除其他地图中的元素，例如哈希地图。
+- en: 'If you want to add a new element to the map or update an existing one, you
+    can use the `map update` command. You can grab the map identifier from the previous
+    example:'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想向地图中添加新元素或更新现有元素，可以使用`map update`命令。你可以从前面的示例中获取地图标识符：
+- en: '[PRE16]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'If you try to update an element with an invalid key or value, BPFTool will
+    return an error:'
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果尝试使用无效的键或值更新元素，BPFTool将返回错误：
+- en: '[PRE17]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: 'BPFTool can give you a dump of all the elements in a map if you need to inspect
+    its values. You can see how BPF initializes all of the elements to a null value
+    when you create fixed-size array maps:'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果需要检查其值，BPFTool可以为你提供地图中所有元素的转储。当你创建固定大小数组地图时，你可以看到BPF如何将所有元素初始化为null值：
+- en: '[PRE18]'
+  id: totrans-65
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'One of the most powerful options that BPFTool gives you is that you can attach
+    precreated maps to new programs and replace the maps that they would initialize
+    with those preallocated maps. That way, you can give programs access to saved
+    data from the beginning, even if you didn’t write the program to read a map from
+    the BPF file system. To do that, you need to set the map you want to initialize
+    when you load the program with BPFTool. You can specify the map by the ordered
+    identifier that it would have when the program loads it, for example 0 for the
+    first map, 1 for the second one, and so on. You can also specify the map by its
+    name, which is usually more convenient:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTool给你提供的最强大选项之一是你可以将预先创建的地图附加到新程序上，并用这些预分配的地图替换它们将初始化的地图。这样，即使你没有编写程序从BPF文件系统读取地图，也可以在程序加载时给程序访问保存的数据。为此，你需要在使用BPFTool加载程序时设置要初始化的地图。你可以通过地图的有序标识符指定地图，例如第一个地图为0，第二个为1，依此类推。你也可以通过地图的名称指定地图，这通常更方便：
+- en: '[PRE19]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: In this example we attach the map that we just created to a new program. In
+    this case, we replace the map by its name, because we know that the program initializes
+    a map called `counter`. You can also use the map’s index position with the keyword
+    `idx`, as in `idx 0`, if that’s easier to remember for you.
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个例子中，我们将刚创建的地图附加到一个新程序中。在这种情况下，我们通过地图名称替换地图，因为我们知道该程序初始化了一个名为`counter`的地图。如果你觉得更容易记忆，你也可以使用关键词`idx`来使用地图的索引位置，例如`idx
+    0`。
+- en: Accessing BPF maps directly from the command line is useful when you need to
+    debug message passing in real time. BPFTool gives you direct access in a convenient
+    way. Besides introspecting programs and maps, you can use BPFTool to extract much
+    more information from the kernel. Let’s see how to access specific interfaces
+    next.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 直接从命令行访问BPF地图在需要实时调试消息传递时非常有用。BPFTool以方便的方式为你提供直接访问。除了检查程序和地图之外，你还可以使用BPFTool从内核中提取更多信息。接下来让我们看看如何访问特定接口。
+- en: Inspecting Programs Attached to Specific Interfaces
+  id: totrans-70
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 检查连接到特定接口的程序
+- en: Sometimes you’ll find yourself wondering which programs are attached to specific
+    interfaces. BPF can load programs that work on top of cgroups, Perf events, and
+    network packets. The subcommands `cgroup`, `perf`, and `net` can help you trace
+    back attachments on those interfaces.
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有时你会想知道哪些程序连接到特定接口。BPF可以加载在cgroups、Perf事件和网络数据包之上运行的程序。子命令`cgroup`、`perf`和`net`可以帮助你跟踪这些接口上的附件。
+- en: The `perf` subcommand lists all programs attached to tracing points in the system,
+    like kprobes, uprobes, and tracepoints; you can see that listing by running `bpftool
+    perf show`.
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`perf`子命令列出系统中跟踪点（如kprobes、uprobes和tracepoints）附加的所有程序；你可以通过运行`bpftool perf
+    show`查看此列表。'
+- en: The `net` subcommand lists programs attached to XDP and Traffic Control. Other
+    attachments, like socket filters and reuseport programs, are accessible only by
+    using `iproute2`. You can list the attachments to XDP and TC with `bpftool net
+    show`, like you’ve seen with other BPF objects.
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`net`子命令列出连接到XDP和Traffic Control的程序。像套接字过滤器和复用端口程序这样的其他附件只能通过使用`iproute2`访问。你可以像查看其他BPF对象一样，使用`bpftool
+    net show`列出连接到XDP和TC的附件。'
+- en: 'Finally, the `cgroup` subcommand lists all programs attached to cgroups. This
+    subcommand is a little bit different than the other ones you’ve seen. `bpftool
+    cgroup show` requires the path to the cgroup you want to inspect. If you want
+    to list all the attachments in all cgroups in the system, you’ll need to use `bpftool
+    cgroup tree`, as shown in this example:'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最后，`cgroup` 子命令列出附加到 cgroups 的所有程序。这个子命令与您看到的其他命令有点不同。`bpftool cgroup show`
+    需要指定要检查的 cgroup 的路径。如果要列出系统中所有 cgroups 中的所有附件，您需要使用 `bpftool cgroup tree`，如本例所示：
+- en: '[PRE20]'
+  id: totrans-75
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: Thanks to BPFTool, you can verify that your programs are attached correctly
+    to any interface in the kernel, giving you quick visibility access to cgroups,
+    Perf, and the network interface.
+  id: totrans-76
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有了 BPFTool，您可以验证程序是否正确附加到内核中的任何接口，从而快速访问 cgroups、Perf 和网络接口。
+- en: So far, we’ve talked about how you can enter different commands in your terminal
+    to debug how your BPF programs behave. However, remembering all these commands
+    can be cumbersome when you need them the most. Next we describe how to load several
+    commands from plain-text files so that you can build a set of scripts that you
+    can keep handy without having to retain each option that we’ve talked about.
+  id: totrans-77
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 到目前为止，我们已经讨论了如何在终端中输入不同的命令来调试您的 BPF 程序的行为。然而，在您最需要它们时，记住所有这些命令可能会很麻烦。接下来我们描述如何从纯文本文件中加载多个命令，以便您可以建立一组脚本，而无需记住我们讨论过的每个选项。
+- en: Loading Commands in Batch Mode
+  id: totrans-78
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 批处理模式加载命令
+- en: It’s common to run several commands over and over while you’re trying to analyze
+    the behavior of one or multiple systems. You might end up with a collection of
+    commands that you use frequently as part of your toolchain. BPFTool’s batch mode
+    is for you if you don’t want to type those commands every single time.
+  id: totrans-79
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在您试图分析一个或多个系统的行为时，运行多个命令多次是很常见的。您可能会最终得到一组您在工具链中经常使用的命令集合。如果您不想每次都输入这些命令，BPFTool
+    的批处理模式就是为您准备的。
+- en: 'With batch mode, you can write all of the commands that you want to execute
+    in a file and run all of them at once. You can also write comments in this file
+    by starting a line with #. However, this execution mode is not atomic. BPFTool
+    executes commands line by line, and it will abort the execution if one of the
+    commands fails, leaving the system in the state it was in after running the latest
+    successful command.'
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '使用批处理模式，您可以将想要执行的所有命令写入一个文件中，并一次性运行它们。您还可以通过在行首添加 # 来在此文件中编写注释。然而，这种执行模式不是原子性的。BPFTool
+    逐行执行命令，并且如果其中一个命令失败，它将中止执行，使系统保持在最新成功命令运行后的状态。'
+- en: 'This is a short example of a file that batch mode can process:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是批处理模式可以处理的文件的一个简短示例：
+- en: '[PRE21]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'If you save those commands in a file called */tmp/batch_example.txt*, you’ll
+    be able to load it with `bpftool batch file /tmp/batch_example.txt`. You’ll get
+    output similar to the following snippet when you run this command for the first
+    time, but if you try to run it again, the command will exit with no output because
+    we already have a map with the name `hash_map` in the system, and the batch execution
+    will fail in the first line:'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你将这些命令保存在名为 */tmp/batch_example.txt* 的文件中，你可以使用 `bpftool batch file /tmp/batch_example.txt`
+    加载它。当你第一次运行此命令时，将会得到类似以下片段的输出，但如果你尝试再次运行它，由于系统中已经有一个名为 `hash_map` 的映射，命令将会退出而不产生输出，并且批处理执行将在第一行失败：
+- en: '[PRE22]'
+  id: totrans-84
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: Batch mode is one of our favorite options in BPFTool. We recommend keeping these
+    batch files in a version control system so that you can share them with your team
+    to create your own set of utility tools. Before jumping to our next favorite utility,
+    let’s see how BPFTool can help you understand the BPF Type Format better.
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 批处理模式是我们在 BPFTool 中最喜欢的选项之一。我们建议将这些批处理文件存储在版本控制系统中，以便您可以与团队共享，创建自己的一套实用工具。在跳转到我们下一个最喜欢的实用程序之前，让我们看看
+    BPFTool 如何帮助您更好地理解 BPF 类型格式。
+- en: Displaying BTF Information
+  id: totrans-86
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 显示 BTF 信息
+- en: BPFTool can display BPF Type Format (BTF) information for any given binary object
+    when it is present. As we mentioned in [Chapter 2](ch02.html#running_your_first_BPF_programs),
+    BTF annotates program structures with metadata information to help you debug programs.
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当存在时，BPFTool 可以显示任何给定二进制对象的 BPF 类型格式（BTF）信息。正如我们在[第2章](ch02.html#running_your_first_BPF_programs)中提到的，BTF
+    用元数据信息注释程序结构，以帮助您调试程序。
+- en: For example, it can give you the source file and line numbers for each instruction
+    in a BPF program when you add the keyword `linum` to `prog dump`.
+  id: totrans-88
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，当您向 `prog dump` 添加关键字 `linum` 时，它可以为 BPF 程序中的每条指令提供源文件和行号。
+- en: More recent versions of BPFTool include a new `btf` subcommand to help you dive
+    into your programs. The initial focus of this command is to visualize structure
+    types. For example, `bpftool btf dump id 54` shows all of the BFT types for the
+    program loaded with an ID of 54.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 较新版本的BPFTool包括一个新的`btf`子命令，帮助您深入了解程序。该命令的初始重点是可视化结构类型。例如，`bpftool btf dump id
+    54`显示了加载ID为54的程序的所有BFT类型。
+- en: These are some of the things you can use BPFTool for. It’s a low-friction entry
+    point to any system, especially if you don’t work on that system on a day-to-day
+    basis.
+  id: totrans-90
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用BPFTool的一些用途。这是一个低摩擦的入口点，尤其是如果你不是每天在该系统上工作的话。
+- en: BPFTrace
+  id: totrans-91
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: BPFTrace
+- en: BPFTrace is a high-level tracing language for BPF. It allows you to write BPF
+    programs with a concise DSL, and save them as scripts that you can execute without
+    having to compile and load them in the kernel manually. The language is inspired
+    by other well-known tools, like awk and DTrace. If you’re familiar with DTrace
+    and you’ve always missed being able to use it on Linux, you’re going to find in
+    BPFTrace a great substitute.
+  id: totrans-92
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTrace是一种面向BPF的高级跟踪语言。它允许您使用简洁的DSL编写BPF程序，并将它们保存为脚本，无需手动编译和加载到内核中。这种语言受其他知名工具的启发，如awk和DTrace。如果您熟悉DTrace，并且一直想在Linux上使用它，那么在BPFTrace中您会找到一个很好的替代品。
+- en: One of the advantages of using BPFTrace over writing programs directly with
+    BCC or other BPF tooling is that BPFTrace provides a lot of built-in functionality
+    that you don’t need to implement yourself, such as aggregating information and
+    creating histograms. On the other hand, the language that BPFTrace uses is much
+    more limited, and it will get in your way if you try to implement advanced programs.
+    In this section, we show you the most important aspects of the language. We recommend
+    going to the [BPFTrace repository on GitHub](https://github.com/iovisor/bpftrace)
+    to learn about it.
+  id: totrans-93
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 使用BPFTrace而不是直接用BCC或其他BPF工具编写程序的一个优点是，BPFTrace提供了许多不需要您自己实现的内置功能，例如聚合信息和创建直方图。另一方面，BPFTrace使用的语言更加有限，如果尝试实现高级程序可能会受到限制。在本节中，我们展示了语言的最重要方面。我们建议访问[Github上的BPFTrace存储库](https://github.com/iovisor/bpftrace)来了解更多信息。
+- en: Installation
+  id: totrans-94
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 安装
+- en: You can install BPFTrace in several ways, although its developers recommend
+    you use one of the prebuilt packages for your specific Linux distribution. They
+    also maintain a document with all the installation options and prerequisites for
+    your system in their repository. There, you’ll find instructions in the [installation
+    document](https://oreil.ly/h9Pha).
+  id: totrans-95
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以通过多种方式安装BPFTrace，尽管其开发人员建议您使用适合您特定Linux发行版的预构建软件包之一。他们还在其存储库中维护了一份包含所有安装选项和系统前提条件的文档。在那里，您会找到关于[安装文档](https://oreil.ly/h9Pha)的说明。
+- en: Language Reference
+  id: totrans-96
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 语言参考
+- en: 'The programs that BPFTrace executes have a terse syntax. We can divide them
+    into three sections: header, action blocks, and footer. The header is a special
+    block that BPFTrace executes when it loads the program; it’s commonly used to
+    print some information at the top of the output, like a preamble. In the same
+    way, the footer is a special block that BPFTrace executes once before terminating
+    the program. Both the header and footer are optional sections in a BPFTrace program.
+    A BPFTrace program must have at least one *action block*. Action blocks are where
+    we specify the probes that we want to trace and the actions we perform when the
+    kernel fires the events for those probes. The next snippet shows you these three
+    sections in a basic example:'
+  id: totrans-97
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTrace执行的程序具有简洁的语法。我们可以将它们分为三个部分：头部、动作块和尾部。头部是BPFTrace加载程序时执行的特殊块；通常用于在输出顶部打印一些信息，如序言。同样，尾部是BPFTrace在终止程序之前执行的特殊块。头部和尾部都是BPFTrace程序中可选的部分。BPFTrace程序必须至少有一个*动作块*。动作块是我们指定要跟踪的探针及内核触发这些探针事件时执行的操作的地方。下一段代码片段展示了一个基本示例中的这三个部分：
+- en: '[PRE23]'
+  id: totrans-98
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: The header section is always marked with the keyword `BEGIN`, and the footer
+    section is always marked with the keyword `END`. These keywords are reserved by
+    BPFTrace. Action block identifiers define the probe to which you want to attach
+    the BPF action. In the previous example, we printed a log line every time the
+    kernel opens a file.
+  id: totrans-99
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 头部区域始终用关键字`BEGIN`标记，尾部区域始终用关键字`END`标记。这些关键字是BPFTrace保留的。动作块标识符定义了要将BPF动作附加到的探针。在前面的示例中，我们每次内核打开文件时都会打印一条日志行。
+- en: Besides identifying the program sections, we can already see a few more details
+    about the language syntax in the previous examples. BPFTrace provides some helpers
+    that are translated to BPF code when the program is compiled. The helper `printf`
+    is a wrapper around the C function `printf`, which prints program details when
+    you need it. `str` is a built-in helper that translates a C pointer to its string
+    representation. Many kernel functions receive pointers to characters as arguments;
+    this helper translates those pointers to strings for you.
+  id: totrans-100
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了识别程序段之外，我们已经在之前的示例中看到了有关语言语法的一些更多细节。当程序编译时，BPFTrace提供一些帮助器，这些帮助器会被转换为BPF代码。帮助器`printf`是C函数`printf`的包装器，用于在需要时打印程序细节。`str`是一个内置帮助器，将C指针转换为其字符串表示。许多内核函数接收字符指针作为参数；此帮助器会将这些指针转换为字符串。
+- en: BPFTrace could be considered a dynamic language in the sense that it doesn’t
+    know the number of arguments a probe might receive when it’s executed by the kernel.
+    This is why BPFTrace provides argument helpers to access the information that
+    the kernel processes. BPFTrace generates these helpers dynamically depending on
+    the number of arguments the block receives, and you can access the information
+    by its position in the list of arguments. In the previous example, `arg1` is the
+    reference to the second argument in the `open` syscall, which makes reference
+    to the file path.
+  id: totrans-101
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTrace在某种意义上可以被视为动态语言，因为它不知道内核在执行时可能接收到的参数数量。这就是为什么BPFTrace提供参数帮助器来访问内核处理的信息。BPFTrace根据块接收的参数数量动态生成这些帮助器，并且您可以通过参数在参数列表中的位置访问信息。在上一个示例中，`arg1`是`open`系统调用中第二个参数的引用，该参数是文件路径的引用。
+- en: 'To execute this example, you can save it in a file and run BPFTrace with the
+    file path as the first argument:'
+  id: totrans-102
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要执行此示例，您可以将其保存到文件中，并使用文件路径作为第一个参数运行BPFTrace：
+- en: '[PRE24]'
+  id: totrans-103
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: 'BPFTrace’s language is designed with scripting in mind. In the previous examples,
+    you’ve seen the terse version of the language, so you can get familiar with it.
+    But many of the programs that you can write with BPFTrace fit on one single line.
+    You don’t need to store those one-line programs in files to execute them; you
+    can run them with the option `-e` when you execute BPFTrace. For example, the
+    previous counter example can be a one-liner by collapsing the action block into
+    a single line:'
+  id: totrans-104
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTrace的语言设计考虑到了脚本编写。在前面的示例中，您已经看到了该语言的简洁版本，因此您可以熟悉它。但是，您可以用BPFTrace编写的许多程序都可以放在一行中。您无需将这些单行程序存储在文件中以执行它们；在执行BPFTrace时，可以使用`-e`选项来运行它们。例如，前面的计数器示例可以通过将动作块折叠成一行来变成一行代码：
+- en: '[PRE25]'
+  id: totrans-105
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE25]'
+- en: Now that you know a little bit more about BPFTrace’s language, let’s see how
+    to use it in several scenarios.
+  id: totrans-106
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您对BPFTrace的语言有了更多了解，让我们看看如何在几种场景中使用它。
+- en: Filtering
+  id: totrans-107
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 过滤
+- en: When you run the previous example, you probably get a stream of files that your
+    system is constantly opening, until you press Ctrl-C to exit the program. That’s
+    because we’re telling BPF to print every file descriptor that the kernel opens.
+    There are situations when you want to execute the action block only for specific
+    conditions. BPFTrace calls that *filtering*.
+  id: totrans-108
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 当您运行上一个示例时，您可能会得到一个流，显示系统正在不断打开的文件，直到您按Ctrl-C退出程序。这是因为我们告诉BPF打印内核打开的每个文件描述符。有些情况下，您只想针对特定条件执行动作块。BPFTrace称之为*过滤*。
+- en: 'You can associate one filter to each action block. They are evaluated like
+    action blocks, but the action does not execute if the filter returns a false value.
+    They also have access to the rest of the language, including probe arguments and
+    helpers. These filters are encapsulated within two slashes after the action header:'
+  id: totrans-109
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 您可以将一个过滤器与每个动作块关联起来。它们像动作块一样进行评估，但如果过滤器返回false值，则动作不会执行。它们还可以访问语言的其余部分，包括探针参数和帮助器。这些过滤器在动作头部之后用两条斜线封装起来：
+- en: '[PRE26]'
+  id: totrans-110
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE26]'
+- en: 'In this example, we refine our action block to be executed only when the file
+    the kernel is opening is the file that we’re using to store this example. If you
+    run the program with the new filter, you’ll see that it prints the header, but
+    it stops printing there. This is because every file that was triggering our action
+    before is being skipped now thanks to our new filter. If you open the example
+    file several times in a different terminal, you’ll see how the kernel executes
+    the action when the filter matches our file path:'
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这个例子中，我们将我们的动作块细化为仅在内核打开的文件是我们用来存储此示例的文件时执行。如果你使用新的过滤器运行程序，你会看到它打印页眉，但在那里停止打印。这是因为以前触发我们动作的每个文件现在都被跳过了，多亏了我们的新过滤器。如果你在不同的终端中多次打开示例文件，你会看到内核在过滤器匹配我们文件路径时如何执行动作：
+- en: '[PRE27]'
+  id: totrans-112
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE27]'
+- en: BPFTrace’s filtering capabilities are super helpful to hide information that
+    you don’t need, keeping data scoped to what you really care about. Next we talk
+    about how BPFTrace makes working with maps seamless.
+  id: totrans-113
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTrace 的过滤功能非常有助于隐藏不需要的信息，并将数据范围限定在真正关心的内容上。接下来我们将讨论 BPFTrace 如何实现与映射的无缝工作。
+- en: Dynamic Mapping
+  id: totrans-114
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 动态映射
+- en: One handy feature that BPFTrace implements is dynamic map associations. It can
+    generate BPF maps dynamically that you can use for many of the operations you’ve
+    seen throughout the book. All map associations start with the character `@`, followed
+    by the name of the map that you want to create. You can also associate update
+    elements in those maps by assigning them values.
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTrace 实现的一个方便功能是动态映射关联。它可以动态生成你可以用于本书中许多操作的 BPF 映射。所有映射关联都以字符 `@` 开头，后跟你想要创建的映射的名称。你还可以通过为这些映射分配值来关联更新元素。
+- en: 'If we take the example that we started this section with, we could aggregate
+    how often our system opens specific files. To do that, we need to count how many
+    times the kernel runs the `open` syscall on a specific file, and then store those
+    counters in a map. To identify those aggregations, we can use the file path as
+    the map’s key. This is how our action block would look in this case:'
+  id: totrans-116
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果我们采用本节开始时的示例，我们可以聚合系统打开特定文件的频率。为此，我们需要计算内核在特定文件上运行 `open` 系统调用的次数，然后将这些计数器存储在映射中。为了识别这些聚合，我们可以使用文件路径作为映射的键。在这种情况下，我们的动作块将如何看起来：
+- en: '[PRE28]'
+  id: totrans-117
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE28]'
+- en: 'If you run your program again, you’ll get output similar to this:'
+  id: totrans-118
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你再次运行你的程序，你会得到类似于这样的输出：
+- en: '[PRE29]'
+  id: totrans-119
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE29]'
+- en: As you can see, BPFTrace prints the contents of the map when it stops the program
+    execution. And as we expected, it’s aggregating how often the kernel is opening
+    the files in our system. By default, BPFTrace is always going to print the contents
+    of every map it creates when it terminates. You don’t need to specify that you
+    want to print a map; it always assumes that you want to. You can change that behavior
+    by clearing the map inside the `END` block by using the built-in function `clear`.
+    This works because printing maps always happens after the footer block is executed.
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如你所见，当 BPFTrace 停止程序执行时，它会打印映射的内容。正如我们预期的那样，它正在聚合内核在我们系统中打开文件的频率。默认情况下，当 BPFTrace
+    终止时，它总是会打印每个映射的内容。你不需要指定要打印映射；它总是假设你想要这样做。你可以通过在 `END` 块内使用内置函数 `clear` 来更改这种行为来清除映射。这有效是因为打印映射始终发生在页脚块执行之后。
+- en: BPFTrace dynamic mapping is super convenient. It removes a lot of boilerplate
+    required to work with maps and focuses on helping you to collect data easily.
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTrace 的动态映射非常方便。它消除了使用映射所需的大量样板，并专注于帮助你轻松收集数据。
+- en: BPFTrace is a powerful tool for your day-to-day tasks. Its scripting language
+    gives you enough flexibility to access every aspect of your system without the
+    ceremony of having to compile and load your BPF program into the kernel manually,
+    and this can help you trace and debug problems in your system from the get-go.
+    Check out the reference guide in its GitHub repository to learn how to take advantage
+    of all of its built-in capabilities, such as automatic histograms and stack trace
+    aggregations.
+  id: totrans-122
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPFTrace 是你日常任务中强大的工具。其脚本语言提供了足够的灵活性，使你能够在不需要手动编译和加载 BPF 程序到内核的情况下访问系统的各个方面，从而帮助你从一开始就跟踪和调试系统中的问题。请查看其
+    GitHub 仓库中的参考指南，了解如何充分利用其内置功能，如自动直方图和堆栈跟踪聚合。
+- en: In the next section we explore how to use BPFTrace inside Kubernetes.
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在下一节中，我们将探讨如何在 Kubernetes 中使用 BPFTrace。
+- en: kubectl-trace
+  id: totrans-124
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: kubectl-trace
+- en: '`kubectl-trace` is a fantastic plug-in for the Kubernetes command line, `kubectl`.
+    It helps you schedule BPFTrace programs in your Kubernetes cluster without having
+    to install any additional packages or modules. It does this by scheduling a Kubernetes
+    job with a container image that has everything you need to run the program installed
+    already. This image is called `trace-runner`, and it’s also available in the public
+    Docker registry.'
+  id: totrans-125
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`kubectl-trace` 是 Kubernetes 命令行工具 `kubectl` 的一个出色插件。它帮助你在 Kubernetes 集群中调度
+    BPFTrace 程序，而无需安装任何额外的包或模块。它通过调度一个 Kubernetes 任务来实现，任务使用已经安装了运行程序所需一切的容器镜像。这个镜像称为
+    `trace-runner`，并且也可以在公共 Docker 注册表中找到。'
+- en: Installation
+  id: totrans-126
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 安装
+- en: 'You need to install `kubectl-trace` from its source repository using Go’s toolchain
+    because its developers don’t provide any binary package:'
+  id: totrans-127
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你需要使用 Go 的工具链从其源代码仓库安装 `kubectl-trace`，因为它的开发者没有提供二进制包：
+- en: '[PRE30]'
+  id: totrans-128
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE30]'
+- en: '`kubectl`’s plug-in system will automatically detect this new add-on after
+    Go’s toolchain compiles the program and puts it in the path. `kubectl-trace` automatically
+    downloads the Docker images that it needs to run in your cluster the first time
+    that you execute it.'
+  id: totrans-129
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Go 工具链编译程序并将其放入路径后，`kubectl` 的插件系统会自动检测到这个新插件。`kubectl-trace` 在第一次执行时会自动下载它在集群中运行所需的
+    Docker 镜像。
+- en: Inspecting Kubernetes Nodes
+  id: totrans-130
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 检查 Kubernetes 节点
+- en: You can use `kubectl-trace` to target nodes and pods where containers run, and
+    you can also use it to target processes running on those containers. In the first
+    case, you can run pretty much any BPF program that you’d like. However, in the
+    second case, you’re restricted to running only the programs that attach user-space
+    probes to those processes.
+  id: totrans-131
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 你可以使用 `kubectl-trace` 来定位运行容器的节点和 Pod，也可以用它来定位运行在这些容器上的进程。在第一种情况下，你几乎可以运行任何你想要的
+    BPF 程序。但是，在第二种情况下，你只能运行将用户空间探针附加到这些进程的程序。
+- en: 'If you want to run a BPF program on a specific node, you need a proper identifier
+    so that Kubernetes schedules the job in the appropriate place. After you have
+    that identifier, running the program is similar to running the programs you saw
+    earlier. This is how we would run our one-liner to count file openings:'
+  id: totrans-132
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你想在特定节点上运行 BPF 程序，你需要一个适当的标识符，以便 Kubernetes 将任务调度到合适的地方。获取了标识符后，运行程序的方式与之前所见的程序类似。这是我们运行一个用于计算文件打开次数的单行程序的方法：
+- en: '[PRE31]'
+  id: totrans-133
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE31]'
+- en: As you can see, the program is exactly the same, but we’re using the command
+    `kubectl trace run` to schedule it in a specific cluster node. We use the syntax
+    `node/...` to tell `kubectl-trace` that we’re targetting a node in the cluster.
+    If we want to target a specific pod, we’d replace `node/` with `pod/`.
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如你所见，程序完全相同，但我们使用 `kubectl trace run` 命令将其调度到特定的集群节点上。我们使用 `node/...` 语法告诉 `kubectl-trace`
+    我们要定位集群中的一个节点。如果我们想要定位特定的 Pod，我们将 `node/` 替换为 `pod/`。
+- en: 'Running a program on a specific container requires longer syntax; let’s see
+    an example first and go through it:'
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在特定容器上运行程序需要更长的语法；让我们先看一个例子并逐步分解它：
+- en: '[PRE32]'
+  id: totrans-136
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE32]'
+- en: There are two interesting things to highlight in this command. The first is
+    that we need the name of the application running in the container to be able to
+    find its process; this corresponds with the `application_name` in our example.
+    You’ll want to use the name of the binary that’s executed in the container, for
+    example `nginx` or `memcached`. Usually, containers run only one process, but
+    this gives us extra guarantees that we’re attaching our program to the correct
+    process. The second aspect to highlight is the inclusion of `$container_pid` in
+    our BPF program. This is not a BPFTrace helper, but a placeholder that `kubectl-trace`
+    uses as a replacement for the process identifier. Before running the BPF program,
+    the trace-runner substitutes the placeholder with the appropriate identifier,
+    and it attaches our program to the correct process.
+  id: totrans-137
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个命令中有两个值得关注的地方。首先是我们需要应用程序在容器中运行的名称，以便找到其进程；在我们的示例中对应的是 `application_name`。你需要使用在容器中执行的二进制文件的名称，例如
+    `nginx` 或 `memcached`。通常情况下，容器只运行一个进程，但这样做可以确保我们将程序附加到正确的进程上。第二个需要强调的方面是在我们的 BPF
+    程序中包含的 `$container_pid`。这不是一个 BPFTrace 助手，而是 `kubectl-trace` 用作进程标识符替换的占位符。在运行
+    BPF 程序之前，跟踪运行器会用正确的标识符替换占位符，并将我们的程序附加到正确的进程上。
+- en: If you run Kubernetes in production, `kubectl-trace` will make your life much
+    easier when you need to analyze your containers’ behavior.
+  id: totrans-138
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果你在生产环境中运行 Kubernetes，`kubectl-trace` 在需要分析容器行为时将极大地简化你的工作。
+- en: In this and the previous sections, we’ve focused on tools to help you run BPF
+    programs more efficiently, even within container environments. In the next section
+    we talk about a nice tool to integrate data gathering from BPF programs with Prometheus,
+    a well-known open source monitoring system.
+  id: totrans-139
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这一节和前面的章节中，我们专注于帮助您在容器环境中更有效地运行 BPF 程序的工具。在下一节中，我们将介绍一个很好的工具，用于将从 BPF 程序收集的数据集成到
+    Prometheus，这是一个知名的开源监控系统。
+- en: eBPF Exporter
+  id: totrans-140
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: eBPF Exporter
+- en: eBPF Exporter is a tool that allows you to export custom BPF tracing metrics
+    to Prometheus. Prometheus is a highly scalable monitoring and alerting system.
+    One key factor that makes Prometheus different from other monitoring systems is
+    that it uses a pull strategy to fetch metrics, instead of expecting the client
+    to push metrics to it. This allows users to write custom exporters that can gather
+    metrics from any system, and Prometheus will pull them using a well-defined API
+    schema. eBPF Exporter implements this API to fetch tracing metrics from BPF programs
+    and import them into Prometheus.
+  id: totrans-141
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF Exporter 是一个工具，允许您将自定义的 BPF 跟踪指标导出到 Prometheus。Prometheus 是一个高度可扩展的监控和警报系统。使
+    Prometheus 不同于其他监控系统的一个关键因素是它使用拉取策略来获取指标，而不是期望客户端将指标推送给它。这使用户可以编写自定义导出器，从任何系统收集指标，并使用定义良好的
+    API 模式由 Prometheus 拉取它们。eBPF Exporter 实现了这个 API，从 BPF 程序中获取跟踪指标并将其导入 Prometheus。
+- en: Installation
+  id: totrans-142
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 安装
+- en: Although eBPF Exporter offers binary packages, we recommend installing it from
+    source because there are often no new releases. Building from source also gives
+    you access to newer functionality built on top of modern versions of BCC, the
+    BPF Compiler Collection.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管 eBPF Exporter 提供二进制包，我们建议从源代码安装，因为通常没有新的发布版本。从源代码构建还可以让您使用基于现代版本的 BCC（BPF
+    编译器集合）构建的新功能。
+- en: 'To install eBPF Exporter from the source, you need to have BCC and Go’s toolchain
+    already installed on your computer. With those prerequisites, you can use Go to
+    download and build the binary for you:'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要从源代码安装 eBPF Exporter，您需要在计算机上已经安装了 BCC 和 Go 的工具链。有了这些先决条件，您可以使用 Go 下载并构建二进制文件：
+- en: '[PRE33]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE33]'
+- en: Exporting Metrics from BPF
+  id: totrans-146
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 从 BPF 导出指标
+- en: eBPF Exporter is configured using YAML files, in which you can specify the metrics
+    that you want to collect from the system, the BPF program that generates those
+    metrics, and how they translate to Prometheus. When Prometheus sends a request
+    to eBPF Exporter to pull metrics, this tool translates the information that the
+    BPF programs are collecting to metric values. Fortunately, eBPF Exporter bundles
+    many programs that collect very useful information from your system, like instructions
+    per cycle (IPC) and CPU cache hit rates.
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF Exporter 使用 YAML 文件进行配置，您可以在其中指定要从系统收集的指标、生成这些指标的 BPF 程序以及它们如何转换为 Prometheus。当
+    Prometheus 发送请求给 eBPF Exporter 拉取指标时，这个工具将 BPF 程序正在收集的信息转换为指标值。幸运的是，eBPF Exporter
+    捆绑了许多程序，可以从您的系统收集非常有用的信息，如每周期指令数（IPC）和 CPU 缓存命中率。
+- en: 'A simple configuration file for eBPF Exporter includes three main sections.
+    In the first section, you define the metrics that you want Prometheus to pull
+    from the system. Here is where you translate the data collected in BPF maps to
+    metrics that Prometheus understands. Following is an example of these translations
+    from the project’s examples:'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: eBPF Exporter 的简单配置文件包括三个主要部分。在第一部分中，您定义希望 Prometheus 从系统中拉取的指标。这里是将在 BPF 映射中收集的数据转换为
+    Prometheus 理解的指标的地方。以下是项目示例中这些转换的示例：
+- en: '[PRE34]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE34]'
+- en: We’re defining a metric called `timer_start_total`, which aggregates how often
+    the kernel starts a timer. We also specify that we want to collect this information
+    from a BPF map called `counts`. Finally, we define a translation function for
+    the map keys. This is necessary because map keys are usually pointers to the information,
+    and we want to send Prometheus the actual function names.
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们正在定义一个名为 `timer_start_total` 的指标，它汇总内核启动定时器的频率。我们还指定，我们希望从名为 `counts` 的 BPF
+    映射收集此信息。最后，我们为映射键定义了一个转换函数。这是必要的，因为映射键通常是指向信息的指针，而我们希望将实际的函数名称发送给 Prometheus。
+- en: 'The second section in this example describes the probes we want to attach our
+    BPF program to. In this case, we want to trace the timer start calls; we use the
+    tracepoint `timer:timer_start` for that:'
+  id: totrans-151
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此示例的第二节描述了我们要将 BPF 程序附加到的探针。在这种情况下，我们想要跟踪定时器启动调用；我们使用追踪点 `timer:timer_start`
+    实现此目的：
+- en: '[PRE35]'
+  id: totrans-152
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE35]'
+- en: 'Here we’re telling eBPF Exporter that we want to attach the BPF function `tracepoint__timer__timer_start`
+    to this specific tracepoint. Let’s see how to declare that function next:'
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在这里，我们告诉eBPF Exporter，我们希望将BPF函数`tracepoint__timer__timer_start`附加到这个特定的跟踪点。接下来让我们看看如何声明这个函数：
+- en: '[PRE36]'
+  id: totrans-154
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE36]'
+- en: The BPF program is inlined within the YAML file. This is probably one of our
+    less favorite parts of this tool because YAML is particular about whitespacing,
+    but it works for small programs like this one. eBPF Exporter uses BCC to compile
+    programs, so we have access to all its macros and helpers. The previous snippet
+    uses the macro `TRACEPOINT_PROBE` to generate the final function that we’ll attach
+    to our tracepoint with the name `tracepoint__timer__timer_start`.
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: BPF程序是内联在YAML文件中的。这可能是我们这个工具中较不喜欢的部分之一，因为YAML对空白格特别敏感，但对于像这样的小程序来说，它是有效的。eBPF
+    Exporter使用BCC来编译程序，因此我们可以使用其所有宏和助手。前面的代码片段使用宏`TRACEPOINT_PROBE`生成我们将附加到跟踪点的最终函数，其名称为`tracepoint__timer__timer_start`。
+- en: Cloudflare uses eBPF Exporter to monitor metrics across all of its datacenters.
+    The company made sure to bundle the most common metrics that you’ll want to export
+    from your systems. But as you can see, it’s relatively easy to extend with new
+    metrics.
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Cloudflare使用eBPF Exporter来监控其所有数据中心的指标。公司确保捆绑了您希望从系统导出的最常见指标。但正如您所见，扩展新指标相对容易。
+- en: Conclusion
+  id: totrans-157
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 结论
+- en: In this chapter we talked about some of the our favorite tools for system analysis.
+    These tools are general enough to have them on hand when you need to debug any
+    kind of anomaly on your system. As you can see, all these tools abstract the concepts
+    that we saw in the previous chapters to help you use BPF even when the environment
+    is not ready for it. This is one of the many advantages of BPF before other analysis
+    tools; because any modern Linux kernel includes the BPF VM, you can build new
+    tools on top that take advantage of these powerful capabilities.
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本章中，我们讨论了一些我们喜欢的系统分析工具。这些工具足够通用，以便在您需要调试系统中任何异常情况时随时使用。正如您所见，所有这些工具都抽象了我们在前几章中看到的概念，以帮助您在环境尚未准备好使用BPF时使用它。这是BPF在其他分析工具之前的许多优势之一；因为任何现代Linux内核都包括BPF虚拟机，您可以在其上构建利用这些强大功能的新工具。
+- en: There are many other tools that use BPF for similar purposes, such as Cilium
+    and Sysdig, and we encourage you to try them.
+  id: totrans-159
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有许多其他工具也使用BPF来实现类似的目的，如Cilium和Sysdig，我们鼓励您去尝试它们。
+- en: This chapter and [Chapter 4](ch04.html#tracing_with_bpf) dealt mostly with system
+    analysis and tracing, but there is much more that you can do with BPF. In the
+    next chapters we dive into its networking capabilities. We show you how to analyze
+    traffic in any network and how to use BPF to control messages in your network.
+  id: totrans-160
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本章和[第四章](ch04.html#tracing_with_bpf)主要涉及系统分析和跟踪，但是你可以利用BPF做更多事情。在接下来的章节中，我们将深入探讨其网络能力。我们将向您展示如何分析任何网络中的流量，以及如何使用BPF控制网络中的消息。

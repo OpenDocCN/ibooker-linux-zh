@@ -1,0 +1,15 @@
+- en: Part I. Core Concepts
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 第一部分 核心概念
+- en: The first four chapters aim to increase your efficiency quickly, covering concepts
+    and techniques that should be immediately useful. You’ll learn to combine commands
+    with pipes, understand the responsibilities of the Linux shell, rapidly recall
+    and edit commands from the past, and navigate the Linux filesystem with great
+    speed.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 前四章的目标是快速提高您的效率，涵盖应立即有用的概念和技术。您将学会如何使用管道组合命令，了解Linux shell的职责，快速回忆和编辑过去的命令，并以极快的速度浏览Linux文件系统。
