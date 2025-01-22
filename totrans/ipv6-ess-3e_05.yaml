@@ -1,7 +1,9 @@
 - en: Chapter 4. ICMPv6
+  id: totrans-0
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第4章 ICMPv6
 - en: 'If you are familiar with IPv4, the Internet Control Message Protocol (ICMP)
     for IPv4 is probably a good friend of yours: it gives important information about
     the health of the network. ICMPv6 is the version that works with IPv6\. It reports
@@ -12,8 +14,10 @@
     a better packet size and then resend the data. ICMP also performs diagnostic functions,
     such as the well-known ping, which uses ICMP Echo Request and Echo Reply messages
     to test availability of a node.'
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你熟悉IPv4，互联网控制消息协议（ICMP）对于IPv4可能是你的好朋友：它提供有关网络健康的重要信息。ICMPv6是与IPv6配合使用的版本。如果数据包无法正确处理，ICMPv6会报告错误，并发送有关网络状态的信息消息。例如，如果路由器无法转发数据包，因为数据包太大无法通过另一网络发送，它会发送ICMP消息回源主机。源主机可以使用这个ICMP消息来确定更好的数据包大小，然后重新发送数据。ICMP还执行诊断功能，例如著名的ping，它使用ICMP回显请求和回显应答消息来测试节点的可用性。
 - en: ICMPv6 is much more powerful than ICMPv4 and contains new functionality, as
     described in this chapter. For instance, the Internet Group Management Protocol
     (IGMP) function that manages multicast group memberships with IPv4 has been incorporated
@@ -28,51 +32,80 @@
     "Chapter 8. Mobile IPv6"). ICMPv6 is part of IPv6, and it must be implemented
     fully by every IPv6 node. The protocol is defined in RFC 4443\. Neighbor Discovery
     is defined in RFC 4861.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: ICMPv6比ICMPv4更强大，包含新的功能，如本章所述。例如，管理IPv4多播组成员的互联网组管理协议（IGMP）功能已被纳入ICMPv6。同样，IPv4中用于将链路层地址映射到IP地址（反之亦然）的ARP/RARP（地址解析协议/反向地址解析协议）功能也被纳入其中。引入了邻居发现（ND），它使用ICMPv6消息来确定附加到同一链路的邻居的链路层地址，查找路由器，跟踪哪些邻居是可达的，并检测链路层地址的变化。定义了新的消息类型，简化了网络重新编号和主机与路由器之间地址信息更新。ICMPv6还支持移动IPv6，详见[第8章](ch08.html
+    "第8章 移动IPv6")。ICMPv6是IPv6的一部分，必须由每个IPv6节点完全实现。该协议在RFC 4443中定义。邻居发现定义在RFC 4861中。
 - en: General Message Format
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 一般消息格式
 - en: All ICMPv6 messages have the same general header structure, as shown in [Figure 4-1](ch04.html#general_icmpv6_header_format
     "Figure 4-1. General ICMPv6 header format").
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有ICMPv6消息都有相同的一般头部结构，如[图4-1](ch04.html#general_icmpv6_header_format "图4-1.
+    一般ICMPv6头部格式")所示。
 - en: '![General ICMPv6 header format](images/ipv6_0401.png)Figure 4-1. General ICMPv6
     header format'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: '![一般ICMPv6头部格式](images/ipv6_0401.png)图4-1. 一般ICMPv6头部格式'
 - en: Type (1 byte)
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 类型（1字节）
 - en: This field specifies the type of message, which determines the format of the
     remainder of the message. Tables [4-1](ch04.html#icmpv6_error_messages_and_code_type
     "Table 4-1. ICMPv6 error messages and code type") and [4-2](ch04.html#icmpv6_informational_messages
     "Table 4-2. ICMPv6 informational messages") list ICMPv6 message types and numbers.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 该字段指定消息的类型，决定了消息其余部分的格式。表[4-1](ch04.html#icmpv6_error_messages_and_code_type
+    "表 4-1. ICMPv6 错误消息和代码类型")和[4-2](ch04.html#icmpv6_informational_messages "表 4-2.
+    ICMPv6 信息消息")列出了ICMPv6的消息类型和编号。
 - en: Code (1 byte)
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 代码（1字节）
 - en: The Code field depends on the message type and allows for more granular information
     in certain cases. Refer to Tables [4-1](ch04.html#icmpv6_error_messages_and_code_type
     "Table 4-1. ICMPv6 error messages and code type") and [4-2](ch04.html#icmpv6_informational_messages
     "Table 4-2. ICMPv6 informational messages") for a detailed list.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 代码字段依赖于消息类型，并在某些情况下提供更详细的信息。有关详细列表，请参考表[4-1](ch04.html#icmpv6_error_messages_and_code_type
+    "表 4-1. ICMPv6 错误消息和代码类型")和[4-2](ch04.html#icmpv6_informational_messages "表 4-2.
+    ICMPv6 信息消息")。
 - en: Checksum (2 bytes)
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 校验和（2字节）
 - en: The Checksum field is used to detect data corruption in the ICMPv6 header and
     in parts of the IPv6 header. In order to calculate the checksum, a node must determine
     the Source and Destination address in the IPv6 header. There is a pseudoheader
     included in the checksum calculation, which is new with ICMPv6\. [Chapter 5](ch05.html
     "Chapter 5. Networking") discusses the checksum and the pseudoheader.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 校验和字段用于检测ICMPv6头部和部分IPv6头部中的数据损坏。为了计算校验和，节点必须确定IPv6头部中的源地址和目标地址。校验和计算中包括一个伪头部，这是ICMPv6新增的内容。[第5章](ch05.html
+    "第5章 网络")讨论了校验和和伪头部。
 - en: Message body (variable size)
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 消息体（可变大小）
 - en: Depending on the type and code, the message body will hold different data. In
     the case of an error message, to assist in troubleshooting, it will contain as
     much as possible of the packet that invoked the message. The total size of the
@@ -81,351 +114,543 @@
     and code type") and [4-2](ch04.html#icmpv6_informational_messages "Table 4-2. ICMPv6
     informational messages") provide an overview of the different message types, along
     with the additional code information, which depends on the message type.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据类型和代码，消息体将包含不同的数据。对于错误消息，为了帮助故障排除，它将尽可能包含触发该消息的数据包。ICMPv6数据包的总大小不应超过最小IPv6
+    MTU，即1280字节。表[4-1](ch04.html#icmpv6_error_messages_and_code_type "表4-1 ICMPv6错误消息和代码类型")和表[4-2](ch04.html#icmpv6_informational_messages
+    "表4-2 ICMPv6信息性消息")提供了不同消息类型的概述，以及取决于消息类型的附加代码信息。
 - en: 'There are two classes of ICMP messages:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: ICMP消息分为两类：
 - en: ICMP error messages
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: ICMP错误消息
 - en: Error messages have a 0 in the high-order bit of their message Type field. ICMP
     error message types are, therefore, in the range from 0 to 127.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 错误消息在其消息类型字段的高阶位上有一个0。因此，ICMP错误消息类型的范围为0到127。
 - en: ICMP informational messages
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: ICMP信息性消息
 - en: Informational messages have a 1 in the high-order bit of their message Type
     field. ICMP informational message types are, therefore, in the range from 128
     to 255.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 信息性消息在其消息类型字段的高阶位上有一个1。因此，ICMP信息性消息类型的范围为128到255。
 - en: An IPv6 header and zero or more Extension headers precede every ICMPv6 message.
     The header just preceding the ICMP header has a Next Header value of 58\. This
     value is different from the value for ICMPv4 (which has the value 1).
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个ICMPv6消息前面都有一个IPv6头部和零个或多个扩展头部。紧接ICMP头部之前的头部的“下一个头部”值为58。这个值与ICMPv4的值不同（ICMPv4的值为1）。
 - en: Note
+  id: totrans-20
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: The values for the Next Header field are discussed in [Chapter 3](ch03.html
     "Chapter 3. The Structure of the IPv6 Protocol").
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 下一个头部字段的值在[第3章](ch03.html "第3章 IPv6协议结构")中有讨论。
 - en: 'The following message types are described in RFC 4443:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下消息类型在RFC 4443中有描述：
 - en: ICMPv6 error messages
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: ICMPv6错误消息
 - en: Destination Unreachable (message type 1)
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 目标不可达（消息类型1）
 - en: Packet Too Big (message type 2)
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 数据包过大（消息类型2）
 - en: Time Exceeded (message type 3)
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 时间超限（消息类型3）
 - en: Parameter Problem (message type 4)
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 参数问题（消息类型4）
 - en: ICMPv6 informational messages
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: ICMPv6信息性消息
 - en: Echo Request (message type 128)
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 回显请求（消息类型128）
 - en: Echo Reply (message type 129)
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 回显应答（消息类型129）
 - en: Note
+  id: totrans-31
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: For the most current list of ICMPv6 message types, refer to the Internet Assigned
     Number Authority (IANA) at [http://www.iana.org/assignments/icmpv6-parameters](http://www.iana.org/assignments/icmpv6-parameters).
     All IPv4 ICMP parameters can be found at [http://www.iana.org/assignments/icmp-parameters](http://www.iana.org/assignments/icmp-parameters).
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于最新的ICMPv6消息类型列表，请参考互联网分配号码管理局（IANA）网站：[http://www.iana.org/assignments/icmpv6-parameters](http://www.iana.org/assignments/icmpv6-parameters)。所有IPv4
+    ICMP参数可在[http://www.iana.org/assignments/icmp-parameters](http://www.iana.org/assignments/icmp-parameters)找到。
 - en: Table 4-1. ICMPv6 error messages and code type
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 表4-1. ICMPv6错误消息和代码类型
 - en: '| Message number | Message type | Code field |'
+  id: totrans-34
   prefs: []
   type: TYPE_TB
+  zh: '| 消息编号 | 消息类型 | 代码字段 |'
 - en: '| --- | --- | --- |'
+  id: totrans-35
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| 1 | Destination Unreachable | `0` = no route to destination`1` = communication
     with destination administratively prohibited`2` = beyond scope of source address`3`
     = address unreachable`4` = port unreachable`5` = Source address failed ingress/egress
     policy`6` = reject route to destination`7` = error in source routing header |'
+  id: totrans-36
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | 目标不可达 | `0` = 无路由到目标`1` = 与目标的通信被管理禁止`2` = 超出源地址范围`3` = 地址不可达`4` = 端口不可达`5`
+    = 源地址未通过入口/出口策略`6` = 拒绝路由到目标`7` = 源路由头部出错 |'
 - en: '| 2 | Packet Too Big | Code field set to `0` by the sender and ignored by the
     receiver |'
+  id: totrans-37
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | 数据包过大 | 代码字段由发送方设置为 `0`，接收方忽略 |'
 - en: '| 3 | Time Exceeded | `0` = hop limit exceeded in transit`1` = fragment reassembly
     time exceeded |'
+  id: totrans-38
   prefs: []
   type: TYPE_TB
+  zh: '| 3 | 超时 | `0` = 路由跳数限制超出`1` = 分片重组时间超出 |'
 - en: '| 4 | Parameter Problem | `0` = erroneous header field encountered`1` = unrecognized
     next header type encountered`2` = unrecognized IPv6 option encounteredThe pointer
     field identifies the octet offset within the invoking packet where the error was
     detected. The pointer points beyond the end of the ICMPv6 packet if the field
     in error is beyond what can fit in the maximum size of an ICMPv6 error message.
     |'
+  id: totrans-39
   prefs: []
   type: TYPE_TB
+  zh: '| 4 | 参数问题 | `0` = 遇到错误的头字段`1` = 遇到无法识别的下一个头类型`2` = 遇到无法识别的 IPv6 选项。指针字段标识调用数据包中发现错误的字节偏移位置。如果错误字段超出了
+    ICMPv6 错误消息最大大小的范围，指针将指向超出 ICMPv6 包末尾的位置。 |'
 - en: '| 100 and 101 | Private experimentation | RFC 4443 |'
+  id: totrans-40
   prefs: []
   type: TYPE_TB
+  zh: '| 100 和 101 | 私有实验 | RFC 4443 |'
 - en: '| 127 | Reserved for expansion of ICMPv6 error messages | RFC 4443 |'
+  id: totrans-41
   prefs: []
   type: TYPE_TB
+  zh: '| 127 | 保留用于扩展 ICMPv6 错误消息 | RFC 4443 |'
 - en: Note that the message numbers and types have substantially changed compared
     to ICMPv4\. ICMP for IPv6 is a different protocol, and the two versions of ICMP
     are not compatible. Your analyzer, such as Wireshark, should properly decode all
     this information, so you do not have to worry about memorizing it.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，消息编号和类型相比于 ICMPv4 有了显著变化。ICMP for IPv6 是一个不同的协议，两个版本的 ICMP 不兼容。您的分析工具，如
+    Wireshark，应该能够正确解码所有这些信息，因此您不必担心记住它们。
 - en: Table 4-2. ICMPv6 informational messages
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 4-2。ICMPv6 信息消息
 - en: '| Message number | Message type | Description |'
+  id: totrans-44
   prefs: []
   type: TYPE_TB
+  zh: '| 消息编号 | 消息类型 | 描述 |'
 - en: '| --- | --- | --- |'
+  id: totrans-45
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| 128 | Echo Request | RFC 4443\. Used for the ping command. |'
+  id: totrans-46
   prefs: []
   type: TYPE_TB
+  zh: '| 128 | 回显请求 | RFC 4443。用于 ping 命令。 |'
 - en: '| 129 | Echo Reply |   |'
+  id: totrans-47
   prefs: []
   type: TYPE_TB
+  zh: '| 129 | 回显回复 |   |'
 - en: '| 130 | Multicast Listener Query | RFC 2710\. Used for multicast goup management.
     |'
+  id: totrans-48
   prefs: []
   type: TYPE_TB
+  zh: '| 130 | 多播监听器查询 | RFC 2710。用于多播组管理。 |'
 - en: '| 131 | Multicast Listener Report |   |'
+  id: totrans-49
   prefs: []
   type: TYPE_TB
+  zh: '| 131 | 多播监听器报告 |   |'
 - en: '| 132 | Multicast Listener Done |   |'
+  id: totrans-50
   prefs: []
   type: TYPE_TB
+  zh: '| 132 | 多播监听器完成 |   |'
 - en: '| 133 | Router Solicitation | RFC 4861\. Used for Neighbor Discovery and Autoconfiguration.
     |'
+  id: totrans-51
   prefs: []
   type: TYPE_TB
+  zh: '| 133 | 路由器请求 | RFC 4861。用于邻居发现和自动配置。 |'
 - en: '| 134 | Router Advertisement |   |'
+  id: totrans-52
   prefs: []
   type: TYPE_TB
+  zh: '| 134 | 路由器通告 |   |'
 - en: '| 135 | Neighbor Solicitation |   |'
+  id: totrans-53
   prefs: []
   type: TYPE_TB
+  zh: '| 135 | 邻居请求 |   |'
 - en: '| 136 | Neighbor Advertisement |   |'
+  id: totrans-54
   prefs: []
   type: TYPE_TB
+  zh: '| 136 | 邻居通告 |   |'
 - en: '| 137 | Redirect Message |   |'
+  id: totrans-55
   prefs: []
   type: TYPE_TB
+  zh: '| 137 | 重定向消息 |   |'
 - en: '| 138 | Router Renumbering | RFC 2894Codes:`0` = Router renumbering command`1`
     = Router renumbering result`255` = Sequence number reset |'
+  id: totrans-56
   prefs: []
   type: TYPE_TB
+  zh: '| 138 | 路由器重编号 | RFC 2894。代码：`0` = 路由器重编号命令`1` = 路由器重编号结果`255` = 序列号重置 |'
 - en: '| 139 | ICMP Node Information Query | RFC 4620 |'
+  id: totrans-57
   prefs: []
   type: TYPE_TB
+  zh: '| 139 | ICMP 节点信息查询 | RFC 4620 |'
 - en: '| 140 | ICMP Node Information Response |   |'
+  id: totrans-58
   prefs: []
   type: TYPE_TB
+  zh: '| 140 | ICMP 节点信息响应 |   |'
 - en: '| 141 | Inverse ND Solicitation | RFC 3122 |'
+  id: totrans-59
   prefs: []
   type: TYPE_TB
+  zh: '| 141 | 反向 ND 请求 | RFC 3122 |'
 - en: '| 142 | Inverse ND Adv Message | RFC 3122 |'
+  id: totrans-60
   prefs: []
   type: TYPE_TB
+  zh: '| 142 | 反向 ND 通告消息 | RFC 3122 |'
 - en: '| 143 | Version 2 Multicast Listener Report | RFC 3810 |'
+  id: totrans-61
   prefs: []
   type: TYPE_TB
+  zh: '| 143 | 版本 2 多播监听器报告 | RFC 3810 |'
 - en: '| 144 | ICMP Home Agent Address Discovery Request Message | RFC 6275, “ICMPv6
     Messages for Mobile IPv6” |'
+  id: totrans-62
   prefs: []
   type: TYPE_TB
+  zh: '| 144 | ICMP 主机代理地址发现请求消息 | RFC 6275，“移动 IPv6 的 ICMPv6 消息” |'
 - en: '| 145 | ICMP Home Agent Address Discovery Reply Message |   |'
+  id: totrans-63
   prefs: []
   type: TYPE_TB
+  zh: '| 145 | ICMP 主机代理地址发现回复消息 |   |'
 - en: '| 146 | ICMP Mobile Prefix Solicitation Message |   |'
+  id: totrans-64
   prefs: []
   type: TYPE_TB
+  zh: '| 146 | ICMP 移动前缀请求消息 |   |'
 - en: '| 147 | ICMP Mobile Prefix Advertisement Message |   |'
+  id: totrans-65
   prefs: []
   type: TYPE_TB
+  zh: '| 147 | ICMP 移动前缀通告消息 |   |'
 - en: '| 148 | Certification Path Solicitation Message | RFC 3971 “ICMPv6 Messages
     for SEcure Neighbor Discovery” |'
+  id: totrans-66
   prefs: []
   type: TYPE_TB
+  zh: '| 148 | 认证路径请求消息 | RFC 3971 “安全邻居发现的 ICMPv6 消息” |'
 - en: '| 149 | Certification Path Advertisement Message |   |'
+  id: totrans-67
   prefs: []
   type: TYPE_TB
+  zh: '| 149 | 认证路径通告消息 |   |'
 - en: '| 151 | Multicast Router Advertisement | RFC 4286 |'
+  id: totrans-68
   prefs: []
   type: TYPE_TB
+  zh: '| 151 | 多播路由器通告 | RFC 4286 |'
 - en: '| 152 | Multicast Router Solicitation |   |'
+  id: totrans-69
   prefs: []
   type: TYPE_TB
+  zh: '| 152 | 多播路由器请求 |   |'
 - en: '| 153 | Multicast Router Termination |   |'
+  id: totrans-70
   prefs: []
   type: TYPE_TB
+  zh: '| 153 | 多播路由器终止 |   |'
 - en: '| 154 | Fast Mobile IPv6 Messages | RFC 5568 |'
+  id: totrans-71
   prefs: []
   type: TYPE_TB
+  zh: '| 154 | 快速移动 IPv6 消息 | RFC 5568 |'
 - en: '| 155 | Routing Protocol for Low-Power Network Messages | RFC 6550 |'
+  id: totrans-72
   prefs: []
   type: TYPE_TB
+  zh: '| 155 | 低功耗网络消息的路由协议 | RFC 6550 |'
 - en: '| 156 | ILNPv6 Locator Update Message | RFC 6743 |'
+  id: totrans-73
   prefs: []
   type: TYPE_TB
+  zh: '| 156 | ILNPv6 定位器更新消息 | RFC 6743 |'
 - en: '| 157 | Duplicate Address Request | RFC 6775 (6LoWPANs) |'
+  id: totrans-74
   prefs: []
   type: TYPE_TB
+  zh: '| 157 | 重复地址请求 | RFC 6775（6LoWPANs） |'
 - en: '| 158 | Duplicate Address Confirmation |   |'
+  id: totrans-75
   prefs: []
   type: TYPE_TB
+  zh: '| 158 | 重复地址确认 |   |'
 - en: '| 200 and201 | Private experimentation | RFC 4443 |'
+  id: totrans-76
   prefs: []
   type: TYPE_TB
+  zh: '| 200 和 201 | 私有实验 | RFC 4443 |'
 - en: '| 255 | Reserved for expansion of ICMPv6 informational messages | RFC 4443
     |'
+  id: totrans-77
   prefs: []
   type: TYPE_TB
+  zh: '| 255 | 保留用于扩展 ICMPv6 信息消息 | RFC 4443 |'
 - en: With the exception of the router renumbering message (138), the ICMPv6 informational
     messages do not use the Code field. It is, therefore, set to zero.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了路由器重新编号消息（138）外，ICMPv6 信息消息不使用 Code 字段。因此，该字段被设置为零。
 - en: As you will learn in the coming paragraphs, ICMPv6 is very powerful and is used
     for many processes that are critical to the proper working of IPv6, such as Path
     MTU Discovery. Therefore it is not a good idea to completely filter all ICMP messages
     at firewalls, as has been the practice in many IPv4 networks. With ICMPv6 you
     have to carefully evaluate which ICMPv6 messages are important. RFC 4890, “Recommendations
     for Filtering ICMPv6 Messages in Firewalls,” discusses this and makes recommendations.
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你将在接下来的段落中学习到的，ICMPv6 非常强大，广泛应用于许多对于 IPv6 正常工作至关重要的过程，例如路径 MTU 发现。因此，像许多 IPv4
+    网络中那样完全过滤所有 ICMP 消息的做法并不明智。在 ICMPv6 中，你必须仔细评估哪些 ICMPv6 消息是重要的。RFC 4890《防火墙中 ICMPv6
+    消息过滤的建议》讨论了这一点，并提出了建议。
 - en: ICMP Error Messages
+  id: totrans-80
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ICMP 错误消息
 - en: Every ICMP message can have a slightly different header depending on the kind
     of error report or information it carries. The following sections outline the
     structure of each type of ICMPv6 message.
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个 ICMP 消息的头部可能略有不同，具体取决于它所携带的错误报告或信息类型。以下部分概述了每种 ICMPv6 消息类型的结构。
 - en: Destination Unreachable
+  id: totrans-82
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 目标不可达
 - en: A *Destination Unreachable* message is generated if an IP datagram cannot be
     delivered. A Type field with the value 1 identifies this message. The ICMP message
     is sent to the Source address of the invoking packet. The format of the Destination
     Unreachable message is shown in [Figure 4-2](ch04.html#format_of_the_destination_unreachable_me
     "Figure 4-2. Format of the Destination Unreachable message").
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果 IP 数据报无法送达，将生成一个*目标不可达*消息。Type 字段的值为 1，用于标识此消息。ICMP 消息会发送到发起数据包的源地址。*目标不可达*消息的格式如[图
+    4-2](ch04.html#format_of_the_destination_unreachable_me "图 4-2. 目标不可达消息的格式")所示。
 - en: '![Format of the Destination Unreachable message](images/ipv6_0402.png)Figure 4-2. Format
     of the Destination Unreachable message'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: '![目标不可达消息的格式](images/ipv6_0402.png)图 4-2. 目标不可达消息的格式'
 - en: The Type field is set to 1, which is the value for the Destination Unreachable
     message. The Code field supplies more information about the reason why the datagram
     was not delivered. The possible codes are listed in [Table 4-3](ch04.html#code_values_of_the_destination_unreachab
     "Table 4-3. Code values of the Destination Unreachable message (type 1)"). The
     data portion of the ICMP message contains as much of the original message as will
     fit into the ICMP message.
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: Type 字段被设置为 1，这是目标不可达消息的值。Code 字段提供了更多有关数据报未送达原因的信息。可能的代码列在[表 4-3](ch04.html#code_values_of_the_destination_unreachab
+    "表 4-3. 目标不可达消息（类型 1）的代码值")中。ICMP 消息的数据部分包含尽可能多的原始消息内容，以适应 ICMP 消息的大小。
 - en: Table 4-3. Code values of the Destination Unreachable message (type 1)
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 4-3. 目标不可达消息（类型 1）的代码值
 - en: '| Code | Description |'
+  id: totrans-87
   prefs: []
   type: TYPE_TB
+  zh: '| Code | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-88
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| 0 | “No route to destination.”This code is used if a router cannot forward
     a packet because it does not have a route in its table for a destination network.
     This can happen only if the router does not have an entry for a default route.
     |'
+  id: totrans-89
   prefs: []
   type: TYPE_TB
+  zh: '| 0 | “没有到目的地的路由。”如果路由器无法转发数据包，因为它的路由表中没有目标网络的路由，则使用此代码。这种情况只有在路由器没有默认路由条目时才会发生。
+    |'
 - en: '| 1 | “Communication with destination administratively prohibited.”This type
     of message can, for example, be sent by a firewall that cannot forward a packet
     to a host inside the firewall because of a packet filter. It might also be sent
     if a node is configured not to accept unauthenticated Echo Requests. |'
+  id: totrans-90
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | “与目标的通信被管理员禁止。”例如，如果防火墙无法将数据包转发到防火墙内部的主机，因为有数据包过滤器，则可能会发送此类型的消息。如果某个节点配置为不接受未经认证的
+    Echo 请求，也可能会发送此消息。 |'
 - en: '| 2 | “Beyond scope of Source address.”This code is used if the Destination
     address is beyond the scope of the Source address, e.g., if a packet has a link-local
     Source address and a global Destination address. |'
+  id: totrans-91
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | “超出源地址的范围。”如果目标地址超出了源地址的范围，例如，数据包的源地址是链路本地地址，目标地址是全局地址，则使用此代码。 |'
 - en: '| 3 | “Address unreachable.”This code is used if a Destination address cannot
     be resolved into a corresponding network address or if there is a data-link layer
     problem preventing the node from reaching the destination network. |'
+  id: totrans-92
   prefs: []
   type: TYPE_TB
+  zh: '| 3 | “地址不可达。”如果目标地址无法解析为相应的网络地址，或者由于数据链路层问题导致节点无法到达目标网络，则使用此代码。 |'
 - en: '| 4 | “Port unreachable.”This code is used if the transport protocol (e.g.,
     UDP) has no listener and there is no other means to inform the sender. For example,
     if a Domain Name System (DNS) query is sent to a host and the DNS server is not
     running, this type of message is generated. |'
+  id: totrans-93
   prefs: []
   type: TYPE_TB
+  zh: '| 4 | “端口不可达。”如果传输协议（例如 UDP）没有监听器，并且没有其他方式通知发送方，则使用此代码。例如，如果向主机发送域名系统（DNS）查询，而
+    DNS 服务器未运行，则会生成此类型的消息。|'
 - en: '| 5 | “Source address failed ingress/egress policy.”This code is used if a
     packet with this Source address is not allowed due to ingress or egress filtering
     policies. |'
+  id: totrans-94
   prefs: []
   type: TYPE_TB
+  zh: '| 5 | “源地址未通过入口/出口策略。”如果由于入口或出口过滤策略，某个数据包的源地址不被允许，则使用此代码。|'
 - en: '| 6 | “Reject route to destination.”This code is used if the route to the destination
     is a reject route. |'
+  id: totrans-95
   prefs: []
   type: TYPE_TB
+  zh: '| 6 | “拒绝到目标的路由。”如果到目标的路由是拒绝路由，则使用此代码。|'
 - en: If the destination is unreachable due to congestion, no ICMP message is generated.
     A host that receives a Destination Unreachable message must inform the upper-layer
     process.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果由于拥塞导致目标不可达，则不会生成 ICMP 消息。收到 Destination Unreachable 消息的主机必须通知上层进程。
 - en: Packet Too Big
+  id: totrans-97
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Packet Too Big
 - en: If a router cannot forward a packet because it is larger than the MTU of the
     outgoing link, it will generate a Packet Too Big message (shown in [Figure 4-3](ch04.html#format_of_the_packet_too_big_message
     "Figure 4-3. Format of the Packet Too Big message")). This ICMPv6 message type
     is used as part of the Path MTU Discovery process that I discuss later in this
     chapter. The ICMP message is sent to the Source address of the invoking packet.
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果路由器无法转发数据包，因为它大于出站链路的 MTU，它将生成一个 Packet Too Big 消息（如[图 4-3](ch04.html#format_of_the_packet_too_big_message
+    "图 4-3. Packet Too Big 消息的格式")所示）。此 ICMPv6 消息类型作为路径 MTU 发现过程的一部分，我将在本章后续部分中讨论。ICMP
+    消息将发送到发起数据包的源地址。
 - en: '![Format of the Packet Too Big message](images/ipv6_0403.png)Figure 4-3. Format
     of the Packet Too Big message'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: '![Packet Too Big 消息的格式](images/ipv6_0403.png)图 4-3. Packet Too Big 消息的格式'
 - en: The Type field has the value 2, which identifies the Packet Too Big message.
     In this case, the Code field is not used and is set to 0\. The important information
     for this type of message is the MTU field, which contains the MTU size of the
     next hop link.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: Type 字段的值为 2，表示 Packet Too Big 消息。在这种情况下，Code 字段不被使用，设置为 0\。该类型消息的重要信息是 MTU
+    字段，它包含下一跳链路的 MTU 大小。
 - en: RFC 4443 states that an ICMPv6 message should not be generated as a response
     to a packet with an IPv6 multicast Destination address, a link-layer multicast
     address, or a link-layer broadcast address. The Packet Too Big message is an exception
@@ -433,12 +658,18 @@
     hop link, the source host can determine the MTU that it should use for further
     communication. A host that receives a Packet Too Big message must inform the upper-layer
     process.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4443 规定，对于具有 IPv6 多播目的地址、链路层多播地址或链路层广播地址的数据包，不应生成 ICMPv6 消息作为响应。Packet Too
+    Big 消息是这一规则的例外。因为 ICMP 消息包含下一跳链路的支持 MTU，源主机可以确定它应该用于进一步通信的 MTU。接收到 Packet Too
+    Big 消息的主机必须通知上层进程。
 - en: Time Exceeded
+  id: totrans-102
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Time Exceeded
 - en: When a router forwards a packet, it always decrements the hop limit by one.
     The hop limit makes sure that a packet does not endlessly travel through a network.
     If a router receives a packet with a hop limit of 1 and decrements the limit to
@@ -449,44 +680,68 @@
     later in this chapter. [Figure 4-4](ch04.html#format_of_the_time_exceeded_message
     "Figure 4-4. Format of the Time Exceeded message") shows the format of the Time
     Exceeded message.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 当路由器转发数据包时，它会将跳数限制减 1。跳数限制确保数据包不会在网络中无休止地传播。如果路由器收到一个跳数限制为 1 的数据包，并将跳数限制减至 0，它会丢弃该数据包，生成一个代码值为
+    0 的 Time Exceeded 消息，并将该消息发送回源主机。此错误可能表明存在路由环路，或者发送方的初始跳数限制过低。它还可以告诉你某人使用了*traceroute*工具，该工具将在本章后续部分中描述。[图
+    4-4](ch04.html#format_of_the_time_exceeded_message "图 4-4. Time Exceeded 消息的格式")展示了
+    Time Exceeded 消息的格式。
 - en: '![Format of the Time Exceeded message](images/ipv6_0404.png)Figure 4-4. Format
     of the Time Exceeded message'
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: '![Time Exceeded 消息的格式](images/ipv6_0404.png)图 4-4. Time Exceeded 消息的格式'
 - en: The Type field carries the value 3, specifying the Time Exceeded message. The
     Code field can be set to 0, which means the hop limit was exceeded in transit,
     or to 1, which means that the fragment reassembly time is exceeded. The data portion
     of the ICMP message contains as much of the original message as will fit into
     the ICMP message, depending on the MTU used.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: Type 字段的值为 3，指定 Time Exceeded 消息。Code 字段可以设置为 0，表示跃限在传输过程中超出，或者设置为 1，表示片段重组超时。ICMP
+    消息的数据部分包含尽可能多的原始消息内容，具体取决于使用的 MTU。
 - en: An incoming Time Exceeded message must be passed to the upper-layer process.
     [Table 4-4](ch04.html#code_values_for_time_exceeded_message_op "Table 4-4. Code
     values for Time Exceeded message (type 3)") shows the Code fields for the Time
     Exceeded message.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个传入的 Time Exceeded 消息必须传递给上层进程。[表 4-4](ch04.html#code_values_for_time_exceeded_message_op
+    "表 4-4. Time Exceeded 消息的代码值") 显示了 Time Exceeded 消息的 Code 字段。
 - en: Table 4-4. Code values for Time Exceeded message (type 3)
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 4-4. Time Exceeded 消息（类型 3）的代码值
 - en: '| Code | Description |'
+  id: totrans-108
   prefs: []
   type: TYPE_TB
+  zh: '| 代码 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-109
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| 0 | “Hop limit exceeded in transit.”Possible causes: the initial hop limit
     value is too low; there are routing loops; or use of the traceroute utility. |'
+  id: totrans-110
   prefs: []
   type: TYPE_TB
+  zh: '| 0 | “跃限超出传输。”可能的原因：初始跃限值过低；存在路由循环；或使用了 traceroute 工具。 |'
 - en: '| 1 | “Fragment reassembly time exceeded.”If a fragmented packet is sent by
     using a fragment header (refer to [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing")
     for more details) and the receiving host cannot reassemble all packets within
     a certain time, it notifies the sender by issuing this ICMP message. |'
+  id: totrans-111
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | “片段重组超时。”如果使用片段头发送了一个分片数据包（更多细节参见 [第 2 章](ch02.html "第 2 章. IPv6 地址分配")），且接收主机未能在规定时间内完成重组所有数据包，它会通过发出此
+    ICMP 消息通知发送方。 |'
 - en: The “Hop limit exceeded in transit” message type is commonly used to do the
     traceroute function. *Traceroute* is helpful in determining the path that a packet
     takes when traveling through the network. In order to do this, a first packet
@@ -503,12 +758,19 @@
     is important to know that if there are redundant paths to the destination, *traceroute*
     does not necessarily show the same route for all tests because it might choose
     different paths.
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: “跃限超出传输”消息类型通常用于执行 traceroute 功能。*Traceroute* 有助于确定数据包在网络中传输的路径。为了实现这一点，首先发送一个跃限为
+    1 的数据包。路径中的第一个路由器将跃限减至 0，丢弃数据包，并返回 ICMP 类型 3，代码 0 的消息。源主机现在知道了第一个跃点路由器的地址。接下来，它发送第二个跃限为
+    2 的数据包。该数据包由第一个路由器转发，路由器将跃限减至 1。路径中的第二个路由器将跃限减至 0，丢弃数据包，并返回 ICMP 类型 3，代码 0 的消息。现在源主机知道了路径中的第二个路由器。通过增加跃限（每发送一个数据包直到到达最终目的地），继续这一过程。每个到达最终目的地的路由器都会向源主机发送
+    ICMP 消息，提供其 IP 地址。需要注意的是，如果存在冗余的路径到达目的地，*traceroute* 不一定会为所有测试显示相同的路径，因为它可能会选择不同的路径。
 - en: Parameter Problem
+  id: totrans-113
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 参数问题
 - en: If an IPv6 node cannot complete the processing of a packet because it has a
     problem identifying a field in the IPv6 header or in an Extension header, it must
     discard the packet, and it should send an ICMP Parameter Problem message back
@@ -516,12 +778,18 @@
     error that does not fit into any of the other categories is encountered. The format
     of this ICMP message is shown in [Figure 4-5](ch04.html#format_of_the_parameter_problem_message
     "Figure 4-5. Format of the Parameter Problem message").
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果 IPv6 节点因无法识别 IPv6 头或扩展头中的某个字段而无法完成数据包处理，它必须丢弃该数据包，并应向问题数据包的源发送 ICMP 参数问题消息。这种类型的消息通常在遇到无法归类为其他类型的错误时使用。此
+    ICMP 消息的格式如 [图 4-5](ch04.html#format_of_the_parameter_problem_message "图 4-5.
+    参数问题消息的格式") 所示。
 - en: '![Format of the Parameter Problem message](images/ipv6_0405.png)Figure 4-5. Format
     of the Parameter Problem message'
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: '![参数问题消息格式](images/ipv6_0405.png)图 4-5. 参数问题消息格式'
 - en: The Type field has the value 4, which specifies the Parameter Problem message.
     The Code field can contain any of the three values described in [Table 4-5](ch04.html#code_values_for_parameter_problem_open
     "Table 4-5. Code values for Parameter Problem (type 4)"). The Pointer field identifies
@@ -530,50 +798,78 @@
     is possible that the pointer points beyond the ICMPv6 message. This would be the
     case if the field in error was beyond what can fit in the maximum size of an ICMPv6
     error message.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: Type 字段的值为 4，指定为参数问题消息。Code 字段可以包含 [表 4-5](ch04.html#code_values_for_parameter_problem_open
+    "表 4-5. 参数问题的代码值（类型 4）") 中描述的三种值中的任何一种。Pointer 字段标识在原始数据包中检测到错误的字节位置。ICMP 消息包括尽可能多的原始数据，直到最小的
+    IPv6 MTU。指针可能指向 ICMPv6 消息之外的地方。如果发生这种情况，说明错误字段超出了 ICMPv6 错误消息的最大大小能够容纳的范围。
 - en: '[Table 4-5](ch04.html#code_values_for_parameter_problem_open "Table 4-5. Code
     values for Parameter Problem (type 4)") shows the Code fields for the Parameter
     Problem message.'
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: '[表 4-5](ch04.html#code_values_for_parameter_problem_open "表 4-5. 参数问题的代码值（类型
+    4）")显示了参数问题消息的代码字段。'
 - en: Table 4-5. Code values for Parameter Problem (type 4)
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 4-5. 参数问题的代码值（类型 4）
 - en: '| Code | Description |'
+  id: totrans-119
   prefs: []
   type: TYPE_TB
+  zh: '| 代码 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-120
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| 0 | Erroneous header field encountered |'
+  id: totrans-121
   prefs: []
   type: TYPE_TB
+  zh: '| 0 | 遇到错误的头部字段 |'
 - en: '| 1 | Unrecognized next header type encountered |'
+  id: totrans-122
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | 遇到无法识别的下一个头部类型 |'
 - en: '| 2 | Unrecognized IPv6 option encountered |'
+  id: totrans-123
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | 遇到无法识别的 IPv6 选项 |'
 - en: For example, an ICMPv6 message of type 4 with a code value of 1 and a pointer
     set to 40 indicates that the Next Header type in the header following the IPv6
     header was unrecognized.
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，一个类型为 4、代码值为 1、指针设置为 40 的 ICMPv6 消息表示在 IPv6 头部后的头部中的下一个头部类型未被识别。
 - en: An incoming Parameter Problem message must be passed to the upper-layer process.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个传入的参数问题消息必须传递给上层进程。
 - en: ICMP Informational Messages
+  id: totrans-126
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ICMP 信息性消息
 - en: 'In RFC 4443, two types of informational messages are defined: the Echo Request
     and the Echo Reply messages. Other ICMP informational messages are used for Path
     MTU Discovery and Neighbor Discovery. These messages are discussed at the end
     of this chapter and defined in RFC 4861, “Neighbor Discovery for IP Version 6,”
     and RFC 1981, “‘Path MTU Discovery’ for IP Version 6.”'
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 RFC 4443 中，定义了两种类型的信息性消息：回显请求和回显应答消息。其他 ICMP 信息性消息用于路径 MTU 探测和邻居发现。这些消息将在本章末尾讨论，并在
+    RFC 4861《IPv6邻居发现》和 RFC 1981《IPv6路径 MTU 探测》中定义。
 - en: 'The Echo Request and Echo Reply messages are used for one of the most common
     TCP/IP utilities: Packet InterNet Groper (*ping*). Ping is used to determine whether
     a specified host is available on the network and ready to communicate. The source
@@ -582,20 +878,31 @@
     "Figure 4-8. Echo Request in a trace file") and [4-9](ch04.html#echo_reply_in_a_trace_file
     "Figure 4-9. Echo Reply in a trace file") (later in the chapter) show what a ping
     looks like in the trace file.'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 回显请求和回显应答消息用于最常见的 TCP/IP 工具之一：网络探测器（*ping*）。Ping 用于确定指定的主机是否在网络上可用，并准备好进行通信。源主机向指定的目的地发送回显请求消息。如果目标主机可用，它将以回显应答消息进行响应。图
+    [4-8](ch04.html#echo_request_in_a_trace_file "图 4-8. 跟踪文件中的回显请求") 和 [4-9](ch04.html#echo_reply_in_a_trace_file
+    "图 4-9. 跟踪文件中的回显应答")（在本章后面）展示了 ping 在跟踪文件中的表现。
 - en: Echo Request Message
+  id: totrans-129
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 回显请求消息
 - en: The format of the Echo Request message is shown in [Figure 4-6](ch04.html#format_of_the_echo_request_message
     "Figure 4-6. Format of the Echo Request message").
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 回显请求消息的格式显示在 [图 4-6](ch04.html#format_of_the_echo_request_message "图 4-6. 回显请求消息格式")
+    中。
 - en: '![Format of the Echo Request message](images/ipv6_0406.png)Figure 4-6. Format
     of the Echo Request message'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: '![回显请求消息格式](images/ipv6_0406.png)图 4-6. 回显请求消息格式'
 - en: The Type field is set to 128, the value for the Echo Request. The Code Field
     is not used for this message and is therefore set to 0\. The Identifier and Sequence
     Number fields are used to match requests with replies. The reply must always contain
@@ -604,21 +911,33 @@
     the TCP/IP stack you are using. When you analyze trace files with Echo Request
     and Echo Reply messages and you are familiar with some stacks, you can determine
     the TCP/IP stack of the sender by looking at the arbitrary data.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: Type 字段被设置为 128，这是 Echo Request 的值。Code 字段在此消息中未使用，因此设置为 0。Identifier 和 Sequence
+    Number 字段用于匹配请求和回复。回复必须始终包含与请求相同的数字。是否使用标识符和序列号，以及 Echo Request 中包含何种任意数据，取决于你使用的
+    TCP/IP 栈。当你分析包含 Echo Request 和 Echo Reply 消息的跟踪文件，并且熟悉某些栈时，你可以通过查看任意数据来确定发送方的
+    TCP/IP 栈。
 - en: Echo Reply
+  id: totrans-133
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Echo Reply
 - en: The format of the Echo Reply message is very similar to that of the Echo Request,
     as shown in [Figure 4-7](ch04.html#format_of_the_echo_reply_message "Figure 4-7. Format
     of the Echo Reply message").
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: Echo Reply 消息的格式与 Echo Request 非常相似，如 [图 4-7](ch04.html#format_of_the_echo_reply_message
+    "图 4-7. Echo Reply 消息的格式") 所示。
 - en: '![Format of the Echo Reply message](images/ipv6_0407.png)Figure 4-7. Format
     of the Echo Reply message'
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: '![Echo Reply 消息的格式](images/ipv6_0407.png)图 4-7. Echo Reply 消息的格式'
 - en: The Type field contains the value 129 for Echo Reply. The Code field is unused
     and set to 0\. The Identifier and Sequence Number fields must match the fields
     in the request. The data of the Echo Request message must be copied into the reply
@@ -629,100 +948,145 @@
     was sent to an IPv6 multicast address, the Source address of the Echo Reply must
     be a unicast address of the interface on which the multicast Echo Request was
     received.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: Type 字段包含 129 的值，表示 Echo Reply。Code 字段未使用，设置为 0。Identifier 和 Sequence Number
+    字段必须与请求中的字段匹配。Echo Request 消息的数据必须完全且未修改地复制到回复中。如果是上层进程发起了 Echo Request，则回复必须传递给该进程。如果
+    Echo Request 消息发送到了单播地址，则 Echo Reply 消息的 Source 地址必须与 Echo Request 消息的 Destination
+    地址相同。如果 Echo Request 是发送到 IPv6 多播地址，则 Echo Reply 的 Source 地址必须是接收到多播 Echo Request
+    的接口的单播地址。
 - en: According to the specification, ICMPv6 Echo Request and Reply messages can be
     authenticated, using an IPv6 authentication header. This means that a node can
     be configured to ignore nonauthenticated ICMPv6 pings and provide protection against
     different ICMPv6 attacks. I don’t know of any implementation, though, that supports
     this feature.
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据规范，ICMPv6 Echo Request 和 Reply 消息可以通过 IPv6 认证头进行认证。这意味着节点可以配置为忽略未认证的 ICMPv6
+    Ping，并提供保护以防范各种 ICMPv6 攻击。不过，我并不知道有哪个实现支持这个功能。
 - en: Processing Rules
+  id: totrans-138
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 处理规则
 - en: 'There are several rules that govern processing of ICMP packets. They can be
     found in RFC 4443 and are summarized as follows:'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 有若干规则规范 ICMP 数据包的处理。这些规则可以在 RFC 4443 中找到，概要如下：
 - en: If a node receives an ICMPv6 error message of unknown type, it must pass it
     to the upper layer.
+  id: totrans-140
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果节点收到类型未知的 ICMPv6 错误消息，则必须将其传递给上层。
 - en: If a node receives an ICMPv6 informational message of unknown type, it must
     be silently discarded.
+  id: totrans-141
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果节点收到类型未知的 ICMPv6 信息消息，则必须静默丢弃。
 - en: As much as possible of the packet that caused the ICMP error message will be
     included in the ICMP message body. The ICMP packet should not exceed the minimum
     IPv6 MTU.
+  id: totrans-142
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 尽可能多的导致 ICMP 错误消息的数据将包含在 ICMP 消息体中。ICMP 数据包不应超过最小的 IPv6 MTU。
 - en: If the error message has to be passed to the upper-layer protocol, the protocol
     type is determined by extracting it from the original packet (present in the body
     of the ICMPv6 error message). In case the protocol type cannot be found in the
     body of the ICMPv6 message (because there were too many Extension headers present
     in the original packet, and the part of the header that contained the upper-layer
     protocol type was truncated), the ICMPv6 message is silently discarded.
+  id: totrans-143
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果错误消息必须传递给上层协议，则协议类型通过从原始数据包中提取（位于 ICMPv6 错误消息的正文中）来确定。如果无法在 ICMPv6 消息的正文中找到协议类型（因为原始数据包中存在太多扩展头，并且包含上层协议类型的部分头被截断），则
+    ICMPv6 消息会被静默丢弃。
 - en: 'An ICMPv6 error message must not be sent in the following cases:'
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 在以下情况下不得发送 ICMPv6 错误消息：
 - en: As a result of an ICMPv6 error message.
+  id: totrans-145
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 由于收到 ICMPv6 错误消息。
 - en: As a result of an ICMPv6 redirect message.
+  id: totrans-146
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 由于收到 ICMPv6 重定向消息。
 - en: 'As a result of a packet sent to an IPv6 multicast address. There are two exceptions
     to this rule: the Packet Too Big message that is used for Path MTU Discovery,
     and the Parameter Problem with the code value 2 for an unrecognized IPv6 option.'
+  id: totrans-147
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 由于发送到 IPv6 多播地址的数据包。此规则有两个例外：用于路径 MTU 探测的“数据包过大”消息，以及具有代码值 2 的未识别 IPv6 选项的参数问题。
 - en: As a result of a packet sent as a link-layer multicast (exceptions just described
     apply).
+  id: totrans-148
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 由于作为链路层组播发送的数据包（前面描述的例外情况适用）。
 - en: As a result of a packet sent as a link-layer broadcast (exceptions just described
     apply).
+  id: totrans-149
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 由于作为链路层广播发送的数据包（前面描述的例外情况适用）。
 - en: As a result of a packet whose Source address does not uniquely identify a single
     node. This could be an IPv6 unspecified address, an IPv6 multicast address, or
     an IPv6 address known to be an anycast address.
+  id: totrans-150
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 由于源地址不能唯一标识单个节点的数据包。这可能是一个 IPv6 未指定地址、IPv6 多播地址或已知为单播地址的 IPv6 地址。
 - en: Every IPv6 node must implement a rate-limiting function that limits the rate
     of ICMPv6 messages it sends, and it should be configurable. If this function is
     implemented properly, it protects against Denial of Service attacks.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个 IPv6 节点必须实现速率限制功能，限制其发送 ICMPv6 消息的速率，并且应该是可配置的。如果该功能得当实施，可以防止拒绝服务攻击。
 - en: The ICMPv6 Header in a Trace File
+  id: totrans-152
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 跟踪文件中的 ICMPv6 头部
 - en: After reading through all that dry information, you deserve something different.
     The following screenshot ([Figure 4-8](ch04.html#echo_request_in_a_trace_file
     "Figure 4-8. Echo Request in a trace file")) shows what a ping looks like in the
     trace file and provides details of many of the fields discussed so far.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 阅读完所有这些枯燥的信息后，你值得看到一些不同的内容。以下屏幕截图（[图 4-8](ch04.html#echo_request_in_a_trace_file
+    "图 4-8. 跟踪文件中的 Echo Request")）展示了 ping 在跟踪文件中的样子，并提供了迄今为止讨论的许多字段的详细信息。
 - en: '![Echo Request in a trace file](images/ipv6_0408.png)Figure 4-8. Echo Request
     in a trace file'
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: '![跟踪文件中的 Echo Request](images/ipv6_0408.png)图 4-8. 跟踪文件中的 Echo Request'
 - en: 'As shown in [Chapter 3](ch03.html "Chapter 3. The Structure of the IPv6 Protocol"),
     the IPv6 header provides the following information: the Version field is set to
     6 and indicates that this is an IPv6 packet. Priority and Flow Label are not configured
@@ -730,8 +1094,12 @@
     field has the value 58, which is the value for ICMPv6\. The Hop Limit is set to
     64\. We can also see source and destination IP address. The prefix `fe80:` indicates
     that these two addresses are link-local addresses.'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 如[第 3 章](ch03.html "第 3 章. IPv6 协议的结构")所示，IPv6 头部提供以下信息：版本字段设置为 6，表示这是一个 IPv6
+    数据包。优先级和流标签未配置，设置为零。有效负载长度字段设置为 40 字节。下一个头部字段的值为 58，表示 ICMPv6 的值。跳数限制设置为 64。我们还可以看到源和目的地
+    IP 地址。前缀 `fe80:` 表示这两个地址是链路本地地址。
 - en: 'Note the first three fields of the ICMPv6 header. They are the fields that
     are common for every ICMPv6 message: the Type, Code, and Checksum fields. The
     Type field contains the value 128, which is the value for an Echo Request. The
@@ -740,31 +1108,44 @@
     the sequence to 38\. It has to be identical in the matching reply shown in the
     following screenshot. The Data field contains arbitrary data that doesn’t need
     to make sense to anyone.'
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意 ICMPv6 头部的前三个字段。它们是每个 ICMPv6 消息共有的字段：类型、代码和校验和字段。类型字段的值为 128，表示 Echo Request。标识符和序列号字段是
+    Echo Request 和 Echo Reply 消息特有的。标识符在此情况下未使用，发送方将序列号设置为 38。在以下屏幕截图中，匹配的回复中的序列号必须相同。数据字段包含任意数据，不需要对任何人有意义。
 - en: Oh, I almost forgot that earlier I promised to show vendor stack-related data
     in the Echo Request message. What you see here—the alphabet up to the letter “w”—is
     what Microsoft uses. Whenever you see this in a trace file, a Microsoft stack
     is sending the request. [Figure 4-9](ch04.html#echo_reply_in_a_trace_file "Figure 4-9. Echo
     Reply in a trace file") shows the Echo Reply in detail.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 哦，我差点忘了，我之前承诺在 Echo Request 消息中显示供应商堆栈相关数据。你在这里看到的——字母表直到字母“w”——是微软使用的内容。每当你在跟踪文件中看到这一点时，表示是微软的堆栈在发送请求。[图
+    4-9](ch04.html#echo_reply_in_a_trace_file "图 4-9. 跟踪文件中的 Echo Reply") 详细展示了 Echo
+    Reply。
 - en: '![Echo Reply in a trace file](images/ipv6_0409.png)Figure 4-9. Echo Reply in
     a trace file'
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: '![跟踪文件中的回显回复](images/ipv6_0409.png)图4-9. 跟踪文件中的回显回复'
 - en: Again, the IPv6 header shows a value of 6 for the IP version and a Next Header
     value of 58 for ICMPv6\. The Destination address of the previous frame is now
     the Source address, and the previous Source address is now the Destination address.
     The Type field in the ICMPv6 header shows a value of 129, which is the value for
     an Echo Reply. The Identifier and Sequence Number fields, as well as the Data
     field, match the ones in the Echo Request.
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，IPv6头部显示IP版本值为6，ICMPv6的下一个头部值为58。前一帧的目标地址现在是源地址，前源地址现在是目标地址。ICMPv6头部中的类型字段显示值129，这是回显回复的值。标识符和序列号字段，以及数据字段，与回显请求中的值相匹配。
 - en: Neighbor Discovery
+  id: totrans-160
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 邻居发现
 - en: 'Neighbor Discovery (ND) is specified in RFC 4861\. The specifications in this
     RFC relate to different protocols and processes known from IPv4 that have been
     modified and improved. New functionality has also been added. It combines Address
@@ -773,107 +1154,147 @@
     protocol, a Neighbor Unreachability Detection (NUD) mechanism has been defined.
     Duplicate IP address detection (DAD) has also been implemented. IPv6 nodes use
     Neighbor Discovery for the following purposes:'
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 邻居发现（ND）在RFC 4861中进行了规范。该RFC中的规范与IPv4中已知的不同协议和过程相关，这些协议和过程已被修改和改进。还增加了新功能。它将地址解析协议（ARP）和ICMP路由器发现与重定向结合在一起。IPv4中没有办法检测邻居是否可达。通过邻居发现协议，定义了邻居不可达检测（NUD）机制。重复IP地址检测（DAD）也已实现。IPv6节点使用邻居发现进行以下操作：
 - en: For Stateless Autoconfiguration of IPv6 addresses
+  id: totrans-162
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于IPv6地址的无状态自动配置
 - en: To determine network prefixes, routes, and other configuration information
+  id: totrans-163
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于确定网络前缀、路由和其他配置信息
 - en: For Duplicate IP Address Detection (DAD)
+  id: totrans-164
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于重复IP地址检测（DAD）
 - en: To determine Layer 2 addresses of nodes on the same link
+  id: totrans-165
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于确定同一链路上节点的二层地址
 - en: To find neighboring routers that can forward their packets
+  id: totrans-166
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 查找能够转发其数据包的邻近路由器
 - en: To keep track of which neighbors are reachable and which are not (NUD)
+  id: totrans-167
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 跟踪哪些邻居可达，哪些不可达（NUD）
 - en: To detect changed link-layer addresses
+  id: totrans-168
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 检测链路层地址的变化
 - en: 'The following improvements over the IPv4 set of protocols can be noted:'
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以注意到，IPv4协议集相比有以下改进：
 - en: Router Discovery is now part of the base protocol set. With IPv4, the mechanism
     needs to get the information from the routing table or DHCP.
+  id: totrans-170
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器发现现在是基础协议集的一部分。使用IPv4时，机制需要从路由表或DHCP获取信息。
 - en: Router Advertisement packets contain link-layer addresses for the router. There
     is no need for the node receiving a Router Advertisement to send out an additional
     ARP request (as an IPv4 node would have to do) to get the link-layer address for
     the router interface. The same is true for ICMPv6 Redirect messages; they contain
     the link-layer address of the new next-hop router interface.
+  id: totrans-171
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器广告包包含路由器的链路层地址。接收路由器广告的节点无需像IPv4节点那样发送额外的ARP请求来获取路由器接口的链路层地址。ICMPv6重定向消息也是如此；它们包含新下一跳路由器接口的链路层地址。
 - en: Router Advertisement packets contain the prefix for a link (subnet information).
     There is no longer a need to configure subnet masks; they can be learned from
     the Router Advertisement.
+  id: totrans-172
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器广告包包含链路的前缀（子网信息）。不再需要配置子网掩码；可以从路由器广告中学习这些信息。
 - en: Neighbor Discovery (ND) provides mechanisms to renumber networks more easily.
     New prefixes and addresses can be introduced while the old ones are still in use,
     and the old ones can be deprecated and removed gradually.
+  id: totrans-173
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 邻居发现（ND）提供了更轻松重新编号网络的机制。可以引入新的前缀和地址，同时旧的前缀和地址仍在使用，旧的可以逐步弃用和移除。
 - en: Router Advertisements enable Stateless Address Autoconfiguration and can tell
     hosts when to use Stateful Address Configuration (e.g., DHCP).
+  id: totrans-174
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器广告启用无状态地址自动配置，并能告知主机何时使用有状态地址配置（例如，DHCP）。
 - en: Routers can advertise an MTU to be used on a link.
+  id: totrans-175
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器可以广告链路上要使用的最大传输单元（MTU）。
 - en: Multiple prefixes can be assigned to one link. By default, hosts learn all prefixes
     from the router, but the router can be configured not to advertise some or all
     of the prefixes. In that case, hosts assume that a nonadvertised prefix destination
     is remote and send the packets to the router. The router can then issue ICMP Redirect
     messages as needed.
+  id: totrans-176
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个链路可以分配多个前缀。默认情况下，主机从路由器学习所有前缀，但路由器可以配置为不通告某些或所有前缀。在这种情况下，主机会假设未通告的前缀目标是远程的，并将数据包发送到路由器。路由器随后可以根据需要发送ICMP重定向消息。
 - en: Neighbor Unreachability Detection (NUD) is part of the base protocol. It substantially
     improves packet delivery in case of failed routers or link interfaces that changed
     their link-layer address. It solves the issues with outdated ARP caches. NUD detects
     failed connectivity, and traffic is not sent to unreachable neighbors. The Neighbor
     Unreachability Detection also detects failed routers and switches to live ones.
+  id: totrans-177
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 邻居不可达检测（NUD）是基础协议的一部分。在路由器故障或链路接口更改其链路层地址的情况下，它显著提高了数据包传递的可靠性。它解决了过时的ARP缓存问题。NUD能够检测到连接失败，数据流量不会发送到不可达的邻居。邻居不可达检测还可以检测到故障的路由器，并切换到正常工作的路由器。
 - en: Router Advertisements and ICMP redirects use link-local addresses to identify
     routers. This allows hosts to maintain their router associations even in the case
     of renumbering or use of new global prefixes.
+  id: totrans-178
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器通告和ICMP重定向使用链路本地地址来标识路由器。这使得主机即使在重新编号或使用新的全局前缀的情况下，仍能保持与路由器的关联。
 - en: Neighbor Discovery messages have a hop limit value of 255, and requests with
     a lower hop limit are not answered. This makes Neighbor Discovery immune to remote
     hosts that try to sneak into your link, because their packets have a decremented
     hop limit and are thus ignored.
+  id: totrans-179
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 邻居发现消息的跃点限制值为255，跃点限制较低的请求将不会得到响应。这使得邻居发现能够抵御试图潜入链路的远程主机，因为它们的数据包跃点限制已被递减，从而被忽略。
 - en: Standard IP authentication and security mechanisms can be applied to Neighbor
     Discovery.
+  id: totrans-180
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 标准的IP认证和安全机制可以应用于邻居发现。
 - en: 'This summary gives an idea of what can be expected from this part of the specification.
     Now let’s discuss the different processes in detail. The Neighbor Discovery protocol
     consists of five ICMP messages: a pair of Router Solicitation/Router Advertisement
@@ -881,35 +1302,49 @@
     an ICMP Redirect message (refer to [Table 4-2](ch04.html#icmpv6_informational_messages
     "Table 4-2. ICMPv6 informational messages") earlier in this chapter for a summary
     of ICMP informational message types).'
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 本总结概述了该部分规范的预期内容。接下来，我们将详细讨论不同的过程。邻居发现协议包括五种ICMP消息：一对路由器请求/路由器通告消息、一对邻居请求/邻居通告消息，以及一条ICMP重定向消息（有关ICMP信息性消息类型的摘要，请参考本章前面的[表
+    4-2](ch04.html#icmpv6_informational_messages "表 4-2. ICMPv6 信息性消息")）。
 - en: To summarize, the Neighbor Discovery Protocol (NDP) specification is used by
     both hosts and routers. Its functions include Neighbor Discovery (ND), Router
     Discovery (RD), Stateless Address Autoconfiguration (SLAAC), Address Resolution,
     Neighbor Unreachability Detection (NUD), Duplicate Address Detection (DAD), and
     Redirection.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 总结来说，邻居发现协议（NDP）规范同时由主机和路由器使用。其功能包括邻居发现（ND）、路由器发现（RD）、无状态地址自动配置（SLAAC）、地址解析、邻居不可达检测（NUD）、重复地址检测（DAD）和重定向。
 - en: There are operational issues with Neighbor Discovery, which can result in vulnerabilities
     when a network is scanned. RFC 6583, “Operational Neighbor Discovery Problems,”
     describes these issues and presents possible mitigation techniques.
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 邻居发现存在操作性问题，在网络扫描时可能导致漏洞。RFC 6583《操作性邻居发现问题》描述了这些问题，并提出了可能的缓解技术。
 - en: Router Solicitation and Router Advertisement
+  id: totrans-184
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 路由器请求和路由器通告
 - en: Routers send out Router Advertisement messages at regular intervals. Hosts can
     request Router Advertisements by issuing a Router Solicitation message. This will
     trigger routers to issue Router Advertisements immediately, outside of the regular
     interval. The format is shown in [Figure 4-10](ch04.html#router_solicitation_message
     "Figure 4-10. Router Solicitation message").
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 路由器定期发送路由器通告消息。主机可以通过发送路由器请求消息来请求路由器通告。这会触发路由器立即发送路由器通告，跳过常规的时间间隔。格式如[图 4-10](ch04.html#router_solicitation_message
+    "图 4-10. 路由器请求消息")所示。
 - en: '![Router Solicitation message](images/ipv6_0410.png)Figure 4-10. Router Solicitation
     message'
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: '![路由器请求消息](images/ipv6_0410.png)图 4-10. 路由器请求消息'
 - en: In the IP header of a Router Solicitation message, you will usually see the
     all-routers multicast address of `ff02::2` as a Destination address. The hop limit
     is set to 255\. The ICMP Type field is set to 133, which is the value for the
@@ -921,26 +1356,35 @@
     on the IP layer is the unspecified (all-zeros) address, this field is not used.
     More options may be defined in future versions of ND. If a host cannot recognize
     an option, it should ignore the option and process the packet.
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 在路由器请求消息的IP头中，你通常会看到`ff02::2`的所有路由器多播地址作为目的地址。跳数限制设置为255。ICMP类型字段设置为133，这是路由器请求消息的值。代码字段未使用，设置为0。接下来的两个字节用于校验和。接下来的四个字节未使用，并且保留以供将来使用。发送方将它们设置为0，接收方忽略这些字段。对于路由器请求消息，一个有效的选项是发送主机的链路层地址，如果已知发送主机的地址。如果IP层的源地址是未指定（全零）地址，则此字段不使用。未来版本的ND可能会定义更多选项。如果主机无法识别某个选项，它应忽略该选项并处理数据包。
 - en: Routers that receive this Solicitation message reply with a Router Advertisement
     message. Routers also issue those messages periodically. The format of the Router
     Advertisement message is shown in [Figure 4-11](ch04.html#router_advertisement_message
     "Figure 4-11. Router Advertisement message").
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 接收到此请求消息的路由器会回复路由器广告消息。路由器还会定期发送这些消息。路由器广告消息的格式如[图4-11](ch04.html#router_advertisement_message
+    "图4-11. 路由器广告消息")所示。
 - en: '![Router Advertisement message](images/ipv6_0411.png)Figure 4-11. Router Advertisement
     message'
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: '![路由器广告消息](images/ipv6_0411.png)图4-11. 路由器广告消息'
 - en: By inspecting the IP header of the Router Advertisement message, you can determine
     whether this Router Advertisement is periodic or was sent in reply to a Solicitation
     message. A periodic advertisement’s Destination address will be the all-nodes
     multicast address `ff02::1`. A solicited advertisement’s Destination address will
     be the address of the interface that originated the solicitation message. Again,
     the hop limit is set to 255.
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过检查路由器广告消息的IP头，你可以判断此路由器广告是周期性发送的，还是作为对请求消息的回复。周期性广告的目的地址将是所有节点的多播地址`ff02::1`。请求广告的目的地址将是发起请求消息的接口地址。再次说明，跳数限制设置为255。
 - en: The ICMP Type field is set to 134, the value for a Router Advertisement message;
     the Code field is unused and set to 0\. The Current Hop Limit field can be used
     to configure all nodes on a link for a default hop limit. The value entered in
@@ -948,8 +1392,10 @@
     nodes on the link. A value of 0 in this field means that this option is unspecified
     by this router—in which case the default hop limit values of the source hosts
     are used.
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: ICMP类型字段设置为134，这是路由器广告消息的值；代码字段未使用，设置为0。当前跳数限制字段可用于为链路上的所有节点配置默认跳数限制。此字段中输入的值将作为所有链路上节点在传出数据包中的默认跳数限制值。如果此字段中的值为0，则表示此路由器未指定此选项——在这种情况下，源主机的默认跳数限制值将被使用。
 - en: The next 1-bit field, the M-Flag, specifies whether *Stateful Configuration*
     is to be used. Stateful Configuration refers to DHCPv6\. If this bit is 0, the
     nodes on this link use Stateless Address Autoconfiguration (SLAAC). If the bit
@@ -960,23 +1406,32 @@
     to obtain additional configuration options. The Mobile IPv6 specification (RFC
     6275) defines the third bit, the Home Address flag (H-Flag). When a router sets
     the H-Flag to 1, it means that it is a home agent for this link.
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来的1位字段，M标志，指定是否使用*有状态配置*。有状态配置指的是DHCPv6。如果此位为0，则链路上的节点使用无状态地址自动配置（SLAAC）。如果该位设置为1，则指定使用有状态自动配置（DHCPv6）。O标志配置链路上的节点是否使用DHCPv6来获取IP地址以外的信息。值为1表示链路上的节点使用DHCPv6来获取与地址无关的信息。在这种情况下，DHCPv6客户端会发送DHCPv6信息请求消息，以获取额外的配置选项。移动IPv6规范（RFC
+    6275）定义了第三个位，即主地址标志（H-Flag）。当路由器将H标志设置为1时，表示它是该链路的主机代理。
 - en: Note that the DHCPv6 RFC leaves room for interpretation. It is possible that
     different operating systems have slightly different behavior in response to these
     two flags. There is a draft called “DHCPv6/SLAAC Address Configuration Interaction
     Problem Statement,” which describes these issues and discusses the results found
     with testing several desktop operating systems in a lab.
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，DHCPv6 RFC 留有解释空间。不同操作系统可能会对这两个标志作出稍有不同的响应行为。有一份名为“DHCPv6/SLAAC 地址配置交互问题陈述”的草案，描述了这些问题，并讨论了在实验室中对多个桌面操作系统进行测试的结果。
 - en: Note
+  id: totrans-194
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注释
 - en: For a discussion of Mobile IPv6 and Home Agent, refer to [Chapter 8](ch08.html
     "Chapter 8. Mobile IPv6").
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关移动 IPv6 和主机代理的讨论，请参考[第 8 章](ch08.html "第 8 章. 移动 IPv6")。
 - en: The next two bits are used by an optional extension to the Router Advertisement
     message, which allows routers to advertise preferences and more specific routes.
     This makes it possible for hosts to choose the best router in situations where
@@ -986,77 +1441,113 @@
     *Preference flag* and defines a *Route Information option*. It is specified in
     RFC 4191\. The remaining three bits of this byte are reserved for future use and
     must be 0.
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来的两个比特由路由器通告消息的可选扩展使用，该扩展允许路由器通告偏好和更具体的路由。这样，主机就可以在接收到多个路由器通告时选择最佳路由器。这对于多宿主路由器尤为重要，随着
+    IPv6 网络的发展，多宿主路由器将变得越来越重要。该扩展使用路由器通告中的 H-Flag 后面的两个比特作为*偏好标志*，并定义了*路由信息选项*。该扩展在
+    RFC 4191 中有详细说明。本字节的剩余三个比特保留供将来使用，必须设置为 0。
 - en: The Router Lifetime field is important only if this router is to be used as
     a default router by the nodes on the link. A value of 0 indicates that this router
     is not a default router and will therefore not appear on the default router list
     of receiving nodes. Any other value in this field specifies the lifetime, in seconds,
     associated with this router as a default router. The maximum value is 18.2 hours.
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: Router Lifetime 字段仅在此路由器作为链路上节点的默认路由器时才重要。值为 0 表示该路由器不是默认路由器，因此不会出现在接收节点的默认路由器列表中。该字段的其他任何值表示此路由器作为默认路由器的生存时间（以秒为单位）。最大值为
+    18.2 小时。
 - en: The Reachable Time field indicates the time in which a host assumes that neighbors
     are reachable after having received a reachability confirmation. A value of 0
     means that it is unspecified. The Neighbor Unreachability Detection algorithm
     uses this field.
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: Reachable Time 字段表示主机在接收到可达性确认后，认为邻居可达的时间。值为 0 表示未指定。邻居不可达性检测算法使用此字段。
 - en: The Retrans Timer field is used by the address resolution and Neighbor Unreachability
     Detection mechanisms; it states the time in milliseconds between retransmitted
     Neighbor Solicitation messages. A value of 0 indicates that this router is not
     configured with a retransmission timer.
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: Retrans Timer 字段由地址解析和邻居不可达性检测机制使用；它表示重传邻居请求消息之间的时间（以毫秒为单位）。值为 0 表示此路由器未配置重传定时器。
 - en: 'For the Options field, there are currently three possible values:'
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于选项字段，目前有三种可能的值：
 - en: Source link-layer address.
+  id: totrans-201
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 源链路层地址。
 - en: MTU size to be used on links with variable MTU sizes (Token Ring, for example).
+  id: totrans-202
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于具有可变 MTU 大小的链路（例如令牌环）的 MTU 大小。
 - en: Prefix information, important for Stateless Address Autoconfiguration. The router
     inserts all its prefixes for the link that the nodes on the link need to know.
+  id: totrans-203
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 前缀信息，对于无状态地址自动配置至关重要。路由器插入它在链路上需要通知节点的所有前缀。
 - en: More options may be defined in future versions of ND. A trace file later in
     this chapter shows what the options look like.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 ND 的未来版本中，可能会定义更多选项。本章稍后的跟踪文件显示了这些选项的样子。
 - en: Note
+  id: totrans-205
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注释
 - en: Router Advertisement spoofing is a security concern also known as rogue RA.
     The problem and mitigation techniques are discussed in the section [Neighbor Discovery
     issues](ch06.html#neighbor_discovery_issues "Neighbor Discovery issues") in [Chapter 6](ch06.html
     "Chapter 6. Security with IPv6") on Security.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 路由器通告欺骗是一种安全隐患，也称为恶意 RA。相关问题和缓解技术在[邻居发现问题](ch06.html#neighbor_discovery_issues
+    "邻居发现问题")部分以及[第 6 章](ch06.html "第 6 章. 安全与 IPv6")中的安全内容中进行了讨论。
 - en: Neighbor Solicitation and Neighbor Advertisement
+  id: totrans-207
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 邻居请求和邻居通告
 - en: 'This pair of messages fulfills two functions: the link-layer address resolution
     that is handled by ARP in IPv4, and the Neighbor Unreachability Detection mechanism.
     If the Destination address is a multicast address (usually the solicited node
     multicast address), the source is resolving a link-layer address. If the source
     is verifying the reachability of a neighbor, the Destination address is a unicast
     address. This message type is also used for Duplicate IP Address Detection (DAD).'
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 这对消息履行了两个功能：链路层地址解析，这是 IPv4 中 ARP 处理的内容，以及邻居不可达性检测机制。如果目标地址是多播地址（通常是请求节点多播地址），则源正在解析链路层地址。如果源正在验证邻居的可达性，则目标地址是单播地址。此消息类型也用于重复
+    IP 地址检测（DAD）。
 - en: The format of the Neighbor Solicitation message is shown in [Figure 4-12](ch04.html#format_of_the_neighbor_solicitation_mess
     "Figure 4-12. Format of the Neighbor Solicitation message").
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 邻居请求消息的格式如 [图 4-12](ch04.html#format_of_the_neighbor_solicitation_mess "图 4-12.
+    邻居请求消息的格式") 所示。
 - en: '![Format of the Neighbor Solicitation message](images/ipv6_0412.png)Figure 4-12. Format
     of the Neighbor Solicitation message'
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: '![邻居请求消息的格式](images/ipv6_0412.png)图 4-12. 邻居请求消息的格式'
 - en: In the IP header of this message type, the Source address can be either the
     interface address of the originating host or, in the case of SLAAC and DAD, the
     unspecified (all-zeros) address. The hop limit is set to 255\. The Type field
@@ -1064,39 +1555,55 @@
     After the two checksum bytes, four unused bytes are reserved and must be set to
     0\. The target address is used in Neighbor Advertisement and Redirect messages.
     It must not be a multicast address.
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 在此消息类型的 IP 头中，源地址可以是发起主机的接口地址，或者在 SLAAC 和 DAD 的情况下，未指定的（全零）地址。跳数限制设置为 255。ICMP
+    头中的 Type 字段设置为 135，Code 字段未使用，设置为 0。两个校验和字节之后，保留了四个未使用的字节，必须设置为 0。目标地址用于邻居广告和重定向消息。它不能是多播地址。
 - en: The Options field can contain the link-layer Source address, but only if it
     is not sent from the all-zeros address. During Stateless Address Autoconfiguration,
     in a message that uses the unspecified address as a Source address, the Options
     field is set to 0\. The link-layer option must be used in multicast solicitations
     (link-layer address detection) and can be used in unicast solicitations (Unreachability
     Detection).
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: Options 字段可以包含链路层源地址，但只有当它不是从全零地址发送时才会如此。在无状态地址自动配置过程中，如果消息使用未指定地址作为源地址，则 Options
+    字段设置为 0。链路层选项必须在多播请求（链路层地址检测）中使用，也可以在单播请求（不可达性检测）中使用。
 - en: Neighbor Advertisement messages are sent as a reply to Neighbor Solicitation
     messages or to propagate new information quickly. The format of the message is
     shown in [Figure 4-13](ch04.html#format_of_the_neighbor_advertisement_mes "Figure 4-13. Format
     of the Neighbor Advertisement message").
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 邻居广告消息作为对邻居请求消息的回复发送，或快速传播新信息。消息的格式如 [图 4-13](ch04.html#format_of_the_neighbor_advertisement_mes
+    "图 4-13. 邻居广告消息的格式") 所示。
 - en: '![Format of the Neighbor Advertisement message](images/ipv6_0413.png)Figure 4-13. Format
     of the Neighbor Advertisement message'
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: '![邻居广告消息的格式](images/ipv6_0413.png)图 4-13. 邻居广告消息的格式'
 - en: The type of address in the IP header indicates whether the message is the answer
     to a solicitation or an unsolicited message. In the case of a solicited advertisement,
     the destination IP address is the Source address of the interface that sent the
     solicitation. If the message is the reply to a DAD message that originated from
     an unspecified Source address, the reply will go to the all-nodes multicast address
     of `ff02::1`. The same is true for all unsolicited periodic advertisements.
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: IP 头中的地址类型指示该消息是对请求的回答还是非请求消息。对于请求的广告，目标 IP 地址是发送请求的接口的源地址。如果消息是对来自未指定源地址的 DAD
+    消息的回复，则回复将发送到 `ff02::1` 的所有节点多播地址。所有非请求的周期性广告也是如此。
 - en: The Type field in the ICMP header is set to 136, the value for Neighbor Advertisement
     messages. The Code field is unused and set to 0\. When the Router flag is set,
     the sender is a router.
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: ICMP 头中的 Type 字段被设置为 136，这是邻居广告消息的值。Code 字段未使用，设置为 0。当 Router 标志被设置时，发送者是路由器。
 - en: When the Solicited flag is set, the message is sent in response to a Neighbor
     Solicitation. For instance, if a host confirms its reachability in answer to an
     unreachability detection message, the S-Bit is set. The S-Bit is not set in multicast
@@ -1107,58 +1614,83 @@
     for which no link-layer address exists. The O-Bit should not be set in an advertisement
     for an anycast address. I discuss the cache entries later in this chapter. The
     remaining 29 bits are reserved for future use and set to 0.
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 当设置了“请求标志”（Solicited flag）时，消息是响应邻居请求（Neighbor Solicitation）发送的。例如，如果主机确认其可达性以响应不可达性检测消息，则设置S位。在多播广告中，S位不会被设置。Override标志表示广告消息中的信息应覆盖现有的邻居缓存条目，并更新任何缓存的链路层地址。如果未设置O位，广告将不会更新缓存的链路层地址，但会更新没有链路层地址的现有邻居缓存条目。O位不应在任何播地址的广告中设置。稍后我会在本章中讨论缓存条目。剩余的29位保留供将来使用，设置为0。
 - en: In solicited advertisements, the Target Address contains the address of the
     interface that sent the solicitation. In unsolicited advertisements, this field
     contains the address of the interface whose link-layer address has changed. A
     possible option for the Options field is the target link-layer address.
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 在请求广告中，目标地址包含发送请求的接口的地址。在无请求广告中，该字段包含链路层地址已更改的接口的地址。选项字段的一个可能选项是目标链路层地址。
 - en: '[Table 4-6](ch04.html#identification_of_nd_messages "Table 4-6. Identification
     of ND messages") helps you to identify what you are looking at and summarizes
     the different processes.'
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: '[表 4-6](ch04.html#identification_of_nd_messages "表 4-6. ND消息识别")帮助你识别所看到的内容，并总结了不同的处理过程。'
 - en: Table 4-6. Identification of ND messages
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 4-6. ND消息识别
 - en: '| Source address | Destination address | Message type |'
+  id: totrans-221
   prefs: []
   type: TYPE_TB
+  zh: '| 源地址 | 目标地址 | 消息类型 |'
 - en: '| --- | --- | --- |'
+  id: totrans-222
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| All-zero (`::`) | All-routers multicastSolicited node multicast | SLAACDAD
     |'
+  id: totrans-223
   prefs: []
   type: TYPE_TB
+  zh: '| 全零（`::`） | 全路由器多播Solicited节点多播 | SLAACDAD |'
 - en: '| Unicast | Solicited node multicastUnicast | Resolve link-layer addressUnreachability
     detection |'
+  id: totrans-224
   prefs: []
   type: TYPE_TB
+  zh: '| 单播 | 请求节点多播单播 | 解析链路层地址不可达性检测 |'
 - en: The ICMP Redirect Message
+  id: totrans-225
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: ICMP重定向消息
 - en: Routers issue ICMP Redirect messages to inform a node of a better first-hop
     node on the path to a given destination. A Redirect message can also inform a
     node that the destination used is in fact a neighbor on the same link and not
     a node on a remote subnet. The format of the ICMPv6 Redirect message is shown
     in [Figure 4-14](ch04.html#format_of_the_icmp_redirect_message "Figure 4-14. Format
     of the ICMP Redirect message").
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 路由器发送ICMP重定向消息，告知节点更好的第一跳节点以到达给定目标。重定向消息还可以告知节点，所用目标实际上是同一链路上的邻居，而不是远程子网中的节点。ICMPv6重定向消息的格式见[图
+    4-14](ch04.html#format_of_the_icmp_redirect_message "图 4-14. ICMP重定向消息的格式")。
 - en: '![Format of the ICMP Redirect message](images/ipv6_0414.png)Figure 4-14. Format
     of the ICMP Redirect message'
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: '![ICMP重定向消息格式](images/ipv6_0414.png)图 4-14. ICMP重定向消息的格式'
 - en: The Source address in the IP header must be the link-local address of the interface
     from which the message is sent. The Destination address in the IP header is the
     Source address from the packet that triggered the Redirect message. The hop limit
     is set to 255.
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: IP头中的源地址必须是发送消息的接口的链路本地地址。IP头中的目标地址是触发重定向消息的数据包的源地址。跳数限制设置为255。
 - en: The Target Address field contains the link-local address of the interface that
     is a better next hop to use for the given Destination address. The Destination
     Address field contains the address of the destination that is redirected. If the
@@ -1169,12 +1701,17 @@
     needed to issue a separate ARP request to determine the link-layer address of
     the next-hop router. The remaining bits in the Options field contain as much of
     the redirected header as fits into the minimum IPv6 MTU of 1,280 bytes.
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 目标地址字段包含该接口的链路本地地址，该接口是为给定目标地址选择的更好的下一跳。目标地址字段包含被重定向的目的地址。如果目标地址字段中的地址与目的地址字段中的地址相同，则目标是邻居而非远程节点。选项字段包含目标（最佳下一跳路由器）的链路层地址（如果已知）。这是对IPv4版本的改进，在IPv4中，主机需要发出单独的ARP请求以确定下一跳路由器的链路层地址。选项字段中的其余位包含尽可能多的重定向头部，直到适应最小的IPv6
+    MTU（1,280字节）。
 - en: Inverse Neighbor Discovery
+  id: totrans-230
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 逆邻居发现
 - en: '*Inverse Neighbor Discovery* (IND) is an extension to ND. It was originally
     designed for Frame Relay networks, but it can be used in other networks with similar
     requirements. IND is specified in RFC 3122\. It consists of two messages: the
@@ -1183,28 +1720,41 @@
     to the Reverse Address Resolution Protocol (RARP) used with IPv4\. The messages
     have the same format as the ND messages. The IND Solicitation has a message type
     of 141 and the IND Advertisement of 142\. The code field is always set to 0.'
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: '*逆邻居发现*（IND）是对邻居发现（ND）的扩展。它最初为帧中继网络设计，但也可以用于具有类似需求的其他网络。IND在RFC 3122中进行了规范。它由两条消息组成：IND请求消息和IND广告消息。这些消息用于确定已知链路层地址的主机的IPv6地址。IND对应于IPv4中使用的反向地址解析协议（RARP）。这些消息的格式与ND消息相同。IND请求消息的消息类型为141，IND广告消息的消息类型为142。代码字段始终设置为0。'
 - en: The Options field has the same format as in the ND messages and contains the
     same options. Two new IND-specific options have been defined. Option type 9 defines
     the Source Address list; option type 10 the Target Address list (see the overview
     in [Table 4-7](ch04.html#overview_of_nd_options "Table 4-7. Overview of ND options")).
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 选项字段的格式与ND消息中的格式相同，并包含相同的选项。定义了两个新的IND特定选项。选项类型9定义了源地址列表；选项类型10定义了目标地址列表（参见[表4-7](ch04.html#overview_of_nd_options
+    "表4-7. 邻居发现选项概述")中的概述）。
 - en: '*Source Address list—option type 9*'
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: '*源地址列表——选项类型9*'
 - en: List of one or more IPv6 addresses of the interface, which is specified in the
     Source link-layer address option.
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个或多个接口的IPv6地址列表，该列表在源链路层地址选项中指定。
 - en: '*Target Address list—option type 10*'
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: '*目标地址列表——选项类型10*'
 - en: List of all IPv6 addresses of the interface, which is specified in the Target
     link-layer address list.
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 接口的所有IPv6地址列表，该列表在目标链路层地址列表中指定。
 - en: When a host wants to determine the IPv6 address of an interface for which it
     knows the link-layer address, it sends an IND solicitation to the all-nodes multicast
     address. On the link layer, the message is sent directly to the interface in question.
@@ -1213,174 +1763,251 @@
     message, it must send multiple IND advertisements. Like in all other ND messages,
     the hop limit is set to 255, and messages with a hop limit lower than 255 must
     be ignored.
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 当主机想要确定已知链路层地址的接口的IPv6地址时，它会向全节点组播地址发送IND请求消息。在链路层，该消息会直接发送到相关接口。目标接口会回复一条IND广告消息，包含目标地址列表。如果接口具有比单个广告消息能容纳更多的IPv6地址，则必须发送多个IND广告消息。与所有其他ND消息一样，跳数限制被设置为255，跳数限制低于255的消息必须被忽略。
 - en: Neighbor Discovery Options
+  id: totrans-238
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 邻居发现选项
 - en: Neighbor Discovery messages contain a variable-size Options field that has the
     format shown in [Figure 4-15](ch04.html#format_of_the_option_field "Figure 4-15. Format
     of the Options field").
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 邻居发现消息包含一个可变大小的选项字段，其格式如[图4-15](ch04.html#format_of_the_option_field "图4-15.
+    选项字段格式")所示。
 - en: '![Format of the Options field](images/ipv6_0415.png)Figure 4-15. Format of
     the Options field'
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: '![选项字段格式](images/ipv6_0415.png)图4-15. 选项字段格式'
 - en: The Type field indicates what type of option follows. [Table 4-7](ch04.html#overview_of_nd_options
     "Table 4-7. Overview of ND options") shows an overview of the different options
     and the message types in which they are used.
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 类型字段表示后续的选项类型。[表 4-7](ch04.html#overview_of_nd_options "表 4-7. ND 选项概览") 显示了不同选项的概览以及它们使用的消息类型。
 - en: The Length field indicates the length of the option. Value 0 is invalid for
     this field, and packets with this value must be discarded. The calculation of
     the length includes the Type and Length fields.
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: 长度字段表示选项的长度。此字段的值为0时无效，带有此值的数据包必须被丢弃。长度的计算包括类型字段和长度字段。
 - en: Table 4-7. Overview of ND options
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 4-7. ND 选项概览
 - en: '| Option type | RFC | Used in |'
+  id: totrans-244
   prefs: []
   type: TYPE_TB
+  zh: '| 选项类型 | RFC | 使用场景 |'
 - en: '| --- | --- | --- |'
+  id: totrans-245
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| Type 1 Source link-layer address | RFC 4861 | Neighbor SolicitationRouter
     SolicitationRouter AdvertisementIND Solicitation/Advertisement |'
+  id: totrans-246
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 1 源链路层地址 | RFC 4861 | 邻居请求路由器请求路由器广告IND 请求/广告 |'
 - en: '| Type 2 Target link-layer address | RFC 4861 | Neighbor Advertisement RedirectIND
     Solicitation/Advertisement |'
+  id: totrans-247
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 2 目标链路层地址 | RFC 4861 | 邻居广告 重定向IND 请求/广告 |'
 - en: '| Type 3 Prefix | RFC 4861 | Router Advertisement |'
+  id: totrans-248
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 3 前缀 | RFC 4861 | 路由器广告 |'
 - en: '| Type 4 Redirected header | RFC 4861 | Redirect |'
+  id: totrans-249
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 4 重定向头 | RFC 4861 | 重定向 |'
 - en: '| Type 5 MTU | RFC 4861 | Router AdvertisementIND Solicitation/Advertisement
     |'
+  id: totrans-250
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 5 MTU | RFC 4861 | 路由器广告IND 请求/广告 |'
 - en: '| Type 7 Advertisement interval | RFC 6275 | Router Advertisement (Mobile IPv6)
     |'
+  id: totrans-251
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 7 广告间隔 | RFC 6275 | 路由器广告（移动IPv6） |'
 - en: '| Type 8 Home Agent information | RFC 6275 | Router Advertisement (Mobile IPv6)
     |'
+  id: totrans-252
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 8 主机代理信息 | RFC 6275 | 路由器广告（移动IPv6） |'
 - en: '| Type 9 Source address list | RFC 3122 | IND Solicitation |'
+  id: totrans-253
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 9 源地址列表 | RFC 3122 | IND 请求 |'
 - en: '| Type 10 Target address list | RFC 3122 | IND Advertisement |'
+  id: totrans-254
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 10 目标地址列表 | RFC 3122 | IND 广告 |'
 - en: More options have been defined in other specifications, for instance a CGA option
     for Secure Neighbor Discovery (see below).
+  id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: 其他规格中定义了更多选项，例如用于安全邻居发现（见下文）的CGA选项。
 - en: Note
+  id: totrans-256
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: For a full list of available options, refer to [http://bit.ly/1na84cG](http://bit.ly/1na84cG).
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: 欲了解所有可用选项的完整列表，请参见[http://bit.ly/1na84cG](http://bit.ly/1na84cG)。
 - en: Secure Neighbor Discovery
+  id: totrans-258
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 安全邻居发现
 - en: ND can be used for a number of attacks and should therefore be protected. An
     example of a Denial of Service attack is when a node on the link can both advertise
     itself as a default router and also send “forged” Router Advertisement messages
     that immediately time out all other default routers as well as all on-link prefixes.
+  id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: ND 可以用于多种攻击，因此应当加以保护。拒绝服务攻击的一个例子是，当链路上的一个节点既能将自己作为默认路由器进行广告，又能发送“伪造”的路由器广告消息，立即使所有其他默认路由器和链路上的前缀超时。
 - en: The first protection is that packets coming from off-link (with a hop limit
     lower than 255) must be ignored. Further, the original ND specification suggests
     using IPsec to secure ND messages. However, this requires manual setup of security
     associations or the use of a key management protocol. The number of security associations
     to be configured for protecting ND can be very large, so this approach may be
     impractical.
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一种保护是，来自链路外的数据包（跳数限制小于255）必须被忽略。此外，原始的ND规范建议使用IPsec来保护ND消息。然而，这需要手动设置安全关联或使用密钥管理协议。为了保护ND所需配置的安全关联数可能非常大，因此这种方法可能不切实际。
 - en: The Secure Neighbor Discovery (SEND) working group was chartered with the goal
     to define the protocol support needed to secure ND. Three different trust models
     were outlined, roughly corresponding to secured corporate intranets, public wireless
     access networks, and pure ad hoc networks. A number of possible threats are discussed
     relating to these trust models. Refer to RFC 3756 for more details.
+  id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: 安全邻居发现（SEND）工作组的任务是定义保护ND所需的协议支持。概述了三种不同的信任模型，大致对应于受保护的企业内网、公共无线接入网络和纯粹的临时网络。讨论了与这些信任模型相关的若干潜在威胁。更多细节请参见RFC
+    3756。
 - en: 'The SEND protocol, defined in RFC 3971 (updated by RFC 6494, RFC 6495, RFC
     6980), is designed to counter the threats to ND. SEND can be used in environments
     where physical security on the link is not assured (such as over wireless) and
     attacks on ND are a concern. The following components are specified in RFC 3971:'
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: SEND协议在RFC 3971中定义（由RFC 6494、RFC 6495、RFC 6980更新），旨在应对ND的威胁。SEND可用于物理安全性不保证的链路环境（例如无线网络），并且对ND攻击构成担忧。RFC
+    3971中指定了以下组件：
 - en: The authority of routers must be certified before it can be used as default
     router. A host must be configured with a trust anchor to which the router has
     a certification path. *Certification Path Solicitation and Advertisement* messages
     are used to discover a certification path to the trust anchor.
+  id: totrans-263
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器的权限必须经过认证，才能作为默认路由器使用。主机必须配置信任锚点，路由器有一个认证路径。*认证路径请求和广告*消息用于发现到信任锚点的认证路径。
 - en: '*Cryptographically Generated Addresses* (CGAs) are used to make sure that the
     sender of a Neighbor Discovery message is the owner of the claimed address. A
     public-private key pair is generated by all nodes before they can claim an address.
     A new ND option, the CGA option, is used to carry the public key and associated
     parameters.'
+  id: totrans-264
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*加密生成地址*（Cryptographically Generated Addresses，CGA）用于确保邻居发现消息的发送者是声明地址的所有者。在所有节点能够声明地址之前，必须生成公私密钥对。新的ND选项——CGA选项，用于携带公钥和相关参数。'
 - en: Another new ND option, the *RSA Signature* option, is used to protect all messages
     relating to Neighbor and Router Discovery.
+  id: totrans-265
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 另一种新的ND选项是*RSA签名*选项，用于保护所有与邻居和路由器发现相关的消息。
 - en: Two new ND options, the *Timestamp* and *Nonce* options, have been introduced
     to prevent replay attacks.
+  id: totrans-266
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 引入了两个新的ND选项，*时间戳*和*随机数*选项，以防止重放攻击。
 - en: The SEND protocol uses Cryptographically Generated Addresses. SEND currently
     does not support the protection of ND messages for nodes configured with a static
     address or with addresses configured through IPv6 Stateless Address Autoconfiguration
     mechanisms. All new option types and messages are specified in RFC 3971.
+  id: totrans-267
   prefs: []
   type: TYPE_NORMAL
+  zh: SEND协议使用加密生成地址（Cryptographically Generated Addresses）。目前，SEND不支持保护为静态地址或通过IPv6无状态地址自动配置机制配置的节点的ND消息。所有新的选项类型和消息在RFC
+    3971中进行了说明。
 - en: Cryptographically Generated Addresses (CGAs) are specified in RFC 3972 (updated
     by RFC 4581, RFC 4982), which defines a method for binding a public signature
     key to an IPv6 address in the SEND protocol. CGA are IPv6 addresses for which
     the interface identifier is generated by computing a cryptographic one-way hash
     function from a public key and auxiliary parameters.
+  id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: 加密生成地址（Cryptographically Generated Addresses，CGA）在RFC 3972中进行了说明（由RFC 4581和RFC
+    4982更新），它定义了一种方法，通过公共签名密钥将其绑定到SEND协议中的IPv6地址。CGA是生成的IPv6地址，其中接口标识符是通过从公共密钥和辅助参数计算加密单向哈希函数得到的。
 - en: Due to a lack of implementations by vendors, we don’t expect SEND to be used
     widely. It does not make sense in a dual-stack environment, because IPv4 is not
     secured either. SEND would only make sense in an IPv6-only network.
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于供应商缺乏实现，我们预计SEND不会被广泛使用。在双栈环境下没有意义，因为IPv4本身也没有安全性。SEND只有在IPv6-only网络中才有意义。
 - en: Router Advertisement in the Trace File
+  id: totrans-270
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 跟踪文件中的路由器广告
 - en: At this point, you all deserve a refreshment. The following trace file shows
     what ND looks like in the real world and illustrates what we have been talking
     about.
+  id: totrans-271
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，你们都值得休息一下。以下的跟踪文件展示了实际环境中的ND，并说明了我们一直在讨论的内容。
 - en: The screenshot in [Figure 4-16](ch04.html#the_router_advertisement_in_a_trace_file
     "Figure 4-16. The Router Advertisement in a trace file") shows the details of
     a Router Advertisement with three Option fields. Besides initializing the IPv6
     stack and configuring it for the prefix, we have not changed any of the default
     configuration parameters on the router. The options used in this case are options
     1 (Source link-layer address), 5 (MTU size), and 3 (prefix information).
+  id: totrans-272
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图4-16](ch04.html#the_router_advertisement_in_a_trace_file "图4-16. 路由器广告在跟踪文件中的详细信息")中的截图展示了一个带有三个选项字段的路由器广告的详细信息。除了初始化IPv6栈并为前缀进行配置外，我们没有更改路由器上的任何默认配置参数。此时使用的选项是选项1（源链路层地址）、选项5（MTU大小）和选项3（前缀信息）。'
 - en: The Type field is set to 134, the value for a Router Advertisement. The Current
     Hop Limit has a value of 64\. All nodes on this link will use this value for their
     Hop Count field. The M-Flag is set to 0, which means this interface will not use
@@ -1406,12 +2033,22 @@
     Lifetime specifies how long the address being configured with this prefix can
     remain in the preferred state (in milliseconds). The last field shows the prefix
     of `2001:db8:` `cafe:b0::` advertised by this router.
+  id: totrans-273
   prefs: []
   type: TYPE_NORMAL
+  zh: Type 字段设置为 134，这是路由器广告的值。当前跳数限制为 64。此链路上的所有节点将使用该值作为它们的跳数字段。M-Flag 设置为 0，表示该接口不会使用
+    DHCPv6 服务器来接收 IPv6 地址。O-Flag 也设置为 0，表示该接口不会发送 DHCP 信息请求以查找其他 DHCP 信息（如 DNS 或 NTP
+    服务器）。路由器生命周期设置为 1,800，表示该路由器是默认路由器。列出的第一个选项是类型 1。详细屏幕中的链路层地址包含路由器接口的链路层地址。第二个选项是类型
+    5，可以用于将 MTU 大小从默认的 1,500 字节更改（在某些隧道场景中可以防止隧道数据包的分片）。第三个选项是类型 3，表示前缀信息。注意前缀可以提供的所有附加信息。前缀长度字段指定前缀的有效位数（即子网掩码的长度）。L-Bit
+    是链路标志。如果设置，表示该前缀可以用于链路判断。如果未设置，则广告没有声明，该前缀可以用于链上和链下配置。A-Bit 是自动地址配置标志。如果设置，表示该前缀可以用于自动地址配置。在这种情况下，主机会通过将接口标识符添加到前缀中生成一个地址，或者如果使用隐私选项，则通过添加一个随机数作为接口
+    ID。有效生命周期字段指定该前缀的有效时长（以毫秒为单位）。优选生命周期字段指定使用此前缀配置的地址可以保持在优选状态的时间（以毫秒为单位）。最后一个字段显示由该路由器广告的前缀
+    `2001:db8:` `cafe:b0::`。
 - en: '![The Router Advertisement in a trace file](images/ipv6_0416.png.jpg)Figure 4-16. The
     Router Advertisement in a trace file'
+  id: totrans-274
   prefs: []
   type: TYPE_NORMAL
+  zh: '![跟踪文件中的路由器广告](images/ipv6_0416.png.jpg)图 4-16. 跟踪文件中的路由器广告'
 - en: '*Draft-ietf-v6ops-dhcpv6-slaac-problem-00* describes how different operating
     systems have slightly different interpretations of the M-, O- and A-Flag. The
     reason for the ambiguity comes from the fact that the specification defines these
@@ -1419,19 +2056,26 @@
     systems take different approaches of how to interpret these flags. The RFC reviews
     the standard definition of the flags, and provides a test result of several major
     desktop operating systems’ behavior.'
+  id: totrans-275
   prefs: []
   type: TYPE_NORMAL
+  zh: '*Draft-ietf-v6ops-dhcpv6-slaac-problem-00* 描述了不同操作系统对 M-、O- 和 A- 标志的略微不同的解释。这种模糊性的原因在于，规范并没有将这些标志定义为强制性要求，而是作为建议。因此，不同的操作系统采用不同的方法来解释这些标志。该
+    RFC 回顾了这些标志的标准定义，并提供了几个主要桌面操作系统行为的测试结果。'
 - en: Link-Layer Address Resolution
+  id: totrans-276
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 链路层地址解析
 - en: Link-Layer Address Resolution is the process that happens when a node wants
     to determine the link-layer address of an interface for which it knows the IP
     address. With IPv4, this is the functionality of ARP. Link-Layer Address Resolution
     is performed only for nodes that are known to be on the same link (neighbors)
     and is never performed for multicast addresses.
+  id: totrans-277
   prefs: []
   type: TYPE_NORMAL
+  zh: 链路层地址解析是当节点想要确定一个已知 IP 地址的接口的链路层地址时发生的过程。在 IPv4 中，这是 ARP 的功能。链路层地址解析仅在已知与节点处于同一链路上的邻居之间进行，从不为多播地址执行。
 - en: With IPv6, this is a functionality accomplished with ND messages. A node wanting
     to resolve a link-layer address sends a Neighbor Solicitation message to the solicited
     node multicast address of the neighbor. This solicitation message contains the
@@ -1439,39 +2083,55 @@
     reachable, it replies with a Neighbor Advertisement message containing its link-layer
     address. If the resolving node does not receive an answer within a preconfigured
     number of attempts, the address resolution has failed.
+  id: totrans-278
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 IPv6 中，这是通过 ND 消息实现的功能。一个节点如果需要解析链路层地址，会向邻居的目标多播地址发送邻居请求消息。该请求消息在 ND 选项字段中包含发送方的链路层地址。如果目标可达，邻居会回复一条邻居通告消息，包含其链路层地址。如果解析节点在预设的尝试次数内没有收到回复，地址解析失败。
 - en: Neighbor Unreachability Detection
+  id: totrans-279
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 邻居不可达性检测
 - en: 'A neighbor is considered reachable if the node has recently received a confirmation
     that packets sent to the neighbor have been received by its IP layer. This confirmation
     can come in one of two ways: it can be a Neighbor Advertisement in response to
     a Neighbor Solicitation, or it can be an upper-layer process that indicates the
     successful connection (e.g., an active TCP connection). In this case, the receipt
     of TCP acknowledgments implies the reachability of the neighbor.'
+  id: totrans-280
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果节点最近收到确认消息，表明发送到邻居的数据包已被其 IP 层接收，那么该邻居被认为是可达的。这个确认可以通过两种方式得到：可以是对邻居请求的邻居通告，或者是一个上层进程指示成功连接（例如，活跃的
+    TCP 连接）。在这种情况下，收到的 TCP 确认意味着邻居可达。
 - en: To keep track of active and reachable connections, IPv6 nodes use different
     tables. Two important tables relating to ND are the Neighbor and Destination caches,
     which I discuss in the next section.
+  id: totrans-281
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了跟踪活动和可达的连接，IPv6 节点使用不同的表格。与 ND 相关的两个重要表格是邻居缓存和目标缓存，我将在下一节中讨论这两个表格。
 - en: Neighbor Cache and Destination Cache
+  id: totrans-282
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 邻居缓存和目标缓存
 - en: IPv6 nodes need to maintain different tables of information. Among these tables,
     the Neighbor Cache and Destination Cache are particularly important. Depending
     on the IPv6 stack you are working with, the implementation and the troubleshooting
     utilities will be different. But the information must be available on every IPv6
     node.
+  id: totrans-283
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6 节点需要维护不同的信息表格。在这些表格中，邻居缓存和目标缓存尤为重要。根据你使用的 IPv6 协议栈，具体实现和故障排除工具会有所不同。但这些信息必须在每个
+    IPv6 节点上可用。
 - en: '*Neighbor Cache*'
+  id: totrans-284
   prefs: []
   type: TYPE_NORMAL
+  zh: '*邻居缓存*'
 - en: The Neighbor Cache maintains a list of neighbors to which traffic has been sent
     recently. They are listed by their unicast IP addresses, and each entry contains
     information about the neighbor’s link-layer address and a flag that indicates
@@ -1480,19 +2140,27 @@
     queued to be sent to that destination, information about the neighbor’s reachability,
     and the time the next neighbor unreachability detection event is scheduled to
     take place.
+  id: totrans-285
   prefs: []
   type: TYPE_NORMAL
+  zh: 邻居缓存维护了最近发送过流量的邻居列表。它们按单播 IP 地址列出，每个条目包含关于邻居链路层地址的信息，以及一个标志，指示该邻居是路由器还是主机。这可以与
+    IPv4 节点中的 ARP 缓存进行对比。条目中还包含关于是否有数据包排队等待发送到该目标的信息，邻居的可达性信息，以及下次邻居不可达性检测事件的预定时间。
 - en: '*Destination Cache*'
+  id: totrans-286
   prefs: []
   type: TYPE_NORMAL
+  zh: '*目标缓存*'
 - en: This table maintains information about destinations to which traffic has been
     sent recently, including local and remote destinations. The Neighbor Cache can
     be seen as a subset of Destination Cache information. In case of remote destinations,
     the entry lists the link-layer address of the next-hop router. The Destination
     Cache is updated with information received by ICMP Redirect messages. It can also
     contain additional information about MTU sizes and round-trip timers.
+  id: totrans-287
   prefs: []
   type: TYPE_NORMAL
+  zh: 该表格维护了关于最近发送流量的目的地信息，包括本地和远程目的地。邻居缓存可以看作是目的地缓存信息的一个子集。在远程目的地的情况下，条目列出了下一跳路由器的链路层地址。目的地缓存会随着通过
+    ICMP 重定向消息接收到的信息而更新。它还可能包含关于 MTU 大小和往返时延的额外信息。
 - en: The Neighbor and Destination Caches have been mentioned in regard to the Override
     flag that can be set in a Neighbor Advertisement message. If the Override flag
     is set, the information in the Advertisement message should override existing
@@ -1500,69 +2168,101 @@
     of the host that receives the advertisement. If the O-Bit is not set, the advertisement
     will not update a cached link-layer address, but it will update an existing Neighbor
     Cache entry for which no link-layer address exists.
+  id: totrans-288
   prefs: []
   type: TYPE_NORMAL
+  zh: 已提到邻居缓存和目的地缓存，它们涉及在邻居广告消息中可以设置的覆盖标志。如果设置了覆盖标志，广告消息中的信息应覆盖现有的邻居缓存条目，并更新接收广告的主机缓存中的任何链路层地址。如果未设置
+    O 位，广告将不会更新缓存的链路层地址，但会更新现有的没有链路层地址的邻居缓存条目。
 - en: The screenshot in [Figure 4-17](ch04.html#neighbor_cache_entries_on_a_router
     "Figure 4-17. Neighbor Cache entries on a router") shows the Neighbor Cache entries
     of our router. There were two hosts on the link at the time the screenshot was
     taken.
+  id: totrans-289
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 4-17](ch04.html#neighbor_cache_entries_on_a_router "图 4-17. 路由器上的邻居缓存条目")中的屏幕截图显示了我们路由器的邻居缓存条目。截图拍摄时，链路上有两台主机。'
 - en: '![Neighbor Cache entries on a router](images/ipv6_0417.png)Figure 4-17. Neighbor
     Cache entries on a router'
+  id: totrans-290
   prefs: []
   type: TYPE_NORMAL
+  zh: '![路由器上的邻居缓存条目](images/ipv6_0417.png)图 4-17. 路由器上的邻居缓存条目'
 - en: According to RFC 4861, a Neighbor Cache entry can be in one of five states.
     The five states are explained in [Table 4-8](ch04.html#states_of_neighbor_cache_entries
     "Table 4-8. States of Neighbor Cache entries").
+  id: totrans-291
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据 RFC 4861，邻居缓存条目可以处于五种状态之一。这五种状态在[表 4-8](ch04.html#states_of_neighbor_cache_entries
+    "表 4-8. 邻居缓存条目的状态")中进行了说明。
 - en: Table 4-8. States of Neighbor Cache entries
+  id: totrans-292
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 4-8. 邻居缓存条目的状态
 - en: '| State | Description |'
+  id: totrans-293
   prefs: []
   type: TYPE_TB
+  zh: '| 状态 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-294
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| Incomplete | Address resolution is currently being performed and awaiting
     either a response or a timeout. Specifically, a Neighbor Solicitation has been
     sent to the solicited-node multicast address of the target, but the corresponding
     Neighbor Advertisement has not yet been received. |'
+  id: totrans-295
   prefs: []
   type: TYPE_TB
+  zh: '| 不完整 | 地址解析正在进行中，等待响应或超时。具体来说，已经向目标的请求节点组播地址发送了邻居请求，但尚未收到相应的邻居广告。 |'
 - en: '| Reachable | This neighbor is currently reachable, which means positive confirmation
     was received within the last `ReachableTime` milliseconds that the neighbor was
     functioning properly. |'
+  id: totrans-296
   prefs: []
   type: TYPE_TB
+  zh: '| 可达 | 该邻居当前是可达的，这意味着在过去的`ReachableTime`毫秒内已收到确认，表明该邻居正常工作。 |'
 - en: '| Stale | More than `ReachableTime` milliseconds have elapsed since the last
     positive confirmation that the forward path was functioning properly was received.
     No action will take place regarding this neighbor until a packet is sent. |'
+  id: totrans-297
   prefs: []
   type: TYPE_TB
+  zh: '| 陈旧 | 自从收到最后一次确认正向路径正常工作以来，已经过去了超过`ReachableTime`毫秒的时间。直到发送数据包之前，关于此邻居不会采取任何操作。
+    |'
 - en: '| Delay | This neighbor’s Reachable Time has expired, and a packet was sent
     within the last `DelayFirstProbeTime` seconds. If no confirmation is received
     within the `DelayFirstProbeTime` seconds, send a Neighbor Solicitation and change
     the neighbor state to Probe state.The use of `Delay` allows upper-layer protocols
     additional time to provide reachability confirmation. Without this extra time,
     possible redundant traffic would be generated. |'
+  id: totrans-298
   prefs: []
   type: TYPE_TB
+  zh: '| 延迟 | 该邻居的可达时间已过期，并且在过去的`DelayFirstProbeTime`秒内发送了数据包。如果在`DelayFirstProbeTime`秒内未收到确认，则发送邻居请求并将邻居状态更改为探测状态。使用`Delay`为上层协议提供了额外的时间来确认可达性。没有这个额外时间，可能会生成冗余流量。
+    |'
 - en: '| Probe | A reachability confirmation is being actively attempted by sending
     Neighbor Solicitations every `RetransTimer` milliseconds until reachability is
     confirmed. |'
+  id: totrans-299
   prefs: []
   type: TYPE_TB
+  zh: '| 探测 | 正在通过每`RetransTimer`毫秒发送邻居请求来主动尝试确认可达性，直到确认邻居可达。 |'
 - en: If you are interested in the details about the timers, default values, and configuration
     options, refer to RFC 4861.
+  id: totrans-300
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你对定时器、默认值和配置选项的详细信息感兴趣，请参考 RFC 4861。
 - en: Neighbor Discovery and Fragmentation
+  id: totrans-301
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 邻居发现与分片
 - en: As will be discussed in [Chapter 6](ch06.html "Chapter 6. Security with IPv6")
     on Security, ND-based attacks can be mitigated by implementing *RA Guard*. With
     RA Guard you can filter ND messages based on Layer 2 source and filtering rules.
@@ -1571,20 +2271,30 @@
     for Layer 2 devices to properly filter ND messages. RFC 6980, “Security Implications
     of IPv6 Fragmentation with IPv6 Neighbor Discovery,” explains the problem and
     specifies that all ND and SEND messages must not use fragmentation.
+  id: totrans-302
   prefs: []
   type: TYPE_NORMAL
+  zh: 如[第6章](ch06.html "第6章. IPv6 安全性")中关于安全性部分所讨论的，通过实施*RA Guard*可以减轻基于邻居发现（ND）的攻击。通过
+    RA Guard，你可以基于第二层源地址和过滤规则过滤ND消息。已发现邻居发现消息的分片可能带来安全风险，因为分片头可能导致第二层设备无法正确过滤ND消息。RFC
+    6980《IPv6邻居发现的IPv6分片的安全性影响》解释了这个问题，并规定所有ND和SEND消息不得使用分片。
 - en: Note
+  id: totrans-303
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Refer to [Chapter 6](ch06.html "Chapter 6. Security with IPv6") for more information
     on RA Guard and *First Hop Security*.
+  id: totrans-304
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关 RA Guard 和*首跳安全性*的更多信息，请参见[第6章](ch06.html "第6章. IPv6 安全性")。
 - en: Stateless Address Autoconfiguration (SLAAC)
+  id: totrans-305
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 无状态地址自动配置（SLAAC）
 - en: The autoconfiguration capability of IPv6 saves network administrators a lot
     of work. It has been designed to ensure that manually configuring hosts before
     connecting them to the network is not required. Even larger sites with multiple
@@ -1594,15 +2304,23 @@
     You don’t want to depend on a DHCP server to use your home devices. It is also
     useful in public ad hoc networks to minimize administration. In an enterprise
     scenario we rather expect DHCPv6 to be used, mainly for traceability purposes.
+  id: totrans-306
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6的自动配置能力为网络管理员节省了大量工作。它的设计确保了在将主机连接到网络之前无需手动配置主机。即使是拥有多个网络和路由器的大型站点，也不需要
+    DHCP 服务器来配置主机。IPv6 的自动配置特性将成为协议的一个关键功能，尤其是在各种设备（如电视、冰箱、DVD 播放器和手机）都需要使用 IP 地址的情况下。你不希望依赖
+    DHCP 服务器来使用家庭设备。在公共临时网络中，它也有助于减少管理工作。在企业场景中，我们更倾向于使用 DHCPv6，主要出于可追溯性的考虑。
 - en: Note
+  id: totrans-307
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: DHCPv6 is discussed in [Chapter 5](ch05.html "Chapter 5. Networking").
+  id: totrans-308
   prefs: []
   type: TYPE_NORMAL
+  zh: DHCPv6 在[第5章](ch05.html "第5章. 网络")中讨论。
 - en: 'IPv6 knows Stateless and Stateful Address Autoconfiguration. Stateful Address
     Autoconfiguration is DHCPv6\. What’s really new with IPv6 is that hosts can autoconfigure
     their IPv6 addresses without any manual configuration of the host. Some configuration
@@ -1619,63 +2337,98 @@
     mechanism. You can find more on renumbering networks later in this chapter. If
     there is no router present, a host can generate only a link-local address with
     the prefix `fe80`. With this address only nodes on the link can be reached.'
+  id: totrans-309
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6 支持无状态和有状态地址自动配置。有状态地址自动配置是 DHCPv6。IPv6 的真正新颖之处在于，主机可以在没有任何手动配置的情况下自动配置其
+    IPv6 地址。某些配置可能会在路由器上完成，但这一配置机制不需要 DHCP 服务器。为了生成其 IP 地址，主机会结合本地信息（如基于 MAC 地址的接口
+    ID 或随机选择的接口 ID）以及从路由器接收到的信息。路由器可以通告一个或多个前缀，主机根据这些通告来确定前缀信息。这也使得站点重新编号变得更加简单：只需要更改路由器上的前缀信息。例如，如果你更换了
+    ISP，并且新 ISP 分配了新的 IPv6 前缀，你可以配置路由器来通告这个新前缀，同时保留使用旧前缀时的子网 ID。所有连接到这些路由器的主机将通过自动配置机制自行重新编号。关于网络重新编号的更多信息，你可以在本章后面找到。如果没有路由器存在，主机只能生成一个具有
+    `fe80` 前缀的链路本地地址。只有在链路上的节点才能通过此地址进行通信。
 - en: Stateless and Stateful Address Autoconfiguration can also be combined. For instance,
     a host can use Stateless Address Autoconfiguration to generate an IPv6 address
     but then use DHCPv6 for additional parameters. To configure hosts that use SLAAC
     for additional information (e.g., DNS servers), a Stateless DHCP server has been
     specified.
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
+  zh: 无状态和有状态地址自动配置也可以结合使用。例如，主机可以使用无状态地址自动配置生成一个 IPv6 地址，然后使用 DHCPv6 来获取额外的参数。为了配置使用
+    SLAAC 的主机以获取附加信息（例如，DNS 服务器），已指定无状态 DHCP 服务器。
 - en: 'An IPv6 address is leased to a node for a certain lifetime. When the lifetime
     expires, the address becomes invalid. To make sure an address is unique on a link,
     a node runs the Duplicate Address Detection (DAD) process. The DAD algorithm is
     defined in RFC 4862\. An IPv6 address can have different states:'
+  id: totrans-311
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6 地址会被分配给节点，并具有一定的生命周期。当生命周期到期时，地址将变得无效。为了确保地址在链路上是唯一的，节点会执行重复地址检测（DAD）过程。DAD
+    算法在 RFC 4862 中定义。IPv6 地址可以有不同的状态：
 - en: '*Tentative address*'
+  id: totrans-312
   prefs: []
   type: TYPE_NORMAL
+  zh: '*临时地址*'
 - en: This is an address that has not yet been assigned. It is the state prior to
     the assignment, when uniqueness is being verified (during DAD). A node cannot
     communicate in the network using a tentative address. The only messages that can
     be processed with a tentative address are ND messages relating to the autoconfiguration
     process.
+  id: totrans-313
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个尚未分配的地址。在分配之前的状态，就是在进行唯一性验证（即 DAD 过程）时的状态。节点不能使用临时地址在网络中进行通信。只有与自动配置过程相关的
+    ND 消息可以使用临时地址进行处理。
 - en: '*Preferred address*'
+  id: totrans-314
   prefs: []
   type: TYPE_NORMAL
+  zh: '*首选地址*'
 - en: This is an address that has been assigned to an interface and can be used without
     any restrictions for the lifetime assigned.
+  id: totrans-315
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个已经分配给接口的地址，并且可以在分配的生命周期内无任何限制地使用。
 - en: '*Deprecated address*'
+  id: totrans-316
   prefs: []
   type: TYPE_NORMAL
+  zh: '*弃用地址*'
 - en: The use of this address is discouraged but not forbidden. A deprecated address
     might be one whose lifetime is about to expire. It can still be used to continue
     a communication that would disrupt a service if the address changed. It is no
     longer used as a Source address for newly established communications.
+  id: totrans-317
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种地址的使用虽然不被鼓励，但并不被禁止。一个被弃用的地址可能是即将过期的地址。它仍然可以用来继续一个如果地址变化将中断服务的通信，但不再用于新建立的通信的源地址。
 - en: '*Valid address*'
+  id: totrans-318
   prefs: []
   type: TYPE_NORMAL
+  zh: '*有效地址*'
 - en: This term is used for both the Preferred and Deprecated address.
+  id: totrans-319
   prefs: []
   type: TYPE_NORMAL
+  zh: 该术语用于表示首选地址和弃用地址。
 - en: '*Invalid address*'
+  id: totrans-320
   prefs: []
   type: TYPE_NORMAL
+  zh: '*无效地址*'
 - en: An invalid address is not assigned to an interface. A valid address becomes
     invalid when its lifetime expires.
+  id: totrans-321
   prefs: []
   type: TYPE_NORMAL
+  zh: 无效地址不会分配给接口。有效地址在其生命周期到期后变为无效。
 - en: '*Optimistic address*'
+  id: totrans-322
   prefs: []
   type: TYPE_NORMAL
+  zh: '*乐观地址*'
 - en: An address that is assigned to an interface and available for use, subject to
     restrictions, while the DAD process has not completed yet. This address state
     is introduced in RFC 4429, “Optimistic Duplicate Address Detection (DAD) for IPv6.”
@@ -1683,32 +2436,45 @@
     ND and SLAAC processes. The intention is to minimize address configuration delays
     in the successful case, and to reduce disruption as far as possible in the failure
     case.
+  id: totrans-323
   prefs: []
   type: TYPE_NORMAL
+  zh: 在DAD过程尚未完成时，分配给接口并可供使用的地址，受某些限制。这种地址状态在RFC 4429中引入，标题为“Optimistic Duplicate
+    Address Detection (DAD) for IPv6”。乐观重复地址检测（Optimistic DAD）是现有的ND和SLAAC过程的修改，目的是在成功的情况下最小化地址配置延迟，并尽可能减少失败情况下的中断。
 - en: Note
+  id: totrans-324
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Autoconfiguration as defined in RFC 4862 only applies to hosts, not to routers.
     Routers should be configured in a different way. A router can use Stateless Autoconfiguration
     for the generation of its link-local addresses, and it must use the DAD process
     for each of its addresses.
+  id: totrans-325
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4862中定义的自动配置仅适用于主机，而不适用于路由器。路由器应以不同的方式进行配置。路由器可以使用无状态自动配置（Stateless Autoconfiguration）来生成其链路本地地址，并且必须对每个地址使用DAD过程。
 - en: 'When a node is autoconfigured, the following steps are performed:'
+  id: totrans-326
   prefs: []
   type: TYPE_NORMAL
+  zh: 当节点进行自动配置时，将执行以下步骤：
 - en: A link-local address is generated by using the link-local prefix of `fe80` and
     appending the interface identifier. This address is a *tentative* address.
+  id: totrans-327
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 链路本地地址是通过使用`fe80`链路本地前缀并附加接口标识符生成的。此地址为*暂定*地址。
 - en: 'The node joins the following multicast groups: the all-nodes multicast group
     (`ff02::1`) and the solicited-node multicast group for the tentative address (from
     step 1).'
+  id: totrans-328
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 节点加入以下多播组：所有节点多播组（`ff02::1`）以及暂定地址的请求节点多播组（来自步骤1）。
 - en: A Neighbor Solicitation message is sent out with the tentative address as the
     target address. The IP Source address of this message is the all-zeros address;
     the IP Destination address is the solicited-node multicast address. This is the
@@ -1722,22 +2488,31 @@
     and the state of the address changes to *preferred*. IP connectivity on the local
     link is now established. So far, the process is the same for hosts and routers,
     but only hosts perform the next step.
+  id: totrans-329
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 发送邻居请求（Neighbor Solicitation）消息，目标地址为暂定地址。该消息的IP源地址为全零地址；IP目的地址为请求节点多播地址。这是DAD（重复地址检测）过程，用于检测链路上是否已经有其他节点使用该地址。如果存在这样的节点，它将以邻居广告（Neighbor
+    Advertisement）消息进行回复。如果接口ID是EUI-64标识符，自动配置机制将停止。如果接口ID是随机数，则会测试新的组合。具体实现方式取决于所使用的操作系统。如果过程停止，则需要手动重新配置主机。如果没有收到邻居请求的回复，则可以安全地使用该地址；该地址将被分配给接口，并且地址状态变更为*首选*。此时，本地链路上的IP连接已建立。到目前为止，该过程对于主机和路由器是相同的，但只有主机会执行下一步。
 - en: In order to determine if there are IPv6 routers out there, to find a default
     gateway, and if there is a prefix to use for SLAAC, the host sends a Router Solicitation
     message to the all-routers multicast group of `ff02::2`.
+  id: totrans-330
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 为了确定是否存在IPv6路由器、查找默认网关，以及是否有前缀可用于SLAAC，主机将向`ff02::2`的所有路由器多播组发送路由器请求（Router
+    Solicitation）消息。
 - en: All routers on the link reply with a Router Advertisement. For each prefix in
     Router Advertisements with the Autonomous Configuration flag set, the node generates
     an address, combining the prefix with the interface identifier. These addresses
     are added to the list of assigned addresses for the interface.
+  id: totrans-331
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 所有链路上的路由器都将以路由器广告（Router Advertisement）作出回应。对于每个在路由器广告中设置了自配置标志（Autonomous Configuration
+    flag）的前缀，节点将生成一个地址，将前缀与接口标识符结合起来。这些地址会被添加到接口的分配地址列表中。
 - en: All addresses must be verified with a Neighbor Solicitation message (DAD) before
     they are assigned. If the link-local address was generated through the autoconfiguration
     mechanism using the interface identifier, uniqueness has been verified in step
@@ -1745,79 +2520,118 @@
     identifier. All other addresses configured manually or through Stateful configuration
     need to be verified individually. Multihomed hosts perform autoconfiguration for
     each interface.
+  id: totrans-332
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有地址在分配之前必须通过邻居请求消息（DAD）进行验证。如果链路本地地址是通过自动配置机制使用接口标识符生成的，则在第3步中已经验证了其唯一性，对于使用相同接口标识符的其他地址可能不需要重复验证。所有其他手动配置或通过有状态配置的地址需要单独验证。多宿主主机需要为每个接口执行自动配置。
 - en: 'So we have two types of addresses based on how the interface ID is generated:'
+  id: totrans-333
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，我们根据接口ID的生成方式，有两种类型的地址：
 - en: '*Permanent IPv6 address*'
+  id: totrans-334
   prefs: []
   type: TYPE_NORMAL
+  zh: '*永久IPv6地址*'
 - en: This is a Global Unicast or ULA address assigned to the interface either via
     autoconfiguration (SLAAC or DHCPv6) or manually. It does not change as long as
     the interface is enabled and active.
+  id: totrans-335
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个全局单播或ULA地址，分配给接口，可能是通过自动配置（SLAAC或DHCPv6）或手动配置的。只要接口启用并处于活动状态，它就不会变化。
 - en: '*Temporary IPv6 address*'
+  id: totrans-336
   prefs: []
   type: TYPE_NORMAL
+  zh: '*临时IPv6地址*'
 - en: This is a Global Unicast or ULA address assigned to the interface that uses
     a random interface ID that has a limited lifetime and changes in regular and configurable
     intervals.
+  id: totrans-337
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个全局单播或ULA地址，分配给接口，使用一个随机的接口ID，该ID具有有限的生命周期，并在定期且可配置的间隔内发生变化。
 - en: Note
+  id: totrans-338
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: All the different address types mentioned in these descriptions are discussed
     in [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing").
+  id: totrans-339
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有在这些描述中提到的不同地址类型，都在[第2章](ch02.html "第2章. IPv6地址")中进行了讨论。
 - en: The trace shown in the screenshot in [Figure 4-18](ch04.html#autoconfiguration_in_the_trace_file
     "Figure 4-18. Autoconfiguration in the trace file") was taken during the autoconfiguration
     process of our Windows 8 host. The figure shows some of the processes and message
     types discussed earlier, and the discussion of the trace summarizes the concepts
     in this section.
+  id: totrans-340
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[图4-18](ch04.html#autoconfiguration_in_the_trace_file "图4-18. 跟踪文件中的自动配置")的截图中显示的跟踪是在我们Windows
+    8主机的自动配置过程中获取的。该图显示了之前讨论的一些过程和消息类型，跟踪的讨论总结了本节的概念。
 - en: '![Autoconfiguration in the trace file](images/ipv6_0418.png.jpg)Figure 4-18. Autoconfiguration
     in the trace file'
+  id: totrans-341
   prefs: []
   type: TYPE_NORMAL
+  zh: '![跟踪文件中的自动配置](images/ipv6_0418.png.jpg)图4-18. 跟踪文件中的自动配置'
 - en: As long as the booting host does not have a valid IPv6 address, it sends all
     packets from its unspecified all-zeros address, represented as `::` in the trace
     file.
+  id: totrans-342
   prefs: []
   type: TYPE_NORMAL
+  zh: 只要启动主机没有有效的IPv6地址，它将从其未指定的全零地址发送所有数据包，该地址在跟踪文件中表示为`::`。
 - en: '*Packet 1*'
+  id: totrans-343
   prefs: []
   type: TYPE_NORMAL
+  zh: '*数据包 1*'
 - en: In this first packet, the booting host (interface) sends a Neighbor Solicitation
     from the all-zeros address to the solicited node address in order to perform DAD.
     The Target Address field of the ICMPv6 header contains the link-local address
     of `fe80::d4e4:d1e6:c310:aef`. If another node on the link already used this address,
     it would reply with a Neighbor Advertisement message.
+  id: totrans-344
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个第一个数据包中，启动主机（接口）从全零地址向请求节点地址发送邻居请求（Neighbor Solicitation），以执行DAD。ICMPv6头部的目标地址字段包含`fe80::d4e4:d1e6:c310:aef`的链路本地地址。如果链路上的另一个节点已经使用了该地址，它将回复一个邻居通告（Neighbor
+    Advertisement）消息。
 - en: '*Packet 2*'
+  id: totrans-345
   prefs: []
   type: TYPE_NORMAL
+  zh: '*数据包 2*'
 - en: With the second packet, it sends a Router Solicitation message (message type
     133) to the all-routers multicast address `ff02::2`.
+  id: totrans-346
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用第二个数据包，它向所有路由器多播地址`ff02::2`发送路由器请求消息（消息类型133）。
 - en: '*Packet 3*'
+  id: totrans-347
   prefs: []
   type: TYPE_NORMAL
+  zh: '*数据包 3*'
 - en: With this packet, the host registers for the solicited node multicast address
     of `ff02::1:ff10:aef.` The packet contains a Hop-by-Hop Options header with option
     type 5 for MLD messages. The hop limit is set to 1.
+  id: totrans-348
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个数据包中，主机为`ff02::1:ff10:aef`的请求节点多播地址进行注册。该数据包包含一个带有类型5选项的跳逐跳选项头（Hop-by-Hop
+    Options header），用于MLD消息。跳数限制设置为1。
 - en: '*Packet 4*'
+  id: totrans-349
   prefs: []
   type: TYPE_NORMAL
+  zh: '*数据包 4*'
 - en: The router sends a Router Advertisement (RA) to the all-nodes multicast address
     of `ff02::1`, because the host does not have a valid preferred IPv6 address yet.
     With this RA the router advertises itself as default gateway (router lifetime
@@ -1825,19 +2639,31 @@
     the Autonomous Address Configuration flag set to one. The prefix option contains
     the prefix `2001:db8:cafe:b0::/64`. The details of this RA can be seen in [Figure 4-16](ch04.html#the_router_advertisement_in_a_trace_file
     "Figure 4-16. The Router Advertisement in a trace file").
+  id: totrans-350
   prefs: []
   type: TYPE_NORMAL
+  zh: 路由器将路由器通告（RA）发送到所有节点的多播地址`ff02::1`，因为主机尚未拥有有效的首选 IPv6 地址。通过此 RA，路由器将自己通告为默认网关（路由器生命周期设置为
+    1800 秒）。此 RA 的 M 位和 O 位被设置为零（无 DHCPv6），并且自动地址配置标志设置为 1。前缀选项包含前缀`2001:db8:cafe:b0::/64`。此
+    RA 的详细信息可以在[图 4-16](ch04.html#the_router_advertisement_in_a_trace_file "图 4-16.
+    路由器通告在跟踪文件中的表现")中看到。
 - en: '*Packet 5*'
+  id: totrans-351
   prefs: []
   type: TYPE_NORMAL
+  zh: '*数据包 5*'
 - en: With this packet, the host registers for the solicited node multicast address
     of `ff02::1:ff1c:4c99`. The packet contains a Hop-by-Hop Options header with option
     type 5 for MLD messages. The hop limit is set to 1.
+  id: totrans-352
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过此数据包，主机为请求节点多播地址`ff02::1:ff1c:4c99`注册。数据包包含一个 Hop-by-Hop 选项头部，其中选项类型为 5，用于
+    MLD 消息。跳数限制设置为 1。
 - en: '*Packet 6 and 7*'
+  id: totrans-353
   prefs: []
   type: TYPE_NORMAL
+  zh: '*数据包 6 和 7*'
 - en: The host performs the DAD test for the addresses formed by combining the global
     prefix received in the Router Advertisement (packet four) with the two interface
     IDs. The address with the interface ID ending in `aef` is the permanent address.
@@ -1845,18 +2671,28 @@
     option, or as Microsoft calls it, the temporary address. The packet is sent from
     the all-zeros address to the respective solicited node multicast address. The
     IPv6 address can be seen in the summary line of packet 6 and 7.
+  id: totrans-354
   prefs: []
   type: TYPE_NORMAL
+  zh: 主机对通过将路由器通告（数据包四）中接收到的全局前缀与两个接口 ID 组合形成的地址执行 DAD 测试。接口 ID 以`aef`结尾的地址是永久地址。接口
+    ID 以`4c99`结尾的地址是使用隐私选项的地址，或者微软所称的临时地址。数据包从全零地址发送到相应的请求节点多播地址。IPv6 地址可以在数据包 6 和
+    7 的汇总行中看到。
 - en: '*Packet 8*'
+  id: totrans-355
   prefs: []
   type: TYPE_NORMAL
+  zh: '*数据包 8*'
 - en: With this packet, the host registers for its two solicited node multicast addresses.
     The packet contains the Hop-by-Hop Options header with option type 5 for MLD messages.
+  id: totrans-356
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过此数据包，主机为其两个请求节点多播地址注册。数据包包含 Hop-by-Hop 选项头部，其中选项类型为 5，用于 MLD 消息。
 - en: '*Packet 9, 10, and 11*'
+  id: totrans-357
   prefs: []
   type: TYPE_NORMAL
+  zh: '*数据包 9、10 和 11*'
 - en: 'With these three packets the host advertises itself on the link for the following
     addresses: the link-local of `fe80::d4e4:d1e6:c310:aef`, for the global address
     `2001:db8:cafe:b0:d4e4:d1e6:c310:aef`, and also for the global address with the
@@ -1864,8 +2700,11 @@
     in all three packets, which tells the receivers to update their neighbor cache.
     For communication going out to the Internet, this node should use the temporary
     global address ending in `4c99`.'
+  id: totrans-358
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过这三个数据包，主机在链路上为以下地址发布自己：链路本地地址`fe80::d4e4:d1e6:c310:aef`，全局地址`2001:db8:cafe:b0:d4e4:d1e6:c310:aef`，以及具有临时
+    IID 的全局地址`2001:db8:cafe:b0:a43d:d55b:d1c:4c99`。所有三个数据包都设置了覆盖标志，这告诉接收方更新其邻居缓存。对于向互联网发出的通信，该节点应使用以`4c99`结尾的临时全局地址。
 - en: When you take your own traces to analyze a boot process and use different operating
     systems, you will also find differences in the process shown in the trace file.
     The differences come from the fact that the RFCs leave room for interpretation
@@ -1880,8 +2719,10 @@
     system, get enough information from the vendor about which RFCs have been implemented.
     And if the vendor states that it implemented something, you can use your trace
     files to verify whether the stack works as it is supposed to.
+  id: totrans-359
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你获取自己的跟踪数据来分析启动过程，并使用不同的操作系统时，你也会在跟踪文件中发现该过程的不同之处。这些差异来源于RFC中为标准的解释留下了余地，不同厂商可能会略有不同地实现这些标准。只要遵循RFC中的“必须”（MUST）规则，合规性就不成问题。请注意“应当”（should）；这就是当发生故障时，你的跟踪文件分析技能能发挥作用的地方。差异的另一个原因是，实施行为取决于标准化的实施程度和状态。如果某个操作系统实现了隐私选项，那么该堆栈显然会与未实现隐私选项的堆栈有所不同。因此，在分析特定操作系统的过程时，要从厂商那里获得足够的信息，了解哪些RFC已被实施。如果厂商声明它实现了某些功能，你可以利用你的跟踪文件来验证该堆栈是否按预期工作。
 - en: So for instance, with regard to DAD and how Microsoft has implemented it, Windows
     skips the DAD process for temporary addresses since the interface ID is randomly
     generated. It will start using the temporary address right away and do a DAD process
@@ -1891,29 +2732,41 @@
     OS such as Windows 2008 or higher. The server operating systems do not enable
     the temporary addresses by default. Refer to Microsoft’s documentation for more
     information.
+  id: totrans-360
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，关于DAD和微软如何实现它，Windows会跳过临时地址的DAD过程，因为接口ID是随机生成的。它会立即开始使用临时地址，并在稍后执行DAD过程以确认该地址未被使用。这就是前面提到的*机会性DAD*过程。还要注意，在微软操作系统中，客户端操作系统（如Windows
+    7或8）和服务器操作系统（如Windows 2008或更高版本）默认行为不同。服务器操作系统默认不会启用临时地址。有关更多信息，请参考微软的文档。
 - en: Until recently, the choice for interface IDs with SLAAC was either hardware-based
     (EUI-64) or randomized and temporary (Privacy addresses). RFC 7217, “A Method
     for Generating Semantically Opaque Interface Identifiers with IPv6 Stateless Address
     Autoconfiguration (SLAAC),” defines stable randomized interface IDs. As the name
     implies they are stable but not based on the Layer 2 address.
+  id: totrans-361
   prefs: []
   type: TYPE_NORMAL
+  zh: 直到最近，SLAAC的接口ID选择要么是基于硬件（EUI-64），要么是随机的临时地址（隐私地址）。RFC 7217《生成语义上不透明的接口标识符的IPv6无状态地址自动配置（SLAAC）方法》定义了稳定的随机接口ID。顾名思义，它们是稳定的，但不基于Layer
+    2地址。
 - en: Note
+  id: totrans-362
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: For those of you who use and manage Microsoft operating systems, there is a
     great book which I recommend highly. It is written by Ed Horley and will save
     you a lot of sleepless nights and troubleshooting hours. The title is *Practical
     IPv6 for Windows Administrators* (Apress).
+  id: totrans-363
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于那些使用和管理微软操作系统的朋友们，我强烈推荐一本书。它是由Ed Horley编写的，能为你节省许多失眠的夜晚和故障排除的时间。书名是*《Windows管理员实用IPv6》*（Apress）。
 - en: Network Renumbering
+  id: totrans-364
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 网络重编号
 - en: Renumbering a network means replacing an old prefix with a new prefix. This
     can become necessary for a number of reasons, a common one being a change of provider,
     which usually implies a change of prefix. Moving from the IPv4 world to the IPv6
@@ -1921,33 +2774,43 @@
     identifying a network or hosts. The IPv6 addressing architecture adds the concept
     of interfaces having multiple addresses. This challenges us to develop new addressing
     concepts.
+  id: totrans-365
   prefs: []
   type: TYPE_NORMAL
+  zh: 重编号网络意味着用新的前缀替换旧的前缀。这可能由于多种原因变得必要，常见的原因之一是更换服务提供商，这通常意味着需要更换前缀。从IPv4世界过渡到IPv6世界，前缀和地址变得越来越灵活，且不再唯一标识网络或主机。IPv6地址架构引入了接口可以拥有多个地址的概念。这促使我们开发新的寻址概念。
 - en: With the mechanisms given by ICMPv6, renumbering a network in an IPv6 world
     may become a lot easier in the future. It is a procedure that should be considered
     during creation of an IPv6 address plan. Currently there is not much operational
     experience.
+  id: totrans-366
   prefs: []
   type: TYPE_NORMAL
+  zh: 在ICMPv6提供的机制下，未来在IPv6环境中重新编号网络可能会变得更加容易。这是一个在创建IPv6地址计划时应考虑的过程。目前，相关的操作经验不多。
 - en: 'Renumbering a network may encompass the following steps:'
+  id: totrans-367
   prefs: []
   type: TYPE_NORMAL
+  zh: 重新编号网络可能包括以下步骤：
 - en: Each link in the network must be assigned a subprefix from the new prefix before
     beginning the procedure. This is important for the overall process, in order to
     ensure proper configuration of all relevant devices and services such as routers,
     switches, interfaces, DNS, DHCP, etc.
+  id: totrans-368
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在开始此过程之前，网络中的每个链路必须从新前缀分配一个子前缀。这对于整体过程非常重要，以确保所有相关设备和服务（如路由器、交换机、接口、DNS、DHCP等）能够正确配置。
 - en: The DNS database must be updated with the addresses for interfaces from the
     new prefix, and addresses for interfaces from the old prefix must be removed.
     Obviously the changes to DNS must be coordinated with the changes to addresses
     assigned to interfaces. The propagation of this new information can be controlled
     by parameters such as the Time to Live (TTL) for DNS records and the update interval
     between primary and secondary DNS servers.
+  id: totrans-369
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 必须更新DNS数据库，以包含新前缀接口的地址，并删除旧前缀接口的地址。显然，DNS的更改必须与分配给接口的地址更改进行协调。此新信息的传播可以通过如DNS记录的生存时间（TTL）和主从DNS服务器之间的更新间隔等参数进行控制。
 - en: Switches and routers are prepared for the new prefix. All necessary changes
     in the routing infrastructure for the new prefix are added in parallel to the
     old prefix, while the old prefix is still used for datagram services. This includes
@@ -1958,25 +2821,34 @@
     to advertise the prefix for autoconfiguration yet (meaning that the Autonomous
     Address Configuration flag is not set). This will be done once stable routing
     for the new prefix has been verified.
+  id: totrans-370
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 开关和路由器为新前缀做好准备。新前缀的所有必要路由基础设施更改与旧前缀并行添加，而旧前缀仍用于数据报服务。这不仅包括路由器和交换机，还包括防火墙、入口和出口过滤器以及所有其他过滤功能。为了将子网前缀信息传播到路由器，可以使用DHCPv6的IPv6前缀选项（RFC
+    3633）。在主机使用无状态地址自动配置的情况下，路由器尚未配置为通告自动配置前缀（这意味着未设置自主地址配置标志）。一旦新前缀的稳定路由得到验证，便会进行此操作。
 - en: All access lists, route maps, and other network configuration options (e.g.,
     name services other than DNS) that use IP addresses should be checked to ensure
     that hosts and services that use the new prefix will behave as they did with the
     old one.
+  id: totrans-371
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 所有访问控制列表、路由映射和其他使用IP地址的网络配置选项（例如，除了DNS以外的名称服务）应进行检查，确保使用新前缀的主机和服务能够像使用旧前缀时一样正常工作。
 - en: Test and verify network infrastructure and routing for the new prefix.
+  id: totrans-372
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 测试和验证新前缀的网络基础设施和路由。
 - en: Advertise the new prefix outside of the corporate network. Configure all border
     defense systems accordingly to protect the new prefix from outside attacks.
+  id: totrans-373
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将新前缀通告到公司网络之外。相应地配置所有边界防御系统，以保护新前缀免受外部攻击。
 - en: Assign addresses from the new prefix to interfaces on hosts while still retaining
     the addresses from the old prefix. If Stateless Autoconfiguration is used, the
     *autonomous* *address-config* flag is set for the new prefix, so hosts configure
@@ -1985,21 +2857,27 @@
     by using the DHCP Reconfigure message, which will cause every DHCP client to contact
     the DHCP server. The addresses from the new prefix will not be used until they
     are inserted into DNS.
+  id: totrans-374
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 为主机上的接口分配新前缀的地址，同时仍保留旧前缀的地址。如果使用无状态自动配置，则会为新前缀设置*自主* *地址配置*标志，因此主机会为新前缀配置地址，并保留旧地址。如果使用DHCP，则会从两个前缀中分配地址。新信息可以通过使用DHCP重新配置消息来传播，这将导致每个DHCP客户端联系DHCP服务器。直到新前缀的地址插入到DNS中之前，它们不会被使用。
 - en: When the new prefix has been fully integrated into the network infrastructure
     and tested for stable operation, hosts, switches, and routers can begin using
     the new prefix. Once the transition has completed, the old prefix will not be
     in use in the network and can be removed step by step from DNS.
+  id: totrans-375
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 当新前缀已完全集成到网络基础设施中并经过稳定性测试后，主机、交换机和路由器可以开始使用新前缀。过渡完成后，旧前缀将不再在网络中使用，并可以逐步从DNS中移除。
 - en: Special attention has to be given to applications and devices that do not get
     their IP addresses from DHCP or DNS, or that cache or store IP address information
     locally.
+  id: totrans-376
   prefs: []
   type: TYPE_NORMAL
+  zh: 必须特别注意那些没有从DHCP或DNS获取IP地址，或缓存或本地存储IP地址信息的应用程序和设备。
 - en: This is a high-level view of a renumbering process and obviously—as all network
     administrators know well—there are many details and possible pitfalls to be considered.
     Thorough and careful planning of this process is a must. RFC 4192 describes this
@@ -2007,42 +2885,58 @@
     overview and an update to RFC 4192, discusses currently available mechanisms and
     components to support renumbering and analyzes gaps and mechanisms that should
     be developed in order to make renumbering an easier process.
+  id: totrans-377
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个高层次的重新编号过程视图，显然——正如所有网络管理员都清楚的那样——有许多细节和可能的陷阱需要考虑。对这个过程的全面和仔细规划是必须的。RFC
+    4192描述了这个过程。RFC 7010《IPv6站点重新编号差距分析》提供了对RFC 4192的良好概述和更新，讨论了当前可用的支持重新编号的机制和组件，并分析了应该开发的差距和机制，以使重新编号过程更加简便。
 - en: There is a specification for IPv6-to-IPv6 Network Prefix Translation (NPTv6,
     RFC 6296) that can also be used in the scenario of changing prefixes due to ISP
     changes. This sort of introduces NAT for IPv6, although not with the issues of
     port translation, because in IPv6 this would be a one-to-one mapping from an address
     perspective.
+  id: totrans-378
   prefs: []
   type: TYPE_NORMAL
+  zh: 有一个IPv6到IPv6网络前缀转换（NPTv6，RFC 6296）的规范，也可以用于因ISP更改而导致前缀更改的场景。这种方式引入了IPv6的NAT，尽管没有端口转换的问题，因为在IPv6中，这将是一个从地址角度的一对一映射。
 - en: Note
+  id: totrans-379
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Refer to [Chapter 7](ch07.html "Chapter 7. Transition Technologies") for a discussion
     of NPTv6.
+  id: totrans-380
   prefs: []
   type: TYPE_NORMAL
+  zh: 请参考[第7章](ch07.html "第7章. 过渡技术")了解关于NPTv6的讨论。
 - en: Path MTU Discovery
+  id: totrans-381
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 路径MTU发现
 - en: With IPv4, every router can fragment packets if needed. If a router cannot forward
     a packet because the MTU of the next link is smaller than the packet it has to
     send, the router fragments the packet. It cuts it into slices that fit the smaller
     MTU and sends it out as a set of fragments. The packet is then reassembled at
     the final destination. Depending on the network design, an IPv4 packet may be
     fragmented more than once during its travel through the network.
+  id: totrans-382
   prefs: []
   type: TYPE_NORMAL
+  zh: 在IPv4中，每个路由器都可以根据需要对数据包进行分片。如果路由器无法转发数据包，因为下一链路的MTU小于它必须发送的数据包，路由器会对数据包进行分片。它将数据包切割成适应较小MTU的片段，并作为一组片段发送出去。数据包随后在最终目的地重新组装。根据网络设计，IPv4数据包在穿越网络时可能会被分片多次。
 - en: With IPv6, routers do not fragment packets anymore; the sender takes care of
     it. Path MTU Discovery tries to ensure that a packet is sent using the largest
     possible size that is supported on a certain route. The Path MTU is the smallest
     link MTU of all links between a source and a destination. The discovery of the
     Path MTU is described in RFC 1981.
+  id: totrans-383
   prefs: []
   type: TYPE_NORMAL
+  zh: 在IPv6中，路由器不再进行分片；发送方负责处理分片。路径MTU发现试图确保数据包在某一特定路径上使用最大可能的支持大小。路径MTU是源和目的地之间所有链路中最小的链路MTU。路径MTU的发现过程在RFC
+    1981中有描述。
 - en: The discovery process works like this. First, a host assumes that the Path MTU
     is the same as the MTU of the first hop link and it uses that size. If the packet
     is too big for a certain router along the path to deliver the packet to the next
@@ -2053,16 +2947,24 @@
     process of receiving a Packet Too Big message and reducing the size of the packets
     can happen more than once before the packet reaches its destination. The discovery
     process ends when the packets arrive at the final destination.
+  id: totrans-384
   prefs: []
   type: TYPE_NORMAL
+  zh: 发现过程是这样的。首先，主机假定路径 MTU 与第一跳链路的 MTU 相同，并使用该大小。如果数据包对路径中某个路由器来说太大，无法将数据包传递到下一个链路，该路由器会丢弃数据包并发送一个
+    ICMPv6 “数据包过大”消息。请回想一下，这种消息类型包含了下一跳链路的 MTU 大小。此时，主机将使用该 MTU 来发送进一步的数据包到同一目的地。然而，主机永远不会使用低于
+    IPv6 最小 MTU 大小 1280 字节的值。接收“数据包过大”消息并减少数据包大小的过程可能会发生多次，直到数据包到达目的地。该发现过程在数据包到达最终目的地时结束。
 - en: Note
+  id: totrans-385
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Note that ICMPv6 Packet Too Big messages should not be blocked, as this will
     make fragmentation fail.
+  id: totrans-386
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，不应阻塞 ICMPv6 “数据包过大”消息，因为这会导致分片失败。
 - en: The path from a given source to a given destination can change, and so can the
     Path MTU. Smaller MTU sizes are discovered by getting Packet Too Big messages.
     An IPv6 host will try to increase the MTU size from time to time in order to be
@@ -2071,12 +2973,18 @@
     may travel, and each path can have a different Path MTU. Packet Too Big messages
     will be generated just as with a unicast destination, and the packet size used
     by the sender is the smallest Path MTU of the whole set of destinations.
+  id: totrans-387
   prefs: []
   type: TYPE_NORMAL
+  zh: 从给定源到给定目的地的路径可能会发生变化，路径 MTU 也会随之变化。通过获取“数据包过大”消息，发现较小的 MTU 大小。IPv6 主机会不时尝试增大
+    MTU 大小，以便能够检测到更大的路径 MTU。路径 MTU 发现也支持多播目的地。如果目的地是多播地址，则数据包的副本可能通过多条路径传输，每条路径可能具有不同的路径
+    MTU。就像单播目的地一样，将会生成“数据包过大”消息，发送方使用的数据包大小是所有目的地中最小的路径 MTU。
 - en: Multicast Listener Discovery
+  id: totrans-388
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 多播监听者发现
 - en: Multicast has been available in IPv4 since 1988 and is used to address a certain
     group of hosts at the same time. Instead of sending out a broadcast, which is
     not routable and has to be processed by every node on the subnet, the multicast
@@ -2085,23 +2993,32 @@
     Multicast messages can be forwarded over routers. In order to make this routing
     efficient, a multicast group management protocol ensures that routers only forward
     multicast packets over interfaces to links with members of the multicast group.
+  id: totrans-389
   prefs: []
   type: TYPE_NORMAL
+  zh: 自 1988 年以来，多播一直在 IPv4 中可用，并用于同时向一组特定的主机发送数据包。与广播（不可路由且必须由子网内的每个节点处理）不同，多播数据包被定向到
+    Class D 地址范围内的多播组地址。只有该多播组成员的主机才会处理该数据包。多播消息可以通过路由器转发。为了使这种路由高效，多播组管理协议确保路由器仅通过接口将多播数据包转发到包含多播组成员的链路上。
 - en: In IPv6, multicast is an integral part of the protocol and is available on all
     IPv6 nodes. A new multicast address format has been defined with a prefix of `ff`
     and with added functionality by using scopes in addition to the group address.
     For example, a multicast group address can be in a link-local scope (`ff02`),
     a site-local scope (`ff05`), or a global scope (`ff0e`).
+  id: totrans-390
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 IPv6 中，多播是协议的一个重要组成部分，并且在所有 IPv6 节点上都可用。一个新的多播地址格式已被定义，其前缀为`ff`，并通过使用作用域（除了组地址外）增加了功能。例如，一个多播组地址可以位于链路本地作用域（`ff02`）、站点本地作用域（`ff05`）或全局作用域（`ff0e`）中。
 - en: Note
+  id: totrans-391
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: For an explanation of the multicast address format and a list of scope identifiers,
     refer to [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing").
+  id: totrans-392
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关多播地址格式的解释及作用域标识符的列表，请参考[第 2 章](ch02.html "第 2 章. IPv6 地址分配")。
 - en: Multicast group management in IPv4 is done through Internet Group Management
     Protocol (IGMP). Version 2 of IGMP is defined in RFC 2236\. IPv6 uses ICMPv6 messages
     for the same functionality; initial development was based on the IGMPv2 specification.
@@ -2110,22 +3027,34 @@
     It extends MLD version 1 to support the use of Source-Specific Multicast (SSM).
     It is based on IGMPv3 (RFC 3376) and is specified in RFC 3810 and RFC 4604\. MLDv2
     is compatible with MLD version 1.
+  id: totrans-393
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv4 中的多播组管理是通过互联网组管理协议（IGMP）完成的。IGMP 版本 2 在 RFC 2236 中定义。IPv6 使用 ICMPv6 消息来实现相同的功能；最初的开发基于
+    IGMPv2 规范。现在称为 *多播接收者发现*（MLD）。MLD 的版本 1 在 RFC 2710 中定义（由 RFC 3590 和 RFC 3810 更新）。2004
+    年，定义了 MLD 版本 2。它扩展了 MLD 版本 1，以支持源特定多播（SSM）的使用。它基于 IGMPv3（RFC 3376），并在 RFC 3810
+    和 RFC 4604 中进行了规范。MLDv2 与 MLD 版本 1 兼容。
 - en: MLD is the protocol that allows multicast listeners to register for multicast
     addresses they want to use, to ensure efficient routing. Therefore, a routing
     mechanism is needed to manage the forwarding of multicast messages. PIM (Protocol
     Independent Multicast, RFC 4601) can be used with IPv6 with minimal changes.
+  id: totrans-394
   prefs: []
   type: TYPE_NORMAL
+  zh: MLD 是一种协议，允许多播接收者注册他们希望使用的多播地址，以确保高效的路由。因此，需要一个路由机制来管理多播消息的转发。PIM（协议独立多播，RFC
+    4601）可以与 IPv6 一起使用，且只需做最小的更改。
 - en: Note
+  id: totrans-395
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: To find information about the status of PIM, go to the IETF working group at
     [http://www.ietf.org/html.charters/pim-charter.html](http://www.ietf.org/html.charters/pim-charter.html).
+  id: totrans-396
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查找有关 PIM 状态的信息，请访问 IETF 工作组的 [http://www.ietf.org/html.charters/pim-charter.html](http://www.ietf.org/html.charters/pim-charter.html)。
 - en: MLD is an asymmetric protocol. The behavior of *listeners*, i.e., nodes that
     want to receive messages destined for a specific multicast group, differs from
     the behavior of routers. For multicast addresses where a router is a listener,
@@ -2141,57 +3070,83 @@
     a listener deregisters for a multicast address. When the last member of a group
     deregisters for a multicast address, the router removes the address from its list
     for this link.
+  id: totrans-397
   prefs: []
   type: TYPE_NORMAL
+  zh: MLD 是一种非对称协议。*接收者*（即希望接收发送到特定多播组的消息的节点）的行为与路由器的行为不同。对于路由器是接收者的多播地址，它使用协议的两个部分。路由器使用
+    MLD 来发现哪些多播地址在它们的每个链路上有接收者。对于每个附加的链路，路由器会保留一个接收者地址列表。它不会跟踪有多少成员在监听某个地址。只要链路上至少有一个成员，某个多播地址就会被列出。接收者会为其多播地址发送成员报告。通过这些消息，它会在链路上向路由器注册，以接收发送到相应多播组的消息。如果该多播地址不在路由器的链路列表中，路由器会将该地址添加到需要通过该接口转发的多播地址列表中。接收者通过发送“Done”消息注销某个多播地址。当某个组的最后一个成员注销某个多播地址时，路由器会从该链路的地址列表中移除该地址。
 - en: All MLD messages are sent with a link-local IPv6 Source address and a hop limit
     of one to make sure they remain on the local link. The packet has a Hop-by-Hop
     Options header with the Router Alert flag set. Thus, routers will not ignore the
     packet, even if they are not listening to the multicast group address in question.
     Refer to [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing") for more information
     on Extension headers.
+  id: totrans-398
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有 MLD 消息都使用链路本地 IPv6 源地址并设置跳数限制为 1，以确保它们保持在本地链路上。数据包具有带有路由器警告标志的跳逐跳选项头。因此，即使路由器没有监听相关的多播组地址，它也不会忽略该数据包。有关扩展头的更多信息，请参见
+    [第 2 章](ch02.html "第 2 章. IPv6 地址分配")。
 - en: MLDv1
+  id: totrans-399
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: MLDv1
 - en: 'The following message types have been specified for MLDv1 (RFC 2710):'
+  id: totrans-400
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是为 MLDv1（RFC 2710）指定的消息类型：
 - en: '*Multicast Listener Query—type 130*'
+  id: totrans-401
   prefs: []
   type: TYPE_NORMAL
+  zh: '*多播接收者查询—类型 130*'
 - en: 'Used by an IPv6 router to query the multicast addresses on a link. There are
     two types of queries: the general query used to determine the multicast addresses
     that have listeners on the link (in the general query, the multicast address field
     is set to zero) and the address-specific query used to find out whether there
     are members for a specific multicast address on a link (the multicast address
     field is set to the multicast address for which the query is done).'
+  id: totrans-402
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于IPv6路由器查询链路上的多播地址。查询有两种类型：用于确定链路上是否有监听器的多播地址的通用查询（在通用查询中，多播地址字段设置为零），以及用于查找链路上是否有特定多播地址成员的地址特定查询（多播地址字段设置为进行查询的多播地址）。
 - en: '*Multicast Listener Report—type 131*'
+  id: totrans-403
   prefs: []
   type: TYPE_NORMAL
+  zh: '*多播监听器报告——类型131*'
 - en: Used by a listener to register for a multicast group. This can be an unsolicited
     registration or the answer to a multicast listener query from the router.
+  id: totrans-404
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于监听器注册多播组。这可以是一个无请求的注册，或者是对路由器发送的多播监听器查询的回答。
 - en: '*Multicast Listener Done—type 132*'
+  id: totrans-405
   prefs: []
   type: TYPE_NORMAL
+  zh: '*多播监听器完成——类型132*'
 - en: Sent by a listener to deregister for a multicast address. When a router receives
     a Multicast Listener Done message from the last member of the multicast address
     on a link, it will delete the multicast address from its list of multicast addresses
     to be forwarded over this interface.
+  id: totrans-406
   prefs: []
   type: TYPE_NORMAL
+  zh: 由监听器发送以注销多播地址。当路由器收到来自多播地址最后一个成员的多播监听器完成消息时，它会将该多播地址从其需要通过此接口转发的多播地址列表中删除。
 - en: All three message types of MLDv1 have the same format, which is shown in [Figure 4-19](ch04.html#mldv1_message_format
     "Figure 4-19. MLDv1 message format").
+  id: totrans-407
   prefs: []
   type: TYPE_NORMAL
+  zh: MLDv1的三种消息类型具有相同的格式，如[图4-19](ch04.html#mldv1_message_format "图4-19. MLDv1消息格式")所示。
 - en: '![MLDv1 message format](images/ipv6_0419.png)Figure 4-19. MLDv1 message format'
+  id: totrans-408
   prefs: []
   type: TYPE_NORMAL
+  zh: '![MLDv1消息格式](images/ipv6_0419.png)图4-19. MLDv1消息格式'
 - en: The Type field is 130 for Multicast Listener Queries, 131 for Multicast Listener
     Reports, or 132 for Multicast Listener Done messages. The Code field is set to
     0 by the sender and ignored by the receiver. The Maximum Response Delay field
@@ -2202,8 +3157,10 @@
     be queried. In Report and Done messages, this field contains either the multicast
     group to which a member listens (Report message) or the group it is leaving (Done
     message).
+  id: totrans-409
   prefs: []
   type: TYPE_NORMAL
+  zh: 类型字段对于多播监听器查询为130，对于多播监听器报告为131，对于多播监听器完成消息为132。代码字段由发送方设置为0，接收方忽略该字段。最大响应延迟字段仅在查询消息中使用。此字段表示如果节点有监听器，则必须在此最大延迟（以毫秒为单位）内发送报告。在所有其他消息中，该字段设置为0。通用查询中的多播地址字段设置为0。在地址特定查询中，它包含要查询的多播组地址。在报告和完成消息中，该字段包含监听成员的多播组（报告消息）或它正在离开的组（完成消息）。
 - en: Routers send general queries to the link-local scope all-nodes multicast address
     `ff02::1`. Any station that wants to send a report in answer to a query starts
     a timer when it receives the query and is supposed to wait some random delay before
@@ -2212,46 +3169,69 @@
     within that delay, it stops the process. Thus, multiple reports for the same address
     can be avoided. Group membership join reports and terminations are sent to the
     address in question.
+  id: totrans-410
   prefs: []
   type: TYPE_NORMAL
+  zh: 路由器将通用查询发送到链路本地范围的所有节点多播地址`ff02::1`。任何希望响应查询并发送报告的站点，在接收到查询后都会启动一个定时器，并在发送报告之前等待一段随机延迟。最大延迟是查询中“最大响应延迟”字段所指定的值。如果站点在此延迟内看到另一个站点发送报告，它将停止该过程。因此，可以避免为同一地址发送多个报告。组成员加入报告和终止报告将发送到相关地址。
 - en: The link-local scope all-nodes address (`ff02::1`) is a special address. It
     never sends a membership Report or a Done message. If an address has a scope of
     1 (interface-local), MLD messages are never sent. [Table 4-9](ch04.html#message_types_and_their_destinations
     "Table 4-9. Message types and their destinations") summarizes the message types
     and their Destination address.
+  id: totrans-411
   prefs: []
   type: TYPE_NORMAL
+  zh: 链路本地范围的所有节点地址（`ff02::1`）是一个特殊地址。它从不发送成员报告或完成消息。如果一个地址的范围是1（接口本地），则不会发送MLD消息。[表4-9](ch04.html#message_types_and_their_destinations
+    "表4-9. 消息类型及其目标地址")总结了消息类型及其目标地址。
 - en: Table 4-9. Message types and their destinations
+  id: totrans-412
   prefs: []
   type: TYPE_NORMAL
+  zh: 表4-9. 消息类型及其目标地址
 - en: '| Message type | IPv6 Destination address |'
+  id: totrans-413
   prefs: []
   type: TYPE_TB
+  zh: '| 消息类型 | IPv6 目的地址 |'
 - en: '| --- | --- |'
+  id: totrans-414
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| General Query | Link-local scope all-nodes (`ff02::1`) |'
+  id: totrans-415
   prefs: []
   type: TYPE_TB
+  zh: '| 一般查询 | 链路本地范围的所有节点（`ff02::1`） |'
 - en: '| Multicast Address-Specific Query | The multicast address being queried |'
+  id: totrans-416
   prefs: []
   type: TYPE_TB
+  zh: '| 多播地址特定查询 | 正在查询的多播地址 |'
 - en: '| Report | The multicast address being reported |'
+  id: totrans-417
   prefs: []
   type: TYPE_TB
+  zh: '| 报告 | 正在报告的多播地址 |'
 - en: '| Done | Link-local scope all-routers (`ff02::2`) |'
+  id: totrans-418
   prefs: []
   type: TYPE_TB
+  zh: '| 完成 | 链路本地范围的所有路由器（`ff02::2`） |'
 - en: 'RFC 2710 contains a lot of interesting and detailed information. It discusses
     various states that nodes can go through and includes state transition diagrams.
     There is also much detailed information on timers: how they are used, their default
     values, and how they can be configured.'
+  id: totrans-419
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 2710 包含了许多有趣且详细的信息，讨论了节点可能经历的各种状态，并包括状态转换图。还详细介绍了定时器：它们是如何使用的，默认值是什么，以及如何配置它们。
 - en: MLDv2
+  id: totrans-420
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: MLDv2
 - en: MLD version 2 has been specified in RFC 3810 and RFC 4604\. It is based on IGMPv3
     (RFC 3376). MLDv2 adds the ability for a node to do *source filtering*, which
     means to report interest in listening to packets with a particular multicast address
@@ -2259,596 +3239,877 @@
     addresses. This is also referred to as Source-Specific Multicast (SSM) as opposed
     to Any Source Multicast (ASM), which is the name for the previous version, based
     on IGMPv2 (MLDv1).
+  id: totrans-421
   prefs: []
   type: TYPE_NORMAL
+  zh: MLD 版本 2 已在 RFC 3810 和 RFC 4604 中规范化。它基于 IGMPv3（RFC 3376）。MLDv2 增加了节点进行 *源过滤*
+    的能力，即仅从特定源地址或从除特定源地址外的所有源地址接收具有特定多播地址的包。这也被称为源特定多播（SSM），与基于 IGMPv2（MLDv1）的任何源多播（ASM）相对。
 - en: The filter mode to support SSM may be either *INCLUDE* or *EXCLUDE*. In INCLUDE
     mode, reception of packets sent to the specified multicast address is enabled
     only from the source addresses listed in the source list. In EXCLUDE mode, reception
     of packets sent to the given multicast address is enabled from all source addresses
     except those listed in the source list.
+  id: totrans-422
   prefs: []
   type: TYPE_NORMAL
+  zh: 支持 SSM 的过滤模式可以是 *INCLUDE* 或 *EXCLUDE*。在 INCLUDE 模式下，仅启用从源地址列表中列出的源地址接收发送到指定多播地址的包。在
+    EXCLUDE 模式下，启用从除源地址列表中列出的源地址外的所有源地址接收发送到指定多播地址的包。
 - en: 'There are two message types for MLDv2:'
+  id: totrans-423
   prefs: []
   type: TYPE_NORMAL
+  zh: MLDv2 有两种消息类型：
 - en: Multicast Listener Query—type 130
+  id: totrans-424
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 多播监听查询—类型 130
 - en: Version 2 Multicast Listener Report—type 143 (RFC 3810)
+  id: totrans-425
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 版本 2 多播监听报告—类型 143（RFC 3810）
 - en: To be interoperable with MLDv1, MLDv2 implementations also need to support Version
     1 Multicast Listener Report (type 131) and Version 1 Multicast Listener Done (type
     132) messages.
+  id: totrans-426
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了与 MLDv1 兼容，MLDv2 实现也需要支持版本 1 多播监听报告（类型 131）和版本 1 多播监听完成（类型 132）消息。
 - en: 'For MLDv2 query messages, the MLD header is extended with the following fields,
     which are appended after the Multicast Address field shown in [Figure 4-19](ch04.html#mldv1_message_format
     "Figure 4-19. MLDv1 message format"):'
+  id: totrans-427
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于 MLDv2 查询消息，MLD 头部通过以下字段进行扩展，这些字段在多播地址字段之后附加，如 [图 4-19](ch04.html#mldv1_message_format
+    "图 4-19. MLDv1 消息格式") 所示：
 - en: '*Reserved—4 bits*'
+  id: totrans-428
   prefs: []
   type: TYPE_NORMAL
+  zh: '*保留字段—4 位*'
 - en: Must be set to zero.
+  id: totrans-429
   prefs: []
   type: TYPE_NORMAL
+  zh: 必须设置为零。
 - en: '*S-Flag (Suppress Router-Side Processing)—1 bit*'
+  id: totrans-430
   prefs: []
   type: TYPE_NORMAL
+  zh: '*S-标志（抑制路由器端处理）—1 位*'
 - en: When set to one, the S-Flag indicates to any receiving multicast routers that
     they have to suppress the normal timer updates they perform upon hearing a Query.
+  id: totrans-431
   prefs: []
   type: TYPE_NORMAL
+  zh: 当设置为 1 时，S-标志指示任何接收的多播路由器，它们必须抑制在接收到查询时执行的正常定时器更新。
 - en: '*QRV (Querier’s Robustness Variable)—3 bits*'
+  id: totrans-432
   prefs: []
   type: TYPE_NORMAL
+  zh: '*QRV（查询者的鲁棒性变量）—3 位*'
 - en: If nonzero, the QRV field contains the Robustness Variable value used by the
     Querier. This value affects timers and the number of retries. Included in queries
     in order to synchronize all MLDv2 routers connected to the same link.
+  id: totrans-433
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果非零，QRV 字段包含查询者使用的鲁棒性变量值。该值会影响定时器和重试次数。包含在查询中，以便同步所有连接到相同链路的 MLDv2 路由器。
 - en: '*QQIC (Querier’s Query Interval Code)—8 bits*'
+  id: totrans-434
   prefs: []
   type: TYPE_NORMAL
+  zh: '*QQIC（查询者的查询间隔代码）—8 位*'
 - en: The Querier’s Query Interval Code field specifies the Query Interval used by
     the Querier. Included in queries in order to synchronize all MLDv2 routers connected
     to the same link.
+  id: totrans-435
   prefs: []
   type: TYPE_NORMAL
+  zh: 查询者的查询间隔代码字段指定查询者使用的查询间隔。包含在查询中，以便同步所有连接到相同链路的 MLDv2 路由器。
 - en: '*Number of Sources—16 bits*'
+  id: totrans-436
   prefs: []
   type: TYPE_NORMAL
+  zh: '*源数量—16 位*'
 - en: The Number of Sources (N) field specifies how many Source addresses are present
     in the Query. This number is zero in a General Query or a Multicast Address Specific
     Query, and nonzero in a Multicast Address and Source Specific Query.
+  id: totrans-437
   prefs: []
   type: TYPE_NORMAL
+  zh: 源数量（N）字段指定查询中存在多少个源地址。在通用查询或多播地址特定查询中，此数字为零，而在多播地址和源特定查询中，此数字为非零。
 - en: '*Source Address—variable length*'
+  id: totrans-438
   prefs: []
   type: TYPE_NORMAL
+  zh: '*源地址—可变长度*'
 - en: Contains the Source addresses. Length is defined by the number of addresses
     specified in the N-Field.
+  id: totrans-439
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含源地址。长度由 N 字段中指定的地址数量定义。
 - en: 'There are three different kinds of queries that can be sent:'
+  id: totrans-440
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以发送三种不同类型的查询：
 - en: '*General Query*'
+  id: totrans-441
   prefs: []
   type: TYPE_NORMAL
+  zh: '*通用查询*'
 - en: Sent by the Querier to learn which multicast addresses have listeners on an
     attached link. In a General Query, both the multicast address field and the number
     of sources field are set to zero.
+  id: totrans-442
   prefs: []
   type: TYPE_NORMAL
+  zh: 由查询者发送，用于了解哪些多播地址在附加的链路上有监听者。在通用查询中，多播地址字段和源数量字段都设置为零。
 - en: '*Multicast Address Specific Query*'
+  id: totrans-443
   prefs: []
   type: TYPE_NORMAL
+  zh: '*多播地址特定查询*'
 - en: Sent by the Querier to learn if a particular multicast address has any listeners
     on an attached link. In a Multicast Address Specific Query, the Multicast Address
     field contains the multicast address of interest, while the Number of Sources
     field is set to zero.
+  id: totrans-444
   prefs: []
   type: TYPE_NORMAL
+  zh: 由查询者发送，用于了解特定多播地址是否在附加链路上有监听者。在多播地址特定查询中，多播地址字段包含感兴趣的多播地址，而源数量字段设置为零。
 - en: '*Multicast Address and Source Specific Query*'
+  id: totrans-445
   prefs: []
   type: TYPE_NORMAL
+  zh: '*多播地址和源特定查询*'
 - en: Sent by the Querier to learn if any of the sources from the specified list for
     the particular multicast address has any listeners on an attached link or not.
     In a Multicast Address and Source Specific Query, the Multicast Address field
     contains the multicast address of interest, while the Source Address field(s)
     contain(s) the source address(es) of interest.
+  id: totrans-446
   prefs: []
   type: TYPE_NORMAL
+  zh: 由查询者发送，用于了解是否有任何来自指定列表中的源对于特定的多播地址，在附加链路上有监听者。在多播地址和源特定查询中，多播地址字段包含感兴趣的多播地址，而源地址字段包含感兴趣的源地址。
 - en: And [Figure 4-20](ch04.html#mldv2_query "Figure 4-20. MLDv2 Query") shows what
     these fields look like in a trace file.
+  id: totrans-447
   prefs: []
   type: TYPE_NORMAL
+  zh: 并且[图 4-20](ch04.html#mldv2_query "图 4-20. MLDv2 查询") 显示了这些字段在追踪文件中的样子。
 - en: '![MLDv2 Query](images/ipv6_0420.png.jpg)Figure 4-20. MLDv2 Query'
+  id: totrans-448
   prefs: []
   type: TYPE_NORMAL
+  zh: '![MLDv2 查询](images/ipv6_0420.png.jpg) 图 4-20. MLDv2 查询'
 - en: This is a Multicast Address Specific Query, as it contains the multicast address
     to be checked (`ff02::1:3`) in the Multicast Address field. The Number of Sources
     field is set to zero. What you can’t see in this screenshot is that the message
     has a Hop-by-Hop Options header with a Router Alert Option.
+  id: totrans-449
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个多播地址特定查询，因为它在多播地址字段中包含要检查的多播地址（`ff02::1:3`）。源数量字段设置为零。你在这张截图中看不见的是，消息有一个跳跃选项头部，并包含路由器警告选项。
 - en: 'MLDv2 Listener Report messages have the following format:'
+  id: totrans-450
   prefs: []
   type: TYPE_NORMAL
+  zh: MLDv2 监听者报告消息具有以下格式：
 - en: Type field—1 byte, set to 143
+  id: totrans-451
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 类型字段—1字节，设置为143
 - en: Reserved—1 byte
+  id: totrans-452
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 保留—1字节
 - en: Checksum—2 bytes
+  id: totrans-453
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 校验和—2字节
 - en: Reserved—2 bytes
+  id: totrans-454
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 保留—2字节
 - en: M-Field (Number of Multicast Address Records)—2 bytes
+  id: totrans-455
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: M-字段（多播地址记录数量）—2字节
 - en: Multicast Address Records—variable length, depending on number of addresses
+  id: totrans-456
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 多播地址记录—可变长度，取决于地址数量
 - en: '[Figure 4-21](ch04.html#mldv2_listener_report_in_the_trace_file "Figure 4-21. MLDv2
     Listener Report in the trace file") shows the MLDv2 Listener Report in the trace
     file.'
+  id: totrans-457
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 4-21](ch04.html#mldv2_listener_report_in_the_trace_file "图 4-21. MLDv2 监听者报告在追踪文件中")
+    显示了追踪文件中的 MLDv2 监听者报告。'
 - en: '![MLDv2 Listener Report in the trace file](images/ipv6_0421.png.jpg)Figure 4-21. MLDv2
     Listener Report in the trace file'
+  id: totrans-458
   prefs: []
   type: TYPE_NORMAL
+  zh: '![追踪文件中的 MLDv2 监听者报告](images/ipv6_0421.png.jpg) 图 4-21. 追踪文件中的 MLDv2 监听者报告'
 - en: In this case, there is only one multicast address record, so the value is set
     to one. Each Multicast Address Record is a block of fields that contain information
     on the MLD sender listening to a single multicast address on the interface from
     which the Report is sent. It includes a field specifying the number of sources
     and the list of sources for a particular multicast address. The *Record Type field*
     specifies the type of the Multicast Address Record described next.
+  id: totrans-459
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，只有一个多播地址记录，因此值设置为 1。每个多播地址记录是一个字段块，包含有关 MLD 发送者在发送报告的接口上监听单个多播地址的信息。它包括一个字段，指定源的数量以及该多播地址的源列表。*记录类型字段*指定接下来描述的多播地址记录的类型。
 - en: 'A node that receives a Query on an interface responds with a *Current State
     Record* to report the state of the interface regarding the multicast address in
     question. The Current State Record can have one of two values:'
+  id: totrans-460
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个接收到接口查询的节点，会通过一个*当前状态记录（Current State Record）*来报告接口关于特定组播地址的状态。当前状态记录可以有两种值：
 - en: '*Value 1—MODE_IS_INCLUDE*'
+  id: totrans-461
   prefs: []
   type: TYPE_NORMAL
+  zh: '*值 1—模式为包含（MODE_IS_INCLUDE）*'
 - en: Indicates that the interface has a filter mode of INCLUDE for the specified
     multicast address.
+  id: totrans-462
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示该接口对于指定的组播地址采用包含（INCLUDE）过滤模式。
 - en: '*Value 2—MODE_IS_EXCLUDE*'
+  id: totrans-463
   prefs: []
   type: TYPE_NORMAL
+  zh: '*值 2—模式为排除（MODE_IS_EXCLUDE）*'
 - en: Indicates that the interface has a filter mode of EXCLUDE for the specified
     multicast address.
+  id: totrans-464
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示该接口对于指定的组播地址采用排除（EXCLUDE）过滤模式。
 - en: 'If there is a change of the filter mode, a node sends a *Filter Mode Change
     Record*. This record is included in a report sent from the interface where the
     change occurred. The Filter Mode Change Record can have one of two values:'
+  id: totrans-465
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果过滤模式发生变化，节点会发送一个*过滤模式变化记录（Filter Mode Change Record）*。该记录会包含在从发生变化的接口发送的报告中。过滤模式变化记录可以有两种值：
 - en: '*Value 3—CHANGE_TO_INCLUDE_MODE*'
+  id: totrans-466
   prefs: []
   type: TYPE_NORMAL
+  zh: '*值 3—更改为包含模式（CHANGE_TO_INCLUDE_MODE）*'
 - en: Indicates that the interface has changed to INCLUDE filter mode for the specified
     multicast address. The Source Address fields in this Multicast Address Record
     contain the interface’s new source list for the specified multicast address, if
     it is nonempty.
+  id: totrans-467
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示接口已经更改为指定组播地址的包含过滤模式。此组播地址记录中的源地址字段包含接口的新源列表（如果它非空）。
 - en: '*Value 4—CHANGE_TO_EXCLUDE_MODE*'
+  id: totrans-468
   prefs: []
   type: TYPE_NORMAL
+  zh: '*值 4—更改为排除模式（CHANGE_TO_EXCLUDE_MODE）*'
 - en: Indicates that the interface has changed to EXCLUDE filter mode for the specified
     multicast address. The Source Address fields in this Multicast Address Record
     contain the interface’s new source list for the specified multicast address, if
     it is nonempty.
+  id: totrans-469
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示接口已经更改为指定组播地址的排除过滤模式。此组播地址记录中的源地址字段包含接口的新源列表（如果它非空）。
 - en: 'If there is a change of source list, a node includes a *Source List Change
     Record* in a report sent from the interface where the change occurred. The Source
     List Change Record can have one of two values:'
+  id: totrans-470
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果源列表发生变化，节点会在从发生变化的接口发送的报告中包含一个*源列表变化记录（Source List Change Record）*。源列表变化记录可以有两种值：
 - en: '*Value 5—ALLOW_NEW_SOURCES*'
+  id: totrans-471
   prefs: []
   type: TYPE_NORMAL
+  zh: '*值 5—允许新源（ALLOW_NEW_SOURCES）*'
 - en: Indicates that the Source Address fields in this Multicast Address Record contain
     a list of the additional sources that the node wishes to listen to for packets
     sent to the specified multicast address. If the change was to an INCLUDE source
     list, these are the addresses that were added to the list; if the change was to
     an EXCLUDE source list, these are the addresses that were deleted from the list.
+  id: totrans-472
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示此组播地址记录中的源地址字段包含一列节点希望接收的附加源地址，这些地址是发送到指定组播地址的数据包的源地址。如果更改的是包含源列表，这些地址是添加到列表中的；如果更改的是排除源列表，这些地址是从列表中删除的。
 - en: '*Value 6—BLOCK_OLD_SOURCES*'
+  id: totrans-473
   prefs: []
   type: TYPE_NORMAL
+  zh: '*值 6—阻止旧源（BLOCK_OLD_SOURCES）*'
 - en: Indicates that the Source Address fields in this Multicast Address Record contain
     a list of the sources that the node no longer wishes to listen to for packets
     sent to the specified multicast address. If the change was to an INCLUDE source
     list, these are the addresses that were deleted from the list; if the change was
     to an EXCLUDE source list, these are the addresses that were added to the list.
+  id: totrans-474
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示此组播地址记录中的源地址字段包含一列节点不再希望接收的源地址，这些地址是发送到指定组播地址的数据包的源地址。如果更改的是包含源列表，这些地址是从列表中删除的；如果更改的是排除源列表，这些地址是添加到列表中的。
 - en: Version 2 Multicast Listener Reports are sent with an IP Destination address
     of `ff02::16`. All MLDv2-capable multicast routers listen to this address.
+  id: totrans-475
   prefs: []
   type: TYPE_NORMAL
+  zh: 版本2的组播监听报告（MLDv2）会发送到IP目标地址`ff02::16`。所有支持MLDv2的组播路由器都会监听此地址。
 - en: Note
+  id: totrans-476
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: For more information about Multicast and Anycast Group Membership, refer to
     the IETF Magma Group at [http://bit.ly/1rIgD3q](http://bit.ly/1rIgD3q).
+  id: totrans-477
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关组播和任播组成员资格的更多信息，请参考IETF Magma小组的[http://bit.ly/1rIgD3q](http://bit.ly/1rIgD3q)。
 - en: Multicast Router Discovery
+  id: totrans-478
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 组播路由器发现（Multicast Router Discovery）
 - en: 'Multicast Router Discovery (MRD) is a general mechanism that allows for the
     discovery of multicast routers. It does not depend on a specific multicast routing
     protocol. It is specified in RFC 4286 and introduces three new message types:'
+  id: totrans-479
   prefs: []
   type: TYPE_NORMAL
+  zh: 组播路由器发现（Multicast Router Discovery，MRD）是一种通用机制，允许发现组播路由器。它不依赖于特定的组播路由协议。它在RFC
+    4286中被指定，并引入了三种新的消息类型：
 - en: '*Multicast Router Advertisement (message type 151)*'
+  id: totrans-480
   prefs: []
   type: TYPE_NORMAL
+  zh: '*组播路由器广告（Multicast Router Advertisement，消息类型151）*'
 - en: This message is sent by routers to advertise that IP multicast forwarding is
     enabled. It is sent from a link-local Source address to the all-snoopers multicast
     address (`ff02::6a`).
+  id: totrans-481
   prefs: []
   type: TYPE_NORMAL
+  zh: 该消息由路由器发送，用于宣布启用 IP 多播转发功能。它是从链路本地源地址发送到所有监听器的多播地址（`ff02::6a`）。
 - en: '*Multicast Router Solicitation (message type 152)*'
+  id: totrans-482
   prefs: []
   type: TYPE_NORMAL
+  zh: '*多播路由器请求（消息类型 152）*'
 - en: This message is sent by devices in order to solicit Advertisement messages from
     multicast routers. It is sent from a link-local Source address to the all-routers
     multicast address (`ff02::2`).
+  id: totrans-483
   prefs: []
   type: TYPE_NORMAL
+  zh: 该消息由设备发送，用于向多播路由器请求广告消息。它是从链路本地源地址发送到所有路由器的多播地址（`ff02::2`）。
 - en: '*Multicast Router Termination (message type 153)*'
+  id: totrans-484
   prefs: []
   type: TYPE_NORMAL
+  zh: '*多播路由器终止（消息类型 153）*'
 - en: This message is sent by routers to advertise that it stops IP multicast routing
     functions on an interface. It is sent from a link-local Source address to the
     all-snoopers multicast address (`ff02::6a`).
+  id: totrans-485
   prefs: []
   type: TYPE_NORMAL
+  zh: 该消息由路由器发送，用于宣布它在某接口上停止 IP 多播路由功能。它是从链路本地源地址发送到所有监听器的多播地址（`ff02::6a`）。
 - en: All MRD messages are sent with an IPv6 Hop Limit of 1 and contain the Router
     Alert Option.
+  id: totrans-486
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有 MRD 消息都是以 IPv6 跳数限制为 1 且包含路由器警告选项发送的。
 - en: Now that you know how all the cool functionality of IPv6 works, the next chapter
     discusses networking aspects such as Layer 2, Routing, Multicast, QoS, DHCPv6,
     and DNS. So read on.
+  id: totrans-487
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你已经了解了 IPv6 所有酷炫功能的工作原理，下一章将讨论网络方面的内容，例如第 2 层、路由、多播、QoS、DHCPv6 和 DNS。接着阅读吧。
 - en: References
+  id: totrans-488
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参考文献
 - en: Here’s a list of the most important RFCs and drafts mentioned in this chapter.
     Sometimes I include additional subject-related RFCs for your personal further
     study.
+  id: totrans-489
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面是本章中提到的最重要的 RFC 和草案列表。有时，我还会为你个人进一步学习包含一些额外的相关 RFC。
 - en: RFCs
+  id: totrans-490
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: RFC 文档
 - en: RFC 1191, “Path MTU Discovery,” 1991
+  id: totrans-491
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1191, “路径 MTU 发现,” 1991
 - en: RFC 1981, “Path MTU Discovery” for IP version 6,” 1996
+  id: totrans-492
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1981, “IP 版本 6 的路径 MTU 发现,” 1996
 - en: RFC 2236, “Internet Group Management Protocol, Version 2,"1997
+  id: totrans-493
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2236, “互联网组管理协议，第 2 版,” 1997
 - en: 'RFC 2362, “Protocol Independent Multicast-Sparse Mode (PIM-SM): Protocol Specification,”
     1998'
+  id: totrans-494
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2362, “协议独立多播—稀疏模式（PIM-SM）：协议规范,” 1998
 - en: RFC 2365, “Administratively Scoped IP Multicast,"1998
+  id: totrans-495
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2365, “管理范围的 IP 多播,” 1998
 - en: RFC 2463, “Internet Control Message Protocol (ICMPv6),” 1998
+  id: totrans-496
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2463, “互联网控制消息协议（ICMPv6）,” 1998
 - en: RFC 2710, “Multicast Listener Discovery (MLD) for IPv6,” 1999
+  id: totrans-497
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2710, “IPv6 的多播监听器发现（MLD）,” 1999
 - en: RFC 2715, “Interoperability Rules for Multicast Routing Protocols,” 1999
+  id: totrans-498
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2715, “多播路由协议的互操作性规则,” 1999
 - en: RFC 2894, “Router Renumbering for IPv6,” 2000
+  id: totrans-499
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2894, “IPv6 路由器重编号,” 2000
 - en: RFC 3041, “Privacy Extensions for Stateless Address Autoconfiguration in IPv6,”
     2001
+  id: totrans-500
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3041, “IPv6 无状态地址自动配置的隐私扩展,” 2001
 - en: RFC 3122, “Extensions to IPv6 Neighbor Discovery for Inverse Discovery Specification,”
     2001
+  id: totrans-501
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3122, “IPv6 邻居发现的反向发现扩展规范,” 2001
 - en: RFC 3168, “The Addition of Explicit Congestion Notification (ECN) to IP,” 2001
+  id: totrans-502
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3168, “显式拥塞通知（ECN）添加到 IP 中,” 2001
 - en: RFC 3306, “Unicast-Prefix-based IPv6 Multicast Addresses,” 2002
+  id: totrans-503
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3306, “基于单播前缀的 IPv6 多播地址,” 2002
 - en: RFC 3353, “Overview of IP Multicast in a Multi-Protocol Label Switching (MPLS)
     Environment,” 2002
+  id: totrans-504
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3353, “MPLS 环境中 IP 多播概述,” 2002
 - en: RFC 3376, “Internet Group Management Protocol, Version 3,” 2002
+  id: totrans-505
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3376, “互联网组管理协议，第 3 版,” 2002
 - en: RFC 3569, “An Overview of Source-Specific Multicast (SSM),” 2003
+  id: totrans-506
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3569, “源特定多播（SSM）概述,” 2003
 - en: RFC 3590, “Source Address Selection for the Multicast Listener Discovery (MLD)
     Protocol,” 2003
+  id: totrans-507
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3590, “多播监听器发现（MLD）协议的源地址选择,” 2003
 - en: RFC 3756, “IPv6 Neighbor Discovery (ND) Trust Models and Threats,” 2004
+  id: totrans-508
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3756, “IPv6 邻居发现（ND）信任模型与威胁,” 2004
 - en: RFC 3810, “Multicast Listener Discovery Version 2 (MLDv2) for IPv6,” 2004
+  id: totrans-509
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3810, “IPv6 的多播监听器发现版本 2（MLDv2）,” 2004
 - en: RFC 3971, “"Secure Neighbor Discovery,” 2005
+  id: totrans-510
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3971, “安全邻居发现,” 2005
 - en: RFC 3972, “Cryptographically Generated Addresses (CGA),” 2005
+  id: totrans-511
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3972, “密码生成地址（CGA）,” 2005
 - en: 'RFC 3973, “Protocol Independent Multicast—Dense Mode (PIM-DM): Protocol Specification
     (Revised),” 2005'
+  id: totrans-512
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3973, “协议独立多播—密集模式（PIM-DM）：协议规范（修订版）, ” 2005
 - en: RFC 4065, “Instructions for Seamoby and Experimental Mobility Protocol IANA
     Allocations,” 2005
+  id: totrans-513
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4065, “Seamoby 和实验性移动协议 IANA 分配的指令,” 2005
 - en: RFC 4191, “Default Router Preferences and More-Specific Routes,” 2005
+  id: totrans-514
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4191, “默认路由器优先级和更具体的路由,” 2005
 - en: RFC 4192, “Procedures for Renumbering an IPv6 Network without a Flag Day,” 2005
+  id: totrans-515
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4192, “无停机日的 IPv6 网络重编号程序,” 2005
 - en: RFC 4213, “Basic Transition Mechanisms for IPv6 Hosts and Routers,” 2005
+  id: totrans-516
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4213, “IPv6 主机和路由器的基本过渡机制,” 2005
 - en: RFC 4286, “Multicast Router Discovery (MRD),” 2005
+  id: totrans-517
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4286，“组播路由器发现（MRD）”，2005年
 - en: RFC 4429, “Optimistic Duplicate Address Detection (DAD) for IPv6,” 2006
+  id: totrans-518
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4429，“IPv6的乐观重复地址检测（DAD）”，2006年
 - en: RFC 4443, “Internet Control Message Protocol (ICMPv6) for the Internet Protocol
     Version 6 (IPv6) Specification,” 2006
+  id: totrans-519
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4443，“互联网控制消息协议（ICMPv6）用于互联网协议第6版（IPv6）规范”，2006年
 - en: RFC 4581, “Cryptographically Generated Addresses (CGA) Extension Field Format,”
     2006
+  id: totrans-520
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4581，“加密生成地址（CGA）扩展字段格式”，2006年
 - en: RFC 4604, “Using MLDv2 for Source Specific Multicast,” 2006
+  id: totrans-521
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4604，“使用MLDv2进行特定源组播”，2006年
 - en: RFC 4620, “IPv6 Node Information Queries,” 2006
+  id: totrans-522
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4620，“IPv6节点信息查询”，2006年
 - en: RFC 4861, “Neighbor Discovery for IP Version 6,” 2007
+  id: totrans-523
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4861，“IPv6版本的邻居发现”，2007年
 - en: RFC 4862, “IPv6 Stateless Address Autoconfiguration,” 2007
+  id: totrans-524
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4862，“IPv6无状态地址自动配置”，2007年
 - en: RFC 4884, “Extended ICMP to Support Multi-Part Messages,” 2007
+  id: totrans-525
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4884，“扩展ICMP以支持多部分消息”，2007年
 - en: RFC 4890, “Recommendations for Filtering ICMPv6 Messages in Firewalls,” 2007
+  id: totrans-526
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4890，“防火墙中过滤ICMPv6消息的建议”，2007年
 - en: RFC 4982, “Support for Multiple Hash Algorithms in Cryptographically Generated
     Addresses (CGAs),” 2007
+  id: totrans-527
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4982，“支持在加密生成地址（CGA）中使用多种哈希算法”，2007年
 - en: RFC 5059, “Bootstrap Router (BSR) Mechanism for Protocol Independent Multicast
     (PIM),” 2008
+  id: totrans-528
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5059，“协议独立组播（PIM）引导路由器（BSR）机制”，2008年
 - en: RFC 5722, “Handling of Overlapping IPv6 Fragments,” 2009
+  id: totrans-529
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5722，“IPv6碎片重叠处理”，2009年
 - en: RFC 5796, “Authentication and Confidentiality in PIM-SM Link-Local Messages,”
     2010
+  id: totrans-530
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5796，“PIM-SM链路本地消息中的身份验证和保密性”，2010年
 - en: RFC 5871, “IANA Allocation Guidelines for the IPv6 Routing Header,” 2010
+  id: totrans-531
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5871，“IPv6路由头的IANA分配指南”，2010年
 - en: RFC 5887, “Renumbering Still Needs Work,” 2010
+  id: totrans-532
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5887，“重新编号仍需改进”，2010年
 - en: 'RFC 5942, “IPv6 Subnet Model: the Relationship between Links and Subnet Prefixes,”
     2012'
+  id: totrans-533
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5942，“IPv6子网模型：链接与子网前缀之间的关系”，2012年
 - en: RFC 6104, “Rogue IPv6 Router Advertisement Problem Statement,” 2011
+  id: totrans-534
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6104，“恶意IPv6路由器广告问题陈述”，2011年
 - en: RFC 6105, “IPv6 Router Advertisement Guard,” 2011
+  id: totrans-535
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6105，“IPv6路由器广告保护”，2011年
 - en: RFC 6226, “PIM Group-to-Rendezvous-Point Mapping,” 2011
+  id: totrans-536
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6226，“PIM组到汇聚点映射”，2011年
 - en: RFC 6275, “Mobility Support in IPv6,” 2011
+  id: totrans-537
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6275，“IPv6中的移动性支持”，2011年
 - en: RFC 6434, “IPv6 Node Requirements,” 2011
+  id: totrans-538
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6434，“IPv6节点要求”，2011年
 - en: RFC 6494, “Certificate Profile and Certificate Management for SEcure Neighbor
     Discovery (SEND),” 2012
+  id: totrans-539
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6494，“SEcure邻居发现（SEND）证书简介和证书管理”，2012年
 - en: RFC 6495, “Subject Key Identifier (SKI) SEcure Neighbor Discovery (SEND) Name
     Type Fields,” 2012
+  id: totrans-540
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6495，“主体密钥标识符（SKI）SEcure邻居发现（SEND）名称类型字段”，2012年
 - en: RFC 6553, “The Routing Protocol for Low-Power and Lossy Networks (RPL) Option
     for Carrying RPL Information in Data-Plane Datagrams,” 2012
+  id: totrans-541
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6553，“低功耗和丢包网络路由协议（RPL）用于在数据平面数据报中携带RPL信息的选项”，2012年
 - en: RFC 6554, “An IPv6 Routing Header for Source Routes with the Routing Protocol
     for Low-Power and Lossy Networks (RPL),” 2012
+  id: totrans-542
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6554，“低功耗和丢包网络路由协议（RPL）源路由IPv6路由头”，2012年
 - en: RFC 6564, “A Uniform Format for IPv6 Extension Headers,” 2012
+  id: totrans-543
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6564，“IPv6扩展头的统一格式”，2012年
 - en: RFC 6583, “Operational Neighbor Discovery Problems,” 2012
+  id: totrans-544
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6583，“操作性邻居发现问题”，2012年
 - en: RFC 6603, “Prefix Exclude Option for DHCPv6-based Prefix Delegation,” 2012
+  id: totrans-545
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6603，“基于DHCPv6的前缀委派的前缀排除选项”，2012年
 - en: RFC 6724, “Default Address Selection for Internet Protocol version 6 (IPv6),”
     2012
+  id: totrans-546
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6724，“IPv6（互联网协议第6版）默认地址选择”，2012年
 - en: RFC 6775, “Neighbor Discovery Optimization for IPv6 over Low-Power Wireless
     Personal Area Networks (6LoWPANs),” 2012
+  id: totrans-547
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6775，“针对低功耗无线个人区域网络（6LoWPANs）的IPv6邻居发现优化”，2012年
 - en: RFC 6791, “Stateless Source Address Mapping for ICMPv6 Packets,” 2012
+  id: totrans-548
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6791，“ICMPv6数据包的无状态源地址映射”，2012年
 - en: RFC 6866, “Problem Statement for Renumbering IPv6 Hosts with Static Addresses
     in Enterprise Networks,” 2013
+  id: totrans-549
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6866，“在企业网络中重新编号具有静态地址的IPv6主机的问题陈述”，2013年
 - en: RFC 6946, “Processing of IPv6 ‘Atomic’ Fragments,” 2013
+  id: totrans-550
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6946，“处理IPv6‘原子’碎片”，2013年
 - en: RFC 6980, “Security Implications of IPv6 Fragmentation with IPv6 Neighbor Discovery,”
     2013
+  id: totrans-551
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6980，“IPv6碎片化对IPv6邻居发现的安全影响”，2013年
 - en: RFC 7048, “Neighbor Unreachability Detection Is Too Impatient,” 2014
+  id: totrans-552
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7048，“邻居不可达检测过于急躁”，2014年
 - en: RFC 7010, “IPv6 Site Renumbering Gap Analysis,” 2013
+  id: totrans-553
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7010，“IPv6站点重新编号间隙分析”，2013年
 - en: RFC 7113, “Implementation Advice for IPv6 Router Advertisement Guard (RA Guard),”
     2014
+  id: totrans-554
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7113，“IPv6路由器广告保护（RA保护）实施建议”，2014年
 - en: RFC 7136, “Significance of IPv6 Interface Identifiers,” 2014
+  id: totrans-555
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7136，“IPv6接口标识符的重要性”，2014年
 - en: RFC 7217, “A Method for Generating Semantically Opaque Interface Identifiers
     with IPv6 Stateless Address Autoconfiguration (SLAAC),” 2014
+  id: totrans-556
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7217，《通过IPv6无状态地址自动配置（SLAAC）生成语义模糊的接口标识符方法》，2014年
 - en: RFC 7279, “An Acceptable Use Policy for New ICMP Types and Codes,” 2014
+  id: totrans-557
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7279，《新ICMP类型和代码的可接受使用政策》，2014年
 - en: Drafts
+  id: totrans-558
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 草案
 - en: Drafts can be found at [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html).
     To locate the latest version of a draft, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
     You can enter the draft name without a version number and the most current version
@@ -2856,27 +4117,44 @@
     published as an RFC, the RFC number will be displayed. [http://tools.ietf.org/wg](http://tools.ietf.org/wg)
     is also a very useful site. More information on the process of standardization,
     RFCs, and drafts can be found in [Appendix A](apa.html "Appendix A. RFCs").
+  id: totrans-559
   prefs: []
   type: TYPE_NORMAL
+  zh: 草案可以在[http://www.ietf.org/ID.html](http://www.ietf.org/ID.html)找到。要查找草案的最新版本，请参考[https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi)。你可以输入草案名称（无需版本号），系统将显示最新版本。如果草案没有显示，可能是已删除。如果它已发布为RFC，RFC编号将会显示。[http://tools.ietf.org/wg](http://tools.ietf.org/wg)也是一个非常有用的网站。关于标准化过程、RFC和草案的更多信息可以在[附录A](apa.html
+    "附录A. RFCs")找到。
 - en: 'Here’s a list of drafts I refer to in this chapter, as well as interesting
     drafts that relate to the topics in this chapter:'
+  id: totrans-560
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是我在本章中引用的草案列表，以及与本章主题相关的一些有趣草案：
 - en: “DHCPv6/SLAAC Address Configuration Interaction Problem Statement”
+  id: totrans-561
   prefs: []
   type: TYPE_NORMAL
+  zh: 《DHCPv6/SLAAC地址配置交互问题声明》
 - en: '*draft-ietf-v6ops-dhcpv6-slaac-problem-00*'
+  id: totrans-562
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-v6ops-dhcpv6-slaac-problem-00*'
 - en: “Reducing Multicast in IPv6 Neighbor Discovery”
+  id: totrans-563
   prefs: []
   type: TYPE_NORMAL
+  zh: 《减少IPv6邻居发现中的组播》
 - en: '*draft-yourtchenko-colitti-nd-reduce-multicast-00*'
+  id: totrans-564
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-yourtchenko-colitti-nd-reduce-multicast-00*'
 - en: “A comparison between the DHCPv6 and RA based host configuration”
+  id: totrans-565
   prefs: []
   type: TYPE_NORMAL
+  zh: 《基于DHCPv6和RA的主机配置比较》
 - en: '*draft-yourtchenko-ra-dhcpv6-comparison-00*'
+  id: totrans-566
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-yourtchenko-ra-dhcpv6-comparison-00*'

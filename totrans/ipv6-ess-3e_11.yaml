@@ -1,18 +1,25 @@
 - en: Appendix A. RFCs
+  id: totrans-0
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 附录 A. RFCs
 - en: If you want to learn more about IPv6 or any other standardized protocol, you
     need to read RFCs. They are the most accurate source of information—but yes, I
     do agree, not always fun reading (except if you read the ones published on April
     1). This appendix provides a short overview of the standards and the RFC process.
     It also includes a list of IPv6-relevant RFCs mentioned throughout this book.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想了解更多关于 IPv6 或任何其他标准化协议的内容，必须阅读 RFC。它们是最准确的信息来源——但是，我同意，它们的阅读并不总是有趣的（除非你读的是4月1日发布的那些）。本附录提供了标准和
+    RFC 过程的简短概述，还包括了本书中提到的与 IPv6 相关的 RFC 列表。
 - en: General RFC Information
+  id: totrans-2
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 一般 RFC 信息
 - en: 'The Internet Engineering Task Force (IETF) and the Internet Engineering Steering
     Group (IESG) are the organizations that define the official specification documents
     of the Internet Protocol suite. These documents are recorded and published as
@@ -22,44 +29,65 @@
     an IETF meeting, there is an interesting and humorous RFC that describes the background,
     processes, and rules: RFC 4677, titled “The Tao of IETF—A Novice’s Guide to the
     Internet Engineering Task Force.”'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 互联网工程任务组（IETF）和互联网工程指导组（IESG）是定义互联网协议套件官方规范文件的组织。这些文件作为标准化的请求评论（RFC）进行记录和发布。如果你想了解
+    IETF 的作用和标准化过程，或者需要一份涉及该过程的所有组织及其职能的列表，或者想参加 IETF 会议，有一篇有趣且幽默的 RFC 描述了背景、过程和规则：RFC
+    4677，标题为《IETF 的道——互联网工程任务组新手指南》。
 - en: RFCs are written reports describing most of the information regarding TCP/IP
     and the architecture, protocols, and history of the Internet. There are many sites
     on the Internet where RFCs are electronically accessible. The sites are very different,
     but most of them support some form of search mechanism. Find the site that best
     suits your preferences.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 是描述有关 TCP/IP 及互联网的架构、协议和历史的报告。互联网上有许多站点可以电子访问 RFC。这些站点差异较大，但大多数都支持某种形式的搜索机制。请选择最适合你需求的站点。
 - en: A good starting point is [http://www.rfc-editor.org](http://www.rfc-editor.org).
     There used to be a tribute to Jon Postel, one of the fathers of the Internet,
     who died in October 1998\. He was *the* RFC editor. Besides this information,
     there is also an overview of the RFC series and process.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个好的起点是 [http://www.rfc-editor.org](http://www.rfc-editor.org)。这里曾有一篇纪念乔恩·波斯特尔（Jon
+    Postel）的文章，他是互联网的奠基人之一，并于1998年10月去世。他是 *RFC* 编辑。除了这些信息，网站上还有关于 RFC 系列及其过程的概述。
 - en: On the search and retrieve page of this site, there are many ways to access
     the wealth of information. RFCs can be viewed by number or in an index; they can
     be in forward or reverse chronological order; and they can be searched by author,
     title, number, or keyword. Of course, there is also a link to alternative RFC
     repositories.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本网站的搜索与检索页面上，有多种方式可以访问丰富的信息。RFC 可以按编号或索引查看；可以按时间顺序或倒序排列；还可以按作者、标题、编号或关键词进行搜索。当然，也有指向其他
+    RFC 仓库的链接。
 - en: Note
+  id: totrans-7
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: RFC 2555 is an interesting overview of 30 years of RFC history and a good description
     of the contribution of Jon Postel’s services to the Internet community. There
     is even more information about Jon Postel at [http://www.postel.org/postel.html](http://www.postel.org/postel.html).
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 2555 是对 RFC 历史三十年的有趣概述，并对乔恩·波斯特尔为互联网社区做出的贡献进行了很好的描述。有关乔恩·波斯特尔的更多信息可以在 [http://www.postel.org/postel.html](http://www.postel.org/postel.html)
+    找到。
 - en: The first RFC, RFC 0001, was published by Steve Crocker on April 7, 1969\. Today,
     the number of RFCs continues to rise quickly and has exceeded 7,000\. RFCs can
     have different statuses, such as standard, informational, experimental, and historic.
     A good overview of the different statuses and current level of standardization
     can be found at [http://www.rfc-editor.org](http://www.rfc-editor.org).
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一篇 RFC，RFC 0001，由 Steve Crocker 于1969年4月7日发布。今天，RFC 的数量仍在快速增长，已超过 7000 篇。RFC
+    可能有不同的状态，如标准、信息性、实验性和历史性。关于不同状态和当前标准化水平的好概述可以在 [http://www.rfc-editor.org](http://www.rfc-editor.org)
+    找到。
 - en: 'At one time, the RFC Editor published snapshots of the “Internet Official Protocol
     Standards.” These documents were known as xx00 documents, the last of which was
     published in May 2008\. These snapshots have been replaced by a web page, so the
@@ -68,17 +96,25 @@
     issued.” Starting with the RFC number 7100, xx00 numbers will be available for
     assignment. This is published in RFC 7101, “List of Internet Official Protocol
     Standards: Replaced by a Web Page.”'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 曾几何时，RFC 编辑器发布了“互联网官方协议标准”的快照。这些文档被称为 xx00 文档，其中最后一份在 2008 年 5 月发布。这些快照已被网页所取代，因此
+    RFC 编辑器将不再将这些快照发布为 RFC。因此，RFC 编辑器将把未发布的 RFC xx00 号（直到 7000）归类为“从未发布”。从 RFC 号 7100
+    开始，xx00 号将可供分配。此内容已在 RFC 7101《互联网官方协议标准列表：已被网页取代》中发布。
 - en: Drafts
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 草稿
 - en: I refer to drafts often throughout this book. Drafts always have version numbers
     in their names, and this number often increases frequently during the process.
     So let us have a closer look at the draft process.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 本书中我经常提到草稿。草稿的名称中总是包含版本号，这个版本号在整个过程中经常增加。所以让我们更详细地看一下草稿过程。
 - en: During the standardization process, the drafts are published on the Internet.
     Drafts may eventually become RFCs. At the [IETF website](http://www.ietf.org),
     click on Internet Drafts to find all documents. To use the search engine and find
@@ -90,13 +126,19 @@
     under development accessible to a large audience in order to get reviews and comments.
     Another good link to get an overview of RFCs and active drafts with regard to
     specific working groups is [http://tools.ietf.org](http://tools.ietf.org).
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 在标准化过程中，草稿会发布到互联网上。草稿最终可能成为 RFC。在[IETF 网站](http://www.ietf.org)上，点击互联网草稿可以找到所有文档。要使用搜索引擎查找任何文档的最新状态，请参考[https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi)。你也可以点击“IETF
+    工作组”以根据领域（应用、操作、路由、安全等）查找所有工作组。在各个工作组中，你会找到所有相关的 RFC 和草稿。这是了解正在排队的内容和各组正在处理的事项的最佳地点。这个过程的目标是使正在开发中的规范能为广大受众所接触，以便获取评论和反馈。另一个很好的链接是[http://tools.ietf.org](http://tools.ietf.org)，它提供了关于特定工作组的
+    RFC 和活跃草稿的概览。
 - en: So let us understand the draft version numbers. As you have noted, it can change
     frequently. When you enter a draft name in the search engine, it will always show
     you the latest version. The rules for draft numbers are as follows.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 所以让我们来了解草稿版本号。如你所注意到的，它可能会经常变动。当你在搜索引擎中输入草稿名称时，它将始终显示最新的版本。草稿版本号的规则如下。
 - en: Every time a draft is updated, it receives a new version number. At some point,
     a draft may be published as an RFC and then removed from the draft directory.
     A draft with a specific version number has a lifetime of six months at a maximum.
@@ -106,1999 +148,2929 @@
     have been removed or published as RFCs. RFC 7221, “Handling of Internet-Drafts
     by IETF Working Groups,” is the latest update on drafts, the documents, and the
     processes.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 每次更新草稿时，它都会获得一个新的版本号。某个时刻，草稿可能会被发布为 RFC 然后从草稿目录中移除。一个特定版本号的草稿最多有六个月的生命周期。之后，如果它没有被更新或成为
+    RFC，它将被移除出草稿目录。由于本书将会有一段时间上市，所以这里提到的一些草稿在你尝试查找时可能不再有效。它们可能已经被移除或发布为 RFC。RFC 7221《IETF
+    工作组对互联网草稿的处理》是有关草稿、文档和流程的最新更新。
 - en: Drafts are not standards and should not be implemented in commercial products,
     because they are going to change for sure in the case they ever become an RFC.
     This can also lead to incompatibility issues, such as when vendors implement drafts
     at different maturity levels of development or if one implementation is based
     on draft and another on RFC. In practice, you will find draft implementations
     in commercial products, but now you know to be careful when using them.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 草案不是标准，不应在商业产品中实现，因为一旦它们成为RFC，它们肯定会发生变化。这也可能导致兼容性问题，比如当供应商在不同的开发成熟度级别实现草案，或者一个实现基于草案，另一个基于RFC时。在实践中，您会在商业产品中找到草案实现，但现在您知道在使用它们时需要小心。
 - en: RFC Index for IPv6
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPv6的RFC索引
 - en: This is a list of all RFCs relevant to IPv6 and RFCs regarding related technologies
     published as of April 2014\. It is sorted by RFC number.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是截至2014年4月发布的所有与IPv6相关的RFC和相关技术的RFC列表。按RFC编号排序。
 - en: RFC 1, “Host Software,” 1969
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1, “主机软件”，1969年
 - en: RFC 318, “Telnet Protocol,” 1972
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 318, “Telnet协议”，1972年
 - en: RFC 791, “Internet Protocol,” 1981
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 791, “互联网协议”，1981年
 - en: RFC 854, “TELNET PROTOCOL SPECIFICATION,” 1983
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 854, “TELNET协议规范”，1983年
 - en: RFC 855, “TELNET OPTION SPECIFICATIONS,” 1983
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 855, “TELNET选项规范”，1983年
 - en: RFC 959, “FILE TRANSFER PROTOCOL (FTP),” 1985
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 959, “文件传输协议（FTP）”，1985年
 - en: RFC 1058, “Routing Information Protocol,” 1988
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1058, “路由信息协议”，1988年
 - en: RFC 1191, “Path MTU Discovery,” 1991
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1191, “路径MTU发现”，1991年
 - en: RFC 1195, “Use of OSI IS-IS for Routing in TCP/IP and Dual Environments,” 1990
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1195, “在TCP/IP和双环境中使用OSI IS-IS进行路由”，1990年
 - en: RFC 1321, “The MD5 Message Digest Algorithm,” 1992
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1321, “MD5消息摘要算法”，1992年
 - en: RFC 1546, “Host Anycasting Service,” 1993
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1546, “主机任播服务”，1993年
 - en: RFC 1700, “Assigned Numbers,” 1994
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1700, “分配号码”，1994年
 - en: 'RFC 1707, “CATNIP: Common Architecture for the Internet,” 1994'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1707, “CATNIP：互联网的通用架构”，1994年
 - en: RFC 1710, “Simple Internet Protocol Plus White Paper,” 1994
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1710, “简单互联网协议加白皮书”，1994年
 - en: RFC 1745, “BGP4/IDRP for IP—OSPF Interaction,” 1994
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1745, “BGP4/IDRP与IP-OSPF交互”，1994年
 - en: RFC 1752, “The Recommendation for the IP Next Generation Protocol,” 1995
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1752, “IP下一代协议的建议”，1995年
 - en: RFC 1771, “A Border Gateway Protocol 4 (BGP-4),” 1995
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1771, “边界网关协议4（BGP-4）”，1995年
 - en: RFC 1793, “Extending OSPF to Support Demand Circuits,” 1995
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1793, “扩展OSPF以支持需求电路”，1995年
 - en: RFC 1812, “Requirements for IP Version 4 Routers,” 1995
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1812, “IP版本4路由器要求”，1995年
 - en: RFC 1819, “Internet Stream Protocol Version 2,” 1995
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1819, “互联网流协议版本2”，1995年
 - en: RFC 1828, “IP Authentication using Keyed MD5,” 1995
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1828, “使用键控MD5的IP认证”，1995年
 - en: RFC 1829, “The ESP DES-CBC Transform,” 1995
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1829, “ESP DES-CBC变换”，1995年
 - en: RFC 1883, “Internet Protocol, Version 6 (IPv6) Specification,” 1995
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1883, “互联网协议，版本6（IPv6）规范”，1995年
 - en: RFC 1918, “Address Allocation for Private Internets,” 1996
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1918, “私有互联网地址分配”，1996年
 - en: RFC 1981, “Path MTU Discovery for IP version 6,” 1996
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1981, “IP版本6的路径MTU发现”，1996年
 - en: RFC 1997, “BGP Communities Attribute,” 1996
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1997, “BGP社区属性”，1996年
 - en: RFC 2003, “IP Encapsulation within IP” (October, 1996)
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2003, “IP内IP封装”（1996年10月）
 - en: RFC 2080, “RIPng” for IPv6,” 1997
+  id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2080, “IPv6的RIPng”，1997年
 - en: RFC 2085, “HMAC-MD5 IP Authentication with Replay Prevention,” 1997
+  id: totrans-47
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2085, “HMAC-MD5 IP认证与重放预防”，1997年
 - en: RFC 2101, “IPv4 Address Behaviour Today,” 1997
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2101, “IPv4地址行为现状”，1997年
 - en: 'RFC 2104, “HMAC: Keyed-Hashing for Message Authentication,” 1997'
+  id: totrans-49
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2104, “HMAC：消息认证的键控哈希”，1997年
 - en: RFC 2136, “Dynamic Updates in the Domain Name System,” 1997
+  id: totrans-50
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2136, “域名系统中的动态更新”，1997年
 - en: RFC 2149, “Multicast Server Architectures for MARS-based ATM multicasting,”
     1997
+  id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2149, “基于MARS的ATM多播的多播服务器架构”，1997年
 - en: RFC 2185, “Routing Aspects Of IPv6 Transition,” 1997
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2185, “IPv6过渡的路由方面”，1997年
 - en: RFC 2205, “Resource ReSerVation Protocol (RSVP)—Version 1 Functional Specification,”
     1997
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2205, “资源预留协议（RSVP）—版本1功能规格”，1997年
 - en: RFC 2207, “RSVP Extensions for IPSEC Data Flows,” 1997
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2207, “RSVP扩展用于IPSEC数据流”，1997年
 - en: RFC 2210, “The Use of RSVP with IETF Integrated Services,” 1997
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2210, “RSVP与IETF集成服务的使用”，1997年
 - en: RFC 2233, “The Interfaces Group MIB using SMIv2,” 1997
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2233, “使用SMIv2的接口组MIB”，1997年
 - en: RFC 2235, “Hobbes’ Internet Timeline,” 1997
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2235, “霍布斯互联网时间线”，1997年
 - en: RFC 2324, “Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0),” 1998
+  id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2324, “超文本咖啡壶控制协议（HTCPCP/1.0）”，1998年
 - en: RFC 2328, “OSPF Version 2,” 1998
+  id: totrans-59
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2328, “OSPF版本2”，1998年
 - en: 'RFC 2362, “Protocol Independent Multicast-Sparse Mode (PIM-SM): Protocol Specification,”
     1998'
+  id: totrans-60
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2362, “协议独立多播-稀疏模式（PIM-SM）：协议规范”，1998年
 - en: RFC 2365, “Administratively Scoped IP Multicast,” 1998
+  id: totrans-61
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2365, “管理范围的IP多播”，1998年
 - en: RFC 2375, “IPv6 Multicast Address Assignments,” 1998
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2375，“IPv6多播地址分配”，1998年
 - en: RFC 2403, “The Use of HMAC-MD5-96 within ESP and AH,” 1998
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2403，“在ESP和AH中使用HMAC-MD5-96”，1998年
 - en: RFC 2404, “The Use of HMAC-SHA-1-96 within ESP and AH,” 1998
+  id: totrans-64
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2404，“在ESP和AH中使用HMAC-SHA-1-96”，1998年
 - en: RFC 2405, “The ESP DES-CBC Cipher Algorithm With Explicit IV,” 1998
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2405，“ESP DES-CBC加密算法与显式IV”，1998年
 - en: RFC 2410, “The NULL Encryption Algorithm and Its Use With IPsec,” 1998
+  id: totrans-66
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2410，“NULL加密算法及其在IPsec中的使用”，1998年
 - en: RFC 2412, “The OAKLEY Key Determination Protocol,” 1998
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2412，“OAKLEY 密钥确定协议”，1998年
 - en: RFC 2428, “FTP Extensions for IPv6 and NATs,” 1998
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2428，“针对IPv6和NAT的FTP扩展”，1998年
 - en: RFC 2430, “A Provider Architecture for Differentiated Services and Traffic Engineering
     (PASTE),” 1998
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2430，“区分服务和流量工程的提供商架构（PASTE）”，1998年
 - en: RFC 2450, “Proposed TLA and NLA Assignment Rules,” 1998
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2450，“提出的TLA和NLA分配规则”，1998年
 - en: RFC 2451, “The ESP CBC-Mode Cipher Algorithms,” 1998
+  id: totrans-71
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2451，“ESP CBC模式加密算法”，1998年
 - en: RFC 2453, “RIP Version 2,” 1998
+  id: totrans-72
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2453，“RIP第2版”，1998年
 - en: RFC 2460, “Internet Protocol, Version 6 (IPv6) Specification,” 1998
+  id: totrans-73
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2460，“互联网协议，第6版（IPv6）规范”，1998年
 - en: RFC 2464, “Transmission of IPv6 Packets over Ethernet Networks,” 1998
+  id: totrans-74
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2464，“通过以太网网络传输IPv6数据包”，1998年
 - en: RFC 2467, “Transmission of IPv6 Packets over FDDI Networks,” 1998
+  id: totrans-75
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2467，“通过FDDI网络传输IPv6数据包”，1998年
 - en: 'RFC 2465, “Management Information Base for IP Version 6: Textual Conventions
     and General Group,” 1998'
+  id: totrans-76
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2465，“IP版本6的管理信息库：文本约定和通用组”，1998年
 - en: 'RFC 2466, “Management Information Base for IP Version 6: ICMPv6 Group,” 1998'
+  id: totrans-77
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2466，“IP版本6的管理信息库：ICMPv6组”，1998年
 - en: RFC 2471, “IPv6 Testing Address Allocation” (6Bone), 1998
+  id: totrans-78
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2471，“IPv6测试地址分配”（6Bone），1998年
 - en: RFC 2473, “Generic Packet Tunneling in IPv6 Specification,” 1998
+  id: totrans-79
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2473，“IPv6中的通用数据包隧道规范”，1998年
 - en: RFC 2474, “Definition of the Differentiated Services Field (DS Field) in the
     IPv4 and IPv6 Headers,” 1998
+  id: totrans-80
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2474，“IPv4和IPv6头中的区分服务字段（DS字段）定义”，1998年
 - en: RFC 2475, “An Architecture for Differentiated Services,” 1998
+  id: totrans-81
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2475，“区分服务架构”，1998年
 - en: RFC 2491, “IPv6 over Non-Broadcast Multiple Access (NBMA) networks,” 1999
+  id: totrans-82
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2491，“通过非广播多址（NBMA）网络传输IPv6”，1999年
 - en: RFC 2492, “IPv6 over ATM Networks,” January, 1999
+  id: totrans-83
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2492，“通过ATM网络传输IPv6”，1999年1月
 - en: RFC 2507, “IP Header Compression,” 1999
+  id: totrans-84
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2507，“IP头压缩”，1999年
 - en: RFC 2526, “Reserved IPv6 Subnet Anycast Addresses,” 1999
+  id: totrans-85
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2526，“保留的IPv6子网任播地址”，1999年
 - en: RFC 2529, “Transmission of IPv6 over IPv4 Domains without Explicit Tunnels,”
     1999
+  id: totrans-86
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2529，“IPv6在没有显式隧道的IPv4域中的传输”，1999年
 - en: RFC 2545, “Use of BGP-4 Multiprotocol Extensions for IPv6 Inter-Domain Routing,”
     1999
+  id: totrans-87
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2545，“BGP-4多协议扩展在IPv6跨域路由中的使用”，1999年
 - en: RFC 2555, “30 Years of RFCs,” 1999
+  id: totrans-88
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2555，“RFC发布30周年”，1999年
 - en: RFC 2590, “Transmission of IPv6 Packets over Frame Relay Networks Specification,”
     1999
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2590，“通过帧中继网络传输IPv6数据包的规范”，1999年
 - en: RFC 2597, “Assured Forwarding PHB Group,” 1999
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2597，“保证转发PHB组”，1999年
 - en: RFC 2608, “Service Location Protocol, Version 2,” 1999
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2608，“服务位置协议，第2版”，1999年
 - en: RFC 2663, “IP Network Address Translator (NAT) Terminology and Considerations,”
     1999
+  id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2663，“IP网络地址转换（NAT）术语与考虑因素”，1999年
 - en: RFC 2675, “IPv6 Jumbograms,” 1999
+  id: totrans-93
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2675，“IPv6大数据包”，1999年
 - en: RFC 2710, “Multicast Listener Discovery (MLD) for IPv6,” 1999
+  id: totrans-94
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2710，“IPv6的多播监听者发现（MLD）”，1999年
 - en: RFC 2711, “IPv6 Router Alert Option,” 1999
+  id: totrans-95
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2711，“IPv6路由器警告选项”，1999年
 - en: RFC 2715, “Interoperability Rules for Multicast Routing Protocols,” 1999
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2715，“多播路由协议的互操作性规则”，1999年
 - en: RFC 2784, “Generic Routing Encapsulation (GRE),” 2000
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2784，“通用路由封装（GRE）”，2000年
 - en: RFC 2845, “Secret Key Transaction Authentication for DNS (TSIG),” 2000
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2845，“DNS的秘密密钥事务身份验证（TSIG）”，2000年
 - en: RFC 2884, “Performance Evaluation of Explicit Congestion Notification (ECN)
     in IP Networks,” 2000
+  id: totrans-99
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2884，“在IP网络中显式拥塞通知（ECN）性能评估”，2000年
 - en: RFC 2894, “Router Renumbering for IPv6,” 2000
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2894，“IPv6路由器重编号”，2000年
 - en: RFC 2914, “Congestion Control Principles,” 2000
+  id: totrans-101
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2914，“拥塞控制原则”，2000年
 - en: RFC 2921, “6BONE pTLA and pNLA Formats (pTLA),” 2000
+  id: totrans-102
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2921，“6BONE pTLA和pNLA格式（pTLA）”，2000年
 - en: RFC 2925, “Definitions of Managed Objects for Remote Ping, Traceroute, and Lookup
     Operations,” 2000
+  id: totrans-103
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2925，“远程Ping、Traceroute和查找操作的管理对象定义”，2000年
 - en: RFC 2928, “Initial IPv6 Sub-TLA ID Assignments,” 2000
+  id: totrans-104
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2928，“初始IPv6子TLA ID分配”，2000年
 - en: RFC 2963, “A Rate Adaptive Shaper for Differentiated Services,” 2000
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2963，“针对区分服务的速率自适应整形器”，2000年
 - en: RFC 2983, “Differentiated Services and Tunnels,” 2000
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2983，“区分服务与隧道”，2000年
 - en: RFC 2993, “Architectural Implications of NAT,” 2000
+  id: totrans-107
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2993，“NAT的架构影响”，2000年
 - en: RFC 2998, “A Framework for Integrated Services Operation over Diffserv Networks,”
     2000
+  id: totrans-108
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2998, “在Diffserv网络上操作的集成服务框架，”2000
 - en: RFC 3006, “Integrated Services in the Presence of Compressible Flows,” 2000
+  id: totrans-109
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3006, “压缩流存在下的集成服务，”2000
 - en: RFC 3007, “Secure Domain Name System (DNS) Dynamic Update,” 2000
+  id: totrans-110
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3007, “安全域名系统（DNS）动态更新，”2000
 - en: RFC 3019, “IP Version 6 Management Information Base for The Multicast Listener
     Discovery Protocol,” 2001
+  id: totrans-111
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3019, “IP版本6管理信息库用于多播监听者发现协议，”2001
 - en: RFC 3022, “Traditional IP Network Address Translator (Traditional NAT),” 2001
+  id: totrans-112
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3022, “传统IP网络地址转换器（传统NAT），”2001
 - en: RFC 3027, “Protocol Complications with the IP Network Address Translator,” 2001
+  id: totrans-113
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3027, “IP网络地址转换器中的协议复杂性，”2001
 - en: RFC 3041, “Privacy Extensions for Stateless Address Autoconfiguration in IPv6,”
     2001
+  id: totrans-114
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3041, “IPv6中无状态地址自动配置的隐私扩展，”2001
 - en: RFC 3053, “IPv6 Tunnel Broker,” 2001
+  id: totrans-115
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3053, “IPv6隧道代理，”2001
 - en: RFC 3056, “Connection of IPv6 Domains via IPv4 Clouds,” 2001
+  id: totrans-116
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3056, “通过IPv4云连接IPv6域，”2001
 - en: RFC 3068, “An Anycast Prefix for 6to4 Relay Routers,” 2001
+  id: totrans-117
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3068, “6to4中继路由器的任播前缀，”2001
 - en: RFC 3086, “Definition of Differentiated Services Per Domain Behaviors and Rules
     for their Specification,” 2001
+  id: totrans-118
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3086, “每域差异化服务行为的定义及其规范规则，”2001
 - en: RFC 3101, “The OSPF NSSA Option,” 2003
+  id: totrans-119
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3101, “OSPF NSSA选项，”2003
 - en: RFC 3107, “Carrying Label Information in BGP-4,” 2001
+  id: totrans-120
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3107, “在BGP-4中携带标签信息，”2001
 - en: RFC 3111, “Service Location Protocol Modifications for IPv6,” 2001
+  id: totrans-121
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3111, “IPv6的服务位置协议修改，”2001
 - en: RFC 3118, “Authentication for DHCP Messages,” 2001
+  id: totrans-122
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3118, “DHCP消息的认证，”2001
 - en: RFC 3122, “Extensions to IPv6 Neighbor Discovery for Inverse Discovery Specification,”
     2001
+  id: totrans-123
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3122, “IPv6邻居发现的扩展，用于逆向发现规范，”2001
 - en: RFC 3124, “The Congestion Manager,” 2001
+  id: totrans-124
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3124, “拥塞管理器，”2001
 - en: RFC 3140, “Per Hop Behavior Identification Codes,” 2001
+  id: totrans-125
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3140, “每跳行为标识码，”2001
 - en: RFC 3142, “An IPv6-to-IPv4 Transport Relay Translator,” 2001
+  id: totrans-126
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3142, “IPv6到IPv4传输中继转换器，”2001
 - en: RFC 3146, “Transmission of IPv6 Packets over IEEE 1394 Networks,” 2001
+  id: totrans-127
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3146, “IPv6数据包在IEEE 1394网络上的传输，”2001
 - en: RFC 3162, “RADIUS and IPv6,” 2001
+  id: totrans-128
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3162, “RADIUS和IPv6，”2001
 - en: RFC 3168, “The Addition of Explicit Congestion Notification (ECN) to IP,” 2001
+  id: totrans-129
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3168, “在IP中添加显式拥塞通知（ECN），”2001
 - en: RFC 3175, “Aggregation of RSVP for IPv4 and IPv6 Reservations,” 2001
+  id: totrans-130
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3175, “IPv4和IPv6预留的RSVP聚合，”2001
 - en: RFC 3178, “IPv6 Multihoming Support at Site Exit Routers,” 2001
+  id: totrans-131
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3178, “IPv6多宿主支持于站点出口路由器，”2001
 - en: RFC 3226, “DNSSEC and IPv6 A6 aware server/resolver message size requirements,”
     2001
+  id: totrans-132
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3226, “DNSSEC和IPv6 A6感知服务器/解析器消息大小要求，”2001
 - en: 'RFC 3232, “Assigned Numbers: RFC 1700 is Replaced by an On-line Database,”
     2002'
+  id: totrans-133
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3232, “分配的号码：RFC 1700由在线数据库取代，”2002
 - en: RFC 3246, “An Expedited Forwarding PHB,” 2002
+  id: totrans-134
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3246, “加急转发PHB，”2002
 - en: RFC 3247, “Supplemental Information for the New Definition of the EF PHB (Expedited
     Forwarding Per-Hop Behavior),” 2002
+  id: totrans-135
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3247, “新定义的EF PHB（加急转发每跳行为）补充信息，”2002
 - en: RFC 3260, “New Terminology and Clarifications for Diffserv,” 2002
+  id: totrans-136
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3260, “Diffserv的新术语和澄清，”2002
 - en: RFC 3289, “Management Information Base for the Differentiated Services Architecture,”
     2002
+  id: totrans-137
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3289, “差异化服务架构的管理信息库，”2002
 - en: RFC 3290, “An Informal Management Model for Diffserv Routers,” 2002
+  id: totrans-138
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3290, “Diffserv路由器的非正式管理模型，”2002
 - en: RFC 3306, “Unicast-Prefix-based IPv6 Multicast,” 2002
+  id: totrans-139
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3306, “基于单播前缀的IPv6组播，”2002
 - en: RFC 3307, “Allocation Guidelines for IPv6 Multicast Addresses,” 2002
+  id: totrans-140
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3307, “IPv6组播地址分配指南，”2002
 - en: RFC 3315, “Dynamic Host Configuration Protocol for IPv6 (DHCPv6),” 2003
+  id: totrans-141
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3315, “IPv6动态主机配置协议（DHCPv6），”2003
 - en: RFC 3317, “Differentiated Services Quality of Service Policy Information Base,”
     2003
+  id: totrans-142
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3317, “差异化服务质量服务策略信息库，”2003
 - en: RFC 3319, “Dynamic Host Configuration Protocol (DHCPv6) Options for Session
     Initiation Protocol (SIP) Servers,” 2003
+  id: totrans-143
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3319, “会话发起协议（SIP）服务器的动态主机配置协议（DHCPv6）选项，”2003
 - en: RFC 3353, “Overview of IP Multicast in a Multi-Protocol Label Switching (MPLS)
     Environment,” 2002
+  id: totrans-144
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3353, “多协议标签交换（MPLS）环境中IP组播概述，”2002
 - en: RFC 3376, “Internet Group Management Protocol, Version 3,” 2002
+  id: totrans-145
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3376, “互联网组管理协议，第3版，”2002
 - en: RFC 3493, “Basic Socket Interface Extensions for IPv6” 2003
+  id: totrans-146
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3493, “IPv6的基本套接字接口扩展，”2003
 - en: RFC 3514, “The Security Flag in the IPv4 Header,” April 1, 2003
+  id: totrans-147
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3514, “IPv4头中的安全标志，”2003年4月1日
 - en: RFC 3526, “More Modular Exponential (MODP) Diffie-Hellman groups for Internet
     Key Exchange (IKE),” 2003
+  id: totrans-148
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3526, “用于互联网密钥交换（IKE）的更多模块化指数（MODP）Diffie-Hellman组，”2003
 - en: RFC 3542, “Advanced Sockets Application Program Interface (API) for IPv6,” 2003
+  id: totrans-149
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3542，《IPv6 的高级套接字应用程序接口（API）》，2003年
 - en: RFC 3569, “An Overview of Source-Specific Multicast (SSM),” 2003
+  id: totrans-150
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3569，《源特定多播（SSM）概述》，2003年
 - en: RFC 3582, “Goals for IPv6 Site-Multihoming Architectures,” 2003
+  id: totrans-151
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3582，《IPv6 网站多宿主架构的目标》，2003年
 - en: RFC 3587, “IPv6 Global Unicast Address Format,” 2003
+  id: totrans-152
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3587，《IPv6 全球单播地址格式》，2003年
 - en: RFC 3590, “Source Address Selection for the Multicast Listener Discovery (MLD)
     Protocol,” 2003
+  id: totrans-153
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3590，《多播监听器发现（MLD）协议的源地址选择》，2003年
 - en: RFC 3596, “DNS Extensions to Support IP Version 6,” 2003
+  id: totrans-154
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3596，《支持 IP 版本 6 的 DNS 扩展》，2003年
 - en: RFC 3602, “The AES-CBC Cipher Algorithm and Its Use with IPsec,” 2003
+  id: totrans-155
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3602，《AES-CBC 密码算法及其与 IPsec 的应用》，2003年
 - en: RFC 3631, “Security Mechanisms for the Internet,” 2003
+  id: totrans-156
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3631，《互联网的安全机制》，2003年
 - en: RFC 3633, “IPv6 Prefix Options for Dynamic Host Configuration Protocol (DHCP)
     version 6,” 2003
+  id: totrans-157
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3633，《IPv6 前缀选项用于动态主机配置协议（DHCP）版本 6》，2003年
 - en: RFC 3646, “DNS Configuration options for Dynamic Host Configuration Protocol
     for IPv6 (DHCPv6),” 2003
+  id: totrans-158
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3646，《动态主机配置协议 IPv6（DHCPv6）的 DNS 配置选项》，2003年
 - en: RFC 3701, “6bone (IPv6 Testing Address Allocation) -Phaseout,” 2004
+  id: totrans-159
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3701，《6bone（IPv6 测试地址分配）- 阶段性淘汰》，2004年
 - en: RFC 3715, “IPsec-Network Address Translation (NAT) Compatibility Requirements,”
     2004
+  id: totrans-160
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3715，《IPsec-网络地址转换（NAT）兼容性要求》，2004年
 - en: 'RFC 3717, “IP over Optical Networks: A Framework,” 2004'
+  id: totrans-161
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3717，《光网络中的 IP：框架》，2004年
 - en: RFC 3736, “Stateless Dynamic Host Configuration Protocol (DHCP) Service for
     IPv6,” 2004
+  id: totrans-162
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3736，《IPv6 的无状态动态主机配置协议（DHCP）服务》，2004年
 - en: 'RFC 3739, “Internet X.509 Public Key Infrastructure: Qualified Certificates
     Profile,” 2004'
+  id: totrans-163
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3739，《互联网 X.509 公钥基础设施：合格证书配置文件》，2004年
 - en: RFC 3740, “The Multicast Group Security Architecture,” 2004
+  id: totrans-164
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3740，《多播组安全架构》，2004年
 - en: RFC 3748, “Extensible Authentication Protocol (EAP),” 2004
+  id: totrans-165
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3748，《可扩展认证协议（EAP）》，2004年
 - en: RFC 3754, “IP Multicast in Differentiated Services (DS) Networks,” 2004
+  id: totrans-166
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3754，《差异化服务（DS）网络中的 IP 多播》，2004年
 - en: RFC 3756, “IPv6 Neighbor Discovery (ND) Trust Models and Threats,” 2004
+  id: totrans-167
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3756，《IPv6 邻居发现（ND）信任模型与威胁》，2004年
 - en: RFC 3765, “NOPEER Community for Border Gateway Protocol (BGP) Route Scope Control,”
     2004
+  id: totrans-168
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3765，《用于边界网关协议（BGP）路由范围控制的 NOPEER 社区》，2004年
 - en: RFC 3769, “Requirements for IPv6 Prefix Delegation,” 2004
+  id: totrans-169
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3769，《IPv6 前缀委派的要求》，2004年
 - en: RFC 3776, “Using IPsec to Protect Mobile IPv6 Signaling Between Mobile Nodes
     and Home Agents,” 2004
+  id: totrans-170
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3776，《使用 IPsec 保护移动 IPv6 信令，跨移动节点与本地代理之间的通信》，2004年
 - en: RFC 3789, “Introduction to the Survey of IPv4 Addresses in Currently Deployed
     IETF Standards Track and Experimental Documents,” 2004
+  id: totrans-171
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3789，《目前已部署的 IETF 标准轨道和实验性文档中 IPv4 地址调查简介》，2004年
 - en: RFC 3790, “Survey of IPv4 Addresses in Currently Deployed IETF Internet Area
     Standards Track and Experimental Documents,” 2004
+  id: totrans-172
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3790，《目前已部署的 IETF 互联网区域标准轨道和实验性文档中 IPv4 地址调查》，2004年
 - en: RFC 3791, “Survey of IPv4 Addresses in Currently Deployed IETF Routing Area
     Standards Track and Experimental Documents,” 2004
+  id: totrans-173
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3791，《目前已部署的 IETF 路由区域标准轨道和实验性文档中 IPv4 地址调查》，2004年
 - en: RFC 3792, “Survey of IPv4 Addresses in Currently Deployed IETF Security Area
     Standards Track and Experimental Documents,” 2004
+  id: totrans-174
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3792，《目前已部署的 IETF 安全区域标准轨道和实验性文档中 IPv4 地址调查》，2004年
 - en: RFC 3793, “Survey of IPv4 Addresses in Currently Deployed IETF Sub-IP Area Standards
     Track and Experimental Documents,” 2004
+  id: totrans-175
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3793，《目前已部署的 IETF 子 IP 区域标准轨道和实验性文档中 IPv4 地址调查》，2004年
 - en: RFC 3794, “Survey of IPv4 Addresses in Currently Deployed IETF Transport Area
     Standards Track and Experimental Documents,” 2004
+  id: totrans-176
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3794，《目前已部署的 IETF 传输区域标准轨道和实验性文档中 IPv4 地址调查》，2004年
 - en: RFC 3795, “Survey of IPv4 Addresses in Currently Deployed IETF Application Area
     Standards Track and Experimental Documents,” 2004
+  id: totrans-177
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3795，《目前已部署的 IETF 应用区域标准轨道和实验性文档中 IPv4 地址调查》，2004年
 - en: RFC 3796, “Survey of IPv4 Addresses in Currently Deployed IETF Operations &
     Management Area Standards Track and Experimental Documents,” 2004
+  id: totrans-178
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3796，《目前已部署的 IETF 操作与管理区域标准轨道和实验性文档中 IPv4 地址调查》，2004年
 - en: RFC 3810, “Multicast Listener Discovery Version 2 (MLDv2) for IPv6,” 2004
+  id: totrans-179
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3810，《IPv6 的多播监听器发现版本 2（MLDv2）》，2004年
 - en: RFC 3849, “IPv6 Documentation Address,” 2004
+  id: totrans-180
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3849，《IPv6 文档地址》，2004年
 - en: RFC 3879, “Deprecating Site Local Addresses,” 2004
+  id: totrans-181
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3879，《弃用站点本地地址》，2004年
 - en: RFC 3898, “Network Information Service (NIS) Configuration Options for Dynamic
     Host Configuration Protocol for IPv6 (DHCPv6),” 2004
+  id: totrans-182
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3898，《动态主机配置协议 IPv6（DHCPv6）中的网络信息服务（NIS）配置选项》，2004年
 - en: RFC 3901, “DNS IPv6 Transport Operational Guidelines,” 2004
+  id: totrans-183
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3901, “DNS IPv6 传输操作指南，” 2004
 - en: RFC 3936, “Procedures for Modifying the Resource reSerVation Protocol (RSVP),”
     2004
+  id: totrans-184
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3936, “修改资源预留协议 (RSVP) 的程序，” 2004
 - en: RFC 3947, “Negotiation of NAT-Traversal in the IKE,” 2005
+  id: totrans-185
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3947, “IKE 中 NAT 穿越的协商，” 2005
 - en: RFC 3948, “UDP Encapsulation of IPsec ESP Packets,” 2005
+  id: totrans-186
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3948, “IPsec ESP 数据包的 UDP 封装，” 2005
 - en: RFC 3956, “Embedding the Rendezvous Point (RP) Address in an IPv6 Multicast
     Address,” 2004
+  id: totrans-187
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3956, “在 IPv6 多播地址中嵌入会合点 (RP) 地址，” 2004
 - en: RFC 3963, " Network Mobility (NEMO) Basic Support Protocol,” 2005
+  id: totrans-188
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3963, " 网络移动性 (NEMO) 基本支持协议，” 2005
 - en: RFC 3964, “Security Considerations for 6to4,” 2004
+  id: totrans-189
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3964, “6to4 的安全性考虑，” 2004
 - en: RFC 3971, “Secure Neighbor Discovery,” 2005
+  id: totrans-190
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3971, “安全邻居发现，” 2005
 - en: RFC 3972, “Cryptographically Generated Addresses (CGA),” 2005
+  id: totrans-191
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3972, “加密生成地址 (CGA)，” 2005
 - en: 'RFC 3973, “Protocol Independent Multicast, Dense Mode (PIM-DM): Protocol Specification
     (Revised),” 2005'
+  id: totrans-192
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3973, “协议独立的组播，密集模式 (PIM-DM)：协议规范（修订版），” 2005
 - en: 'RFC 3986, “Uniform Resource Identifier (URI): Generic Syntax,” 2005'
+  id: totrans-193
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3986, “统一资源标识符 (URI)：通用语法，” 2005
 - en: RFC 4007, “IPv6 Scoped Address Architecture,” 2005
+  id: totrans-194
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4007, “IPv6 范围地址架构，” 2005
 - en: RFC 4029, “Scenarios and Analysis for Introducing IPv6 into ISP Networks,” 2005
+  id: totrans-195
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4029, “将 IPv6 引入 ISP 网络的场景与分析，” 2005
 - en: RFC 4033, “DNS Security Introduction and Requirements,” 2005
+  id: totrans-196
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4033, “DNS 安全性介绍及需求，” 2005
 - en: RFC 4034, “Resource Records for the DNS Security Extensions,” 2005
+  id: totrans-197
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4034, “DNS 安全扩展的资源记录，” 2005
 - en: RFC 4035, “Protocol Modifications for the DNS Security Extensions,” 2005
+  id: totrans-198
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4035, “DNS 安全扩展的协议修改，” 2005
 - en: RFC 4038, “Application Aspects of IPv6 Transition,” 2005
+  id: totrans-199
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4038, “IPv6 过渡的应用方面，” 2005
 - en: RFC 4057, “IPv6 Enterprise Network Scenarios,” 2005
+  id: totrans-200
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4057, “IPv6 企业网络场景，” 2005
 - en: RFC 4065, “Instructions for Seamoby and Experimental Mobility Protocol IANA
     Allocations,” 2005
+  id: totrans-201
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4065, “Seamoby 和实验性移动协议 IANA 分配的说明，” 2005
 - en: RFC 4074, “Common Misbehavior Against DNS Queries for IPv6 Addresses,” 2005
+  id: totrans-202
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4074, “针对 IPv6 地址的 DNS 查询的常见错误行为，” 2005
 - en: RFC 4075, “Simple Network Time Protocol (SNTP) Configuration Option for DHCPv6,”
     2005
+  id: totrans-203
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4075, “DHCPv6 的简单网络时间协议 (SNTP) 配置选项，” 2005
 - en: RFC 4076, “Renumbering Requirements for Stateless Dynamic Host Configuration
     Protocol for IPv6 (DHCPv6),” 2005
+  id: totrans-204
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4076, “无状态动态主机配置协议 IPv6 (DHCPv6) 的重新编号要求，” 2005
 - en: RFC 4094, “Analysis of Existing Quality-of-Service Signaling Protocols,” 2005
+  id: totrans-205
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4094, “现有服务质量信令协议分析，” 2005
 - en: RFC 4106, “The Use of Galois/Counter Mode (GCM) in IPsec Encapsulating Security
     Payload (ESP),” 2005
+  id: totrans-206
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4106, “在 IPsec 封装安全有效载荷 (ESP) 中使用 Galois/Counter 模式 (GCM)，” 2005
 - en: RFC 4107, “Guidelines for Cryptographic Key Management,” 2005
+  id: totrans-207
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4107, “密码学密钥管理指南，” 2005
 - en: RFC 4109, “Algorithms for Internet Key Exchange version 1 (IKEv1),” 2005
+  id: totrans-208
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4109, “互联网密钥交换版本 1 (IKEv1) 的算法，” 2005
 - en: RFC 4113, “Management Information Base for the User Datagram Protocol,” 2005
+  id: totrans-209
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4113, “用户数据报协议的管理信息库，” 2005
 - en: RFC 4135, “Goals of Detecting Network Attachment in IPv6,” 2005
+  id: totrans-210
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4135, “检测 IPv6 网络附着目标的目标，” 2005
 - en: RFC 4140, “Hierarchical Mobile IPv6,” 2005
+  id: totrans-211
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4140, “层次化移动 IPv6，” 2005
 - en: RFC 4159, “Deprecation of ‘ip6.int,’” 2005
+  id: totrans-212
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4159, “‘ip6.int’ 的弃用，” 2005
 - en: RFC 4177, “Architectural Approaches to Multi-homing for IPv6,” 2005
+  id: totrans-213
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4177, “IPv6 多宿主架构方法，” 2005
 - en: RFC 4191, “Default Router Preferences and More-Specific Routes,” 2005
+  id: totrans-214
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4191, “默认路由器优先级和更具体的路由，” 2005
 - en: RFC 4192, “Procedures for Renumbering an IPv6 Network without a Flag Day,” 2005
+  id: totrans-215
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4192, “无‘标志日’的 IPv6 网络重新编号程序，” 2005
 - en: RFC 4193, “Unique Local IPv6 Unicast Addresses,” 2005
+  id: totrans-216
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4193, “唯一本地 IPv6 单播地址，” 2005
 - en: RFC 4213, “Basic Transition Mechanisms for IPv6 Hosts and Routers,” 2005
+  id: totrans-217
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4213, “IPv6 主机和路由器的基本过渡机制，” 2005
 - en: RFC 4215, “Analysis on IPv6 Transition in Third Generation Partnership Project
     (3GPP) Networks,” 2005
+  id: totrans-218
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4215, “第三代合作伙伴项目 (3GPP) 网络中 IPv6 过渡的分析，” 2005
 - en: RFC 4218, “Threats Relating to IPv6 Multihoming Solutions,” 2005
+  id: totrans-219
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4218, “与 IPv6 多宿主解决方案相关的威胁，” 2005
 - en: RFC 4219, “Things Multihoming in IPv6 (MULTI6) Developers Should Think About,”
     2005
+  id: totrans-220
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4219, “IPv6 中多宿主（MULTI6）开发人员应考虑的事项，” 2005
 - en: RFC 4225, “Mobile IP Version 6 Route Optimization Security Design Background,”
     2005
+  id: totrans-221
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4225, “移动 IP 版本 6 路由优化安全设计背景，” 2005
 - en: RFC 4241, “A Model of IPv6/IPv4 Dual Stack Internet Access Service,” 2005
+  id: totrans-222
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4241, “IPv6/IPv4 双栈互联网接入服务模型，” 2005
 - en: RFC 4242, “Information Refresh Time Option for Dynamic Host Configuration Protocol
     for IPv6 (DHCPv6),” 2005
+  id: totrans-223
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4242, “IPv6 动态主机配置协议 (DHCPv6) 的信息刷新时间选项，” 2005
 - en: RFC 4243, “Vendor-Specific Information Suboption for the Dynamic Host Configuration
     Protocol (DHCP) Relay Agent Option,” 2005
+  id: totrans-224
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4243, “动态主机配置协议（DHCP）中转代理选项的厂商特定信息子选项”，2005
 - en: RFC 4260, “Mobile IPv6 Fast Handovers for 802.11 Networks,” 2005
+  id: totrans-225
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4260, “移动IPv6快速切换用于802.11网络”，2005
 - en: RFC 4280, “Dynamic Host Configuration Protocol (DHCP) Options for Broadcast
     and Multicast Control Servers,” 2005
+  id: totrans-226
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4280, “广播和组播控制服务器的动态主机配置协议（DHCP）选项”，2005
 - en: RFC 4282, “The Network Access Identifier,” 2005
+  id: totrans-227
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4282, “网络接入标识符”，2005
 - en: RFC 4283, “Mobile Node Identifier Option for Mobile IPv6 (MIPv6),” 2005
+  id: totrans-228
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4283, “移动IPv6（MIPv6）的移动节点标识符选项”，2005
 - en: RFC 4285, “Authentication Protocol for Mobile IPv6,” 2006
+  id: totrans-229
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4285, “移动IPv6的认证协议”，2006
 - en: RFC 4286, “Multicast Router Discovery (MRD),” 2005
+  id: totrans-230
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4286, “组播路由器发现（MRD）”，2005
 - en: RFC 4291, “IP Version 6 Addressing Architecture,” 2006
+  id: totrans-231
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4291, “IP版本6地址架构”，2006
 - en: RFC 4301, “Security Architecture for the Internet Protocol,” 2005
+  id: totrans-232
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4301, “互联网协议安全架构”，2005
 - en: RFC 4302, “IP Authentication Header,” 2005
+  id: totrans-233
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4302, “IP身份验证头”，2005
 - en: RFC 4303, “IP Encapsulating Security Payload (ESP),” 2005
+  id: totrans-234
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4303, “IP封装安全负载（ESP）”，2005
 - en: RFC 4305, “Cryptographic Algorithm Implementation Requirements for Encapsulating
     Security Payload (ESP) and Authentication Header (AH),” 2005
+  id: totrans-235
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4305, “封装安全负载（ESP）和身份验证头（AH）的加密算法实现要求”，2005
 - en: RFC 4306, “Internet Key Exchange (IKEv2) Protocol,” 2005
+  id: totrans-236
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4306, “互联网密钥交换（IKEv2）协议”，2005
 - en: RFC 4307, “Cryptographic Algorithms for Use in the Internet Key Exchange Version
     2 (IKEv2),” 2005
+  id: totrans-237
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4307, “用于互联网密钥交换版本2（IKEv2）的加密算法”，2005
 - en: RFC 4308, “Cryptographic Suites for IPsec,” 2005
+  id: totrans-238
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4308, “IPsec的加密套件”，2005
 - en: RFC 4309, “Using Advanced Encryption Standard (AES) CCM Mode with IPsec Encapsulating
     Security Payload (ESP),” 2005
+  id: totrans-239
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4309, “使用高级加密标准（AES）CCM模式与IPsec封装安全负载（ESP）”，2005
 - en: RFC 4338, “Transmission of IPv6, IPv4, and Address Resolution Protocol (ARP)
     Packets over Fibre Channel,” 2006
+  id: totrans-240
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4338, “通过光纤通道传输IPv6、IPv4和地址解析协议（ARP）数据包”，2006
 - en: RFC 4339, “IPv6 Host Configuration of DNS Server Information Approaches,” 2006
+  id: totrans-241
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4339, “IPv6主机配置DNS服务器信息方法”，2006
 - en: RFC 4359, “The Use of RSA/SHA-1 Signatures within Encapsulating Security Payload
     (ESP) and Authentication Header (AH),” 2006
+  id: totrans-242
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4359, “在封装安全负载（ESP）和身份验证头（AH）中使用RSA/SHA-1签名”，2006
 - en: 'RFC 4380, “Teredo: Tunneling IPv6 over UDP through Network Address Translations
     (NATs),” 2006'
+  id: totrans-243
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4380, “Teredo：通过网络地址转换（NAT）隧道化IPv6通过UDP”，2006
 - en: RFC 4429, “Optimistic Duplicate Address Detection (DAD) for IPv6,” 2006
+  id: totrans-244
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4429, “IPv6的乐观重复地址检测（DAD）”，2006
 - en: RFC 4443, “Internet Control Message Protocol (ICMPv6) for the Internet Protocol
     Version 6 (IPv6) Specification,” 2006
+  id: totrans-245
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4443, “互联网控制消息协议（ICMPv6）用于互联网协议版本6（IPv6）规范”，2006
 - en: RFC 4449, “Securing Mobile IPv6 Route Optimization Using a Static Shared Key,”
     2006
+  id: totrans-246
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4449, “使用静态共享密钥保护移动IPv6路由优化”，2006
 - en: RFC 4456, “BGP Route Reflection,” 2006
+  id: totrans-247
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4456, “BGP路由反射”，2006
 - en: RFC 4472, “Operational Considerations and Issues with IPv6 DNS,” 2006
+  id: totrans-248
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4472, “IPv6 DNS的操作考虑和问题”，2006
 - en: 'RFC 4477, “Dynamic Host Configuration Protocol (DHCP): IPv4 and IPv6 Dual-Stack
     Issues,” 2006'
+  id: totrans-249
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4477, “动态主机配置协议（DHCP）：IPv4和IPv6双栈问题”，2006
 - en: 'RFC 4487, “Mobile IPv6 and Firewalls: Problem Statement,” 2006'
+  id: totrans-250
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4487, “移动IPv6与防火墙：问题声明”，2006
 - en: RFC 4489, “A Method for Generating Link-Scoped IPv6 Multicast Addresses,” 2006
+  id: totrans-251
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4489, “生成链路范围IPv6组播地址的方法”，2006
 - en: RFC 4554, “Use of VLANs for IPv4-IPv6 Coexistence in Enterprise Networks,” 2006
+  id: totrans-252
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4554, “在企业网络中使用VLAN实现IPv4-IPv6共存”，2006
 - en: RFC 4555, “IKEv2 Mobility and Multihoming Protocol (MOBIKE),” 2006
+  id: totrans-253
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4555, “IKEv2移动性和多宿协议（MOBIKE）”，2006
 - en: RFC 4581, “Cryptographically Generated Addresses (CGA) Extension Field Format,”
     2006
+  id: totrans-254
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4581, “加密生成地址（CGA）扩展字段格式”，2006
 - en: RFC 4584, “Extensions to Sockets API for Mobile IPv6,” 2006
+  id: totrans-255
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4584, “为移动IPv6扩展的套接字API”，2006
 - en: RFC 4601, “Internet Group Management Protocol, Version 2,” 2006
+  id: totrans-256
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4601, “互联网组管理协议，第2版”，2006
 - en: RFC 4604, “Using MLDv2 for Source Specific Multicast,” 2006
+  id: totrans-257
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4604, “使用MLDv2进行源特定组播”，2006
 - en: RFC 4620, “IPv6 Node Information Queries,” 2006
+  id: totrans-258
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4620, “IPv6节点信息查询”，2006
 - en: RFC 4621, “Design of the IKEv2 Mobility and Multihoming (MOBIKE) Protocol,”
     2006
+  id: totrans-259
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4621, “IKEv2移动性和多宿协议（MOBIKE）设计”，2006
 - en: RFC 4659, “BGP-MPLS IP Virtual Private Network (VPN) Extension for IPv6 VPN,”
     2006
+  id: totrans-260
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4659, “BGP-MPLS IP虚拟专用网络（VPN）扩展用于IPv6 VPN”，2006
 - en: 'RFC 4677, “The Tao of IETF: A Novice’s Guide to the Internet Engineering Task
     Force,” 2006'
+  id: totrans-261
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4677, “IETF的道：互联网工程任务组新手指南”，2006
 - en: RFC 4703, “Resolution of Fully Qualified Domain Name (FQDN) Conflicts among
     Dynamic Host Configuration Protocol (DHCP) Clients,” 2006
+  id: totrans-262
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4703，“动态主机配置协议（DHCP）客户端之间完全限定域名（FQDN）冲突的解决”，2006
 - en: RFC 4727, “Experimental Values in IPv4, IPv6, ICMPv4, ICMPv6, UDP, and TCP Headers,”
     2006
+  id: totrans-263
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4727，“IPv4、IPv6、ICMPv4、ICMPv6、UDP 和 TCP 头中的实验性值”，2006
 - en: RFC 4760, “Multiprotocol Extensions for BGP-4,” 2007
+  id: totrans-264
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4760，“BGP-4 的多协议扩展”，2007
 - en: RFC 4779, “ISP IPv6 Deployment Scenarios in Broadband Access Networks,” 2007
+  id: totrans-265
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4779，“宽带接入网络中的 ISP IPv6 部署场景”，2007
 - en: RFC 4787, “Network Address Translation (NAT) Behavioral Requirements for Unicast
     UDP,” 2007
+  id: totrans-266
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4787，“单播 UDP 的网络地址转换（NAT）行为要求”，2007
 - en: RFC 4795, “Link-Local Multicast Name Resolution (LLMNR),” 2007
+  id: totrans-267
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4795，“链路本地组播名称解析（LLMNR）”，2007
 - en: RFC 4798, “Connecting IPv6 Islands over IPv4 MPLS Using IPv6 Provider Edge Routers
     (6PE),” 2007
+  id: totrans-268
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4798，“通过 IPv6 提供商边缘路由器（6PE）在 IPv4 MPLS 上连接 IPv6 网络岛”，2007
 - en: RFC 4822, “RIPv2 Cryptographic Authentication,” 2007
+  id: totrans-269
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4822，“RIPv2 加密认证”，2007
 - en: RFC 4831, “Goals for Network-Based Localized Mobility Management (NETLMM),”
     2007
+  id: totrans-270
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4831，“基于网络的局部化移动性管理（NETLMM）目标”，2007
 - en: RFC 4835, “Cryptographic Algorithm Implementation Requirements for Encapsulating
     Security Payload (ESP) and Authentication Header (AH),” 2007
+  id: totrans-271
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4835，“封装安全载荷（ESP）和认证头（AH）的加密算法实现要求”，2007
 - en: RFC 4852, “IPv6 Enterprise Network Analysis—IP Layer 3 Focus,” 2007
+  id: totrans-272
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4852，“IPv6 企业网络分析—IP 层 3 聚焦”，2007
 - en: RFC 4861, “Neighbor Discovery for IP Version 6,” 2007
+  id: totrans-273
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4861，“IP 版本 6 邻居发现”，2007
 - en: RFC 4862, “IPv6 Stateless Address Autoconfiguration,” 2007
+  id: totrans-274
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4862，“IPv6 无状态地址自动配置”，2007
 - en: RFC 4864, “Local Network Protection for IPv6,” 2007
+  id: totrans-275
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4864，“IPv6 的本地网络保护”，2007
 - en: RFC 4866, “Enhanced Route Optimization for Mobile IPv6,” 2007
+  id: totrans-276
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4866，“移动 IPv6 的增强路由优化”，2007
 - en: RFC 4877, “Mobile IPv6 Operation with IKEv2 and the Revised IPsec Architecture,”
     2007
+  id: totrans-277
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4877，“使用 IKEv2 和修订版 IPsec 架构的移动 IPv6 操作”，2007
 - en: RFC 4884, “Extended ICMP to Support Multi-Part Messages,” 2007
+  id: totrans-278
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4884，“扩展 ICMP 支持多部分消息”，2007
 - en: RFC 4885, “Network Mobility Support Terminology,” 2007
+  id: totrans-279
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4885，“网络移动性支持术语”，2007
 - en: RFC 4887, “Network Mobility Home Network Models,” 2007
+  id: totrans-280
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4887，“网络移动性家庭网络模型”，2007
 - en: RFC 4890, “Recommendations for Filtering ICMPv6 Messages in Firewalls,” 2007
+  id: totrans-281
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4890，“防火墙中过滤 ICMPv6 消息的建议”，2007
 - en: RFC 4891, “Using IPsec to Secure IPv6-in-IPv4 Tunnels,” 2007
+  id: totrans-282
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4891，“使用 IPsec 保护 IPv6-in-IPv4 隧道”，2007
 - en: RFC 4908, “Multi-homing for small scale fixed network Using Mobile IP and NEMO,”
     2007
+  id: totrans-283
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4908，“使用移动 IP 和 NEMO 的小规模固定网络的多宿主连接”，2007
 - en: RFC 4941, “Privacy Extensions for Stateless Address Autoconfiguration in IPv6,”
     2007
+  id: totrans-284
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4941，“IPv6 无状态地址自动配置的隐私扩展”，2007
 - en: RFC 4942, “IPv6 Transition/Coexistence Security Considerations,” 2007
+  id: totrans-285
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4942，“IPv6 过渡/共存安全性考虑”，2007
 - en: RFC 4944, “Transmission of IPv6 Packets over IEEE 802.15.4 Networks,” 2007
+  id: totrans-286
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4944，“通过 IEEE 802.15.4 网络传输 IPv6 数据包”，2007
 - en: RFC 4957, “Link-Layer Event Notifications for Detecting Network Attachments,”
     2007
+  id: totrans-287
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4957，“用于检测网络附着的链路层事件通知”，2007
 - en: RFC 4966, “Reasons to Move the Network Address Translator - Protocol Translator
     (NAT-PT) to Historic Status,” 2007
+  id: totrans-288
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4966，“将网络地址转换器 - 协议转换器（NAT-PT）移至历史状态的原因”，2007
 - en: RFC 4982, “Support for Multiple Hash Algorithms in Cryptographically Generated
     Addresses (CGAs),” 2007
+  id: totrans-289
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4982，“支持加密生成地址（CGA）中的多种哈希算法”，2007
 - en: RFC 5015, “Bidirectional Protocol Independent Multicast (BIDIR-PIM),” 2007
+  id: totrans-290
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5015，“双向协议独立组播（BIDIR-PIM）”，2007
 - en: RFC 5059, “Bootstrap Router (BSR) Mechanism for Protocol Independent Multicast
     (PIM),” 2008
+  id: totrans-291
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5059，“协议独立组播（PIM）的引导路由器（BSR）机制”，2008
 - en: RFC 5065, “Autonomous System Confederations for BGP,” 2007
+  id: totrans-292
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5065，“BGP 的自治系统联合体”，2007
 - en: RFC 5072, “IP Version 6 over PPP,” 2007
+  id: totrans-293
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5072，“PPP 上的 IP 版本 6”，2007
 - en: RFC 5084, “Using AES-CCM and AES-GCM Authenticated Encryption in the Cryptographic
     Message Syntax (CMS),” 2007
+  id: totrans-294
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5084，“在加密消息语法（CMS）中使用 AES-CCM 和 AES-GCM 认证加密”，2007
 - en: RFC 5094, “Mobile IPv6 Vendor Specific Option,” 2007
+  id: totrans-295
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5094，“移动 IPv6 厂商特定选项”，2007
 - en: RFC 5095, “Deprecation of Type 0 Routing Headers in IPv6,” 2007
+  id: totrans-296
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5095，“IPv6 中类型 0 路由头的弃用”，2007
 - en: RFC 5096, “Mobile IPv6 Experimental Messages,” 2007
+  id: totrans-297
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5096，“移动 IPv6 实验性消息”，2007
 - en: 'RFC 5120, “M-ISIS: Multi Topology (MT) Routing in Intermediate System to Intermediate
     Systems (IS-ISs),” 2008'
+  id: totrans-298
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5120，“M-ISIS：中间系统到中间系统（IS-IS）中的多拓扑（MT）路由”，2008
 - en: RFC 5142, “Mobility Header Home Agent Switch Message,” 2008
+  id: totrans-299
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5142，“移动头家庭代理切换消息”，2008
 - en: RFC 5149, “Service Selection for Mobile IPv6,” 2008
+  id: totrans-300
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5149，“移动 IPv6 的服务选择”，2008
 - en: RFC 5156, “Special Use IPv6 Addresses,” 2008
+  id: totrans-301
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5156，《特殊用途IPv6地址》，2008年
 - en: RFC 5157, “IPv6 Implications for Network Scanning,” 2008
+  id: totrans-302
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5157，《IPv6对网络扫描的影响》，2008年
 - en: 'RFC 5164, “Mobility Services Transport: Problem Statement,” 2008'
+  id: totrans-303
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5164，《移动服务传输：问题陈述》，2008年
 - en: RFC 5172, “Negotiation for IPv6 Datagram Compression using IPv6 Control Protocol,”
     2008
+  id: totrans-304
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5172，《使用IPv6控制协议的IPv6数据报压缩协商》，2008年
 - en: RFC 5181, “IPv6 Deployment Scenarios in 802.16 Networks,” 2008
+  id: totrans-305
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5181，《802.16网络中的IPv6部署场景》，2008年
 - en: RFC 5213, “Proxy Mobile IPv6,” 2008
+  id: totrans-306
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5213，《代理移动IPv6》，2008年
 - en: RFC 5214, “Intra-Site Automatic Tunnel Addressing Protocol (ISATAP),” 2008
+  id: totrans-307
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5214，《站点内自动隧道地址协议（ISATAP）》，2008年
 - en: RFC 5220, “Problem Statement for Default Address Selection in Multi-Prefix Environments,”
     2008
+  id: totrans-308
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5220，《多前缀环境中默认地址选择的问题陈述》，2008年
 - en: RFC 5247, “Extensible Authentication Protocol (EAP) Key Management Framework,”
     2008
+  id: totrans-309
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5247，《可扩展认证协议（EAP）密钥管理框架》，2008年
 - en: RFC 5268, “Mobile IPv6 Fast Handovers,” 2008
+  id: totrans-310
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5268，《移动IPv6快速切换》，2008年
 - en: RFC 5270, “Mobile IPv6 Fast Handovers over IEEE 802.16e Networks,” 2008
+  id: totrans-311
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5270，《通过IEEE 802.16e网络进行移动IPv6快速切换》，2008年
 - en: RFC 5271, “Mobile IPv6 Fast Handovers for 3G CDMA Networks,” 2008
+  id: totrans-312
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5271，《3G CDMA网络的移动IPv6快速切换》，2008年
 - en: RFC 5308, “Routing IPv6 with IS-IS,” 2008
+  id: totrans-313
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5308，《通过IS-IS路由IPv6》，2008年
 - en: RFC 5340, “OSPF for IPv6 (OSPFv3),” 2008
+  id: totrans-314
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5340，《IPv6的OSPF（OSPFv3）》，2008年
 - en: RFC 5350, “IANA Considerations for the IPv4 and IPv6 Router Alert Options,”
     2008
+  id: totrans-315
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5350，《IPv4和IPv6路由器警报选项的IANA考虑事项》，2008年
 - en: RFC 5375, “IPv6 Unicast Address Assignment Considerations,” 2008
+  id: totrans-316
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5375，《IPv6单播地址分配考虑因素》，2008年
 - en: RFC 5380, “Hierarchical Mobile IPv6 (HMIPv6) Mobility Management,” 2008
+  id: totrans-317
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5380，《分层移动IPv6（HMIPv6）移动性管理》，2008年
 - en: RFC 5453, “Reserved IPv6 Interface Identifiers,” 2009
+  id: totrans-318
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5453，《保留的IPv6接口标识符》，2009年
 - en: RFC 5492, “Capabilities Advertisement with BGP-4,” 2009
+  id: totrans-319
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5492，《通过BGP-4广告功能》，2009年
 - en: RFC 5555, “Mobile IPv6 Support for Dual Stack Hosts and Routers,” 2009
+  id: totrans-320
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5555，《移动IPv6对双栈主机和路由器的支持》，2009年
 - en: RFC 5568, “Mobile IPv6 Fast Handovers,” 2009
+  id: totrans-321
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5568，《移动IPv6快速切换》，2009年
 - en: RFC 5569, “IPv6 Rapid Deployment on IPv4 Infrastructures (6rd),” 2010
+  id: totrans-322
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5569，《在IPv4基础设施上快速部署IPv6（6rd）》，2010年
 - en: RFC 5571, “Softwire Hub and Spoke Deployment Framework with Layer Two Tunneling
     Protocol Version 2 (L2TPv2),” 2009
+  id: totrans-323
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5571，《带有第二层隧道协议版本2（L2TPv2）的软路由中心-辐射部署框架》，2009年
 - en: RFC 5572, “IPv6 Tunnel Broker with the Tunnel Setup Protocol,” 2010
+  id: totrans-324
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5572，《带隧道设置协议的IPv6隧道代理》，2010年
 - en: RFC 5637, “Authentication, Authorization, and Accounting (AAA) Goals for Mobile
     IPv6,” 2009
+  id: totrans-325
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5637，《移动IPv6的认证、授权和计费（AAA）目标》，2009年
 - en: RFC 5648, “Multiple Care-of Addresses Registration,” 2009
+  id: totrans-326
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5648，《多个Care-of地址注册》，2009年
 - en: RFC 5722, “Handling of Overlapping IPv6 Fragments,” 2009
+  id: totrans-327
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5722，《重叠IPv6片段的处理》，2009年
 - en: RFC 5739, “IPv6 Configuration in Internet Key Exchange Protocol Version 2 (IKEv2),”
     2010
+  id: totrans-328
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5739，《在互联网密钥交换协议版本2（IKEv2）中的IPv6配置》，2010年
 - en: RFC 5796, “Authentication and Confidentiality in Protocol Independent Multicast
     Sparse Mode (PIM-SM) Link-Local Messages,” 2010
+  id: totrans-329
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5796，《协议无关组播稀疏模式（PIM-SM）链路本地消息中的认证与机密性》，2010年
 - en: RFC 5838, “Support of Address Families in OSPFv3,” 2010
+  id: totrans-330
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5838，《OSPFv3中地址族的支持》，2010年
 - en: RFC 5844, “IPv4 Support for Proxy Mobile IPv6,” 2010
+  id: totrans-331
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5844，《IPv4对代理移动IPv6的支持》，2010年
 - en: RFC 5846, “Binding Revocation for IPv6 Mobility,” 2010
+  id: totrans-332
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5846，《IPv6移动性的绑定撤销》，2010年
 - en: RFC 5847, “Heartbeat Mechanism for Proxy Mobile IPv6,” 2010
+  id: totrans-333
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5847，《代理移动IPv6的心跳机制》，2010年
 - en: RFC 5871, “IANA Allocation Guidelines for the IPv6 Routing Header,” 2010
+  id: totrans-334
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5871，《IANA对IPv6路由标头的分配指南》，2010年
 - en: RFC 5887, “Renumbering Still Needs Work,” 2010
+  id: totrans-335
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5887，《重新编号仍需改进》，2010年
 - en: RFC 5902, “IAB Thoughts on IPv6 Network Address Translation,” 2010
+  id: totrans-336
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5902，《IAB对IPv6网络地址转换的看法》，2010年
 - en: 'RFC 5909, “Securing Neighbor Discovery Proxy: Problem Statement,” 2010'
+  id: totrans-337
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5909，《保护邻居发现代理：问题陈述》，2010年
 - en: 'RFC 5942, “IPv6 Subnet Model: the Relationship between Links and Subnet Prefixes,”
     2010'
+  id: totrans-338
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5942，《IPv6子网模型：链路与子网前缀之间的关系》，2010年
 - en: RFC 5944, “IP Mobility Support for IPv4,” 2010
+  id: totrans-339
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5944，《IPv4的IP移动性支持》，2010年
 - en: RFC 5952, “A Recommendation for IPv6 Address Text Representation,” 2010
+  id: totrans-340
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5952，《IPv6地址文本表示的建议》，2010年
 - en: RFC 5969, “IPv6 Rapid Deployment on IPv4 Infrastructures (6rd)—Protocol Specification,”
     2010
+  id: totrans-341
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5969，《在IPv4基础设施上快速部署IPv6（6rd）—协议规范》，2010年
 - en: RFC 5991, “Teredo Security Updates,” 2010
+  id: totrans-342
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5991，《Teredo安全更新》，2010年
 - en: RFC 5996, “Internet Key Exchange Protocol Version 2 (IKEv2),” 2010
+  id: totrans-343
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5996，《互联网密钥交换协议版本2（IKEv2）》，2010年
 - en: RFC 6014, “Cryptographic Algorithm Identifier Allocation for DNSSEC,” 2010
+  id: totrans-344
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6014，《DNSSEC的加密算法标识符分配》，2010年
 - en: RFC 6036, “Emerging Service Provider Scenarios for IPv6 Deployment,” 2010
+  id: totrans-345
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6036, “IPv6 部署中的新兴服务提供商场景”，2010  '
 - en: RFC 6040, “Tunneling of Explicit Congestion Notification,” 2010
+  id: totrans-346
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6040, “显式拥塞通知的隧道传输”，2010  '
 - en: RFC 6052, “IPv6 Addressing of IPv4/IPv6 Translators,” 2010
+  id: totrans-347
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6052, “IPv4/IPv6 翻译器的 IPv6 地址分配”，2010  '
 - en: RFC 6071, “IP Security (IPsec) and Internet Key Exchange (IKE) Document Roadmap,”
     2011
+  id: totrans-348
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6071, “IP 安全性（IPsec）和互联网密钥交换（IKE）文档路线图”，2011  '
 - en: RFC 6081, “Teredo Extensions,” 2011
+  id: totrans-349
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6081, “Teredo 扩展”，2011  '
 - en: RFC 6085, “Address Mapping of IPv6 Multicast Packets on Ethernet,” 2011
+  id: totrans-350
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6085, “以太网中 IPv6 多播数据包的地址映射”，2011  '
 - en: RFC 6089, “Flow Bindings in Mobile IPv6 and Network Mobility (NEMO) Basic Support,”
     2011
+  id: totrans-351
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6089, “移动 IPv6 和网络移动性（NEMO）基本支持中的流绑定”，2011  '
 - en: RFC 6092, “Recommended Simple Security Capabilities in Customer Premises Equipment
     (CPE) for Providing Residential IPv6 Internet Service,” 2011
+  id: totrans-352
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6092, “为提供住宅 IPv6 网络服务的客户终端设备（CPE）推荐的简单安全功能”，2011  '
 - en: RFC 6104, “Rogue IPv6 Router Advertisement Problem Statement,” 2011
+  id: totrans-353
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6104, “恶意 IPv6 路由器通告问题陈述”，2011  '
 - en: RFC 6105, “IPv6 Router Advertisement Guard,” 2011
+  id: totrans-354
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6105, “IPv6 路由器通告保护”，2011  '
 - en: RFC 6106, “IPv6 Router Advertisement Options for DNS Configuration,” 2010
+  id: totrans-355
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6106, “IPv6 路由器通告选项用于 DNS 配置”，2010  '
 - en: RFC 6119, “IPv6 Traffic Engineering in IS-IS,” 2011
+  id: totrans-356
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6119, “IS-IS 中的 IPv6 流量工程”，2011  '
 - en: RFC 6144, “Framework for IPv4/IPv6 Translation,” 2011
+  id: totrans-357
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6144, “IPv4/IPv6 转换框架”，2011  '
 - en: RFC 6145, “Stateless IP/ICMP Translation,” 2011
+  id: totrans-358
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6145, “无状态 IP/ICMP 转换”，2011  '
 - en: 'RFC 6146, “Stateful NAT64: Network Address and Protocol Translation from IPv6
     Clients to IPv4 Servers,” 2011'
+  id: totrans-359
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6146, “有状态 NAT64：IPv6 客户端到 IPv4 服务器的网络地址和协议转换”，2011  '
 - en: 'RFC 6147, “DNS64: DNS Extensions for Network Address Translation from IPv6
     Clients to IPv4 Servers,” 2011'
+  id: totrans-360
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6147, “DNS64：IPv6 客户端到 IPv4 服务器的网络地址转换的 DNS 扩展”，2011  '
 - en: RFC 6151, “Updated Security Considerations for the MD5 Message-Digest and the
     HMAC-MD5 Algorithms,” 2011
+  id: totrans-361
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6151, “更新 MD5 消息摘要算法和 HMAC-MD5 算法的安全性考虑”，2011  '
 - en: RFC 6164, “Using 127-Bit IPv6 Prefixes on Inter-Router Links,” 2011
+  id: totrans-362
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6164, “在路由器间链路上使用 127 位 IPv6 前缀”，2011  '
 - en: RFC 6169, “Security Concerns with IP Tunneling,” 2011
+  id: totrans-363
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6169, “IP 隧道的安全性问题”，2011  '
 - en: RFC 6177, “IPv6 Address Assignment to End Sites,” 2011
+  id: totrans-364
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6177, “IPv6 地址分配给终端站点”，2011  '
 - en: RFC 6180, “Guidelines for Using IPv6 Transition Mechanisms during IPv6 Deployment,”
     2011
+  id: totrans-365
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6180, “在 IPv6 部署过程中使用 IPv6 过渡机制的指南”，2011  '
 - en: RFC 6221, “Lightweight DHCPv6 Relay Agent,” 2011
+  id: totrans-366
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6221, “轻量级 DHCPv6 转发代理”，2011  '
 - en: RFC 6226, “PIM Group-to-Rendezvous-Point Mapping,” 2011
+  id: totrans-367
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6226, “PIM 组到 rendezvous 点映射”，2011  '
 - en: RFC 6250, “Evolution of the IP Model,” 2011
+  id: totrans-368
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6250, “IP 模型的演进”，2011  '
 - en: RFC 6269, “Issues with IP address sharing,” 2011
+  id: totrans-369
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6269, “IP 地址共享问题”，2011  '
 - en: RFC 6273, “The Secure Neighbor Discovery (SEND) Hash Threat Analysis,” 2011
+  id: totrans-370
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6273, “安全邻居发现（SEND）哈希威胁分析”，2011  '
 - en: RFC 6275, “Mobility Support in IPv6,” 2011
+  id: totrans-371
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6275, “IPv6 中的移动性支持”，2011  '
 - en: RFC 6279, “Proxy Mobile IPv6 (PIMPv6) Localized Routing Problem Statement,”
     2011
+  id: totrans-372
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6279, “代理移动 IPv6 (PIMPv6) 局部路由问题陈述”，2011  '
 - en: RFC 6282, “Compression Format for IPv6 Datagrams over IEEE 802.15.4-Based Networks,”
     2011
+  id: totrans-373
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6282, “基于 IEEE 802.15.4 网络的 IPv6 数据报压缩格式”，2011  '
 - en: RFC 6294, “Survey of Proposed Use Cases for the IPv6 Flow Label,” 2011
+  id: totrans-374
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6294, “对 IPv6 流标签提议的使用案例调查”，2011  '
 - en: RFC 6296, “IPv6-to-IPv6 Network Prefix Translation,” 2011
+  id: totrans-375
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6296, “IPv6 到 IPv6 网络前缀转换”，2011  '
 - en: RFC 6302, “Logging Recommendations for Internet-Facing Servers,” 2011
+  id: totrans-376
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6302, “面向互联网的服务器的日志记录建议”，2011  '
 - en: RFC 6308, “The Internet Multicast Address Allocation Architecture,” 2011
+  id: totrans-377
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6308, “互联网多播地址分配架构”，2011  '
 - en: RFC 6324, “Routing Loop Attack Using IPv6 Automatic Tunnels,” 2011
+  id: totrans-378
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6324, “使用 IPv6 自动隧道的路由环路攻击”，2011  '
 - en: RFC 6326, “Transparent Interconnection of Lots of Links (TRILL) Use of IS-IS,”
     2011
+  id: totrans-379
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6326, “大量链路的透明互连（TRILL）在 IS-IS 中的应用”，2011
 - en: RFC 6333, “Dual-Stack Lite Broadband Deployments Following IPv4 Exhaustion,”
     2011
+  id: totrans-380
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6333, “IPv4 地址耗尽后的双栈轻型宽带部署”，2011  '
 - en: RFC 6334, “Dynamic Host Configuration Protocol for IPv6 (DHCPv6) Option for
     Dual-Stack Lite,” 2011
+  id: totrans-381
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6334, “双栈轻型的 IPv6（DHCPv6）选项的动态主机配置协议”，2011  '
 - en: RFC 6343, “Advisory Guidelines for 6to4 Deployment,” 2011
+  id: totrans-382
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6343, “6to4 部署的建议指南”，2011  '
 - en: RFC 6398, “IP Router Alert Considerations and Usage,” 2011
+  id: totrans-383
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6398, “IP 路由器警报考虑事项和使用”，2011  '
 - en: RFC 6422, “Relay Supplied DHCP Options,” 2011
+  id: totrans-384
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6422, “转发器提供的 DHCP 选项”，2011  '
 - en: RFC 6434, “IPv6 Node Requirements,” 2011
+  id: totrans-385
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6434, “IPv6 节点要求”，2011  '
 - en: RFC 6436, “Rationale for Update to the IPv6 Flow Label Specification,” 2011
+  id: totrans-386
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6436, “更新 IPv6 流标签规范的理由”，2011  '
 - en: RFC 6437, “IPv6 Flow Label Specification,” 2011
+  id: totrans-387
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6437, “IPv6 流标签规范”，2011  '
 - en: RFC 6438, “Using the IPv6 Flow Label for Equal Cost Multipath Routing and Link
     Aggregation in Tunnels,” 2011
+  id: totrans-388
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6438, “在隧道中使用IPv6流标签进行等成本多路径路由和链路聚合，”2011年
 - en: RFC 6459, “IPv6 in 3rd Generation Partnership Project (3GPP) Evolved Packet
     System (EPS),” 2012
+  id: totrans-389
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6459, “3GPP演进分组系统（EPS）中的IPv6支持，”2012年
 - en: RFC 6494, “Certificate Profile and Certificate Management for SEcure Neighbor
     Discovery (SEND),” 2012
+  id: totrans-390
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6494, “SEcure邻居发现（SEND）的证书配置文件和证书管理，”2012年
 - en: RFC 6495, “Subject Key Identifier (SKI) SEcure Neighbor Discovery (SEND) Name
     Type Fields,” 2012
+  id: totrans-391
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6495, “主题密钥标识符（SKI）SEcure邻居发现（SEND）名称类型字段，”2012年
 - en: RFC 6535, “Dual Stack Hosts using the ‘Bump-in-the-Host’ Technique (BIHS),”
     2012
+  id: totrans-392
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6535, “使用‘主机内的碰撞’技术（BIHS）的双栈主机，”2012年
 - en: RFC 6540, “IPv6 Support Required for All IP-Capable Nodes,” 2012
+  id: totrans-393
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6540, “所有IP支持的节点都需要IPv6支持，”2012年
 - en: RFC 6543, “Reserved IPv6 Interface Identifier for Proxy Mobile IPv6,” 2012
+  id: totrans-394
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6543, “代理移动IPv6的保留IPv6接口标识符，”2012年
 - en: RFC 6553, “The Routing Protocol for Low-Power and Lossy Networks (RPL) Option
     for Carrying RPL Information in Data-Plane Datagrams,” 2012
+  id: totrans-395
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6553, “低功耗和丢包网络（RPL）数据平面数据报中携带RPL信息的路由协议选项，”2012年
 - en: RFC 6554, “An IPv6 Routing Header for Source Routes with the Routing Protocol
     for Low-Power and Lossy Networks (RPL),” 2012
+  id: totrans-396
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6554, “带有低功耗和丢包网络（RPL）路由协议的IPv6源路由路由头，”2012年
 - en: 'RFC 6555, “Happy Eyeballs: Success with Dual-Stack Hosts,” 2012'
+  id: totrans-397
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6555, “幸福眼球：双栈主机的成功，”2012年
 - en: RFC 6556, “Testing Eyeball Happiness,” 2012
+  id: totrans-398
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6556, “测试眼球幸福度，”2012年
 - en: RFC 6564, “A Uniform Format for IPv6 Extension Headers,” 2012
+  id: totrans-399
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6564, “IPv6扩展头的统一格式，”2012年
 - en: RFC 6572, “RADIUS Support for Proxy Mobile IPv6,” 2012
+  id: totrans-400
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6572, “RADIUS支持代理移动IPv6，”2012年
 - en: RFC 6583, “Operational Neighbor Discovery Problems,” 2012
+  id: totrans-401
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6583, “操作中的邻居发现问题，”2012年
 - en: RFC 6586, “Experiences from an IPv6-only Network,” 2012
+  id: totrans-402
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6586, “来自仅IPv6网络的经验，”2012年
 - en: RFC 6603, “Prefix Exclude Option for DHCPv6-based Prefix Delegation,” 2012
+  id: totrans-403
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6603, “用于基于DHCPv6的前缀委派的前缀排除选项，”2012年
 - en: RFC 6610, “DHCP Options for Home Information Discovery in Mobile IPv6 (MIPv6),”
     2012
+  id: totrans-404
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6610, “移动IPv6（MIPv6）中的家庭信息发现的DHCP选项，”2012年
 - en: RFC 6611, “Mobile IPv6 (MIPv6) Bootstrapping for the Integrated Scenario,” 2012
+  id: totrans-405
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6611, “集成场景下的移动IPv6（MIPv6）引导过程，”2012年
 - en: RFC 6618, “Mobile IPv6 Security Framework Using Transport Layer Security for
     Communication between the Mobile Node and Home Agent,” 2012
+  id: totrans-406
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6618, “使用传输层安全协议实现移动节点与主代理之间通信的移动IPv6安全框架，”2012年
 - en: RFC 6619, “Scalable Operation of Address Translators with Per-Interface Bindings,”
     2012
+  id: totrans-407
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6619, “具有每接口绑定的地址转换器的可扩展操作，”2012年
 - en: 'RFC 6620, “FCFS SAVI: First-Come, First-Served Source Address Validation Improvement
     for Locally Assigned IPv6 Addresses,” 2012'
+  id: totrans-408
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6620, “FCFS SAVI：先到先得源地址验证改进，适用于本地分配的IPv6地址，”2012年
 - en: RFC 6621, “Simplified Multicast Forwarding,” 2012
+  id: totrans-409
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6621, “简化的多播转发，”2012年
 - en: RFC 6655, “AES-CCM Cipher Suites for Transport Layer Security (TLS),” 2012
+  id: totrans-410
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6655, “传输层安全协议（TLS）中的AES-CCM密码套件，”2012年
 - en: RFC 6705, “Localized Routing for Proxy Mobile IPv6,” 2012
+  id: totrans-411
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6705, “代理移动IPv6的本地化路由，”2012年
 - en: RFC 6724, “Default Address Selection for Internet Protocol Version 6 (IPv6),
     2012
+  id: totrans-412
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6724, “互联网协议版本6（IPv6）默认地址选择，”2012年
 - en: RFC 6775, “Neighbor Discovery Optimization for IPv6 over Low-Power Wireless
     Personal Area Networks (6LoWPANs),” 2012
+  id: totrans-413
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6775, “针对低功耗无线个人区域网络（6LoWPAN）的IPv6邻居发现优化，”2012年
 - en: RFC 6791, “Stateless Source Address Mapping for ICMPv6 Packets,” 2012
+  id: totrans-414
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6791, “ICMPv6数据包的无状态源地址映射，”2012年
 - en: RFC 6822, “IS-IS Multi-Instance,” 2012
+  id: totrans-415
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6822, “IS-IS多实例，”2012年
 - en: RFC 6830, “The Locator/ID Separation Protocol (LISP),” 2013
+  id: totrans-416
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6830, “定位符/标识符分离协议（LISP），”2013年
 - en: RFC 6831, “The Locator/ID Separation Protocol (LISP) for Multicast Environments,”
     2013
+  id: totrans-417
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6831, “定位符/标识符分离协议（LISP）在多播环境中的应用，”2013年
 - en: RFC 6832, “Interworking between Locator/ID Separation Protocol (LISP) and Non-LISP
     Sites,” 2013
+  id: totrans-418
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6832, “定位符/标识符分离协议（LISP）与非LISP站点之间的互联互通，”2013年
 - en: RFC 6833, “Locator/ID Separation Protocol (LISP) Map-Server Interface,” 2013
+  id: totrans-419
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6833, “定位符/标识符分离协议（LISP）地图服务器接口，”2013年
 - en: RFC 6834, “Locator/ID Separation Protocol (LISP) Map-Versioning,” 2013
+  id: totrans-420
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6834, “定位符/标识符分离协议（LISP）地图版本控制，”2013年
 - en: RFC 6835, “The Locator/ID Separation Protocol Internet Groper (LIG),” 2013
+  id: totrans-421
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6835, “定位符/标识符分离协议互联网探测器（LIG），”2013年
 - en: RFC 6836, “Locator/ID Separation Protocol Alternative Logical Topology (LISP+ALT),”
     2013
+  id: totrans-422
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6836, “定位符/标识符分离协议（LISP）备用逻辑拓扑（LISP+ALT），”2013年
 - en: RFC 6845, “OSPF Hybrid Broadcast and Point-to-Multipoint Interface Type,” 2013
+  id: totrans-423
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6845, “OSPF混合广播和点对多点接口类型，”2013年
 - en: RFC 6853, “DHCPv6 Redundancy Deployment Considerations,” 2013
+  id: totrans-424
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6853, “DHCPv6冗余部署考虑因素”，2013年
 - en: RFC 6860, “Hiding Transit-Only Networks in OSPF,” 2013
+  id: totrans-425
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6860, “在OSPF中隐藏仅传输网络”，2013年
 - en: RFC 6866, “Problem Statement for Renumbering IPv6 Hosts with Static Addresses
     in Enterprise Networks,” 2013
+  id: totrans-426
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6866, “关于在企业网络中重新编号具有静态地址的IPv6主机的问题陈述”，2013年
 - en: RFC 6874, “Representing IPv6 Zone Identifiers in Address Literals and Uniform
     Resource Identifiers,” 2013
+  id: totrans-427
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6874, “在地址文字和统一资源标识符中表示IPv6区域标识符”，2013年
 - en: 'RFC 6877, “464XLAT: Combination of Stateful and Stateless Translation,” 2013'
+  id: totrans-428
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6877, “464XLAT：有状态和无状态翻译的结合”，2013年
 - en: RFC 6879, “IPv6 Enterprise Network Renumbering Scenarios, Considerations, and
     Methods,” 2013
+  id: totrans-429
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6879, “IPv6企业网络重新编号场景、考虑因素和方法”，2013年
 - en: RFC 6883, “IPv6 Guidance for Internet Content Providers and Application Service
     Providers,” 2013
+  id: totrans-430
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6883, “互联网内容提供商和应用服务提供商的IPv6指导”，2013年
 - en: RFC 6886, “NAT Port Mapping Protocol (NAT-PMP), 2013
+  id: totrans-431
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6886, “NAT端口映射协议（NAT-PMP）”，2013年
 - en: RFC 6888, “Common Requirements for Carrier-Grade NATs (CGNs),” 2013
+  id: totrans-432
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6888, “运营商级NAT（CGN）的常见要求”，2013年
 - en: RFC 6889, “Analysis of Stateful 64 Translation,” 2013
+  id: totrans-433
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6889, “有状态64翻译分析”，2013年
 - en: RFC 6895, “Domain Name System (DNS) IANA Considerations,” 2013
+  id: totrans-434
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6895, “域名系统（DNS）IANA考虑事项”，2013年
 - en: RFC 6908, “Deployment Considerations for Dual-Stack Lite,” 2013
+  id: totrans-435
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6908, “双栈精简版的部署考虑”，2013年
 - en: RFC 6909, “IPv4 Traffic Offload Selector Option for Proxy Mobile IPv6,” 2013
+  id: totrans-436
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6909, “用于代理移动IPv6的IPv4流量卸载选择器选项”，2013年
 - en: RFC 6911, “RADIUS Attributes for IPv6 Access Networks,” 2013
+  id: totrans-437
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6911, “IPv6接入网络的RADIUS属性”，2013年
 - en: RFC 6921, “Design Considerations for Faster-Than-Light (FTL) Communication,”
     April 1, 2013
+  id: totrans-438
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6921, “超光速（FTL）通信的设计考虑”，2013年4月1日
 - en: RFC 6939, “Client Link-Layer Address Option in DHCPv6,” 2013
+  id: totrans-439
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6939, “DHCPv6中的客户端链路层地址选项”，2013年
 - en: RFC 6946, “Processing of IPv6 ‘Atomic’ Fragments,” 2013
+  id: totrans-440
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6946, “IPv6 ‘原子’片段处理”，2013年
 - en: RFC 6959, “Source Address Validation Improvement (SAVI) Threat Scope,” 2013
+  id: totrans-441
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6959, “源地址验证改进（SAVI）威胁范围”，2013年
 - en: RFC 6977, “Triggering DHCPv6 Reconfiguration from Relay Agents,” 2013
+  id: totrans-442
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6977, “通过中继代理触发DHCPv6重新配置”，2013年
 - en: RFC 6980, “Security Implications of IPv6 Fragmentation with IPv6 Neighbor Discovery,”
     2013
+  id: totrans-443
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6980, “IPv6片段化与IPv6邻居发现的安全影响”，2013年
 - en: RFC 6992, “Routing for IPv4-Embedded IPv6 Packets,” 2013
+  id: totrans-444
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6992, “为IPv4嵌入IPv6数据包进行路由”，2013年
 - en: RFC 7010, “IPv6 Site Renumbering Gap Analysis,” 2013
+  id: totrans-445
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7010, “IPv6站点重新编号差距分析”，2013年
 - en: RFC 7021, “Assessing the Impact of Carrier-Grade NAT on Network Applications,”
     2013
+  id: totrans-446
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7021, “评估运营商级NAT对网络应用的影响”，2013年
 - en: RFC 7031, “DHCPv6 Failover Requirements,” 2013
+  id: totrans-447
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7031, “DHCPv6故障转移要求”，2013年
 - en: RFC 7039, “Source Address Validation Improvement (SAVI) Framework,” 2013
+  id: totrans-448
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7039, “源地址验证改进（SAVI）框架”，2013年
 - en: RFC 7040, “Public IPv4-over-IPv6 Access Network,” 2013
+  id: totrans-449
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7040, “公共IPv4通过IPv6访问网络”，2013年
 - en: RFC 7045, “Transmission and Processing of IPv6 Extension Headers,” 2014
+  id: totrans-450
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7045, “IPv6扩展头的传输和处理”，2014年
 - en: RFC 7048, “Neighbor Unreachability Detection Is Too Impatient,” 2014
+  id: totrans-451
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7048, “邻居不可达检测过于急躁”，2014年
 - en: RFC 7050, “Discovery of the IPv6 Prefix Used for IPv6 Address Synthesis,” 2013
+  id: totrans-452
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7050, “用于IPv6地址合成的IPv6前缀发现”，2013年
 - en: RFC 7051, “Analysis of Solution Proposals for Hosts to Learn NAT64 Prefix,”
     2013
+  id: totrans-453
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7051, “主机学习NAT64前缀的解决方案提案分析”，2013年
 - en: RFC 7059, “A Comparison of IPv6-over-IPv4 Tunnel Mechanisms,” 2013
+  id: totrans-454
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7059, “IPv6-over-IPv4隧道机制的比较”，2013年
 - en: RFC 7066, “IPv6 for Third Generation Partnership Project (3GPP) Cellular Hosts,”
     2013
+  id: totrans-455
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7066, “面向第三代合作伙伴计划（3GPP）蜂窝主机的IPv6”，2013年
 - en: RFC 7077, “Update Notifications for Proxy Mobile IPv6,” 2013
+  id: totrans-456
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7077, “代理移动IPv6的更新通知”，2013年
 - en: RFC 7078, “Distributing Address Selection Policy Using DHCPv6,” 2014
+  id: totrans-457
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7078, “使用DHCPv6分发地址选择策略”，2014年
 - en: RFC 7084, “Basic Requirements for IPv6 Customer Edge Routers,” 2013
+  id: totrans-458
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7084, “IPv6客户边缘路由器的基本要求”，2013年
 - en: RFC 7094, “Architectural Considerations of IP Anycast,” 2014
+  id: totrans-459
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7094, “IP Anycast的架构考虑”，2014年
 - en: RFC 7098, “Using the IPv6 Flow Label for Load Balancing in Server Farms,” 2013
+  id: totrans-460
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7098, “在服务器集群中使用IPv6流标签进行负载均衡”，2013年
 - en: 'RFC 7101, “List of Internet Official Protocol Standards: Replaced by a Web
     Page,” 2013'
+  id: totrans-461
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7101, “互联网官方协议标准列表：由网页替代”，2013年
 - en: RFC 7108, “A Summary of Various Mechanisms Deployed at L-Root for the Identification
     of Anycast Nodes,” 2014
+  id: totrans-462
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7108, “L-Root上部署的各种机制总结，用于标识Anycast节点”，2014年
 - en: RFC 7109, “Flow Bindings Initiated by Home Agents for Mobile IPv6,” 2014
+  id: totrans-463
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7109, “移动IPv6中由家庭代理发起的流绑定”，2014年
 - en: RFC 7112, “Implications of Oversized IPv6 Header Chains,” 2014
+  id: totrans-464
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7112, “超大IPv6头链的影响”，2014年
 - en: RFC 7113, “Implementation Advice for IPv6 Router Advertisement Guard (RA Guard),”
     2014
+  id: totrans-465
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7113, “IPv6路由器通告防护（RA Guard）实现建议，” 2014
 - en: RFC 7123, “Security Implications of IPv6 on IPv4 Networks,” 2014
+  id: totrans-466
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7123, “IPv6对IPv4网络的安全影响，” 2014
 - en: RFC 7136, “Significance of IPv6 Interface Identifiers,” 2014
+  id: totrans-467
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7136, “IPv6接口标识符的意义，” 2014
 - en: RFC 7148, “Prefix Delegation Support for Proxy Mobile IPv6,” 2014
+  id: totrans-468
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7148, “代理移动IPv6的前缀委派支持，” 2014
 - en: RFC 7156, “Diameter Support for Proxy Mobile IPv6 Localized Routing,” 2014
+  id: totrans-469
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7156, “代理移动IPv6本地路由的Diameter支持，” 2014
 - en: RFC 7157, “IPv6 Multihoming without Network Address Translation,” 2014
+  id: totrans-470
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7157, “没有网络地址转换的IPv6多宿，” 2014
 - en: RFC 7161, “Proxy Mobile IPv6 (PMIPv6) Multicast Handover Optimization by the
     Subscription Information Acquisition through the LMA (SIAL),” 2014
+  id: totrans-471
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7161, “通过LMA获取订阅信息（SIAL）进行代理移动IPv6（PMIPv6）多播切换优化，” 2014
 - en: RFC 7168, “The Hyper Text Coffee Pot Control Protocol for Tea Efflux Appliances
     (HTCPCP-TEA),” April 1, 2014
+  id: totrans-472
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7168, “茶水流量设备的超文本咖啡壶控制协议（HTCPCP-TEA），” 2014年4月1日
 - en: RFC 7217, “A Method for Generating Semantically Opaque Interface Identifiers
     with IPv6 Stateless Address Autoconfiguration (SLAAC),” 2014
+  id: totrans-473
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7217, “通过IPv6无状态地址自动配置（SLAAC）生成语义不透明的接口标识符的方法，” 2014
 - en: RFC 7219, “SEcure Neighbor Discovery (SEND) Source Address Validation Improvement
     (SAVI),” 2014
+  id: totrans-474
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7219, “安全邻居发现（SEND）源地址验证改进（SAVI），” 2014
 - en: RFC 7221, “Handling of Internet-Drafts by IETF Working Groups,” 2014
+  id: totrans-475
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7221, “IETF工作组对互联网草案的处理，” 2014
 - en: RFC 7222, “Quality-of-Service Option for Proxy Mobile IPv6,” 2014
+  id: totrans-476
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7222, “代理移动IPv6的服务质量选项，” 2014
 - en: RFC 7225, “Discovering NAT64 IPv6 Prefixes Using the Port Control Protocol (PCP),”
     2014
+  id: totrans-477
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7225, “使用端口控制协议（PCP）发现NAT64 IPv6前缀，” 2014
 - en: RFC 7279, “An Acceptable Use Policy for New ICMP Types and Codes,” 2014
+  id: totrans-478
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7279, “新ICMP类型和代码的可接受使用政策，” 2014

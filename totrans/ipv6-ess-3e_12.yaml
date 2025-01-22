@@ -1,66 +1,98 @@
 - en: Appendix B. Recommended Reading
+  id: totrans-0
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 附录B：推荐阅读
 - en: 'This appendix provides a list of books that I recommend:'
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 本附录提供了我推荐的一些书籍：
 - en: '*Planning for IPv6*, by Silvia Hagen (O’Reilly, 2011)'
+  id: totrans-2
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*IPv6规划*，作者：Silvia Hagen（O’Reilly，2011年）'
 - en: '*Practical IPv6 for Windows Administrators*, by Ed Horley (Apress, 2013)'
+  id: totrans-3
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*Windows管理员的实用IPv6*，作者：Ed Horley（Apress，2013年）'
 - en: '*IPv6 Security*, by Scott Hogg and Eric Vyncke (Cisco Press, 2009)'
+  id: totrans-4
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*IPv6安全*，作者：Scott Hogg 和 Eric Vyncke（Cisco Press，2009年）'
 - en: '*DNS and BIND on IPv6*, by Cricket Liu (O’Reilly, 2011)'
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*IPv6上的DNS和BIND*，作者：Cricket Liu（O’Reilly，2011年）'
 - en: '*Global IPv6 Strategies*, by Patrick Grossetete, Ciprian Popoviciu, and Fred
     Wettling (Cisco Press, 2008)'
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*全球IPv6战略*，作者：Patrick Grossetete、Ciprian Popoviciu 和 Fred Wettling（Cisco Press，2008年）'
 - en: '*OSPF and IS-IS: Choosing an IGP for Large-Scale Networks*, by Jeff Doyle (Addison-Wesley,
     2005)'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*OSPF和IS-IS：为大规模网络选择IGP*，作者：Jeff Doyle（Addison-Wesley，2005年）'
 - en: '*Routing TCP/IP, Volume 1 (2nd edition)*, by Jeff Doyle (Cisco Press, 2005)'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*路由TCP/IP，卷1（第二版）*，作者：Jeff Doyle（Cisco Press，2005年）'
 - en: '*Deploying IPv6 Networks*, by Ciprian Popoviciu, Eric Levy-Abegnoli, and Patrick
     Grossetete (Cisco Press, 2006)'
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*部署IPv6网络*，作者：Ciprian Popoviciu、Eric Levy-Abegnoli 和 Patrick Grossetete（Cisco
+    Press，2006年）'
 - en: '*IPv6 for Enterprise Networks*, by Shannon McFarland, Muninder Sambi, Nikhil
     Sharma, and Sanjay Hooda (Cisco Press, 2011)'
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*企业网络中的IPv6*，作者：Shannon McFarland、Muninder Sambi、Nikhil Sharma 和 Sanjay Hooda（Cisco
+    Press，2011年）'
 - en: '*Mobile IPv6*, by Hesham Soliman (Addison-Wesley, 2004)'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*移动IPv6*，作者：Hesham Soliman（Addison-Wesley，2004年）'
 - en: '*IPv6 Network Administration*, by David Malone and Niall Richard Murphy (O’Reilly,
     2005)'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*IPv6网络管理*，作者：David Malone 和 Niall Richard Murphy（O’Reilly，2005年）'
 - en: '*The Biology of Transcendence: A Blueprint of the Human Spirit*, by Joseph
     Chilton Pearce (Park Street Press, 2004)'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*超越生物学：人类精神的蓝图*，作者：Joseph Chilton Pearce（Park Street Press，2004年）'
 - en: '*The View from the Center of the Universe*, by Joel. R. Primack and Nancy Ellen
     Abrams (Riverhead Books, 2007)'
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*来自宇宙中心的视角*，作者：Joel R. Primack 和 Nancy Ellen Abrams（Riverhead Books，2007年）'

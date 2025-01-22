@@ -1,7 +1,9 @@
 - en: Chapter 2. IPv6 Addressing
+  id: totrans-0
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第2章. IPv6地址
 - en: An IPv4 address has 32 bits and looks familiar. An IPv6 address has 128 bits
     and looks wild at first glance. Extending the address space was one of the driving
     reasons to develop IPv6, along with optimization of routing tables, especially
@@ -12,12 +14,17 @@
     space offers opportunity for new address designs. So make sure that you dive into
     this before you work on an IPv6 address plan. The IPv6 addressing architecture
     is defined in RFC 4291.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个IPv4地址有32位，外观看起来很熟悉。一个IPv6地址有128位，乍一看显得非常复杂。扩展地址空间是开发IPv6的主要原因之一，同时还包括优化路由表，尤其是在互联网上。本章将帮助你熟悉扩展的地址空间，并解释IPv6地址是如何工作的，以及为什么它被设计成现在这个样子。理解的不仅仅是128位的地址，地址架构已经得到扩展，庞大的地址空间为新的地址设计提供了机会。所以，在你开始制定IPv6地址规划之前，务必要深入了解这一点。IPv6地址架构在RFC
+    4291中进行了定义。
 - en: The IPv6 Address Space
+  id: totrans-2
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPv6地址空间
 - en: The 32 bits of the IPv4 address space provide a theoretical maximum of 2^(32)
     addresses, equal to approximately 4.29 billion addresses. The current world population
     is over 7 billion people. So even if it were possible to use 100 percent of the
@@ -28,16 +35,22 @@
     for global routing and address conservation issues. These address ranges cannot
     be easily reclaimed, so consequently there are many unused addresses that are
     not available for allocation.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv4地址空间的32个位提供了理论上最大值为2^(32)的地址，即大约42.9亿个地址。目前全球人口超过70亿。因此，即使能够完全使用IPv4地址空间，我们也无法为地球上的每个人分配一个IP地址。事实上，这个地址空间中只有很小一部分是可以使用的。在IP的早期阶段，没有人预见到今天我们所知的互联网的存在。因此，大量的地址块被分配时并没有考虑到全球路由和地址节约的问题。这些地址范围不能轻易回收，因此有很多未使用的地址无法分配。
 - en: Note
+  id: totrans-4
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注
 - en: Are you aware that today (in 2014) only about 2.4 billion people have Internet
     access? They represent approximately 34 percent of the world’s population.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 你是否知道今天（2014年）只有大约24亿人能够上网？这大约占全球人口的34%。
 - en: The heated discussions about the end of the IPv4 address pool came to an end
     when the IANA (Internet Assigned Numbers Authority) declared on February 3, 2011,
     that the free pool was empty. This happened after IPv4 address consumption had
@@ -48,8 +61,10 @@
     the Internet is growing. And the Internet will continue to grow at that pace,
     if not faster. Only now, because the IPv4 pool is empty, the Internet’s growth
     will to a large part happen over IPv6.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于IPv4地址池耗尽的激烈讨论在2011年2月3日当IANA（互联网号码分配局）宣布免费池已空时画上了句号。这发生在IPv4地址消耗在2010年翻了一番之后。过去10年，全球平均每年消耗大约10个/8地址块。到2010年1月时，仍有24个/8地址块可用。所以按理说这些地址应该还能用超过两年。然而，仅仅一年后，在2011年1月，地址池就空了。这表明互联网增长的速度是多么之快。而且互联网将继续以这样的速度增长，甚至可能更快。现在，由于IPv4池已经耗尽，互联网的增长将在很大程度上通过IPv6来实现。
 - en: The evolution of the Internet and our services shows that in the future, not
     only will we need addresses for users and computers, but we’ll also need more
     and more addresses for all sorts of devices that need permanent Internet connections,
@@ -63,8 +78,10 @@
     information. There was a prototype Renault car with an integrated Cisco router
     and a Mobile IPv6 implementation built in the early years of the last decade.
     Most of the big car manufacturers have similar plans and prototypes.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 互联网及其服务的演进表明，在未来，我们不仅需要为用户和计算机分配地址，还需要为各种需要永久连接互联网的设备分配越来越多的地址，例如智能手机、平板电脑、网络摄像头、冰箱、汽车、输液泵、水表、电表等许多设备。以汽车制造商为例，它们正在设计未来的联网汽车，每辆车需要多个IP地址。我们有多少辆车呢？根据[http://howmanyarethere.net](http://howmanyarethere.net)的数据显示，2011年全球约有10亿辆汽车。那么，假设每辆车需要50个IP地址……结果就出来了！这些地址将用于监控和维护，也用于访问天气、交通等服务信息。在上个十年初，曾有一款原型车，配备了集成的思科路由器和内置的移动IPv6实现。大多数大型汽车制造商都有类似的计划和原型。
 - en: The IPv6 address space uses a 128-bit address, meaning that we have a maximum
     of 2^(128) addresses available. Do you want to know what this number looks like?
     It equals 340,282,366,920,938,463,463,374,607,431,768,211,456, or in other words
@@ -78,57 +95,85 @@
     (binary 001) allows for 2^(45) network IDs with a /48 prefix, or 35,184,372,088,832
     networks. Each of these networks can further be divided into 65,536 subnets using
     the remaining 16 bits of the prefix.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6地址空间使用128位地址，这意味着我们最多可以拥有2^(128)个可用地址。想知道这个数字有多大吗？它等于340,282,366,920,938,463,463,374,607,431,768,211,456，或者换句话说，每平方米地球表面上大约有6.65
+    × 10^(23)个地址。这个数字可以读作340无尽亿个地址。对于像我这样无法想象这个数字的人来说，这个数量可以比作为地球上每一粒沙子分配多个IP地址。IPv4地址空间，按最初定义的地址类别（A、B、C、D、E）允许最多有2,113,389个网络ID。在引入无类别域间路由（CIDR）后，这个数字稍有增加。让我们将其与IPv6进行比较。目前，全球单播地址（前缀为二进制001）地址空间允许使用/48前缀的2^(45)个网络ID，即35,184,372,088,832个网络。每个网络还可以利用剩余的16位前缀进一步划分为65,536个子网。
 - en: And in a little while, when we are deeper into this chapter and discuss the
     address format, I’ll show you another comparison that will help you to understand
     how big this address space really is.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 稍后，当我们深入讨论这一章并讲解地址格式时，我将给你展示一个新的对比，帮助你更好地理解这个地址空间究竟有多大。
 - en: Address Types
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 地址类型
 - en: IPv4 knows unicast, broadcast, and multicast addresses. With IPv6, the broadcast
     address is not used anymore; multicast addresses are used instead. This is good
     news because broadcasts are a problem in most networks. The anycast address, a
     type of address introduced with RFC 1546, has already been used in the IPv4 world
     but will probably be used on a wider basis with IPv6.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv4支持单播、广播和组播地址。而在IPv6中，广播地址不再使用，取而代之的是组播地址。这是个好消息，因为广播在大多数网络中都存在问题。任播地址是一种通过RFC
+    1546引入的地址类型，虽然在IPv4中已经有使用，但预计在IPv6中会更加广泛使用。
 - en: Unicast, Multicast, and Anycast Addresses
+  id: totrans-12
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 单播、组播和任播地址
 - en: 'An IPv6 address can be classified into one of three categories:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6地址可以分为三类：
 - en: '*Unicast*'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '*单播*'
 - en: A unicast address uniquely identifies an interface of an IPv6 node. A packet
     sent to a unicast address is delivered to the interface identified by that address.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 单播地址唯一标识一个IPv6节点的接口。发送到单播地址的数据包会被传送到该地址所标识的接口。
 - en: '*Multicast*'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '*组播*'
 - en: A multicast address identifies a group of IPv6 interfaces. A packet sent to
     a multicast address is processed by all members of the multicast group.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 多播地址用于标识一组IPv6接口。发送到多播地址的数据包将由多播组中的所有成员处理。
 - en: '*Anycast*'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '*任播*'
 - en: An anycast address is assigned to multiple interfaces (usually on multiple nodes).
     A packet sent to an anycast address is delivered to only one of these interfaces,
     usually the nearest one.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 任播地址分配给多个接口（通常位于多个节点上）。发送到任播地址的数据包只会送达其中一个接口，通常是最近的那个接口。
 - en: Some General Rules
+  id: totrans-20
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 一些通用规则
 - en: IPv6 addresses are assigned to interfaces as in IPv4, not to nodes as in OSI,
     so each interface of a node needs at least one unicast address. A single interface
     can also be assigned multiple IPv6 addresses of any type (unicast, multicast,
@@ -136,15 +181,21 @@
     interfaces. It is also possible to assign one unicast address to multiple interfaces
     for load-sharing reasons, but if you do this, you need to make sure that the hardware
     and drivers support it.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6地址分配给接口的方式与IPv4类似，而不是像OSI中那样分配给节点，因此每个节点的每个接口至少需要一个单播地址。一个接口也可以分配多个类型的IPv6地址（单播、多播和任播）。因此，节点可以通过其任何接口的地址来标识自己。出于负载共享的原因，也可以将一个单播地址分配给多个接口，但如果这样做，需要确保硬件和驱动程序支持此功能。
 - en: Note
+  id: totrans-22
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: With IPv6, all zeros and ones are legal values for any field in an address.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 在IPv6中，所有的零和一都是合法的地址字段值。
 - en: IPv6 supports addresses of different *scopes*. There are global and nonglobal
     (e.g., link-local) scopes. Operationally, the use of nonglobal addresses has been
     introduced with IPv4 by using IP addresses from the private range or administratively
@@ -156,33 +207,50 @@
     in the section [Multicast Address](ch02.html#multicast_address "Multicast Address"),
     and refer to RFC 4007, “IPv6 Scoped Address Architecture” for an explanation of
     scopes.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6支持不同*作用域*的地址。存在全局作用域和非全局作用域（例如链路本地）。在操作上，使用非全局地址的概念通过使用私有范围内的IP地址或管理作用域的多播地址引入了IPv4。IPv6的设计在基础架构中包含了地址作用域。除了未指定地址外的每个IPv6地址都有一个特定的作用域，作用域是地址可以作为接口或接口组唯一标识符使用的拓扑范围。地址的作用域作为地址的一部分进行编码。你可以在[多播地址](ch02.html#multicast_address
+    "Multicast Address")章节找到关于作用域的描述，并参考RFC 4007《IPv6作用域地址架构》以了解作用域的解释。
 - en: Address Notation
+  id: totrans-25
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 地址表示法
 - en: 'An IPv6 address has 128 bits, or 16 bytes. The address is divided into eight
     16-bit hexadecimal blocks separated by colons. For example:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6地址有128位，或16字节。该地址被划分为8个16位的十六进制块，由冒号分隔。例如：
 - en: '[PRE0]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'To make life easier, some abbreviations are possible. For instance, leading
     zeros in a 16-bit block can be skipped. The example address now looks like this:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了简化生活，可以使用一些缩写。例如，16位块中的前导零可以省略。此时，示例地址看起来如下：
 - en: '[PRE1]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'A double colon can replace consecutive zeros or leading or trailing zeros within
     the address. If we apply this rule, our address looks as follows:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 双冒号可以替代地址中的连续零或前导零或尾随零。如果我们应用此规则，地址看起来如下所示：
 - en: '[PRE2]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Note that the double colon can appear only once in an address. The reason for
     this rule is that the computer always uses a full 128-bit binary representation
     of the address, even if the displayed address is simplified. When the computer
@@ -191,11 +259,15 @@
     zeros to add for each colon. So the IPv6 address `2001:db8:0000:0000:0056:abcd:0000:1234`
     can be represented in the following ways (note the two possible positions for
     the double colon):'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，在一个地址中，双冒号只能出现一次。这个规则的原因是计算机始终使用地址的完整128位二进制表示，即使显示的地址已经简化。当计算机遇到双冒号时，它会用所需数量的零来扩展地址以达到128位。如果一个地址有两个双冒号，计算机就无法确定每个冒号应该添加多少零。因此，IPv6地址`2001:db8:0000:0000:0056:abcd:0000:1234`可以通过以下方式表示（注意双冒号的两个可能位置）：
 - en: '[PRE3]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: There are so many different ways to write and abbreviate IPv6 addresses and
     this can cause operational troubles. If you want to do lookups in a database or
     a spreadsheet, you have to make sure that everybody uses the same format to store
@@ -203,67 +275,94 @@
     the list. For this purpose the best option is probably to just use the full format,
     as it’s the only unambiguous format. Also be aware that some systems are case
     sensitive, so you need to define whether to use capitals or not.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 有很多种不同的方式来写和缩写IPv6地址，这可能会导致操作上的问题。如果你要在数据库或电子表格中进行查找，必须确保每个人都使用相同的格式来存储地址；否则，你将无法判断某个地址是否已经在列表中。为了这个目的，最好的选择可能是使用完整的格式，因为它是唯一不含歧义的格式。还要注意，有些系统对大小写敏感，因此需要定义是否使用大写字母。
 - en: 'For the purpose of making administration easier, an RFC was written to standardize
     IPv6 address representation. It also discusses the issues that can arise when
     storing IPv6 addresses in databases and spreadsheets for lookup. You need solid
     rules for address representation to be able to find addresses. Probably for these
     cases it is best to use the full address representation, as it is the only unambiguous
     one. For all other cases, RFC 5952 recommends using the following rules:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了简化管理，写了一份RFC来规范IPv6地址的表示方法。它还讨论了在将IPv6地址存储在数据库和电子表格中以供查找时可能出现的问题。你需要有明确的地址表示规则，才能找到地址。对于这些情况，最好使用完整的地址表示方法，因为它是唯一不含歧义的表示方式。对于所有其他情况，RFC
+    5952建议使用以下规则：
 - en: Leading zeros must be suppressed.
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 必须省略前导零。
 - en: A single 16-bit 0000 field must be represented as 0 and should not be replaced
     by a double colon.
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 单个16位的0000字段必须表示为0，并且不应被双冒号替代。
 - en: Shorten as much as possible. Use a double colon whenever possible.
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 尽可能简化表示。尽量使用双冒号。
 - en: Always shorten the largest number of zeros.
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 总是缩短最大数量的零。
 - en: If two blocks of zero are equally long, shorten the first one.
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果两个零区块长度相同，应该缩短第一个。
 - en: Use lowercase for a, b, c, d, e, f.
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于a、b、c、d、e、f使用小写字母。
 - en: In environments where IPv4 and IPv6 nodes are mixed, another convenient form
     of IPv6 address notation is to put the values of an IPv4 address into the four
     low-order bytes of the address. An IPv4 address of `192.168.0.2` can be represented
     as `x:x:x:x:x:x:192.168.0.2`, and an address of `0:0:0:0:0:0:192.168.0.2` can
     be written as `::192.168.0.2`. If you prefer, you can also write `::c0a8:2`. This
     is the hex representation for 192.168.0.2.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 在IPv4和IPv6节点混合的环境中，另一种方便的IPv6地址表示方式是将IPv4地址的值放入地址的四个低位字节中。IPv4地址`192.168.0.2`可以表示为`x:x:x:x:x:x:192.168.0.2`，而`0:0:0:0:0:0:192.168.0.2`可以写作`::192.168.0.2`。如果你愿意，也可以写成`::c0a8:2`。这是192.168.0.2的十六进制表示法。
 - en: 'For the representation of an IPv6 address followed by a port number, the best
     way is to put the IPv6 address in square brackets, followed by a colon and the
     port number. So it may look like this: `[2001:db8::1]:80`.'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于带有端口号的IPv6地址表示，最好的方法是将IPv6地址放在方括号中，后跟冒号和端口号。因此，它可能看起来像这样：`[2001:db8::1]:80`。
 - en: Note
+  id: totrans-44
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: These recommendations are fully compliant with RFC 4291\. But there are many
     more choices offered by RFC 4291\. An IPv6 implementation must always be able
     to process an address written in any format possible as per RFC 4291.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些建议完全符合RFC 4291的要求。但RFC 4291还提供了更多的选择。IPv6的实现必须始终能够处理任何RFC 4291规定的格式表示的地址。
 - en: Prefix Notation
+  id: totrans-46
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 前缀表示法
 - en: 'The notation for prefixes has also been specified in RFC 4291\. A *global routing
     prefix* is the high-order bits of an IP address used to identify the subnet or
     a specific type of address (refer to [Table 2-2](ch02.html#list_of_assigned_prefixes
@@ -272,11 +371,16 @@
     written in CIDR (Classless Interdomain Routing) notation, and it is also commonly
     used for subnetted IPv4 addresses. The notation appends the prefix length, written
     as a number of bits with a slash, which leads to the following format:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 前缀的表示法也在RFC 4291中进行了规定。*全局路由前缀*是用于标识子网或特定类型地址的IP地址的高位字节（参见[表2-2](ch02.html#list_of_assigned_prefixes
+    "表2-2。分配的前缀列表")）。它在早期的RFC中被称为*格式前缀*。前缀表示法与IPv4地址在CIDR（无类域间路由）表示法中的写法非常相似，它也常用于子网划分的IPv4地址。该表示法在前缀后附加前缀长度，前缀长度作为以斜杠分隔的比特数表示，形成以下格式：
 - en: '[PRE4]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: The prefix length specifies how many leftmost bits of the address specify the
     prefix. This is another way of noting a *subnet mask*. Remember, a subnet mask
     specifies the bits of the IPv4 address that belong to the network ID. The prefix
@@ -285,120 +389,180 @@
     Consider the IPv6 prefix notation `2001:db8:1200::/40`. To understand this address,
     let’s convert the hex into binary as shown in [Table 2-1](ch02.html#understanding_prefix_notation
     "Table 2-1. Understanding prefix notation").
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 前缀长度指定了地址中有多少最左边的位表示前缀。这是标记*子网掩码*的另一种方式。记住，子网掩码指定了IPv4地址中属于网络ID的位。前缀用于识别一个接口所属的子网，并由路由器用于转发。以下示例解释了如何理解前缀。考虑IPv6前缀表示法`2001:db8:1200::/40`。为了理解这个地址，我们将十六进制转换为二进制，如[表 2-1](ch02.html#understanding_prefix_notation
+    "表 2-1. 理解前缀表示法")所示。
 - en: Table 2-1. Understanding prefix notation
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 2-1. 理解前缀表示法
 - en: '| Hex notation | Binary notation | Number of bits |'
+  id: totrans-51
   prefs: []
   type: TYPE_TB
+  zh: '| 十六进制表示 | 二进制表示 | 位数 |'
 - en: '| --- | --- | --- |'
+  id: totrans-52
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| 2001 | 0010 0000 0000 0001 | 16 |'
+  id: totrans-53
   prefs: []
   type: TYPE_TB
+  zh: '| 2001 | 0010 0000 0000 0001 | 16 |'
 - en: '| 0db8 | 0000 1101 1011 1000 | 16 |'
+  id: totrans-54
   prefs: []
   type: TYPE_TB
+  zh: '| 0db8 | 0000 1101 1011 1000 | 16 |'
 - en: '| 1200 | 0001 0010 | 8 |'
+  id: totrans-55
   prefs: []
   type: TYPE_TB
+  zh: '| 1200 | 0001 0010 | 8 |'
 - en: '|  |  | Total: 40 |'
+  id: totrans-56
   prefs: []
   type: TYPE_TB
+  zh: '|  |  | 总计：40 |'
 - en: The *compressed notation* (replacing a sequence of zeros with a double colon)
     is also applicable to the prefix representation. It should be used carefully,
     though, because there are often two or more ranges of zeros within an address,
     and only one can be compressed. The rules in RFC 5952 dictate how to do it, but
     an IPv6 interface must still be capable of dealing with addresses not complying
     with RFC 5952, as mentioned above.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: '*压缩表示法*（用双冒号替换一连串的零）同样适用于前缀表示。尽管如此，它应谨慎使用，因为一个地址中通常会有两个或更多的零范围，且只能压缩其中一个。RFC
+    5952中的规则定义了如何进行压缩，但如前所述，IPv6接口仍然必须能够处理不符合RFC 5952的地址。'
 - en: Global Routing Prefixes
+  id: totrans-58
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 全球路由前缀
 - en: '[Table 2-2](ch02.html#list_of_assigned_prefixes "Table 2-2. List of assigned
     prefixes") outlines the current assignment of reserved prefixes and special addresses,
     such as link-local addresses or multicast addresses. The major part of the address
     space (over 80 percent) is unassigned with the exception of a few special cases,
     mentioned below. This leaves room for future assignments.'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '[表 2-2](ch02.html#list_of_assigned_prefixes "表 2-2. 分配的前缀列表")概述了当前保留前缀和特殊地址的分配情况，例如链路本地地址或多播地址。大部分地址空间（超过80%）是未分配的，只有少数特殊情况，如下所述。这为未来的分配留出了空间。'
 - en: Table 2-2. List of assigned prefixes
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 2-2. 分配的前缀列表
 - en: '| Allocation | Prefix binary | Prefix hex | Fraction of address space |'
+  id: totrans-61
   prefs: []
   type: TYPE_TB
+  zh: '| 分配 | 前缀二进制 | 前缀十六进制 | 地址空间占比 |'
 - en: '| --- | --- | --- | --- |'
+  id: totrans-62
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- |'
 - en: '| Global unicast | 001 | 2000::/3 | 1/8 |'
+  id: totrans-63
   prefs: []
   type: TYPE_TB
+  zh: '| 全球单播 | 001 | 2000::/3 | 1/8 |'
 - en: '| Link-local unicast | 1111 1110 10 | fe80::/10 | 1/1024 |'
+  id: totrans-64
   prefs: []
   type: TYPE_TB
+  zh: '| 链路本地单播 | 1111 1110 10 | fe80::/10 | 1/1024 |'
 - en: '| Unique-local IPv6 address | 1111 110 | fc00::/7 |  |'
+  id: totrans-65
   prefs: []
   type: TYPE_TB
+  zh: '| 唯一本地IPv6地址 | 1111 110 | fc00::/7 |  |'
 - en: '| Multicast | 1111 1111 | ff00::/8 | 1/256 |'
+  id: totrans-66
   prefs: []
   type: TYPE_TB
+  zh: '| 多播 | 1111 1111 | ff00::/8 | 1/256 |'
 - en: All address ranges not listed in [Table 2-2](ch02.html#list_of_assigned_prefixes
     "Table 2-2. List of assigned prefixes") are currently reserved or unassigned (with
     the exceptions mentioned just below). The Internet Assigned Numbers Authority
     (IANA) currently assigns only out of the binary range starting with 001.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有未列在[表 2-2](ch02.html#list_of_assigned_prefixes "表 2-2. 分配的前缀列表")中的地址范围目前都是保留的或未分配的（以下列出了几个例外）。互联网号码分配局（IANA）目前仅从以001开头的二进制范围中分配地址。
 - en: Note
+  id: totrans-68
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: 'The updated list of address allocations can be found at the following link:
     [http://www.iana.org/assignments/ipv6-address-space](http://www.iana.org/assignments/ipv6-address-space).
     You can also find an updated IANA list of special-purpose prefixes here: [http://bit.ly/1pDkTzo](http://bit.ly/1pDkTzo).'
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 更新的地址分配列表可以在以下链接找到：[http://www.iana.org/assignments/ipv6-address-space](http://www.iana.org/assignments/ipv6-address-space)。你还可以在这里找到更新的IANA特殊用途前缀列表：[http://bit.ly/1pDkTzo](http://bit.ly/1pDkTzo)。
 - en: Some special addresses are assigned out of the reserved address space with the
     binary prefix `0000 0000`. These include the *unspecified address*, the *loopback
     address*, and IPv6 addresses with embedded IPv4 addresses, which I discuss in
     detail later in this chapter.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些特殊地址是从保留地址空间中分配的，具有二进制前缀`0000 0000`。这些包括*未指定地址*、*回环地址*和嵌入IPv4地址的IPv6地址，后面章节中我会详细讨论这些地址。
 - en: Unicast addresses can be distinguished from multicast addresses by their prefixes.
     Globally unique unicast addresses have a high-order byte starting with `001`.
     An IPv6 address with a high-order byte of `1111 1111` (`ff` in hex) is always
     a multicast address. For more information about multicast addresses, refer to
     the section [Multicast Address](ch02.html#multicast_address "Multicast Address").
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 单播地址可以通过其前缀与多播地址区分开。全局唯一的单播地址的高阶字节以`001`开头。一个高阶字节为`1111 1111`（即十六进制的`ff`）的IPv6地址始终是多播地址。有关多播地址的更多信息，请参阅[Multicast
+    Address](ch02.html#multicast_address "Multicast Address")部分。
 - en: Anycast addresses are taken from the unicast address space, so they can’t be
     identified as anycast just by looking at the prefix. If you assign the same unicast
     address to multiple interfaces, thereby making it an anycast address, you have
     to configure the interfaces so they all know that this address is an anycast address.
     For more information about anycast addresses, refer to the section [Anycast Address](ch02.html#anycast_address
     "Anycast Address").
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: Anycast地址来自单播地址空间，因此仅通过查看前缀无法识别它们是Anycast地址。如果你将相同的单播地址分配给多个接口，从而使其成为Anycast地址，你必须配置这些接口，使它们都知道该地址是Anycast地址。有关Anycast地址的更多信息，请参阅[Anycast
+    Address](ch02.html#anycast_address "Anycast Address")部分。
 - en: Global Unicast Address
+  id: totrans-73
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 全局单播地址
 - en: Global unicast addresses are identified by the binary prefix `001`, as shown
     earlier in [Table 2-2](ch02.html#list_of_assigned_prefixes "Table 2-2. List of
     assigned prefixes"). RFC 4291 defines the global unicast address format as shown
     in [Figure 2-1](ch02.html#format_of_the_global_unicast_address "Figure 2-1. Format
     of the global unicast address").
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 全局单播地址通过二进制前缀`001`进行标识，如[表2-2](ch02.html#list_of_assigned_prefixes "Table 2-2. List
+    of assigned prefixes")中所示。RFC 4291定义了全局单播地址格式，如[图2-1](ch02.html#format_of_the_global_unicast_address
+    "Figure 2-1. Format of the global unicast address")所示。
 - en: '![Format of the global unicast address](images/ipv6_0201.png)Figure 2-1. Format
     of the global unicast address'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: '![全局单播地址格式](images/ipv6_0201.png)图2-1. 全局单播地址格式'
 - en: The *global routing prefix* identifies the address range allocated to a site.
     This part of the address is assigned by the international registry services and
     the Internet Service Providers (ISPs) and has a hierarchical structure. The *subnet
@@ -407,12 +571,16 @@
     ID* identifies an interface on a subnet and must be unique within that subnet.
     The interface ID is always 64 bits, so therefore an IPv6 subnet is always a /64
     subnet. No more subnet mask issues with IPv6.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: '*全局路由前缀*标识分配给站点的地址范围。该部分地址由国际注册服务和互联网服务提供商（ISPs）分配，并具有层级结构。*子网ID*标识站点内的一个链路。一个链路可以分配多个子网ID。站点的本地管理员分配该部分地址。*接口ID*标识子网中的一个接口，并且在该子网内必须唯一。接口ID始终为64位，因此IPv6子网始终为/64子网。IPv6不再存在子网掩码问题。'
 - en: International Registry Services and Current Address Allocations
+  id: totrans-77
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 国际注册服务和当前地址分配
 - en: 'The international allocation of IPv6 addresses has been delegated to several
     regional registry services: ARIN (American Registry for Internet Numbers) for
     North America and Sub-Saharan Africa; RIPE NCC (Réseau IP Européens Network Coordination
@@ -421,122 +589,183 @@
     American and Caribbean Internet Addresses Registry) for Latin America. AfriNIC
     (African Network Information Centre) went into operation in 2005 to cover Africa
     in the future.'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6地址的国际分配已经委托给多个区域注册服务：ARIN（美国互联网号码注册中心）负责北美和撒哈拉以南非洲；RIPE NCC（欧洲IP网络协调中心）负责欧洲、中东、中亚和北非；APNIC（亚太网络信息中心）负责亚太地区；LACNIC（拉丁美洲和加勒比互联网地址注册中心）负责拉丁美洲。AfriNIC（非洲网络信息中心）于2005年开始运营，未来将覆盖非洲地区。
 - en: Each of these registries has information on its site about address allocation
     issues, current practices, and procedures.
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个注册机构的网站上都有关于地址分配问题、当前实践和程序的信息。
 - en: Several allocations have been made, as listed in [Table 2-3](ch02.html#current_allocations
     "Table 2-3. Current allocations").
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 已经进行了多个分配，如[表2-3](ch02.html#current_allocations "Table 2-3. Current allocations")所列。
 - en: Table 2-3. Current allocations
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 表2-3. 当前分配
 - en: '| Prefix | Allocation | RFC |'
+  id: totrans-82
   prefs: []
   type: TYPE_TB
+  zh: '| 前缀 | 分配 | RFC |'
 - en: '| --- | --- | --- |'
+  id: totrans-83
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| 0100::/64 | Discard-Only Address Block | RFC 6666 |'
+  id: totrans-84
   prefs: []
   type: TYPE_TB
+  zh: '| 0100::/64 | 丢弃专用地址块 | RFC 6666 |'
 - en: '| 64:ff9b::/96 | IPv4-IPv6 Translator | RFC 6052 |'
+  id: totrans-85
   prefs: []
   type: TYPE_TB
+  zh: '| 64:ff9b::/96 | IPv4-IPv6转换器 | RFC 6052 |'
 - en: '| 2000::/3 | Global Unicast Address spaceAllocations made out of the `2000::/3`
     space can be viewed at [http://bit.ly/ipv6-add](http://bit.ly/ipv6-add) | RFC
     4291 |'
+  id: totrans-86
   prefs: []
   type: TYPE_TB
+  zh: '| 2000::/3 | 全球单播地址空间  从`2000::/3`空间分配的地址可以在[http://bit.ly/ipv6-add](http://bit.ly/ipv6-add)查看
+    | RFC 4291 |'
 - en: '| 2001::/32 | Teredo | RFC 4380 |'
+  id: totrans-87
   prefs: []
   type: TYPE_TB
+  zh: '| 2001::/32 | Teredo | RFC 4380 |'
 - en: '| 2001:db8::/32 | For documentation purposes only, nonroutable | RFC 3849 |'
+  id: totrans-88
   prefs: []
   type: TYPE_TB
+  zh: '| 2001:db8::/32 | 仅用于文档目的，不可路由 | RFC 3849 |'
 - en: '| 2002::/16 | 6to4 | RFC 3056 |'
+  id: totrans-89
   prefs: []
   type: TYPE_TB
+  zh: '| 2002::/16 | 6to4 | RFC 3056 |'
 - en: '| fc00::/7 | Unique-local (ULA) | RFC 4193 |'
+  id: totrans-90
   prefs: []
   type: TYPE_TB
+  zh: '| fc00::/7 | 唯一本地地址（ULA） | RFC 4193 |'
 - en: '| fe80::/10 | Link-scoped unicast | RFC 4291 |'
+  id: totrans-91
   prefs: []
   type: TYPE_TB
+  zh: '| fe80::/10 | 链路范围单播 | RFC 4291 |'
 - en: Note
+  id: totrans-92
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: '[http://www.iana.org/numbers](http://www.iana.org/numbers) is a great entry
     point for global IP address services, current address allocations for both IPv4
     and IPv6, and information about how to request IPv6 address services. You can
     also find an updated IANA list of special-purpose prefixes here: [http://bit.ly/1pDkTzo](http://bit.ly/1pDkTzo).'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: '[http://www.iana.org/numbers](http://www.iana.org/numbers)是全球IP地址服务、IPv4和IPv6当前地址分配以及如何请求IPv6地址服务的重要入口。你还可以在此找到更新的IANA特殊用途前缀列表：[http://bit.ly/1pDkTzo](http://bit.ly/1pDkTzo)。'
 - en: The address space for 6Bone operation (`3ffe::/16`) was phased out by June 2006
     and the prefix returned to the unassigned address pool. It was created in order
     to allow for global testing of IPv6 while address allocation had not been standardized.
     Since IPv6 address allocation has been defined, 6Bone hosts have been moved to
     the official IPv6 address space.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 6Bone操作的地址空间（`3ffe::/16`）在2006年6月被逐步淘汰，前缀被返回到未分配的地址池中。这个地址空间的创建是为了在IPv6地址分配尚未标准化时，允许进行全球范围的IPv6测试。由于IPv6地址分配已被定义，6Bone主机已迁移到官方的IPv6地址空间。
 - en: Note
+  id: totrans-95
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: For information on where and how to get IPv6 address space, refer to [Chapter 9](ch09.html
     "Chapter 9. Planning for IPv6") on Planning.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于如何获取IPv6地址空间，请参考[第9章](ch09.html "第9章。IPv6规划")中的规划内容。
 - en: So How Large Is This Address Space Again?
+  id: totrans-97
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 那么，这个地址空间到底有多大呢？
 - en: In the introduction to this chapter, when we discussed how many addresses IPv6
     provides, I promised to make another example later on. So here it comes.
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章的引言部分，当我们讨论IPv6提供了多少个地址时，我曾承诺稍后会做一个例子。现在，我来提供这个例子。
 - en: If an ISP gets a /32 prefix, this means there are 32 more bits in the prefix
     that can be administered by the ISP or its customers.
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果ISP获得了/32前缀，这意味着前缀中有32位可以由ISP或其客户进行管理。
 - en: Note
+  id: totrans-100
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: 'Imagine: one single /32 is more address space than we ever had with IPv4, because
     in IPv4 the 32 bits in the address include the host ID, whereas in IPv6 each of
     these /64 subnets has 64 bits for interface IDs.'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 想象一下：一个单一的/32地址块比我们在IPv4中曾经拥有的地址空间还要大，因为在IPv4中，地址的32位包括主机ID，而在IPv6中，每个/64子网有64位用于接口ID。
 - en: Is this a lot? Well, obviously a lot more than we ever had in IPv4\. But we
     still don’t know how much it really is.
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 这算多吗？显然，比我们在IPv4中拥有的要多得多。但我们仍然不知道它到底有多大。
 - en: Let us have a look at the IANA IPv6 pool. By March 2014, there were 138,786
     /32 blocks allocated. That seems like a lot if we consider that one of these is
     more than we ever had in IPv4.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看IANA的IPv6地址池。到2014年3月为止，已经分配了138,786个/32块。如果我们考虑到其中一个块比我们在IPv4中曾经拥有的地址空间还要大，那么这个数字看起来相当可观。
 - en: Note
+  id: totrans-104
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: If we calculate how much this is of the total IPv6 address space currently available
     (`2000::/3`), it makes up for 0.026%.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果我们计算当前可用的总IPv6地址空间（`2000::/3`）中有多少，结果是占0.026%。
 - en: With the 138,786 /32 blocks, more than 9 billion customers can receive a /48,
     with which each can create 65,536 /64 subnets.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用138,786个/32块，可以为超过90亿个客户分配/48地址，每个客户可以创建65,536个/64子网。
 - en: At [http://www.bgpexpert.com/addrspace-ipv6.php](http://www.bgpexpert.com/addrspace-ipv6.php)
     you can find updated numbers about IPv6 allocations.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[http://www.bgpexpert.com/addrspace-ipv6.php](http://www.bgpexpert.com/addrspace-ipv6.php)上，你可以找到关于IPv6分配的最新数据。
 - en: So I kindly ask you to use these numbers as your daily mantra when you start
     working on an IPv6 address plan. One of the biggest challenges when doing that
     is to get rid of all the address conservation rules that are ingrained in our
@@ -545,12 +774,16 @@
     in 20 years, we still have 7 times more space available to do better. The `2000::/3`
     is only the binary 001 block, which is currently used for globally unique unicast
     IPv6 addresses.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，我恳请你在开始工作时，将这些数字作为你每天的座右铭。当我们进行IPv6地址规划时，其中一个最大挑战就是摆脱那些深深植入我们细胞中的地址节约规则。即使某些做法看起来非常浪费，实际上也许并不是。如果我们必须意识到我们过于浪费了，因为我们在20年内使用完了`2000::/3`，我们依然有7倍更多的空间可以利用。所以，`2000::/3`仅仅是二进制001块，它目前用于全球唯一的单播IPv6地址。
 - en: The Interface ID
+  id: totrans-109
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 接口标识符
 - en: Addresses in the prefix range `001` to `111` should use a 64-bit interface identifier
     that follows the EUI-64 (Extended Unique Identifier) format (except for multicast
     addresses with the prefix `1111 1111`). The [EUI-64](http://bit.ly/1mOVk9G) is
@@ -559,8 +792,12 @@
     create EUI-64 identifiers, and more details can be found in the link-specific
     RFCs, such as “IPv6 over Ethernet” or “IPv6 over FDDI.” [Chapter 5](ch05.html
     "Chapter 5. Networking") contains a short discussion and a list of these RFCs.
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 前缀范围`001`到`111`之间的地址应使用遵循EUI-64（扩展唯一标识符）格式的64位接口标识符（多播地址前缀为`1111 1111`的地址除外）。[EUI-64](http://bit.ly/1mOVk9G)是由电气和电子工程师协会（IEEE）定义的唯一标识符。[RFC
+    4291](apa.html "附录A. RFC")的附录A解释了如何创建EUI-64标识符，更多细节可以在特定的RFC中找到，如“IPv6 over Ethernet”或“IPv6
+    over FDDI”。[第5章](ch05.html "第5章. 网络")包含了简短的讨论和这些RFC的列表。
 - en: An interface uses an identifier following the EUI-64 format during Stateless
     Address Autoconfiguration. For example, when an interface autoconfigures for a
     link-local address on an Ethernet interface using its MAC address, the 64-bit
@@ -570,21 +807,29 @@
     `0x00` (the first byte) of the MAC address, is complemented. The second low-order
     bit of `0x00` is `0`, which, when complemented, becomes `1`; as a result, the
     first byte of the MAC address becomes `0x02`.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 在无状态地址自动配置期间，接口使用遵循EUI-64格式的标识符。例如，当一个接口通过其MAC地址在以太网接口上自动配置链路本地地址时，必须从48位（6字节）以太网MAC地址创建64位接口标识符。首先，将十六进制数字`0xff-fe`插入到MAC地址的第三个字节和第四个字节之间。然后，MAC地址的第一个字节`0x00`中的第二个低位（universal/local位）被补充。`0x00`的第二个低位是`0`，补充后变为`1`；因此，MAC地址的第一个字节变为`0x02`。
 - en: Therefore, the IPv6 interface identifier corresponding to the Ethernet MAC address
     `00-02-b3-1e-83-29` is `02-02-b3-ff-fe-1e-83-29`. This example discusses only
     the EUI-64 creation process. Many other steps occur during Stateless Address Autoconfiguration.
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，IPv6接口标识符对应于以太网MAC地址`00-02-b3-1e-83-29`的是`02-02-b3-ff-fe-1e-83-29`。此示例仅讨论了EUI-64创建过程。在无状态地址自动配置期间，还会发生许多其他步骤。
 - en: Note
+  id: totrans-113
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: To learn how IPv6 Stateless Address Autoconfiguration works, refer to [Chapter 4](ch04.html
     "Chapter 4. ICMPv6").
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解IPv6无状态地址自动配置如何工作，请参阅[第4章](ch04.html "第4章. ICMPv6")。
 - en: The link-local address of an interface is the combination of the prefix `fe80::/64`
     and a 64-bit interface identifier expressed in IPv6 colon-hexadecimal notation.
     Therefore, the MAC-based link-local address of the previous example interface,
@@ -592,23 +837,32 @@
     `fe80::202:b3ff:fe1e:8329`. This is shown in [Figure 2-2](ch02.html#how_the_mac_address_is_converted_to_an
     "Figure 2-2. How the MAC address is converted to an interface ID") and described
     in RFC 2464, “Transmission of IPv6 Packets over Ethernet Networks.”
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 接口的链路本地地址是前缀`fe80::/64`和一个以IPv6冒号十六进制表示的64位接口标识符的组合。因此，前述示例接口的基于MAC的链路本地地址，具有前缀`fe80::/64`和接口标识符`02-02-b3-ff-fe-1e-83-29`，为`fe80::202:b3ff:fe1e:8329`。此过程如[图2-2](ch02.html#how_the_mac_address_is_converted_to_an
+    "图2-2. MAC地址如何转换为接口ID")所示，并在RFC 2464《IPv6数据包在以太网网络上传输》中有所描述。
 - en: '![How the MAC address is converted to an interface ID](images/ipv6_0202.png)Figure 2-2. How
     the MAC address is converted to an interface ID'
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: '![MAC地址如何转换为接口标识符](images/ipv6_0202.png)图 2-2. MAC地址如何转换为接口标识符'
 - en: The figure shows how this Interface Identifier is combined with the link-local
     prefix. As indicated, it can be combined with any other prefix received. (More
     on this in [Chapter 4](ch04.html "Chapter 4. ICMPv6") on Neighbor Discovery.)
     There is a discussion going on at the time of writing that advises against using
     Interface IDs that are based on hardware information. See below for more information.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 图中展示了该接口标识符如何与链路本地前缀结合。如图所示，它可以与接收到的任何其他前缀结合。（更多内容请参见[第4章](ch04.html "第4章. ICMPv6")，关于邻居发现。）在撰写时，关于是否使用基于硬件信息的接口标识符，存在讨论。更多信息请见下文。
 - en: Address Privacy
+  id: totrans-118
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 地址隐私
 - en: The privacy of autoconfigured IPv6 addresses using the interface identifier
     was an issue discussed in the IETF in the early days of IPv6\. If an IPv6 address
     is built using the MAC identifier, your Internet access could be traced even across
@@ -623,8 +877,11 @@
     address*. It is generated in addition to the EUI-64 interface ID. The temporary
     address is then used for outgoing communications and the EUI-64 based address
     for server functions and incoming connections.
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用接口标识符的自动配置IPv6地址隐私性是IPv6初期在IETF中讨论的问题。如果IPv6地址是使用MAC标识符构建的，那么即使跨网络，你的互联网访问也可能被追踪，因为这个标识符是唯一的，与你的接口相关。需要理解的是，IPv6节点可以基于接口标识符拥有一个地址，但这并不是必须的。作为替代，IPv6设备可以拥有类似当前IPv4地址的地址，这些地址可以是静态手动配置的，也可以是由DHCP服务器动态分配的。RFC
+    4941《IPv6无状态地址自动配置的隐私扩展》引入了另一种仅在IPv6中使用的地址类型，其中包含一个随机数字，代替硬件地址。这个接口ID也可以随着时间的推移而变化。有时它也被称为*临时地址*。它是在EUI-64接口ID之外生成的。临时地址用于外发通信，而基于EUI-64的地址用于服务器功能和传入连接。
 - en: An Internet device that is a target for IP communication—for instance, a web
     or FTP server—needs a unique and stable IP address. But a host running a browser
     or an FTP client does not need to have the same address every time it connects
@@ -632,27 +889,40 @@
     interface identifiers according to RFC 4941\. This way, they use DHCPv6 to manage
     their address space but prevent anyone from topology mapping their network or
     tracking their nodes.
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为IP通信目标的互联网设备——例如，Web或FTP服务器——需要一个唯一且稳定的IP地址。但运行浏览器或FTP客户端的主机则不需要每次连接互联网时都使用相同的地址。一些DHCPv6实现支持根据RFC
+    4941生成随机接口标识符。通过这种方式，它们使用DHCPv6管理地址空间，但防止任何人进行拓扑映射或追踪其节点。
 - en: 'With the address architecture in IPv6, you can choose between two types of
     addresses:'
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 在IPv6的地址架构中，你可以选择两种类型的地址：
 - en: '*Unique stable IP addresses*'
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: '*唯一稳定的IP地址*'
 - en: Assigned through manual configuration, a DHCP server, or Stateless Address Autoconfiguration
     using the EUI-64 interface identifier or another address type created with a permanent
     IID (see below).
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过手动配置、DHCP服务器或使用EUI-64接口标识符的无状态地址自动配置分配，或者使用永久IID创建的其他地址类型（见下文）。
 - en: '*Temporary transient IP addresses*'
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: '*临时过渡性IP地址*'
 - en: Assigned using a random number that changes in regular intervals and can be
     used in place of the stable interface identifier.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用定期变化的随机数字分配，并可以作为稳定接口标识符的替代。
 - en: While the temporary privacy addresses provide some security by complicating
     the task of eavesdroppers and other information collectors (e.g., in logfiles,
     headers) to correlate the activities of a host, they can become challenging in
@@ -667,8 +937,11 @@
     moves from one network to another and are not based on any hardware identifier.
     This method then applies to all prefixes a host may use, such as link-local, global,
     or unique-local.
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然临时隐私地址通过增加窃听者和其他信息收集者（例如日志文件、头部信息）关联主机活动的难度提供了一些安全性，但它们在其他领域可能会带来挑战。从网络管理的角度来看，临时地址增加了事件日志记录、故障排除、访问控制和服务质量的复杂性。因此，一些组织即使牺牲了隐私，也禁用了临时地址的使用。为了确保地址稳定且不频繁变化（如隐私地址所做的那样），RFC
+    7217中定义了稳定隐私地址，《一种生成语义不透明接口标识符的IPv6无状态地址自动配置方法》。其目标是使IPv6地址在子网内稳定，但在主机从一个网络迁移到另一个网络时会发生变化，并且不基于任何硬件标识符。此方法适用于主机可能使用的所有前缀，如链路本地、全局或唯一本地地址。
 - en: At the same time there is currently a draft in discussion (at the time of writing
     in early 2014) with the title “Recommendation on Stable IPv6 Interface Identifiers”
     (*draft-ietf-6man-default-iids-00*). It recommends using stable SLAAC addresses,
@@ -677,29 +950,41 @@
     and privacy risks. Draft “Privacy Considerations for IPv6 Address Generation Mechanisms”
     (*draft-ietf-6man-ipv6-address-generation-privacy-01.txt*) offers a great discussion
     on the pros and cons of each Interface ID generation option.
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 与此同时，目前（截至2014年初）有一份名为《稳定IPv6接口标识符建议》（*draft-ietf-6man-default-iids-00*）的草案正在讨论。该草案建议使用不基于硬件标识符的稳定SLAAC地址。如前所述，已经有人提出将硬件信息嵌入IPv6地址中会带来安全和隐私风险。草案《IPv6地址生成机制的隐私考虑》（*draft-ietf-6man-ipv6-address-generation-privacy-01.txt*）对每种接口ID生成选项的利弊进行了很好的讨论。
 - en: Note
+  id: totrans-128
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Be aware, when going through all these considerations, that the Interface ID
     is not the only way to track users. DNS names, cookies, browser fingerprints,
     and application-layer usernames can all be used to link a host’s activities together.
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，在考虑所有这些因素时，接口ID并不是唯一用于追踪用户的方法。DNS名称、Cookie、浏览器指纹和应用层用户名都可以用来将主机的活动关联在一起。
 - en: Special Addresses
+  id: totrans-130
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 特殊地址
 - en: 'There are a number of special addresses that we need to discuss. The first
     part of the IPv6 address space with the prefix of `0000 0000` is reserved. Out
     of this prefix, special addresses have been defined as follows:'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们需要讨论一些特殊地址。IPv6地址空间的第一部分以`0000 0000`为前缀，该部分被保留。在这个前缀中，已经定义了一些特殊地址：
 - en: '*The unspecified address*'
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: '*未指定地址*'
 - en: The unspecified address has a value of `0:0:0:0:0:0:0:0` and is therefore also
     called the *all-zeros address*. It is comparable to `0.0.0.0` in IPv4\. It indicates
     the absence of a valid address, and it can, for example, be used as a Source address
@@ -710,77 +995,110 @@
     IP address or within an IPv6 Routing header. It is sometimes used in configuration
     files for software to tell a program to use any IPv6 address configured on an
     interface.
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 未指定地址的值为`0:0:0:0:0:0:0:0`，因此也称为*全零地址*。它与IPv4中的`0.0.0.0`类似。它表示缺少有效地址，例如，在启动过程中，主机在发送地址配置请求时，可以使用该地址作为源地址。如果应用本章前面讨论的记法规范，未指定地址也可以简写为`::`。它永远不应静态或动态分配给接口，且不应出现在目标IP地址或IPv6路由头中。有时它在软件配置文件中被使用，告诉程序使用接口上配置的任何IPv6地址。
 - en: '*The loopback address*'
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: '*回环地址*'
 - en: The IPv4 loopback address, `127.0.0.1`, is probably familiar to you. It is helpful
     in troubleshooting and testing the IP stack because it can be used to send a packet
     to the protocol stack without sending it out on the subnet. With IPv6, the loopback
     address works the same way and is represented as `0:0:0:0:0:0:0:1`, abbreviated
     as `::1`. It should never be statically or dynamically assigned to an interface.
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: '`127.0.0.1`这个IPv4回环地址你可能很熟悉。它在故障排除和测试IP协议栈时非常有用，因为可以用来将数据包发送到协议栈，而无需将其发送到子网。对于IPv6，回环地址的作用相同，表示为`0:0:0:0:0:0:0:1`，简写为`::1`。它不应被静态或动态地分配给接口。'
 - en: The next sections describe different types of addresses that have been specified
     to be used with different transition mechanisms, which can be used in the migration
     to IPv6\. These virtual interfaces are commonly called *pseudo-interfaces*.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来的部分将描述为与不同过渡机制一起使用而被指定的不同类型的地址，这些地址可以在向IPv6迁移的过程中使用。这些虚拟接口通常称为*伪接口*。
 - en: Note
+  id: totrans-137
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: A description of the transition mechanisms can be found in [Chapter 7](ch07.html
     "Chapter 7. Transition Technologies").
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关过渡机制的描述可以在[第7章](ch07.html "第7章. 过渡技术")中找到。
 - en: IPv6 Addresses with Embedded IPv4 Addresses
+  id: totrans-139
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 带有嵌入IPv4地址的IPv6地址
 - en: 'Because the transition to IPv6 will be gradual, two special types of addresses
     have been defined for backward compatibility with IPv4\. Both are described in
     RFC 4291:'
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于向IPv6的过渡将是渐进的，因此为与IPv4兼容而定义了两种特殊类型的地址。两者均在RFC 4291中有所描述：
 - en: '*IPv4-compatible IPv6 address (deprecated)*'
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: '*IPv4兼容的IPv6地址（已弃用）*'
 - en: This type of address is used to tunnel IPv6 packets dynamically over an IPv4
     routing infrastructure. IPv6 nodes that use this technique are assigned a special
     IPv6 unicast address that carries an IPv4 address in the low-order 32 bits. This
     address type has so far rarely been used and was deprecated in RFC 4291\. New
     or updated implementations will no longer need to support this type of address.
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种类型的地址用于通过IPv4路由基础设施动态隧道IPv6数据包。使用这种技术的IPv6节点会被分配一个特殊的IPv6单播地址，其中低位32位包含一个IPv4地址。到目前为止，这种地址类型很少被使用，并且在RFC
+    4291中已被弃用。新的或更新的实现将不再需要支持这种类型的地址。
 - en: '*IPv4-mapped IPv6 address*'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: '*IPv4映射的IPv6地址*'
 - en: This type of address is used to represent the addresses of IPv4-only nodes as
     IPv6 addresses. An IPv6 node can use this address to send a packet to an IPv4-only
     node. The address also carries the IPv4 address in the low-order 32 bits of the
     address.
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种类型的地址用于将IPv4-only节点的地址表示为IPv6地址。IPv6节点可以使用该地址将数据包发送到IPv4-only节点。该地址还在地址的低位32位中携带IPv4地址。
 - en: '[Figure 2-3](ch02.html#format_of_ipv6_addresses_with_an_embedde "Figure 2-3. Format
     of IPv6 addresses with an embedded IPv4 address") shows the format of both these
     addresses.'
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图2-3](ch02.html#format_of_ipv6_addresses_with_an_embedde "图2-3. 带有嵌入IPv4地址的IPv6地址格式")显示了这两种地址的格式。'
 - en: '![Format of IPv6 addresses with an embedded IPv4 address](images/ipv6_0203.png)Figure 2-3. Format
     of IPv6 addresses with an embedded IPv4 address'
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: '![带有嵌入IPv4地址的IPv6地址的格式](images/ipv6_0203.png)图2-3. 带有嵌入IPv4地址的IPv6地址的格式'
 - en: The two addresses are pretty much the same. The only difference is the 16 bits
     in the middle. When they are set to 0, the address is an IPv4-compatible IPv6
     address; if these bits are set to 1, it is an IPv4-mapped IPv6 address.
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 这两种地址几乎相同，唯一的区别是中间的16位。当它们设置为0时，该地址为IPv4兼容的IPv6地址；如果这些位设置为1，则为IPv4映射的IPv6地址。
 - en: 6to4 Addresses
+  id: totrans-148
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 6to4地址
 - en: The IANA has permanently assigned a 13-bit TLA identifier for 6to4 operations
     within the global unicast address range (001). 6to4 is one of the mechanisms defined
     to let IPv6 hosts or networks communicate over an IPv4-only infrastructure. I
@@ -788,42 +1106,64 @@
     and it is specified in RFC 3056\. The 6to4 TLA identifier is `0x0002`. The address
     format is shown in [Figure 2-4](ch02.html#format_of_the_6to4_address "Figure 2-4. Format
     of the 6to4 address").
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: IANA已经永久分配了一个13位的TLA标识符，用于6to4操作，属于全球单播地址范围（001）。6to4是定义的一种机制，用于让IPv6主机或网络通过仅支持IPv4的基础设施进行通信。我在[第7章](ch07.html
+    "第7章. 过渡技术")中描述了6to4，并且它在RFC 3056中有所规定。6to4的TLA标识符是`0x0002`。地址格式见[图2-4](ch02.html#format_of_the_6to4_address
+    "图2-4. 6to4地址的格式")。
 - en: '![Format of the 6to4 address](images/ipv6_0204.png)Figure 2-4. Format of the
     6to4 address'
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: '![6to4地址的格式](images/ipv6_0204.png)图2-4. 6to4地址的格式'
 - en: The prefix has a total length of 48 bits. The IPv4 address in the prefix must
     be a public IPv4 address and is represented in hexadecimal notation. For instance,
     if you configure an interface for 6to4 with an IPv4 address of `62.2.84.115`,
     the 6to4 prefix is `2002:3e02:5473::/48`. Through this interface, all IPv6 hosts
     on this link can tunnel their packets over the IPv4 infrastructure.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 前缀的总长度为 48 位。前缀中的 IPv4 地址必须是一个公共的 IPv4 地址，并以十六进制表示。例如，如果你为 6to4 配置一个接口，并且该接口的
+    IPv4 地址为 `62.2.84.115`，则 6to4 前缀为 `2002:3e02:5473::/48`。通过这个接口，所有在该链路上的 IPv6 主机都可以通过
+    IPv4 基础设施隧道传输它们的包。
 - en: Note
+  id: totrans-152
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: The 6to4 specification was written when the global unicast address format according
     to RFC 2374 was current, so it uses the old terms and formats (format prefix,
     TLA, SLA).
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 6to4 规范是在全球单播地址格式根据 RFC 2374 为当前时，编写的，因此它使用了旧的术语和格式（格式前缀、TLA、SLA）。
 - en: 6rd Addresses
+  id: totrans-154
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 6rd 地址
 - en: In 2010, a specification was published called 6rd (IPv6 Rapid Deployment). It
     is described in [Chapter 7](ch07.html "Chapter 7. Transition Technologies") and
     specified in RFC 5969\. The address format is based on 6to4 and shown in [Figure 2-5](ch02.html#format_of_the_6rd_address
     "Figure 2-5. Format of the 6rd address").
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 2010 年发布了一项名为 6rd（IPv6 快速部署）的规范。它在 [第 7 章](ch07.html "第 7 章. 过渡技术")中进行了描述，并在
+    RFC 5969 中进行了规范。地址格式基于 6to4，并显示在 [图 2-5](ch02.html#format_of_the_6rd_address "图
+    2-5. 6rd 地址格式") 中。
 - en: '![Format of the 6rd address](images/ipv6_0205.png)Figure 2-5. Format of the
     6rd address'
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: '![6rd 地址格式](images/ipv6_0205.png)图 2-5. 6rd 地址格式'
 - en: 'The main difference in the address is that 6rd does not use a special prefix
     like 6to4 and also doesn’t have a fixed boundary at /48\. The prefix has a total
     length of 64 bits and is divided into the ISP prefix and the site IPv4 address.
@@ -836,33 +1176,51 @@
     add 32 bits of IPv4 address and give out /60 to his customers. Or, if his IPv4
     address plan allows to aggregate customers in, let’s say, a /8 prefix (the customer’s
     IPv4 addresses), the size of the 6rd prefix would be one of the following:'
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 地址的主要区别在于，6rd 不使用像 6to4 那样的特殊前缀，也没有像 /48 这样的固定边界。前缀的总长度为 64 位，并分为 ISP 前缀和站点的
+    IPv4 地址。如图所示，这两部分的长度是可变的。如果提供商使用他的 /32 前缀并添加站点的完整 IPv4 地址，他最终会为客户分配 /64 子网。在大多数情况下，不推荐这样做。即使是家庭站点，未来也需要多个子网。根据
+    ISP 的环境、地址架构和客户结构，设计 6rd 地址有很多种方式。一个选择是，如果 ISP 有 /28 前缀，他可以添加 32 位的 IPv4 地址，并向客户分配
+    /60 前缀。或者，如果他的 IPv4 地址规划允许在一个 /8 前缀（客户的 IPv4 地址）中聚合客户，则 6rd 前缀的大小将是以下之一：
 - en: A /52 if the provider has a /28 (28 + 24 for the aggregated customer IPv4 block)
+  id: totrans-158
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果提供商有 /28 前缀（28 + 24 用于聚合客户 IPv4 块），则为 /52。
 - en: A /56 if the provider has a /32 (32 + 24 for the aggregated customer IPv4 block)
+  id: totrans-159
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果提供商有 /32 前缀（32 + 24 用于聚合客户 IPv4 块），则为 /56。
 - en: There are discussions going on in several regions, such as RIPE and ARIN, to
     make this easier by assigning larger 6rd prefixes to ISPs.
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 在多个地区，如 RIPE 和 ARIN，正在进行讨论，旨在通过向 ISP 分配更大的 6rd 前缀来简化这一过程。
 - en: Note
+  id: totrans-161
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: The important point here is to assign prefixes to home users that allow them
     to have multiple subnets. Refer to [Chapter 9](ch09.html "Chapter 9. Planning
     for IPv6") for a description of regional Registry policies and home networks.
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里的重点是分配前缀给家庭用户，以便他们可以拥有多个子网。有关区域注册表政策和家庭网络的描述，请参阅 [第 9 章](ch09.html "第 9 章.
+    规划 IPv6")。
 - en: ISATAP Addresses
+  id: totrans-163
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: ISATAP 地址
 - en: The *Intra-Site Automatic Tunnel Addressing Protocol* (ISATAP) is an automatic
     tunneling mechanism specified in RFC 5214\. It is designed for dual-stack nodes
     that are separated by an IPv4-only infrastructure. It treats the IPv4 network
@@ -871,12 +1229,17 @@
     identifier of `0xFE` for specifying an IPv6 address with an embedded IPv4 address.
     The format of an ISATAP address is shown in [Figure 2-6](ch02.html#format_of_the_isatap_address
     "Figure 2-6. Format of the ISATAP address").
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: '*站内自动隧道地址协议*（ISATAP）是一种自动隧道机制，在RFC 5214中进行了规范。它为通过仅支持IPv4的基础设施分隔的双栈节点设计。它将IPv4网络视为一个大型链路层网络，并允许这些双栈节点使用任何形式的IPv4地址自动在彼此之间隧道传输。ISATAP使用`0xFE`的类型标识符来指定带有嵌入IPv4地址的IPv6地址。ISATAP地址的格式如[图2-6](ch02.html#format_of_the_isatap_address
+    "图2-6. ISATAP地址格式")所示。'
 - en: '![Format of the ISATAP address](images/ipv6_0206.png)Figure 2-6. Format of
     the ISATAP address'
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: '![ISATAP地址格式](images/ipv6_0206.png)图2-6. ISATAP地址格式'
 - en: The first 64 bits follow the format of the global unicast address. IANA owns
     the IEEE Organizationally Unique Identifier (OUI) `00-00-5E` and specifies the
     EUI-48 format interface identifier assignments within that OUI. Within the first
@@ -886,20 +1249,26 @@
     address. The type identifier is `0xFE`. The last 32 bits contain the embedded
     IPv4 address, which can be written in dotted decimal notation or in hexadecimal
     representation.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 前64位遵循全局单播地址的格式。IANA拥有IEEE组织唯一标识符（OUI）`00-00-5E`，并在该OUI内指定了EUI-48格式的接口标识符分配。在前16位中，一个类型标识符表示IPv4地址是来自私有范围（`0000`）还是全局唯一地址（`0200`）。接下来的8位包含一个类型标识符，用于表明这是一个带有嵌入式IPv4地址的IPv6地址。该类型标识符是`0xFE`。最后32位包含嵌入的IPv4地址，该地址可以用点分十进制表示法或十六进制表示法写出。
 - en: Assume we have a host with an IPv4 address of `192.168.0.1` and the host is
     assigned a 64-bit prefix of `2001:db8:510:200::/64`. The ISATAP address for this
     host is `2001:db8:510:200:0:5efe:192.168.0.1`. Alternatively, you can use the
     hexadecimal representation for the IPv4 address, in which case the address is
     written `2001:db8:510:200:0:5efe:c0a8:1`. The link-local address for this host
     is `fe80::5efe:192.168.0.1`.
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设我们有一个IPv4地址为`192.168.0.1`的主机，并且该主机被分配了一个64位前缀`2001:db8:510:200::/64`。该主机的ISATAP地址为`2001:db8:510:200:0:5efe:192.168.0.1`。或者，你也可以使用IPv4地址的十六进制表示形式，此时地址写作`2001:db8:510:200:0:5efe:c0a8:1`。该主机的链路本地地址为`fe80::5efe:192.168.0.1`。
 - en: Teredo Addresses
+  id: totrans-168
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Teredo地址
 - en: '*Teredo* is a mechanism designed to provide IPv6 connectivity to hosts that
     sit behind one or more NATs. This is done by tunneling the IPv6 packet within
     UDP. The mechanism consists of Teredo clients, servers, and relays. The Teredo
@@ -909,16 +1278,23 @@
     show that this is not the case. You can refer to the [Google statistics](http://www.google.com/ipv6/statistics.html)
     to see how the red line representing 6to4 and Teredo traffic declined to almost
     zero.'
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: '*Teredo*是一种旨在为位于一个或多个NAT后面的主机提供IPv6连接性的机制。其通过在UDP中隧道传输IPv6数据包来实现。该机制包括Teredo客户端、服务器和中继。Teredo中继是位于Teredo服务和本地IPv6网络之间的IPv6路由器。Teredo在RFC
+    4380中进行了规范。原本预期这一服务会广泛应用，直到ISP升级到本地IPv6服务。但当前的互联网统计数据显示，情况并非如此。你可以参考[Google统计](http://www.google.com/ipv6/statistics.html)，查看代表6to4和Teredo流量的红线如何下降到几乎为零。'
 - en: A Teredo address has the format shown in [Figure 2-7](ch02.html#format_of_the_teredo_address
     "Figure 2-7. Format of the Teredo address").
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个Teredo地址的格式如[图2-7](ch02.html#format_of_the_teredo_address "图2-7. Teredo地址格式")所示。
 - en: '![Format of the Teredo address](images/ipv6_0207.png)Figure 2-7. Format of
     the Teredo address'
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: '![Teredo地址格式](images/ipv6_0207.png)图2-7. Teredo地址格式'
 - en: 'The prefix has a length of 32 bits. The global Teredo IPv6 Service Prefix is
     `2001:0000:/32`. The server IPv4 address field has a length of 32 bits and contains
     the IPv4 address of a Teredo server. The flags field has 16 bits and specifies
@@ -927,20 +1303,28 @@
     contains the mapped IPv4 address of the client. In this format, both the mapped
     UDP port and the mapped IPv4 address of the client are obfuscated: each bit in
     the address and port number is reversed.'
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 该前缀的长度为32位。全球Teredo IPv6服务前缀是`2001:0000:/32`。服务器IPv4地址字段的长度为32位，包含Teredo服务器的IPv4地址。标志字段长度为16位，指定所使用的地址类型和NAT类型。16位端口字段包含Teredo服务在客户端的映射UDP端口，客户端IPv4地址字段包含客户端的映射IPv4地址。在这种格式中，客户端的映射UDP端口和映射IPv4地址都会被混淆：地址和端口号中的每一位都会被反转。
 - en: Note
+  id: totrans-173
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: To learn how IPv6 and IPv4 can coexist using these addresses, refer to [Chapter 7](ch07.html
     "Chapter 7. Transition Technologies").
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解IPv6和IPv4如何通过这些地址共存，请参考[第7章](ch07.html "第7章. 过渡技术")。
 - en: Cryptographically Generated Addresses
+  id: totrans-175
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 加密生成地址
 - en: To increase security for Neighbor Discovery (ND), which is discussed in [Chapter 4](ch04.html
     "Chapter 4. ICMPv6"), RFC 3972 defines cryptographically generated addresses (CGAs).
     RFC 3972 has been updated by RFCs 4581 and 4982\. CGAs contain a cryptographic
@@ -948,33 +1332,45 @@
     key can then be used to sign messages sent from this address. This prevents attackers
     from taking over an IPv6 address and can be used in environments where no PKI
     (Public Key) infrastructure is present.
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了增加邻居发现（ND）的安全性，RFC 3972定义了加密生成地址（CGA）。RFC 3972已经被RFC 4581和4982更新。CGA包含了公共密钥的加密哈希，作为接口ID的一部分。相应的私钥可以用来签署从该地址发送的消息。这可以防止攻击者接管一个IPv6地址，并可在没有公钥基础设施（PKI）的环境中使用。
 - en: Link-Local and Unique Local IPv6 Addresses
+  id: totrans-177
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 链路本地地址和唯一本地IPv6地址
 - en: With IPv4, organizations often use IP addresses from the private ranges as defined
     in RFC 1918\. The addresses reserved for private use should never be forwarded
     over Internet routers but should instead be confined to the organization’s network.
     For connection to the Internet, Network Address Translation (NAT) maps internal
     private addresses to publicly registered IPv4 addresses.
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: 在IPv4中，组织通常使用RFC 1918定义的私有地址范围中的IP地址。保留用于私有用途的地址永远不应通过互联网路由器转发，而应限制在组织的网络内部。为了连接到互联网，网络地址转换（NAT）将内部私有地址映射到公开注册的IPv4地址。
 - en: The original IPv6 specification allocated two separate address spaces (scopes)
     for link- and site-local use, both identified by their prefixes. The prefix for
     site-local addresses was `fec0::/10`.
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 最初的IPv6规范为链路本地和站点本地用途分配了两个独立的地址空间（作用域），并通过它们的前缀来标识。这些站点本地地址的前缀是`fec0::/10`。
 - en: Note
+  id: totrans-180
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: The site-local address has been deprecated in RFC 3879\. Too many potential
     problems arose in the application of this address. It has been replaced by the
     Unique Local IPv6 Address, also called ULA (see below).
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 站点本地地址已在RFC 3879中被弃用。由于该地址在应用过程中出现了过多潜在问题，因此被替换为唯一本地IPv6地址，也叫做ULA（见下文）。
 - en: A *link-local* address is for use on a single link and should never be routed.
     It doesn’t need a global prefix and can be used for Autoconfiguration mechanisms,
     for Neighbor Discovery, and on networks with no routers, so it is useful for creating
@@ -982,46 +1378,66 @@
     want to share files on your computers. You can connect your computers using a
     wireless network or a cross cable between your Ethernet interfaces, and you can
     share files without any special configuration by using the link-local address.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: '*链路本地*地址用于单一链路，并且不应被路由。它不需要全球前缀，可以用于自动配置机制、邻居发现以及没有路由器的网络，因此它对于创建临时网络非常有用。假设你在会议室遇到你的朋友，并且你想要分享计算机中的文件。你可以通过无线网络或在以太网接口之间使用交叉电缆连接计算机，利用链路本地地址共享文件，而无需任何特殊配置。'
 - en: The replacement for site-local addresses is called *Unique Local IPv6 Unicast
     Address (ULA)*, or *Local IPv6 Address* for short. It is specified in RFC 4193\.
     These addresses are globally unique but should not be routed to the global Internet.
     They are designed to be used within corporate sites or confined sets of networks.
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 站点本地地址的替代方案称为*唯一本地IPv6单播地址(ULA)*，简称*本地IPv6地址*。该地址在RFC 4193中有详细说明。这些地址是全球唯一的，但不应路由到全球互联网。它们旨在用于公司站点或有限的网络集内。
 - en: 'The characteristics of unique local IPv6 unicast addresses are the following:'
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 唯一本地IPv6单播地址的特点如下：
 - en: Have a unique, global prefix, which allows for filtering at network boundaries
+  id: totrans-185
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 拥有一个唯一的全球前缀，允许在网络边界进行过滤
 - en: Allow for private connection of networks without the risk of address conflicts
     and the consequence of having to renumber one of the sites
+  id: totrans-186
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 允许网络之间的私密连接，而不必担心地址冲突和重新编号其中一个站点的后果
 - en: Are independent of ISP
+  id: totrans-187
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 与ISP无关
 - en: Can be used for internal communication without an Internet connection
+  id: totrans-188
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可以在没有互联网连接的情况下用于内部通信
 - en: Can be used by applications just like regular global unicast addresses
+  id: totrans-189
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可以像常规全球单播地址一样供应用程序使用
 - en: The format of these addresses is shown in [Figure 2-8](ch02.html#address_formats_for_link-_and_site-local
     "Figure 2-8. Address formats for link- and site-local use").
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些地址的格式见[图2-8](ch02.html#address_formats_for_link-_and_site-local "图2-8. 链路和站点本地地址格式").
 - en: '![Address formats for link- and site-local use](images/ipv6_0208.png)Figure 2-8. Address
     formats for link- and site-local use'
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: '![链路和站点本地地址格式](images/ipv6_0208.png)图2-8. 链路和站点本地地址格式'
 - en: In hexadecimal notation, a link-local address is identified by the prefix `fe80::/10`.
     For the unique local IPv6 address, RFC 4193 specifies a prefix of `fc00::/7`.
     The 8th bit is currently set to `1` and specifies local administration of the
@@ -1029,16 +1445,22 @@
     addresses. For the moment, it was decided to standardize only a locally assigned
     version. The centrally assigned form may be defined in the future if a strong
     need is identified.
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 在十六进制表示法中，链路本地地址由前缀`fe80::/10`标识。对于唯一本地IPv6地址，RFC 4193指定了`fc00::/7`的前缀。第8位目前设置为`1`，表示该前缀由本地管理。将第8位设置为`0`可能在未来用于中心化管理的地址。目前，已决定只标准化本地分配的版本。如果未来确实有强烈需求，可能会定义中心化分配的形式。
 - en: Note
+  id: totrans-193
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: In the meantime, you can use the [Sixxs unofficial registration site](http://www.sixxs.net/tools/grh/ula/)
     and find out. You will also find other cool IPv6 information and tools there.
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 与此同时，你可以使用[Sixxs非官方注册网站](http://www.sixxs.net/tools/grh/ula/)进行查询。你还可以在那里找到其他有用的IPv6信息和工具。
 - en: So for locally administered addresses, we currently have a hexadecimal prefix
     of `fd00::/8`. It is followed by the 40 bits for the global ID, which is randomly
     created to ensure a high probability of uniqueness; 16 bits used for subnet ID;
@@ -1046,39 +1468,53 @@
     address with the prefix `fec0::/10` if you use older implementations, but it should
     not be used for new implementations or deployments but be replaced by either global
     unicast addresses or ULAs.
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于本地管理地址，目前我们使用的十六进制前缀是`fd00::/8`。它后面跟着40位的全球ID，该ID是随机生成的，以确保具有较高的唯一性；16位用于子网ID；64位用于接口标识符。如果你使用的是较旧的实现，仍然可能会看到已弃用的站点本地地址，其前缀为`fec0::/10`，但新实现或部署应避免使用此地址，而应替换为全球单播地址或ULA。
 - en: Make sure that your global ID is generated using the *Pseudo-Random Global ID
     Algorithm* defined in RFC 4193\. This algorithm includes values such as time,
     hardware identifiers, and other system-specific values, among others. This is
     to ensure that your prefix is going to be unique and there should be no ULA collision
     when merging your network with any other ULA network.
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保你的全球ID是使用RFC 4193中定义的*伪随机全球ID算法*生成的。此算法包括时间、硬件标识符以及其他系统特定的值等。这是为了确保你的前缀是唯一的，并且在将你的网络与任何其他ULA网络合并时，不会发生ULA冲突。
 - en: As mentioned previously, these local addresses should not be routed to the Internet.
     Border routers should be configured to filter these prefixes. Local addresses
     should not appear in global DNS servers. They can be used on your internal, private
     DNS server.
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，这些本地地址不应路由到互联网上。边界路由器应配置为过滤这些前缀。本地地址不应出现在全球DNS服务器中。它们可以在你自己的内部私有DNS服务器上使用。
 - en: Link-local addresses (`fe80::/10`) are by default assigned through Autoconfiguration.
     ULAs have to be assigned by configuring the local prefix on your routers (Router
     Advertisement) or through DHCPv6.
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: 链路本地地址 (`fe80::/10`) 默认通过自动配置分配。ULA 必须通过在路由器上配置本地前缀（路由器广告）或通过 DHCPv6 进行分配。
 - en: Note
+  id: totrans-199
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: If you are interested in the reasons for deprecating the site-local address,
     refer to RFC 3879\. Find a discussion about whether and when to use ULAs in [Chapter 9](ch09.html
     "Chapter 9. Planning for IPv6").
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你对弃用站点本地地址的原因感兴趣，请参考 RFC 3879\. 在[第9章](ch09.html "第9章. IPv6规划")中找到关于是否以及何时使用ULA的讨论。
 - en: Anycast Address
+  id: totrans-201
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Anycast 地址
 - en: Anycast addresses are designed to provide redundancy and load balancing in situations
     where multiple hosts or routers provide the same service. Anycast was not created
     for IPv6; it was defined in RFC 1546 in 1993 as an experimental specification
@@ -1086,8 +1522,12 @@
     make an anycast address recognizable as such based on the prefix. Anycast was
     meant to be used for services such as DNS and HTTP. The RFC discusses possible
     modifications to TCP to deal with these addresses that are not globally unique.
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: Anycast 地址旨在提供冗余和负载均衡，适用于多个主机或路由器提供相同服务的情况。Anycast 并非为 IPv6 设计；它在 1993 年由 RFC
+    1546 定义，为 IPv4 提供了一种实验性规范。该 RFC 为 Anycast 分配了一个特殊前缀，使得 Anycast 地址可以根据前缀被识别出来。Anycast
+    主要用于 DNS 和 HTTP 等服务。该 RFC 讨论了针对这些不具有全球唯一性的地址可能对 TCP 进行的修改。
 - en: In practice, anycast has not been implemented as it was designed to be. Often
     a method called *shared unicast address* is chosen. This method is implemented
     by assigning a regular unicast address to multiple interfaces and creating multiple
@@ -1098,105 +1538,157 @@
     instance, DNS over UDP. The root DNS servers in the Internet are set up using
     shared unicast addresses. As this procedure does not require any support from
     the network layer, it can also be used with IPv6.
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: 实际上，Anycast 并没有按预期那样实现。通常会选择一种叫做*共享单播地址*的方法。这种方法通过将一个常规单播地址分配给多个接口，并在路由表中创建多个条目来实现。在这种情况下，网络层和传输层假定它是一个全球唯一的
+    IP 地址。如果它不是，处理歧义地址的机制需要集成到应用程序中。这个规则的一个例外是如果应用程序使用独立的无状态请求/应答事务——例如，DNS over UDP。互联网中的根
+    DNS 服务器是通过共享单播地址设置的。由于该过程不需要网络层的任何支持，因此它也可以与 IPv6 一起使用。
 - en: From the beginning, the IPv6 developers considered anycast to be incorporated
     in the network layer according to RFC 1546\. No special prefix was assigned. IPv6
     anycast addresses are in the same address range as global unicast addresses, and
     each participating interface must be configured to have an anycast address. Within
     the region where the interfaces containing the same anycast addresses are, each
     host must be advertised as a separate entry in the routing tables.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 从一开始，IPv6 开发者就考虑将 Anycast 纳入网络层，按照 RFC 1546 的定义。没有分配特殊前缀。IPv6 Anycast 地址与全局单播地址处于相同的地址范围内，并且每个参与的接口都必须配置有
+    Anycast 地址。在包含相同 Anycast 地址的接口所在的区域内，每个主机必须作为路由表中的一个单独条目进行广告。
 - en: Within one network where a group of routers can provide access to a common routing
     domain, they can be assigned a single address. When a client sends a packet to
     this address, it will be forwarded to the next available router. One example is
     the 6to4 relay anycast address that is specified in RFC 3068 and described in
     [Chapter 7](ch07.html "Chapter 7. Transition Technologies"). The Mobile IPv6 specification
     also uses anycast addresses.
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 在一个网络中，如果一组路由器可以提供访问共同的路由域，它们可以分配一个单一的地址。当客户端将数据包发送到此地址时，它将被转发到下一个可用的路由器。一个例子是
+    RFC 3068 中指定的 6to4 中继 Anycast 地址，并在[第7章](ch07.html "第7章. 过渡技术")中进行了描述。移动 IPv6
+    规范也使用 Anycast 地址。
 - en: When using anycast addresses, we have to be aware that the sender has no control
     over which interface the packet will be delivered to. This decision is taken on
     the level of the routing protocol. When a sender sends multiple packets to an
     anycast address, the packets may arrive at different destinations due to routing
     table instability or changes during the requests. If there is a series of requests
     and replies or if the packet has to be fragmented, this may cause problems.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用任何播送地址时，我们必须意识到发送者无法控制数据包将被送达哪个接口。这个决定是在路由协议层面做出的。当发送者向任何播送地址发送多个数据包时，由于路由表的不稳定或在请求期间发生的变化，数据包可能到达不同的目的地。如果存在一系列的请求和应答，或者数据包必须被分段，这可能会导致问题。
 - en: The *subnet-router anycast address*, which is defined in RFC 4291 and shown
     in [Figure 2-9](ch02.html#format_of_the_subnet-router_anycast_addr "Figure 2-9. Format
     of the subnet-router anycast address"), is a required anycast address.
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: '*子网路由器任何播送地址*，定义在 RFC 4291 中，并在[图2-9](ch02.html#format_of_the_subnet-router_anycast_addr
+    "图2-9. 子网路由器任何播送地址的格式")中展示，是一个必需的任何播送地址。'
 - en: '![Format of the subnet-router anycast address](images/ipv6_0209.png)Figure 2-9. Format
     of the subnet-router anycast address'
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: '![子网路由器任何播送地址的格式](images/ipv6_0209.png)图2-9. 子网路由器任何播送地址的格式'
 - en: Basically, the address looks like a regular unicast address with a prefix specifying
     the subnet and an identifier set to all zeros. A packet sent to this address will
     be delivered to one router on that subnet. All routers are required to support
     the subnet-router anycast address for subnets to which they have interfaces.
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 基本上，这个地址看起来像是一个常规的单播地址，前缀指定了子网，标识符设置为全零。发送到该地址的数据包将被送达该子网上的一个路由器。所有路由器都需要支持子网路由器任何播送地址，才能支持它们有接口的子网。
 - en: A reserved subnet anycast address can have one of two formats, as shown in [Figure 2-10](ch02.html#general_format_of_anycast_addresses
     "Figure 2-10. General format of anycast addresses").
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 保留的子网任何播送地址可以有两种格式，如[图2-10](ch02.html#general_format_of_anycast_addresses "图2-10.
+    一般格式的任何播送地址")所示。
 - en: '![General format of anycast addresses](images/ipv6_0210.png)Figure 2-10. General
     format of anycast addresses'
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: '![任何播送地址的一般格式](images/ipv6_0210.png)图2-10. 任何播送地址的一般格式'
 - en: RFC 2526 specifies that within each subnet, the highest 128 interface identifier
     values are reserved for assignment as subnet anycast addresses. Currently, the
     anycast IDs listed in [Table 2-4](ch02.html#reserved_anycast_ids "Table 2-4. Reserved
     anycast IDs") have been reserved.
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 2526 规定，在每个子网内，最高的 128 个接口标识符值保留作为子网任何播送地址分配。目前，已预留的任何播送 ID 列表请参见[表2-4](ch02.html#reserved_anycast_ids
+    "表2-4. 保留的任何播送ID")。
 - en: Table 2-4. Reserved anycast IDs
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 表2-4. 保留的任何播送 ID
 - en: '| Decimal | Hexadecimal | Description |'
+  id: totrans-214
   prefs: []
   type: TYPE_TB
+  zh: '| 十进制 | 十六进制 | 描述 |'
 - en: '| --- | --- | --- |'
+  id: totrans-215
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| 127 | 7F | Reserved |'
+  id: totrans-216
   prefs: []
   type: TYPE_TB
+  zh: '| 127 | 7F | 保留 |'
 - en: '| 126 | 7E | Mobile IPv6 Home-Agents anycast |'
+  id: totrans-217
   prefs: []
   type: TYPE_TB
+  zh: '| 126 | 7E | 移动IPv6主代理的任何播送 |'
 - en: '| 0–125 | 00–7D | Reserved |'
+  id: totrans-218
   prefs: []
   type: TYPE_TB
+  zh: '| 0–125 | 00–7D | 保留 |'
 - en: The main difference between this form of using anycast and the shared unicast
     address is that in the latter, the application needs to support anycast, while
     in the former, this support is avoided if possible. Guidelines of how to use this
     and modifications to existing stateful transport protocols are needed.
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种使用任何播送的形式与共享单播地址的主要区别在于，后者需要应用程序支持任何播送，而前者则尽量避免这种支持。如果需要，应该提供如何使用此方式的指南，并对现有的有状态传输协议进行修改。
 - en: Note
+  id: totrans-220
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: If you are interested in more information and background on anycast, refer to
     RFC 7094, “Architectural Considerations of IP Anycast.” It provides an overview
     of the history of anycast, discusses different architectural models and principles,
     and covers anycast in IPv6 as well as deployment considerations.
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你对任何播送（anycast）有兴趣，想了解更多信息和背景，参考 RFC 7094，"IP Anycast 的架构考虑"。它提供了任何播送的历史概述，讨论了不同的架构模型和原理，并涵盖了
+    IPv6 中的任何播送及部署注意事项。
 - en: Multicast Address
+  id: totrans-222
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 组播地址
 - en: This section covers the multicast address format. For a description of multicast
     and Multicast Listener Discovery (MLD), also known as Multicast Group Management,
     refer to [Chapter 4](ch04.html "Chapter 4. ICMPv6"). For a general overview and
     summary of multicast topics, refer to [Chapter 5](ch05.html "Chapter 5. Networking").
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: 本节介绍了组播地址格式。有关组播和组播监听发现（MLD）的描述，参见[第4章](ch04.html "第4章 ICMPv6")。有关组播主题的一般概述和总结，请参见[第5章](ch05.html
+    "第5章 网络").
 - en: A multicast address is an identifier for a group of nodes identified by the
     high-order byte `ff`, or `1111 1111` in binary notation (refer to [Table 2-2](ch02.html#list_of_assigned_prefixes
     "Table 2-2. List of assigned prefixes") earlier in the chapter). The multicast
@@ -1205,12 +1697,18 @@
     the packet. Multicast exists in IPv4, but it has been redefined and improved for
     IPv6\. The multicast address format is shown in [Figure 2-11](ch02.html#format_of_the_multicast_address
     "Figure 2-11. Format of the multicast address").
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 组播地址是一个标识符，用于标识一组节点，这些节点的高字节为`ff`，即二进制表示为`1111 1111`（参见本章前面的[表2-2](ch02.html#list_of_assigned_prefixes
+    "表2-2. 已分配的前缀列表")）。组播前缀为`ff00::/8`。一个节点可以属于多个组播组。当数据包发送到组播地址时，组播组的所有成员都将处理该数据包。IPv4中也存在组播，但IPv6中的组播经过重新定义和改进。组播地址格式如[图2-11](ch02.html#format_of_the_multicast_address
+    "图2-11. 组播地址格式")所示。
 - en: '![Format of the multicast address](images/ipv6_0211.png)Figure 2-11. Format
     of the multicast address'
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: '![组播地址格式](images/ipv6_0211.png)图2-11. 组播地址格式'
 - en: 'The first byte identifies the address as a multicast address. The next four
     bits are used for Flags, defined as follows: the first bit of the Flag field must
     be zero; it is reserved for future use. The second bit indicates whether this
@@ -1224,67 +1722,105 @@
     indicates a temporary address. The Scope field is used to limit the scope of a
     multicast address. The possible values are shown in [Table 2-5](ch02.html#values_for_the_scope_field
     "Table 2-5. Values for the Scope field").'
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一个字节标识该地址为组播地址。接下来的四位用于标识标志位，定义如下：标志字段的第一个比特必须为零，保留供未来使用。第二个比特表示该组播地址是否包含*会合点*。会合点是组播网络中某一特定组播流的分发点（参见RFC
+    3956）。第三个比特表示该组播地址是否包含前缀信息（本章稍后讨论；另见RFC 3306）。标志字段的最后一位表示该地址是否为永久分配——即由IANA分配的知名组播地址，或临时组播地址。最后一位为零时定义为知名地址，为一时则表示临时地址。作用域字段用于限制组播地址的范围。可能的值请参见[表2-5](ch02.html#values_for_the_scope_field
+    "表2-5. 作用域字段的值")。
 - en: Table 2-5. Values for the Scope field
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 表2-5. 作用域字段的值
 - en: '| Value | Description |'
+  id: totrans-228
   prefs: []
   type: TYPE_TB
+  zh: '| 值 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-229
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| 0 | Reserved |'
+  id: totrans-230
   prefs: []
   type: TYPE_TB
+  zh: '| 0 | 保留 |'
 - en: '| *1* | *Interface-local scope (used to be called node-local scope in earlier
     specs)* |'
+  id: totrans-231
   prefs: []
   type: TYPE_TB
+  zh: '| *1* | *接口本地范围（在早期规范中曾称为节点本地范围）* |'
 - en: '| *2* | *Link-local scope* |'
+  id: totrans-232
   prefs: []
   type: TYPE_TB
+  zh: '| *2* | *链路本地范围* |'
 - en: '| 3 | Reserved |'
+  id: totrans-233
   prefs: []
   type: TYPE_TB
+  zh: '| 3 | 保留 |'
 - en: '| 4 | Admin-local scope |'
+  id: totrans-234
   prefs: []
   type: TYPE_TB
+  zh: '| 4 | 管理本地范围 |'
 - en: '| *5* | *Site-local scope* |'
+  id: totrans-235
   prefs: []
   type: TYPE_TB
+  zh: '| *5* | *站点本地范围* |'
 - en: '| 6, 7 | Unassigned |'
+  id: totrans-236
   prefs: []
   type: TYPE_TB
+  zh: '| 6, 7 | 未分配 |'
 - en: '| 8 | Organization-local scope |'
+  id: totrans-237
   prefs: []
   type: TYPE_TB
+  zh: '| 8 | 组织本地范围 |'
 - en: '| 9, A, B, C, D | Unassigned |'
+  id: totrans-238
   prefs: []
   type: TYPE_TB
+  zh: '| 9, A, B, C, D | 未分配 |'
 - en: '| *E* | *Global scope* |'
+  id: totrans-239
   prefs: []
   type: TYPE_TB
+  zh: '| *E* | *全局范围* |'
 - en: '| F | Reserved |'
+  id: totrans-240
   prefs: []
   type: TYPE_TB
+  zh: '| F | 保留 |'
 - en: The boundaries of zones of a scope other than interface-local, link-local, and
     global must be defined and configured by network administrators. The reserved
     scopes should not be used. RFC 4007, “IPv6 Scoped Address Architecture,” specifies
     the architectural characteristics, expected behavior, textual representation,
     and usage of IPv6 addresses of different scopes.
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 范围的边界（除接口本地、链路本地和全局之外）必须由网络管理员定义和配置。保留的范围不应使用。RFC 4007《IPv6作用域地址架构》定义了不同作用域IPv6地址的架构特性、预期行为、文本表示和使用方法。
 - en: Well-Known Multicast Addresses
+  id: totrans-242
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 知名组播地址
 - en: According to RFC 4291, the last 112 bits of the address carry the multicast
     group ID. RFC 3307, “Allocation Guidelines for IPv6 Multicast Addresses,” refers
     to a 32-bit group ID.
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据RFC 4291，地址的最后112位携带组播组ID。RFC 3307《IPv6组播地址分配指南》参考了一个32位的组ID。
 - en: RFC 2375 defines the initial assignment of IPv6 multicast addresses that are
     permanently assigned. Some assignments are made for fixed scopes, and some assignments
     are valid over all scopes. [Table 2-6](ch02.html#well-known_multicast_addresses-id1
@@ -1293,194 +1829,312 @@
     in [Table 2-5](ch02.html#values_for_the_scope_field "Table 2-5. Values for the
     Scope field") in the byte just following the multicast identifier of `ff` (first
     byte).
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 2375 定义了永久分配的 IPv6 组播地址的初始分配。某些分配是为固定作用域做的，而某些分配则在所有作用域上有效。 [表 2-6](ch02.html#well-known_multicast_addresses-id1
+    "表 2-6. 知名组播地址") 给出了为固定作用域分配的地址的概览。请注意，在紧随 `ff`（第一个字节）之后的字节中列出的作用域值，这些值列在 [表 2-5](ch02.html#values_for_the_scope_field
+    "表 2-5. 作用域字段的值") 中。
 - en: Table 2-6. Well-known multicast addresses
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 2-6. 知名组播地址
 - en: '| Address | Description |'
+  id: totrans-246
   prefs: []
   type: TYPE_TB
+  zh: 地址 | 描述 |
 - en: '| --- | --- |'
+  id: totrans-247
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| **Interface-local scope** |  |'
+  id: totrans-248
   prefs: []
   type: TYPE_TB
+  zh: '| **接口-local 作用域** |  |'
 - en: '| ff01::1 | All-nodes address |'
+  id: totrans-249
   prefs: []
   type: TYPE_TB
+  zh: '| ff01::1 | 所有节点地址 |'
 - en: '| ff01::2 | All-routers address |'
+  id: totrans-250
   prefs: []
   type: TYPE_TB
+  zh: '| ff01::2 | 所有路由器地址 |'
 - en: '| ff01::fb | mDNSv6 |'
+  id: totrans-251
   prefs: []
   type: TYPE_TB
+  zh: '| ff01::fb | mDNSv6 |'
 - en: '| **Link-local scope** |  |'
+  id: totrans-252
   prefs: []
   type: TYPE_TB
+  zh: '| **链路-local 作用域** |  |'
 - en: '| ff02::1 | All-nodes address |'
+  id: totrans-253
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::1 | 所有节点地址 |'
 - en: '| ff02::2 | All-routers address |'
+  id: totrans-254
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::2 | 所有路由器地址 |'
 - en: '| ff02::4 | DVMRP routers |'
+  id: totrans-255
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::4 | DVMRP 路由器 |'
 - en: '| ff02::5 | OSPFIGP |'
+  id: totrans-256
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::5 | OSPFIGP |'
 - en: '| ff02::6 | OSPFIGP designated routers |'
+  id: totrans-257
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::6 | OSPFIGP 指定路由器 |'
 - en: '| ff02::7 | ST routers |'
+  id: totrans-258
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::7 | ST 路由器 |'
 - en: '| ff02::8 | ST hosts |'
+  id: totrans-259
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::8 | ST 主机 |'
 - en: '| ff02::9 | RIP routers |'
+  id: totrans-260
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::9 | RIP 路由器 |'
 - en: '| ff02::a | EIGRP routers |'
+  id: totrans-261
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::a | EIGRP 路由器 |'
 - en: '| ff02::b | Mobile agents |'
+  id: totrans-262
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::b | 移动代理 |'
 - en: '| ff02::d | All PIM routers |'
+  id: totrans-263
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::d | 所有 PIM 路由器 |'
 - en: '| ff02::e | RSVP encapsulation |'
+  id: totrans-264
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::e | RSVP 封装 |'
 - en: '| ff02::16 | All MLDv2-capable routers |'
+  id: totrans-265
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::16 | 所有支持 MLDv2 的路由器 |'
 - en: '| ff02::6a | All snoopers |'
+  id: totrans-266
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::6a | 所有嗅探器 |'
 - en: '| ff02::fb | mDNSv6 |'
+  id: totrans-267
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::fb | mDNSv6 |'
 - en: '| ff02::1:1 | Link name |'
+  id: totrans-268
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::1:1 | 链路名称 |'
 - en: '| ff02::1:2 | All DHCP agents |'
+  id: totrans-269
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::1:2 | 所有 DHCP 代理 |'
 - en: '| ff02::1:3 | Link-local Multicast Name Resolution (LLMNR) |'
+  id: totrans-270
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::1:3 | 链路-local 多播名称解析 (LLMNR) |'
 - en: '| ff02::1:4 | DTCP Announcement |'
+  id: totrans-271
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::1:4 | DTCP 公告 |'
 - en: '| ff02::1:ffXX:XXXX | Solicited-node address |'
+  id: totrans-272
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::1:ffXX:XXXX | 请求节点地址 |'
 - en: '| ff02::2:ff00::/104 | Node Information Queries |'
+  id: totrans-273
   prefs: []
   type: TYPE_TB
+  zh: '| ff02::2:ff00::/104 | 节点信息查询 |'
 - en: '| **Site-local scope** |  |'
+  id: totrans-274
   prefs: []
   type: TYPE_TB
+  zh: '| **站点-local 作用域** |  |'
 - en: '| ff05::2 | All-routers address |'
+  id: totrans-275
   prefs: []
   type: TYPE_TB
+  zh: '| ff05::2 | 所有路由器地址 |'
 - en: '| ff05::fb | mDNSv6 |'
+  id: totrans-276
   prefs: []
   type: TYPE_TB
+  zh: '| ff05::fb | mDNSv6 |'
 - en: '| ff05::1:3 | All DHCP servers |'
+  id: totrans-277
   prefs: []
   type: TYPE_TB
+  zh: '| ff05::1:3 | 所有 DHCP 服务器 |'
 - en: '| ff05::1:1000 to ff05::1:13ff | Service location (SLP) version 2 |'
+  id: totrans-278
   prefs: []
   type: TYPE_TB
+  zh: '| ff05::1:1000 到 ff05::1:13ff | 服务位置 (SLP) 版本 2 |'
 - en: The term *node-local scope* from RFC 2375 has been changed to *interface-local
     scope*, so you may encounter both terms. The list for the permanently assigned
     multicast addresses that are independent of scopes is long, and it is available
     in [Appendix B](apb.html "Appendix B. Recommended Reading") and in RFC 2375\.
     All those addresses are noted beginning with `ff0X`; `X` is the placeholder for
     a variable scope value.
+  id: totrans-279
   prefs: []
   type: TYPE_NORMAL
+  zh: 来自 RFC 2375 的术语 *node-local scope* 已更改为 *interface-local scope*，因此你可能会遇到这两个术语。与作用域无关的永久分配组播地址的列表较长，并且可以在
+    [附录 B](apb.html "附录 B. 推荐阅读") 和 RFC 2375 中找到。所有这些地址的开头都是 `ff0X`，`X` 是一个可变作用域值的占位符。
 - en: The IPv4 broadcast address is replaced by the link-local all-nodes multicast
     address `ff02::1`.
+  id: totrans-280
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv4 广播地址被链路-local 所有节点多播地址 `ff02::1` 替代。
 - en: Note
+  id: totrans-281
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: 'Find the most updated list of multicast address assignments here: [http://www.iana.org/assignments/ipv6-multicast-addresses](http://www.iana.org/assignments/ipv6-multicast-addresses).'
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
+  zh: '在此查看最新的组播地址分配列表: [http://www.iana.org/assignments/ipv6-multicast-addresses](http://www.iana.org/assignments/ipv6-multicast-addresses)。'
 - en: 'As an example, let’s look at the one described in RFC 2373\. There is a multicast
     group ID defined for all NTP servers. The multicast group ID is `0x101`. This
     group ID can be used with different scope values as follows:'
+  id: totrans-283
   prefs: []
   type: TYPE_NORMAL
+  zh: 举个例子，我们来看 RFC 2373 中描述的一个例子。为所有 NTP 服务器定义了一个组播组 ID。该组播组 ID 为 `0x101`。这个组 ID
+    可以与不同的作用域值一起使用，如下所示：
 - en: '`ff01::101`'
+  id: totrans-284
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ff01::101`'
 - en: All NTP servers on the same node as the sender.
+  id: totrans-285
   prefs: []
   type: TYPE_NORMAL
+  zh: 发送方所在节点的所有 NTP 服务器。
 - en: '`ff02::101`'
+  id: totrans-286
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ff02::101`'
 - en: All NTP servers on the same link as the sender.
+  id: totrans-287
   prefs: []
   type: TYPE_NORMAL
+  zh: 发送方所在链路的所有 NTP 服务器。
 - en: '`ff05::101`'
+  id: totrans-288
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ff05::101`'
 - en: All NTP servers on the same site as the sender.
+  id: totrans-289
   prefs: []
   type: TYPE_NORMAL
+  zh: 发送方所在站点的所有 NTP 服务器。
 - en: '`ff0e::101`'
+  id: totrans-290
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ff0e::101`'
 - en: All NTP servers in the Internet.
+  id: totrans-291
   prefs: []
   type: TYPE_NORMAL
+  zh: 互联网上的所有 NTP 服务器。
 - en: Temporarily assigned multicast addresses are meaningful only within a defined
     scope.
+  id: totrans-292
   prefs: []
   type: TYPE_NORMAL
+  zh: 临时分配的组播地址仅在定义的作用域内有意义。
 - en: Note
+  id: totrans-293
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Multicast addresses should not be used as a Source address in IPv6 packets or
     appear in any routing header.
+  id: totrans-294
   prefs: []
   type: TYPE_NORMAL
+  zh: 多播地址不应作为 IPv6 数据包中的源地址使用，也不应出现在任何路由头中。
 - en: For the management of multicast, IPv6 uses Multicast Listener Discovery (MLD)
     based on ICMPv6.
+  id: totrans-295
   prefs: []
   type: TYPE_NORMAL
+  zh: 在多播管理方面，IPv6 使用基于 ICMPv6 的多播监听器发现（MLD）。
 - en: Note
+  id: totrans-296
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: To learn how multicast addresses are managed, refer to the section [Multicast
     Listener Discovery](ch04.html#multicast_listener_discovery "Multicast Listener
     Discovery") in [Chapter 4](ch04.html "Chapter 4. ICMPv6"). To get a general overview
     and summary of multicast, refer to [Chapter 5](ch05.html "Chapter 5. Networking").
+  id: totrans-297
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解多播地址的管理方式，请参考[第 4 章](ch04.html#multicast_listener_discovery "多播监听器发现")中的[多播监听器发现](ch04.html#multicast_listener_discovery)。若要获得关于多播的概述和总结，请参考[第
+    5 章](ch05.html "第 5 章. 网络").
 - en: Solicited-Node Multicast Address
+  id: totrans-298
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 请求节点多播地址
 - en: The *solicited-node multicast address* is a multicast address that every node
     must join for every unicast and anycast address it is assigned. It is used in
     Neighbor Discovery, which is described in [Chapter 4](ch04.html "Chapter 4. ICMPv6").
     RFC 4291 specifies the solicited-node multicast address.
+  id: totrans-299
   prefs: []
   type: TYPE_NORMAL
+  zh: '*请求节点多播地址*是每个节点必须为其分配的每个单播和任何播地址加入的多播地址。它用于邻居发现，详细内容见[第 4 章](ch04.html "第 4
+    章. ICMPv6")。RFC 4291 规定了请求节点多播地址。'
 - en: In the IPv4 world, an ARP request (used to determine the MAC address of an interface)
     is sent to the MAC-layer broadcast address and therefore examined by every interface
     on the link. In the IPv6 world, resolving the MAC address of an interface is done
@@ -1488,66 +2142,97 @@
     "Chapter 4. ICMPv6")) to the solicited-node multicast address, and not to the
     link-local all-nodes multicast address. This way only the node registered to this
     multicast address will examine the packet.
+  id: totrans-300
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 IPv4 网络中，ARP 请求（用于确定接口的 MAC 地址）会发送到 MAC 层广播地址，因此会被链路上的每个接口检查。而在 IPv6 网络中，接口的
+    MAC 地址解析是通过发送邻居请求消息（在[第 4 章](ch04.html "第 4 章. ICMPv6")中讨论）到请求节点多播地址来完成的，而不是发送到链路本地所有节点的多播地址。这样，只有注册到该多播地址的节点才会检查该数据包。
 - en: This address is formed by taking the low-order 24 bits of an IPv6 address (the
     last part of the host ID) and appending those bits to the well-known prefix `ff02:0:0:0:0:1:ff00::/104`.
     Thus, the range for solicited-node multicast addresses goes from `ff02:0:0:0:0:1:ff00:0000`
     to `ff02:0:0:0:0:1:ffff:ffff`.
+  id: totrans-301
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个地址是通过取一个 IPv6 地址的低 24 位（主机 ID 的最后一部分），并将这些位附加到已知前缀 `ff02:0:0:0:0:1:ff00::/104`
+    后形成的。因此，请求节点多播地址的范围从 `ff02:0:0:0:0:1:ff00:0000` 到 `ff02:0:0:0:0:1:ffff:ffff`。
 - en: For example, our host Marvin has the IPv6 address `fe80::202:b3ff:fe1e:8329`.
     The corresponding solicited-node multicast address is `ff02::1:ff1e:8329`. If
     this host has other IPv6 unicast or anycast addresses, each one will have a corresponding
     solicited-node multicast address for which the host must be registering.
+  id: totrans-302
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，我们的主机 Marvin 拥有 IPv6 地址 `fe80::202:b3ff:fe1e:8329`。对应的请求节点多播地址是 `ff02::1:ff1e:8329`。如果该主机还有其他
+    IPv6 单播或任何播地址，每个地址都会有一个对应的请求节点多播地址，主机必须注册该地址。
 - en: Mapping Multicast Addresses to MAC Addresses
+  id: totrans-303
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 将多播地址映射到 MAC 地址
 - en: When a packet is sent to an IPv6 multicast address, the IPv6 address must be
     mapped to a MAC address on the link layer. The format of the Ethernet MAC multicast
     address is specified in RFC 2464\. The first two bytes of an IPv6 MAC multicast
     address are `0x3333`. The following four bytes correspond to the last four bytes
     of the IPv6 multicast address.
+  id: totrans-304
   prefs: []
   type: TYPE_NORMAL
+  zh: 当一个数据包发送到一个 IPv6 多播地址时，必须将该 IPv6 地址映射到链路层的 MAC 地址。以太网 MAC 多播地址的格式在 RFC 2464
+    中有规定。IPv6 MAC 多播地址的前两个字节是 `0x3333`。接下来的四个字节对应于 IPv6 多播地址的最后四个字节。
 - en: '[Figure 2-12](ch02.html#mac_representation_of_an_ipv6_multicast "Figure 2-12. MAC
     representation of an IPv6 multicast address") shows how a multicast address is
     mapped to a MAC address.'
+  id: totrans-305
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 2-12](ch02.html#mac_representation_of_an_ipv6_multicast "图 2-12. IPv6 多播地址的
+    MAC 表示") 展示了多播地址如何映射到 MAC 地址。'
 - en: '![MAC representation of an IPv6 multicast address](images/ipv6_0212.png)Figure 2-12. MAC
     representation of an IPv6 multicast address'
+  id: totrans-306
   prefs: []
   type: TYPE_NORMAL
+  zh: '![IPv6 多播地址的 MAC 表示](images/ipv6_0212.png)图 2-12. IPv6 多播地址的 MAC 表示'
 - en: The link-local scoped multicast address of `ff02::1:3` is mapped to the MAC
     address of `33:33:00:01:00:03`. The mapping for other media types is specified
     in separate RFCs. You can find more information about other media types in [Chapter 5](ch05.html
     "Chapter 5. Networking") or by searching the RFC database.
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ff02::1:3` 的链路本地作用域多播地址映射到 MAC 地址 `33:33:00:01:00:03`。其他媒体类型的映射在单独的 RFC 中进行了说明。您可以在
+    [第 5 章](ch05.html "第 5 章. 网络") 中找到有关其他媒体类型的更多信息，或通过搜索 RFC 数据库。'
 - en: Dynamic Allocation of Multicast Addresses
+  id: totrans-308
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 多播地址的动态分配
 - en: The multicast address architecture has been extended in RFC 3306\. It contains
     definitions that allow the allocation of unicast prefix-based addresses and of
     source-specific multicast addresses. It is based on a modified multicast address
     format that contains prefix information. The goal of this specification is to
     reduce the number of protocols needed for the allocation of multicast addresses.
+  id: totrans-309
   prefs: []
   type: TYPE_NORMAL
+  zh: 多播地址架构在 RFC 3306 中得到了扩展。它包含允许基于单播前缀地址和源特定多播地址分配的定义。它基于一种修改过的多播地址格式，其中包含前缀信息。此规范的目标是减少分配多播地址所需的协议数量。
 - en: '[Figure 2-13](ch02.html#format_of_the_extended_multicast_address "Figure 2-13. Format
     of the extended multicast address") shows the format of the extended multicast
     address.'
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 2-13](ch02.html#format_of_the_extended_multicast_address "图 2-13. 扩展多播地址的格式")
+    显示了扩展多播地址的格式。'
 - en: '![Format of the extended multicast address](images/ipv6_0213.png)Figure 2-13. Format
     of the extended multicast address'
+  id: totrans-311
   prefs: []
   type: TYPE_NORMAL
+  zh: '![扩展多播地址的格式](images/ipv6_0213.png)图 2-13. 扩展多播地址的格式'
 - en: In the original specification, the Flags field only uses the last bit (T) to
     specify whether the multicast address is a well-known or temporary one. The extended
     format shown here uses the second last bit (P) to indicate whether the multicast
@@ -1559,8 +2244,13 @@
     prefix length is smaller than 64 bits, the unused bits in the prefix field should
     be set to 0\. The group ID uses 32 bits. Note that when P is set to 1 (extended
     multicast address), the T flag should also be set to 1 (temporary multicast address).
+  id: totrans-312
   prefs: []
   type: TYPE_NORMAL
+  zh: 在原始规范中，标志字段仅使用最后一位（T）来指定多播地址是已知地址还是临时地址。这里显示的扩展格式使用倒数第二位（P）来指示多播地址分配是否基于网络前缀（值为
+    1）或不是（值为 0）。P 设置为 1 表示这是一个遵循扩展格式的多播地址。作用域字段的使用没有变化。如果 P 标志设置为 1，则作用域字段后的八位被保留并设置为
+    0。接下来的八位（PLen）指定前缀字段中的前缀长度。如果前缀长度小于 64 位，则前缀字段中的未使用位应设置为 0。组 ID 使用 32 位。注意，当 P
+    设置为 1（扩展多播地址）时，T 标志也应设置为 1（临时多播地址）。
 - en: Multicast Listener Discovery is used for multicast management. There are two
     versions, MLDv1 and MLDv2\. MLDv2 supports *source-specific multicast*. For an
     overview of source-specific multicast, refer to RFC 3569\. In the traditional
@@ -1569,23 +2259,33 @@
     (SSM), an interface can register for a multicast group and specify the source(s)
     for the data. SSM can be implemented using MLDv2 and the extended multicast address
     format.
+  id: totrans-313
   prefs: []
   type: TYPE_NORMAL
+  zh: 多播监听者发现（MLD）用于多播管理。它有两个版本，MLDv1 和 MLDv2。MLDv2 支持*源特定多播*。有关源特定多播的概述，请参阅 RFC 3569。在传统的多播模型中，称为任意源多播（ASM），多播监听者无法控制它想接收的数据源。而在源特定多播（SSM）中，一个接口可以注册一个多播组，并指定数据的源(s)。SSM
+    可以通过 MLDv2 和扩展的多播地址格式实现。
 - en: For a source-specific multicast address, the T and the P flag are set to 1\.
     Prefix length and network prefix are both set to 0\. This leads to a multicast
     prefix of `ff3x:/32`, where `x` is a scope value. The source address in the IPv6
     header identifies the owner of the multicast address. All SSM addresses have the
     format `ff3X::/96`.
+  id: totrans-314
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于源特定多播地址，T 和 P 标志都设置为 1。前缀长度和网络前缀都设置为 0。这将导致一个多播前缀 `ff3x:/32`，其中 `x` 是作用域值。IPv6
+    头中的源地址标识多播地址的所有者。所有 SSM 地址的格式为 `ff3X::/96`。
 - en: Note
+  id: totrans-315
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注
 - en: Refer to RFC 3307, “Allocation Guidelines for IPv6 Multicast Addresses,” for
     more information.
+  id: totrans-316
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关更多信息，请参阅 RFC 3307，“IPv6 多播地址分配指南”。
 - en: RFC 4489, “Link-Scoped Multicast Address Format,” defines an extension to the
     multicast addressing architecture of the IPv6 protocol. The extension allows for
     the use of interface identifiers to allocate link-local scoped multicast addresses.
@@ -1595,65 +2295,97 @@
     identifier. The group ID is generated to indicate a multicast application and
     needs to be unique only on this host. It is designed for environments in which
     link-local scope multicast addresses are used.
+  id: totrans-317
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4489《链路范围组播地址格式》定义了 IPv6 协议的组播寻址架构的扩展。该扩展允许使用接口标识符来分配链路本地范围的组播地址。在这个组播地址中，标志字段被设置为二进制
+    `0011`；作用域字段被设置为 2，表示链路本地作用域；pLen 字段被设置为 `ff`（全是 1 的二进制）；网络 ID 字段的 64 位用于接口标识符。组
+    ID 生成以指示组播应用，并且只需在该主机上唯一。它设计用于使用链路本地范围组播地址的环境。
 - en: Required Addresses
+  id: totrans-318
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 必需的地址
 - en: 'The standard specifies that each host must assign the following addresses to
     identify itself:'
+  id: totrans-319
   prefs: []
   type: TYPE_NORMAL
+  zh: 标准规定，每个主机必须分配以下地址来标识自己：
 - en: Its link-local address for each interface
+  id: totrans-320
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 每个接口的链路本地地址
 - en: Any assigned unicast and anycast addresses
+  id: totrans-321
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有分配的单播和任何播地址
 - en: The loopback address
+  id: totrans-322
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 回环地址
 - en: The all-nodes multicast address
+  id: totrans-323
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有节点的组播地址
 - en: Solicited-node multicast address for each of its assigned unicast and anycast
     addresses
+  id: totrans-324
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 为其分配的每个单播和任何播地址的请求节点组播地址
 - en: Multicast addresses of all other groups to which the host belongs
+  id: totrans-325
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 主机所属的所有其他组的组播地址
 - en: 'A router needs to recognize all of the previous addresses, plus the following:'
+  id: totrans-326
   prefs: []
   type: TYPE_NORMAL
+  zh: 路由器需要识别所有上述地址，并且还需要识别以下地址：
 - en: The subnet-router anycast address for the interfaces for which it is configured
     to act as a router on each link
+  id: totrans-327
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 配置为在每个链路上作为路由器工作的接口的子网路由器任何播地址
 - en: All anycast addresses with which the router has been configured
+  id: totrans-328
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器已配置的所有任何播地址
 - en: The all-routers multicast address
+  id: totrans-329
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有路由器的组播地址
 - en: Multicast addresses of all other groups to which the router belongs
+  id: totrans-330
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器所属的所有其他组的组播地址
 - en: Default Address Selection
+  id: totrans-331
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 默认地址选择
 - en: The architecture of IPv6 allows an interface to have multiple addresses. The
     addresses may differ in scope (link-local, global) or state (preferred, deprecated);
     they may be part of mobility (home-address, care-of-address) or multihoming situation;
@@ -1661,8 +2393,11 @@
     hosts have IPv6 and IPv4 addresses. The result is that IPv6 implementations that
     need to initiate a connection are often faced with a choice between multiple Source
     and Destination addresses.
+  id: totrans-332
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6 的架构允许一个接口拥有多个地址。这些地址可能在作用域（链路本地、全球）或状态（首选、过时）上有所不同；它们可能是移动性（家庭地址、临时地址）或多宿主情况的一部分；也可能是永久的公共地址或虚拟隧道接口。双栈主机具有
+    IPv6 和 IPv4 地址。结果是，IPv6 实现需要发起连接时，通常面临从多个源地址和目的地址中做出选择的情况。
 - en: Imagine a situation where a client issues a DNS request for an external service
     and receives a global IPv6 and a public IPv4 address back. If this client has
     a private IPv4 address and a global IPv6 address, it might make sense to use IPv6
@@ -1673,8 +2408,12 @@
     some dual-stack. The way this is dealt with depends on the implementations. Application
     developers have to be aware of this and try to provide mechanisms that will make
     their applications behave optimally in every possible environment.
+  id: totrans-333
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设有这样一种情况，一个客户端发出对外部服务的 DNS 请求，并接收到一个全球 IPv6 地址和一个公共 IPv4 地址。如果该客户端有一个私有 IPv4
+    地址和一个全球 IPv6 地址，那么使用 IPv6 访问该外部服务是有意义的。但如果该客户端有一个隧道化的 IPv6 地址和一个公共 IPv4 地址，则应选择
+    IPv4 地址来连接服务。这些是在未来混合网络环境中需要处理的情况和选择，一些是仅支持 IPv4 的，另一些是仅支持 IPv6 的，还有一些是双栈的。如何处理这些情况取决于具体的实现。应用程序开发人员需要意识到这一点，并尽力提供能够使应用程序在每种可能的环境中都能表现最佳的机制。
 - en: RFC 6724, “Default Address Selection for IPv6,” defines two general algorithms,
     one for Source address selection and the other for Destination address selection.
     All IPv6 nodes (host and router) have to implement RFC 6724\. The algorithms specify
@@ -1684,300 +2423,442 @@
     To each prefix listed, a *precedence* and a *label* are assigned. The precedence
     is used for sorting Destination addresses; the label value is used to define policies
     that associate a specific Source address to a given Destination address.
+  id: totrans-334
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 6724, “IPv6 的默认地址选择”定义了两个通用算法，一个用于源地址选择，另一个用于目标地址选择。所有 IPv6 节点（主机和路由器）都必须实现
+    RFC 6724。该算法指定了 IPv6 节点的默认行为。该算法不覆盖应用程序、上层协议或其他策略做出的选择。该 RFC 包含一个策略表，类似于路由表，是一个最长匹配前缀查找表。为每个列出的前缀分配一个*优先级*和一个*标签*。优先级用于对目标地址进行排序；标签值用于定义将特定源地址与给定目标地址关联的策略。
 - en: 'Here’s a summary of the most important rules:'
+  id: totrans-335
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面是最重要规则的总结：
 - en: Address pairs of the same scope or type (link-local, global) are preferred.
+  id: totrans-336
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 相同作用域或类型（链路本地、全球）的地址对优先。
 - en: A smaller scope for the Destination address is preferred (use the smallest scope
     possible).
+  id: totrans-337
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 目标地址的作用域越小越优先（使用最小的作用域）。
 - en: A preferred (nondeprecated) address is preferred.
+  id: totrans-338
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 优先选择首选（非弃用）地址。
 - en: Transitional addresses (e.g., ISATAP or 6to4 addresses) are not used if native
     IPv6 addresses are available.
+  id: totrans-339
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果有原生 IPv6 地址可用，则不使用过渡地址（例如 ISATAP 或 6to4 地址）。
 - en: If all criteria are similar, address pairs with the longest common prefix are
     preferred.
+  id: totrans-340
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果所有标准相似，则优先选择具有最长公共前缀的地址对。
 - en: Prefer outgoing interface.
+  id: totrans-341
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 优先选择外向接口。
 - en: Prefer addresses in a prefix advertised by the next hop.
+  id: totrans-342
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 优先选择由下一跳广告的前缀中的地址。
 - en: Prefer matching label.
+  id: totrans-343
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 优先匹配标签。
 - en: For the Source address, temporary addresses are preferred over public addresses.
+  id: totrans-344
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于源地址，临时地址优先于公共地址。
 - en: Use longest matching prefix.
+  id: totrans-345
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用最长匹配前缀。
 - en: In Mobile IP situations, home addresses are preferred over care-of addresses.
+  id: totrans-346
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在移动 IP 环境中，家庭地址优先于照看地址。
 - en: In short, the default table prefers native IPv6 over native IPv4 and NATed IPv4
     over 6to4 and other tunnels.
+  id: totrans-347
   prefs: []
   type: TYPE_NORMAL
+  zh: 简而言之，默认表格优先选择原生 IPv6 地址，其次是原生 IPv4 地址，再次是 NAT 转换后的 IPv4 地址，最后是 6to4 和其他隧道。
 - en: Note
+  id: totrans-348
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: The rules in RFC 6724 are to be used in all situations when nothing else is
     specified. Implementations should provide mechanisms to override the default policy
     and to configure address selection individually to adapt default address selection
     to the specifics of the network. RFC 7078 defines a DHCP option that allows the
     administrator to distribute an address selection policy which overrides the default
     policy from RFC 6724.
+  id: totrans-349
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 6724 中的规则在没有其他规定时应被使用。实现应提供机制，以覆盖默认策略，并根据网络的具体情况单独配置地址选择。RFC 7078 定义了一个
+    DHCP 选项，允许管理员分发覆盖 RFC 6724 默认策略的地址选择策略。
 - en: Now that you are familiar with the extended address space and the IPv6 address
     types, the next chapter discusses the IPv6 header and the Extension headers.
+  id: totrans-350
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你已经熟悉了扩展的地址空间和 IPv6 地址类型，下一章将讨论 IPv6 头部和扩展头部。
 - en: References
+  id: totrans-351
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参考文献
 - en: The following are lists of the most important RFCs and drafts mentioned in this
     chapter. Sometimes I include additional subject-related RFCs for your personal
     further study.
+  id: totrans-352
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是本章中提到的最重要的 RFC 和草案的列表。有时我还会为你个人的进一步学习，加入一些与主题相关的附加 RFC。
 - en: RFCs
+  id: totrans-353
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: RFC 文档
 - en: RFC 1546, “Host Anycasting Service,” 1993
+  id: totrans-354
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1546, “主机任播服务”，1993年
 - en: RFC 1918, “Address Allocation for Private Internets,” 1996
+  id: totrans-355
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1918, “私人互联网地址分配”，1996年
 - en: RFC 2101, “IPv4 Address Behaviour Today,” 1997
+  id: totrans-356
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2101, “今天的 IPv4 地址行为”，1997年
 - en: RFC 2365, “Administratively Scoped IP Multicast,” 1998
+  id: totrans-357
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2365, “管理员作用域的 IP 多播”，1998年
 - en: RFC 2464, “Transmission of IPv6 Packets over Ethernet Networks,” 1998
+  id: totrans-358
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2464, “IPv6 数据包通过以太网网络的传输”，1998年
 - en: RFC 2471, “IPv6 Testing Address Allocation (6Bone), " 1998
+  id: totrans-359
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2471, “IPv6 测试地址分配（6Bone）”，1998年
 - en: RFC 2526, “Reserved IPv6 Subnet Anycast Addresses,” 1999
+  id: totrans-360
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2526, “保留的 IPv6 子网任播地址”，1999年
 - en: RFC 2710, “Multicast Listener Discovery (MLD)” for IPv6,” 1999
+  id: totrans-361
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2710, “IPv6 的多播监听发现（MLD）”，1999年
 - en: RFC 2908, “The Internet Multicast Address Allocation Architecture,” 2000
+  id: totrans-362
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2908, “互联网多播地址分配架构”，2000年
 - en: RFC 3056, “Connection of IPv6 Domains via IPv4 Clouds” (6to4), 2001
+  id: totrans-363
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3056, “通过 IPv4 云连接 IPv6 域”（6to4），2001年
 - en: RFC 3068, “An Anycast Prefix for 6to4 Relay Routers,” 2001
+  id: totrans-364
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3068，“用于 6to4 转发路由器的任何播前缀”，2001年
 - en: RFC 3306, “Unicast-Prefix-based IPv6 Multicast,” 2002
+  id: totrans-365
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3306，“基于单播前缀的 IPv6 多播”，2002年
 - en: RFC 3307, “Allocation Guidelines for IPv6 Multicast Addresses,” 2002
+  id: totrans-366
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3307，“IPv6 多播地址的分配指南”，2002年
 - en: RFC 3569, “An Overview of Source-Specific Multicast (SSM),” 2003
+  id: totrans-367
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3569，“源特定多播（SSM）概述”，2003年
 - en: RFC 3587, “IPv6 Global Unicast Address Format,” 2003
+  id: totrans-368
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3587，“IPv6 全球单播地址格式”，2003年
 - en: RFC 3590, “Source Address Selection for the Multicast Listener Discovery (MLD)
     Protocol,” 2003
+  id: totrans-369
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3590，“多播监听器发现（MLD）协议的源地址选择”，2003年
 - en: RFC 3810, “Multicast Listener Discovery Version 2 (MLDv2) for IPv6,” 2004
+  id: totrans-370
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3810，“IPv6 多播监听器发现版本 2（MLDv2）”，2004年
 - en: RFC 3849, “IPv6 Documentation Address,” 2004
+  id: totrans-371
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3849，“IPv6 文档地址”，2004年
 - en: RFC 3879, “Deprecating Site Local Addresses,” 2004
+  id: totrans-372
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3879，“弃用站点本地地址”，2004年
 - en: RFC 3956, “Embedding the Rendezvous Point (RP) Address in an IPv6 Multicast
     Address,” 2004
+  id: totrans-373
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3956，“在 IPv6 多播地址中嵌入会合点（RP）地址”，2004年
 - en: RFC 3972, “Cryptographically Generated Addresses (CGA),” 2005
+  id: totrans-374
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3972，“加密生成地址（CGA）”，2005年
 - en: RFC 4007, “IPv6 Scoped Address Architecture,” 2005
+  id: totrans-375
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4007，“IPv6 范围地址架构”，2005年
 - en: RFC 4192, “Procedures for Renumbering an IPv6 Network without a Flag Day,” 2005
+  id: totrans-376
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4192，“无需标志日的 IPv6 网络重新编号程序”，2005年
 - en: RFC 4193, “Unique Local IPv6 Unicast Addresses,” 2005
+  id: totrans-377
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4193，“唯一本地 IPv6 单播地址”，2005年
 - en: RFC 4291, “IPv6 Addressing Architecture,” 2006
+  id: totrans-378
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4291，“IPv6 地址架构”，2006年
 - en: 'RFC 4380, “Teredo: Tunneling IPv6 over UDP through Network Address Translations
     (NATs),” 2006'
+  id: totrans-379
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4380，“Teredo：通过网络地址转换（NAT）在 UDP 上隧道 IPv6”，2006年
 - en: RFC 4489, “A Method for Generating Link-Scoped IPv6 Multicast Addresses,” 2006
+  id: totrans-380
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4489，“生成链路范围 IPv6 多播地址的方法”，2006年
 - en: RFC 4581, “Cryptographically Generated Addresses (CGA) Extension Field Format,”
     2006
+  id: totrans-381
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4581，“加密生成地址（CGA）扩展字段格式”，2006年
 - en: RFC 4795, “Link-Local Multicast Name Resolution (LLMNR),” 2007
+  id: totrans-382
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4795，“链路本地多播名称解析（LLMNR）”，2007年
 - en: RFC 4941, “Privacy Extensions for Stateless Address Autoconfiguration in IPv6,”
     2007
+  id: totrans-383
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4941，“IPv6 无状态地址自动配置的隐私扩展”，2007年
 - en: RFC 4982, “Support for Multiple Hash Algorithms in Cryptographically Generated
     Addresses (CGAs),” 2007
+  id: totrans-384
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4982，“加密生成地址（CGA）中对多种哈希算法的支持”，2007年
 - en: RFC 5156, “Special Use IPv6 Addresses,” 2008
+  id: totrans-385
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5156，“特殊用途 IPv6 地址”，2008年
 - en: RFC 5214, “Intra-Site Automatic Tunnel Addressing Protocol (ISATAP),” 2008
+  id: totrans-386
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5214，“站内自动隧道地址协议（ISATAP）”，2008年
 - en: RFC 5375, “IPv6 Unicast Address Assignment Considerations,” 2008
+  id: totrans-387
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5375，“IPv6 单播地址分配注意事项”，2008年
 - en: RFC 5453, “Reserved IPv6 Interface Identifiers,” 2009
+  id: totrans-388
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5453，“保留的 IPv6 接口标识符”，2009年
 - en: RFC 5569, “IPv6 Rapid Deployment on IPv4 Infrastructures (6rd),” 2010
+  id: totrans-389
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5569，“IPv6 在 IPv4 基础设施上的快速部署（6rd）”，2010年
 - en: RFC 5952, “A Recommendation for IPv6 Address Text Representation,” 2010
+  id: totrans-390
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5952，“IPv6 地址文本表示的建议”，2010年
 - en: RFC 5991, “Teredo Security Updates,” 2010
+  id: totrans-391
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5991，“Teredo 安全更新”，2010年
 - en: RFC 6052, “IPv6 Addressing of IPv4/IPv6 Translators,” 2010
+  id: totrans-392
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6052，“IPv4/IPv6 转换器的 IPv6 地址分配”，2010年
 - en: RFC 6081, “Teredo Extensions,” 2011
+  id: totrans-393
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6081，“Teredo 扩展”，2011年
 - en: RFC 6085, “Address Mapping of IPv6 Multicast Packets on Ethernet,” 2011
+  id: totrans-394
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6085，“以太网上的 IPv6 多播数据包地址映射”，2011年
 - en: RFC 6164, “Using 127-Bit IPv6 Prefixes on Inter-Router Links,” 2011
+  id: totrans-395
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6164，“在路由器间链路上使用 127 位 IPv6 前缀”，2011年
 - en: RFC 6177, “IPv6 Address Assignment to End Sites,” 2011
+  id: totrans-396
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6177，“IPv6 地址分配给最终站点”，2011年
 - en: RFC 6724, “Default Address Selection for Internet Protocol version 6 (IPv6),”
     2012
+  id: totrans-397
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6724，“IPv6 默认地址选择”，2012年
 - en: RFC 7078, “Distributing Address Selection Policy Using DHCPv6,” 2014
+  id: totrans-398
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7078，“通过 DHCPv6 分发地址选择策略”，2014年
 - en: RFC 7094, “Architectural Considerations of IP Anycast,” 2014
+  id: totrans-399
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7094，“IP Anycast 的架构考虑”，2014年
 - en: RFC 7108, “A Summary of Various Mechanisms Deployed at L-Root for the Identification
     of Anycast Nodes,” 2014
+  id: totrans-400
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7108，“L-Root 部署的各种机制总结，用于识别任何播节点”，2014年
 - en: RFC 7136, “Significance of IPv6 Interface Identifiers,” 2014
+  id: totrans-401
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7136，“IPv6 接口标识符的重要性”，2014年
 - en: RFC 7217, “A Method for Generating Semantically Opaque Interface Identifiers
     with IPv6 Stateless Address Autoconfiguration (SLAAC),” 2014
+  id: totrans-402
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7217，“使用 IPv6 无状态地址自动配置（SLAAC）生成语义不透明的接口标识符的方法”，2014年
 - en: Drafts
+  id: totrans-403
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 草案
 - en: Drafts can be found at [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html).
     To locate the latest version of a draft, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
     You can enter the draft name without a version number and the most current version
@@ -1985,21 +2866,34 @@
     published as an RFC, the RFC number will be displayed. [http://tools.ietf.org/wg](http://tools.ietf.org/wg)
     is also a very useful site. More information on the process of standardization,
     RFCs, and drafts can be found in [Appendix A](apa.html "Appendix A. RFCs").
+  id: totrans-404
   prefs: []
   type: TYPE_NORMAL
+  zh: 草案可以在[http://www.ietf.org/ID.html](http://www.ietf.org/ID.html)找到。要查找草案的最新版本，请参考[https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi)。你可以输入草案名称而不需要版本号，系统会自动显示最新版本。如果草案没有显示出来，可能是它已经被删除。如果草案已发布为RFC，RFC编号会显示出来。[http://tools.ietf.org/wg](http://tools.ietf.org/wg)也是一个非常有用的网站。关于标准化过程、RFC和草案的更多信息，可以在[附录A](apa.html
+    "附录A. RFCs")中找到。
 - en: 'Here’s a list of drafts I refer to in this chapter, as well as interesting
     drafts that relate to the topics in this chapter:'
+  id: totrans-405
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里是我在本章中参考的一些草案列表，以及与本章主题相关的有趣草案：
 - en: “Privacy Considerations for IPv6 Address Generation Mechanisms”
+  id: totrans-406
   prefs: []
   type: TYPE_NORMAL
+  zh: “IPv6地址生成机制的隐私考虑”
 - en: '*draft-ietf-6man-ipv6-address-generation-privacy-01*'
+  id: totrans-407
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-6man-ipv6-address-generation-privacy-01*'
 - en: “Recommendation on Stable IPv6 Interface Identifiers”
+  id: totrans-408
   prefs: []
   type: TYPE_NORMAL
+  zh: “稳定的IPv6接口标识符建议”
 - en: '*draft-ietf-6man-default-iids-00*'
+  id: totrans-409
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-6man-default-iids-00*'

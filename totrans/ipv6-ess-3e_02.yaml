@@ -1,7 +1,9 @@
 - en: Chapter 1. Why IPv6?
+  id: totrans-0
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第1章 为什么选择IPv6？
 - en: The IP version currently used in networks and the Internet is IP version 4 (IPv4).
     IPv4 was developed in the early ’70s to facilitate communication and information
     sharing between government researchers and academics in the United States. At
@@ -14,15 +16,19 @@
     in network device diversity and mobile communications, along with global adoption
     of networking technologies, new services, and social networks, are overwhelming
     IPv4 and have driven the development of a next-generation Internet Protocol.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 当前在网络和互联网中使用的IP版本是IPv4（IP版本4）。IPv4于70年代初期开发，目的是促进美国政府研究人员和学者之间的通信与信息共享。当时，该系统是封闭的，访问点数量有限，因此开发人员并未考虑安全性或服务质量等需求。值得称赞的是，IPv4已经存在了30多年，并且成为了互联网革命的核心部分。但即便是最巧妙设计的系统也会随着时间的推移逐渐过时，IPv4也不例外。如今的网络需求远远超出了支持网页和电子邮件的范围。网络设备多样性和移动通信的爆炸性增长，以及网络技术、新服务和社交网络的全球普及，已经压垮了IPv4，促使了下一代互联网协议的发展。
 - en: IPv6 has been developed based on the rich experience we have from developing
     and using IPv4\. Proven and established mechanisms have been retained, known limitations
     have been discarded, and scalability and flexibility have been extended. IPv6
     is a protocol designed to handle the growth rate of the Internet and to cope with
     the demanding requirements on services, mobility, and end-to-end security.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6的开发基于我们在开发和使用IPv4中的丰富经验。已经验证并建立的机制得以保留，已知的局限性被舍弃，扩展性和灵活性得到了增强。IPv6是一个旨在应对互联网增长速度、满足服务、移动性和端到端安全性等严格要求的协议。
 - en: When the Internet was switched from using Network Control Protocol (NCP) to
     Internet Protocol (IP) in one day in 1983, IP was not the mature protocol that
     we know today. Many of the well-known and commonly used extensions were developed
@@ -31,119 +37,166 @@
     1995 when it became a Draft Standard. In the decade since then, those implementations
     have matured, and IPv6 support has spread beyond the basic network infrastructure
     and will continue to be extended.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 当互联网在1983年一天之内从使用网络控制协议（NCP）切换到互联网协议（IP）时，IP并不是我们今天所熟悉的成熟协议。许多广为人知且常用的扩展是在随后的几年里为了满足互联网日益增长的需求而开发的。相比之下，硬件厂商和操作系统供应商自1995年IPv6成为草案标准以来就已经支持IPv6。在此后的十年里，这些实现已经成熟，IPv6的支持不仅限于基础网络设施，还将继续扩展。
 - en: It is very important for organizations to pay attention to the introduction
     of IPv6 as early as possible because its use is inevitable in the long term. If
     IPv6 is included in strategic planning; if organizations think about possible
     integration scenarios ahead of time; and if its introduction is considered when
     investing in IT capital expenditures, organizations can save considerable cost
     and can enable IPv6 more efficiently when it is needed.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 对组织来说，尽早关注IPv6的引入非常重要，因为从长远来看，IPv6的使用是不可避免的。如果将IPv6纳入战略规划；如果组织提前考虑可能的整合场景；如果在投资IT资本支出时考虑到其引入，组织就能节省可观的成本，并能在需要时更高效地启用IPv6。
 - en: An interesting and humorous overview of the history of the Internet can be found
     in RFC 2235, “Hobbes’ Internet Timeline.” The account starts in 1957 with the
     launch of *Sputnik* in Russia and the formation of the Advanced Research Projects
     Agency (ARPA) by the Department of Defense (DoD) in the United States. The RFC
     contains a list of yearly growth rate of hosts, networks, and domain registrations
     in the Internet.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于互联网历史的有趣且幽默的概述可以在RFC 2235《霍布斯互联网时间线》中找到。该记载从1957年开始，讲述了苏联发射*斯普特尼克*卫星和美国国防部（DoD）成立高级研究计划局（ARPA）的事件。RFC中还列出了互联网主机、网络和域名注册的年度增长率。
 - en: 'Some excerpts from the RFC:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是来自RFC的一些摘录：
 - en: '1969: Steve Crocker makes the first Request for Comment (RFC 1): “Host Software.”'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1969年：史蒂夫·克罗克（Steve Crocker）提出了第一个《评论请求》（RFC 1）：“主机软件”。
 - en: '1970: ARPANET hosts start using Network Control Protocol (NCP).'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1970年：ARPANET主机开始使用网络控制协议（NCP）。
 - en: '1971: 23 hosts connect with ARPANET (UCLA, SRI, UCSB, University of Utah, BBN,
     MIT, RAND, SDC, Harvard, Lincoln Lab, Stanford, UIU©, CWRU, CMU, NASA/Ames).'
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1971年：23台主机连接到ARPANET（UCLA、SRI、UCSB、犹他大学、BBN、MIT、RAND、SDC、哈佛、林肯实验室、斯坦福、UIU©、CWRU、CMU、NASA/Ames）。
 - en: '1972: InterNetworking Working Group (INWG) is created with Vinton Cerf as Chairman
     to address the need for establishing agreed-upon protocols. Telnet specification
     (RFC 318) is published.'
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1972年：成立了互联网工作组（INWG），由文顿·瑟夫（Vinton Cerf）担任主席，旨在解决制定统一协议的需求。Telnet规范（RFC 318）发布。
 - en: '1973: First international connections to the ARPANET are made at the University
     College of London (England) and Royal Radar Establishment (Norway). Bob Metcalfe’s
     Harvard PhD thesis outlines the idea for Ethernet. File transfer specification
     (RFC 454) is published.'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1973年：与ARPANET的首次国际连接在伦敦大学（英国）和皇家雷达研究所（挪威）完成。鲍勃·梅特卡夫（Bob Metcalfe）的哈佛博士论文概述了以太网的构想。文件传输规范（RFC
+    454）发布。
 - en: '1976: Queen Elizabeth II sends an email.'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1976年：伊丽莎白二世女王发送了一封电子邮件。
 - en: '1981: Minitel (Teletel) is deployed across France by France Telecom.'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1981年：法国电信公司在法国部署了Minitel（Teletel）。
 - en: '1983: The cutover from NCP to TCP/IP happens on January 1.'
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1983年：1月1日，从NCP到TCP/IP的切换完成。
 - en: '1984: The number of hosts breaks 1,000.'
+  id: totrans-15
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1984年：主机数量突破1,000。
 - en: '1987: An email link is established between Germany and China using CSNET protocols,
     with the first message from China sent on September 20\. The thousandth RFC is
     published. The number of hosts breaks 10,000.'
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1987年：使用CSNET协议在德国和中国之间建立了电子邮件连接，第一封来自中国的邮件于9月20日发送。第1000号RFC发布。主机数量突破10,000。
 - en: '1988: An Internet worm burrows through the Net, affecting 10 percent of the
     60,000 hosts on the Internet.'
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1988年：一只互联网蠕虫通过网络传播，影响了60,000台主机中的10%。
 - en: '1989: The number of hosts breaks 100,000\. Clifford Stoll writes *Cuckoo’s
     Egg*, which tells the real-life tale of a German cracker group that infiltrated
     numerous U.S. facilities.'
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1989年：主机数量突破100,000。克利福德·斯托尔（Clifford Stoll）写下了《布谷鸟的蛋》一书，讲述了一群德国黑客渗透美国多个设施的真实故事。
 - en: '1991: The World Wide Web (WWW) is developed by Tim Berners-Lee and released
     by CERN.'
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1991年：万维网（WWW）由蒂姆·伯纳斯-李（Tim Berners-Lee）开发，并由CERN发布。
 - en: '1992: The number of hosts breaks 1,000,000\. The World Bank comes online.'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1992年：主机数量突破1,000,000。世界银行上线。
 - en: '1993: The White House comes online during President Bill Clinton’s time in
     office. Worms of a new kind find their way around the Net—WWW Worms (W4) are joined
     by Spiders, Wanderers, Crawlers, and Snakes.'
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1993年：白宫在比尔·克林顿总统任期内上线。新型蠕虫开始在网络中传播——WWW蠕虫（W4）与蜘蛛、流浪者、爬虫和蛇一起登场。
 - en: '1994: Internet shopping is introduced; the first spam mail is sent; Pizza Hut
     comes online.'
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1994年：互联网购物被引入；第一封垃圾邮件被发送；必胜客上线。
 - en: '1995: The Vatican comes online. Registration of domain names is no longer free.'
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1995年：梵蒂冈上线。域名注册不再免费。
 - en: '1996: 9,272 organizations find themselves unlisted after the InterNIC drops
     their name service as a result of their not having paid their domain name fees.'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1996年：9,272个组织因未支付域名费用，被InterNIC取消了其名称服务，结果未能列入名单。
 - en: '1997: The 2,000th RFC is published.'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1997年：第2,000号RFC发布。
 - en: This is how far the RFC goes. But history goes on. According to [http://www.internetworldstats.com/emarketing.htm](http://www.internetworldstats.com/emarketing.htm),
     the worldwide online population reached 361 million users in 2000 (a penetration
     rate of 5.8%) and 587 million users in 2002\. In 2003, the U.S. Department of
@@ -153,8 +206,11 @@
     the Internet,” joined Google. By that time the number of Internet users had reached
     1.08 billion. Today, at the time of writing in 2014, we are at approximately 2.4
     billion Internet users, which corresponds to a penetration rate of 34%.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC的历史发展到此为止。但历史仍在继续。根据[http://www.internetworldstats.com/emarketing.htm](http://www.internetworldstats.com/emarketing.htm)，全球在线用户在2000年达到了3.61亿（渗透率为5.8%），2002年达到了5.87亿。2003年，美国国防部宣布将于2008年前将国防部网络迁移到IPv6，并启动了[Moonv6项目](http://www.moonv6.org)（现已结束）。2005年，谷歌注册了一个/32的IPv6前缀，互联网之父Vint
+    Cerf加入了谷歌。到那时，互联网用户数量已达10.8亿。到2014年写作时，全球互联网用户数量约为24亿，渗透率为34%。
 - en: So while these numbers reflect all Internet users, independent of the IP protocol
     version, now we are starting to watch the growth of the IPv6 Internet. It is in
     its early days, but according to the growth numbers of the last two years, we
@@ -163,8 +219,12 @@
     Adoption statistics](http://www.google.com/ipv6/statistics.html) and the stats
     as of spring 2014 are shown in [Figure 1-1](ch01.html#googleas_global_ipv6_adoption_statistics
     "Figure 1-1. Google’s global IPv6 adoption statistics as of spring 2014").
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，尽管这些数字反映了所有互联网用户，无论IP协议版本如何，但现在我们开始看到IPv6互联网的增长。它仍处于初期阶段，但根据过去两年的增长数据，我们预计增长将呈指数级，并且可能比我们当中的热衷者预期的还要快。IPv6互联网的增长可以在[Google
+    IPv6采纳统计数据](http://www.google.com/ipv6/statistics.html)中看到，2014年春季的统计数据如[图1-1](ch01.html#googleas_global_ipv6_adoption_statistics
+    "图1-1. 2014年春季Google全球IPv6采纳统计")所示。
 - en: The stats show that in early 2011 (when the IANA IPv4 pool ran out), the percentage
     of native IPv6 Internet users was at approximately 0.2%. The stats also show that
     the percentage of users that were not native IPv6 (e.g., 6to4 or Teredo, red line)
@@ -174,28 +234,38 @@
     3% IPv6 Internet users, which corresponds to approximately 72 million users. At
     the time of delivering this chapter, in April 2014, we were at 3.5%. The number
     of IPv6 Internet users currently doubles approximately every nine months.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 统计数据显示，在2011年初（当IANA的IPv4池用尽时），原生IPv6互联网用户的比例约为0.2%。统计数据显示，非原生IPv6的用户（例如6to4或Teredo，红线）的比例已降至几乎为零，并且从那时起变得微不足道。在一年内，IPv6互联网用户的数量翻了一番，达到了0.4%——虽然是一个小数字，但仍然是增长。到2013年1月，IPv6互联网的用户已经突破了1%的大关，我们进入了2014年，IPv6互联网用户接近3%，大约为7200万用户。在交付本章时，即2014年4月，我们达到了3.5%。目前，IPv6互联网用户的数量大约每九个月翻一番。
 - en: These are just a few selected events and milestones of the Internet’s history.
     Keep watching as more history unfolds. We are all creating it together.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些只是互联网历史中的一些精选事件和里程碑。继续关注，更多的历史将继续展开。我们大家都在共同创造这段历史。
 - en: '![Google’s global IPv6 adoption statistics as of spring 2014](images/ipv6_0101.png.jpg)Figure 1-1. Google’s
     global IPv6 adoption statistics as of spring 2014'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: '![2014年春季Google全球IPv6采纳统计数据](images/ipv6_0101.png.jpg)图1-1. 2014年春季Google全球IPv6采纳统计数据'
 - en: The History of IPv6
+  id: totrans-31
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPv6的历史
 - en: The Internet Engineering Task Force (IETF) began the effort to develop a successor
     protocol to IPv4 in the early 1990s. Several parallel efforts to solve the foreseen
     address space limitation and to provide additional functionality began simultaneously.
     The IETF started the Internet Protocol Next Generation (or *IPng*) area in 1993
     to investigate the different proposals and to make recommendations for further
     procedures.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 互联网工程任务组（IETF）在1990年代初开始着手开发IPv4的继任协议。为了解决预见到的地址空间限制并提供额外的功能，多个平行的努力同时展开。IETF于1993年启动了互联网协议下一代（或*IPng*）领域，旨在研究不同的提案并为进一步的程序提供建议。
 - en: The IPng area directors of the IETF recommended the creation of IPv6 at the
     Toronto IETF meeting in 1994\. Their recommendation is specified in RFC 1752,
     “The Recommendation for the IP Next Generation Protocol.” The Directors formed
@@ -204,8 +274,10 @@
     or if the remaining time would allow only the development of an address space
     solution. In 1994, the ALE working group projected that the IPv4 address exhaustion
     would occur sometime between 2005 and 2011 based on the available statistics.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: IETF的IPng领域负责人在1994年的多伦多IETF会议上推荐创建IPv6。他们的建议在RFC 1752中有所规定，“IP下一代协议的推荐”。这些负责人组建了一个地址生命周期期望（ALE）工作组，旨在确定IPv4的预期生命周期是否足够支持开发具有新功能的协议，或者剩余时间是否仅足以开发一个地址空间解决方案。1994年，ALE工作组预计，根据现有统计数据，IPv4地址耗尽将发生在2005年至2011年之间。
 - en: 'For those of you who are interested in the different proposals, here’s some
     more information about the process (from RFC 1752). There were four main proposals:
     CNAT, IP Encaps, Nimrod, and Simple CLNP. Three more proposals followed: the P
@@ -216,31 +288,48 @@
     The TP/IX working group changed its name to Common Architecture for the Internet
     (CATNIP). The main proposals were now CATNIP, TUBA, and SIPP. For a short discussion
     of the proposals, refer to RFC 1752.'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于那些对不同提案感兴趣的人，这里有一些关于过程的更多信息（来自 RFC 1752）。主要有四个提案：CNAT、IP Encaps、Nimrod 和 Simple
+    CLNP。随后又有三个提案：P Internet Protocol (PIP)、Simple Internet Protocol (SIP) 和 TP/IX。1992年3月的圣地亚哥
+    IETF 会议后，Simple CLNP 发展成了带有更大地址的 TCP 和 UDP（TUBA），而 IP Encaps 变成了 IP 地址封装（IPAE）。IPAE
+    与 PIP 和 SIP 合并，并自称为 Simple Internet Protocol Plus (SIPP)。TP/IX 工作组更名为互联网通用架构（CATNIP）。现在的主要提案是
+    CATNIP、TUBA 和 SIPP。关于这些提案的简短讨论，请参阅 RFC 1752。
 - en: Note
+  id: totrans-35
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: CATNIP is specified in RFC 1707; TUBA in RFCs 1347, 1526, and 1561; and SIPP
     in RFC 1710.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: CATNIP 在 RFC 1707 中有规范；TUBA 在 RFC 1347、1526 和 1561 中有规范；SIPP 在 RFC 1710 中有规范。
 - en: The Internet Engineering Steering Group approved the IPv6 recommendation and
     drafted a Proposed Standard on November 17, 1994\. RFC 1883, “Internet Protocol,
     Version 6 (IPv6) Specification,” was published in 1995\. The core set of IPv6
     protocols became an IETF Draft Standard on August 10, 1998\. This included RFC
     2460, which obsoleted RFC 1883.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 互联网工程指导小组（IESG）于 1994 年 11 月 17 日批准了 IPv6 的建议，并草拟了一个提议标准。RFC 1883，《互联网协议，第六版（IPv6）规范》，于
+    1995 年发布。IPv6 的核心协议集于 1998 年 8 月 10 日成为 IETF 草案标准。此标准包括 RFC 2460，废除了 RFC 1883。
 - en: Note
+  id: totrans-38
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Why isn’t the new protocol called IPv5? The version number 5 could not be used,
     because it had been allocated to the experimental stream protocol.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 为什么新协议不叫 IPv5？版本号 5 无法使用，因为它已经被分配给了实验流协议。
 - en: One of the big challenges but also one of the main opportunities of IPv6 is
     the fact that we can redesign our networks for the future. This is what enterprises
     should focus on most when planning their IPv6 integration in order to make sure
@@ -251,31 +340,44 @@
     has changed in the many years of operating our networks. So it helps to free our
     minds for thinking in new ways. One funny little quote that demonstrates what
     I am talking about is included below.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6 的一个重大挑战，同时也是主要机遇之一，就是我们可以重新设计网络以适应未来。这是企业在规划 IPv6 集成时应最关注的，确保他们不仅仅是将旧有的概念复制到新协议上。我们必须重新思考我们的架构。这一千载难逢的机会可以用来摆脱许多遗留问题。一份有趣的
+    RFC 有助于在这一过程中看到全局，那就是 RFC 6250，《IP 模型的演变》。它展示了在多年运营网络的过程中，这一模型发生了多大的变化。因此，它有助于解放我们的思维，以便从新的角度思考。以下是一个有趣的小引述，能体现我所说的内容。
 - en: 'In this RFC there is mention of the first IP model and addressing architecture,
     and it quotes RFC 791, which defined IPv4 and the IPv4 address:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这份 RFC 中提到了第一个 IP 模型和寻址架构，并引用了 RFC 791，该文档定义了 IPv4 和 IPv4 地址：
 - en: '*Addresses are fixed length of four octets (32 bits). An address begins with
     a one-octet network number, followed by a three-octet local address. This three-octet
     field is called the “rest” field.*'
+  id: totrans-42
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: '*地址长度固定为四个字节（32 位）。地址以一个字节的网络号开始，后跟三个字节的本地地址。这个三字节字段被称为“剩余”字段。*'
 - en: This is how far we have come. Now project this into the future with the vast
     IPv6 address space in mind. Making meaningful use of the new address architecture
     and the enormous space will write the next chapter of the evolution of the IP
     model.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 这就是我们走到的地步。现在，考虑到 IPv6 广阔的地址空间，将这一点展望到未来。如何有意义地利用新的地址架构和巨大的空间，将书写 IP 模型演变的下一个篇章。
 - en: Note
+  id: totrans-44
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: 'Here’s a quote from Vint Cerf:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里是 Vint Cerf 的一句引述：
 - en: The vast IPv6 address space opens up serious opportunities for the re-examination
     of the notion of address. The IETF has only allocated 1/8^(th) of the IPv6 address
     space for current use. The remaining 7/8^(ths) of the address space is still to
@@ -283,36 +385,50 @@
     address space in ways that are different from topological end points. This is
     precisely the reason that a focus on the future of IPv6 is so important at this
     point in the evolution of the Internet.
+  id: totrans-46
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 广阔的IPv6地址空间为重新审视地址的概念提供了巨大机会。IETF仅为当前使用分配了IPv6地址空间的1/8。剩余的7/8地址空间仍待分配。因此，我们可能能够以不同于拓扑端点的方式解释IP地址空间的新段。这正是当前互联网发展过程中，关注IPv6未来的重要原因。
 - en: What’s New in IPv6?
+  id: totrans-47
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPv6有什么新特点？
 - en: IPv6 is an evolution of IPv4\. The protocol is installed as a software upgrade
     in most devices and operating systems. If you buy up-to-date hardware and operating
     systems, IPv6 is usually supported and needs only activation or configuration.
     In many cases it is activated by default. Currently available transition mechanisms
     allow the step-by-step introduction of IPv6 without putting the current IPv4 infrastructure
     at risk.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6是IPv4的演进。该协议作为软件升级在大多数设备和操作系统中安装。如果你购买的是最新的硬件和操作系统，IPv6通常会得到支持，只需激活或配置。在许多情况下，它默认是激活的。目前可用的过渡机制允许逐步引入IPv6，而不会危及当前的IPv4基础设施。
 - en: 'Here is an overview of the main changes:'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是主要变化的概述：
 - en: '*Extended address space*'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '*扩展的地址空间*'
 - en: The address format is extended from 32 bits to 128 bits. This provides multiple
     IP addresses for every grain of sand on the planet. In addition, it also allows
     for hierarchical structuring of the address space in favor of optimized global
     routing.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 地址格式从32位扩展到128位。这为地球上每一粒沙子提供了多个IP地址。此外，它还允许在地址空间中进行层次化结构，从而优化全球路由。
 - en: '*Autoconfiguration*'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: '*自动配置*'
 - en: Perhaps the most intriguing new feature of IPv6 is its *Stateless Address Autoconfiguration
     (SLAAC)* mechanism. When a booting device in the IPv6 world comes up and asks
     for its network prefix, it can get one or more network prefixes from an IPv6 router
@@ -326,47 +442,65 @@
     indispensable. Imagine reconfiguring your DHCP server at home when you buy a new
     television! Stateless Address Autoconfiguration also allows for easy connection
     of mobile devices, such as a smartphone, when moving to foreign networks.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 也许IPv6最吸引人的新特性是其*无状态地址自动配置（SLAAC）*机制。当一个设备在IPv6环境中启动并请求其网络前缀时，它可以从其连接上的IPv6路由器获取一个或多个网络前缀。通过这些前缀信息，设备可以使用其MAC标识符或一个私有随机数来自动配置一个或多个有效的全球IP地址，从而构建一个唯一的IP地址。在IPv4环境中，我们必须为每个设备分配唯一的IP地址，通常是通过手动配置或使用DHCP。SLAAC应当能简化网络管理员的工作，并大幅节省维护IP网络的成本。此外，假设将来在家中需要IP地址的设备数量不断增加，这一特性将变得不可或缺。想象一下，当你购买一台新电视时，必须重新配置家里的DHCP服务器！无状态地址自动配置还使得移动设备（例如智能手机）在切换到外国网络时能够轻松连接。
 - en: '*Simplification of header format*'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: '*头部格式简化*'
 - en: The IPv6 header is much simpler than the IPv4 header and has a fixed length
     of 40 bytes. This allows for faster processing. It basically accommodates two
     times 16 bytes for the Source and Destination address and only 8 bytes for general
     header information.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6头部比IPv4头部简单得多，其固定长度为40字节。这允许更快的处理。它基本上包含了两组16字节的源地址和目标地址，并且只有8字节用于一般的头部信息。
 - en: '*Improved support for options and extensions*'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: '*增强的选项和扩展支持*'
 - en: IPv4 integrates options in the base header, whereas IPv6 carries options in
     so-called *Extension headers*, which are inserted only if they are needed. Again,
     this allows for faster processing of packets. The base specification describes
     a set of six Extension headers, including headers for routing, Quality of Service,
     and security.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 'IPv4将在基本头部中集成选项，而IPv6则在所谓的*扩展头部*中携带选项，只有在需要时才插入这些选项。再次，这允许更快地处理数据包。基本规范描述了一组六个扩展头部，包括路由、服务质量和安全头部。  '
 - en: Why Do We Need IPv6?
+  id: totrans-58
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '为什么我们需要IPv6？  '
 - en: For historic reasons, organizations and government agencies in the United States
     used the largest part of the allocatable IPv4 address space. The rest of the world
     had to share what was left over. Some organizations used to have more IPv4 address
     space than the whole of Asia (where more than 50% of the world’s population live).
     This is one explanation of why the deployment of IPv6 in Asia is much more common
     than in Europe and the United States.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '出于历史原因，美国的组织和政府机构使用了大部分可分配的IPv4地址空间。世界其他地区必须共享剩余的部分。有些组织曾拥有比整个亚洲还多的IPv4地址空间（亚洲拥有超过50%世界人口）。这也解释了为什么IPv6在亚洲的部署比在欧洲和美国要普遍得多。  '
 - en: Note
+  id: totrans-60
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: '注意  '
 - en: 'An interesting resource site for statistics can be found at the following link:
     [http://www.internetworldstats.com/stats.htm](http://www.internetworldstats.com/stats.htm).'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: '一个有趣的统计资源网站可以通过以下链接访问：[http://www.internetworldstats.com/stats.htm](http://www.internetworldstats.com/stats.htm)。  '
 - en: The IPv4 address space has a theoretical limit of 4.3 billion addresses. However,
     early distribution methods allocated addresses inefficiently. Consequently, some
     organizations obtained address blocks much larger than they needed, and addresses
@@ -378,16 +512,20 @@
     that in the future we will need IP addresses for billions of devices. Vendors
     in all industries are developing monitoring, control, and management systems based
     on IP.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv4地址空间的理论上限为43亿个地址。然而，早期的分配方法效率低下。结果，一些组织获得了远超其需求的地址块，而本可以在其他地方使用的地址如今已不可用。如果可以重新分配IPv4地址空间，它将能更有效地使用，但这一过程是不可行的，全球重新分配和重新编号也是不现实的。除此之外，这样做也没多大意义，因为即使是43亿个地址，在当前的增长速度下也很快就不够用了。我们必须考虑到未来我们将需要为数十亿的设备分配IP地址。各行各业的厂商都在开发基于IP的监控、控制和管理系统。
 - en: As the previous section shows, the IPv6 working group has done more than just
     extend the address space. For many complex networks of today and tomorrow, and
     for the number of IP devices of all types, the Autoconfiguration capability of
     IPv6 will be a necessity. The management of such services can’t be accomplished
     with traditional addressing methods, and Stateless Address Autoconfiguration will
     also help to reduce administrative costs for organizations.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: '正如前一节所示，IPv6工作组做的远不止扩展地址空间。对于当今及未来的许多复杂网络，以及各种类型IP设备的数量，IPv6的自动配置功能将成为必要。传统的地址分配方法无法管理这些服务，*无状态地址自动配置*也将帮助减少组织的管理成本。  '
 - en: 'The extended address space and the restoration of the original end-to-end model
     of the Internet allows for the elimination of Network Address Translation (NAT),
     in which a single or a few public IPv4 address(es) are used to connect a high
@@ -406,16 +544,21 @@
     or the creation of a complex address-mapping scheme. The amplification of limited
     address space, the primary benefit of NAT, is not needed with IPv6 and therefore
     is not supported by design.'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 扩展的地址空间以及恢复互联网原始的端到端模型，使得可以消除网络地址转换（NAT）。在NAT中，一个或少数几个公共IPv4地址用于通过将内部地址映射到公共地址，连接大量使用私有地址的用户到互联网。NAT是作为解决IPv4地址空间限制的短期修复方案引入的，因为IPv6当时尚未准备好（参见RFC
+    1631；原始的NAT规范在2001年被RFC 3022废止）。NAT在IPv4网络中变得非常常见，但它们在管理和操作中带来了严重的缺点：为了进行地址映射，NAT会修改IP头中的终端节点地址。通常，应用层网关（ALG）会与NAT一起使用，以提供应用层透明性。有一长串协议和应用程序在NAT环境中使用时会出现问题，IPsec和对等应用程序就是两个著名的例子。NAT的另一个已知问题是在合并网络时私有地址空间的重叠，这需要对其中一个网络进行重新编号或创建复杂的地址映射方案。NAT的主要优点——扩大有限的地址空间，在IPv6中不再需要，因此设计上不予支持。
 - en: By introducing a more flexible header structure (Extension headers), the protocol
     has been designed to be open and extensible. In the future, new extensions can
     easily be defined and integrated in the protocol set. Based on the fact that IPv4
     has been in use for almost 30 years, the development of IPv6 was based on the
     experience with IPv4 and focused on creating an extensible foundation; you can
     expect it to last a long time.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过引入更灵活的头部结构（扩展头部），该协议被设计为开放且可扩展的。未来，可以轻松地定义并集成新的扩展到协议集中。基于IPv4已经使用近30年的事实，IPv6的开发是基于对IPv4的经验，并着重于创建一个可扩展的基础；你可以期待它能够持续很长时间。
 - en: Broadband penetration rates in many countries continue to accelerate and, in
     some cases, have reached 65% or more. This level of always-on connectivity with
     substantial bandwidth capacity means that there is greater opportunity for devices
@@ -435,8 +578,11 @@
     IPv6, will help to usher in a new era of computerization in the home, but hopefully
     without the enormous deployment headache that it would cause if it were attempted
     with the current protocol.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多国家的宽带普及率继续加速，在某些情况下，已达到65%或更高。这种“始终在线”且带宽容量可观的连接方式意味着设备连接的机会更大。而且许多消费电子产品制造商已经抓住了这一机会。在线游戏不再是PC游戏的专利。游戏主机，如索尼的PlayStation
+    4、Xbox One或任天堂Wii U，都已经增加了在线功能。许多电信运营商也在其IP网络上提供电视类服务（电影、音频内容等）。甚至家电产品，如冰箱、炉子、热水器和浴缸等，也开始联网。虽然将浴缸联网看起来有些荒谬，但许多此类设备被联网的目的是为了实现电力管理、远程控制、故障排除，以及远程监控/监测等功能。我们正步入智能建筑和智能城市的时代。这个网络化过程的最终结果是需要进行寻址的设备数量大增，其中许多设备将不具备标准的用户界面。在这些情况下，IPv6地址空间结合邻居发现、无状态自动配置和移动IPv6等特性，将帮助迎来家庭计算机化的新时代，但希望能够避免当前协议部署所带来的巨大头痛。
 - en: The growth of the wireless industry (both cellular and wireless networks) has
     been nothing short of phenomenal. In more and more countries the number of cell
     phones actually exceeds the number of people. In this world of continuous reachability
@@ -453,8 +599,10 @@
     efficient manner and providing the overlay mechanisms for users to maintain their
     connections when moving between networks, even if those networks do not use the
     same type of media access.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 无线行业（包括蜂窝网络和无线网络）的增长可谓是现象级的。在越来越多的国家，手机数量实际上超过了人口数量。在这个持续可达、随时能够获取信息的世界中，终端用户对移动性的需求变得尤为重要。从运营商的角度来看，特别是那些支持多种媒体接入类型（例如3G、WiMax、LTE）的运营商，利用IP作为传输和路由数据包的方式是有道理的。智能手机上网、与其他用户玩游戏、打电话，甚至播放视频内容。与其使用不同的传输协议支持所有这些功能并创建中介应用来促进通信，不如更高效地利用现有的互联网和公司网络基础设施。我们稍后会看到，从技术角度来看，移动IPv6的设计非常优雅，能够高效地支持移动用户，并提供覆盖机制，使用户在不同网络之间移动时保持连接，即使这些网络使用的媒体接入类型不同。
 - en: There still remain some questions about the value of IPv6 to the enterprise,
     and it is worth conceding that each organization needs to evaluate the benefits
     and best timing of IPv6 for their own internal use. In many instances, organizations
@@ -467,8 +615,10 @@
     minimizes cost. The step-by-step introduction allows you to learn as you go, thereby
     saving a lot of money and headaches, and you can do it without putting the current
     IPv4 infrastructure at risk.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于IPv6对企业的价值仍然存在一些疑问，值得承认的是，每个组织都需要评估IPv6对其内部使用的好处和最佳时机。在许多情况下，组织可以找到巧妙的方法，利用IPv6解决“痛点”问题，而不必迁移整个网络。采用可以逐步进行，制定一个最小化集成难题的计划，并确保当需要“切换开关”时，一切都已准备就绪。正如许多案例研究所示，经过精心规划的引入成本比预期要低得多；节省成本的主要因素是提前规划使你能够使用所有的更新周期，从而最大限度地减少成本。逐步引入使你能够边学边做，从而节省大量资金和麻烦，并且可以在不影响现有IPv4基础设施的情况下进行。
 - en: But with all these thoughts and considerations, let’s not forget the most essential
     advantage of IPv6\. With its new structure and extensions, IPv6 provides the foundation
     for a new generation of services. There will be devices and services on the market
@@ -481,22 +631,30 @@
     manner, by taking one step at a time to prepare the infrastructure for these new
     services. This protects you from having to introduce a business-critical application
     based on IPv6 at unreasonably high cost with no time for thorough planning.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 但在考虑了所有这些思考和顾虑后，我们也不能忘记IPv6最根本的优势。通过其新的结构和扩展，IPv6为新一代服务提供了基础。未来市场上将会出现一些无法用IPv4开发的设备和服务。这为厂商和服务提供商带来了新的市场和商业机会。先行者的机会是巨大的，延长当前产品生命周期的机会也同样可观，因为可以通过将技术与IPv6结合来刷新产品。另一方面，这意味着组织和用户在中期将需要此类服务。因此，建议通过逐步而非破坏性的方式小心地集成新协议，为这些新服务做好基础设施准备。这可以避免在没有充分规划的情况下，以不合理的高成本引入基于IPv6的业务关键应用。
 - en: Common Misconceptions
+  id: totrans-70
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 常见误解
 - en: 'When considering all these advantages, maybe the question should be: “Why not
     IPv6?” When talking to customers, we often find that they share a similar set
     of misconceptions preventing them from considering IPv6\. Here are the most common
     ones:'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 考虑到所有这些优势，或许应该问的是：“为什么不选择IPv6？”与客户交流时，我们经常发现他们有一套类似的误解，阻止他们考虑IPv6。以下是最常见的误解：
 - en: “The introduction of IPv6 puts our current IP infrastructure—our networks and
     services—at risk.”
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: “引入IPv6会使我们现有的IP基础设施——我们的网络和服务——面临风险。”
 - en: This concern is unsubstantiated. A major focus in IPv6’s development was to
     create integration mechanisms that allow both protocols to coexist peacefully.
     You can use IPv6 both in tandem with and independently of IPv4\. It is possible
@@ -506,30 +664,41 @@
     in [Chapter 7](ch07.html "Chapter 7. Transition Technologies"). Your biggest risk
     is to not take advantage of all the opportunities IPv6 offers. You can only use
     these opportunities if you plan while there is time.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种担忧没有依据。IPv6发展的一个主要焦点是创建允许两种协议和平共存的集成机制。你可以将IPv6与IPv4一起使用，也可以独立使用IPv6。可以在引入IPv6的同时使用它来访问新的服务，同时保留IPv4来访问传统服务。这不仅确保了不间断地访问IPv4服务，而且还允许逐步引入IPv6。我在[第7章](ch07.html
+    "第7章：过渡技术")中讨论了这些机制。你最大的风险是不利用IPv6所提供的所有机会。只有在有时间的情况下进行规划，你才能利用这些机会。
 - en: “The IPv6 protocol is immature and hasn’t proven that it stands the test of
     time or whether it is capable of handling the requirements.”
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: “IPv6协议还不成熟，尚未证明它能够经得起时间的考验，或者它是否能够满足需求。”
 - en: This was a concern of many people back in 2006 when we published the second
     edition of this book. Now in 2014 this is not true anymore. Many ISPs and organizations
     are deploying IPv6, vendors are getting up to speed, and the working groups have
     developed and optimized mechanisms that help with the integration. There is no
     technical reason not to do IPv6.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是2006年我们发布本书第二版时，许多人关心的问题。而到了2014年，这种说法已不再成立。许多ISP和组织正在部署IPv6，厂商也在加快步伐，工作组已经开发并优化了有助于集成的机制。没有技术上的理由不使用IPv6。
 - en: “The costs of introducing IPv6 are too high.”
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: “引入IPv6的成本太高。”
 - en: There will certainly be costs associated with adopting IPv6\. In many cases,
     newer networks will find that the level of IPv6 support in their current infrastructure
     is actually high. Regardless, the transition will necessitate some hardware and
     software costs. Organizations will need to create new designs, review current
     concepts, train their IT staff, and may need to seek outside expertise in order
     to take full advantage of IPv6.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 采用IPv6肯定会有一些成本。在许多情况下，较新的网络会发现它们现有基础设施中对IPv6的支持实际上已经很高。不管怎样，过渡过程中将需要一些硬件和软件的投入。组织需要创建新的设计，审查当前的概念，培训IT人员，可能还需要寻求外部专家的帮助，以便充分利用IPv6。
 - en: However, the cost savings associated with IPv6 are becoming easier to define.
     Networks based on IPv4 are becoming increasingly more complex. New IT services
     such as VoIP, instant messaging, video teleconferencing, IPTV, and unified communications
@@ -541,12 +710,16 @@
     a cleaner and more cost-effective model in the long run than IPv4 can provide.
     And the fact is that an investment in IPv4 is an investment in an end-of-life
     technology, while an investment in IPv6 is an investment in the future technology.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，IPv6带来的成本节约已经变得越来越容易定义。基于IPv4的网络变得越来越复杂。新的IT服务，如VoIP、即时消息、视频会议、IPTV和统一通信，增加了中间件层和复杂性。正在合并的组织或进行B2B交易的公司正在实施具有高管理成本且难以排查故障的NAT重叠解决方案。而且，日益增长的移动设备和网络设备市场需要强大的访问模型，而这些模型在IPv4环境中既昂贵又难以实现。在所有这些情况下，IPv6从长远来看提供了比IPv4更简洁且具有成本效益的模型。事实上，投资IPv4就是投资一个即将淘汰的技术，而投资IPv6则是在投资未来的技术。
 - en: “With Stateless Address Autoconfiguration, we will not be able to control or
     monitor network access.”
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: “通过无状态地址自动配置（Stateless Address Autoconfiguration），我们将无法控制或监控网络访问。”
 - en: While this statement may generally be true for networks that widely utilize
     Stateless Address Autoconfiguration, administrators will have a choice about their
     level of control. DHCPv6 as defined in RFC 3315 has been extended to support two
@@ -556,12 +729,16 @@
     server. DHCPv6 also offers a Stateless mode in which DHCPv6 clients simply request
     configuration options from a DHCPv6 server and use other means, such as Stateless
     Address Autoconfiguration, to obtain an IPv6 address.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然对于广泛使用无状态地址自动配置的网络，这种说法通常是正确的，但管理员将有选择其控制级别的权利。根据RFC 3315定义的DHCPv6已经扩展以支持两种常见的操作模式：有状态和无状态。有状态模式是当前使用DHCP（用于IPv4）的用户熟悉的模式，其中一个节点（DHCP客户端）动态地从DHCP服务器请求IP地址和配置选项。DHCPv6还提供了无状态模式，在这种模式下，DHCPv6客户端只是从DHCPv6服务器请求配置选项，并通过其他方式，如无状态地址自动配置，来获取IPv6地址。
 - en: “Our Internet Service Provider (ISP) does not offer IPv6 services, so we can’t
     use it.”
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: “我们的互联网服务提供商（ISP）不提供IPv6服务，因此我们无法使用它。”
 - en: You do not have to wait for your ISP to use IPv6 in your corporate or private
     network. If you want to connect to the global IPv6 Internet, you can use one of
     the transition mechanisms and tunnel your IPv6 packets over the IPv4 infrastructure
@@ -570,11 +747,17 @@
     customers to support IPv6\. And this should be your standard requirement in any
     renewal of contract and SLAs (Service Level Agreements). If your ISP does not
     provide IPv6 services, consider finding a new provider.
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 你不必等待你的 ISP 在公司或私人网络中启用 IPv6。如果你想连接到全球 IPv6 网络，可以使用过渡机制之一，通过 ISP 的 IPv4 基础设施传输你的
+    IPv6 数据包。这对于较小的组织来说是可行的。另一方面，在 2014 年写作时，你可以期望大型 ISP 面向企业客户时会支持 IPv6。这应该成为你在任何合同续签和服务水平协议（SLA）中的标准要求。如果你的
+    ISP 不提供 IPv6 服务，考虑更换服务提供商。
 - en: “It would be too expensive and complex to upgrade our backbone.”
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: “升级我们的骨干网络将会太昂贵且复杂。”
 - en: The transition mechanisms make it possible to use IPv6 where appropriate without
     dictating an order of upgrade. Usually for the backbone it is advisable to wait
     for the regular life cycle, when hardware needs to be exchanged anyway. Make sure
@@ -586,11 +769,18 @@
     only with the next refresh or redesign cycle, because it substantially reduces
     operational cost. In this scenario we will start to tunnel IPv4 packets over IPv6
     backbones. IPv4 as a service is the new keyword.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 过渡机制使得在适当的情况下可以使用 IPv6，而无需规定升级顺序。通常对于骨干网络，建议等待常规生命周期，当硬件需要更换时再进行升级。确保选择支持性能
+    IPv6 路由的硬件。与此同时，你可以通过 IPv4 骨干网络隧道传输你的 IPv6 数据包。使用 MPLS 的网络可以轻松地通过其 IPv4 MPLS 骨干网络隧道传输
+    IPv6 数据包。你可以在[第7章](ch07.html "第7章. 过渡技术")中了解更多内容。越来越多的组织开始考虑在下一个更新或重新设计周期中将其骨干网和数据中心迁移到仅支持
+    IPv6，因为这能显著降低运营成本。在这种情况下，我们将开始通过 IPv6 骨干网隧道传输 IPv4 数据包。IPv4 作为一种服务是新的关键词。
 - en: “It would be too complex and expensive to port all of our applications to IPv6.”
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: “将所有应用程序迁移到 IPv6 会太复杂且成本过高。”
 - en: The effort necessary to port applications to run over IPv6 is often much lower
     than expected. If an application is well written, it may simply run over IPv6
     without modification. Instead of assuming that it won’t work, test it to find
@@ -602,11 +792,17 @@
     it is recommendable for enterprise customers to start the planning process early
     and provide good labs for the application teams to test their applications before
     there is time pressure.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 将应用程序迁移到 IPv6 上运行所需的工作量通常远低于预期。如果应用程序编写得很好，它可能只需通过 IPv6 就能正常运行，而无需修改。不要假设它无法工作，测试一下就知道了。对于需要修改但尚不可用的应用程序，或者对于那些迁移没有意义的应用程序，有可用的机制可以支持
+    IPv4 应用程序在 IPv6 网络中运行，或者支持 IPv6 应用程序在 IPv4 网络中运行。另一种选择是运行双栈网络，在这种网络中，你可以使用 IPv4
+    访问 IPv4 应用程序，使用 IPv6 访问 IPv6 应用程序。无论如何，建议企业客户尽早开始规划，并为应用团队提供良好的实验环境，让他们在没有时间压力的情况下测试应用程序。
 - en: “We have enough IPv4 addresses; we don’t need IPv6.”
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: “我们有足够的 IPv4 地址；我们不需要 IPv6。”
 - en: True—if you have enough IPv4 addresses, there may be no immediate need to integrate
     IPv6 today. But ignoring IPv6 for this reason is a perspective that assumes that
     your network stands completely isolated from the rest of the world, including
@@ -616,92 +812,130 @@
     in Tokyo may eventually become complicated if you do not support IPv6\. Plus,
     the assumption that IPv6 is about address space only doesn’t account for the advanced
     features that IPv6 brings to the table.
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是真的——如果你有足够的IPv4地址，今天可能没有迫切需要集成IPv6。但出于这个原因忽略IPv6是一种假设，认为你的网络完全与外界隔离，包括你的供应商、合作伙伴和客户。IPv6在亚洲和欧洲的普及进展比在美国更快，因此，即使你在丹佛的运营有足够的地址空间，与你在东京的合作伙伴组织互联时，如果你不支持IPv6，最终可能会变得复杂。此外，认为IPv6仅仅是关于地址空间的假设，并没有考虑到IPv6所带来的先进功能。
 - en: When Is It Time for IPv6?
+  id: totrans-89
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 什么时候是切换到IPv6的时机？
 - en: The answer in 2014 is *now*! If the rest of the world moves to IPv6 while you
     insist on continuing to use IPv4, you will exclude yourself from global communication
     and reachability. The risks if you wait too long include losing potential customers
     and access to new markets and the inability to use new IPv6-based business applications.
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 2014年的答案是*现在*！如果世界其他地方都迁移到IPv6，而你仍坚持使用IPv4，那么你将把自己排除在全球通信和可达性之外。等待太久的风险包括失去潜在客户、无法进入新市场以及无法使用基于IPv6的新业务应用。
 - en: 'There is a golden rule in IT: “Never touch a running system.” As long as your
     IPv4 infrastructure runs well and fulfills your needs, there is no reason to change
     anything. But from now on, whenever you invest in your infrastructure, you should
     consider IPv6\. An investment in the new technology gives it a much longer lifetime
     and keeps your network state-of-the-art.'
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: IT领域有一条黄金法则：“永远不要触碰一个正在运行的系统。”只要你的IPv4基础设施运行良好并满足你的需求，就没有理由更改任何东西。但从现在起，每当你投资于基础设施时，应该考虑IPv6。对新技术的投资将使其拥有更长的生命周期，并保持网络的最前沿。
 - en: 'These are the main indicators that it may be time for you to consider switching
     to or integrating IPv6:'
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是一些主要的指标，表明你可能需要考虑切换或集成IPv6：
 - en: You need to extend or fix your IPv4 network or NAT implementation.
+  id: totrans-93
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你需要扩展或修复你的IPv4网络或NAT实现。
 - en: You are running out of address space.
+  id: totrans-94
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你已用尽地址空间。
 - en: You want to prepare your network for applications that are based on advanced
     features of IPv6.
+  id: totrans-95
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你想为基于IPv6高级功能的应用程序准备网络。
 - en: You need end-to-end security for a large number of users and you do not have
     the address space, or you struggle with a NAT implementation.
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你需要为大量用户提供端到端的安全性，但你没有足够的地址空间，或者你在NAT实现上遇到了困难。
 - en: You need to replace your hardware or applications that are at the end of their
     life cycles. Make sure you buy products that support IPv6 adequately, even if
     you don’t enable it right away.
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你需要更换那些已经进入生命周期末期的硬件或应用程序。确保购买支持IPv6的产品，即使你暂时不启用它。
 - en: You want to introduce IPv6 while there is no time pressure.
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你希望在没有时间压力的情况下引入IPv6。
 - en: 'The following provisions can be taken in order to prepare for IPv6 adequately:'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了充分准备IPv6，可以采取以下措施：
 - en: Build internal knowledge, educate IT staff, and create a test network.
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 构建内部知识，培训IT员工，并创建测试网络。
 - en: Include IPv6 in your IT strategy.
+  id: totrans-101
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将IPv6纳入你的IT战略。
 - en: Design future-proof network, security, and service concepts while you have time.
+  id: totrans-102
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在你有时间的情况下，设计未来-proof的网络、安全和服务概念。
 - en: Create integration scenarios based on your network and requirements.
+  id: totrans-103
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 根据你的网络和需求创建集成场景。
 - en: Put IPv6 support on all of your hardware and software purchasing guidelines.
     Be specific about which features (RFCs) must be supported. Don’t forget to add
     IPv6 requirements to outsourcing and service contracts, as well as SLAs.
+  id: totrans-104
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在所有硬件和软件采购指南中增加对IPv6的支持要求。具体说明必须支持哪些特性（RFC）。不要忘记在外包和服务合同以及SLA中添加IPv6要求。
 - en: Compel your vendors to add IPv6 support to their products.
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 强迫你的供应商为他们的产品添加IPv6支持。
 - en: If you do this, you can determine the right moment for the introduction of IPv6
     in your network. You can also assess whether a further investment in your IPv4
     infrastructure makes sense or whether introducing IPv6 would be a better way to
     go.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你这么做，你可以决定在你的网络中引入IPv6的最佳时机。你也可以评估是否继续投资IPv4基础设施更有意义，或者引入IPv6会是一个更好的选择。
 - en: There will be no “flag day” for IPv6 like there was for the 1983 move from NCP
     to IPv4\. Probably there will be no killer application either, so don’t wait for
     one. Or as some people like to say, the killer application for IPv6 is the Internet.
@@ -711,50 +945,73 @@
     at risk or force you to exchange hardware or software before you are ready, and
     it allows you to become familiar with the protocol, to experiment, to learn, and
     to integrate what you’ve learned into your strategy.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6 不会像 1983 年从 NCP 转向 IPv4 时那样有一个“切换日”。可能也不会有杀手级应用程序，所以不要指望出现一个。或者正如一些人喜欢说的，IPv6
+    的杀手级应用程序就是互联网。IPv6 将逐步融入我们的网络和互联网中。根据您的需求，采取逐步实施 IPv6 的方法可能是最具成本效益的整合方式。这种方法不会使您的当前基础设施面临风险，也不会强迫您在准备好之前更换硬件或软件，它允许您熟悉该协议，进行实验，学习，并将所学整合到您的策略中。
 - en: Note
+  id: totrans-108
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: You may want to enable IPv6 in your public services first. Due to the lack of
     IPv4 addresses, ISPs that want to grow their customer base (and who does not want
     to do that?) make use of NAT-type mechanisms to extend their IPv4 address space.
     This includes CGN (Carrier Grade NAT), which means multiple customers share one
     single public IPv4 address and sit behind multiple layers of NAT.
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能希望首先在公共服务中启用 IPv6。由于 IPv4 地址的匮乏，想要扩展客户基础的 ISP（谁不想这么做呢？）使用 NAT 类型的机制来扩展其 IPv4
+    地址空间。这包括 CGN（运营商级 NAT），即多个客户共享一个公共 IPv4 地址，并且位于多个 NAT 层后面。
 - en: These users may have a bad user experience accessing your IPv4 website, and
     for e-commerce or other more complex services it may even fail. The users will
     not know that it is the provider’s CGN causing the issue and will blame your website
     for their problems. If you provide your website dual-stack, these users can access
     it over IPv6 and bypass the IPv4 NATs.
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些用户可能在访问您的 IPv4 网站时体验不佳，对于电子商务或其他更复杂的服务，甚至可能完全无法访问。用户并不知道是提供商的 CGN 导致了问题，而会把责任归咎于您的网站。如果您为网站提供双栈，这些用户可以通过
+    IPv6 访问您的网站，绕过 IPv4 的 NAT。
 - en: Note
+  id: totrans-111
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Find more information on CGN in the “NAT to extend IPv4 address space” section
     in [Chapter 7](ch07.html "Chapter 7. Transition Technologies").
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[第 7 章](ch07.html "第7章：过渡技术")的“通过 NAT 扩展 IPv4 地址空间”部分中可以找到更多关于 CGN 的信息。
 - en: IPv6 Status and Vendor Support
+  id: totrans-113
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPv6 状态和供应商支持
 - en: As previously mentioned, IPv6 is implemented in most up-to-date versions of
     routing and operating systems. For standard applications, assume that IPv6 support
     has already been added or will be added with their next major release at the latest.
     For creating an IPv6 integration plan for your corporate network, you will need
     to assess the status and degree of IPv6 support with each vendor individually.
     Many vendors have an information site that can often be found at *http://www.<vendor>.com/ipv6*.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，IPv6 已在大多数最新版本的路由和操作系统中实现。对于标准应用程序，假设 IPv6 支持已经添加或将在下一个主要版本中添加。要为您的企业网络创建
+    IPv6 集成计划，您需要单独评估每个供应商的 IPv6 支持状态和程度。许多供应商都有一个信息网站，通常可以在 *http://www.<vendor>.com/ipv6*
+    找到。
 - en: It can be said that IPv6 support up to the network layer is mature, tested,
     and optimized. This includes routing, transition mechanisms, DNS, and DHCPv6.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以说，IPv6 至网络层的支持已经成熟、经过测试并得到了优化。这包括路由、过渡机制、DNS 和 DHCPv6。
 - en: Development is most active in the security, transition mechanism, IPv4/IPv6
     MIB integration, and Mobile IPv6 areas. More work needs to be done in the areas
     of network management and firewalls. Vendors such as Cisco, Checkpoint, Juniper,
@@ -762,125 +1019,186 @@
     developing, and new applications will appear on the market that will make use
     of the advanced features of IPv6\. Thanks to the transition mechanisms, you can
     still use IPv4 applications in IPv6 networks.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 在安全性、过渡机制、IPv4/IPv6 MIB 集成和移动 IPv6 等领域的开发最为活跃。在网络管理和防火墙方面仍需要更多的工作。思科（Cisco）、检查点（Checkpoint）、瞻博（Juniper）等众多供应商都在这些领域开展工作。应用领域持续发展，新的应用程序将出现在市场上，利用
+    IPv6 的先进功能。得益于过渡机制，您仍然可以在 IPv6 网络中使用 IPv4 应用程序。
 - en: Note
+  id: totrans-117
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Find more information on the planning process in [Chapter 9](ch09.html "Chapter 9. Planning
     for IPv6").
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[第 9 章](ch09.html "第9章：IPv6 规划")中可以找到更多关于规划过程的信息。
 - en: Now you know why you should care about IPv6\. The following chapters in this
     book aim to make learning about IPv6 a joy. So please read on.
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你知道为什么你应该关心IPv6了。书中的以下章节旨在让你愉快地学习IPv6。所以请继续阅读。
 - en: References
+  id: totrans-120
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参考文献
 - en: Here’s a list of the most important RFCs mentioned in this chapter. Sometimes
     I include additional subject-related RFCs for your further personal study.
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是本章中提到的最重要的RFC列表。有时我还会包括一些额外的与主题相关的RFC，供你进一步个人学习。
 - en: RFCs
+  id: totrans-122
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: RFCs
 - en: RFC 1, “Host Software,” 1969
+  id: totrans-123
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1, “主机软件，”1969年
 - en: RFC 791, “Internet Protocol,” 1981
+  id: totrans-124
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 791, “互联网协议，”1981年
 - en: RFC 1347, “TCP and UDP with Bigger Addresses (TUBA),” 1992
+  id: totrans-125
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1347, “具有更大地址的TCP和UDP（TUBA），”1992年
 - en: RFC 1526, “Assignment of System Identifiers for TUBA/CLNP Hosts,” 1993
+  id: totrans-126
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1526, “TUBA/CLNP主机的系统标识符分配，”1993年
 - en: RFC 1561, “Use of ISO CLNP in TUBA Environments,"1993
+  id: totrans-127
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1561, “在TUBA环境中使用ISO CLNP，”1993年
 - en: RFC 1631, “The IP Network Address Translator (NAT),” 1994
+  id: totrans-128
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1631, “IP网络地址转换器（NAT），”1994年
 - en: 'RFC 1707, “CATNIP: Common Architecture for the Internet,” 1994'
+  id: totrans-129
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1707, “CATNIP：互联网的通用架构，”1994年
 - en: RFC 1710, “Simple Internet Protocol Plus White Paper,” 1994
+  id: totrans-130
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1710, “简单互联网协议加白皮书，”1994年
 - en: RFC 1752, “The Recommendation for the IP Next Generation Protocol,” 1995
+  id: totrans-131
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1752, “下一代IP协议的推荐，”1995年
 - en: RFC 1883, “Internet Protocol, Version 6 (IPv6) Specification,” 1995
+  id: totrans-132
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 1883, “互联网协议，第6版（IPv6）规范，”1995年
 - en: RFC 2235, “Hobbes’ Internet Timeline,” 1997
+  id: totrans-133
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2235, “霍布斯互联网时间线，”1997年
 - en: RFC 2324, “Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0),” April 1, 1998
+  id: totrans-134
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2324, “超文本咖啡壶控制协议（HTCPCP/1.0），”1998年4月1日
 - en: RFC 2460, “Internet Protocol, Version 6 (IPv6) Specification,” 1998
+  id: totrans-135
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2460, “互联网协议，第6版（IPv6）规范，”1998年
 - en: RFC 2555, “30 Years of RFCs,” 1999
+  id: totrans-136
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2555, “30年的RFC，”1999年
 - en: RFC 2663, “IP Network Address Translator (NAT) Terminology and Considerations,”
     1999
+  id: totrans-137
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2663, “IP网络地址转换器（NAT）术语和考虑因素，”1999年
 - en: RFC 3022, “Traditional IP Network Address Translator (Traditional NAT),” 2001
+  id: totrans-138
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3022, “传统IP网络地址转换器（传统NAT），”2001年
 - en: RFC 3027, “Protocol Complications with the IP Network Address Translator,” 2001
+  id: totrans-139
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3027, “IP网络地址转换器的协议复杂性，”2001年
 - en: 'RFC 4677, “The Tao of IETF: A Novice’s Guide to the Internet Engineering Task
     Force,” 2006'
+  id: totrans-140
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4677, “IETF的道：互联网工程任务组新手指南，”2006年
 - en: RFC 5902, “IAB Thoughts on IPv6 Network Address Translation,” 2010
+  id: totrans-141
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5902, “IAB关于IPv6网络地址转换的思考，”2010年
 - en: RFC 6250, “Evolution of the IP Model,” 2011
+  id: totrans-142
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6250, “IP模型的演变，”2011年
 - en: RFC 6269, “Issues with IP address sharing,” 2011
+  id: totrans-143
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6269, “IP地址共享问题，”2011年
 - en: RFC 6921, “Design Considerations for Faster-Than-Light (FTL) Communication,”
     April 1, 2013
+  id: totrans-144
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6921, “超光速（FTL）通信的设计考虑，”2013年4月1日
 - en: RFC 7168, “The Hyper Text Coffee Pot Control Protocol for Tea Efflux Appliances
     (HTCPCP-TEA),” April 1, 2014
+  id: totrans-145
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7168, “茶叶流出设备的超文本咖啡壶控制协议（HTCPCP-TEA），”2014年4月1日

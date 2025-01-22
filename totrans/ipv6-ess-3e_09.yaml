@@ -1,7 +1,9 @@
 - en: Chapter 8. Mobile IPv6
+  id: totrans-0
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第8章 移动IPv6
 - en: In the past, we were used to making phone calls from home or from the office.
     Public pay phones allowed us to make phone calls while on the road. Today, the
     use of mobile phones is common and we make phone calls from almost anywhere and
@@ -18,8 +20,10 @@
     All the applications, such as your Skype session or your voice call running on
     your tablet, don’t drop. Isn’t this cool? This section about Mobile IP explores
     the mechanisms needed and shows how IPv6 is ready for this challenge.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 过去，我们习惯于在家中或办公室打电话。公共电话亭使我们能够在外出时打电话。今天，使用手机已经变得非常普遍，我们几乎可以在任何地方、任何生活场景下拨打电话。笔记本电脑、无线网络和便携设备的使用不断增加，我们可以想象，无论身处何地，都能使用智能设备。如果这些设备要使用IP作为传输协议，我们需要移动IP来使其工作。我们希望设备在移动时保持连接，并能在更换接入网络的地点时不中断连接，就像今天我们习惯于在手机上从一个基站漫游到另一个基站一样。例如，假设你有一台配备802.11（无线）接口和UMTS（通用移动通信系统）接口的平板电脑。在酒店房间里，你通过无线接口连接到网络；当你离开房间走到街上时，你会自动切换到UMTS，而不会丢失连接。所有的应用程序，例如正在运行的Skype会话或语音通话，都不会中断。是不是很酷？这一节关于移动IP的内容探讨了实现这一目标所需的机制，并展示了IPv6如何为这一挑战做好准备。
 - en: With IPv4 and IPv6 alike, the prefix (subnet address) changes depending on the
     network to which we are attached. When a mobile node changes its point of access
     to the network, it needs to get a new IP address, which disrupts its TCP or UDP
@@ -34,24 +38,33 @@
     large masses of devices. The fact that IPv6 uses Neighbor Discovery (instead of
     ARP like IPv4) makes IPv6 more independent of the Link layer. Mobile IPv6 takes
     the experience from Mobile IPv4 and makes use of the advanced features of IPv6.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论是IPv4还是IPv6，前缀（子网地址）都会根据我们所连接的网络发生变化。当移动节点改变其接入网络的方式时，它需要获取一个新的IP地址，这会中断其TCP或UDP连接。RFC
+    5944《IPv4的IP移动性支持》描述了IPv4的移动IP概念和规范。然而，使用IPv4的移动IP存在一些局限性，使其不适用于全球网络中的需求。一个原因是地址空间的有限性。如果我们仅仅想象智能手机需要一个IP地址，那么全球所需的地址数量将远远超过可用的IPv4地址空间。另一个原因是IPv6及其扩展头的使用为移动世界中的路由优化提供了可能，这在讨论大量设备的移动性时尤为重要。IPv6使用邻居发现（而非像IPv4那样使用ARP）使其更加独立于链路层。移动IPv6借鉴了移动IPv4的经验，并利用了IPv6的先进特性。
 - en: 'This chapter describes how Mobile IPv6 works and how it is suited to provide
     the foundation for mobile services of tomorrow. First, I explain the most important
     terms that will be used throughout the chapter, then I provide an overview of
     the functionality, and after this I dive into the technical details of the protocol:
     the new headers, messages, options, processes, and communications. So take a deep
     breath and read on.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章描述了移动IPv6如何工作以及它如何为未来的移动服务提供基础。首先，我将解释本章中将使用的最重要术语，然后提供功能概述，之后深入探讨协议的技术细节：新的头部、消息、选项、过程和通信。所以，深呼吸一下，继续阅读。
 - en: Overview
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 概述
 - en: Mobile IPv6 is a protocol that allows a mobile node to move from one network
     to another without losing its connections. It is specified in RFC 6275.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动IPv6是一种协议，允许移动节点在不同网络之间切换而不丢失连接。它在RFC 6275中有所规定。
 - en: Most Internet traffic uses TCP connections. A TCP connection is defined by the
     combination of IP address and port number of both endpoints of the communication.
     If one of these four numbers changes, the communication is disrupted and has to
@@ -65,150 +78,229 @@
     this works within homogeneous networks (if the node moves from an Ethernet segment
     to another Ethernet segment) but also in heterogeneous networks (if the node moves
     from an Ethernet segment to a wireless LAN or UMTS).
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数互联网流量使用TCP连接。TCP连接由通信双方端点的IP地址和端口号的组合来定义。如果这四个数字中的任何一个发生变化，通信就会中断并需要重新建立。如果一个移动节点连接到不同的网络，它需要一个新的IP地址。移动IP解决了在不更改IP地址的情况下将节点移动到不同连接点的挑战，通过为移动节点的接口分配一个新的附加IP地址。此时，移动节点仍然知道它的*主地址*，这个地址是静态的并且不会改变，因此用于标识TCP连接。新的IP地址被称为*Care-of地址*。它根据节点当前附着的网络而变化。因此，这在同质网络中有效（如果节点从一个以太网段移动到另一个以太网段），也适用于异质网络（如果节点从一个以太网段移动到无线局域网或UMTS）。
 - en: In a wireless network, we are familiar with the *handover*, the event where
     a device moves from one access point to another. This is a handover on the Link
     layer. Mobile IPv6 solves the handover issue on the Network layer and maintains
     connections to applications and services if a device changes its temporary IP
     address.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在无线网络中，我们熟悉*切换*，即设备从一个接入点移动到另一个接入点的事件。这是在链路层的切换。移动IPv6解决了网络层的切换问题，并在设备更改其临时IP地址时保持与应用程序和服务的连接。
 - en: Mobile IPv6 Terms
+  id: totrans-8
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 移动IPv6术语
 - en: Here are the definitions of some terms that are used throughout the chapter.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是本章中使用的一些术语的定义。
 - en: '*Home address*'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: '*主地址*'
 - en: A global unicast address assigned to a mobile node. It is used as the permanent
     address for this node and is within the mobile node’s home link. Regular routing
     mechanisms deliver packets to the home address of the mobile node.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 分配给移动节点的全局单播地址。它作为该节点的永久地址，并位于移动节点的主链路内。常规路由机制将数据包传送到移动节点的主地址。
 - en: '*Home subnet prefix*'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '*主子网前缀*'
 - en: The IP subnet prefix corresponding to a mobile node’s home address.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 对应移动节点主地址的IP子网前缀。
 - en: '*Home link*'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '*主链路*'
 - en: The link on which a mobile node’s home subnet prefix is defined.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 定义移动节点主子网前缀的链路。
 - en: '*Mobile node*'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '*移动节点*'
 - en: A node that can change its point of attachment from one link to another while
     still being reachable via its home address.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 一种可以在不同链路间切换附着点的节点，同时仍可以通过其主地址进行访问。
 - en: '*Correspondent node*'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '*通信节点*'
 - en: A peer node with which a mobile node is communicating. The correspondent node
     may be either mobile or stationary.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 与移动节点进行通信的对等节点。通信节点可以是移动的也可以是静态的。
 - en: '*Foreign subnet prefix*'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: '*外部子网前缀*'
 - en: Any IP subnet prefix other than the mobile node’s home subnet prefix.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 除移动节点主子网前缀外的任何IP子网前缀。
 - en: '*Foreign link*'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: '*外部链路*'
 - en: Any link other than the mobile node’s home link.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 除移动节点主链路以外的任何链路。
 - en: '*Care-of address*'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: '*Care-of地址*'
 - en: A global unicast address for the mobile node while it is in a foreign network
     (away from home). The subnet prefix of the Care-of address is the foreign subnet
     prefix. A mobile node may have multiple Care-of addresses. The one being registered
     with its home agent is the primary Care-of address.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点在外部网络（远离主网络）中的全局单播地址。Care-of地址的子网前缀为外部子网前缀。一个移动节点可能有多个Care-of地址。注册到其主代理的Care-of地址是主要Care-of地址。
 - en: '*Home agent*'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: '*主代理*'
 - en: A router on a mobile node’s home link with which the mobile node has registered
     its current Care-of address. While the mobile node is away from home, the home
     agent intercepts packets on the home link destined to the mobile node’s home address,
     encapsulates them (IPv6 encapsulation), and tunnels them to the mobile node’s
     registered Care-of address.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点家庭链路上的一台路由器，移动节点已将其当前的Care-of地址注册到该路由器。当移动节点不在家时，家庭代理会拦截发往该移动节点家庭地址的数据包，封装它们（IPv6封装），并通过隧道传送到移动节点的注册Care-of地址。
 - en: '*Binding*'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: '*绑定*'
 - en: The association of the home address of a mobile node with a Care-of address
     for that mobile node, along with the remaining lifetime of that association.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点的家庭地址与该移动节点的Care-of地址之间的关联，以及该关联的剩余生命周期。
 - en: '*Registration*'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注册*'
 - en: The process during which a mobile node sends a Binding Update to its home agent
     or a correspondent node, causing a binding for the mobile node to be registered.
     The registration with the correspondent node is called Correspondent Registration.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点将绑定更新发送给其家庭代理或通信节点，从而使得该移动节点的绑定被注册。与通信节点的注册称为通信节点注册（Correspondent Registration）。
 - en: '*Binding authorization*'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: '*绑定授权*'
 - en: A registration with a correspondent node needs to be authorized to allow the
     recipient to ensure that the sender has the right to specify a new binding.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 需要通过通信节点进行注册授权，以便接收方确保发送方有权指定新的绑定。
 - en: '*Return Routability Procedure*'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '*返回可达性过程*'
 - en: A procedure that authorizes registrations by the use of a cryptographic token
     exchange.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过加密令牌交换授权注册的过程。
 - en: '*Keygen token*'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: '*密钥生成令牌*'
 - en: A number supplied by a correspondent node in the Return Routability Procedure
     to enable the mobile node to compute the necessary binding management key for
     authorizing a Binding Update.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 由通信节点在返回可达性过程（Return Routability Procedure）中提供的一个编号，用于使移动节点计算必要的绑定管理密钥，以授权绑定更新（Binding
+    Update）。
 - en: '*Nonce*'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '*随机数*'
 - en: Random numbers used internally by the correspondent node in the creation of
     keygen tokens related to the Return Routability Procedure. The nonces are not
     specific to a mobile node and are kept secret within the correspondent node.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 在创建与返回可达性过程相关的密钥生成令牌时，通信节点内部使用的随机数。这些随机数并不特定于某个移动节点，并且保密存储在通信节点内。
 - en: '*Nonce index*'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: '*随机数索引*'
 - en: Used to indicate which nonces have been used when creating keygen token values
     without revealing the nonces themselves.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于指示在创建密钥生成令牌（keygen token）值时已使用哪些随机数，而不暴露这些随机数本身。
 - en: How Mobile IPv6 Works
+  id: totrans-42
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 移动IPv6的工作原理
 - en: '[Figure 8-1](ch08.html#overview_mobile_ipv6 "Figure 8-1. Overview Mobile IPv6")
     shows the components of Mobile IPv6 and how they interact.'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 8-1](ch08.html#overview_mobile_ipv6 "图 8-1. 移动IPv6概述")展示了移动IPv6的组成部分及其如何相互作用。'
 - en: '![Overview Mobile IPv6](images/ipv6_0801.png)Figure 8-1. Overview Mobile IPv6'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '![移动IPv6概述](images/ipv6_0801.png)图 8-1. 移动IPv6概述'
 - en: The home address is the IPv6 address within the home link prefix of a *Mobile
     Node* (*MN*). As long as the mobile node is at home, it receives packets through
     regular IP routing mechanisms and behaves like any other regular IP host. When
@@ -216,8 +308,10 @@
     address. It receives the Care-of address through regular IPv6 mechanisms such
     as SLAAC (Stateless Address Autoconfiguration) or DHCPv6 when connecting to the
     new link.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 家庭地址是一个位于*移动节点*（*MN*）的家庭链路前缀内的IPv6地址。只要移动节点处于家庭网络中，它通过常规的IP路由机制接收数据包，表现得就像任何其他普通IP主机一样。当移动节点处于外部网络（外链路）时，它会有一个额外的暂时地址（Care-of地址）。它通过常规IPv6机制，如SLAAC（无状态地址自动配置）或DHCPv6，在连接到新的链路时获取Care-of地址。
 - en: The association of a home address and a Care-of address is called a *binding*.
     While away from home, the mobile node registers its Care-of address with a router
     on its home link, its *Home Agent* (*HA*). To register its Care-of address, the
@@ -226,25 +320,35 @@
     called a *Correspondent Node* (*CN*). Mobile nodes can also send registrations
     to the correspondent node directly (called a correspondent registration). A correspondent
     node can also be a mobile node.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 家庭地址与Care-of地址之间的关联称为*绑定*。当移动节点离家时，它会将自己的Care-of地址注册到家庭链路上的一台路由器，即其*家庭代理*（*HA*）。为了注册Care-of地址，移动节点向家庭代理发送绑定更新消息。家庭代理回应一个绑定确认。与移动节点通信的每个节点称为*通信节点*（*CN*）。移动节点也可以直接向通信节点发送注册消息（称为通信节点注册）。通信节点也可以是一个移动节点。
 - en: 'There are two ways to communicate for a correspondent node and a mobile node:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 有两种通信方式供通信节点和移动节点使用：
 - en: '*Bidirectional Tunneling*'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: '*双向隧道*'
 - en: Packets from the correspondent node are sent to the home agent, which encapsulates
     them in IPv6 and sends them to the Care-of address of the mobile node. Packets
     from the mobile node are sent through the reverse tunnel to the home agent that
     forwards them to the correspondent node through regular routing mechanisms. This
     mode does not require any Mobile IPv6 support on the correspondent node and works
     without correspondent registration.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 来自通信节点的数据包被发送到主机代理，主机代理将它们封装成IPv6格式并发送到移动节点的Care-of地址。来自移动节点的数据包通过反向隧道发送到主机代理，主机代理通过常规路由机制将其转发到通信节点。这种模式不要求通信节点支持任何移动IPv6，并且在不需要通信节点注册的情况下也能工作。
 - en: '*Route Optimization*'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '*路由优化*'
 - en: With Route Optimization, the communication between mobile node and correspondent
     node can be direct without going through the home agent. This is one of the main
     advantages of Mobile IPv6 over Mobile IPv4, where Route Optimization is not possible.
@@ -256,55 +360,76 @@
     node directly. The mobile node uses the Home Address option (defined for Mobile
     IPv6) when sending packets to the correspondent node. The whole process is described
     in more detail later in the chapter.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用路由优化后，移动节点与通信节点之间可以直接通信，而无需经过主机代理。这是移动IPv6相对于移动IPv4的主要优势之一，因为在移动IPv4中，路由优化是不可能的。路由优化要求移动节点将其Care-of地址注册到通信节点（称为通信节点注册），并且该绑定通过返回可达性过程（在本章后面“返回可达性过程”一节中讨论）获得授权。通信节点在直接向移动节点发送数据包时使用特殊的路由头（类型2）。移动节点在向通信节点发送数据包时使用主机地址选项（为移动IPv6定义）。整个过程将在本章稍后部分进行更详细的描述。
 - en: The advantage of Route Optimization is that the shortest available path can
     be used between correspondent node and mobile node. The packets do not have to
     go through the home agent. This not only ensures shorter communication paths but
     also reduces the load on the home agent and the home link. This becomes very important
     when we talk about high numbers of mobile nodes constantly moving around, for
     instance in a VoIP (Voice over IP) scenario or when moving around with your smartphones.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 路由优化的优点是，通信节点与移动节点之间可以使用最短的路径。数据包无需经过主机代理。这不仅确保了更短的通信路径，还减少了主机代理和主机链接的负载。当我们讨论大量移动节点不断移动时，特别是在VoIP（语音IP）场景中，或使用智能手机时，这一点尤为重要。
 - en: Mobile IPv6 also supports the option to have multiple home agents, and the mobile
     node can learn about reconfiguration of its home link or a change of IP address
     of its home agent through Dynamic Home Agent Address Discovery. If the prefix
     of its home link changes, the mobile node uses the Mobile Prefix Discovery mechanism
     to learn about the new prefix.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动IPv6还支持多个主机代理的选项，移动节点可以通过动态主机代理地址发现（Dynamic Home Agent Address Discovery）得知其主机链接的重新配置或主机代理IP地址的变化。如果其主机链接的前缀发生变化，移动节点则使用移动前缀发现机制来获取新前缀。
 - en: The following sections describe the protocol and new messages, options, and
     flags in more detail. After this, I dive into the communication flows that have
     just been described in an overview. Some people prefer to learn this way; other
     people prefer to learn about the processes and flows first and then about the
     technical details. Please read the sections in the order that best fits your preference.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下各节将更详细地描述协议和新的消息、选项以及标志。之后，我将深入介绍刚才概述的通信流程。有些人喜欢这样学习；而另一些人则喜欢先了解过程和流程，然后再学习技术细节。请按照最适合您偏好的顺序阅读各节内容。
 - en: The Mobile IPv6 Protocol
+  id: totrans-55
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 移动IPv6协议
 - en: This section describes the components, messages, and options for Mobile IPv6.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 本节描述了移动IPv6的组件、消息和选项。
 - en: Mobility Header and Mobility Messages
+  id: totrans-57
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 移动头和移动消息
 - en: The Mobility Header (MH) has been defined for Mobile IPv6\. It is an Extension
     header used by mobile node, correspondent node, and home agent. It is used in
     all messages that are related to establishing and maintaining bindings.
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动性头部（MH）已为移动 IPv6 定义。它是一个扩展头部，供移动节点、对应节点和家庭代理使用。它用于所有与建立和维护绑定相关的消息。
 - en: A Mobility Header is specified by the Next Header value 135 in the preceding
     header and has the format shown in [Figure 8-2](ch08.html#format_of_the_mobility_header
     "Figure 8-2. Format of the Mobility Header").
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动性头部由前一个头部中的下一个头部值 135 指定，其格式如[图 8-2](ch08.html#format_of_the_mobility_header
+    "图 8-2. 移动性头部格式")所示。
 - en: '![Format of the Mobility Header](images/ipv6_0802.png)Figure 8-2. Format of
     the Mobility Header'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: '![移动性头部格式](images/ipv6_0802.png)图 8-2. 移动性头部格式'
 - en: The Payload Proto field corresponds to the Next Header field and identifies
     the following header. It can therefore contain the same values as the Next Header
     field. The current specification sets the value in this field to 59 decimal, which
@@ -319,133 +444,203 @@
     field identifies the type of Mobility message. The messages defined are listed
     in [Table 8-1](ch08.html#mobility_message_types "Table 8-1. Mobility message types").
     The Data field is variable; it depends on the type of message.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 负载协议字段对应于下一个头部字段，并标识下一个头部。因此，它可以包含与下一个头部字段相同的值。当前规范将此字段的值设置为 59（十进制），表示“无下一个头部”。它旨在用于未来的扩展。头部长度字段包含移动性头部的长度，单位为
+    8 字节。前 8 字节不计算在内。移动性头部的长度始终是 8 字节的倍数。校验和字段包含移动性头部的校验和。它是基于伪头部计算的，并遵循 RFC 2460
+    中定义的规则。伪头部中使用的地址是 IPv6 头部中的源地址和目标地址。如果移动性消息包含家庭地址目标选项，则使用家庭地址来计算校验和。MH 类型字段标识移动性消息的类型。已定义的消息列在[表
+    8-1](ch08.html#mobility_message_types "表 8-1. 移动性消息类型")中。数据字段是可变的，取决于消息类型。
 - en: '[Table 8-1](ch08.html#mobility_message_types "Table 8-1. Mobility message types")
     is an overview of the Mobility messages.'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: '[表 8-1](ch08.html#mobility_message_types "表 8-1. 移动性消息类型")是移动性消息的概述。'
 - en: Table 8-1. Mobility message types
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 8-1. 移动性消息类型
 - en: '| Value | Message type | Description | RFC |'
+  id: totrans-64
   prefs: []
   type: TYPE_TB
+  zh: '| 值 | 消息类型 | 描述 | RFC |'
 - en: '| --- | --- | --- | --- |'
+  id: totrans-65
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- |'
 - en: '| 0 | Binding Refresh Request | Sent by CN requesting the MN to update its
     binding. | RFC 6275 |'
+  id: totrans-66
   prefs: []
   type: TYPE_TB
+  zh: '| 0 | 绑定刷新请求 | 由 CN 发送，请求 MN 更新其绑定。 | RFC 6275 |'
 - en: '| 1 | Home Test Init | Sent by the MN to initiate the Return Routability Procedure
     and request a Home keygen token from a CN. Sent to the CN through the tunnel via
     HA. | RFC 6275 |'
+  id: totrans-67
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | 家庭测试初始化 | 由 MN 发送以启动返回可达性过程并向 CN 请求家庭密钥生成令牌。通过隧道经过 HA 发送给 CN。 | RFC 6275
+    |'
 - en: '| 2 | Care-of Test Init | Sent by the MN to initiate the Return Routability
     Procedure and request a keygen token from a CN. Sent to the CN directly. | RFC
     6275 |'
+  id: totrans-68
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | 外部地址测试初始化 | 由 MN 发送以启动返回可达性过程并向 CN 请求密钥生成令牌。直接发送给 CN。 | RFC 6275 |'
 - en: '| 3 | Home Test Message | Response to a Home Test Init message (type 1). Sent
     from the CN to MN. Contains a cookie and a Home keygen token for the authorization
     in the Return Routability Process. Sent through the tunnel via HA. | RFC 6275
     |'
+  id: totrans-69
   prefs: []
   type: TYPE_TB
+  zh: '| 3 | 家庭测试消息 | 响应家庭测试初始化消息（类型 1）。由 CN 发送给 MN。包含一个 cookie 和一个家庭密钥生成令牌，用于返回可达性过程中的授权。通过
+    HA 隧道发送。 | RFC 6275 |'
 - en: '| 4 | Care-of Test Message | Response to Care-of Test Init message (type 2).
     Sent from CN to MN. Contains cookie and a Care-of keygen token for the authorization
     in the Return Routability Procedure. Sent to the MN directly. | RFC 6275 |'
+  id: totrans-70
   prefs: []
   type: TYPE_TB
+  zh: '| 4 | 外部地址测试消息 | 响应外部地址测试初始化消息（类型 2）。由 CN 发送给 MN。包含 cookie 和一个外部地址密钥生成令牌，用于返回可达性过程中的授权。直接发送给
+    MN。 | RFC 6275 |'
 - en: '| 5 | Binding Update | Sent by MN to notify a change of its Care-of address.
     This message is explained in more detail later in the chapter. | RFC 6275 |'
+  id: totrans-71
   prefs: []
   type: TYPE_TB
+  zh: '| 5 | 绑定更新 | 由 MN 发送以通知其外部地址的变化。此消息将在本章稍后详细解释。 | RFC 6275 |'
 - en: '| 6 | Binding Ack | Sent as acknowledgment for receipt of a Binding Update
     message. This message is explained in more detail later in the chapter. | RFC
     6275 |'
+  id: totrans-72
   prefs: []
   type: TYPE_TB
+  zh: '| 6 | 绑定确认 | 作为确认接收到绑定更新消息的响应发送。该消息将在本章后面详细解释。 | RFC 6275 |'
 - en: '| 7 | Binding Error | Sent by CN to signal an error related to mobility, such
     as an inappropriate attempt to use the Home Address Destination option without
     an existing binding. The status field can have the following values:1 = unkown
     binding for Home Address Destination option2 = unrecognized MH type value | RFC
     6275 |'
+  id: totrans-73
   prefs: []
   type: TYPE_TB
+  zh: '| 7 | 绑定错误 | 由CN发送，用于指示与移动性相关的错误，例如在没有现有绑定的情况下，尝试使用Home Address Destination选项。状态字段可以具有以下值：1
+    = Home Address Destination选项的未知绑定；2 = 未识别的MH类型值 | RFC 6275 |'
 - en: '| 8 | Fast Binding Update | Identical to Binding Update message, only with
     slightly different processing rules. | RFC 5568 |'
+  id: totrans-74
   prefs: []
   type: TYPE_TB
+  zh: '| 8 | 快速绑定更新 | 与绑定更新消息相同，仅具有稍微不同的处理规则。 | RFC 5568 |'
 - en: '| 9 | Fast Binding Ack | Sent as acknowledgment for receipt of a Fast Binding
     Update message. | RFC 5568 |'
+  id: totrans-75
   prefs: []
   type: TYPE_TB
+  zh: '| 9 | 快速绑定确认 | 作为确认接收到快速绑定更新消息的响应发送。 | RFC 5568 |'
 - en: '| 10 | Fast Neighbor Advertisement | Deprecated. | RFC 5568 |'
+  id: totrans-76
   prefs: []
   type: TYPE_TB
+  zh: '| 10 | 快速邻居广告 | 已弃用。 | RFC 5568 |'
 - en: '| 11 | Experimental Mobility Header | Defined for testing of new message types
     without the risk to collide with standardized values. | RFC 5096 |'
+  id: totrans-77
   prefs: []
   type: TYPE_TB
+  zh: '| 11 | 实验性移动头 | 为测试新消息类型而定义，不会与标准化的值发生冲突。 | RFC 5096 |'
 - en: '| 12 | Home Agent Switch | Sent from HA to MN. Forces MN to configure a new
     HA. | RFC 5142 |'
+  id: totrans-78
   prefs: []
   type: TYPE_TB
+  zh: '| 12 | 主机代理切换 | 从HA发送到MN，强制MN配置新的HA。 | RFC 5142 |'
 - en: '| 13 | Heartbeat | Sent by MAC and LMA to verify status of reachability (Proxy
     Mobile IPv6). | RFC 5847 |'
+  id: totrans-79
   prefs: []
   type: TYPE_TB
+  zh: '| 13 | 心跳 | 由MAC和LMA发送，以验证可达性的状态（代理移动IPv6）。 | RFC 5847 |'
 - en: '| 14 | Handover Initiate | Sent between access routers to initiate the process
     of handover of MNs. | RFC 5568 |'
+  id: totrans-80
   prefs: []
   type: TYPE_TB
+  zh: '| 14 | 切换初始化 | 在接入路由器之间发送，用于初始化移动节点的切换过程。 | RFC 5568 |'
 - en: '| 15 | Handover Ack | Sent by access routers to acknowledge the receipt of
     the Handover Initiate message. | RFC 5568 |'
+  id: totrans-81
   prefs: []
   type: TYPE_TB
+  zh: '| 15 | 切换确认 | 由接入路由器发送，用于确认接收到切换初始化消息。 | RFC 5568 |'
 - en: '| 16 | Binding Revocation | Sent by a mobility node to terminate a binding:1
     = Binding Revocation Indication2 = Binding Revocation Ack | RFC 5846 |'
+  id: totrans-82
   prefs: []
   type: TYPE_TB
+  zh: '| 16 | 绑定撤销 | 由移动节点发送以终止绑定：1 = 绑定撤销指示；2 = 绑定撤销确认 | RFC 5846 |'
 - en: '| 17 | Localized Routing Initiation | Sent by LMA or MAG to initiate localized
     routing (Proxy Mobile IPv6). | RFC 6705 |'
+  id: totrans-83
   prefs: []
   type: TYPE_TB
+  zh: '| 17 | 本地路由初始化 | 由LMA或MAG发送，用于初始化本地路由（代理移动IPv6）。 | RFC 6705 |'
 - en: '| 18 | Localized Routing Ack | Sent by LMA or MAG as response to Localized
     Routing Initiation. | RFC 6705 |'
+  id: totrans-84
   prefs: []
   type: TYPE_TB
+  zh: '| 18 | 本地路由确认 | 由LMA或MAG作为对本地路由初始化的响应发送。 | RFC 6705 |'
 - en: To help you understand the binding, the next section explores the Binding Update
     and the Binding Acknowledgment messages in more detail.
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 为帮助你理解绑定，下一节将更详细地探讨绑定更新和绑定确认消息。
 - en: Note
+  id: totrans-86
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注
 - en: You can find all message and option types as well as status codes at [http://www.iana.org/assignments/mobility-parameters](http://www.iana.org/assignments/mobility-parameters).
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以在[http://www.iana.org/assignments/mobility-parameters](http://www.iana.org/assignments/mobility-parameters)找到所有消息和选项类型以及状态代码。
 - en: The Binding Update Message
+  id: totrans-88
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 绑定更新消息
 - en: The Binding Update message is used by the mobile node to inform the home agent
     or a correspondent node about a new Care-of address. The message is also used
     to extend the lifetime of an existing binding.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 绑定更新消息用于移动节点通知主机代理或对应节点一个新的Care-of地址。该消息还用于扩展现有绑定的生命周期。
 - en: The Binding Update message is of MH type 5 and has the format shown in [Figure 8-3](ch08.html#format_of_the_binding_update_message
     "Figure 8-3. Format of the Binding Update message").
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 绑定更新消息是MH类型5，格式如[图 8-3](ch08.html#format_of_the_binding_update_message "图 8-3.
+    绑定更新消息的格式")所示。
 - en: '![Format of the Binding Update message](images/ipv6_0803.png)Figure 8-3. Format
     of the Binding Update message'
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: '![绑定更新消息的格式](images/ipv6_0803.png)图 8-3. 绑定更新消息的格式'
 - en: The Sequence Number is used by the receiving node for sequencing Binding Updates.
     The sending node uses it to verify whether the Binding Acknowledgments received
     correspond to its Binding Updates. The Acknowledge bit (A-Bit) is set by the mobile
@@ -462,8 +657,12 @@
     address is valid (in four-second units). If the Lifetime is set to 0, the receiver
     must delete the entry in its Binding Cache. In this case, the mobile node must
     be on its home link, and the Care-of address is the same as the home address.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 序列号由接收节点用于对Binding Updates进行排序。发送节点使用它来验证接收到的Binding Acknowledgments是否与其Binding
+    Updates对应。如果移动节点期望对其Binding Update的响应，Acknowledge位（A-Bit）会被设置。Home Registration位（H-Bit）由移动节点设置，表示请求接收方充当该节点的家庭代理。只有当接收方位于移动节点的家庭链路上时，这才是可能的。Link-Local地址兼容性位（L-Bit）如果家庭地址具有与移动节点的链路-local地址相同的接口标识符，则设置该位。密钥管理移动能力位（K-Bit）仅在发送到家庭代理的Binding
+    Updates中有效。如果IPsec安全关联应在移动节点移动到另一个网络后继续有效，则K-Bit被设置。如果不可能，则K-Bit被设置为0。通信节点忽略K-Bit。生命周期字段表示Care-of地址的绑定有效期（以四秒为单位）。如果生命周期设置为0，则接收方必须删除其Binding缓存中的条目。在这种情况下，移动节点必须处于其家庭链路上，并且Care-of地址与家庭地址相同。
 - en: The M-Bit shown in [Figure 8-3](ch08.html#format_of_the_binding_update_message
     "Figure 8-3. Format of the Binding Update message") has additionally been created
     to identify Local Binding Updates sent to a local home agent called a *Mobility
@@ -473,114 +672,181 @@
     defined in RFC 4140, “Hierarchical Mobile IPv6,” and is explained in more detail
     at the end of this chapter. When the M-Bit is set, the H-Bit cannot be set and
     vice versa.
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[图8-3](ch08.html#format_of_the_binding_update_message "图8-3. Binding Update消息格式")中显示的M-Bit被额外创建用来识别发送到本地家庭代理的本地Binding
+    Update，该代理称为*移动锚点*（MAP）。这个新节点用于改善移动IPv6切换性能，以便在同一地理区域内获得移动节点与通信节点之间的高效路由，并实现位置隐私。该机制在RFC
+    4140《分层移动IPv6》中定义，并在本章末尾有更详细的解释。当M-Bit被设置时，H-Bit不能被设置，反之亦然。
 - en: 'A Binding Update can have the following options:'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: Binding Update可以包含以下选项：
 - en: Binding Authorization Data option (this option is mandatory in Binding Updates
     sent to a correspondent node)
+  id: totrans-95
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Binding授权数据选项（此选项在发送到通信节点的Binding Updates中是必需的）
 - en: Nonce Indices option
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Nonce索引选项
 - en: Alternate Care-of Address option
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 替代的Care-of地址选项
 - en: The Binding Acknowledgment
+  id: totrans-98
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Binding Acknowledgment
 - en: The Binding Acknowledgment is sent to confirm receipt of a Binding Update. It
     has to be sent if the A-Bit is set in the Binding Update. If the A-Bit is not
     set (which means the sender of the Binding Update does not require an acknowledgment),
     the Binding Acknowledgment is sent only if there is a problem in the Binding Update.
     If the receiver accepts the Binding Update and the A-Bit was not set, no acknowledgment
     is sent.
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: Binding Acknowledgment用于确认接收到Binding Update。如果Binding Update中的A-Bit被设置，则必须发送Binding
+    Acknowledgment。如果A-Bit没有被设置（这意味着Binding Update的发送方不要求确认），则只有在Binding Update出现问题时才会发送Binding
+    Acknowledgment。如果接收方接受Binding Update并且A-Bit没有设置，则不发送确认。
 - en: The Binding Acknowledgment is of MH type 6 and has the format shown in [Figure 8-4](ch08.html#format_of_the_binding_acknowledgment
     "Figure 8-4. Format of the Binding Acknowledgment").
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: Binding Acknowledgment属于MH类型6，其格式如[图8-4](ch08.html#format_of_the_binding_acknowledgment
+    "图8-4. Binding Acknowledgment格式")所示。
 - en: '![Format of the Binding Acknowledgment](images/ipv6_0804.png)Figure 8-4. Format
     of the Binding Acknowledgment'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: '![Binding Acknowledgment格式](images/ipv6_0804.png)图8-4. Binding Acknowledgment格式'
 - en: The status field indicates the status of the Binding Update. [Table 8-2](ch08.html#status_values_in_the_binding_acknowledgm
     "Table 8-2. Status values in the Binding Acknowledgment") shows the status values.
     Values in the range of 0 to 127 indicate that the Binding Update has been accepted.
     Values above 128 indicate that the Binding Update has not been accepted.
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 状态字段表示绑定更新的状态。[表8-2](ch08.html#status_values_in_the_binding_acknowledgm "表8-2.
+    绑定确认中的状态值") 显示了状态值。值范围为0到127表示绑定更新已被接受。值大于128表示绑定更新未被接受。
 - en: Table 8-2. Status values in the Binding Acknowledgment
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 表8-2. 绑定确认中的状态值
 - en: '| Value | Description |'
+  id: totrans-104
   prefs: []
   type: TYPE_TB
+  zh: '| 值 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-105
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| 0 | Binding Update accepted |'
+  id: totrans-106
   prefs: []
   type: TYPE_TB
+  zh: '| 0 | 绑定更新已接受 |'
 - en: '| 1 | Accepted but prefix discovery necessary |'
+  id: totrans-107
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | 已接受，但需要前缀发现 |'
 - en: '| 128 | Reason unspecified |'
+  id: totrans-108
   prefs: []
   type: TYPE_TB
+  zh: '| 128 | 原因未指定 |'
 - en: '| 129 | Administratively prohibited |'
+  id: totrans-109
   prefs: []
   type: TYPE_TB
+  zh: '| 129 | 行政禁止 |'
 - en: '| 130 | Insufficient resources |'
+  id: totrans-110
   prefs: []
   type: TYPE_TB
+  zh: '| 130 | 资源不足 |'
 - en: '| 131 | Home Registration not supported |'
+  id: totrans-111
   prefs: []
   type: TYPE_TB
+  zh: '| 131 | 不支持家庭注册 |'
 - en: '| 132 | Not home subnet |'
+  id: totrans-112
   prefs: []
   type: TYPE_TB
+  zh: '| 132 | 非家庭子网 |'
 - en: '| 133 | Not home agent for this mobile node |'
+  id: totrans-113
   prefs: []
   type: TYPE_TB
+  zh: '| 133 | 不是该移动节点的家庭代理 |'
 - en: '| 134 | Duplicate Address Detection failed |'
+  id: totrans-114
   prefs: []
   type: TYPE_TB
+  zh: '| 134 | 地址重复检测失败 |'
 - en: '| 135 | Sequence Number out of window |'
+  id: totrans-115
   prefs: []
   type: TYPE_TB
+  zh: '| 135 | 序列号超出窗口 |'
 - en: '| 136 | Expired home nonce index |'
+  id: totrans-116
   prefs: []
   type: TYPE_TB
+  zh: '| 136 | 已过期的家庭随机数索引 |'
 - en: '| 137 | Expired care-of nonce index |'
+  id: totrans-117
   prefs: []
   type: TYPE_TB
+  zh: '| 137 | 已过期的Care-of随机数索引 |'
 - en: '| 138 | Expired nonces |'
+  id: totrans-118
   prefs: []
   type: TYPE_TB
+  zh: '| 138 | 已过期的随机数 |'
 - en: '| 139 | Registration type change disallowed |'
+  id: totrans-119
   prefs: []
   type: TYPE_TB
+  zh: '| 139 | 禁止注册类型更改 |'
 - en: These are the status values defined in RFC 6275\. There are more status values
     from other specifications such as NEMO or Proxy Mobile IPv6 (discussed in the
     sections [NEMO](ch08.html#nemo "NEMO") and [Proxy Mobile IPv6](ch08.html#proxy_mobile_ipv6
     "Proxy Mobile IPv6")).
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些是RFC 6275中定义的状态值。还有更多来自其他规范的状态值，如NEMO或代理移动IPv6（在[NEMO](ch08.html#nemo "NEMO")和[代理移动IPv6](ch08.html#proxy_mobile_ipv6
+    "Proxy Mobile IPv6")部分中讨论）。
 - en: Note
+  id: totrans-121
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Find the full list of status codes at [http://www.iana.org/assignments/mobility-parameters](http://www.iana.org/assignments/mobility-parameters).
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 查找完整的状态码列表，访问 [http://www.iana.org/assignments/mobility-parameters](http://www.iana.org/assignments/mobility-parameters)。
 - en: The K-Bit is the Key Management Mobility Capability bit (see the description
     earlier in the section [The Binding Update Message](ch08.html#the_binding_update_message
     "The Binding Update Message")). This bit is of importance only in bindings between
@@ -593,24 +859,35 @@
     for this binding in its Binding Cache. In a Binding Acknowledgment that indicates
     that the binding has not been accepted (value of 128 or higher), the Lifetime
     is not specified.
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: K位是密钥管理移动性能力位（请参阅之前在[绑定更新消息](ch08.html#the_binding_update_message "The Binding
+    Update Message")部分中的描述）。该位仅在移动节点和家庭代理之间的绑定中重要。通信节点会忽略此位。绑定确认中的序列号是从绑定更新中的序列号字段复制的。它用于移动节点将此绑定确认与未完成的绑定更新进行匹配。生命周期以4秒为单位，表示Care-of地址绑定的有效时间。在此期间，家庭代理或通信节点会将该绑定条目保存在其绑定缓存中。在表示绑定未被接受的绑定确认中（值为128或更高），不会指定生命周期。
 - en: 'A Binding Acknowledgment can have the following options:'
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个绑定确认可以包含以下选项：
 - en: Binding Authorization Data option (this option is mandatory in Binding Acknowledgments
     sent by a correspondent node)
+  id: totrans-125
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 绑定授权数据选项（此选项在由通信节点发送的绑定确认中是强制性的）
 - en: Binding Refresh Advice option
+  id: totrans-126
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 绑定刷新建议选项
 - en: The Binding Revocation
+  id: totrans-127
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 绑定撤销
 - en: In certain cases it may be necessary to inform an MN that it can no longer receive
     Mobile IPv6 services for its home address. For this purpose a Binding Revocation
     mechanism has been defined in RFC 5846\. It uses a new Mobility Header (type 16;
@@ -618,27 +895,41 @@
     types")). This revocation mechanism can be used for Mobile IPv6 as well as for
     Proxy Mobile IPv6 (RFC 5213; described in the section [Proxy Mobile IPv6](ch08.html#proxy_mobile_ipv6
     "Proxy Mobile IPv6")).
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 在某些情况下，可能需要通知 MN 其无法再接收主机地址的移动 IPv6 服务。为此，RFC 5846 定义了绑定撤销机制。它使用一个新的移动性头（类型
+    16；参见 [表 8-1](ch08.html#mobility_message_types "表 8-1. 移动性消息类型")）。该撤销机制可用于移动 IPv6
+    以及代理移动 IPv6（RFC 5213；在 [代理移动 IPv6](ch08.html#proxy_mobile_ipv6 "代理移动 IPv6") 部分中描述）。
 - en: 'New terms have been defined in this specification:'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本规范中定义了以下新术语：
 - en: '*Initiator*'
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: '*发起方*'
 - en: The mobility node that initiates the Binding Revocation process. It sends a
     Binding Revocation message to its peers (e.g., home agent, local mobility anchor,
     or mobile access gateway).
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 启动绑定撤销过程的移动性节点。它向其对等节点（例如，主机代理、本地移动锚点或移动接入网关）发送绑定撤销消息。
 - en: '*Responder*'
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: '*响应方*'
 - en: The mobility node that receives the Binding Revocation message and responds
     with a Binding Revocation Acknowledgment (e.g., mobile node, mobile access gateway,
     or local mobility anchor).
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 接收绑定撤销消息并响应绑定撤销确认的移动性节点（例如，移动节点、移动接入网关或本地移动锚点）。
 - en: To revoke a binding, the HA sends a *Binding Revocation Indication* (BRI) message
     to the MN. To indicate the binding, the HA includes the home address in the message
     (in the Type 2 Routing header). In the case of dual-stack Mobile IP (DSMIPv6)
@@ -647,68 +938,102 @@
     revocation message, to identify which binding is revoked. When an MN receives
     a Binding Revocation Indication message with its home address in the Type 2 Routing
     header, it responds with a Binding Revocation Acknowledgment message.
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了撤销绑定，HA 向 MN 发送 *绑定撤销指示*（BRI）消息。为了指示绑定，HA 将主机地址包含在消息中（在类型 2 路由头中）。在双栈移动 IP（DSMIPv6）的情况下，也可以包括
+    IPv4 主机地址选项。如果 MN 注册了多个 Care-of 地址，HA 会在撤销消息中包含绑定标识符（BID）选项，以标识哪个绑定被撤销。当 MN 收到包含其主机地址的类型
+    2 路由头的绑定撤销指示消息时，它会响应绑定撤销确认消息。
 - en: Similarly, in the case of Proxy Mobile IPv6, the local mobility anchor is sending
     the revocation message to the mobile access gateway. In this case the local mobility
     anchor includes the mobile node home network prefix option and the mobile node
     identifier option.
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似地，在代理移动 IPv6 的情况下，本地移动锚点向移动接入网关发送撤销消息。在这种情况下，本地移动锚点包括移动节点主机网络前缀选项和移动节点标识符选项。
 - en: Mobility Options
+  id: totrans-136
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 移动性选项
 - en: A mobility message can contain zero, one, or more options. These options are
     included in the Variable Data field of the Mobility header. This architecture
     is very flexible, as options are inserted only if needed and additional options
     can easily be defined in the future.
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动性消息可以包含零个、一个或多个选项。这些选项被包含在移动性头的可变数据字段中。该架构非常灵活，因为选项只有在需要时才插入，并且未来可以轻松定义额外的选项。
 - en: The presence of options is indicated in the Header Length field of the Mobility
     header. They have the known TLV format (Type 1 byte, Length 1 byte, Value variable).
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 选项的存在通过移动性头中的头部长度字段指示。它们采用已知的 TLV 格式（类型 1 字节，长度 1 字节，值可变）。
 - en: '[Table 8-3](ch08.html#mobility_options-id1 "Table 8-3. Mobility options") contains
     an overview of the currently defined options for mobility messages.'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: '[表 8-3](ch08.html#mobility_options-id1 "表 8-3. 移动性选项") 包含当前定义的移动性消息选项概览。'
 - en: Table 8-3. Mobility options
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 8-3. 移动性选项
 - en: '| Value length | Name | Description |'
+  id: totrans-141
   prefs: []
   type: TYPE_TB
+  zh: '| 值长度 | 名称 | 描述 |'
 - en: '| --- | --- | --- |'
+  id: totrans-142
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| Type 0 | Pad1 | Used to insert one padding byte. This option has a special
     format; it contains only a Type field, and no fields for length and data. |'
+  id: totrans-143
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 0 | Pad1 | 用于插入一个填充字节。此选项具有特殊格式；它仅包含类型字段，没有长度和数据字段。 |'
 - en: '| Type 1 | PadN | Used to insert two or more padding bytes. |'
+  id: totrans-144
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 1 | PadN | 用于插入两个或更多填充字节。 |'
 - en: '| Type 2 Length 2 | Binding Refresh Advice | Indicates the remaining time until
     the MN should send a new Home Registration to HA. Only valid in Binding Acks sent
     from the HA in response to a Home Registration. The interval must be shorter than
     the Lifetime value in the Binding Acknowledgment. A time unit is four seconds.
     |'
+  id: totrans-145
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 2 长度 2 | 绑定刷新建议 | 指示 MN 应该发送新的主机注册到 HA 的剩余时间。仅在 HA 对主机注册响应时发送的绑定确认中有效。该间隔必须小于绑定确认中的
+    Lifetime 值。时间单位为四秒。|'
 - en: '| Type 3 Length 16 | Alternate Care-of address | Contains an address to use
     as the Care-of address for the binding rather than using the Source address of
     the packet as the Care-of address. Only in Binding Update messages. |'
+  id: totrans-146
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 3 长度 16 | 备用 Care-of 地址 | 包含用于作为绑定的 Care-of 地址的地址，而不是使用数据包的源地址作为 Care-of
+    地址。仅在绑定更新消息中有效。|'
 - en: '| Type 4 Length 4 | Nonce Indices | Has two additional fields besides the Type
     and Length field. The Home Nonce Index field tells the CN which nonce value to
     use when producing the Home Keygen Token. The Care-of Nonce field indicates the
     value for generating the Care-of Keygen Token. Valid only in the Binding Update
     message sent to a CN, and only when present together with a Binding Authorization
     Data option. |'
+  id: totrans-147
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 4 长度 4 | 随机数索引 | 除了类型和长度字段外，还包含两个附加字段。Home Nonce Index 字段告诉 CN 在生成 Home
+    Keygen Token 时使用哪个随机数值。Care-of Nonce 字段指示用于生成 Care-of Keygen Token 的值。仅在发送到 CN
+    的绑定更新消息中有效，并且只有与绑定授权数据选项一起出现时有效。|'
 - en: '| Type 5 Length variable | Binding Authorization Data | Contains a cryptographic
     value that can be used to determine that the message in question comes from the
     right authority. Rules for calculating this value depend on the authorization
@@ -716,27 +1041,40 @@
     Update and Binding Acknowledgment. Used for the Return Routability process. In
     this case, the calculation of the Authenticator value is based on Care-of address
     of MN, IPv6 address of CN, and data from the MH. |'
+  id: totrans-148
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 5 长度 可变 | 绑定授权数据 | 包含一个加密值，用于确定该消息来自正确的授权机构。计算此值的规则取决于所使用的授权程序。必须始终是 MH
+    中的最后一个选项。仅在绑定更新和绑定确认中有效。用于返回可达性过程。在这种情况下，Authenticator 值的计算基于 MN 的 Care-of 地址、CN
+    的 IPv6 地址和来自 MH 的数据。|'
 - en: '| Type 201 Length 16 | Home Address | Contains the home address of MN. Sent
     by MN when away from home to indicate its home address to the receiver. Carried
     in a Destination Options header. Must be inserted after Routing header and before
     Fragment, AH, or ESP header (if present). |'
+  id: totrans-149
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 201 长度 16 | 主机地址 | 包含 MN 的主机地址。当 MN 离家时，发送给接收方以指示其主机地址。通过目标选项头传输。必须插入在路由头之后，分片头、AH
+    或 ESP 头（如果存在）之前。|'
 - en: With the exception of the Binding Authorization Data option, these options can
     appear in arbitrary order. The Home Address option is an exception, as it is carried
     in a Destination Options header and not in the Mobility Header (MH).
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了绑定授权数据选项外，这些选项可以以任意顺序出现。主机地址选项是一个例外，因为它通过目标选项头传输，而不是通过移动性头（MH）。
 - en: Note
+  id: totrans-151
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Again, there is a full list of mobility options including options from other
     specifications at [http://bit.ly/1nabH2o](http://bit.ly/1nabH2o).
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 再次强调，可以在 [http://bit.ly/1nabH2o](http://bit.ly/1nabH2o) 查阅包括其他规范中选项的完整移动选项列表。
 - en: RFC 4283, “Mobile Node Identifier Option for Mobile IPv6 (MIPv6),” extends the
     original specification to allow MIPv6 nodes (HA, CN, MN) to use identifiers other
     than an IP address. It defines an option with a subtype number to specify the
@@ -744,31 +1082,42 @@
     see RFC 4282), an International Mobile Station Identifier (IMSI), or an application/deployment
     specific opaque identifier. Additional identifier types will be specified in the
     future.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4283，“Mobile IPv6（MIPv6）的移动节点标识符选项”扩展了原始规范，允许 MIPv6 节点（HA、CN、MN）使用除 IP 地址以外的标识符。它定义了一个具有子类型编号的选项，用于指定标识符类型。标识符类型可以是网络接入标识符（NAI；见
+    RFC 4282）、国际移动台标识符（IMSI）或特定应用/部署的不可见标识符。将来将指定更多标识符类型。
 - en: Routing Header Type 2
+  id: totrans-154
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 路由头类型 2
 - en: A new Routing header has been defined for Mobile IPv6\. This Extension header
     allows the data exchange between the Care-of address of a mobile node and a correspondent
     node without being routed through the home agent. In other words, it is used when
     communication is performed with Route Optimization after a successful Return Routability
     Procedure.
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动IPv6定义了一个新的路由头。这个扩展头允许在不通过家庭代理路由的情况下，移动节点的临时地址与对应节点之间的数据交换。换句话说，当在成功执行返回可路由性过程后使用路由优化进行通信时，就会使用此扩展头。
 - en: RFC 6275 defines the Type 2 Routing header. It allows, among other things, the
     configuration of specific rules for Mobile IPv6 packets on firewalls.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 6275定义了类型2路由头。它允许对防火墙中的移动IPv6数据包配置特定规则，除此之外还有其他功能。
 - en: When a correspondent node sends an IPv6 datagram to a mobile node using Route
     Optimization, the Destination address field in the IPv6 header contains the Care-of
     address of the mobile node. The Routing header Type 2 inserted contains the home
     address of the mobile node. The Routing header Type 2 can only contain one unicast
     address. IPv6 nodes that process these Routing headers must verify that the IPv6
     address contained corresponds to the home address of the mobile node.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 当一个对应节点使用路由优化向移动节点发送IPv6数据报时，IPv6头部中的目标地址字段包含了移动节点的临时地址。插入的路由头类型2包含了移动节点的家庭地址。路由头类型2只能包含一个单播地址。处理这些路由头的IPv6节点必须验证其中包含的IPv6地址是否与移动节点的家庭地址相对应。
 - en: The format of the Routing header Type 2 is shown in [Chapter 3](ch03.html "Chapter 3. The
     Structure of the IPv6 Protocol") (Figures [3-6](ch03.html#format_of_the_routing_header
     "Figure 3-6. Format of the Routing header") and [3-7](ch03.html#routing_header_type_2_in_a_trace_file
@@ -778,117 +1127,161 @@
     the Segments Left field is set to 1 for one address. The Home Address field carries
     the home address of the mobile node. How this Routing header Type 2 is used and
     processed is described later in this chapter.
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 路由头类型2的格式见[第3章](ch03.html "第3章。IPv6协议结构")（图[3-6](ch03.html#format_of_the_routing_header
+    "图3-6。路由头格式")和[3-7](ch03.html#routing_header_type_2_in_a_trace_file "图3-7。路由头类型2的跟踪文件")）。头部扩展长度字段的值为2；此头部没有可变长度，因为它仅包含一个地址。在路由类型字段中，值为2，并且“剩余段数”字段设置为1，表示只有一个地址。家庭地址字段携带了移动节点的家庭地址。该路由头类型2的使用和处理方式将在本章后续部分描述。
 - en: ICMPv6 and Mobile IPv6
+  id: totrans-159
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ICMPv6与移动IPv6
 - en: This section describes two new ICMPv6 message pairs and some modifications to
     Neighbor Discovery (ND) that have been made to support Mobile IPv6.
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 本节描述了两种新的ICMPv6消息对以及为支持移动IPv6所做的一些邻居发现（ND）修改。
 - en: Home Agent Address Discovery
+  id: totrans-161
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 家庭代理地址发现
 - en: The Home Agent Address Discovery mechanism is used by the mobile node to determine
     the address of its home agent on its home link. For this purpose the mobile node
     uses the two new ICMPv6 message pairs and the home agents list, which is a list
     maintained by each home agent.
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点使用家庭代理地址发现机制来确定其家庭链路上家庭代理的地址。为此，移动节点使用两种新的ICMPv6消息对和家庭代理列表，后者是由每个家庭代理维护的列表。
 - en: ICMPv6 Home Agent Address Discovery messages
+  id: totrans-163
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: ICMPv6家庭代理地址发现消息
 - en: This message pair consists of a Home Agent Address Discovery Request and Reply
     message. As the name implies, the mobile node uses these messages to find its
     home agent on the home link dynamically. Normally, mobile nodes are configured
     statically with a home agent address. In the case where a home agent is renumbered
     or goes down and is replaced by another home agent with a different IP address,
     dynamic discovery of the home agent address may be a useful mechanism.
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 这一消息对包括家庭代理地址发现请求和回复消息。顾名思义，移动节点使用这些消息动态查找其家庭链路上的家庭代理。通常，移动节点会静态配置一个家庭代理地址。如果家庭代理地址发生重新编号或代理发生故障并被具有不同IP地址的新家庭代理替代，则动态发现家庭代理地址可能是一种有用的机制。
 - en: The mobile node sends a Discovery message to the Home Agent Anycast address
     (Anycast ID decimal 126, hexadecimal `0x7E`; see [Chapter 2](ch02.html "Chapter 2. IPv6
     Addressing")) on its home link. The Source address field in the IPv6 header carries
     the Care-of address of the mobile node.
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点将发现消息发送到其家庭链路上的家庭代理任播地址（任播ID十进制126，十六进制`0x7E`；见[第2章](ch02.html "第2章。IPv6寻址")）。IPv6头部中的源地址字段携带了移动节点的临时地址。
 - en: The home agents on the home link that are configured for the Home Agent Anycast
     address respond with a Home Agent Address Discovery Reply message.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置为家庭代理任播地址的家庭链路上的家庭代理通过家庭代理地址发现回复消息进行响应。
 - en: The Discovery message has a type value of 144; the Reply message has a type
     value of 145\. The Code field is always set to 0\. The Identifier field is inserted
     by the mobile node and copied over by the home agent for the Reply. This allows
     to identify corresponding messages. The Reply carries a Home Address field, which
     can carry one or more home agent addresses. This address or list of addresses
     is generated from the home agents list (described next).
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 发现消息的类型值为144；回复消息的类型值为145。代码字段始终设置为0。标识符字段由移动节点插入，并由家庭代理在回复中复制。这可以用来识别对应的消息。回复携带一个家庭地址字段，该字段可以包含一个或多个家庭代理地址。这个地址或地址列表是根据家庭代理列表生成的（如下一节所述）。
 - en: Note
+  id: totrans-168
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: For a detailed description of the header fields in an ICMPv6 message, please
     refer to [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关ICMPv6消息头字段的详细描述，请参考[第4章](ch04.html "第4章：ICMPv6")。
 - en: Home agents list
+  id: totrans-170
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 家庭代理列表
 - en: 'Every home agent needs to maintain a home agents list. In this list, every
     router must be listed that is connected to the same link and provides home agent
     services. A router advertises itself as a home agent by setting the H-Bit in the
     Router Advertisement. A router maintains a home agents list for each link on which
     it acts as a home agent. The list is updated through Router Advertisements and
     contains the following information:'
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个家庭代理需要维护一个家庭代理列表。在该列表中，必须列出与同一链路连接并提供家庭代理服务的每个路由器。路由器通过在路由器通告中设置H位，向外宣告自己作为一个家庭代理。每个路由器为其作为家庭代理的每个链路维护一个家庭代理列表。该列表通过路由器通告进行更新，包含以下信息：
 - en: Link-local address of the HAs on the link. This address is learned from the
     Source address field in the IPv6 header of Router Advertisements that have the
     H-Bit set (home agent bit).
+  id: totrans-172
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 链路上家庭代理的链路本地地址。该地址从IPv6头部中设置了H位（家庭代理位）的路由器通告的源地址字段中学习得到。
 - en: One or more global IPv6 unicast addresses for these HAs. These addresses are
     learned from the Prefix option in the Router Advertisements.
+  id: totrans-173
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个或多个这些家庭代理的全球IPv6单播地址。这些地址是从路由器通告中的前缀选项（Prefix option）学习得到的。
 - en: Remaining Lifetime for this HA entry. When the Lifetime expires, the HA has
     to be deleted from the list.
+  id: totrans-174
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 此家庭代理（HA）条目的剩余生存时间。当生存时间到期时，必须将该家庭代理从列表中删除。
 - en: Preference for this HA. Higher values means higher preference. This value is
     learned from the Home Agent Preference field in the Home Agent Information option
     in a Router Advertisement (if present). If not present, this value is set to 0\.
     The HA uses this preference to sort the HA list when sending out a Home Agent
     Address Discovery Reply message.
+  id: totrans-175
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 该家庭代理的优先级。较高的值表示较高的优先级。此值从路由器通告中的家庭代理信息选项（Home Agent Information）中的家庭代理优先级字段学习得来（如果存在）。如果不存在，则此值设置为0。家庭代理使用此优先级在发送家庭代理地址发现回复消息时对家庭代理列表进行排序。
 - en: The HA sending out a Home Agent Address Discovery Reply must list all HAs on
     the link, sorted by preference. Only the global IPv6 unicast addresses of the
     home agents are contained in the home agent address field of the Home Agent Address
     Discovery Reply message. The reply must not be larger than 1,280 bytes. Sorting
     by preference ensures that HAs with a high priority are listed in this packet.
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 发送家庭代理地址发现回复（Home Agent Address Discovery Reply）时，必须列出链路上的所有家庭代理，并按优先级排序。回复消息中的家庭代理地址字段仅包含家庭代理的全球IPv6单播地址。回复的大小不得超过1,280字节。按优先级排序确保具有较高优先级的家庭代理会在此数据包中列出。
 - en: Mobile Prefix Solicitation
+  id: totrans-177
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 移动前缀请求
 - en: The Mobile Prefix Solicitation message is sent by a mobile node away from home
     to determine changes in the prefix configuration of its home link (i.e., home
     network renumbering). The HA answers the Solicitation message with a Prefix Advertisement.
     Based on this reply, the mobile node can adjust its home address.
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动前缀请求（Mobile Prefix Solicitation）消息由离开家庭的移动节点发送，用于确定其家庭链路的前缀配置变化（即家庭网络重新编号）。家庭代理通过前缀通告（Prefix
+    Advertisement）回答请求消息。根据此回复，移动节点可以调整其家庭地址。
 - en: The mobile node sends an ICMPv6 Mobile Prefix Solicitation message to its HA.
     The IPv6 header carries the Care-of address as Source address. A Home Address
     Destination option is inserted. IPsec headers are supported and should be used.
@@ -896,8 +1289,11 @@
     described in [Chapter 4](ch04.html "Chapter 4. ICMPv6") (RFC 4861). Currently,
     there are no specific options defined. The type value field of a Mobile Prefix
     Solicitation message is set to 146; the Code field is set to 0.
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点向其HA发送ICMPv6移动前缀请求消息。IPv6头部将原地址作为源地址，插入家庭地址目标选项。支持IPsec头，并应使用。移动前缀请求可以携带必须遵循[第4章](ch04.html
+    "第4章 ICMPv6")（RFC 4861）中描述的格式的选项。目前，没有定义具体的选项。移动前缀请求消息的类型值字段设置为146；代码字段设置为0。
 - en: The HA replies with an ICMPv6 Mobile Prefix Advertisement message to the Care-of
     address of the mobile node. The HA can also send out unsolicited Advertisements
     at regular intervals. The Advertisement carries a Routing header Type 2\. The
@@ -908,29 +1304,42 @@
     contains the Prefix option described in [Chapter 4](ch04.html "Chapter 4. ICMPv6").
     It carries all prefixes that should be used by the mobile node to configure its
     home addresses.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: HA向移动节点的原地址发送ICMPv6移动前缀广告消息。HA还可以定期发送非请求式广告。广告携带类型为2的路由头。回复消息发送到请求消息的源地址。如果是非请求式广告，则发送到已注册移动节点的原地址。广告的类型值设置为147。如果是对请求的回应，标识符将从请求消息中复制。广告包含在[第4章](ch04.html
+    "第4章 ICMPv6")中描述的前缀选项。它携带所有应该由移动节点用来配置其家庭地址的前缀。
 - en: Changes in Neighbor Discovery (ND)
+  id: totrans-181
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 邻居发现（ND）中的变化
 - en: Some changes and new options have been defined in ND for use with Mobile IPv6.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 在ND中定义了一些变化和新选项，以便与移动IPv6一起使用。
 - en: Modified Router Advertisement format
+  id: totrans-183
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 修改后的路由器广告格式
 - en: As already mentioned in [Chapter 4](ch04.html "Chapter 4. ICMPv6"), there is
     a new flag in the Router Advertisement. The M-Flag and the O-Flag are followed
     by the H-Flag, which allows a router to advertise that it acts as a home agent
     on this link.
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 如在[第4章](ch04.html "第4章 ICMPv6")中已提到，路由器广告中新增了一个标志。M标志和O标志后面跟着H标志，该标志允许路由器在此链路上广告其作为主机代理的角色。
 - en: Modified Prefix option
+  id: totrans-185
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 修改后的前缀选项
 - en: In order to build an updated HA list based on Router Advertisements, a mobile
     node must know the global unicast address of the routers. A regular Router Advertisement
     lists only the link-local address of the router. For this purpose, the Prefix
@@ -938,20 +1347,26 @@
     R-Flag (router address). When this flag is set, it indicates that the Prefix option
     field does not contain a Prefix, but rather a global IPv6 unicast address for
     the router.
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了基于路由器广告构建更新后的HA列表，移动节点必须知道路由器的全局单播地址。常规的路由器广告只列出了路由器的链路本地地址。为此，前缀选项已经进行了修改。前缀选项现在携带一个额外的标志——R标志（路由器地址）。当设置该标志时，表示前缀选项字段不包含前缀，而是包含路由器的全局IPv6单播地址。
 - en: New Advertisement Interval option
+  id: totrans-187
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 新的广告间隔选项
 - en: The Advertisement Interval option is used in Router Advertisements. It indicates
     the interval at which the router will send unsolicited multicast Router Advertisements.
     The option follows the TLV format (Time, Length, Value) and has a type value of
     7\. The Advertisement Interval field has 4 bytes and carries the time in milliseconds
     between unsolicited Router Advertisements. The mobile node uses this information
     in its Movement Detection Algorithm (described later in this chapter).
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 广告间隔选项用于路由器广告中。它表示路由器发送非请求式多播路由器广告的间隔时间。该选项采用TLV格式（时间、长度、值），类型值为7。广告间隔字段占4字节，表示路由器广告之间的毫秒时间间隔。移动节点在其移动检测算法中使用此信息（该算法将在本章后续部分介绍）。
 - en: The Neighbor Discovery specification sets a minimum interval of three seconds
     for unsolicited multicast Router Advertisements. Mobile nodes are dependent on
     learning as fast as possible when moving to a new network to create new Care-of
@@ -961,16 +1376,22 @@
     Router Advertisement Interval. Alternatively, mobility information from lower
     layers (i.e., Layer 2) can be used to aid the mobile node in achieving faster
     movement detection.
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 邻居发现规范为无请求的多播路由器广告设置了最小间隔为三秒。移动节点依赖于尽可能快速地学习，当移动到新网络时，相应地创建新的临时地址并发送绑定更新。它们通过来自尚未认识的路由器的路由器广告来检测自己是否移动到新网络。因此，支持移动IPv6的路由器必须能够配置为更短的路由器广告间隔。或者，可以使用来自更低层（即第二层）的移动信息来帮助移动节点更快地检测移动。
 - en: New Home Agent Information option
+  id: totrans-190
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 新的主机代理信息选项
 - en: The Home Agent Information option is used in Router Advertisements and follows
     the TLV format. The type value is 8.
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: 主机代理信息选项用于路由器广告，并遵循TLV格式。类型值为8。
 - en: The HA Preference field has a length of 2 bytes. In a Router Advertisement,
     the HA can use this field to indicate which level of preference should be associated
     to it. A higher value means a higher preference. When this option is not set,
@@ -978,118 +1399,170 @@
     adjust to different situations, e.g., to the number of mobile nodes currently
     connected or based on how many resources are available to serve additional mobile
     nodes. Alternatively, the preference can be configured manually.
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: HA优先级字段的长度为2字节。在路由器广告中，HA可以使用此字段指示应与其关联的优先级级别。较高的值表示较高的优先级。当此选项未设置时，HA的优先级为0。该字段可由HA用于动态调整以应对不同情况，例如当前连接的移动节点数量或可用资源多少来服务更多的移动节点。或者，优先级可以手动配置。
 - en: The Home Agent Lifetime field also has a length of 2 bytes. It indicates the
     lifetime for this HA in seconds. The default value corresponds to the value in
     the basic Router Advertisement header. The maximum possible value is 18.2 hours.
     A value of 0 is not accepted. The HA Lifetime field only relates to the HA service
     of this router, so it can be present only in a Router Advertisement with the H-Bit
     (home agent) set.
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 主机代理生命周期字段的长度也为2字节。它表示此HA的生命周期，单位为秒。默认值对应于基本路由器广告头中的值。最大可能值为18.2小时。值为0不被接受。HA生命周期字段仅与此路由器的HA服务相关，因此仅能出现在H位（主机代理）设置的路由器广告中。
 - en: Mobile IPv6 Communication
+  id: totrans-194
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 移动IPv6通信
 - en: This section discusses Mobile IPv6 terms and goes into more details on the communication
     processes.
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 本节讨论了移动IPv6术语，并深入探讨了通信过程的细节。
 - en: Binding Cache
+  id: totrans-196
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 绑定缓存
 - en: Every correspondent node and home agent maintains a Binding Cache for each of
     its global IPv6 addresses. It lists all mobile nodes for which it has a binding.
     If it wants to send data to a certain destination, it first searches its Binding
     Cache, and after this, the Destination Cache for an address.
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个通信节点和主机代理都会为其每个全局IPv6地址维护一个绑定缓存。它列出所有拥有绑定的移动节点。如果它想将数据发送到某个目的地，它会首先在其绑定缓存中查找，然后在目标缓存中查找地址。
 - en: 'A Binding Cache entry carries the following information:'
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: 绑定缓存条目携带以下信息：
 - en: Home address of the mobile node for the entry. This field is used to determine
     the Destination address when sending a packet.
+  id: totrans-199
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于该条目的移动节点的主机地址。此字段用于在发送数据包时确定目标地址。
 - en: Care-of address for the mobile node indicated by the Home Address field in this
     Binding Cache entry.
+  id: totrans-200
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 由主机地址字段指示的移动节点的临时地址，位于此绑定缓存条目中。
 - en: Lifetime value for the binding.
+  id: totrans-201
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 绑定的生命周期值。
 - en: A flag indicating whether this entry is a home registration entry. Present only
     on a node that acts as a home agent.
+  id: totrans-202
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个标志，指示此条目是否为主机注册条目。仅出现在充当主机代理的节点上。
 - en: Maximum value of the Sequence Number field of all previous Binding Updates received
     for this home address.
+  id: totrans-203
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 针对此主机地址接收到的所有先前绑定更新的序列号字段的最大值。
 - en: Information on the use of this entry.
+  id: totrans-204
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 此条目的使用信息。
 - en: Binding Update List
+  id: totrans-205
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 绑定更新列表
 - en: Every mobile node maintains a Binding Update List. The list has an entry for
     each Binding Update the mobile node has sent to its home agent(s) and to correspondent
     nodes for which the Lifetime has not expired. If it has sent more than one Binding
     Update, only the last message with the highest Sequence Number is listed.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个移动节点维护一个绑定更新列表。该列表包含移动节点发送给其家乡代理和通信节点的每个绑定更新条目，前提是其生命周期尚未过期。如果它发送了多个绑定更新，则只列出具有最高序列号的最后一条消息。
 - en: 'A Binding Update List carries the following information:'
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 绑定更新列表包含以下信息：
 - en: IPv6 address of the node to which the Binding Update has been sent
+  id: totrans-208
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 绑定更新已发送的节点的IPv6地址
 - en: Home address for which the Binding Update has been sent
+  id: totrans-209
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 绑定更新已发送的家乡地址
 - en: Care-of address that was indicated in this Binding Update
+  id: totrans-210
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 该绑定更新中指示的外部地址
 - en: Lifetime that was indicated in the Binding Update
+  id: totrans-211
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 绑定更新中指示的生命周期
 - en: Remaining Lifetime for the Binding
+  id: totrans-212
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 绑定的剩余生命周期
 - en: Highest used Sequence Number for this Binding
+  id: totrans-213
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 该绑定的最高使用序列号
 - en: Time when Binding Update was sent
+  id: totrans-214
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 绑定更新发送的时间
 - en: State of any retransmissions needed
+  id: totrans-215
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 需要重传的状态
 - en: A flag indicating whether further Binding Updates have to be sent to this destination
+  id: totrans-216
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个标志，指示是否需要向该目标发送进一步的绑定更新
 - en: Return Routability Procedure
+  id: totrans-217
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 返回可路由性程序
 - en: The Return Routability Procedure is designed to allow a correspondent node to
     detect whether the mobile node is reachable at its Care-of address as well as
     at its home address. Only when this has been successfully proven can *Route Optimization*
@@ -1100,37 +1573,50 @@
     attack. Only after a successful Return Routability test does the correspondent
     node accept Binding Updates from the mobile node and send datagrams to the Care-of
     address of the mobile node directly.
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回可路由性程序的设计目的是让通信节点检测移动节点是否可以在其外部地址和家乡地址上都能被访问。只有当这一点成功验证后，*路由优化*（即通信节点与移动节点之间的直接通信）才可使用。移动节点能在两个地址上被访问，表明它确实在外部链路上，并且已为家乡地址进行了有效注册。这降低了（但并不消除）该绑定更新为安全攻击的风险。只有在成功通过返回可路由性测试后，通信节点才会接受来自移动节点的绑定更新，并直接向移动节点的外部地址发送数据报文。
 - en: 'The message flow for the Return Routability Procedure consists of the following
     steps (for MH types, refer to [Table 8-1](ch08.html#mobility_message_types "Table 8-1. Mobility
     message types")):'
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回可路由性程序的消息流程包括以下步骤（关于MH类型，请参见[表8-1](ch08.html#mobility_message_types "表8-1.
+    移动消息类型")）：
 - en: MN sends a Home Test Init message (MH type 1) via HA to the CN. This message
     carries a Home Init Cookie. This way the CN learns the home address of the MN.
+  id: totrans-220
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 移动节点通过家乡代理向通信节点发送“家乡测试初始化”消息（MH类型1）。该消息携带家乡初始化Cookie。通过这种方式，通信节点得知了移动节点的家乡地址。
 - en: MN sends a Care-of Test Init message (MH type 2) to the CN. This message carries
     a Care-of Init Cookie. It is sent to the CN directly (not through HA). This way,
     the CN learns the Care-of address of the MN.
+  id: totrans-221
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 移动节点发送“外部地址测试初始化”消息（MH类型2）给通信节点。该消息携带外部初始化Cookie，并直接发送给通信节点（而非通过家乡代理）。通过这种方式，通信节点得知了移动节点的外部地址。
 - en: CN replies to the Home Test Init message with a Home Test message (MH type 3)
     sent via HA. It carries the Home Init Cookie, the Home Keygen Token, and the Home
     Nonce Index. The MN can now generate a Home Keygen Token.
+  id: totrans-222
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 通信节点对“家乡测试初始化”消息进行回复，并通过家乡代理发送“家乡测试”消息（MH类型3）。该消息携带家乡初始化Cookie、家乡密钥生成令牌和家乡随机数索引。移动节点现在可以生成家乡密钥生成令牌。
 - en: CN replies to the Care-of Test Init message with a Care-of Test message (MH
     type 4) sent to the MN’s Care-of address. It carries the Care-of Init Cookie,
     the Care-of Keygen Token, and the Care-of Nonce Index. The MN can now generate
     a Care-of Keygen Token.
+  id: totrans-223
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 通信节点对“外部地址测试初始化”消息进行回复，并发送到移动节点的外部地址，回复为“外部地址测试”消息（MH类型4）。该消息包含外部初始化Cookie、外部密钥生成令牌和外部随机数索引。移动节点现在可以生成外部密钥生成令牌。
 - en: Once the mobile node has received the Home Test and the Care-of Test messages,
     the Return Routability Procedure has been accomplished. The mobile node hashes
     the two tokens and creates a 20-byte Management Key, which is obviously also known
@@ -1139,60 +1625,82 @@
     node. Upon a successful security check, the correspondent node can accept the
     Binding Update since the mobile node has proven that it is reachable on the home
     and Care-of addresses contained in the Binding Update.
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦移动节点接收到家庭测试和Care-of测试消息，返回可达性过程就完成了。移动节点将这两个令牌哈希，并创建一个20字节的管理密钥，显然该密钥也为最初生成这两个令牌的对应节点所知。此密钥将由移动节点用于保护绑定更新到对应节点。经过安全检查成功后，对应节点可以接受绑定更新，因为移动节点已经证明它在绑定更新中包含的家庭地址和Care-of地址是可达的。
 - en: RFC 4225, “Mobile IP Version 6 Route Optimization Security Design Background,”
     outlines the security considerations and choices that were made when the Return
     Routability Procedure was defined. The goal of this informational document is
     to help implementers of MIPv6 understand the design choices and to help people
     who design mobility of multihoming solutions to avoid some common security pitfalls.
     The security problems and possible countermeasures are discussed in detail.
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4225《移动IP版本6路由优化安全设计背景》概述了在定义返回可达性过程时所做的安全性考虑和选择。该信息性文档的目的是帮助MIPv6实现者理解设计选择，并帮助设计多宿主解决方案的人员避免一些常见的安全陷阱。详细讨论了安全问题和可能的对策。
 - en: Home Agent Operation
+  id: totrans-226
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 家庭代理操作
 - en: When the mobile node is away from home, the HA must intercept all packets destined
     to the mobile node and tunnel them to the Care-of address of the mobile node.
     It uses Proxy Neighbor Discovery to do so.
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 当移动节点离开家庭时，HA必须拦截所有发送到移动节点的数据包，并将其隧道到移动节点的Care-of地址。它通过代理邻居发现来实现这一点。
 - en: Proxy Neighbor Discovery
+  id: totrans-228
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 代理邻居发现
 - en: 'In order to intercept packets destined to the mobile node on the home link,
     the HA must pretend to be the mobile node. The HA sends Neighbor Advertisements
     to the all-nodes multicast address, providing its own link-layer address as link-layer
     address for the home address of the mobile node. The ND message has the following
     information:'
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了拦截发送到家庭链路上移动节点的数据包，HA必须假装成移动节点。HA向所有节点组播地址发送邻居广告，提供它自己的链路层地址作为移动节点家庭地址的链路层地址。ND消息包含以下信息：
 - en: The Source address in the IPv6 header of the Neighbor Advertisement is the address
     of the HA.
+  id: totrans-230
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 邻居广告中的IPv6头部的源地址是HA的地址。
 - en: The Target Address field in the ND message carries the IPv6 address of the mobile
     node.
+  id: totrans-231
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: ND消息中的目标地址字段携带移动节点的IPv6地址。
 - en: The ND Advertisement contains a Target Link-Layer Address option carrying the
     link-layer address of the HA.
+  id: totrans-232
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: ND广告包含一个目标链路层地址选项，携带HA的链路层地址。
 - en: The Router flag (R-Flag) must be set to 0.
+  id: totrans-233
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器标志（R-Flag）必须设置为0。
 - en: The Override flag (O-Flag) must be set. All nodes on the link will update their
     Neighbor Caches and store the link-layer address.
+  id: totrans-234
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 必须设置覆盖标志（O-Flag）。链路上的所有节点将更新其邻居缓存，并存储链路层地址。
 - en: Now the HA receives all packets on this link that are destined to the IPv6 address
     of the mobile node. The HA acts as a proxy for the mobile node. It must inspect
     all Neighbor Solicitations it receives and verify whether the Target Address field
@@ -1201,83 +1709,115 @@
     address for the mobile node. This procedure also defends the mobile node’s home
     address from other home link nodes trying to configure that same address (i.e.,
     Duplicate Address Detection).
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，HA接收到所有发送到移动节点IPv6地址的链路上的数据包。HA充当移动节点的代理。它必须检查所有收到的邻居请求，并验证目标地址字段是否与其绑定缓存中的家庭注册条目对应。如果是，它会通过邻居广告回复，指出它自己的链路层地址作为移动节点的链路层地址。此过程还保护了移动节点的家庭地址，防止其他家庭链路节点试图配置该地址（即，重复地址检测）。
 - en: Note
+  id: totrans-236
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注
 - en: For more details on Neighbor Discovery and the formats of the ND messages and
     processes mentioned, refer to [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关邻居发现以及提到的ND消息和过程格式的更多详细信息，请参阅[第4章](ch04.html "第4章 ICMPv6")。
 - en: Bidirectional tunneling
+  id: totrans-238
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 双向隧道
 - en: To forward packets destined to the home address of the mobile node, the HA uses
     an IPv6 tunnel. It inserts an additional IPv6 header called the Tunnel header.
     The Source address in the Tunnel header is the IPv6 address of the HA. The destination
     address is the primary Care-of address of the mobile node. The mobile node processes
     the Tunnel header and forwards the decapsulated packet internally to the upper-layer
     protocols and applications.
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了转发发送到移动节点家庭地址的数据包，HA使用IPv6隧道。它插入一个额外的IPv6头，称为隧道头。隧道头中的源地址是HA的IPv6地址，目标地址是移动节点的主要Care-of地址。移动节点处理隧道头并将解封装后的数据包转发到上层协议和应用程序。
 - en: 'In order to receive multicast packets when away from home, the mobile node
     must register for these group memberships. There are two ways to accomplish this:'
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了在离家时接收组播数据包，移动节点必须注册这些组成员资格。有两种方式可以实现：
 - en: The mobile node can register with local routers on the Home Link using its Care-of
     address. In this case, it can receive multicast packets directly. These memberships
     will not survive if the mobile node moves to another foreign network.
+  id: totrans-241
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 移动节点可以使用其Care-of地址向主链路上的本地路由器注册。在这种情况下，它可以直接接收组播数据包。如果移动节点移动到另一个外部网络，这些成员资格将失效。
 - en: The mobile node can register for multicast group memberships on its Home Link
     by sending MLD registrations to its HA, which in turn will forward multicast packets
     to the mobile node using the tunnel. This will always work no matter how many
     times the mobile node changes the network.
+  id: totrans-242
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 移动节点可以通过向其HA发送MLD注册请求，在其主链路上注册组播组成员资格，HA会通过隧道将组播数据包转发到移动节点。这无论移动节点更换网络多少次，始终有效。
 - en: 'The following packets are not forwarded to the mobile node:'
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下数据包不会转发到移动节点：
 - en: Packets sent to the link-layer address of the mobile node. These packets are
     answered with an ICMPv6 Destination Unreachable message.
+  id: totrans-244
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 发送到移动节点链路层地址的数据包。这些数据包将以ICMPv6目标不可达消息响应。
 - en: Packets sent to the site-local address of the mobile node. (Site-local addresses
     have been deprecated after the publication of the Mobile IPv6 specification; this
     will be removed in a future version of this RFC.)
+  id: totrans-245
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 发送到移动节点站点本地地址的数据包。（站点本地地址在发布移动IPv6规范后已被弃用；此项将在未来版本的RFC中删除。）
 - en: Multicast packets sent to a link-local, site-local, or organization-local scope.
+  id: totrans-246
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 发送到链路本地、站点本地或组织本地范围的组播数据包。
 - en: Packets sent through the Reverse Tunnel from the mobile node to the HA are decapsulated
     by the HA and forwarded to their destinations through regular routing mechanisms.
+  id: totrans-247
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过反向隧道从移动节点发送到HA的数据包会被HA解封装，并通过常规路由机制转发到目标。
 - en: When the HA itself sends data to the mobile node, it behaves like a regular
     correspondent node, which means it does not use the tunnel, but inserts a Routing
     header Type 2, which carries the home address of the mobile node.
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 当HA本身向移动节点发送数据时，它的行为像一个普通的对应节点，这意味着它不使用隧道，而是插入一个路由头类型2，携带移动节点的家庭地址。
 - en: Mobile Node Operation
+  id: totrans-249
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 移动节点操作
 - en: As long as the MN is at home, no Mobile IPv6 mechanisms are necessary. If the
     MN is away from home, it uses its home address as well as its Care-of address.
     For each communication, it must choose which address to use. Applications and
     processes above the IP layer usually communicate using the home address of the
     MN.
+  id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: 只要移动节点在家庭网络中，就不需要使用移动IPv6机制。如果移动节点离家，它同时使用家庭地址和Care-of地址。对于每次通信，它必须选择使用哪个地址。IP层之上的应用和进程通常使用移动节点的家庭地址进行通信。
 - en: If a communication has to survive a move of the MN to another network, the home
     address must be used. As soon as the MN has a communication with a correspondent
     node for which there is a Binding, the communication can be routed directly. If
@@ -1287,59 +1827,83 @@
     When the MN communicates with local nodes in a foreign network—e.g., for Neighbor
     Discovery—it should communicate directly and not use the Home Address Destination
     option.
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果通信需要在移动节点迁移到另一个网络后继续进行，必须使用家庭地址。一旦移动节点与一个有绑定的对应节点建立通信，通信就可以直接路由。如果没有绑定，所有数据都将通过家庭代理隧道传输。对于某些特定的、新的通信，移动节点也可以选择使用其Care-of地址，而不依赖于移动IPv6功能，就像普通的单播地址一样。当移动节点与外部网络中的本地节点进行通信时，例如进行邻居发现时，它应直接通信，而不使用家庭地址目标选项。
 - en: The choice of the best communication path and the corresponding address depends
     on the requirements of the application, and that is where the decision has to
     be made. This definition is not part of the Mobile IPv6 specification.
+  id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: 最佳通信路径和相应地址的选择取决于应用程序的要求，这就是决策必须做出的地方。这个定义并不是移动IPv6规范的一部分。
 - en: Route Optimization in detail
+  id: totrans-253
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 路由优化详细信息
 - en: When a mobile node away from home communicates with a correspondent node for
     which it has a Binding, it uses the process called Route Optimization.
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: 当一个不在家庭网络中的移动节点与其有绑定的通讯节点进行通信时，它会使用称为路由优化的过程。
 - en: 'The MN goes through the following steps: it checks its Binding Update List
     for an entry of its home address for this correspondent node. This verifies whether
     the correspondent node can process the Home Address Destination option. Then,
     it checks the Binding Update List for the following:'
+  id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点执行以下步骤：它检查其绑定更新列表，查找此通讯节点的家庭地址条目。这样可以验证通讯节点是否能够处理家庭地址目标选项。然后，它检查绑定更新列表中的以下内容：
 - en: Whether the Source address it wants to use corresponds to the home address in
     the entry.
+  id: totrans-256
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 检查它想要使用的源地址是否与条目中的家庭地址相对应。
 - en: Whether the Destination address it wants to use corresponds to the address of
     the correspondent node in the entry.
+  id: totrans-257
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 检查它想要使用的目标地址是否与条目中通讯节点的地址相对应。
 - en: Whether its current Care-of address is listed as Care-of address in this entry.
+  id: totrans-258
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 检查其当前的暂时地址（Care-of address）是否列为该条目的暂时地址。
 - en: Whether the Binding is valid and the Lifetime is greater than zero.
+  id: totrans-259
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 检查绑定是否有效，并且生命周期是否大于零。
 - en: 'If all these requirements are met, the mobile node knows that the correspondent
     node has a valid Binding Cache entry. A packet sent from the MN to this correspondent
     node contains the following information:'
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果满足所有这些要求，移动节点就知道通讯节点拥有一个有效的绑定缓存条目。从移动节点发送到该通讯节点的数据包包含以下信息：
 - en: The Source address field in the IPv6 header contains the Care-of address.
+  id: totrans-261
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: IPv6头中的源地址字段包含暂时地址。
 - en: The packet carries a Destination Options header with a Home Address option containing
     the home address of the mobile node.
+  id: totrans-262
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 数据包携带一个目标选项头，内含一个家庭地址选项，包含移动节点的家庭地址。
 - en: The correspondent node receiving this packet copies the home address from the
     Destinations Options header into the Source address field of the IPv6 header before
     processing the packet to upper-layer protocols and applications. To the upper
@@ -1347,39 +1911,53 @@
     address of the mobile node. When the correspondent node wants to send data to
     an MN, it checks its Binding Cache for an entry for the destination. If there
     is such an entry, it inserts a Routing header Type 2.
+  id: totrans-263
   prefs: []
   type: TYPE_NORMAL
+  zh: 接收此数据包的通讯节点将从目标选项头中复制家庭地址到IPv6头的源地址字段，然后再将数据包传递给上层协议和应用程序。对于上层协议和应用程序来看，数据包似乎是从移动节点的家庭地址发送的。当通讯节点想要向一个移动节点（MN）发送数据时，它会检查其绑定缓存中是否有该目标的条目。如果存在该条目，它会插入一个路由头类型2。
 - en: 'When the correspondent node replies, the addresses are used as follows:'
+  id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: 当通讯节点回复时，地址的使用方式如下：
 - en: The Destination address in the IPv6 header contains the Care-of address of the
     mobile node.
+  id: totrans-265
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: IPv6头中的目标地址包含移动节点的暂时地址。
 - en: The packet contains a Routing header Type 2\. The address field in the Routing
     header contains the home address of the mobile node.
+  id: totrans-266
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 数据包包含一个路由头类型2。路由头中的地址字段包含移动节点的家庭地址。
 - en: The mobile node exchanges the address in the Destination address field of the
     IPv6 header with the home address copied from the Routing header, reduces the
     Segments Left field in the Routing header by one to zero, and processes the packet
     internally to upper-layer protocols and applications. Again, to the upper layers,
     it looks as though the packet had been sent to the home address of the mobile
     node.
+  id: totrans-267
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 移动节点将IPv6头中的目标地址字段中的地址与从路由头中复制的家庭地址交换，减少路由头中的剩余段字段（Segments Left）值，将其设置为零，并将数据包传递给上层协议和应用程序。对于上层协议来看，数据包似乎是已发送到移动节点的家庭地址。
 - en: '[Figure 8-5](ch08.html#header_information_with_route_optimizati "Figure 8-5. Header
     information with Route Optimization") shows the communication between the MN and
     the CN, as well as the specific headers associated with Route Optimization.'
+  id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 8-5](ch08.html#header_information_with_route_optimizati "图 8-5. 路由优化的头信息")展示了移动节点（MN）与通讯节点（CN）之间的通信，以及与路由优化相关的具体头信息。'
 - en: '![Header information with Route Optimization](images/ipv6_0805.png)Figure 8-5. Header
     information with Route Optimization'
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: '![带路由优化的头部信息](images/ipv6_0805.png)图 8-5. 带路由优化的头部信息'
 - en: This figure illustrates the processes described previously. The main goal of
     Mobile IPv6 is for an MN to keep connectivity to services and applications while
     moving from one network to another. The goal of Route Optimization is to allow
@@ -1387,8 +1965,11 @@
     options and Routing Type 2 header, both nodes can process the packets internally
     as though they were in direct communication with the MN on its home link. So to
     the application, it looks as though the mobile node is on its home link.
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 此图说明了前面描述的过程。移动 IPv6 的主要目标是让 MN 在从一个网络移动到另一个网络时，保持对服务和应用的连接。路由优化的目标是允许 MN 和对应节点之间进行直接路由。通过使用目标选项和路由类型
+    2 头部，两个节点可以像直接与 MN 在其主机链路上通信一样，在内部处理数据包。因此，对于应用程序来说，看起来就像移动节点仍然在其主机链路上。
 - en: This explains why Mobility with IPv6 is much more scalable and well-suited for
     widespread mobility. The Extension header architecture allows for Route Optimization.
     Imagine millions of mobile nodes communicating through their home agents to reach
@@ -1396,12 +1977,16 @@
     of failure, and the home link unnecessarily overloaded. In many cases, the route
     from the mobile node to the correspondent node is much shorter than the route
     going through the home agent.
+  id: totrans-271
   prefs: []
   type: TYPE_NORMAL
+  zh: 这解释了为什么 IPv6 移动性更具可扩展性，并且更适合广泛的移动性应用。扩展头部架构支持路由优化。试想成千上万的移动节点通过其主机代理与对应节点通信。如果所有流量都通过主机代理，主机代理将成为瓶颈、单点故障，并且主机链路将不必要地过载。在许多情况下，从移动节点到对应节点的路由要比经过主机代理的路由短得多。
 - en: Communication with bidirectional tunneling
+  id: totrans-272
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 双向隧道通信
 - en: If the MN wants to communicate with a correspondent node for which it does not
     have a Binding, it uses the Reverse Tunneling mechanism. In this case, the packet
     is sent through the tunnel via the home agent. The Source address in the original
@@ -1412,16 +1997,24 @@
     first header and forwards the original packet to the correspondent node. [Figure 8-6](ch08.html#header_information_with_bidirectional_tu
     "Figure 8-6. Header information with bidirectional tunneling") illustrates the
     header information.
+  id: totrans-273
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果 MN 想与没有绑定的对应节点通信，它将使用反向隧道机制。在这种情况下，数据包通过主机代理的隧道发送。原始数据包中的源地址携带 MN 的主机地址，而对应节点的地址作为目标地址。该数据包被封装在另一个
+    IPv6 头部中，源地址字段携带 MN 的 Care-of 地址，目标地址字段携带主机代理的 IPv6 地址。主机代理处理第一个头部并将原始数据包转发给对应节点。[图
+    8-6](ch08.html#header_information_with_bidirectional_tu "图 8-6. 带双向隧道的头部信息") 说明了头部信息。
 - en: '![Header information with bidirectional tunneling](images/ipv6_0806.png)Figure 8-6. Header
     information with bidirectional tunneling'
+  id: totrans-274
   prefs: []
   type: TYPE_NORMAL
+  zh: '![带双向隧道的头部信息](images/ipv6_0806.png)图 8-6. 带双向隧道的头部信息'
 - en: Movement Detection
+  id: totrans-275
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 移动检测
 - en: How does the MN detect that it has moved to another network? Movement Detection
     is based on the process of Neighbor Unreachability Detection (NUD; described in
     [Chapter 4](ch04.html "Chapter 4. ICMPv6")). Using NUD, the MN detects when its
@@ -1431,97 +2024,139 @@
     builds new Care-of addresses based on the Router prefixes advertised. When the
     new addresses are initialized, it performs a Binding Update with its home agent
     first and then with all correspondent nodes for which it has Bindings.
+  id: totrans-276
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点（MN）如何检测自己已经移动到另一个网络？移动检测基于邻居不可达检测（NUD；详见[第 4 章](ch04.html "第 4 章. ICMPv6")）。通过使用
+    NUD，MN 可以检测到其默认路由器不再可用。在这种情况下，MN 会尝试寻找新的默认路由器。它会对其链路本地地址进行重复地址检测（DAD），根据路由器广告选择新的默认路由器，并基于路由器前缀构建新的
+    Care-of 地址。当新的地址初始化时，它首先与主机代理执行绑定更新，然后与所有有绑定的对应节点进行更新。
 - en: 'The fact that new routers advertise new prefixes is not necessarily a sign
     that the MN is in a new network. There may be a new router or a prefix change
     in the current network. Procedures have to be defined to prevent an MN from unnecessarily
     updating all Bindings when it has not moved to another network. The following
     procedures have been defined so far:'
+  id: totrans-277
   prefs: []
   type: TYPE_NORMAL
+  zh: 新路由器通告新前缀的事实并不一定是移动节点处于新网络的标志。可能是当前网络中的新路由器或前缀发生了变化。必须定义程序，以防止移动节点在未移动到其他网络时不必要地更新所有绑定。到目前为止，已定义以下程序：
 - en: If the MN receives RAs from new routers with new prefixes but its default router
     is still reachable, it will not perform any Binding Updates. It uses NUD to detect
     whether its default router is still available.
+  id: totrans-278
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果移动节点收到来自新路由器的带有新前缀的路由公告，但其默认路由器仍然可达，它将不会执行任何绑定更新。它使用邻居可达性检测（NUD）来检测默认路由器是否仍然可用。
 - en: RAs can carry an Advertisement Interval option. This allows the MN to detect
     whether this router is still available based on the comparison of the interval
     in different RAs.
+  id: totrans-279
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由公告（RAs）可以携带广告间隔选项。这允许移动节点根据不同路由公告中的间隔比较来检测此路由器是否仍然可用。
 - en: If the default router does not reply to a Neighbor Solicitation, the MN should
     perform a Multicast Router Solicitation.
+  id: totrans-280
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果默认路由器未响应邻居请求（Neighbor Solicitation），移动节点应执行多播路由请求（Multicast Router Solicitation）。
 - en: RFC 5568, “Mobile IPv6 Fast Handovers,” describes an update to the Mobile IPv6
     specification to reduce the handover latency. New ND messages types are defined
     for this purpose.
+  id: totrans-281
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 5568，"移动 IPv6 快速切换"，描述了对移动 IPv6 规范的更新，以减少切换延迟。为此目的定义了新的 ND 消息类型。
 - en: Returning home
+  id: totrans-282
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 返回家园
 - en: When the MN detects that it is back on its home link, it sends a Binding Update
     to the home agent to inform it that it is back home and that the HA no longer
     needs to forward packets through the tunnel. This is called a de-registration
     Binding Update and only after having de-registered can the MN send and receive
     packets using its home address.
+  id: totrans-283
   prefs: []
   type: TYPE_NORMAL
+  zh: 当移动节点检测到自己已经回到家乡链接时，它向家乡代理发送绑定更新，通知其已回到家中，并且家乡代理不再需要通过隧道转发数据包。这被称为注销绑定更新，只有在注销之后，移动节点才能使用其家庭地址发送和接收数据包。
 - en: 'This Home Registration looks as follows:'
+  id: totrans-284
   prefs: []
   type: TYPE_NORMAL
+  zh: 该家庭注册如下所示：
 - en: The A-Bit (Acknowledge) and the H-Bit (Home Registration) must be set.
+  id: totrans-285
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 必须设置 A 位（确认）和 H 位（家庭注册）。
 - en: The Lifetime field is set to 0.
+  id: totrans-286
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Lifetime 字段设置为 0。
 - en: The Care-of address must be the same as the home address.
+  id: totrans-287
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Care-of 地址必须与家庭地址相同。
 - en: The Source address in the IPv6 header must be the home address of the MN.
+  id: totrans-288
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: IPv6 头部中的源地址必须是移动节点的家庭地址。
 - en: Security
+  id: totrans-289
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 安全
 - en: If the data flow between home agent and mobile node is not secured, there are
     many possibilities for attacks—for example, man-in-the-middle attacks, hijacking,
     or Denial of Service attacks.
+  id: totrans-290
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果家乡代理和移动节点之间的数据流未加密，则可能面临许多攻击的可能性，例如中间人攻击、劫持或拒绝服务攻击。
 - en: To secure the tunnel between home agent and mobile node, an IPsec tunnel is
     configured. IPsec ESP is required for Mobile IPv6 messages. The Mobile IPv6 specification
     details this.
+  id: totrans-291
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了保护家乡代理和移动节点之间的隧道，配置了 IPsec 隧道。移动 IPv6 消息需要 IPsec ESP。移动 IPv6 规范对此进行了详细说明。
 - en: 'The following data flows have to be secured:'
+  id: totrans-292
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下数据流必须进行保护：
 - en: Binding Update and Binding Ack between MN and HA
+  id: totrans-293
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 移动节点（MN）和家乡代理（HA）之间的绑定更新和绑定确认
 - en: Home Test Init and Home Test messages sent via HA during the Return Routability
     Procedure
+  id: totrans-294
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在返回可路由性过程（Return Routability Procedure）期间，通过家乡代理发送的家庭测试初始化和家庭测试消息
 - en: ICMPv6 messages between MN and HA used for prefix discovery
+  id: totrans-295
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于前缀发现的移动节点（MN）和家乡代理（HA）之间的 ICMPv6 消息
 - en: All control messages between mobile node and home agent need authentication,
     integrity, proper sequencing, and anti-replay protection. This protection requires
     a Security Association (SA) between home agent and mobile node. IPsec does not
@@ -1529,48 +2164,67 @@
     by the Sequence Number in Binding Update and Acknowledgment messages. Greater
     protection from replay attacks can be provided only when Internet Key Exchange
     (IKE) is used.
+  id: totrans-296
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点和家乡代理之间的所有控制消息都需要认证、完整性、正确的顺序和防重放保护。此保护需要家乡代理和移动节点之间的安全关联（SA）。IPsec 不提供任何控制消息顺序的手段。正确的顺序由绑定更新和确认消息中的序列号提供。仅当使用互联网密钥交换（IKE）时，才能提供更强的重放攻击保护。
 - en: Note
+  id: totrans-297
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: For a description of security terms and concepts, refer to [Chapter 6](ch06.html
     "Chapter 6. Security with IPv6").
+  id: totrans-298
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关安全术语和概念的描述，请参见[第 6 章](ch06.html "第 6 章. 使用 IPv6 的安全性")。
 - en: Binding Updates between the mobile node and correspondent node are protected
     by the SA established during the Return Routability Procedure. Binding Updates
     between the mobile node and correspondent node must also be protected by the Binding
     Authorization Data option. This option includes a Binding Management Key, which
     is generated during the Return Routability Procedure.
+  id: totrans-299
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动节点与对应节点之间的绑定更新通过在返回路由能力过程（Return Routability Procedure）中建立的安全关联（SA）进行保护。移动节点与对应节点之间的绑定更新还必须通过绑定授权数据选项进行保护。此选项包括一个绑定管理密钥，该密钥是在返回路由能力过程中生成的。
 - en: A more detailed discussion of security aspects and mechanisms with Mobile IPv6
     can be found in RFC 6275 (“Mobility Support in IPv6”), RFC 3776 (“Using IPsec
     to Protect Mobile IPv6 Signaling between mobile nodes and home agents”), and RFC
     4877 (“Mobile IPv6 Operation with IKEv2 and the Revised IPsec Architecture”),
     as well as in general security RFCs.
+  id: totrans-300
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于移动IPv6的安全性方面及机制的更详细讨论，可以参见RFC 6275（《IPv6中的移动支持》）、RFC 3776（《使用IPsec保护移动节点与家庭代理之间的移动IPv6信令》）、RFC
+    4877（《使用IKEv2和修订版IPsec架构的移动IPv6操作》），以及一般的安全性RFC。
 - en: RFC 4285, “Authentication Protocol for Mobile IPv6,” specifies an alternate
     mechanism to secure MIPv6 messages in 3GPP2 networks. It is an informational RFC
     not reviewed by the IETF and consists of a MIPv6-specific mobility message authentication
     option that can be added to MIPv6 signaling messages.
+  id: totrans-301
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4285，《移动IPv6认证协议》为3GPP2网络中的MIPv6消息提供了一种安全机制。它是一个信息性RFC，没有经过IETF的审查，包含一个专为MIPv6设计的移动性消息认证选项，可添加到MIPv6信令消息中。
 - en: Extensions to Mobile IPv6
+  id: totrans-302
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 移动IPv6扩展
 - en: A number of extensions have been defined for Mobile IPv6 to make it more flexible
     and scalable. The following sections describe them.
+  id: totrans-303
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了使移动IPv6更加灵活和可扩展，已定义了若干扩展。以下部分将对这些扩展进行描述。
 - en: NEMO
+  id: totrans-304
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: NEMO
 - en: An extension to Mobile IPv6 called Network Mobility (NEMO) has been specified
     in RFC 3963\. The NEMO Basic Support protocol enables mobile networks to attach
     to different points in the Internet. It allows session continuity for every node
@@ -1578,8 +2232,10 @@
     to the Internet. It also allows every node in the Mobile Network to be reachable
     while moving around. The solution supports both mobile nodes and hosts that do
     not support mobility in the Mobile Network.
+  id: totrans-305
   prefs: []
   type: TYPE_NORMAL
+  zh: 移动IPv6的扩展——网络移动（NEMO）已在RFC 3963中定义。NEMO基本支持协议使得移动网络可以连接到互联网上的不同节点。它使得移动网络中的每个节点在移动路由器改变其附着点时，仍能保持会话连续性。它还允许移动网络中的每个节点在移动时仍然可达。该解决方案支持既支持移动性的移动节点，也支持在移动网络中不支持移动性的主机。
 - en: The processes and messages are basically the same as in Mobile IPv6, except
     that in this case, the mobile node is a *Mobile Router*. In the current NEMO specification,
     communication between nodes in the mobile network and correspondent nodes always
@@ -1590,20 +2246,26 @@
     car could be the Mobile Router. The future will show how we use these technologies,
     and the developments in the past couple years show that sometimes unexpected applications
     spring up overnight and are used en masse.
+  id: totrans-306
   prefs: []
   type: TYPE_NORMAL
+  zh: 该过程和消息与移动IPv6基本相同，不同之处在于，此时移动节点是一个*移动路由器*。在当前的NEMO规范中，移动网络中的节点与对应节点之间的通信始终通过家庭代理进行。路由优化尚未定义。从理论上讲，可以配置嵌套的移动性，其中一个移动路由器允许另一个移动路由器连接到其移动网络。这为许多高移动性的场景打开了新的可能性。一个应用案例可能是车载通信，车中的路由器可以作为移动路由器。未来我们将看到如何使用这些技术，过去几年中的发展表明，有时意想不到的应用会在一夜之间出现并广泛使用。
 - en: Hierarchical Mobile IPv6
+  id: totrans-307
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 分层移动IPv6
 - en: With RFC 5380, “Hierarchical Mobile IPv6,” the scalability of Mobile IPv6 is
     further extended. It is designed to significantly enhance performance of Mobile
     IPv6 and to reduce the number of messages a mobile node sends over a link in order
     to update its bindings with the home agent and the correspondent node. It also
     allows mobile nodes to hide their location from correspondent nodes and home agents
     when using route optimization.
+  id: totrans-308
   prefs: []
   type: TYPE_NORMAL
+  zh: 随着RFC 5380《分层移动IPv6》的发布，移动IPv6的可扩展性得到了进一步扩展。该设计旨在显著提升移动IPv6的性能，并减少移动节点在链路上传输更新其与家庭代理和对应节点绑定的消息的次数。它还允许移动节点在使用路由优化时，隐藏其位置，避免暴露给对应节点和家庭代理。
 - en: Hierarchical Mobile IPv6 introduces a new node type, the *Mobility Anchor Point*
     (MAP). The MAP can be located anywhere in the hierarchical network of routers.
     It is essentially a local home agent in the geographical region of the mobile
@@ -1613,12 +2275,17 @@
     is rerouted to the new location of the mobile node. The correspondent node and
     home agent operation are not affected by this and therefore need no changes. [Figure 8-7](ch08.html#hierarchical_mobile_ipv6-id1
     "Figure 8-7. Hierarchical Mobile IPv6") illustrates the concept.
+  id: totrans-309
   prefs: []
   type: TYPE_NORMAL
+  zh: 分层移动IPv6引入了一种新的节点类型——*移动锚点*（MAP）。MAP可以位于分层网络中的任何路由器位置。它本质上是移动节点所在地理区域的本地家庭代理。移动节点现在将绑定更新消息发送到本地MAP，而不是家庭代理和通信节点。通过向MAP发送一次绑定更新消息，所有来自家庭代理和通信节点的后续流量将被重新路由到移动节点的新位置。家庭代理和通信节点的操作不会受到影响，因此无需进行任何更改。[图8-7](ch08.html#hierarchical_mobile_ipv6-id1
+    "图8-7. 分层移动IPv6")说明了这一概念。
 - en: '![Hierarchical Mobile IPv6](images/ipv6_0807.png)Figure 8-7. Hierarchical Mobile
     IPv6'
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
+  zh: '![分层移动IPv6](images/ipv6_0807.png)图8-7. 分层移动IPv6'
 - en: When the mobile node enters a MAP domain, it receives Router Advertisements
     containing information on one or more local MAPs (MAP option). The *Regional Care-of
     Address* (RCoA) of the MAP corresponds to the Care-of address in the base MIPv6
@@ -1635,28 +2302,39 @@
     of Mobile IPv6, because Binding Updates do not have to be sent to the home agent
     and the correspondent nodes every time the mobile node moves to another network
     within the MAP domain.
+  id: totrans-311
   prefs: []
   type: TYPE_NORMAL
+  zh: 当移动节点进入MAP域时，它会接收到包含一个或多个本地MAP信息的路由器广告（MAP选项）。MAP的*区域关怀地址*（RCoA）对应于基础MIPv6规范中的关怀地址。在与MAP注册后，移动节点将其RCoA注册到其家庭代理，并最终注册到当前的通信节点。RCoA现在被用作移动节点的关怀地址。它是家庭代理和通信节点用于与远离家庭的移动节点通信的地址。当移动节点在MAP域内从一个网络移动到另一个网络时，它会将新的*链路本地关怀地址*（LCoA）注册到MAP。MAP作为本地家庭代理，代表移动节点接收所有数据包，并将其封装并转发到移动节点的当前地址。[图8-7](ch08.html#hierarchical_mobile_ipv6-id1
+    "图8-7. 分层移动IPv6")中的接入路由器（AR1和AR2）定义了MAP域的边界。这显著提高了移动IPv6的性能，因为每次移动节点在MAP域内切换到另一个网络时，绑定更新不必再发送到家庭代理和通信节点。
 - en: As mentioned in the section on the Binding Update message, a new bit has been
     added to the Binding Update message, the M-Bit, which indicates that this is a
     MAP registration and not a Binding Update with a home agent. There is also an
     extension to Neighbor Discovery specified to include the MAP’s global IPv6 address.
+  id: totrans-312
   prefs: []
   type: TYPE_NORMAL
+  zh: 如绑定更新消息部分所述，绑定更新消息中新增了一个位——M位，用于指示这是一个MAP注册，而非与家庭代理的绑定更新。此外，邻居发现协议也进行了扩展，以包括MAP的全局IPv6地址。
 - en: A MAP can exist anywhere in the hierarchical network. Several MAPs can be located
     within the same domain independently. In addition, overlapping MAP domains are
     allowed and recommended. Both static and dynamic hierarchies are supported.
+  id: totrans-313
   prefs: []
   type: TYPE_NORMAL
+  zh: MAP可以存在于分层网络中的任何位置。多个MAP可以独立地位于同一域内。此外，允许并推荐重叠的MAP域。支持静态和动态层级结构。
 - en: Proxy Mobile IPv6
+  id: totrans-314
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 代理移动IPv6
 - en: Proxy Mobile IPv6 is a network-based mobility management protocol. It is defined
     in RFC 5213 and provides mobility on the Network layer, which means that network
     components take over the handling of mobility messages.
+  id: totrans-315
   prefs: []
   type: TYPE_NORMAL
+  zh: 代理移动IPv6是一种基于网络的移动性管理协议。它在RFC 5213中进行了定义，并在网络层提供移动性管理，这意味着网络组件接管了处理移动性消息的工作。
 - en: The elements are the *Local Mobility Anchor* (LMA) and the *Mobile Access Gateway*
     (MAG). The LMA is responsible for managing the reachability of the MN and its
     home prefixes. The LMA has the function of a topological anchor point of the MN.
@@ -1664,17 +2342,23 @@
     of the MN and is responsible for the movements of the MN and for initiating the
     binding messages with the LMA. There can be multiple LMAs in a Mobile IPv6 domain,
     of which each can manage different groups of MNs.
+  id: totrans-316
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些元素包括*本地移动锚点*（LMA）和*移动接入网关*（MAG）。LMA负责管理MN及其家庭前缀的可达性。LMA具有MN的拓扑锚点功能。MAG管理MN的移动性。MAG位于MN的接入网络上，负责MN的移动以及与LMA的绑定消息的发起。在一个移动IPv6域中可以有多个LMA，每个LMA可以管理不同的MN组。
 - en: Alternatively, localized routing can be used (RFC 6705) to allow nodes attached
     to the MAGs to directly exchange traffic by using localized forwarding or a direct
     tunnel between the gateways.
+  id: totrans-317
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，可以使用本地路由（RFC 6705）允许连接到MAG的节点通过使用本地转发或网关之间的直接隧道直接交换流量。
 - en: Multiple Care-of Addresses Registration
+  id: totrans-318
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 多个Care-of地址注册
 - en: If an MN has multiple active interfaces, it can only bind one of its Care-of
     addresses with its home address. The specification in RFC 5648 defines extensions
     that support the binding of multiple Care-of addresses to the home address. For
@@ -1682,22 +2366,30 @@
     created and included in the Binding Update. The HA creates a separate binding
     for each BID und stores it accordingly in its Binding Cache. The same mechanism
     is used in binding messages with a CN.
+  id: totrans-319
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果MN具有多个活动接口，它只能将其中一个Care-of地址与其家庭地址绑定。RFC 5648中的规范定义了支持将多个Care-of地址与家庭地址绑定的扩展。每个MN创建的绑定都会生成一个新的*绑定标识号*（BID），并将其包含在绑定更新中。HA为每个BID创建一个单独的绑定，并相应地将其存储在绑定缓存中。相同的机制也适用于与CN的绑定消息。
 - en: Flow Binding
+  id: totrans-320
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 流绑定
 - en: The Multiple Care-of addresses registration described above allows the binding
     of multiple CoAs with the Home address. With the Flow Binding Specification in
     RFC 6089, it is possible to associate different policies to each binding. This
     is also possible with bindings with CNs or MAPs.
+  id: totrans-321
   prefs: []
   type: TYPE_NORMAL
+  zh: 上述多个Care-of地址注册允许将多个CoA与家庭地址进行绑定。通过RFC 6089中的流绑定规范，可以为每个绑定关联不同的策略。这也适用于与CN或MAP的绑定。
 - en: Fast Handover
+  id: totrans-322
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 快速切换
 - en: In RFC 5568, a protocol is specified to reduce the mobile node’s handover latency
     when moving from one network to another. It is called “Fast Handover for Mobile
     IPv6.” The handover operationally consists of movement detection, address configuration,
@@ -1705,283 +2397,414 @@
     real-time applications (e.g., VoIP). This specification describes a set of protocols
     and procedures to significantly reduce the handover latency. All throughput-sensitive
     applications can benefit from the Fast Handover.
+  id: totrans-323
   prefs: []
   type: TYPE_NORMAL
+  zh: 在RFC 5568中，指定了一种协议，用于减少移动节点从一个网络移动到另一个网络时的切换延迟。它被称为“移动IPv6的快速切换”。切换操作包括移动检测、地址配置和地址更新。综合切换延迟通常足以影响实时应用（例如VoIP）。此规范描述了一组协议和程序，以显著减少切换延迟。所有对吞吐量敏感的应用都能从快速切换中受益。
 - en: RFC 4260, “Mobile IPv6 Fast Handovers for 802.11 Networks,” discusses and gives
     some deployment examples for Mobile IPv6 Fast Handovers on 802.11 networks.
+  id: totrans-324
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4260《802.11网络的移动IPv6快速切换》讨论并给出了一些关于在802.11网络上实施移动IPv6快速切换的例子。
 - en: Support for Dual-Stack Hosts and Routers
+  id: totrans-325
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 支持双栈主机和路由器
 - en: The original Mobile IPv6 and NEMO specification describe the use of Mobility
     with IPv6 only. RFC 5555 extends this and allows the registration of IPv4 addresses
     and prefixes and also the transport of IPv4 and IPv6 packets across the tunnel
     to the HA. The MN can move from an IPv4 network to an IPv6 network and vice versa,
     even if there is a NAT in the path between the MN and the HA.
+  id: totrans-326
   prefs: []
   type: TYPE_NORMAL
+  zh: 原始的移动IPv6和NEMO规范仅描述了使用IPv6进行移动性。RFC 5555扩展了这一点，允许IPv4地址和前缀的注册，并且还允许IPv4和IPv6数据包通过隧道传输到HA。MN可以从IPv4网络移动到IPv6网络，反之亦然，即使MN与HA之间的路径中存在NAT。
 - en: Now you have reached the end of the technical chapters in this book. [Chapter 9](ch09.html
     "Chapter 9. Planning for IPv6") puts all the pieces together and explains what
     planning and designing your future network is all about. It integrates more than
     10 years of experience, education, and consulting, with many recommendations based
     on best practices.
+  id: totrans-327
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你已经阅读完本书中的技术章节。[第9章](ch09.html "第9章. 规划 IPv6 网络")将所有内容整合在一起，解释了规划和设计未来网络的关键。它整合了超过
+    10 年的经验、教育和咨询，结合了许多基于最佳实践的建议。
 - en: References
+  id: totrans-328
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参考文献
 - en: Here’s a list of the most important RFCs and drafts mentioned in this chapter.
     Sometimes I include additional subject-related RFCs for your personal further
     study.
+  id: totrans-329
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是本章提到的最重要的 RFC 和草案列表。有时我还会提供一些与主题相关的额外 RFC，供你个人进一步学习。
 - en: RFCs
+  id: totrans-330
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: RFCs
 - en: RFC 2710, “Multicast Listener Discovery (MLD) for IPv6,” 1999
+  id: totrans-331
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 2710, “IPv6 的多播监听发现（MLD）”，1999
 - en: RFC 3776, “Using IPsec to Protect Mobile IPv6 Signaling Between Mobile Nodes
     and Home Agents,” 2004
+  id: totrans-332
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3776, “使用 IPsec 保护移动节点与主代理之间的移动 IPv6 信令”，2004
 - en: RFC 3963, “Network Mobility (NEMO) Basic Support Protocol,” 2005
+  id: totrans-333
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3963, “网络移动性（NEMO）基本支持协议”，2005
 - en: RFC 4065, “Instructions for Seamoby and Experimental Mobility Protocol IANA
     Allocations,” 2005
+  id: totrans-334
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4065, “Seamoby 和实验性移动协议 IANA 分配的说明”，2005
 - en: RFC 4140, “Hierarchical Mobile IPv6,” 2005
+  id: totrans-335
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4140, “分层移动 IPv6”，2005
 - en: RFC 4225, “Mobile IP Version 6 Route Optimization Security Design Background,”
     2005
+  id: totrans-336
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4225, “移动 IPv6 路由优化安全设计背景”，2005
 - en: RFC 4260, “Mobile IPv6 Fast Handovers for 802.11 Networks,” 2005
+  id: totrans-337
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4260, “802.11 网络上的移动 IPv6 快速切换”，2005
 - en: RFC 4282, “The Network Access Identifier,” 2005
+  id: totrans-338
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4282, “网络接入标识符”，2005
 - en: RFC 4283, “Mobile Node Identifier Option for Mobile IPv6 (MIPv6),” 2005
+  id: totrans-339
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4283, “移动 IPv6（MIPv6）的移动节点标识符选项”，2005
 - en: RFC 4285, “Authentication Protocol for Mobile IPv6,” 2006
+  id: totrans-340
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4285, “移动 IPv6 的认证协议”，2006
 - en: RFC 4303, “IP Encapsulating Security Payload (ESP),” 2005
+  id: totrans-341
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4303, “IP 封装安全负载（ESP）”，2005
 - en: RFC 4306, “The Internet Key Exchange (IKEv2),” 2005
+  id: totrans-342
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4306, “互联网密钥交换（IKEv2）”，2005
 - en: RFC 4449, “Securing Mobile IPv6 Route Optimization Using a Static Shared Key,”
     2006
+  id: totrans-343
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4449, “使用静态共享密钥保护移动 IPv6 路由优化”，2006
 - en: 'RFC 4487, “Mobile IPv6 and Firewalls: Problem Statement,” 2006'
+  id: totrans-344
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4487, “移动 IPv6 与防火墙：问题陈述”，2006
 - en: RFC 4555, “IKEv2 Mobility and Multihoming Protocol (MOBIKE),” 2006
+  id: totrans-345
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4555, “IKEv2 移动性和多宿主协议（MOBIKE）”，2006
 - en: RFC 4584, “Extensions to Sockets API for Mobile IPv6,” 2006
+  id: totrans-346
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4584, “移动 IPv6 的套接字 API 扩展”，2006
 - en: RFC 4621, “Design of the IKEv2 Mobility and Multihoming (MOBIKE) Protocol,”
     2006
+  id: totrans-347
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4621, “IKEv2 移动性和多宿主（MOBIKE）协议设计”，2006
 - en: RFC 4831, “Goals for Network-Based Localized Mobility Management (NETLMM),”
     2007
+  id: totrans-348
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4831, “基于网络的本地化移动性管理（NETLMM）目标”，2007
 - en: RFC 4866, “Enhanced Route Optimization for Mobile IPv6,” 2007
+  id: totrans-349
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4866, “移动 IPv6 的增强路由优化”，2007
 - en: RFC 4877, “Mobile IPv6 Operation with IKEv2 and the Revised IPsec Architecture,”
     2007
+  id: totrans-350
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4877, “与 IKEv2 和修订后的 IPsec 架构一起操作的移动 IPv6”，2007
 - en: RFC 4885, “Network Mobility Support Terminology,” 2007
+  id: totrans-351
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4885, “网络移动性支持术语”，2007
 - en: RFC 4887, “Network Mobility Home Network Models,” 2007
+  id: totrans-352
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4887, “网络移动性家庭网络模型”，2007
 - en: RFC 4908, “Multi-homing for small scale fixed network Using Mobile IP and NEMO,”
     2007
+  id: totrans-353
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4908, “使用移动 IP 和 NEMO 的小规模固定网络多宿主”，2007
 - en: RFC 5094, “Mobile IPv6 Vendor Specific Option,” 2007
+  id: totrans-354
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5094, “移动 IPv6 厂商特定选项”，2007
 - en: RFC 5096, “Mobile IPv6 Experimental Messages,” 2007
+  id: totrans-355
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5096, “移动 IPv6 实验消息”，2007
 - en: RFC 5142, “Mobility Header Home Agent Switch Message,” 2008
+  id: totrans-356
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5142, “移动性头主代理切换消息”，2008
 - en: RFC 5149, “Service Selection for Mobile IPv6,” 2008
+  id: totrans-357
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5149, “移动 IPv6 服务选择”，2008
 - en: 'RFC 5164, “Mobility Services Transport: Problem Statement,” 2008'
+  id: totrans-358
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5164, “移动性服务传输：问题陈述”，2008
 - en: RFC 5213, “Proxy Mobile IPv6,” 2008
+  id: totrans-359
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5213, “代理移动 IPv6”，2008
 - en: RFC 5270, “Mobile IPv6 Fast Handovers over IEEE 802.16e Networks,” 2008
+  id: totrans-360
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5270, “IEEE 802.16e 网络上的移动 IPv6 快速切换”，2008
 - en: RFC 5271, “Mobile IPv6 Fast Handovers for 3G CDMA Networks,” 2008
+  id: totrans-361
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5271, “3G CDMA 网络上的移动 IPv6 快速切换”，2008
 - en: RFC 5380, “Hierarchical Mobile IPv6 (HMIPv6) Mobility Management,” 2008
+  id: totrans-362
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5380, “分层移动 IPv6（HMIPv6）移动性管理”，2008
 - en: RFC 5555, “Mobile IPv6 Support for Dual Stack Hosts and Routers,” 2009
+  id: totrans-363
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5555, “移动 IPv6 对双栈主机和路由器的支持”，2009
 - en: RFC 5568, “Mobile IPv6 Fast Handovers,” 2009
+  id: totrans-364
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5568, “移动 IPv6 快速切换”，2009
 - en: RFC 5637, “Authentication, Authorization, and Accounting (AAA) Goals for Mobile
     IPv6,” 2009
+  id: totrans-365
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5637, “移动 IPv6 的认证、授权和计费（AAA）目标”，2009
 - en: RFC 5648, “Multiple Care-of Addresses Registration,” 2009
+  id: totrans-366
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5648, “多个 Care-of 地址注册”，2009
 - en: RFC 5844, “IPv4 Support for Proxy Mobile IPv6,” 2010
+  id: totrans-367
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5844, “IPv4 支持代理移动 IPv6”，2010
 - en: RFC 5846, “Binding Revocation for IPv6 Mobility,” 2010
+  id: totrans-368
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5846, “IPv6 移动性绑定撤销”，2010年
 - en: RFC 5847, “Heartbeat Mechanism for Proxy Mobile IPv6,” 2010
+  id: totrans-369
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5847, “代理移动 IPv6 的心跳机制”，2010年
 - en: RFC 5944, “IP Mobility Support for IPv4,” 2010
+  id: totrans-370
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5944, “IPv4 的 IP 移动性支持”，2010年
 - en: RFC 6089, “Flow Bindings in Mobile IPv6 and Network Mobility (NEMO) Basic Support,”
     2011
+  id: totrans-371
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6089, “移动 IPv6 和网络移动性（NEMO）基本支持中的流绑定”，2011年
 - en: RFC 6275, “Mobility Support in IPv6,” 2011
+  id: totrans-372
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6275, “IPv6 中的移动性支持”，2011年
 - en: RFC 6279, “Proxy Mobile IPv6 (PIMPv6) Localized Routing Problem Statement,”
     2011
+  id: totrans-373
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6279, “代理移动 IPv6（PIMPv6）本地化路由问题陈述”，2011年
 - en: RFC 6463, “Runtime Local Mobility Anchor (LMA) Assignment Support for Proxy
     Mobile IPv6,” 2012
+  id: totrans-374
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6463, “代理移动 IPv6 的运行时本地移动锚点（LMA）分配支持”，2012年
 - en: RFC 6543, “Reserved IPv6 Interface Identifier for Proxy Mobile IPv6,” 2012
+  id: totrans-375
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6543, “代理移动 IPv6 的保留 IPv6 接口标识符”，2012年
 - en: RFC 6572, “RADIUS Support for Proxy Mobile IPv6,” 2012
+  id: totrans-376
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6572, “代理移动 IPv6 的 RADIUS 支持”，2012年
 - en: RFC 6610, “DHCP Options for Home Information Discovery in Mobile IPv6 (MIPv6),”
     2012
+  id: totrans-377
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6610, “移动 IPv6（MIPv6）中的主信息发现的 DHCP 选项”，2012年
 - en: RFC 6611, “Mobile IPv6 (MIPv6) Bootstrapping for the Integrated Scenario,” 2012
+  id: totrans-378
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6611, “移动 IPv6（MIPv6）集成场景的引导过程”，2012年
 - en: RFC 6618, “Mobile IPv6 Security Framework Using Transport Layer Security for
     Communication between the Mobile Node and Home Agent,” 2012
+  id: totrans-379
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6618, “使用传输层安全性（TLS）进行移动节点与主代理之间通信的移动 IPv6 安全框架”，2012年
 - en: RFC 6705, “Localized Routing for Proxy Mobile IPv6,” 2012
+  id: totrans-380
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6705, “代理移动 IPv6 的本地化路由”，2012年
 - en: RFC 6909, “IPv4 Traffic Offload Selector Option for Proxy Mobile IPv6,” 2013
+  id: totrans-381
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6909, “代理移动 IPv6 的 IPv4 流量卸载选择器选项”，2013年
 - en: RFC 7077, “Update Notifications for Proxy Mobile IPv6,” 2013
+  id: totrans-382
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7077, “代理移动 IPv6 的更新通知”，2013年
 - en: RFC 7109, “Flow Bindings Initiated by Home Agents for Mobile IPv6,” 2014
+  id: totrans-383
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7109, “由主代理发起的移动 IPv6 流绑定”，2014年
 - en: RFC 7148, “Prefix Delegation Support for Proxy Mobile IPv6,” 2014
+  id: totrans-384
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7148, “代理移动 IPv6 的前缀委派支持”，2014年
 - en: RFC 7156, “Diameter Support for Proxy Mobile IPv6 Localized Routing,” 2014
+  id: totrans-385
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7156, “Diameter 对代理移动 IPv6 本地化路由的支持”，2014年
 - en: RFC 7161, “Proxy Mobile IPv6 (PMIPv6) Multicast Handover Optimization by the
     Subscription Information Acquisition through the LMA (SIAL),” 2014
+  id: totrans-386
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7161, “通过 LMA（SIAL）获取订阅信息的代理移动 IPv6（PMIPv6）组播切换优化”，2014年
 - en: RFC 7222, “Quality-of-Service Option for Proxy Mobile IPv6,” 2014
+  id: totrans-387
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7222, “代理移动 IPv6 的服务质量选项”，2014年

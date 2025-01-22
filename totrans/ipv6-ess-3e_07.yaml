@@ -1,7 +1,9 @@
 - en: Chapter 6. Security with IPv6
+  id: totrans-0
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第6章. IPv6的安全性
 - en: The developers of IPv4 did not rack their brains about security. The “Internet”
     in those early days connected a few trusted networks of some visionary researchers.
     The individuals who controlled these networks, as well as those who were allowed
@@ -21,146 +23,214 @@
     This strict rule has been loosened recently, but more about this later. Before
     we dive into the technical details, I want to talk about some general security
     concepts and practices.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv4的开发者并没有过多考虑安全性。早期的“互联网”仅连接了一些可信的网络，这些网络由一些有远见的研究人员控制。这些网络的控制者以及被允许使用网络资源的个人，默认被信任不会进行恶意或破坏性的行为。这也是原始IP架构没有包含一个可以供所有应用程序使用的安全框架的原因。如果需要安全性，通常只包括初步的身份验证/授权，并且这些安全功能是嵌入在应用程序代码中的（例如，Telnet和FTP的密码）。许多年后，IPsec在IPv4已经广泛部署后才被引入。因此，IPsec需要被后期集成到现有的部署中。由于互操作性和性能问题，以及它是后期开发的，IPsec并不像它在许多IPv4场景中应该有的那样广泛部署。与此不同的是，IPv6从一开始就意识到，必须将基本的安全功能纳入基础协议中，以便在任何互联网平台上使用。在IPv6的早期，符合标准的IPv6实现必须包括IPsec，以便在适当配置后实现更加安全的通信。这个严格的规定最近有所放宽，但稍后我们会详细讨论。在深入技术细节之前，我想先谈一些通用的安全概念和实践。
 - en: General Security Concepts
+  id: totrans-2
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 一般安全概念
 - en: 'In order to protect data, one has to be aware of the possible threats. People
     often focus solely on malicious attacks from foreign networks. A comprehensive
     security concept needs to consider many other aspects. The following is a list
     of some possible points of weakness:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了保护数据，必须意识到可能的威胁。人们通常仅关注来自外部网络的恶意攻击。一个全面的安全概念需要考虑许多其他方面。以下是一些可能的弱点：
 - en: Insufficient or nonexistent IT security concepts and corresponding provisions
+  id: totrans-4
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 不足或不存在的IT安全概念及相应的规定
 - en: Nonobservance or insufficient control of IT security provisions
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 不遵守或不足够控制IT安全规定
 - en: Usurping of rights (password theft, privilege escalation)
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 权限篡夺（密码盗窃，特权升级）
 - en: Incorrect use or faulty administration of IT systems
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 错误使用或故障管理IT系统
 - en: Abuse of rights
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 权限滥用
 - en: Weaknesses in software (e.g., buffer/heap overflows in conjunction with applications
     running with superuser rights, cross-site scripting)
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 软件中的弱点（例如，运行在超级用户权限下的应用程序中的缓冲区/堆溢出，跨站脚本攻击）
 - en: Manipulation, theft, or destruction of IT devices, software, or data (physical
     security)
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: IT设备、软件或数据的篡改、盗窃或破坏（物理安全）
 - en: Network eavesdropping (sniffing wired or wireless networks) or replaying of
     messages
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 网络窃听（监听有线或无线网络）或消息重放
 - en: Trojan horses, viruses, and worms
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 木马、病毒和蠕虫
 - en: Security attacks such as masquerading, IP spoofing, Denial of Service (DoS)
     attacks, man-in-the-middle attacks, or DNS poisoning
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 安全攻击，如伪装、IP欺骗、拒绝服务（DoS）攻击、中间人攻击或DNS中毒
 - en: Routing misuse
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由滥用
 - en: There are many statistics showing that malicious attacks from the outside are
     only a smaller fraction of all the possible risks. Many threats come from within
     the internal network and can in many cases be related to human misconduct or faulty
     administration. Many of these risks cannot be controlled by technical mechanisms.
     This chapter is not a guide to an overall security concept; it discusses the technology
     aspects of security with IPv6.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多统计数据显示，外部的恶意攻击仅占所有可能风险的一小部分。许多威胁来自内部网络，而且在很多情况下与人为失误或管理不当有关。这些风险中的许多无法通过技术机制控制。本章不是一个整体安全概念的指南；它讨论的是与
+    IPv6 安全相关的技术方面。
 - en: General Security Practices
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 一般安全实践
 - en: 'Standard security practices involve two “triads” of thought, CIA and AAA. The
     CIA triad includes:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 标准的安全实践包括两个“思维三元组”，即 CIA 和 AAA。CIA 三元组包括：
 - en: '*Confidentiality*'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '*机密性*'
 - en: Stored or transmitted information cannot be read or altered by an unauthorized
     party.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 存储或传输的信息不能被未授权方读取或篡改。
 - en: '*Integrity*'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: '*完整性*'
 - en: Any alteration of transmitted or stored information can be detected.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 任何对传输或存储信息的篡改都可以被检测到。
 - en: '*Availability*'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: '*可用性*'
 - en: The information in question is readily accessible to authorized users at all
     times.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 相关信息随时可以供授权用户访问。
 - en: 'The AAA triad includes:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: AAA 三元组包括：
 - en: '*Authentication*'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: '*身份验证*'
 - en: Ensuring an individual or group is who they say they are. The act of clarifying
     a claimed identity. Common forms of authentication include usernames and passwords
     or ATM card/PIN combinations.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保某个人或群体确实是他们所声称的身份。明确声明身份的行为。常见的身份验证方式包括用户名和密码或 ATM 卡/密码组合。
 - en: '*Authorization*'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '*授权*'
 - en: Ensuring that the authenticated user or group has the proper rights to access
     the information they are attempting to access. Common implementations include
     Access Control Lists (ACLs).
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保经过身份验证的用户或群体拥有访问其尝试访问的信息的适当权限。常见的实现方式包括访问控制列表（ACL）。
 - en: '*Accounting*'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: '*审计*'
 - en: The act of collecting information on resource usage. The log of an HTTP server
     would be a common form of accounting.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 收集资源使用信息的行为。HTTP 服务器的日志是常见的审计形式。
 - en: '*Nonrepudiation* is not included in the CIA/AAA triads. Nonrepudiation means
     a specified action, such as sending, receiving, or deleting of information, cannot
     be denied by any of the parties involved.'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: '*不可否认性* 不包括在 CIA/AAA 三元组中。不可否认性意味着任何涉及的方都不能否认特定的行为，如发送、接收或删除信息。'
 - en: 'These security requirements need to be provided by two basic security elements:
     encryption (to provide confidentiality) and secure checksums or hash (to provide
     integrity). Suitable combinations of these two elements may then be used to provide
     more complex services, such as authenticity and nonrepudiation.'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些安全要求需要由两个基本的安全元素提供：加密（提供机密性）和安全校验和或哈希（提供完整性）。这两种元素的适当组合可以用于提供更复杂的服务，如真实性和不可否认性。
 - en: There are two forms of encryption that are commonly used. The first is called
     *Secret Key Cryptography*, also termed *symmetric key encryption*, which requires
     the sender and recipient to agree on a shared secret (i.e., a key or password)
     that is then used to encrypt and decrypt the information exchanged. Common symmetric
     key algorithms are AES, DES, 3DES, IDEA, and RC-4.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 常用的加密方式有两种。第一种称为 *秘密密钥密码学*，也叫 *对称密钥加密*，它要求发送者和接收者达成一致，使用共享的秘密（即密钥或密码）来加密和解密交换的信息。常见的对称密钥算法有
+    AES、DES、3DES、IDEA 和 RC-4。
 - en: The second is called *Public Key Cryptography*, also termed *asymmetric encryption*.
     An asymmetric encryption algorithm uses a key pair consisting of a known and distributed
     public key and an individual private key. When a message is encrypted using the
@@ -171,58 +241,82 @@
     by the recipient with a corresponding public key, the security services of data
     origin authentication and nonrepudiation are added. Common asymmetric key algorithms
     are RSA, ElGamal, and elliptic curves cryptography (ECC).
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二种叫做*公钥密码学*，也称为*非对称加密*。非对称加密算法使用一对密钥，包括已知并分发的公钥和个人私钥。当消息使用公钥加密后，接收方使用相应的私钥解密时，只有预定的接收者才能看到加密的消息。这种加密形式可以用于建立机密数据交换。如果此外，消息还使用发送者的私钥加密，并由接收者用相应的公钥解密，则增加了数据源认证和不可否认性安全服务。常见的非对称密钥算法有RSA、ElGamal和椭圆曲线密码学（ECC）。
 - en: Secure checksums or hash functions often provide data integrity. A hash function
     takes input of an arbitrary length and outputs fixed-length code. The fixed-length
     output is called the *message digest*, or the *hash*, of the original input message.
     These hashes are unique and thereby provide the integrity of the message. Common
     one-way hash functions are SHA-1 and MD-5.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 安全的校验和或哈希函数通常提供数据完整性。哈希函数接受任意长度的输入并输出固定长度的代码。该固定长度输出称为*信息摘要*，或*哈希*，即原始输入消息的摘要。这些哈希是唯一的，从而提供了消息的完整性。常见的单向哈希函数有SHA-1和MD-5。
 - en: The IPsec standard uses a combination of algorithmic choices based on symmetric
     and asymmetric cryptography, as well as one-way hash functions. This chapter describes
     the IPsec framework and the security elements in IPv6 and includes a discussion
     about special issues to be aware of when securing an IPv6 network.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: IPsec标准结合了基于对称加密和非对称加密的算法选择，以及单向哈希函数。本章描述了IPsec框架和IPv6中的安全元素，并讨论了在保护IPv6网络时需要注意的特殊问题。
 - en: IPsec Basics
+  id: totrans-37
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPsec基础知识
 - en: IPsec, described in RFC 4301, defines a security architecture for both versions
     of IP for IPv4 and IPv6.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: IPsec，描述于RFC 4301，定义了IPv4和IPv6两个版本的IP的安全架构。
 - en: 'The following elements are part of the IPsec framework:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下元素是IPsec框架的一部分：
 - en: A general description of security requirements and mechanisms at the network
     layer
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 网络层的安全要求和机制的一般描述
 - en: A protocol for encryption (Encapsulating Security Payload, or ESP)
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于加密的协议（封装安全负载，或ESP）
 - en: A protocol for authentication (Authentication Header, or AH)
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于身份验证的协议（身份验证头，或AH）
 - en: A definition for the use of cryptographic algorithms for encryption and authentication
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于加密和身份验证的密码学算法的定义
 - en: A definition of security policies and security associations between communication
     peers
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 定义通信对等体之间的安全策略和安全关联
 - en: Key management
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 密钥管理
 - en: The configuration of IPsec creates a boundary between a protected and an unprotected
     area. The boundary can be around a single host or a network. The access control
     rules specified by the administrator determine what happens to packets traversing
@@ -232,12 +326,16 @@
     policies identified by the *selectors*. The selectors are the specific traffic-match
     criteria defined by an administrator—for example, a specific application being
     transmitted from a subnet to a specific end-host.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: IPsec的配置在受保护区域和非受保护区域之间创建了一个边界。这个边界可以围绕单个主机或一个网络。管理员指定的访问控制规则决定了跨越边界的数据包的处理方式。安全要求由*安全策略数据库*（SPD）定义。通常，根据*选择器*确定的适用SPD策略，每个数据包要么通过IPsec安全服务保护，要么被丢弃，或者允许绕过IPsec保护。选择器是管理员定义的特定流量匹配标准——例如，从子网传输到特定终端主机的特定应用程序。
 - en: Security Associations
+  id: totrans-47
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 安全关联
 - en: '*Security Associations* (SA) are agreements between communication peers. Three
     elements are part of the agreement: a key, an encryption or authentication mechanism,
     and additional parameters for the algorithm. SAs are unidirectional, and each
@@ -249,31 +347,47 @@
     return traffic from Peer B. It also requires two additional SAs to ensure that
     if Peer B initiates a Telnet session, both it and the return traffic for this
     scenario are protected.'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: '*安全关联*（SA）是通信对等体之间的协议。协议包含三个元素：一个密钥、一个加密或认证机制以及算法的其他参数。SA 是单向的，每个单独的安全服务都需要一个
+    SA。这意味着，两个希望加密和认证双向通信的通信对等体需要四个 SA（一个加密对和一个认证对）。双向应用流量——例如，双向 Telnet 连接——也需要在每个通信对等体上配置四个
+    SA。对等体 A 必须保护其发起的流量和来自对等体 B 的回传流量。它还需要两个额外的 SA，以确保如果对等体 B 发起 Telnet 会话，则该会话及其回传流量也能得到保护。'
 - en: 'IPsec differentiates two modes of transport:'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: IPsec 区分了两种传输模式：
 - en: '*Transport mode*'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '*传输模式*'
 - en: The SA is made between two end nodes and defines the encryption or authentication
     for the payload of all IP packets for that connection. The IP header is not encrypted.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: SA 是在两个端节点之间建立的，并定义了该连接所有 IP 数据包有效载荷的加密或认证方式。IP 头部不会被加密。
 - en: '*Tunnel mode*'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: '*隧道模式*'
 - en: The SA is usually made between two security gateways (usually a firewall). The
     whole packet including the original IP header is encrypted or authenticated by
     encapsulating it in a new header. This is the foundation for a virtual private
     network (VPN).
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: SA 通常在两个安全网关（通常是防火墙）之间建立。整个数据包，包括原始 IP 头部，都会通过封装在新头部中进行加密或认证。这是虚拟私人网络（VPN）的基础。
 - en: Key Management
+  id: totrans-54
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 密钥管理
 - en: Most of the security mechanisms provided by IPsec require the use of cryptographic
     keys. A separate set of mechanisms has been defined for putting the keys in place.
     Support for both manual and automated distribution of keys is a requirement. RFC
@@ -281,50 +395,75 @@
     mechanism. Other mechanisms may be used. IKEv1 is actually officially deprecated
     and to be replaced with IKEv2, but as it is still used widely today, we describe
     both versions in this book.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: IPsec 提供的大多数安全机制都要求使用加密密钥。为将密钥放置到位，已经定义了一组单独的机制。必须支持手动和自动密钥分发。RFC 4301 指定了 IKEv2（稍后会在本节中描述）作为一种自动化的密钥分发机制。也可以使用其他机制。实际上，IKEv1
+    已被官方弃用，并将由 IKEv2 替代，但由于 IKEv1 目前仍被广泛使用，因此本书中同时描述了这两个版本。
 - en: In order to establish a Security Association (SA), the communication peers have
     to agree on a cryptographic algorithm and negotiate keys. The negotiation of an
     SA often happens over insecure paths. Internet Key Exchange (IKE) specifies a
     protocol that allows for the exchange and negotiation of parameters for an SA.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了建立安全关联（SA），通信对等体必须就加密算法达成一致并协商密钥。SA 的协商通常通过不安全的路径进行。互联网密钥交换（IKE）定义了一种协议，用于交换和协商
+    SA 参数。
 - en: IKEv1
+  id: totrans-57
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: IKEv1
 - en: 'IKEv1 is specified in RFC 2409 and updated in RFC 4109\. It consists of selected
     functions from three different protocols:'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: IKEv1 在 RFC 2409 中定义，并在 RFC 4109 中更新。它由来自三种不同协议的选定功能组成：
 - en: '*ISAKMP (Internet Security Association and Key Management Protocol)*'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '*ISAKMP（互联网安全关联与密钥管理协议）*'
 - en: ISAKMP specifies a framework for the management of SAs and key exchange without
     describing the process in detail. It therefore supports different key exchange
     mechanisms. It is specified in RFC 5996.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: ISAKMP 定义了一个用于管理 SA 和密钥交换的框架，但没有详细描述具体过程。因此，它支持不同的密钥交换机制。它在 RFC 5996 中有详细规范。
 - en: '*Oakley Key Determination Protocol*'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: '*Oakley 密钥确定协议*'
 - en: The Oakley Key Determination protocol is used for the exchange of keys and is
     specified in RFC 2412\. It is an extension of the Diffie-Hellman algorithm. It
     uses only a subset of the functions of the Oakley protocol.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: Oakley 密钥确定协议用于密钥交换，并在 RFC 2412 中进行了规范。它是 Diffie-Hellman 算法的扩展，仅使用 Oakley 协议的一部分功能。
 - en: '*SKEME (Versatile Secure Key Exchange Mechanism for the Internet)*'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: '*SKEME（适用于互联网的多功能安全密钥交换机制）*'
 - en: 'SKEME is a fast key exchange technique described in “SKEME: A Versatile Secure
     Key Exchange Mechanism for the Internet,” from *IEEE Proceedings of the 1996 Symposium
     on Network and Distributed Systems Security* by H. Krawczyk. IKE uses only a subset
     of the functions defined for the SKEME protocol.'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 'SKEME 是一种快速的密钥交换技术，描述于 *IEEE 1996年网络与分布式系统安全研讨会论文集* 中的《SKEME: A Versatile Secure
+    Key Exchange Mechanism for the Internet》，作者 H. Krawczyk。IKE 只使用了 SKEME 协议中定义的一个子集功能。'
 - en: IKEv1 uses UDP on port 500 or 4500 and goes through two phases.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: IKEv1 使用 UDP 端口 500 或 4500，并经历两个阶段。
 - en: In phase one, the ISAKMP communication peers negotiate a secure, authenticated
     communication channel called ISAKMP Security Association. Note that some implementations
     use the term “IKE SA,” which is synonymous with the ISAKMP SA. The phase one exchange
@@ -332,8 +471,12 @@
     The authentication can be provided by either preshared keys, an RSA checksum encrypted
     with the private key of the sender, or the public key of the receiver combined
     with its X.509 certificate.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 在第一阶段，ISAKMP 通信对等体协商一个安全的、经过认证的通信通道，称为 ISAKMP 安全关联。请注意，一些实现使用术语 “IKE SA”，该术语与
+    ISAKMP SA 同义。第一阶段的交换基于 Diffie-Hellman 算法和加密的身份令牌。认证可以通过预共享密钥、使用发送者私钥加密的 RSA 校验和，或使用接收者公钥和其
+    X.509 证书进行认证提供。
 - en: In phase two, the cryptographic algorithms and the keys for other protocols
     (e.g., ESP and/or AH) can be exchanged over the secure communication channel established
     in phase one. The outcome of IKE phase two results in an IPsec SA. These IPsec
@@ -343,24 +486,37 @@
     Both the IPsec SAs and ISAKMP SAs generate new cryptographic keys on a periodic
     basis to provide greater security. Typically, the IPsec SAs are rekeyed at a faster
     rate than the ISAKMP SAs.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 在第二阶段，其他协议（例如 ESP 和/或 AH）的加密算法和密钥可以通过第一阶段建立的安全通信通道进行交换。IKE 第二阶段的结果是生成一个 IPsec
+    SA。这些 IPsec SA 定义了用于保护传输中的流量的安全服务。可以通过第一阶段建立的安全通道协商多个 IPsec SA。这允许协商更细粒度且更灵活的安全服务。IPsec
+    SA 和 ISAKMP SA 都会定期生成新的加密密钥，以提供更高的安全性。通常，IPsec SA 的密钥更新速率高于 ISAKMP SA。
 - en: RFC 4109 updates the original specification. The changes are made to ensure
     that the suggested and required algorithms reflect the current market situation.
     The changes are intended to be deployed for all IKEv1 implementations.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4109 更新了原始规范。更改旨在确保建议和要求的算法能够反映当前的市场情况。这些更改计划应用于所有 IKEv1 实现。
 - en: Note
+  id: totrans-69
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: You can find all IKEv1 relevant and updated numbers and codes at [http://www.iana.org/assignments/ipsec-registry](http://www.iana.org/assignments/ipsec-registry).
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以在 [http://www.iana.org/assignments/ipsec-registry](http://www.iana.org/assignments/ipsec-registry)
+    查找所有 IKEv1 相关和更新的数字及代码。
 - en: IKEv2
+  id: totrans-71
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: IKEv2
 - en: 'IKEv2 is specified in RFC 5996, which combines and therefore obsoletes the
     following RFCs: RFC 4306, “Internet Key Exchange (IKEv2) Protocol,” RFC 2407,
     “The Internet IP Security Domain of Interpretation for ISAKMP,” RFC 2408, “Internet
@@ -368,19 +524,27 @@
     Internet Key Exchange (IKE).” IKEv2 brings, among other things, enhancements for
     the use of IPsec in combination with NAT traversal, for Extensible Authentication,
     and for Remote Address acquisition.'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: IKEv2 在 RFC 5996 中进行了规范，合并并因此废弃了以下 RFC：RFC 4306，“Internet Key Exchange (IKEv2)
+    协议”，RFC 2407，“Internet IP 安全域解释 ISAKMP”，RFC 2408，“Internet 安全关联与密钥管理协议 (ISAKMP)”，以及
+    RFC 2409，“Internet 密钥交换协议 (IKE)”。IKEv2 带来了诸多改进，尤其是在结合 NAT 穿越使用 IPsec、可扩展认证以及远程地址获取方面。
 - en: IKEv2 runs over UDP ports 500 and 4500, and a host running IKEv2 must accept
     packets from any ports and respond to those same ports.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: IKEv2 在 UDP 端口 500 和 4500 上运行，运行 IKEv2 的主机必须接受来自任何端口的数据包并响应这些相同的端口。
 - en: The initial exchange (called *phase one* in IKEv1 terminology) normally consists
     of two pairs of messages. The first message pair negotiates cryptographic algorithms,
     exchanges nonces (number used once to prevent replay attack), and does a Diffie-Hellman
     exchange. The second message pair authenticates the previous messages, exchanges
     identities and certificates, and establishes the first `CHILD_SA`.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 初始交换（在IKEv1术语中称为*第一阶段*）通常由两对消息组成。第一对消息协商加密算法，交换一次性密钥（防止重放攻击的数字），并进行Diffie-Hellman交换。第二对消息对前面的消息进行认证，交换身份和证书，并建立第一个`CHILD_SA`。
 - en: In IKEv1, SA lifetimes were negotiated. In IKEv2, each end of the SA is responsible
     for enforcing its own lifetime policy on the SA and rekeying the SA when necessary.
     The end with the shorter lifetime will have to request the rekeying if the lifetime
@@ -391,8 +555,10 @@
     of the endpoints and the traffic selectors may not uniquely identify an SA between
     those endpoints. Therefore, with IKEv2, SAs can no longer be deleted based on
     duplicate traffic selectors.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 在IKEv1中，SA生命周期是通过协商的。在IKEv2中，SA的每一端负责执行自己的生命周期策略，并在必要时重新协商SA。生命周期较短的一端将在生命周期策略不同的情况下请求重新协商。IKE版本之间的另一个不同之处在于，IKEv2允许在相同的流量选择器之间使用并行的SA。这种差异以及其他因素支持在SAs之间具有不同服务质量（QoS）要求的流量。因此，与IKEv1不同，端点和流量选择器的组合可能无法唯一标识这两个端点之间的SA。因此，在IKEv2中，不能仅通过重复的流量选择器来删除SA。
 - en: Opening an IPsec connection through a NAT creates some special problems. The
     changing of IP addresses changes the checksums, so they will fail and cannot be
     corrected by the NAT, because they are cryptographically protected. IKEv2 has
@@ -401,70 +567,98 @@
     often translate TCP and UDP port numbers, IPsec packets must be accepted from
     any port and sent back to that same port. The good news is that we don’t build
     NATs in IPv6 networks, so this is not an issue anymore.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过NAT打开IPsec连接会带来一些特殊问题。IP地址的变化会改变校验和，因此它们会失败，且无法被NAT修正，因为它们是经过加密保护的。IKEv2通过协商UDP封装IKE和ESP包来改进对此类情况的支持。端口4500保留用于UDP封装的ESP和IKE。由于NAT通常会转换TCP和UDP端口号，IPsec包必须接受来自任何端口的流量，并将其发送回相同的端口。好消息是，我们在IPv6网络中不再构建NAT，因此这个问题不再存在。
 - en: Note
+  id: totrans-77
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: You can find all relevant and updated IKEv2 numbers and codes at [http://www.iana.org/assignments/ikev2-parameters](http://www.iana.org/assignments/ikev2-parameters).
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以在[http://www.iana.org/assignments/ikev2-parameters](http://www.iana.org/assignments/ikev2-parameters)找到所有相关的、更新的IKEv2编号和代码。
 - en: 'A summary of the changes to IKEv2 can be taken from RFC 5996\. Here are some
     of the main points (refer to the RFC for the whole list):'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: IKEv2的变更摘要可以参考RFC 5996。以下是一些主要内容（完整列表请参考RFC）：
 - en: To define the entire IKE protocol in a single document, replacing RFCs 2407,
     2408, and 2409, and incorporating subsequent changes to support NAT Traversal,
     Extensible Authentication, and Remote Address acquisition.
+  id: totrans-80
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在单个文档中定义整个IKE协议，取代RFC 2407、2408和2409，并整合后续的变更以支持NAT穿越、可扩展认证和远程地址获取。
 - en: To simplify IKE by replacing the eight different initial exchanges with a single
     four-message exchange.
+  id: totrans-81
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通过将八种不同的初始交换替换为一个四消息交换，简化IKE。
 - en: To decrease IKE’s latency in the common case by making the initial exchange
     two round trips (four messages) and allowing the ability to piggyback setup of
     a `CHILD_SA` on that exchange. It also adds Denial of Service resistance to the
     initial exchange.
+  id: totrans-82
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通过将初始交换限制为两轮往返（四条消息），并允许在该交换中附带`CHILD_SA`的设置，从而减少IKE的延迟。它还增加了初始交换的拒绝服务抗性。
 - en: To reduce the number of possible error states by making the protocol reliable.
     This is done by requiring all messages to be acknowledged and sequenced. This
     allows shortening `CREATE_CHILD_SA` exchanges from three messages to two.
+  id: totrans-83
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通过使协议可靠，减少可能的错误状态。这是通过要求所有消息都被确认并按顺序排列来实现的。这使得`CREATE_CHILD_SA`交换从三条消息缩短为两条消息。
 - en: To maintain existing syntax and magic numbers to the extent possible to make
     it likely that implementations of IKEv1 can be enhanced to support IKEv2 with
     minimum effort.
+  id: totrans-84
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 尽可能保持现有语法和魔法数字，以使得 IKEv1 的实现能够通过最小的努力增强以支持 IKEv2。
 - en: A list of algorithms to be used with IKEv2 is specified as mandatory to implement
     in RFC 4307 “Cryptographic Algorithms for Use in the Internet Key Exchange Version
     2 (IKEv2).” This is in order to ensure interoperability between different implementations.
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 要求在 RFC 4307《用于互联网密钥交换版本 2（IKEv2）的加密算法》中实施的一组算法被指定为必需。这是为了确保不同实现之间的互操作性。
 - en: Note
+  id: totrans-86
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: For a good overview of the relevant security RFCs and drafts, go to the IETF
     Security working groups at [http://www.ietf.org/html.charters/wg-dir.html](http://www.ietf.org/html.charters/wg-dir.html).
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关相关安全 RFC 和草案的详细概述，请访问 IETF 安全工作组的[页面](http://www.ietf.org/html.charters/wg-dir.html)。
 - en: IPv6 Security Elements
+  id: totrans-88
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPv6 安全元素
 - en: IPsec describes general security mechanisms that can be used with both protocols,
     IPv6 and IPv4\. This means that IPv6 is not more secure than IPv4.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: IPsec 描述了可以与 IPv6 和 IPv4 协议一起使用的一般安全机制。这意味着 IPv6 并不比 IPv4 更加安全。
 - en: In the early days of IPv6, the implementation of IPsec in every IPv6 stack was
     mandated and the use of IKE for key management recommended. With RFC 6434, “IPv6
     Node Requirements,” this strict rule was downgraded to “SHOULD.” It is now up
@@ -473,83 +667,125 @@
     impractical to demand full IPsec implementations on all sorts of special device
     types, for instance, sensors where resources are very limited, or device types
     with very special applications that may have an application-based security approach.
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 IPv6 早期，要求每个 IPv6 堆栈都必须实现 IPsec，并推荐使用 IKE 进行密钥管理。随着 RFC 6434《IPv6 节点要求》的发布，这一严格要求已被降级为“SHOULD”。现在，由厂商决定是否要求他们的
+    IPv6 产品支持 IPsec（或者由客户要求）。这样做的主要原因是，要求所有类型的特殊设备（例如资源非常有限的传感器，或者具有特殊应用的设备，可能有基于应用的安全方法）都实现完整的
+    IPsec 实现，似乎不切实际。
 - en: On the other hand, the same RFC states that nodes that implement IPsec have
     stronger requirements than before. Support for RFC 4301, “Security Architecture
     for the Internet Protocol,” is now mandatory, which includes the use of IKEv2
     for automatic key management and requires support for a minimum set of cryptographic
     algorithms, making IPsec more interoperable across vendor implementations.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一方面，同一 RFC 声明，实施 IPsec 的节点比以前有更严格的要求。现在，支持 RFC 4301《互联网协议安全架构》是强制性的，其中包括使用
+    IKEv2 进行自动密钥管理，并要求支持最小集的加密算法，从而使得 IPsec 在不同厂商的实现之间具有更好的互操作性。
 - en: The IPsec specification defines protocols for the Authentication Header (AH)
     and the Encapsulating Security Payload Header (ESP). With IPv6, these headers
     are included as Extension headers. An IPsec implementation must support ESP and
     may support AH. With the older specification, support for both protocols was required.
     The requirement for AH support has been removed because ESP can be used to provide
     integrity, which in most cases has proven to be sufficient.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: IPsec 规范定义了身份验证头（AH）和封装安全负载头（ESP）的协议。在 IPv6 中，这些头部被作为扩展头部包含。IPsec 实现必须支持 ESP，并可以支持
+    AH。在较早的规范中，要求同时支持这两个协议。现在，由于 ESP 可以提供完整性保护，而在大多数情况下已证明其足够，因此不再强制要求支持 AH。
 - en: Note
+  id: totrans-93
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: To understand Extension headers and Next Header values, refer to [Chapter 3](ch03.html
     "Chapter 3. The Structure of the IPv6 Protocol").
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解扩展头部和下一个头部值，请参见[第3章](ch03.html "第3章. IPv6协议的结构")。
 - en: Authentication Header
+  id: totrans-95
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 身份验证头
 - en: The Authentication Header (AH) provides integrity and authentication (no confidentiality)
     for all end-to-end data transported in an IP packet. It supports different authentication
     mechanisms. It is specified in RFC 4302 and is indicated by the Next Header value
     51 in the preceding header.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 身份验证头（AH）为在 IP 数据包中传输的所有端到端数据提供完整性和认证（无机密性）。它支持不同的认证机制。它在 RFC 4302 中进行了规范，并通过前导头中的下一个头部值
+    51 来标识。
 - en: The AH is located between the IPv6 header and upper-layer headers (e.g., TCP,
     UDP, ICMP). If Extension headers are present, it has to be placed after the Hop-by-Hop,
     Routing, and Fragment Extension headers.
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: AH 位于 IPv6 头部和上层头部之间（例如，TCP、UDP、ICMP）。如果存在扩展头部，它必须放置在逐跳、路由和分片扩展头部之后。
 - en: The format of the AH is shown in [Figure 6-1](ch06.html#the_format_of_the_authentication_header
     "Figure 6-1. The format of the Authentication Header").
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: AH 的格式如[图 6-1](ch06.html#the_format_of_the_authentication_header "图 6-1. 身份验证头格式")所示。
 - en: '![The format of the Authentication Header](images/ipv6_0601.png)Figure 6-1. The
     format of the Authentication Header'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: '![身份验证头格式](images/ipv6_0601.png)图 6-1. 身份验证头格式'
 - en: 'Each field is discussed in the following list:'
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个字段的说明如下：
 - en: '*Next Header (1 byte)*'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: '*下一个头部 (1 字节)*'
 - en: The Next Header field identifies the type of header that follows the Authentication
     Header. It uses the values listed in [Table 3-1](ch03.html#values_in_the_next_header_field
     "Table 3-1. Values in the Next Header field").
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 下一个头部字段标识紧随身份验证头后的头部类型。它使用[表 3-1](ch03.html#values_in_the_next_header_field
+    "表 3-1. 下一个头部字段中的值")中列出的值。
 - en: '*Payload Length (1 byte)*'
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: '*有效载荷长度 (1 字节)*'
 - en: Describes the length of the header in four-byte units, not including the first
     eight bytes in the calculation. This length indication is necessary because the
     authentication data in the AH may differ in length depending on the algorithm
     used.
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 描述头部的长度，单位为四字节，不包括前八个字节的计算。此长度指示是必要的，因为 AH 中的身份验证数据的长度可能会根据使用的算法不同而有所不同。
 - en: '*Reserved (2 bytes)*'
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: '*保留 (2 字节)*'
 - en: Not used; set to 0.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 未使用；设为 0。
 - en: '*Security Parameter Index (SPI) (4 bytes)*'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: '*安全参数索引 (SPI) (4 字节)*'
 - en: Arbitrary 32-bit value. Used by the receiver to identify the SA to which an
     incoming packet belongs. The SPI field is mandatory, and this mechanism for mapping
     inbound traffic to unicast SAs must be supported by all AH implementations. If
@@ -559,11 +795,17 @@
     by the Internet Assigned Numbers Authority (IANA) for future use. The SPI value
     of 0 is reserved for local, implementation-specific use and must not be sent on
     the wire.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 任意 32 位值。接收方使用该值来标识传入数据包所属的安全关联 (SA)。SPI 字段是必需的，并且所有 AH 实现都必须支持将传入流量映射到单播 SA
+    的机制。如果 IPsec 实现支持多播，则必须额外支持使用为此目的指定的去复用算法将传入的 IPsec 数据报映射到多播 SA。范围为 1 到 255 的
+    SPI 值由互联网号码分配局 (IANA) 保留以供将来使用。SPI 值为 0 保留供本地实现特定用途，且不得在网络上传输。
 - en: '*Sequence Number (4 bytes)*'
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: '*序列号 (4 字节)*'
 - en: This 32-bit sequence number is a monotonically increasing counter value. It
     has to be set by the sender, but it is the choice of the receiver whether to act
     on it. It ensures that packets with identical data are not resent repeatedly.
@@ -573,16 +815,24 @@
     of an SA, the value is set to 0 at the sender and at the receiver. The first packet
     always has the value 1, which is increased by one for every consecutive packet.
     When the value 232 is reached, the counter is reinitialized to 0.
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个 32 位的序列号是单调递增的计数器值。它必须由发送方设置，但是否使用该值由接收方决定。它确保相同数据的包不会被重复发送，从而防止在单播或单发送方的
+    SA 中发生重放攻击。对于多发送方 SA，AH 不支持反重放功能，因为 AH 没有机制在多个发送方之间同步数据包计数器。在建立 SA 时，发送方和接收方的值都设置为
+    0。第一个数据包的值总是 1，每发送一个连续的数据包，值增加 1。当值达到 232 时，计数器会重置为 0。
 - en: '*Integrity Check Value (variable length)*'
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: '*完整性检查值 (可变长度)*'
 - en: This field contains the checksum (Integrity Check Value, or ICV) for the packet.
     The length depends on the algorithm chosen on establishing the SA. It is always
     a multiple of four bytes.
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 此字段包含数据包的校验和（完整性检查值，或 ICV）。长度取决于在建立 SA 时选择的算法。其长度总是四字节的倍数。
 - en: The AH Specification in RFC 4302 defines a new Extended (64-bit) Sequence Number
     (ESN). It cannot be seen in [Figure 6-1](ch06.html#the_format_of_the_authentication_header
     "Figure 6-1. The format of the Authentication Header") because only the low-order
@@ -592,106 +842,155 @@
     number is a new option designed to support high-speed IPsec implementations. The
     use of an Extended Sequence Number is negotiated on setup of the SA. The default
     with IKEv2 is ESN, unless 32-bit is explicitly negotiated.
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4302中的AH规范定义了一个新的扩展（64位）序列号（ESN）。由于只有扩展序列号的低32位被传输，因此在[图6-1](ch06.html#the_format_of_the_authentication_header
+    "图6-1. 认证头的格式")中看不到。扩展序列号的高32位由发送方和接收方共同维护，作为序列号计数器的一部分，并包含在ICV计算中。64位序列号是一项旨在支持高速IPsec实现的新选项。扩展序列号的使用在SA建立时协商。IKEv2的默认值是ESN，除非显式协商为32位。
 - en: 'The checksum is calculated over the following fields:'
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 校验和是根据以下字段计算的：
 - en: All fields of the IP header or Extension header fields before the AH that do
     not change in transit or whose value when arriving at the destination can be predicted.
     For example, if a Routing Extension header is present, the last address in the
     Routing Extension header is used for the calculation. The Traffic Class field,
     the Flow Label, and the Hop Limit are not included in the calculation.
+  id: totrans-115
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有不在传输过程中改变或在到达目标时可以预测其值的IP头或扩展头字段。例如，如果存在路由扩展头，则会使用路由扩展头中的最后一个地址进行计算。流量类字段、流标签和跳数限制不包含在计算中。
 - en: All fields of the Authentication Header.
+  id: totrans-116
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 认证头的所有字段。
 - en: Other Extension headers present and the payload.
+  id: totrans-117
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 其他存在的扩展头和有效载荷。
 - en: The high-order bits of the ESN (if employed) and any implicit padding required
     by the integrity algorithm.
+  id: totrans-118
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果使用了ESN，则计算ESN的高位部分（如果使用了）以及完整性算法要求的任何隐式填充。
 - en: 'The following algorithms are considered suitable for IPsec:'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下算法被认为适用于IPsec：
 - en: Keyed Message Authentication Codes (MACs) based on symmetric encryption algorithms.
+  id: totrans-120
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 基于对称加密算法的消息认证码（MACs）。
 - en: One-way hash functions (e.g., MD5, SHA-1, SHA-256).
+  id: totrans-121
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 单向哈希函数（例如，MD5、SHA-1、SHA-256）。
 - en: 'Other algorithms can be negotiated. RFC 4305, “Cryptographic Algorithm Implementation
     Requirements for Encapsulating Security Payload (ESP) and Authentication Header
     (AH),” lists the following implementation rules for AH:'
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以协商其他算法。RFC 4305《封装安全有效载荷（ESP）和认证头（AH）的加密算法实现要求》列出了以下认证头的实现规则：
 - en: MUST, HMAC-SHA1-96 (RFC 2404)
+  id: totrans-123
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 必须使用 HMAC-SHA1-96（RFC 2404）
 - en: SHOULD, AES-XCBC-MAC-96 (RFC 3566)
+  id: totrans-124
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 应该使用 AES-XCBC-MAC-96（RFC 3566）
 - en: MAY, HMAC-MD5-96 (RFC 2403)
+  id: totrans-125
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可以使用 HMAC-MD5-96（RFC 2403）
 - en: Weaknesses have become apparent in MD5; however, they should not affect the
     use of MD5 with HMAC.
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: MD5中已经显现出一些弱点；然而，这些弱点不应影响MD5与HMAC的使用。
 - en: The Authentication Header can be used in both transport and tunnel modes, as
     shown in [Figure 6-2](ch06.html#authentication_header_in_transport_and "Figure 6-2. Authentication
     Header in transport and tunnel mode").
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 认证头可以在传输模式和隧道模式下使用，如[图6-2](ch06.html#authentication_header_in_transport_and
+    "图6-2. 传输模式和隧道模式中的认证头")所示。
 - en: '![Authentication Header in transport and tunnel mode](images/ipv6_0602.png)Figure 6-2. Authentication
     Header in transport and tunnel mode'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: '![传输模式和隧道模式中的认证头](images/ipv6_0602.png)图6-2. 传输模式和隧道模式中的认证头'
 - en: In transport mode, the whole payload, including the fields of the IPv6 header,
     which do not change in transit, is secured. In tunnel mode, the inner packet contains
     the IP address of sender and receiver. The outer IP header contains the IP address
     of the tunnel endpoints. In this case, the complete original packet, including
     the fields of the outer header that do not change in transit, is secured.
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 在传输模式下，整个有效载荷，包括在传输过程中不变的IPv6头字段，都会被保护。在隧道模式下，内部数据包包含发送者和接收者的IP地址，外部IP头包含隧道端点的IP地址。在这种情况下，整个原始数据包，包括在传输过程中不变的外部头字段，都将被保护。
 - en: Encapsulating Security Payload Header
+  id: totrans-130
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 封装安全有效载荷头
 - en: The Encapsulating Security Payload (ESP) header provides Integrity, Confidentiality,
     Data Origin Authentication, Anti-Replay Service, and limited Traffic Flow Confidentiality
     for all end-to-end data transported in an IP packet. The set of services provided
     is negotiated on establishment of the SA. The ESP is defined in RFC 4303 and indicated
     by a Next Header value of 50 in the preceding header.
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 封装安全载荷（ESP）头部提供完整性、机密性、数据源认证、反重放服务和有限的流量流动机密性，适用于通过IP数据包传输的所有端到端数据。这些服务的集合在建立SA时协商。ESP定义在RFC
+    4303中，并通过前面的头部中的Next Header值50来指示。
 - en: The ESP header is located in front of the transport (e.g., UDP or TCP), network
     control (e.g., ICMP), or routing (e.g., OSPF) protocol header.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: ESP头部位于传输（例如UDP或TCP）、网络控制（例如ICMP）或路由（例如OSPF）协议头部之前。
 - en: The format of the ESP is shown in [Figure 6-3](ch06.html#format_of_the_encapsulating_security_pay
     "Figure 6-3. Format of the Encapsulating Security Payload header").
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: ESP的格式如[图6-3](ch06.html#format_of_the_encapsulating_security_pay "图6-3. 封装安全载荷头部格式")所示。
 - en: '![Format of the Encapsulating Security Payload header](images/ipv6_0603.png)Figure 6-3. Format
     of the Encapsulating Security Payload header'
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: '![封装安全载荷头部格式](images/ipv6_0603.png)图6-3. 封装安全载荷头部格式'
 - en: '*Security Parameter Index (SPI) (4 bytes)*'
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: '*安全参数索引（SPI）（4字节）*'
 - en: Arbitrary 32-bit value. Used by the receiver to identify the SA to which an
     incoming packet belongs. The SPI field is mandatory, and this mechanism for mapping
     inbound traffic to unicast SAs must be supported by all ESP implementations. If
@@ -701,11 +1000,15 @@
     by the Internet Assigned Numbers Authority (IANA) for future use. The SPI value
     of 0 is reserved for local, implementation-specific use and must not be sent on
     the wire.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 任意的32位值。接收方用它来识别一个传入数据包所属的SA。SPI字段是强制性的，所有ESP实现必须支持该机制，以便将传入流量映射到单播SA。如果IPsec实现支持多播，它还必须支持使用为此目的指定的解复用算法来映射传入的IPsec数据报到多播SA。IANA为未来使用保留了1到255范围内的SPI值。SPI值0保留供本地实现特定使用，且不得在网络上传输。
 - en: '*Sequence Number (4 bytes)*'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: '*序列号（4字节）*'
 - en: This 32-bit sequence number is a monotonically increasing counter value. It
     has to be set by the sender, but it is the choice of the receiver whether to act
     on it. It ensures that packets with identical data are not resent repeatedly.
@@ -715,55 +1018,79 @@
     of an SA, the value is set to 0 at the sender and at the receiver. The first packet
     always has the value 1, which is increased by one for every consecutive packet.
     When the value 2^(32) is reached, the counter is reinitialized to 0.
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个32位序列号是一个单调递增的计数器值。它必须由发送方设置，但是否根据该值采取行动由接收方决定。它确保相同数据的分组不会被重复发送，从而防止在单播或单发送方SA中的重放攻击。在多发送方SA中，由于ESP没有机制在多个发送方之间同步分组计数器，因此无法使用反重放功能。在建立SA时，该值在发送方和接收方均设置为0。第一个分组的序列号始终为1，之后每个连续的分组序列号加1。当达到2^(32)时，计数器会重新初始化为0。
 - en: '*Payload Data (variable length)*'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: '*有效载荷数据（可变长度）*'
 - en: Contains the encrypted data as well as the encryption Initialization Vector
     (IV) if required by the encryption mechanism.
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含加密数据以及加密初始化向量（IV），如果加密机制需要的话。
 - en: '*Padding (0 to 255 bytes)*'
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: '*填充（0到255字节）*'
 - en: Used to align the packet to a multiple of 4 bytes and to reach a minimum packet
     size if the encryption mechanism requires one.
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于将数据包对齐到4字节的倍数，并在加密机制要求最小数据包大小时达到最小数据包尺寸。
 - en: '*Pad Length (1 byte)*'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: '*填充长度（1字节）*'
 - en: Indicates the number of preceding padding *bytes*.
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 指示前面填充的*字节*数。
 - en: '*Next Header (1 byte)*'
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: '*下一个头部（1字节）*'
 - en: Identifies the type of header that follows the ESP header. It uses the values
     listed in [Table 3-1](ch03.html#values_in_the_next_header_field "Table 3-1. Values
     in the Next Header field"). To facilitate the rapid generation and discarding
     of the padding traffic in support of traffic flow confidentiality, the protocol
     value 59 (no next header) designates a *dummy* packet. The receiver of a dummy
     packet must discard it without creating an error message.
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 标识紧随ESP头之后的头的类型。它使用[表3-1](ch03.html#values_in_the_next_header_field "表3-1. 下一个头字段中的值")中列出的值。为了促进快速生成和丢弃填充流量以支持流量保密性，协议值59（无下一个头）表示*虚拟*数据包。虚拟数据包的接收方必须丢弃它，而不生成错误消息。
 - en: '*Integrity Check Value (variable length)*'
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: '*完整性检查值（可变长度）*'
 - en: The Integrity Check Value (ICV) is a variable-length field containing a checksum
     computed over the ESP header, Payload, and ESP Trailer fields. The ICV field is
     optional. It is present only if the integrity service is selected, and it is provided
     by either a separate integrity algorithm or a combined mode algorithm that uses
     an ICV. The length of the field is specified by the integrity algorithm selected
     and associated with the SA.
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 完整性检查值（ICV）是一个可变长度的字段，包含对ESP头、负载和ESP尾字段进行校验和计算后的值。ICV字段是可选的，只有在选择完整性服务时才会出现，它由单独的完整性算法或使用ICV的组合模式算法提供。该字段的长度由所选的完整性算法和与SA关联的算法指定。
 - en: The Padding, Pad Length, and Next Header fields are part of the ESP Trailer.
     The encryption algorithm is either specified manually and included in the SA for
     the packet stream or negotiated dynamically by the key exchange protocol.
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 填充、填充长度和下一个头字段是ESP尾的一部分。加密算法要么手动指定并包含在数据包流的SA中，要么通过密钥交换协议动态协商。
 - en: The ESP specification in RFC 4303 defines an Extended (64-bit) Sequence Number
     (ESN). It cannot be seen in [Figure 5-3](ch05.html#mac_header_for_an_ipv6_multicast_destina
     "Figure 5-3. MAC header for an IPv6 multicast Destination address"), because only
@@ -773,55 +1100,79 @@
     number is a new option designed to support high-speed IPsec implementations. The
     use of an Extended Sequence Number is negotiated on setup of the SA. The default
     with IKEv2 is ESN unless 32-bit is explicitly negotiated.
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4303中的ESP规范定义了扩展（64位）序列号（ESN）。在[图5-3](ch05.html#mac_header_for_an_ipv6_multicast_destina
+    "图5-3. IPv6组播目标地址的MAC头")中无法看到它，因为只有扩展序列号的低32位被传输。高32位由发送方和接收方作为序列号计数器的一部分维护，并包含在ICV的计算中。64位序列号是为支持高速IPsec实现而设计的新选项。扩展序列号的使用在SA建立时协商。IKEv2的默认值是ESN，除非明确协商为32位。
 - en: RFC 4835, “Cryptographic Algorithm Implementation Requirements for Encapsulating
     Security Payload (ESP) and Authentication Header (AH),” lists the implementation
     rules for ESP.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4835，“封装安全负载（ESP）和认证头（AH）的密码算法实现要求”，列出了ESP的实现规则。
 - en: Combined Mode algorithms provide both confidentiality and authentication services.
     They are expected to provide significant throughput and efficiency advantages.
     AES-CM (Advanced Encryption Standard Counter Mode), which has been adopted as
     the preferred mode for security in IEEE 802.11i, is defined in RFC 5084 and RFC
     6655.
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 组合模式算法同时提供机密性和认证服务。预计它们将在吞吐量和效率上提供显著的优势。AES-CM（高级加密标准计数模式），已被采纳为IEEE 802.11i中的首选安全模式，定义在RFC
+    5084和RFC 6655中。
 - en: Since ESP authentication and encryption are both optional, support for NULL
     algorithms must be given for both. Note that only one of them can be set to NULL
     at a time.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于ESP认证和加密都是可选的，因此必须为两者都提供对NULL算法的支持。请注意，每次只能将其中一个设置为NULL。
 - en: The ESP can be used in both transport and tunnel modes, as shown in [Figure 6-4](ch06.html#encapsulating_security_payload_header_in
     "Figure 6-4. Encapsulating Security Payload header in transport and tunnel mode").
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: ESP可以在传输模式和隧道模式中使用，如[图6-4](ch06.html#encapsulating_security_payload_header_in
+    "图6-4. 传输模式和隧道模式中的封装安全负载头")所示。
 - en: '![Encapsulating Security Payload header in transport and tunnel mode](images/ipv6_0604.png)Figure 6-4. Encapsulating
     Security Payload header in transport and tunnel mode'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: '![传输模式和隧道模式中的封装安全负载头](images/ipv6_0604.png)图6-4. 传输模式和隧道模式中的封装安全负载头'
 - en: In transport mode, the IP header and the Extension headers that follow are not
     encrypted; otherwise, the packet could not be forwarded. If the complete packet
     has to be encrypted, tunnel mode is the way to go. Just as with the AH in tunnel
     mode, the inner packet contains the IP address of sender and receiver, whereas
     the outer IP header contains the IP address of the tunnel endpoints.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 在传输模式中，IP 头部及其后续的扩展头部不会被加密；否则数据包将无法转发。如果必须对完整数据包进行加密，则应使用隧道模式。与隧道模式中的 AH 一样，内部数据包包含发送方和接收方的
+    IP 地址，而外部 IP 头部则包含隧道端点的 IP 地址。
 - en: The ESP header can be used with a NULL encryption option, which is defined in
     RFC 2410\. With NULL encryption, only the authentication option of the ESP is
     used, and the packet is not encrypted.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: ESP 头部可以与 NULL 加密选项一起使用，该选项在 RFC 2410 中进行了定义。使用 NULL 加密时，仅使用 ESP 的认证选项，并且数据包不进行加密。
 - en: Combination of AH and ESP
+  id: totrans-158
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: AH 和 ESP 的组合
 - en: The two headers can be used in combination as well. In that case, the AH has
     to precede the ESP header to verify authenticity and integrity before the packet
     is decrypted. The authentication option has been included in the ESP header to
     allow for authentication of encrypted packets with only one header.
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 这两个头部也可以结合使用。在这种情况下，AH 必须先于 ESP 头部，以便在数据包解密之前验证其真实性和完整性。ESP 头部中已包含认证选项，以便仅通过一个头部对加密数据包进行认证。
 - en: If the AH header is used in tunnel mode, the first IP header is included in
     the authentication. If the ESP header is used, only the part of the packet following
     the ESP header is authenticated. If encryption and integrity of the IP addresses
@@ -829,17 +1180,25 @@
     not necessary to use the authentication in the ESP header. On the other hand,
     an ESP header with NULL encryption can be used if the given authentication is
     sufficient.
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果在隧道模式中使用 AH 头部，则第一个 IP 头部会包含在认证中。如果使用 ESP 头部，则仅对 ESP 头部之后的部分数据包进行认证。如果需要对
+    IP 地址进行加密和完整性保护，则必须同时使用这两个头部。如果同时使用这两个头部，显然不需要在 ESP 头部中使用认证。另一方面，如果给定的认证足够，可以使用
+    NULL 加密的 ESP 头部。
 - en: Interaction of IPsec with IPv6 Elements
+  id: totrans-161
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPsec 与 IPv6 元素的交互
 - en: 'The use of IPsec for IPv6 provides the same security as IPsec for IPv4 in the
     Internet. But there are some areas where IPsec cannot easily be combined with
     other services:'
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 IPv6 中使用 IPsec 提供的安全性与在 IPv4 中使用 IPsec 的安全性相同。但在某些领域，IPsec 很难与其他服务结合使用：
 - en: '*Tunneling*, a fundamental element of both IPsec and multiple transition mechanisms,
     creates difficulties for existing firewalls and security gateways at the edge
     of the internal network. An encrypted IPsec tunnel built through a firewall providing
@@ -849,40 +1208,56 @@
     issue is that the inner packet can contain information that presents a threat
     for the internal network. This could be routing information or network control
     messages (e.g., ICMP redirect).'
+  id: totrans-163
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*隧道技术*是 IPsec 和多种过渡机制的基础元素，它为位于内部网络边缘的现有防火墙和安全网关带来了困难。通过防火墙建立的加密 IPsec 隧道为两端主机提供端到端安全，防止防火墙检测到危险或未授权的内容。解决此问题的一种方式是定义安全网关之间的安全关联，而不是定义端节点之间的安全关联。另一个问题是，内部数据包可能包含对内部网络构成威胁的信息。这些信息可能是路由信息或网络控制消息（例如，ICMP
+    重定向）。'
 - en: The extended mobility options with constantly changing IP addresses can lead
     to situations that are difficult to manage and control in IPsec environments.
     Dynamic addresses such as privacy addresses (RFC 4941) create difficulties if
     they are used for IKE identity checks.
+  id: totrans-164
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 具有不断变化 IP 地址的扩展移动性选项可能导致在 IPsec 环境中难以管理和控制的情况。动态地址，例如隐私地址（RFC 4941），如果用于 IKE
+    身份验证检查，可能会造成困难。
 - en: IPv6 Security “Gotchas”
+  id: totrans-165
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPv6 安全“陷阱”
 - en: Security in an IPv6 network is not substantially different from security in
     an IPv4 network. Many of the existing well-known IPv4 attacks can be performed
     with IPv6, so our means for securing data is similar.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6 网络中的安全性与 IPv4 网络中的安全性没有本质区别。许多现有的 IPv4 攻击也可以在 IPv6 中进行，因此我们保护数据的方式是相似的。
 - en: Just like in the IPv4 world, there will always be unethical hackers who find
     new ways to break into our networks. The designers of security concepts and the
     entire computer security community will have to stay alert and keep finding mechanisms
     to keep pace with the hackers and find ways to protect their networks from new
     attacks.
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像在IPv4世界中一样，总会有不道德的黑客找到新的方法来突破我们的网络。安全设计师和整个计算机安全社区必须保持警觉，持续寻找机制以跟上黑客的步伐，并找到保护网络免受新攻击的方法。
 - en: Note
+  id: totrans-168
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: If both protocols (IPv4 and IPv6) are used in a network, each protocol needs
     its own security concept and provisions, which need to be coordinated.
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果网络中同时使用IPv4和IPv6协议，每个协议都需要有自己独立的安全概念和措施，并且这些措施需要进行协调。
 - en: Having a strong and well-thought-out security design in your dual-stack network
     is a must. But even before you deploy IPv6, you must make a first step of protection.
     IPv6 is included in most operating systems, usually rather simple to configure,
@@ -890,33 +1265,45 @@
     default. IPv4 network administrators may believe that they do not have to worry
     about IPv6, but they don’t realize that there may be IPv6 traffic in their network
     already. This fact is used by IPv6 hackers to intrude into IPv4 networks.
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 在双栈网络中拥有一个强大且经过深思熟虑的安全设计是必须的。但即使在部署IPv6之前，你也必须迈出第一步来保护网络。IPv6已经包含在大多数操作系统中，通常配置相对简单，且常常默认启用。甚至隧道机制通常也是默认启用的。IPv4网络管理员可能认为自己不需要担心IPv6，但他们没有意识到，网络中可能已经存在IPv6流量。IPv6黑客正是利用这一点侵入IPv4网络。
 - en: Note
+  id: totrans-171
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Find the IPv6 traffic in your network by filtering your trace files for `0x86DD`
     in the MAC header or for protocol 41 in the IPv4 protocol type field. You may
     find a surprising number of Neighbor Discovery messages—a good indicator that
     you have active IPv6 nodes on your network.
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过过滤你的追踪文件中的`0x86DD` MAC头部或IPv4协议类型字段中的协议41来查找你网络中的IPv6流量。你可能会发现大量的邻居发现消息——这是你网络中存在活跃IPv6节点的良好指示。
 - en: As a first step of protection, while you have not deployed IPv6 yet, make sure
     you filter all IPv6 traffic coming into and going out from your network. This
     includes native IPv6 traffic and tunneled traffic. And in addition to this it
     could be wise to monitor and audit IPv6 traffic, specifically ND messages such
     as Router or Neighbor Advertisements that could be used to misconfigure your clients.
+  id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为保护的第一步，在尚未部署IPv6时，请确保过滤所有进出你网络的IPv6流量。这包括原生IPv6流量和隧道流量。除此之外，监控和审计IPv6流量，特别是如路由器或邻居广告等ND消息，这些消息可能被用来错误配置你的客户端，可能是明智的做法。
 - en: Note
+  id: totrans-174
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: RFC 7123, “Security Implications of IPv6 on IPv4 Networks,” provides useful
     suggestions on how to protect such an “unmanaged” IPv6 enterprise network.
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 7123，《IPv6对IPv4网络的安全影响》，提供了有关如何保护这种“未管理”IPv6企业网络的有用建议。
 - en: IPsec, while being a good security mechanism, is not the be-all and end-all
     for security. Most security professionals agree that there is no *silver bullet*
     in securing a network from internal or external attacks. Combinations of best
@@ -924,20 +1311,28 @@
     near future, there are some security concerns that should be addressed. Be advised
     that this is not a complete list, as entire volumes of information could be written
     on the subject.
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然IPsec是一个很好的安全机制，但它并不是安全的万能解。大多数安全专家都同意，没有*银弹*可以防止网络受到内部或外部攻击。最佳实践和用户培训的结合可以最大限度地减少风险。如果你打算在不久的将来部署IPv6，以下是一些需要解决的安全问题。请注意，这不是一个完整的清单，因为关于这个主题可以写出大量的资料。
 - en: Native IPv6
+  id: totrans-177
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 原生IPv6
 - en: When connecting to IPv6 natively, some security issues that should be considered
     are discussed in the following sections.
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: 当本地连接到IPv6时，以下章节将讨论一些需要考虑的安全问题。
 - en: Public Key Infrastructure (PKI)
+  id: totrans-179
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 公钥基础设施（PKI）
 - en: While RFC 4301 specifies the requirement for IPSec in the IPv6 protocol, it
     does not cover how the keys will be exchanged. You could manually set up preshared
     keying, but in large enterprises, this task becomes tedious and time consuming.
@@ -947,12 +1342,18 @@
     Benefits of IKEv2 are its usability on both IPv4 and IPv6 and its simpler implementation.
     It is not compatible with the first version of IKE, but both versions’ header
     formats are similar enough to run them both unambiguously over the same UDP port.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然 RFC 4301 指定了 IPv6 协议中对 IPSec 的要求，但它并未涵盖密钥如何交换。你可以手动设置预共享密钥，但在大型企业中，这项任务会变得繁琐且耗时。在这种环境下，使用集中式证书服务器是理想的选择。对于
+    IPv6，直到最近才有这样的集中式证书服务器。在 IKEv2 协议的基础上，服务器已经改变，这一协议在 RFC 5996 中进行了规范。IKEv2 的优势在于它可以同时支持
+    IPv4 和 IPv6，并且实现更为简便。它与 IKE 的第一个版本不兼容，但两个版本的报文头格式相似，可以通过相同的 UDP 端口无歧义地运行。
 - en: Firewalls and intrusion detection/prevention systems
+  id: totrans-181
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 防火墙和入侵检测/防御系统
 - en: While end-to-end IPsec is considered one of the major advantages of IPv6, it
     also introduces new problems with existing firewalling and IDS/IPsec if ESP is
     used with encryption turned on. If the packets are encrypted from end to end,
@@ -963,8 +1364,11 @@
     of tunneled IPv6 protocols and a general lack of attack signatures for IPv6-based
     attacks, although as IPv6 proliferates to more networks, these issues should eventually
     be solved.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管端到端 IPsec 被认为是 IPv6 的主要优势之一，但如果在启用加密的情况下使用 ESP，它也会引入现有防火墙和 IDS/IPsec 的新问题。如果数据包从端到端加密，中间的设备如何在不解密数据包的情况下进行检查？将所有加密密钥存储在中央位置既是单点故障的风险，也是黑客攻击的目标，黑客可以入侵并窃取网络中的所有加密密钥。目前
+    IPv4 IDS/IPS 系统的问题包括无法检测隧道化的 IPv6 协议，以及缺乏针对基于 IPv6 的攻击的攻击特征，尽管随着 IPv6 在更多网络中的普及，这些问题最终应该会得到解决。
 - en: Firewalls that support IPv6 are included in most of the major operating systems,
     but firewalls that keep the state of connections (*stateful firewalls*) are not
     available in older implementations. Cisco, Checkpoint, and Netscreen (Juniper),
@@ -973,18 +1377,27 @@
     Refer to [Chapter 9](ch09.html "Chapter 9. Planning for IPv6") for more information.
     Even though most implementations have some basic features available, often important
     features that are needed in an IPv6 network are still lacking support.
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 支持 IPv6 的防火墙已包含在大多数主要操作系统中，但在旧版实现中，保持连接状态的防火墙（*stateful firewalls*）并不可用。思科、CheckPoint
+    和 Netscreen（Juniper）等公司提供对 IPv6 数据包的状态检查。防火墙产品必须经过仔细评估，并根据特定的 RFC 要求进行测试。有关更多信息，请参见[第
+    9 章](ch09.html "第 9 章。IPv6 规划")。尽管大多数实现都提供了一些基本功能，但在 IPv6 网络中仍然缺少许多关键功能。
 - en: The draft “Requirements for IPv6 Enterprise Firewalls” (*draft-gont-opsec-ipv6-firewall-reqs-01*)
     specifies a set of requirements for IPv6 firewalls, in order to establish some
     common-ground in terms of what features can be expected and should be requested
     in RFPs (Request for Proposal).
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 草案《IPv6 企业防火墙的要求》（*draft-gont-opsec-ipv6-firewall-reqs-01*）规定了一套 IPv6 防火墙的要求，以便在
+    RFP（请求提案）中确定可以预期和应要求的功能。
 - en: Implementation issues
+  id: totrans-185
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 实现问题
 - en: Many IPv6 implementations are fairly new. This leads to two other possible security
     issues. The first issue is a lack of IPv6 assessment tools. It is a common practice
     in the information security field to audit your own network with well-known security
@@ -999,21 +1412,29 @@
     to test stacks and security implementations in your lab before you go to production,
     and then establish a process for rapidly addressing security implementation risks
     and flaws coming up.
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多IPv6实现相对较新，这带来了另外两个可能的安全问题。第一个问题是缺乏IPv6评估工具。在信息安全领域，通常做法是使用知名的安全审计工具审计自己的网络，然后通过这些工具修补发现的漏洞。这些流行的工具中的许多正在移植以审计IPv6网络，因此你需要检查你最喜欢的工具的成熟度。第二个问题是IPv6实现中未经测试的代码（这也与缺乏测试这些实现的工具有关）。未经充分测试的代码可能会比那些在生产环境中运行已久的代码存在更多的安全漏洞。厂商必须等待市场反馈和事件报告才能修复他们的实现。在规划中，你需要为测试协议栈和安全实现留出足够的时间，在进入生产环境之前，并且要建立一个流程来快速解决出现的安全实现风险和漏洞。
 - en: Note
+  id: totrans-187
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: On the other hand we have to understand that in many cases transport layer security
     is overemphasized, while much more efficient measures such as phishing, Trojans,
     etc., are underestimated.
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一方面，我们必须理解，在许多情况下，传输层安全性被过度强调，而诸如网络钓鱼、特洛伊木马等更有效的措施却被低估。
 - en: Neighbor Discovery issues
+  id: totrans-189
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 邻居发现问题
 - en: 'ARP in IPv4 has been replaced with ICMP messages in IPv6\. Without using IPsec
     AH or SEND, however, NDP has many of the security problems that ARP presented
     in IPv4, such as redirect attacks (malicious nodes redirecting packets away from
@@ -1022,32 +1443,44 @@
     Address Detection and Router Advertisements can also be abused. These attacks
     are similar to the ARP/DHCP attacks in IPv4\. A quote from RFC 4862 (IPv6 Stateless
     Autoconfiguration) states:'
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv4中的ARP已经被IPv6中的ICMP消息取代。然而，如果没有使用IPsec AH或SEND，NDP（邻居发现协议）就会存在许多IPv4中ARP所面临的安全问题，例如重定向攻击（恶意节点将数据包重定向至非合法接收者）、拒绝服务（DoS）攻击，以及泛洪攻击（将其他主机的流量重定向到受害节点，制造大量伪造流量）。重复地址检测和路由器通告也可能遭到滥用。这些攻击类似于IPv4中的ARP/DHCP攻击。RFC
+    4862（IPv6无状态自动配置）中的一段话指出：
 - en: If a node determines that its tentative link-local address is not unique, autoconfiguration
     stops and manual configuration of the interface is required.
+  id: totrans-191
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 如果一个节点确定其临时的链路本地地址不是唯一的，自动配置将停止，需要手动配置该接口。
 - en: This poses a possible Denial of Service attack, as multiple IPv6 addresses can
     be assigned to a single interface. A rogue workstation could be assigned several
     thousand addresses and deny other workstations the ability to acquire a link-local
     address. Or even much simpler, a software responder can be built that always responds
     with “address in use” such as new IPv6 tools from The Hacker’s Choice.
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 这可能会导致拒绝服务攻击（Denial of Service），因为多个IPv6地址可以分配给单个接口。恶意工作站可能会分配几千个地址，从而使其他工作站无法获取链路本地地址。甚至更简单的，可能会构建一个软件响应器，总是回应“地址正在使用”之类的信息，像黑客选择（The
+    Hacker’s Choice）发布的新IPv6工具。
 - en: Another point is that link-local addresses can be acquired without preconfiguration.
     An attacker can get access to a link without any further knowledge about the network.
     This feature gives a malicious node the opportunity to mount an attack on any
     other node attached to this link. Possible ways to protect from this are either
     link-layer authentication (Network Access Control) or the use of Cryptographically
     Generated Addresses (see below).
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个问题是，链路本地地址可以在没有预配置的情况下获取。攻击者可以在没有进一步了解网络的情况下访问该链路。这一特性使得恶意节点有机会对任何连接到该链路的其他节点发起攻击。保护此类攻击的可能方法包括链路层认证（网络访问控制）或使用加密生成地址（见下文）。
 - en: First-hop security
+  id: totrans-194
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 第一跳安全性
 - en: Router Advertisement spoofing is another security concern also known as *rogue
     RA*. Since multiple addresses are allowed on a single interface, multiple routes
     are allowed as well. A booting node sends a Router Solicitation to the all-routers
@@ -1062,8 +1495,11 @@
     attack happens in the IPv4 world also; it differs only in the mechanisms used.
     Using the IPsec’s AH component, SEcure Neighbor Discovery (SEND), or RA Guard
     are ways to mitigate this risk, among others.
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 路由器广告欺骗是另一个安全问题，也被称为*恶意RA*。由于单个接口上允许多个地址，因此也允许多个路由。一个启动节点向所有路由器的链路本地多播地址（`ff02::2`）发送路由器请求。链路上的每个路由器都会回复一个路由器广告，其中包含客户端的配置信息。这就为通过不应发送流量的路由器发送流量提供了可能性（允许在恶意路由器上嗅探流量，进而可能发起中间人攻击）。攻击者可以利用RA中的其他选项误导客户端，例如配置错误的DNS服务器信息（如果客户端堆栈支持），为链路上的所有节点配置非常小的MTU值，或者为所有节点设置跳数限制为1。显然，这种类型的攻击在IPv4环境中也会发生；其区别仅在于所使用的机制。使用IPsec的AH组件、安全邻居发现（SEND）或RA
+    Guard等方法可以缓解这一风险。
 - en: '*RA Guard* (Router Advertisement Guard) is defined in RFC 6105\. The purpose
     of RA Guard is to filter Router Advertisements on Layer 2, based on a set of criteria,
     before they reach the target. The criteria can be to allow RAs from a set of defined
@@ -1072,8 +1508,10 @@
     the concept of a router authorization proxy that would check RAs on behalf of
     the clients according to the criteria defined. And then only send out RAs from
     the link that has been approved as coming from a legitimate source.'
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: '*RA Guard*（路由器广告保护）在RFC 6105中定义。RA Guard的目的是在Layer 2层过滤路由器广告，基于一组标准，在它们到达目标之前进行过滤。标准可以是允许来自一组定义源的RA，在给定接口上禁止RA，允许来自认证源的RA等。它可以在有状态或无状态模式下运行。该规范还定义了一个路由器授权代理的概念，代理会根据定义的标准代表客户端检查RA。然后只发送来自已被批准为合法源的链路的RA。'
 - en: The efficiency of RA Guard depends on the capability of the Layer 2 device to
     detect Router Advertisement messages. Practice has shown that in some implementations
     it is possible to circumvent that capability with Extension headers, namely Fragmentation
@@ -1084,22 +1522,32 @@
     Discovery is forbidden. RFC 7113, “Implementation Advice for IPv6 Router Advertisement
     Guard (RA Guard),” describes the issues and proposes filtering rules. It is an
     update to RFC 6105 on RA Guard.
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: RA Guard的效率取决于Layer 2设备检测路由器广告消息的能力。实践表明，在某些实现中，可以通过扩展头部，特别是分段头部，绕过该能力。当数据包被分段成多个片段时，Layer
+    2设备可能无法找到执行数据包过滤所需的所有信息。RFC 6980，“IPv6分段与IPv6邻居发现的安全隐患”，更新了RFC 4861，禁止在传统邻居发现中使用IPv6分段头。RFC
+    7113，“IPv6路由器广告保护（RA Guard）实施建议”描述了相关问题，并提出了过滤规则。它是RFC 6105关于RA Guard的更新。
 - en: The specification in NDP suggests using IPsec to protect from attacks, without
     providing more detailed information on how to do this. In many cases, especially
     in public and wireless networks, the key management used with IPsec is too complex
     and impractical.
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: NDP规范建议使用IPsec来防范攻击，但没有提供如何做到这一点的详细信息。在许多情况下，特别是在公共和无线网络中，IPsec使用的密钥管理过于复杂且不切实际。
 - en: Note
+  id: totrans-199
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: A reference that outlines the possible threats with NDP and provides guidelines
     is RFC 3756, “IPv6 Neighbor Discovery (ND) Trust Models and Threats.”
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 概述NDP可能面临的威胁并提供指导的参考文献是RFC 3756，“IPv6邻居发现（ND）信任模型与威胁”。
 - en: RFC 6946 discusses the issue of *atomic fragments*. An atomic fragment is a
     packet that contains a Fragment header but is actually not fragmented. This can
     happen if a host receives an ICMPv6 “Packet Too Big” message with a next-hop MTU
@@ -1109,16 +1557,24 @@
     treat these atomic fragments like regular fragments. This can be used for attacks.
     It would be better to process them as regular packets, with no need to queue them
     and wait for more fragments.
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 6946 讨论了 *原子分片* 问题。原子分片是一个包含分片头部，但实际上没有分片的包。如果主机收到一个 ICMPv6 “数据包太大”消息，并且下一跳的
+    MTU 小于 1280 字节，就可能发生这种情况。分片头部包含“分片偏移”和“M 位”设置为零。这样可以导致主机对数据包进行分片，然后发起基于分片的攻击。许多实现将这些原子分片视为普通分片，这可能被用来发起攻击。最好将它们当作普通数据包处理，无需排队等待更多分片。
 - en: Note
+  id: totrans-202
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: The Fragment header is described in [Chapter 3](ch03.html "Chapter 3. The Structure
     of the IPv6 Protocol") and Neighbor Discovery in [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: 分片头部在[第 3 章](ch03.html "第 3 章. IPv6 协议结构")中进行了描述，邻居发现则在[第 4 章](ch04.html "第
+    4 章. ICMPv6")中进行了描述。
 - en: '*SEcure Neighbor Discovery* (SEND) is defined in RFC 3971 to secure NDP without
     using IPsec. This approach involves the use of new NDP options to carry public
     key-based signatures. A zero-configuration mechanism is used for showing address
@@ -1127,25 +1583,37 @@
     from a lack of implementation in generic hosts such as Windows or Mac OS X and
     only a couple of routers have implemented it. This renders SEND a generally unusable
     solution.'
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: '*SEcure Neighbor Discovery* (SEND) 在 RFC 3971 中定义，目的是在不使用 IPsec 的情况下保护 NDP。此方法使用新的
+    NDP 选项来承载基于公钥的签名。通过零配置机制，显示各个节点的地址所有权；路由器通过信任锚认证。SEND 是 IPv6 第二层相邻节点之间的协议建立信任，但它在
+    Windows 或 Mac OS X 等通用主机中缺乏实现，且仅有少数路由器实现了该功能。这使得 SEND 成为一种普遍不可用的解决方案。'
 - en: Note
+  id: totrans-205
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: You can find a description of SEND and Cryptographically Generated Addresses
     (CGA) in [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以在[第 4 章](ch04.html "第 4 章. ICMPv6")中找到关于 SEND 和加密生成地址（CGA）的描述。
 - en: As part of your *first-hop security* strategy you will also configure mechanisms
     such as *ICMP Snooping*, *DHCPv6 Guard*, and *IPv6 Destination Guard*. Refer to
     your vendor’s configuration guide to learn how to configure these features.
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为 *首跳安全* 策略的一部分，你还将配置 *ICMP 嗅探*、*DHCPv6 防护* 和 *IPv6 目的地防护* 等机制。请参考供应商的配置指南，了解如何配置这些功能。
 - en: Fragmentation
+  id: totrans-208
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 分片
 - en: 'As the section on ND and first-hop security have shown, there are several cases
     where Extension headers and especially the Fragment header can cause security
     issues. RFC 6980, “Security Implications of IPv6 Fragmentation with IPv6 Neighbor
@@ -1153,46 +1621,67 @@
     Discovery. The RFC specifies that nodes MUST NOT employ IPv6 fragmentation for
     sending any of the following Neighbor Discovery and SEcure Neighbor Discovery
     messages:'
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如 ND 和首跳安全部分所示，有几个情况表明扩展头部，特别是分片头部，可能会引发安全问题。RFC 6980《IPv6 分片与 IPv6 邻居发现的安全影响》描述了这些问题，并禁止在邻居发现中使用分片。该
+    RFC 指定节点不得使用 IPv6 分片发送以下任何邻居发现和安全邻居发现消息：
 - en: Neighbor Solicitation
+  id: totrans-210
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 邻居请求
 - en: Neighbor Advertisement
+  id: totrans-211
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 邻居广告
 - en: Router Solicitation
+  id: totrans-212
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器请求
 - en: Router Advertisement
+  id: totrans-213
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 路由器广告
 - en: Redirect
+  id: totrans-214
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 重定向
 - en: Certification Path Solicitation
+  id: totrans-215
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 认证路径请求
 - en: Note
+  id: totrans-216
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: If an IPv6 host receives ND messages with fragmentation, the message should
     be silently discarded. So this is an update to the original ND specification in
     RFC 4861\. If you notice that ND messages are discarded, verify that fragmentation
     is the cause and find out where it is coming from.
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果一个 IPv6 主机收到带有分片的 ND 消息，应该将该消息静默丢弃。所以这是对原始 ND 规范 RFC 4861 的更新。如果你注意到 ND 消息被丢弃，请验证分片是否是原因，并查找它的来源。
 - en: Address and port scanning
+  id: totrans-218
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 地址和端口扫描
 - en: Address scanning has become much more complex, if not impractical. The interface
     identifier in IPv6 has 64 bits. RFC 4846, “Local Network Protection for IPv6,”
     states that “an attacker has to send out a simply unrealistic number of pings
@@ -1205,40 +1694,55 @@
     not using words such as `BEEF`, `F00D`, `CAFE`, `1234`, and `ABCD` as part of
     an IPv6 address, and not using sequentially numbered or easy-to-guess addresses
     to key infrastructure devices (such as `x::1` for routers).
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: 地址扫描变得更加复杂，甚至可以说不再实际。IPv6中的接口标识符有64位。RFC 4846《IPv6本地网络保护》指出，“攻击者必须发送一个几乎不可能实现的ping数量来映射网络，而且病毒/蠕虫传播将在过程中被阻止。在40
+    Gbps的满速率下（是典型100 Mbps局域网的400倍，是典型DSL/电缆接入链接的13,000倍），扫描单个64位地址空间需要超过5,000年。”这很难想象！如果使用自动配置而没有隐私选项，某些部分的地址（例如，厂商ID）可能被猜测到，但它仍然是一个庞大的地址空间。一种简单有效的保护方法是避免使用容易猜测的地址方案，例如不使用`BEEF`、`F00D`、`CAFE`、`1234`、`ABCD`等词作为IPv6地址的一部分，也不要为关键基础设施设备（如路由器）使用顺序编号或容易猜测的地址（例如`x::1`）。
 - en: On the other hand, getting an easy-to-remember address such as `x::1` for routers
     makes network operations easier, hence more reliable, hence more secure as well.
     The network operator has to balance the risk and the benefit of using predictable
     addresses.
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一方面，获取一个容易记住的地址，如`x::1`作为路由器地址，可以使网络操作更简便，从而提高可靠性，也增强了安全性。因此，网络运营商需要平衡使用可预测地址的风险与收益。
 - en: Note
+  id: totrans-221
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: RFC 5157, “IPv6 Implications for Network Scanning,” discusses this topic and
     explains alternative methods attackers may use. It also makes recommendations
     on how you can address these issues in your design.
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 5157《IPv6对网络扫描的影响》讨论了这个话题，并解释了攻击者可能使用的替代方法。它还提出了在设计中如何解决这些问题的建议。
 - en: Because an IPv6 network cannot be scanned, this also renders network inventory
     more complex, and knowing who uses your network is, of course, also a key security
     ingredient. Netflow or periodic NDP cache scans by SNMP can help with making your
     network inventory. You may also use your IPAM (IP address management) or DDI (DNS,
     DHCP, IP Address Management) tools for information on your network.
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于IPv6网络无法进行扫描，这也使得网络清单管理变得更加复杂，了解谁在使用你的网络，当然也是一个重要的安全因素。Netflow或SNMP定期扫描NDP缓存可以帮助管理网络清单。你还可以使用IPAM（IP地址管理）或DDI（DNS、DHCP、IP地址管理）工具来获取关于网络的信息。
 - en: Port scanning, on the other hand, commonly refers to scanning the TCP and UDP
     port space on a particular IP address to determine which services are running.
     Since IPv6 doesn’t change the TCP or UDP port space from its existing 16 bits,
     port scanning is still a threat.
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一方面，端口扫描通常指的是扫描特定IP地址上的TCP和UDP端口空间，以确定哪些服务正在运行。由于IPv6没有改变其现有的16位TCP或UDP端口空间，因此端口扫描依然构成威胁。
 - en: Multicast issues
+  id: totrans-225
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 多播问题
 - en: IPv6 supports multicast addresses with site scope, which can potentially allow
     an attacker to identify certain important resources on the site if misused. Particular
     examples are the all-routers (`ff05::2`) and all-DHCP-Servers (`ff05::1:3`) addresses.
@@ -1251,20 +1755,26 @@
     should not join multicast groups for which there is no legitimate use on the site,
     and site routers should be configured to drop packets directed to these unused
     addresses.
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6支持站点范围的多播地址，如果使用不当，可能会使攻击者识别出站点上的某些重要资源。特定的例子包括所有路由器（`ff05::2`）和所有DHCP服务器（`ff05::1:3`）地址。能够将目标为这些地址的消息渗透到站点的攻击者，可能会收到返回的信息，识别站点上的关键资源。这些信息可以被用来进行定向攻击，从简单的洪水攻击到更具体的旨在颠覆设备的机制。通过确保所有防火墙和站点边界路由器配置为丢弃具有站点范围目标地址的数据包，可以将风险最小化。此外，节点不应加入站点上没有合法用途的多播组，站点路由器应配置为丢弃定向到这些未使用地址的数据包。
 - en: Transition and Tunneling Mechanisms
+  id: totrans-227
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 过渡与隧道机制
 - en: IPv4 is not expected to go away anytime soon. It is very likely that there will
     be IPv4 nodes on networks for many years to come. IPv4 hosts cannot communicate
     with IPv6 hosts without some sort of transition or tunnel mechanism, which can
     add complexity to the existing network topology and the underlying code for the
     network stack. Transition and tunnel mechanisms can also be used as backdoors
     into normally IPv4-only networks.
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv4预计不会很快消失。很可能在未来的很多年里，网络上会有IPv4节点。IPv4主机在没有某种过渡或隧道机制的情况下，无法与IPv6主机进行通信，这可能会增加现有网络拓扑结构和网络协议栈底层代码的复杂性。过渡和隧道机制还可以作为进入通常仅支持IPv4的网络的后门。
 - en: Using IPv6 as a back door into IPv4 networks has been a known practice since
     2002\. On December 17, one of the HoneyNet Project’s ([http://www.honeynet.org](http://www.honeynet.org))
     Solaris 8 servers was compromised. The difference between this attack and earlier
@@ -1274,8 +1784,10 @@
     advent of UDP-based tunneling mechanisms designed to allow IPv6 from behind NATs
     (a practice that was almost impossible before these mechanisms were available).
     Teredo and Tunnel Setup Protocol (TSP) are two such mechanisms.
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用IPv6作为进入IPv4网络的后门从2002年开始就已经是一种已知的做法。2002年12月17日，HoneyNet项目的一个Solaris 8服务器（[http://www.honeynet.org](http://www.honeynet.org)）遭到入侵。这次攻击与之前的不同之处在于，攻击者设置了一个IPv6隧道连接到另一个国家，并通过该隧道窃取数据。这绕过了当时的许多入侵检测系统，今天可能依然有效。随着基于UDP的隧道机制的出现，这种做法变得更加容易，这些机制旨在允许IPv6通过NAT（在这些机制出现之前，这几乎是不可能的）。Teredo和隧道设置协议（TSP）就是这样的两种机制。
 - en: Generally, with tunneling one has to make sure that packets that enter the network
     through a tunnel cannot circumvent incoming packet filters. An attacker from the
     Internet could, for instance, send an IPv4 packet to the tunnel endpoint (the
@@ -1291,45 +1803,65 @@
     treated like any other ingress point into your network. RFC 4891, “Using IPsec
     to Secure IPv6-in-IPv4 Tunnels,” goes into more details and gives guidance on
     securing manually configured IPv6-in-IPv4 tunnels using IPsec.
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，使用隧道时，必须确保通过隧道进入网络的数据包无法绕过进入的数据包过滤器。例如，来自互联网的攻击者可能会向隧道端点（即网络的入口点）发送一个IPv4数据包，该数据包包含一个IPv6数据包，并且IPv6源地址来自你内部网络的地址范围。隧道端点解封装数据包后，将IPv6数据包转发到内部网络。接收方会认为这个数据包来自内部网络中的一台主机。在这方面，自动隧道更危险，因为它们必须接受来自任何来源的数据包。因此，部分保护措施可以是配置隧道端点只接受来自配置的隧道入口点的数据包，或仅使用手动配置的隧道。但是，攻击者仍然可以伪造该地址。必须在隧道端点实现额外的过滤机制。它必须像其他任何进入你网络的入口点一样进行处理。RFC
+    4891《使用IPsec保护IPv6-in-IPv4隧道》详细说明了如何使用IPsec保护手动配置的IPv6-in-IPv4隧道。
 - en: '*6to4 tunneling* is a well-known transition mechanism for networks that do
     not currently have native IPv6 connectivity. It consists of using a dual-stacked
     border router with a routable IPv4 address'
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: '*6to4隧道*是一个广为人知的过渡机制，用于当前没有本地IPv6连接的网络。它通过使用一个具有可路由IPv4地址的双栈边界路由器来实现。'
 - en: Note
+  id: totrans-232
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Refer to [Chapter 7](ch07.html "Chapter 7. Transition Technologies") for a detailed
     discussion of 6to4.
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: 请参考[第7章](ch07.html "第7章：过渡技术")，了解6to4的详细讨论。
 - en: 'In the 6to4 scenarios, there are special considerations discussed in RFC 3964,
     “Security Considerations for 6to4.” The issues here are that: a) all 6to4 routers
     must accept and decapsulate IPv4 packets from every other 6to4 router and from
     6to4 relays, and b) all 6to4 relay routers must accept traffic from any native
     IPv6 node. The routing scenarios to be analyzed are as follows:'
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 在6to4场景中，有一些特殊的考虑事项，在RFC 3964中进行了讨论，“6to4的安全考虑”。这里的问题是：a) 所有6to4路由器必须接收并解封装来自其他6to4路由器和6to4中继的IPv4数据包；b)
+    所有6to4中继路由器必须接受来自任何本地IPv6节点的流量。需要分析的路由场景如下：
 - en: From 6to4 to 6to4
+  id: totrans-235
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 从6to4到6to4
 - en: From native IPv6 to 6to4
+  id: totrans-236
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 从本地IPv6到6to4
 - en: From 6to4 to native IPv6
+  id: totrans-237
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 从6to4到本地IPv6
 - en: Please refer to the RFC for a detailed discussion of the scenarios and best
     practices to protect your network. And if applying our general design guidelines,
     you will not deploy 6to4 in a production network anyway.
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: 请参阅RFC以获取有关场景和最佳实践的详细讨论，以保护您的网络。如果遵循我们的通用设计指南，您无论如何都不会在生产网络中部署6to4。
 - en: The 6to4 router can be used for a Distributed Denial of Service (DDoS) attack
     using a tool called *4to6DDoS*. 4to6DDoS does not require an IPv6 stack to be
     installed on either the attacking or the victim host. It sends IPv6 in IPv4 encapsulated
@@ -1340,8 +1872,10 @@
     does not guarantee symmetric routing, meaning that traffic can take one routing
     path going to its destination, and take a completely different path upon return.
     This situation may not be optimal from a security and performance standpoint.
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 6to4路由器可以用于通过一个名为*4to6DDoS*的工具发起分布式拒绝服务（DDoS）攻击。4to6DDoS工具不要求在攻击主机或受害主机上安装IPv6协议栈。它直接从v4到v4发送IPv6封装在IPv4数据包中的流量。用于6to4隧道的路由器也可以通过简单地使用私有IPv4地址多次连接到路由器进行DoS攻击。这些路由器必须接收并解封装IPv4数据包，即使它们是伪造的。它们还必须接受来自任何本地IPv6节点的流量。6to4还不保证对称路由，这意味着流量在前往目的地时可能走一条路由路径，而返回时则走完全不同的路径。从安全性和性能的角度来看，这种情况可能并不理想。
 - en: '*Automatic tunnels* can create another vulnerability. If a packet comes in
     through a tunnel and the destination IPv6 address does not match a valid interface
     within the IPv6 network, it can bounce back in and out of the tunnel until the
@@ -1350,20 +1884,29 @@
     to facilitate DoS attacks. RFC 6324 describes the issues and mitigation measures
     such as verification of endpoint existence, Destination and Source address checks,
     and operational measures.'
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: '*自动隧道*可能会创建另一种漏洞。如果一个数据包通过隧道进入，而目标IPv6地址与IPv6网络中的有效接口不匹配，它可能会在隧道中反复进出，直到跳数限制被超越。这适用于所有自动隧道，如6to4、ISATAP和6rd（所有协议41隧道）。它可以被滥用作为流量放大的工具，促使DoS攻击。RFC
+    6324描述了这些问题以及缓解措施，例如端点存在验证、目标和源地址检查，以及操作性措施。'
 - en: Note
+  id: totrans-241
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: A good reference with an overview of security issues is RFC 4942, “IPv6 Transition/Coexistence
     Security Considerations.”
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个关于安全问题的很好的参考是RFC 4942，“IPv6过渡/共存安全考虑事项”。
 - en: Enterprise Security Models for IPv6
+  id: totrans-243
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 企业IPv6安全模型
 - en: End-to-end transparency and security has been lost in many IPv4 networks due
     to the need to introduce NAT because of the shortage of IPv4 addresses. IPv6 can
     restore the transparency. However, some people have become used to seeing NAT
@@ -1371,8 +1914,10 @@
     the network topology from the outside. These people may perceive the IPv6 transparency
     as a threat to their network and may even plan to deploy IPv6 networks with private
     local addressing schemes and translators only for this reason.
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于IPv4地址短缺，需要引入NAT（网络地址转换），许多IPv4网络已经失去了端到端的透明性和安全性。IPv6可以恢复这种透明性。然而，一些人已经习惯通过使用NAT和私有地址方案来隐藏网络拓扑，从而为企业网络提供安全性。这些人可能会将IPv6的透明性视为对其网络的威胁，甚至可能仅仅因为这个原因就计划部署使用私有本地地址方案和转换器的IPv6网络。
 - en: The goal with IPv6 is to restore end-to-end connectivity by using the abundant
     address space. To secure an IPv6 network, a security concept has to be created
     and the security mechanisms have to be implemented. NAT should no longer be used
@@ -1380,12 +1925,17 @@
     mechanisms should be used, such as privacy extensions for Stateless Address Autoconfiguration
     (RFC 4941), Unique Local Addresses (ULAs, RFC 4193), or untraceable IPv6 addresses
     as described in RFC 4864, “Local Network Protection for IPv6.”
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6的目标是通过利用丰富的地址空间恢复端到端连接。为了保障IPv6网络的安全，必须创建一个安全概念，并实施安全机制。IPv6不应再使用NAT。如果需要隐藏外部网络拓扑，应使用其他机制，如无状态地址自动配置（RFC
+    4941）的隐私扩展、唯一本地地址（ULAs，RFC 4193）或RFC 4864中描述的不可追踪的IPv6地址，即“IPv6本地网络保护”。
 - en: The New Model
+  id: totrans-246
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 新模型
 - en: In IPv4 networks, the common model for security is to have perimeter firewalls
     and integrate NATs. Applying this same approach in an IPv6 network may be a good
     starting point, but is limiting in the long term. In IPv6 networks, you should
@@ -1411,12 +1961,16 @@
     the final goal to introduce a new type of distributed security concept should
     be kept in mind as you go along, and the development of these technologies should
     be followed closely.
+  id: totrans-247
   prefs: []
   type: TYPE_NORMAL
+  zh: 在IPv4网络中，常见的安全模型是使用外围防火墙并集成NAT。将这种相同的策略应用于IPv6网络可能是一个好的起点，但从长远来看是有限的。在IPv6网络中，应该致力于设计一个改进的安全模型，不仅能提高网络的整体安全性，还能促进端到端通信。IPv6在每个节点上提供了IPsec功能。仅依赖一个外围防火墙是危险的。攻击者如果突破了防火墙，通常会发现一个开放且不安全的区域。IPv6网络的最佳安全概念可能是“深度防御”，即集中的安全策略仓库与分发机制相结合，通过与可信主机配合使用，允许网络管理员更多依赖端点的安全机制，并允许端点影响外围防火墙的行为。外围防火墙将负责保护网络免受常规攻击，而终端节点将负责保护自己免受节点相关的攻击。IPv6/IPsec网络的新安全政策模型必须是基于身份的模型，以便将安全政策与网络ID分离。这对于希望实现自动化、自动配置和移动性而不妥协安全性的网络至关重要。这种新的分布式安全模型正在逐步形成，一些所需的技术仍在开发中，包括允许端节点控制和通知防火墙的协议。初期的IPv6部署可能会使用与当前IPv4网络相似的防火墙和入侵检测技术（除NAT外，IPv6网络中不应使用NAT）。但引入一种新型的分布式安全概念的最终目标应始终铭记，并应密切关注这些技术的发展。
 - en: Using Directory Services for Controlling Access
+  id: totrans-248
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用目录服务来控制访问
 - en: With the address architecture of IPv6, we have to learn to detach identity from
     IP address. An IPv6 interface has usually multiple IPv6 addresses and can change
     them frequently (depending on address plan). So having security rules and ACLs
@@ -1427,8 +1981,12 @@
     and another prefix for access to internal systems where we have fixed interface
     IDs, so our users are trackable. This other internal prefix could be the ULA prefix
     or just a slice of the public prefix set aside for internal use.
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 IPv6 的地址架构下，我们必须学会将身份与 IP 地址分离。一个 IPv6 接口通常有多个 IPv6 地址，并且可能会频繁变化（取决于地址规划）。因此，基于
+    IPv6 地址的安全规则和访问控制列表（ACL）可能不容易管理。而且，用户（身份）通常会通过不同的设备访问系统。解决这个问题的一种方法是使用两个不同的前缀，一个用于访问外部网络，我们希望接口
+    ID 能变化，这样就不能轻易地在互联网上被追踪；另一个用于访问内部系统，我们使用固定的接口 ID，这样可以追踪用户身份。这个内部前缀可以是 ULA 前缀，或者是专门为内部使用划分的公共前缀的一部分。
 - en: A new approach is to base rule definitions on identities in a directory service.
     After all, we want to control access for specific groups, specific machines, or
     maybe specific users, depending on what machine they are coming from. With IP-based
@@ -1436,8 +1994,11 @@
     So, if we instead assigned rules based on identities, controlling access would
     be a lot easier, and the security device could resolve the rule by querying directory
     services.
+  id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: 一种新的方法是将规则定义基于目录服务中的身份。毕竟，我们希望根据特定的群体、特定的机器，或者根据用户所在的机器来控制访问。使用基于 IP 的访问规则，在双栈或
+    IPv6 环境中会变得非常复杂。因此，如果我们改为基于身份分配规则，控制访问会更加简便，而且安全设备可以通过查询目录服务来解析规则。
 - en: It seems that the market is going in this direction. Leading firewall vendors,
     including Checkpoint and Cisco, are developing what is currently called *identity-based
     firewalls*. This connects the firewall with a directory service (often Active
@@ -1446,8 +2007,11 @@
     properties. You can define a firewall rule for specific users when they send traffic
     from specific machines, or a firewall rule for a specific user regardless of which
     machine he sends traffic from.
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: 市场似乎正在朝这个方向发展。领先的防火墙供应商，包括 Checkpoint 和 Cisco，正在开发目前称为*基于身份的防火墙*。这将防火墙与目录服务（通常是
+    Active Directory）连接，并匹配用户和机器身份。它可以显示与用户或机器名称相关的 IP 地址，并让你基于这些属性定义规则。你可以为特定用户定义防火墙规则，当他们从特定的机器发送流量时，或者为特定用户定义防火墙规则，无论他们从哪台机器发送流量。
 - en: So, when you design your future network, allow yourself to think in new ways.
     Directory services are a great example where leveraging an existing, powerful
     tool can change the operational paradigm of the environment. Especially with the
@@ -1455,75 +2019,105 @@
     directory services and a well-designed implementation of Identity Management,
     you can centralize access control to your DMZ, letting partners, customers, and
     employees access certain services and displaying content based on who they are.
+  id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: 所以，在设计未来的网络时，允许自己从新的角度思考。目录服务是一个很好的例子，利用现有的强大工具可以改变环境的操作范式。特别是随着 IPv6 的引入，连接方式变得更加多样。例如，使用目录服务和精心设计的身份管理实现，你可以集中管理
+    DMZ 的访问控制，让合作伙伴、客户和员工根据身份访问某些服务并显示内容。
 - en: IPv6 Firewall Filter Rules
+  id: totrans-253
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: IPv6 防火墙过滤规则
 - en: 'When you live in a dual-stack network, you will have two security concepts:
     one for the IPv4 world and another for the IPv6 world. The two concepts should
     be congruent, but need to respect the requirements of each protocol. So, for instance,
     where administrators often choose to completely block ICMP traffic in IPv4 networks,
     it is not possible to do that with IPv6, because it may break some IPv6 features,
     such as Path MTU Discovery.'
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你处于一个双栈网络中时，你将拥有两个安全概念：一个是 IPv4 网络的，另一个是 IPv6 网络的。这两个概念应该是相互一致的，但需要遵循各自协议的要求。因此，例如，在
+    IPv4 网络中管理员通常选择完全阻止 ICMP 流量，但在 IPv6 中这样做是不可能的，因为这可能会破坏一些 IPv6 特性，如路径 MTU 发现。
 - en: 'Without trying to provide a full-fledged security and firewall guide, here
     are some ideas for IPv6 security provisions and firewall filters that should be
     considered:'
+  id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然不能提供一份完整的安全和防火墙指南，但以下是一些应考虑的IPv6安全措施和防火墙过滤建议：
 - en: Ingress filter at perimeter firewall for internally used addresses to prevent
     spoofing.
+  id: totrans-256
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在外围防火墙上为内部使用的地址配置入口过滤，以防止欺骗攻击。
 - en: Filter unneeded services at the perimeter firewall.
+  id: totrans-257
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在外围防火墙上过滤不需要的服务。
 - en: Deploy host-based firewalls for a defense in depth.
+  id: totrans-258
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 部署主机级防火墙以实现深度防御。
 - en: Critical systems should have static, nonobvious (randomly generated) IPv6 addresses,
     even at the expense of more complex operations. Consider using static neighbor
     entries for critical systems (versus letting them participate in ND).
+  id: totrans-259
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 关键系统应具有静态且不易猜测的（随机生成的）IPv6地址，即使这意味着更复杂的操作。考虑为关键系统使用静态邻居条目（而不是让它们参与ND）。
 - en: Hosts for Mobile IPv6 operations should be separate systems (to protect them
     by separate rules).
+  id: totrans-260
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于移动IPv6操作的主机应是独立的系统（通过不同的规则进行保护）。
 - en: Ensure that end nodes do not forward packets with Routing Extension type 0 headers.
+  id: totrans-261
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 确保终端节点不转发带有路由扩展类型0头部的数据包。
 - en: Layer 3 firewalls should never forward link-local addressed packets.
+  id: totrans-262
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 第3层防火墙绝不应转发链路本地地址的数据包。
 - en: Firewalls should support filtering based on Source and Destination address,
     IPv6 Extension headers, and upper-layer protocol information.
+  id: totrans-263
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 防火墙应支持基于源地址和目标地址、IPv6扩展头部以及上层协议信息的过滤。
 - en: Check your network for external packets that did not enter through your main
     perimeter firewall as an indication of backdoor connections or surreptitious tunneling.
+  id: totrans-264
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 检查网络中未通过主要外围防火墙进入的外部数据包，以此作为后门连接或隐蔽隧道的迹象。
 - en: In IPv6 networks, ICMPv6 plays a fundamental role and provides great functionality.
     Uncontrolled forwarding of ICMP messages also creates security risks. RFC 4890,
     “Recommendations for Filtering ICMPv6 Messages in Firewalls,” provides recommendations
     for the configuration of ICMPv6 firewall filtering rules (specifically, allowing
     the forwarding of messages that are important for the functioning of the network
     and dropping messages that are potential security risks).
+  id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: 在IPv6网络中，ICMPv6发挥着基础性作用并提供了强大的功能。ICMP消息的无控制转发也会带来安全风险。RFC 4890《防火墙中ICMPv6消息过滤的建议》提供了ICMPv6防火墙过滤规则配置的建议（特别是允许转发对网络运行至关重要的消息，并丢弃可能存在安全风险的消息）。
 - en: Another draft is on the way, called “Requirements for IPv6 Enterprise Firewalls”
     (*draft-gont-opsec-ipv6-firewall-reqs-01*). It is in an early stage at the time
     of writing. Its goal is to initialize a more in-depth discussion about what the
@@ -1533,8 +2127,10 @@
     manage firewalls, or if you are a firewall vendor, I highly recommend going through
     the lists of requirements in this draft. I assume that it will become an RFC in
     the near future.
+  id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一份草案正在制定中，名为“IPv6 企业防火墙的要求”（*draft-gont-opsec-ipv6-firewall-reqs-01*）。在撰写时，它仍处于早期阶段。其目标是启动关于IPv6防火墙需求的更深入讨论。这个草案不仅针对需要编写提案请求的网络运营商，还针对防火墙厂商，帮助他们识别需要实现的重要选项。如果你是防火墙的运营、购买、部署或管理人员，或者是防火墙厂商，我强烈建议你仔细查看该草案中的需求列表。我猜测它将在不久的将来成为RFC标准。
 - en: For those of you who work in security, you will want to dive a lot deeper than
     a security chapter in a general IPv6 book can cover. The best advice I can give
     you is to take your time to plan your IPv6 security concept and to dive into the
@@ -1542,428 +2138,625 @@
     type of security implementations, but as the real-world implementations are still
     in an early stage, there is not enough feedback from the market right now. So
     most implementations are not in a very mature state.
+  id: totrans-267
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于从事安全工作的人员，你将希望深入了解比一般IPv6书籍中的安全章节更多的内容。我能给出的最佳建议是，花时间规划你的IPv6安全概念，并通过实验室进行深入探讨并测试所有内容。到今天为止（2014年），大多数厂商已有某种形式的安全实现，但由于现实世界的实现仍处于早期阶段，目前市场反馈不足。因此，大多数实现尚未成熟。
 - en: Note
+  id: totrans-268
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意事项
 - en: A good read on IPv6 security is the book *IPv6 Security* by Scott Hogg and Eric
     Vyncke (Cisco Press), two renowned industry experts. It’s been a while since it’s
     been published and I am hoping for a second edition soon, but I consider it a
     must-read for IPv6 security people.
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: '一本关于 IPv6 安全的好书是由两位著名行业专家 Scott Hogg 和 Eric Vyncke（思科出版社）编写的《*IPv6 安全*》。这本书已经出版一段时间了，我期待着它的第二版，但我认为它是
+    IPv6 安全人员必读的书籍。  '
 - en: The next chapter describes integration and transition mechanisms and scenarios
     that allow for a smooth, step-by-step introduction of IPv6 into your network.
     It also covers important aspects of the planning and design process as well as
     lessons learned by organizations who have already done the planning.
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: '下一章描述了集成和过渡机制以及允许 IPv6 平稳、逐步引入网络的场景。它还涵盖了规划和设计过程中的重要方面，以及那些已经进行过规划的组织的经验教训。  '
 - en: References
+  id: totrans-271
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '参考文献  '
 - en: Here’s a list of the most important RFCs and drafts mentioned in this chapter.
     Sometimes I include additional subject-related RFCs for your personal further
     study.
+  id: totrans-272
   prefs: []
   type: TYPE_NORMAL
+  zh: '下面是本章中提到的最重要的 RFC 和草案列表。有时我会包括一些额外的与主题相关的 RFC 供你个人进一步学习。  '
 - en: RFCs
+  id: totrans-273
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 'RFC  '
 - en: RFC 1828, “IP Authentication using Keyed MD5,” 1995
+  id: totrans-274
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 1828, “使用键控 MD5 的 IP 身份验证”，1995年  '
 - en: RFC 1829, “The ESP DES-CBC Transform,” 1995
+  id: totrans-275
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 1829, “ESP DES-CBC 变换”，1995年  '
 - en: RFC 1918, “Address Allocation for Private Internets,” 1996
+  id: totrans-276
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 1918, “私有互联网地址分配”，1996年  '
 - en: RFC 2085, “HMAC-MD5 IP Authentication with Replay Prevention,” 1997
+  id: totrans-277
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2085, “HMAC-MD5 IP 身份验证与重放防止”，1997年  '
 - en: RFC 2403, “The Use of HMAC-MD5-96 within ESP and AH,” 1998
+  id: totrans-278
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2403, “在 ESP 和 AH 中使用 HMAC-MD5-96”，1998年  '
 - en: RFC 2404, “The Use of HMAC-SHA-1-96 within ESP and AH,” 1998
+  id: totrans-279
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2404, “在 ESP 和 AH 中使用 HMAC-SHA-1-96”，1998年  '
 - en: RFC 2405, “The ESP DES-CBC Cipher Algorithm With Explicit IV,” 1998
+  id: totrans-280
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2405, “带显式 IV 的 ESP DES-CBC 加密算法”，1998年  '
 - en: RFC 2407, “The Internet IP Security Domain of Interpretation for ISAKMP,” 1998
+  id: totrans-281
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2407, “ISAKMP 的互联网 IP 安全域解释”，1998年  '
 - en: RFC 2408, “Internet Security Association and Key Management Protocol (ISAKMP),”
     1998
+  id: totrans-282
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2408, “互联网安全关联和密钥管理协议（ISAKMP）”，1998年  '
 - en: RFC 2409, “The Internet Key Exchange (IKE),” 1998
+  id: totrans-283
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2409, “互联网密钥交换（IKE）”，1998年  '
 - en: RFC 2410, “The NULL Encryption Algorithm and Its Use With IPsec,” 1998
+  id: totrans-284
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2410, “NULL 加密算法及其在 IPsec 中的使用”，1998年  '
 - en: RFC 2412, “The OAKLEY Key Determination Protocol,” 1998
+  id: totrans-285
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2412, “OAKLEY 密钥确定协议”，1998年  '
 - en: RFC 2451, “The ESP CBC-Mode Cipher Algorithms,” 1998
+  id: totrans-286
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2451, “ESP CBC 模式加密算法”，1998年  '
 - en: RFC 2474, “Definition of the Differentiated Services Field (DS Field) in the
     IPv4 and IPv6 Headers,” 1998
+  id: totrans-287
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2474, “IPv4 和 IPv6 标头中区分服务字段（DS 字段）的定义”，1998年  '
 - en: RFC 3056, “Connection of IPv6 Domains Via IPv4 Clouds,” 2001
+  id: totrans-288
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3056, “通过 IPv4 云连接 IPv6 域”，2001年  '
 - en: RFC 3068, “An Anycast Prefix for 6to4 Relay Routers,” 2001
+  id: totrans-289
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3068, “用于 6to4 中继路由器的任播前缀”，2001年  '
 - en: RFC 3168, “The Addition of Explicit Congestion Notification (ECN) to IP,” 2001
+  id: totrans-290
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3168, “向 IP 添加显式拥塞通知（ECN）”，2001年  '
 - en: RFC 3260, “New Terminology and Clarification for DiffServ,” 2002
+  id: totrans-291
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3260, “DiffServ 新术语和澄清”，2002年  '
 - en: RFC 3493, “Basic Socket Interface Extensions for IPv6,” 2003
+  id: totrans-292
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3493, “IPv6 的基本套接字接口扩展”，2003年  '
 - en: RFC 3526, “More Modular Exponential (MODP) Diffie-Hellman groups for Internet
     Key Exchange (IKE),” 2003
+  id: totrans-293
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3526, “用于互联网密钥交换（IKE）的更多模块化指数（MODP）Diffie-Hellman 组”，2003年  '
 - en: RFC 3602, “The AES-CBC Cipher Algorithm and Its Use with IPsec,” 2003
+  id: totrans-294
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3602, “AES-CBC 加密算法及其在 IPsec 中的使用”，2003年  '
 - en: RFC 3631, “Security Mechanisms for the Internet,” 2003
+  id: totrans-295
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3631, “互联网的安全机制”，2003年  '
 - en: RFC 3715, “IPsec-Network Address Translation (NAT) Compatibility Requirements,”
     2004
+  id: totrans-296
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3715, “IPsec-网络地址转换（NAT）兼容性要求”，2004年
 - en: 'RFC 3739, “Internet X.509 Public Key Infrastructure: Qualified Certificates
     Profile,” 2004'
+  id: totrans-297
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3739, “互联网 X.509 公共密钥基础设施：合格证书配置文件”，2004年  '
 - en: RFC 3740, “The Multicast Group Security Architecture,” 2004
+  id: totrans-298
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3740, “多播组安全架构”，2004年  '
 - en: RFC 3748, “Extensible Authentication Protocol (EAP),” 2004
+  id: totrans-299
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3748, “可扩展认证协议（EAP）”，2004年  '
 - en: RFC 3754, “IP Multicast in Differentiated Services (DS) Networks,” 2004
+  id: totrans-300
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3754, “区分服务（DS）网络中的 IP 多播”，2004年  '
 - en: RFC 3756, “IPv6 Neighbor Discovery (ND) Trust Models and Threats,” 2004
+  id: totrans-301
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3756, “IPv6 邻居发现（ND）信任模型与威胁”，2004年  '
 - en: RFC 3765, “NOPEER Community for Border Gateway Protocol (BGP) Route Scope Control,”
     2004
+  id: totrans-302
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3765, “边界网关协议（BGP）路由范围控制的 NOPEER 社区”，2004年  '
 - en: RFC 3947, “Negotiation of NAT-Traversal in the IKE,” 2005
+  id: totrans-303
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3947, “IKE 中 NAT 穿越协商”，2005年  '
 - en: RFC 3948, “UDP Encapsulation of IPsec ESP Packets,” 2005
+  id: totrans-304
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3948, “IPsec ESP 数据包的 UDP 封装”，2005年  '
 - en: RFC 3964, “Security Considerations for 6to4,” 2004
+  id: totrans-305
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3964, “6to4 的安全考虑”，2004年  '
 - en: RFC 3971, “Secure Neighbor Discovery,” 2005
+  id: totrans-306
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3971, “安全邻居发现”，2005年  '
 - en: RFC 3972, “Cryptographically Generated Addresses (CGA),” 2005
+  id: totrans-307
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3972, “加密生成地址（CGA），”2005  '
 - en: RFC 4033, “DNS Security Introduction and Requirements,” 2005
+  id: totrans-308
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4033, “DNS安全性介绍和要求，”2005  '
 - en: RFC 4035, “Protocol Modifications for the DNS Security Extensions,” 2005
+  id: totrans-309
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4035, “DNS安全扩展的协议修改，”2005  '
 - en: RFC 4106, “The Use of Galois/Counter Mode (GCM) in IPsec Encapsulating Security
     Payload (ESP),” 2005
+  id: totrans-310
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4106, “在IPsec封装安全负载（ESP）中使用Galois/计数模式（GCM），”2005  '
 - en: RFC 4107, “Guidelines for Cryptographic Key Management,” 2005
+  id: totrans-311
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4107, “加密密钥管理指南，”2005  '
 - en: RFC 4109, “Algorithms for Internet Key Exchange version 1 (IKEv1),” 2005
+  id: totrans-312
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4109, “互联网密钥交换版本1（IKEv1）的算法，”2005  '
 - en: RFC 4285, “Authentication Protocol for Mobile IPv6,” 2005
+  id: totrans-313
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4285, “移动IPv6的认证协议，”2005  '
 - en: RFC 4301, “Security Architecture for the Internet Protocol,” 2005
+  id: totrans-314
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4301, “互联网协议的安全架构，”2005  '
 - en: RFC 4302, “IP Authentication Header,” 2005
+  id: totrans-315
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4302, “IP认证头，”2005  '
 - en: RFC 4303, “IP Encapsulating Security Payload (ESP),” 2005
+  id: totrans-316
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4303, “IP封装安全负载（ESP），”2005  '
 - en: RFC 4307, “Cryptographic Algorithms for Use in the Internet Key Exchange Version
     2 (IKEv2),” 2005
+  id: totrans-317
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4307, “在互联网密钥交换版本2（IKEv2）中使用的加密算法，”2005  '
 - en: RFC 4308, “Cryptographic Suites for IPsec,” 2005
+  id: totrans-318
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4308, “IPsec的加密套件，”2005  '
 - en: RFC 4309, " Using Advanced Encryption Standard (AES) CCM Mode with IPsec Encapsulating
     Security Payload (ESP),” 2005
+  id: totrans-319
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4309, “在IPsec封装安全负载（ESP）中使用高级加密标准（AES）CCM模式，”2005  '
 - en: RFC 4359, “The Use of RSA/SHA-1 Signatures within Encapsulating Security Payload
     (ESP) and Authentication Header (AH),” 2006
+  id: totrans-320
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4359, “在封装安全负载（ESP）和认证头（AH）中使用RSA/SHA-1签名，”2006  '
 - en: 'RFC 4380, “Teredo: Tunneling IPv6 over UDP through Network Address Translations
     (NATs),” 2006'
+  id: totrans-321
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4380, “Teredo：通过网络地址转换（NAT）隧道化IPv6至UDP，”2006  '
 - en: RFC 4581, “Cryptographically Generated Addresses (CGA) Extension Field Format,”
     2006
+  id: totrans-322
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4581, “加密生成地址（CGA）扩展字段格式，”2006  '
 - en: RFC 4835, “Cryptographic Algorithm Implementation Requirements for Encapsulating
     Security Payload (ESP) and Authentication Header (AH),” 2007
+  id: totrans-323
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4835, “封装安全负载（ESP）和认证头（AH）中的加密算法实现要求，”2007  '
 - en: RFC 4862, “IPv6 Stateless Address Autoconfiguration,"2007
+  id: totrans-324
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4862, “IPv6无状态地址自动配置，”2007  '
 - en: RFC 4864, “Local Network Protection for IPv6,” 2007
+  id: totrans-325
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4864, “IPv6的本地网络保护，”2007  '
 - en: RFC 4890, “Recommendations for Filtering ICMPv6 Messages in Firewalls,” 2007
+  id: totrans-326
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4890, “防火墙中过滤ICMPv6消息的建议，”2007  '
 - en: RFC 4891, “Using IPsec to Secure IPv6-in-IPv4 Tunnels,” 2007
+  id: totrans-327
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4891, “使用IPsec保护IPv6内IPv4隧道，”2007  '
 - en: RFC 4941, “Privacy Extensions for Stateless Address Autoconfiguration in IPv6,”
     2007
+  id: totrans-328
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4941, “IPv6无状态地址自动配置的隐私扩展，”2007  '
 - en: RFC 4942, “IPv6 Transition/Coexistence Security Considerations,” 2007
+  id: totrans-329
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4942, “IPv6过渡/共存的安全性考虑，”2007
 - en: RFC 4982, “Support for Multiple Hash Algorithms in Cryptographically Generated
     Addresses (CGAs),” 2007
+  id: totrans-330
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4982, “在加密生成地址（CGAs）中支持多种哈希算法，”2007  '
 - en: RFC 5084, “Using AES-CCM and AES-GCM Authenticated Encryption in the Cryptographic
     Message Syntax (CMS),” 2007
+  id: totrans-331
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 5084, “在加密消息语法（CMS）中使用AES-CCM和AES-GCM认证加密，”2007  '
 - en: RFC 5095, “Deprecation of Type 0 Routing Headers in IPv6,” 2007
+  id: totrans-332
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 5095, “IPv6中类型0路由头的弃用，”2007  '
 - en: RFC 5157, “IPv6 Implications for Network Scanning,” 2008
+  id: totrans-333
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 5157, “IPv6对网络扫描的影响，”2008  '
 - en: RFC 5247, “Extensible Authentication Protocol (EAP) Key Management Framework,”
     2008
+  id: totrans-334
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 5247, “可扩展认证协议（EAP）密钥管理框架，”2008  '
 - en: RFC 5722, “Handling of Overlapping IPv6 Fragments,” 2009
+  id: totrans-335
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 5722, “重叠IPv6分片的处理，”2009  '
 - en: RFC 5739, “IPv6 Configuration in Internet Key Exchange Protocol Version 2 (IKEv2),”
     2010
+  id: totrans-336
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 5739, “互联网密钥交换协议版本2（IKEv2）中的IPv6配置，”2010  '
 - en: 'RFC 5909, “Securing Neighbor Discovery Proxy: Problem Statement,” 2010'
+  id: totrans-337
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 5909, “邻居发现代理安全性：问题陈述，”2010  '
 - en: RFC 5991, “Teredo Security Updates,” 2010
+  id: totrans-338
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 5991, “Teredo安全更新，”2010  '
 - en: RFC 5996, “Internet Key Exchange Protocol Version 2 (IKEv2),” 2010
+  id: totrans-339
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 5996, “互联网密钥交换协议版本2（IKEv2），”2010  '
 - en: RFC 6014, “Cryptographic Algorithm Identifier Allocation for DNSSEC,” 2010
+  id: totrans-340
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6014, “DNSSEC的加密算法标识符分配，”2010  '
 - en: RFC 6040, “Tunneling of Explicit Congestion Notification,” 2010
+  id: totrans-341
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6040, “显式拥塞通知的隧道化，”2010  '
 - en: RFC 6071, “IP Security (IPsec) and Internet Key Exchange (IKE) Document Roadmap,”
     2011
+  id: totrans-342
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6071, “IP安全（IPsec）和互联网密钥交换（IKE）文档路线图，”2011  '
 - en: RFC 6081, “Teredo Extensions,” 2011
+  id: totrans-343
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6081, “Teredo扩展，”2011  '
 - en: RFC 6092, “Recommended Simple Security Capabilities in Customer Premises Equipment
     (CPE) for Providing Residential IPv6 Internet Service,” 2011
+  id: totrans-344
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6092, “为提供住宅IPv6互联网服务的客户前设备（CPE）推荐的简单安全功能，”2011  '
 - en: RFC 6104, “Rogue IPv6 Router Advertisement Problem Statement,” 2011
+  id: totrans-345
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 6104, “恶意IPv6路由器广告问题陈述，”2011  '
 - en: RFC 6105, “IPv6 Router Advertisement Guard,” 2011
+  id: totrans-346
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6105，《IPv6路由器广告防护》，2011年
 - en: RFC 6151, “Updated Security Considerations for the MD5 Message-Digest and the
     HMAC-MD5 Algorithms,” 2011
+  id: totrans-347
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6151，《MD5消息摘要和HMAC-MD5算法的更新安全考虑》，2011年
 - en: RFC 6169, “Security Concerns with IP Tunneling,” 2011
+  id: totrans-348
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6169，《IP隧道的安全问题》，2011年
 - en: RFC 6273, “The Secure Neighbor Discovery (SEND) Hash Threat Analysis,” 2011
+  id: totrans-349
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6273，《安全邻居发现（SEND）哈希威胁分析》，2011年
 - en: RFC 6324, “Routing Loop Attack Using IPv6 Automatic Tunnels,” 2011
+  id: totrans-350
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6324，《利用IPv6自动隧道的路由环攻击》，2011年
 - en: RFC 6434, “IPv6 Node Requirements,” 2011
+  id: totrans-351
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6434，《IPv6节点要求》，2011年
 - en: RFC 6494, “Certificate Profile and Certificate Management for SEcure Neighbor
     Discovery (SEND),” 2012
+  id: totrans-352
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6494，《安全邻居发现（SEND）的证书配置文件与证书管理》，2012年
 - en: RFC 6495, “Subject Key Identifier (SKI) SEcure Neighbor Discovery (SEND) Name
     Type Fields,” 2012
+  id: totrans-353
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6495，《主题密钥标识符（SKI）安全邻居发现（SEND）名称类型字段》，2012年
 - en: 'RFC 6620, “FCFS SAVI: First-Come, First-Served Source Address Validation Improvement
     for Locally Assigned IPv6 Addresses,” 2012'
+  id: totrans-354
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6620，《FCFS SAVI：针对本地分配IPv6地址的先进先出源地址验证改进》，2012年
 - en: RFC 6655, “AES-CCM Cipher Suites for Transport Layer Security (TLS),” 2012
+  id: totrans-355
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6655，《用于传输层安全（TLS）的AES-CCM密码套件》，2012年
 - en: RFC 6946, “Processing of IPv6 ‘Atomic’ Fragments,” 2013
+  id: totrans-356
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6946，《处理IPv6“原子”片段》，2013年
 - en: RFC 6959, “Source Address Validation Improvement (SAVI) Threat Scope,” 2013
+  id: totrans-357
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6959，《源地址验证改进（SAVI）威胁范围》，2013年
 - en: RFC 6980, “Security Implications of IPv6 Fragmentation with IPv6 Neighbor Discovery,”
     2013
+  id: totrans-358
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6980，《IPv6片段化与IPv6邻居发现的安全影响》，2013年
 - en: RFC 7039, “Source Address Validation Improvement (SAVI) Framework,” 2013
+  id: totrans-359
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7039，《源地址验证改进（SAVI）框架》，2013年
 - en: RFC 7112, “Implications of Oversized IPv6 Header Chains,” 2014
+  id: totrans-360
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7112，《超大IPv6头部链的影响》，2014年
 - en: RFC 7113, “Implementation Advice for IPv6 Router Advertisement Guard (RA-Guard),”
     2014
+  id: totrans-361
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7113，《IPv6路由器广告防护（RA-Guard）的实施建议》，2014年
 - en: RFC 7123, “Security Implications of IPv6 on IPv4 Networks,” 2014
+  id: totrans-362
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7123，《IPv6对IPv4网络的安全影响》，2014年
 - en: RFC 7219, “SEcure Neighbor Discovery (SEND) Source Address Validation Improvement
     (SAVI),” 2014
+  id: totrans-363
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7219，《安全邻居发现（SEND）源地址验证改进（SAVI）》，2014年
 - en: Drafts
+  id: totrans-364
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 草案
 - en: Drafts can be found at [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html).
     To locate the latest version of a draft, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
     You can enter the draft name without a version number and the most current version
@@ -1971,27 +2764,44 @@
     published as an RFC, the RFC number will be displayed. [http://tools.ietf.org/wg](http://tools.ietf.org/wg)
     is also a very useful site. More information on the process of standardization,
     RFCs, and drafts can be found in the [Appendix A](apa.html "Appendix A. RFCs").
+  id: totrans-365
   prefs: []
   type: TYPE_NORMAL
+  zh: 草案可以在[http://www.ietf.org/ID.html](http://www.ietf.org/ID.html)找到。要查找草案的最新版本，请参阅[https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi)。您可以输入草案名称而不带版本号，系统将显示最新版本。如果草案没有显示，可能是已被删除。如果已发布为RFC，则会显示RFC编号。[http://tools.ietf.org/wg](http://tools.ietf.org/wg)也是一个非常有用的网站。有关标准化过程、RFC和草案的更多信息，请参阅[附录A](apa.html
+    "附录A. RFCs")。
 - en: 'Here’s a list of drafts I refer to in this chapter, as well as interesting
     drafts that relate to the topics in this chapter:'
+  id: totrans-366
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是我在本章中引用的草案列表，以及与本章主题相关的有趣草案：
 - en: “SAVI Solution for DHCP”
+  id: totrans-367
   prefs: []
   type: TYPE_NORMAL
+  zh: 《DHCP的SAVI解决方案》
 - en: '*draft-ietf-savi-dhcp-25*, binding table for DHCP assigned addresses'
+  id: totrans-368
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-savi-dhcp-25*，用于DHCP分配地址的绑定表'
 - en: “SAVI for Mixed Address Assignment Methods Scenario”
+  id: totrans-369
   prefs: []
   type: TYPE_NORMAL
+  zh: 《混合地址分配方法场景的SAVI》
 - en: '*draft-ietf-savi-mix-06*, binding table for coexisting ND, DHCP, and SEND addresses'
+  id: totrans-370
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-savi-mix-06*，用于共存的ND、DHCP和SEND地址的绑定表'
 - en: “Requirements for IPv6 Enterprise Firewalls”
+  id: totrans-371
   prefs: []
   type: TYPE_NORMAL
+  zh: 《IPv6企业防火墙的要求》
 - en: '*draft-gont-opsec-ipv6-firewall-reqs-01*'
+  id: totrans-372
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-gont-opsec-ipv6-firewall-reqs-01*'

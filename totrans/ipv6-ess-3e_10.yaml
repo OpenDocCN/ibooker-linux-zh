@@ -1,11 +1,15 @@
 - en: Chapter 9. Planning for IPv6
+  id: totrans-0
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第 9 章：IPv6 规划
 - en: After all these chapters describing the features of IPv6 from a technical perspective,
     this final chapter puts it all together.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 在前面几章从技术角度描述了 IPv6 的特点之后，本章将所有内容汇总起来。
 - en: It summarizes all I have learned in more than 10 years of studying, working,
     playing, teaching, and consulting for IPv6\. It puts at your disposal all that
     is relevant to understand what it takes to plan the integration of IPv6\. It is
@@ -13,8 +17,11 @@
     with customers. And I hope to make you feel a little enthusiastic about the opportunities
     that IPv6 offers. So I wish you a good read and lots of fun learning about and
     planning for IPv6.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 它总结了我在学习、工作、娱乐、教学和为 IPv6 提供咨询的 10 多年里所学到的一切。它为您提供了所有相关的内容，帮助您理解规划 IPv6 集成所需的知识。它也是我在与客户交流时，回答最常见问题的总结。希望能让您对
+    IPv6 所带来的机会感到一些兴奋。所以，我祝您阅读愉快，并在学习和规划 IPv6 时收获乐趣。
 - en: While it is true that the integration in a larger network presents some challenges
     and takes a lot of time and careful planning, there is no need to panic or think
     that it could not be mastered. Every decent engineer that mastered the introduction
@@ -24,17 +31,24 @@
     the different network components, services, and departments. The challenge is
     in the organizational aspects, the design of the future architecture, and the
     interdependencies of all groups and parts of the network and applications.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然在较大网络中进行集成确实会遇到一些挑战，并且需要大量时间和仔细规划，但不需要惊慌，也不用认为这无法掌握。每一个掌握了 DHCP、VPN 和 NAT
+    引入的合格工程师，也能掌握 IPv6 的引入。主要的不同点在于 IPv6 作为传输协议几乎涉及到网络中的每一个组件，因此复杂性来自于考虑不同网络组件、服务和部门之间的所有交互。挑战主要体现在组织层面、未来架构的设计，以及所有团队和网络、应用程序各部分之间的相互依赖关系。
 - en: But the process can be broken down in single doable steps and they do not have
     to be accomplished in three months if you start early enough. This chapter provides
     an outline to help you determine how you want to go about it.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 但这个过程可以分解为单个可执行的步骤，并且如果足够提前开始，完全不需要在三个月内完成。本章提供了一个大纲，帮助您确定如何进行。
 - en: When to Choose IPv6?
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 何时选择 IPv6？
 - en: A golden rule says to “never touch a running system.” This rule also applies
     to your IPv4 networks. As long as they do what they need to do, let them run.
     But when an IPv4 network hits the limits for some reason, or as soon as an upgrade
@@ -45,59 +59,86 @@
     will slowly be phased out and is actually end-of-life. Getting familiar with the
     new protocol early, taking some time to play with it before you really need it,
     and planning for it early saves a lot of cost, time, and headaches.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 一条黄金法则是“永远不要触碰一个正在运行的系统。”这条规则同样适用于您的 IPv4 网络。只要它们能正常工作，就让它们继续运行。但是，当 IPv4 网络因某些原因达到限制，或者当需要进行升级时，选择
+    IPv6。IPv6 已经足够成熟，可以在企业和商业网络中使用，正如全球许多案例研究和部署所展示的那样。如果可能，应该避免在新的 IPv4 设置、修复或复杂的
+    IPv4 配置（特别是 NAT）上进行高额投资，因为它们是在一个将被逐步淘汰的技术上进行的投资，而这个技术实际上已经进入了生命周期末期。提前熟悉新协议，在真正需要它之前花一些时间进行实验，并提前规划，将为您节省大量成本、时间和麻烦。
 - en: Note
+  id: totrans-7
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Whatever you invest in IPv6 is an investment in future technology. An investment
     in IPv4 is an investment in an end-of-life technology.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论您在 IPv6 上的投资如何，它都是对未来技术的投资。而在 IPv4 上的投资则是对一个即将结束生命周期的技术的投资。
 - en: 'As already mentioned in [Chapter 1](ch01.html "Chapter 1. Why IPv6?"), here’s
     the list of indicators that it may be time for you to consider integrating IPv6:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 如同在[第 1 章](ch01.html "第 1 章：为何选择 IPv6？")中提到的，这里列出了可能是您考虑集成 IPv6 的一些指示：
 - en: Your IPv4 network or NAT implementation needs to be fixed or extended.
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您的 IPv4 网络或 NAT 实现需要修复或扩展。
 - en: A major hardware upgrade or redesign is on the schedule. Redesign for IPv6 and
     support IPv4 as needed.
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 计划中的重大硬件升级或重新设计。为 IPv6 重新设计，并根据需要支持 IPv4。
 - en: You are running out of address space.
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您的地址空间即将用尽。
 - en: You want to prepare your network for acquisitions that might suddenly require
     IPv6 support.
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你想为可能突然需要 IPv6 支持的收购做好网络准备。
 - en: You want to prepare your network for applications that are based on advanced
     features of IPv6.
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你想为基于 IPv6 高级特性的应用程序准备网络。
 - en: You need end-to-end security for a large number of users and you do not have
     the address space, or you struggle with a NAT implementation.
+  id: totrans-15
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你需要为大量用户提供端到端安全性，但没有足够的地址空间，或者在 NAT 实现上遇到困难。
 - en: Your hardware (backbone, DMZ, data center, etc.) or applications reach the end
     of their life cycle and must be replaced. Make sure you buy products that support
     IPv6, even if you don’t enable it right away. In order to determine the level
     of support your products need, you need to have an IPv6 strategy.
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你的硬件（骨干网、DMZ、数据中心等）或应用程序已经到达生命周期的尽头，必须更换。确保你购买支持 IPv6 的产品，即使你不会立即启用它。为了确定你的产品需要的支持水平，你需要有一个
+    IPv6 战略。
 - en: Integration Scenarios
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 集成场景
 - en: As the discussion of the different techniques in this chapter shows, there are
     numerous mechanisms that support a step-by-step introduction of IPv6\. There is
     no one mechanism that can cover all requirements or be optimal for all scenarios.
@@ -108,27 +149,39 @@
     practical scenarios for different types of environments, and the results are published.
     We offer a summary here, not with the intent to deliver a cookbook for your environment,
     but rather to provide food for thought that you can apply to your requirements.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如本章对不同技术的讨论所示，存在许多机制支持逐步引入 IPv6。没有一种机制可以覆盖所有需求，或者在所有场景中都最优。在大多数情况下，会选择不同机制的组合。最佳组合和顺序取决于当前环境的基础设施以及过渡/集成的目标和要求。在
+    IETF 中，基础协议的工作已经完成。他们现在专注于为不同类型的环境开发实际场景，结果已发布。我们在此提供一个总结，目的是提供思路，供你根据自己的需求加以应用，而非为你的环境提供操作手册。
 - en: Note
+  id: totrans-19
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: If you want to follow what is going on in the IPv6 operational and maintenance
     working groups, refer to [http://www.ietf.org/html.charters/v6ops-charter.html](http://www.ietf.org/html.charters/v6ops-charter.html)
     and [http://www.ietf.org/html.charters/6man-charter.html](http://www.ietf.org/html.charters/6man-charter.html).
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想了解 IPv6 运维工作组的最新动态，可以参考 [http://www.ietf.org/html.charters/v6ops-charter.html](http://www.ietf.org/html.charters/v6ops-charter.html)
+    和 [http://www.ietf.org/html.charters/6man-charter.html](http://www.ietf.org/html.charters/6man-charter.html)。
 - en: Organizations
+  id: totrans-21
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 组织
 - en: To connect a single host or a small network with the IPv6 Internet is not a
     big challenge and can be done either natively, if your Internet provider offers
     this, or with one of the tunnel mechanisms described earlier. It is easy to implement
     with most operating systems.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 将单一主机或小型网络与 IPv6 Internet 连接并不是一个大挑战，可以通过原生支持（如果你的 Internet 提供商提供此服务）或者使用前面描述的某些隧道机制来实现。大多数操作系统都可以轻松实现此连接。
 - en: If you need a tunnel, have a public IPv4 address, and want access to the IPv6
     Internet, 6rd or a Tunnel Broker can be used. If you have NAT in place and make
     use of private IPv4 addresses, you may choose to use Proto 41 Forwarding if the
@@ -136,55 +189,77 @@
     offering native IPv6 connections can have a dual-stack Internet connection. Dual-stack
     is in many cases the easiest way to go if your devices and operating systems support
     IPv6 (and they do if they are on an up-to-date level).
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你需要隧道，拥有公共 IPv4 地址，并且想要访问 IPv6 Internet，可以使用 6rd 或 Tunnel Broker。如果你已启用 NAT
+    并使用私有 IPv4 地址，你可以选择使用 Proto 41 转发，只要 NAT 设备支持此功能。那些有幸得到提供商提供原生 IPv6 连接的组织可以拥有双栈互联网连接。如果你的设备和操作系统支持
+    IPv6（如果它们是最新版本，肯定支持），那么双栈通常是最简单的方式。
 - en: Many organizations have a number of IPv4 Virtual LANs (VLANs). In such situations,
     an IPv6 router can advertise one single IPv6 prefix into all VLANs that support
     dual-stack communication. This is only advisable for a transition period, though.
     All the IPv6 nodes in the VLANs can autoconfigure for an IPv6 address using the
     prefix advertised by the IPv6 router.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多组织有多个 IPv4 虚拟局域网（VLAN）。在这种情况下，IPv6 路由器可以将一个单一的 IPv6 前缀通告到所有支持双栈通信的 VLAN 中。然而，这仅建议作为过渡期使用。在这些
+    VLAN 中的所有 IPv6 节点可以通过 IPv6 路由器通告的前缀进行自动配置 IPv6 地址。
 - en: The tunnel mechanisms do not only support the transport of IPv6 over the IPv4
     Internet, but also internally over an IPv4 backbone. A backbone upgrade is not
     something you choose to do every year; you probably want to wait for the end of
     the backbone router life cycle before touching it. This does not prevent rolling
     out IPv6 at the edge of the network. As long as the backbone is based on IPv4,
     IPv6 packets are tunneled to IPv6 islands on the other side.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 隧道机制不仅支持通过IPv4互联网传输IPv6，还支持在IPv4骨干网上内部传输IPv6。骨干网升级并不是你每年都会选择做的事情；你可能希望等到骨干路由器生命周期结束后再进行改动。这并不妨碍在网络边缘推广IPv6。只要骨干网基于IPv4，IPv6数据包就会被隧道化到另一端的IPv6岛屿。
 - en: If you want to integrate IPv6 in a more complex DMZ for your public services
     and/or in your internal network including multiple locations, possibly multiple
     data centers, and different types of applications and services used across the
     whole network, you need to define an enterprise transition strategy. Refer to
     the section [Planning for IPv6](ch09.html#planning_for_ipv6-id1 "Planning for
     IPv6") for more details.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你希望将IPv6集成到一个更复杂的DMZ中，用于你的公共服务和/或内部网络，包括多个位置、可能有多个数据中心，以及整个网络中使用的不同类型的应用程序和服务，你需要定义一个企业过渡战略。有关更多细节，请参见[规划IPv6](ch09.html#planning_for_ipv6-id1
+    "Planning for IPv6")章节。
 - en: 'RFC 4057, “IPv6 Enterprise Network Scenarios,” can assist you in your first
     steps. It describes different scenarios for IPv6 deployment within enterprise
     networks and provides guidance and checklists of how to approach this task. The
     following scenarios are covered in this RFC:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4057《IPv6企业网络场景》可以帮助你迈出第一步。它描述了IPv6在企业网络中的不同部署场景，并提供了如何着手这一任务的指导和检查表。该RFC中涵盖了以下场景：
 - en: Deploy IPv6 in conjunction with IPv4.
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在IPv4的配合下部署IPv6。
 - en: Deploy IPv6 because of a specific set of applications to be used over an IPv6
     network.
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 因为一组特定的应用需要通过IPv6网络使用，所以部署IPv6。
 - en: Build a new network or restructure an existing network and deploy IPv6 as the
     predominant protocol within the enterprise in coexistence with IPv4.
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 构建一个新的网络或重组现有的网络，并在企业内部以IPv6作为主要协议与IPv4共存。
 - en: The document then reviews a set of network infrastructure components common
     to most enterprises that must be analyzed.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 文档接着回顾了企业中常见的几种网络基础设施组件，这些组件必须进行分析。
 - en: RFC 4852, “IPv6 Enterprise Network Analysis—IP Layer 3 Focus,” is based on RFC
     4057 and analyzes the transition to IPv6 in enterprise networks focusing on Layer
     3 for the scenarios given in RFC 4057\. There is a table with a good overview
@@ -193,12 +268,16 @@
     RFC was written in 2007\. In some sections mechanisms such as ISATAP, 6to4, and
     Teredo are mentioned. We strongly recommend that you do not use these in production
     environments, but replace them with newer technologies.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4852《IPv6企业网络分析——IP层3重点》基于RFC 4057，分析了企业网络向IPv6过渡的情况，重点讨论了RFC 4057中给出的场景中的第3层。文中有一个表格，概述了不同的场景，然后在文中讨论了如何应对每个场景以及可能的过渡机制。请注意，这份RFC写于2007年。在某些章节中提到了ISATAP、6to4和Teredo等机制。我们强烈建议你不要在生产环境中使用这些机制，而是用更新的技术来替代它们。
 - en: ISPs
+  id: totrans-33
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: ISPs
 - en: IPv6 is designed to enable Internet Service Providers (ISPs) to meet the challenges
     associated with the exponential growth of the Internet, allowing them to provide
     new services to their customers. The number of devices will explode in the coming
@@ -209,24 +288,33 @@
     include peer-to-peer communication without NAT traversal problems, being able
     to securely access devices and applications at work from home or vice versa, enhanced
     IP mobility, and many more.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6的设计旨在帮助互联网服务提供商（ISPs）应对互联网的指数级增长挑战，使其能够为客户提供新的服务。在未来几年内，设备数量将激增，而这一挑战只能通过IPv6的地址空间来解决。电缆、DSL、无线以及其他始终在线的技术也可以从IPv6的地址空间中受益。IPv6的其他优势包括增强端到端安全性和移动通信的能力，以及减轻系统管理负担。举例来说，包括无需NAT穿越问题的点对点通信、能够安全地在家里访问工作中的设备和应用程序或反之亦然、增强的IP移动性等。
 - en: Therefore, ISPs have to evaluate the capabilities of IPv6 to meet these needs.
     Some countries have taken a lead role in this area and moved from testing and
     evaluation to real deployments of IPv6 in the broadband arena. Japan is a prime
     example, along with other countries that are looking at moving toward large-scale
     production deployments of IPv6\. Since the exhaustion of the IPv4 pool in 2011,
     many large providers in Europe and the U.S. have also started to deploy IPv6.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，ISP 必须评估 IPv6 能否满足这些需求。一些国家在这一领域处于领先地位，从测试和评估阶段转向了 IPv6 在宽带领域的实际部署。日本就是一个典型例子，此外还有其他国家正在考虑向大规模生产部署
+    IPv6 迈进。自 2011 年 IPv4 地址池耗尽以来，许多欧洲和美国的大型服务提供商也已开始部署 IPv6。
 - en: Note
+  id: totrans-36
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Globally, the number of IPv6 transit AS (Autonomous System) has increased substantially.
     [As of 2014, more than 80% of the top 300 transit AS in the world are IPv6 enabled](http://6lab.cisco.com).
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 在全球范围内，IPv6 中继 AS（自治系统）的数量大幅增加。[截至 2014年，全球前 300 名中继 AS 中有超过 80% 支持 IPv6](http://6lab.cisco.com)。
 - en: 'ISPs will have to offer both IPv4 and IPv6 services in the coming years. To
     provide access to IPv6 networks to customers in a first phase (as long as their
     backbones are still IPv4), tunnel mechanisms can be used. Many large ISPs have
@@ -244,8 +332,15 @@
     business opportunities and new service offerings. You as a customer want dual-stack
     if you buy Internet services, because only dual-stack makes you a full member
     of both Internets (IPv4 and IPv6).'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 在未来几年，ISP 将不得不同时提供 IPv4 和 IPv6 服务。在第一阶段，为客户提供 IPv6 网络接入（只要其骨干仍为 IPv4）时，可以使用隧道机制。许多大型
+    ISP 选择使用 6rd，这是一种基于 6to4 的机制，但提供了更多或更少的原生性能（参见 [第 7 章](ch07.html "第 7 章。过渡技术")
+    中的 6rd 部分）。这是一种更简单、更经济的方式来开始提供 IPv6 服务。根据客户的需求和要求，原生 IPv6 部署选项可能具有更好的可扩展性，并提供更好的服务性能。你可能可以利用下一个骨干升级周期并引入双栈。所有其他服务，如网页托管、电子邮件和
+    FTP，最好同时支持这两种协议（IPv4 和 IPv6）。迁移步骤应当精心规划，选择并实施有效的机制组合。ISP 的主要目标是通过这两种协议提供所有服务：这是覆盖整个市场的唯一途径。尤其对于
+    ISP 来说，引入 IPv6 提供了创造商业机会和新服务的可能性。作为客户，你在购买互联网服务时希望得到双栈支持，因为只有双栈才能让你成为两个互联网（IPv4
+    和 IPv6）的完整成员。
 - en: RFC 4029, “Scenarios and Analysis for Introducing IPv6 into ISP Networks,” analyzes
     the challenges and opportunities for ISPs and discusses different integration
     and transition scenarios, divided into exploring backbone transition actions,
@@ -258,8 +353,13 @@
     for each of the previously mentioned broadband technology. RFC 5181, “IPv6 Deployment
     Scenarios in 802.16 Networks,” extends the discussion and goes into deployment
     scenarios for wireless broadband access networks.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 4029，《将 IPv6 引入 ISP 网络的场景与分析》，分析了 ISP 面临的挑战和机遇，并讨论了不同的集成和过渡场景，内容分为骨干过渡行动、客户连接过渡行动以及网络和服务运营行动。RFC
+    4779，《宽带接入网络中的 ISP IPv6 部署场景》，介绍了在宽带服务提供商网络接入部分部署 IPv6 服务的可选方案，即电缆/HFC、宽带以太网、xDSL、WLAN
+    和 PLC/BPL。它简要讨论了提供商网络的其他元素，并为每种先前提到的宽带技术提供了不同的可行的 IPv6 部署与集成技术和模型。RFC 5181，《802.16
+    网络中的 IPv6 部署场景》，扩展了讨论，并深入探讨了无线宽带接入网络的部署场景。
 - en: Some ISPs shy away from deploying IPv6 and hope they can get away with extending
     their NATs and implementing CGNs. An IDC study commissioned by Cisco analyzed
     the capital cost (capex) over 5 years for an ISP with 5 million residential subscribers,
@@ -268,27 +368,37 @@
     CGN is much better. The reason is that the native IPv6 offloads traffic from the
     CGN. With the increasing number of IPv6-capable websites, the 6rd deployment offloads
     substantial traffic from the CGN, which reduces the maintenance on the CGN side.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些互联网服务提供商（ISP）回避部署IPv6，希望通过扩展其NAT和实施CGN来应付。思科委托进行的一项IDC研究分析了一个拥有500万家庭用户的ISP在5年内的资本支出（capex），并比较了仅部署CGN的情境与同时部署6rd和CGN的情境。研究表明，同时引入IPv6和CGN的商业案例要好得多。原因在于原生IPv6能够减轻CGN的流量负担。随着IPv6支持的网站数量增加，6rd的部署将大大减轻CGN的流量负担，从而减少CGN端的维护工作。
 - en: Note
+  id: totrans-41
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: The comparison shows that over the period of 5 years an ISP can save up to 69%
     in capex investment by choosing the right IPv6 strategy. If you are interested
     in the study, “The Business Case for Delivering IPv6 Service Now,” you can find
     it at [http://bit.ly/1nac2SH](http://bit.ly/1nac2SH).
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 比较结果表明，在5年内，选择正确的IPv6战略可以使ISP节省多达69%的资本支出投资。如果您对这项研究《现在提供IPv6服务的商业案例》感兴趣，可以通过[http://bit.ly/1nac2SH](http://bit.ly/1nac2SH)找到它。
 - en: Mobile networks
+  id: totrans-43
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 移动网络
 - en: For a long time IPv6 deployment in mobile networks was not happening. Early
     smartphones such as the once-sexy Sony Ericsson P900 had a Symbian stack with
     IPv6 support. But none of the mobile providers would deploy IPv6.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 长期以来，移动网络中的IPv6部署并未发生。早期的智能手机，如曾经流行的索尼爱立信P900，配备了支持IPv6的Symbian协议栈。但当时没有任何移动运营商愿意部署IPv6。
 - en: This has changed in the last two years. Two of the well-known and often discussed
     deployments are by T-Mobile U.S. and Verizon Wireless. T-Mobile has several million
     IPv6 users already in 2014\. Other providers, such as China Mobile and also some
@@ -297,16 +407,23 @@
     IPv6-only services. Demos have showed that with 464XLAT, IPv4 applications run
     well on IPv6-only devices. Other smartphone vendors will hopefully jump onto this
     bandwagon soon.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 过去两年中，这一状况发生了变化。T-Mobile美国和Verizon无线是两个知名的、经常讨论的IPv6部署案例。T-Mobile在2014年就已有数百万IPv6用户。其他运营商，如中国移动以及一些欧洲运营商，也已经部署了IPv6。随着Android
+    4.3及更高版本中464XLAT的实现，为移动运营商提供IPv6-only服务变得更具吸引力。演示表明，使用464XLAT时，IPv4应用程序可以在IPv6-only设备上良好运行。其他智能手机厂商希望尽快加入这一行列。
 - en: Note
+  id: totrans-46
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: For more details on 464XLAT, refer to [Chapter 7](ch07.html "Chapter 7. Transition
     Technologies").
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关464XLAT的更多细节，请参见[第7章](ch07.html "第7章. 过渡技术")。
 - en: RFC 3574 discusses transition scenarios for 3GPP networks. RFC 4215 goes into
     more details for 3GPP networks and is a supplemental document to RFC 3574\. RFC
     6459, “IPv6 in 3rd Generation Partnership Project (3GPP) Evolved Packet System
@@ -321,20 +438,30 @@
     network). It defines a different profile than the one for general connection to
     IPv6 cellular networks defined in RFC 7066\. In particular, it also describes
     features to deliver IPv4 connectivity service over an IPv6-only transport.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 3574讨论了3GPP网络的过渡情境。RFC 4215则更详细地描述了3GPP网络，并且是RFC 3574的补充文档。RFC 6459《IPv6在3rd
+    Generation Partnership Project (3GPP) Evolved Packet System (EPS)中的应用》描述了不同3GPP架构中的IPv6支持，RFC
+    7066《第三代合作伙伴项目（3GPP）蜂窝设备的IPv6要求》描述了超出标准IPv6节点要求（RFC 6434）的蜂窝设备需求，因为蜂窝链路在带宽、成本和延迟方面的特点对IPv6的使用提出了特殊要求。RFC
+    *draft-ietf-v6ops-mobile-device-profile-07*定义了一个IPv6配置文件，许多运营商推荐该配置文件以将3GPP移动设备连接到IPv6-only或双栈无线网络（包括3GPP蜂窝网络和IEEE
+    802.11网络）。该配置文件不同于RFC 7066中定义的用于连接IPv6蜂窝网络的一般配置文件，特别是，它还描述了如何通过IPv6-only传输提供IPv4连接服务的功能。
 - en: Home networks
+  id: totrans-49
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 家庭网络
 - en: In the early days of the Internet, a home “network” consisted of one PC with
     a dial-up modem. The connection had one single IP address. Today this scenario
     has drastically changed and with all the different increasing number and types
     of devices, as well as increased internal routing, challenges increase also. Now
     we add IPv6 to the mix and this again adds complexity and requires new designs,
     new addressing principles, and new operational measures.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 在互联网的早期，家庭“网络”由一台配有拨号调制解调器的PC组成。连接只有一个单一的IP地址。今天，这一场景发生了巨大的变化，随着设备数量和类型的增加，以及内部路由的增多，面临的挑战也在增加。现在，我们将IPv6引入其中，这再次增加了复杂性，并需要新的设计、新的地址原则和新的操作措施。
 - en: One big difference between the IPv4 and the IPv6 addressing architecture is
     that in IPv6 interfaces can and often do have multiple addresses. They have at
     least a link-local address, but in addition to that they have one or multiple
@@ -344,8 +471,11 @@
     /48 prefix via DHCP prefix delegation, etc.). So all the devices in the network
     may end up with two GUAs, one from each prefix. And the home network may typically
     have multiple subnets.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv4和IPv6地址架构之间的一个重大区别是，在IPv6中，接口可以并且通常会拥有多个地址。它们至少有一个链路本地地址，此外，它们还拥有一个或多个全局单播地址（GUAs），甚至可能有一个唯一本地地址（ULA）。如果一个homenet有多个ISP，该家庭网络可能会通过不同的渠道从每个ISP获取IPv6前缀（例如，从一个ISP获得6rd
+    /60前缀，另一个通过DHCP前缀委派获得/48前缀，等等）。因此，网络中的所有设备可能最终会拥有两个GUAs，每个前缀一个。而家庭网络通常会有多个子网。
 - en: Several new aspects have to be taken into consideration. There is a homenet
     working group at IETF, and this group is developing a new architecture for the
     more complex home networks of the future. The homenet group is defining a general
@@ -359,19 +489,27 @@
     is not actively managed, and runs as an IPv6-only or dual-stack network. If you
     are an ISP and have to design home networks, the documents of this group are surely
     a good source.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 有几个新的方面需要考虑。IETF有一个homenet工作组，该小组正在为未来更复杂的家庭网络开发新的架构。homenet小组正在定义基于IPv6的家庭网络的通用架构，并描述相关的原则、考虑因素和要求。他们讨论了引入IPv6对家庭网络的具体影响，描述了架构的各个元素，并建议如何在家庭网络中使用标准的IPv6机制和地址。该小组在其首份文件《IPv6家庭网络架构原则》中开发的架构，描述了某些附加功能所需的特定协议扩展。假设IPv6家庭网络没有进行主动管理，并且作为IPv6仅或双栈网络运行。如果你是ISP，并且需要设计家庭网络，这个小组的文档无疑是一个良好的资源。
 - en: Note
+  id: totrans-53
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: You can find the homenet group at [http://bit.ly/1nac5Om](http://bit.ly/1nac5Om).
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以在[http://bit.ly/1nac5Om](http://bit.ly/1nac5Om)找到homenet小组。
 - en: Planning for IPv6
+  id: totrans-55
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPv6规划
 - en: In February 2011, the global IPv4 address pool was exhausted. Since April 2011,
     APNIC has been running on the last /8\. Since September 2012, RipeNCC has been
     running on the last /8\. This was a wake-up call for the whole industry. Since
@@ -379,8 +517,10 @@
     Many of them are still in the planning phase. As you will see in the coming sections,
     for a large enterprise the planning and deployment can take as long as three to
     five years.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 2011年2月，全球IPv4地址池耗尽。从2011年4月开始，APNIC开始使用最后一个/8块地址。从2012年9月开始，RipeNCC也开始使用最后一个/8块地址。这一事件成为整个行业的警钟。从那时起，许多大型企业启动了不同程度的IPv6项目。许多项目仍处于规划阶段。正如你将在接下来的章节中看到的，对于大型企业，规划和部署可能需要三到五年的时间。
 - en: Most enterprises have overcome the business case discussion. There are many
     reasons to do IPv6 and to do it now. By “now” I mean you have to do the planning
     now. Once you know what it will take to deploy IPv6, how long it will take in
@@ -389,58 +529,84 @@
     you need to turn it on. But if you don’t plan and wait until that day comes, you
     will not be able to create decent and operationally useful designs under time
     pressure.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数企业已经克服了商业案例的讨论。实施IPv6有很多理由，并且应该立即开始。这里的“立即”指的是您必须现在开始规划。一旦您了解了部署IPv6所需的工作量、在不同网络和服务区域的时间安排，以及如何设计您的地址计划和安全概念，您可以将这些计划搁置，直到需要启用IPv6的那一天。但如果您没有提前规划，等到那一天来临时，您将无法在时间压力下创造出合格且具备操作性的重要设计。
 - en: Planning and designing the integration of IPv6 in your network provides a unique
     opportunity to establish a new foundation for your next-generation IT environment.
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 规划和设计IPv6在您网络中的集成为您提供了一个独特的机会，可以为您的下一代IT环境奠定新的基础。
 - en: Note
+  id: totrans-59
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: IPv6 offers the opportunity to clean the existing inconsistencies, drive standardization,
     and implement new architectures and operational models.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6提供了一个机会，可以清理现有的不一致，推动标准化，并实施新的架构和操作模式。
 - en: 'The most common reasons for enterprises that started their IPv6 projects are:'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 启动IPv6项目的企业最常见的原因是：
 - en: Business continuity
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 业务连续性
 - en: Reachability (from outside)
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可达性（来自外部）
 - en: Life cycle management
+  id: totrans-64
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 生命周期管理
 - en: Investment protection
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 投资保护
 - en: Time for education and to build experience
+  id: totrans-66
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 教育和积累经验的时间
 - en: 'What are the advantages of planning early? There are many areas where you can
     save a lot of money with early planning and make good use of the opportunities
     that an IPv6 integration offers. So here’s a list of advantages:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 提前规划有哪些优势？提前规划可以节省很多成本，并且可以充分利用IPv6集成所提供的机会。以下是一些优势：
 - en: Make use of product life cycles, refresh cycles, and other IT projects.
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 利用产品生命周期、更新周期和其他IT项目。
 - en: Investment protection by having clear IPv6 requirements for purchasing of new
     equipment, tools, and applications, and for negotiating outsourcing contracts
     and SLAs. All these must be adjusted to cover IPv6 requirements appropriately.
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通过为购买新设备、工具和应用程序，以及谈判外包合同和SLA制定明确的IPv6要求来保护投资。所有这些都必须进行调整，以便适当覆盖IPv6的需求。
 - en: Integrating IPv6 will take up to three or even more years (mostly in order to
     make use of refresh cycles). If you don’t plan early, you won’t be ready when
     you need it. Especially the design and concept for addressing and security take
@@ -450,113 +616,168 @@
     security people are challenged most and need time to learn about IPv6 and adjust
     their concepts. But they also have a big opportunity to clean out and redesign
     the IPv4-based security concept.
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 集成IPv6将需要三年或更长时间（主要是为了利用更新周期）。如果您不提前规划，当需要时您将没有准备好。尤其是地址和安全的设计和概念需要大量时间，并应谨慎完成。它们需要更新，以便利用新的地址架构，通常需要进行深入讨论和多次迭代，直到所有IT部门都能认同它。通常，安全人员面临最大的挑战，需要时间学习IPv6并调整他们的概念。但这也是一个巨大的机会，可以清理并重新设计基于IPv4的安全概念。
 - en: You need time to educate all IPv6 team members and IT staff.
+  id: totrans-71
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您需要时间来教育所有IPv6团队成员和IT员工。
 - en: You want to use all the opportunities IPv6 offers!
+  id: totrans-72
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您想要利用IPv6所提供的所有机会！
 - en: You need sufficient time for labs, testing, and pilots.
+  id: totrans-73
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您需要足够的时间进行实验室测试、测试和试点。
 - en: You need time for bug fixing with vendors (early stacks).
+  id: totrans-74
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您需要时间与供应商修复bug（早期堆栈）。
 - en: When you run a larger or even global network, most IT decision makers wonder
     where to start and how to go about it.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您运营一个更大规模甚至是全球性的网络时，大多数IT决策者会想知道从哪里开始，以及如何进行。
 - en: Note
+  id: totrans-76
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: The fact that the introduction of IPv6 touches each and every aspect and device
     in your network makes this an IT project of a larger scale than any other IT project.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于IPv6的引入涉及到您网络中的每一个方面和设备，这使得这个IT项目的规模远远超过了其他任何IT项目。
 - en: So let me try to give you a quick start into planning for IPv6.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我为您提供一个快速的IPv6规划入门。
 - en: Note
+  id: totrans-79
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: A more detailed discussion of the planning process can be found in my companion
     book, *Planning for IPv6* (O’Reilly).
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 规划过程的更详细讨论可以在我的配套书籍*《IPv6规划》（O'Reilly）*中找到。
 - en: Where to Start
+  id: totrans-81
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 从哪里开始
 - en: One of the main success factors is that the IPv6 project needs management attention
     and an enterprise IPv6 project manager. All devices, services, and aspects of
     your network are affected and it is important to have an overall picture and be
     aware of the interfaces and dependencies (both organizational and technical).
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 成功的关键因素之一是 IPv6 项目需要管理层关注，并且需要一位企业级 IPv6 项目经理。网络中的所有设备、服务和各个方面都会受到影响，因此必须拥有全局视角，并意识到接口和依赖关系（无论是组织层面的还是技术层面的）。
 - en: 'The first steps:'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一步：
 - en: Get management attention.
+  id: totrans-84
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 获取管理层的关注。
 - en: Note
+  id: totrans-85
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Appoint an IPv6 project manager and establish an IPv6 transition office.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 指定一个 IPv6 项目经理，并建立一个 IPv6 过渡办公室。
 - en: Educate all groups participating in the process.
+  id: totrans-87
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 教育参与过程的所有团队。
 - en: Get an overall perspective.
+  id: totrans-88
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 获取整体视角。
 - en: Involve all teams.
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 涉及所有团队。
 - en: Include business vision, business strategy, and IT strategy, and base the IPv6
     strategy on this foundation to make it sustainable.
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 包括业务愿景、业务战略和 IT 战略，并在此基础上制定 IPv6 战略，使其具有可持续性。
 - en: Your IPv6 strategy is supposed to support the business.
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您的 IPv6 战略应支持业务。
 - en: Develop a communication and internal marketing strategy for the IPv6 project.
+  id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 制定一个针对 IPv6 项目的沟通和内部营销战略。
 - en: 'The following steps are recommended:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下步骤建议：
 - en: '*Create a layout of your current situation*'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: '*创建您当前状况的布局*'
 - en: In the first step analyze your business vision, your business strategy, and
     your IT strategy as well as your IT infrastructure, IT services and projects,
     life cycles of hard- and software, tools, and also contracts and service agreements.
     Create an overview of processes, policies, and standards, and the impact an IPv6
     integration will have on all of these aspects.
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 在第一步中，分析您的业务愿景、业务战略和 IT 战略，以及您的 IT 基础设施、IT 服务和项目、硬件和软件的生命周期、工具，以及合同和服务协议。创建流程、政策和标准的概览，并评估
+    IPv6 集成对所有这些方面的影响。
 - en: '*Define your IPv6 strategy*'
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: '*定义您的 IPv6 战略*'
 - en: In this second step define your target architecture, your high-level IPv6 strategy,
     including a high-level address plan and a high-level security concept (which must
     be aligned with each other). Next define a roadmap, aligning it with other IT
@@ -565,49 +786,70 @@
     types of devices and applications. Assess your *vendor strategy* and find out
     if it needs adjustments for IPv6\. Don’t assume that the vendors who were great
     for IPv4 are automatically the best for IPv6 too.
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 在第二步中，定义您的目标架构、总体 IPv6 战略，包括高级地址规划和高级安全概念（两者必须相互一致）。接下来，定义路线图，并将其与其他 IT 项目和更新周期对齐。清晰地了解采用计划、里程碑和依赖关系。基于您的
+    IPv6 设计，为所有类型的设备和应用程序创建 *RFC 要求*。评估您的 *供应商战略*，并检查它是否需要为 IPv6 做出调整。不要假设为 IPv4 表现优秀的供应商也一定适合
+    IPv6。
 - en: '*Assess current environment*'
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: '*评估当前环境*'
 - en: Based on the RFC requirements, assess your current infrastructure, hard- and
     software, operating systems, applications, services, and contracts for their IPv6
     readiness. Only now will you be able to determine the cost of deploying IPv6,
     based on the information from the assessment. It may also be possible that you
     have to adjust your design or roadmap, or both, based on the findings in the assessment.
     Use this opportunity to build IPv6 experience in your team.
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据 RFC 要求，评估您当前的基础设施、硬件和软件、操作系统、应用程序、服务和合同的 IPv6 准备情况。只有现在，您才能根据评估结果确定部署 IPv6
+    的成本。根据评估中的发现，您可能还需要调整设计或路线图，或两者都需要调整。利用这个机会，在团队中积累 IPv6 经验。
 - en: '*Create detailed concepts and deployment plans*'
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: '*创建详细的概念和部署计划*'
 - en: For all the different areas in your network, detailed design and deployment
     plans have to be created and tested in labs and pilots. All these processes may
     need several iterations. Enough time has to be allocated for testing, bug fixing,
     and vendor evaluation. Also, don’t forget to adjust all processes, such as testing
     of upgrades, all levels of support, change management, security processes, monitoring,
     address management, etc.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 对网络中的所有不同领域，必须创建详细的设计和部署计划，并在实验室和试点中进行测试。所有这些过程可能需要多个迭代。需要为测试、修复漏洞和供应商评估分配足够的时间。同时，不要忘记调整所有相关流程，例如升级测试、所有支持级别、变更管理、安全流程、监控、地址管理等。
 - en: '*Deploy and document*'
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: '*部署并文档化*'
 - en: As mentioned, the deployment of IPv6 in an enterprise network can take up to
     three or even five years. You will not deploy in all areas at once; you will have
     a roadmap and deploy in specific areas aligned with other projects or life cycles.
     So the last steps, such as detailed design, deployment plans, and finally deployment,
     are usually executed for specific areas. Finally, make sure that all is well documented.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，企业网络中IPv6的部署可能需要长达三年甚至五年的时间。你不会一次性在所有领域部署，而是会有一个路线图，并在与其他项目或生命周期对接的特定领域进行部署。因此，最后的步骤，如详细设计、部署计划以及最终部署，通常是针对特定领域执行的。最后，确保所有内容都有良好的文档记录。
 - en: A Word on Applications
+  id: totrans-104
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 关于应用程序的一些说明
 - en: Enabling IPv6 in the network is doable. But as long as applications don’t run
     over IPv6, it is not of much use having an IPv6-enabled network. So you need to
     start working on applications early in the process while enabling the network.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 启用IPv6网络是可行的。但只要应用程序没有在IPv6上运行，启用IPv6的网络也没有太大意义。所以你需要在启用网络的同时，尽早开始处理应用程序。
 - en: 'Third-party applications should usually be IPv6-enabled in the current release,
     and if not, IPv6 support should be on a clear roadmap. Talk to your vendor, and
     if necessary evaluate alternatives. It is a different story for self-developed
@@ -617,8 +859,11 @@
     developed for the market should be running in IPv4 networks, in IPv6 networks,
     and also in dual-stack networks, as the vendor has no control over how users are
     accessing the application.'
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 第三方应用程序通常应在当前版本中启用IPv6，如果没有，IPv6支持应在清晰的路线图中列出。与你的供应商沟通，必要时评估替代方案。然而，自主开发的应用程序情况不同。这里你需要区分两种情况：a)
+    该应用程序仅在内部使用，b) 该应用程序是市场应用程序。在a)情况下，你可以控制用户如何使用这些应用程序。为市场开发的应用程序应该能够在IPv4网络、IPv6网络以及双栈网络中运行，因为供应商无法控制用户如何访问应用程序。
 - en: If you develop applications for the market, it is important to start planning
     early, as often these applications have very long life cycles. If the developers
     don’t understand the impacts of IPv6, the applications may either not run at all,
@@ -627,35 +872,51 @@
     on how to develop for a dual-stack network and update the application design specification
     to support the future IPv6 network. If you buy custom-developed applications on
     the market, you have to update your RFC requirements specifically.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你为市场开发应用程序，重要的是要提前规划，因为这些应用程序通常有很长的生命周期。如果开发人员不了解IPv6的影响，应用程序可能根本无法运行，或者无法针对IPv6网络进行优化。因此，无论你是自行开发应用程序还是与合作伙伴共同开发，都要确保开发团队接受充分的IPv6教育，重点是如何为双栈网络开发，并更新应用程序设计规范以支持未来的IPv6网络。如果你购买市场上的定制开发应用程序，你必须特别更新你的RFC要求。
 - en: This section is not a guide to porting applications. The goal here is to make
     you aware of situations that you will face and what to look out for.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 本节不是应用程序移植的指南。这里的目的是让你了解你将面临的情况以及需要注意的事项。
 - en: 'You will encounter the following situations:'
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 你将遇到以下情况：
 - en: IPv4 applications on dual-stack nodes
+  id: totrans-110
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在双栈节点上的IPv4应用程序
 - en: IPv6 applications on dual-stack nodes
+  id: totrans-111
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在双栈节点上的IPv6应用程序
 - en: Applications supporting IPv4 and IPv6 on dual-stack nodes
+  id: totrans-112
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在双栈节点上，支持IPv4和IPv6的应用程序
 - en: Applications supporting IPv4 and IPv6 on IPv4-only nodes
+  id: totrans-113
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在仅支持IPv4的节点上，支持IPv4和IPv6的应用程序
 - en: Applications supporting IPv4 and IPv6 on IPv6-only nodes
+  id: totrans-114
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在仅支持IPv6的节点上，支持IPv4和IPv6的应用程序
 - en: The challenge for developers that develop for the market is to create applications
     that work well in all situations. DNS names should be used whenever a service
     has to be called. But the DNS reply is not a reliable indicator of which protocol
@@ -669,59 +930,90 @@
     also return a AAAA record, but the host may have no IPv6 path to get there. A
     node resolving a DNS name and getting multiple addresses in the reply should try
     them all and have a mechanism to choose the connection with the best performance.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 开发人员面临的挑战是为市场开发在各种情况下都能良好运作的应用程序。每当需要调用服务时，应该使用 DNS 名称。但是，DNS 回复并不是选择使用哪个协议的可靠指示。例如，一台主机可能是双栈的，并且在
+    DNS 中有一个带 IPv4 地址的 A 记录和一个带 IPv6 地址的 AAAA 记录。但在这台主机上，可能存在仅支持 IPv4 的应用程序。因此，即使解析主机名返回一个
+    IPv6 地址，应用程序也无法通过 IPv6 访问。因此，你需要在 DNS 中输入服务名称，并为每个服务配置相应的记录类型（IPv4 服务使用 A 记录，IPv6
+    服务使用 AAAA 记录）。但如何由 DNS 管理员处理这些问题取决于操作实践，因此不能完全依赖。DNS 请求也可能返回一个 AAAA 记录，但主机可能没有
+    IPv6 路径连接到它。解析 DNS 名称并获得多个地址的节点应该尝试所有地址，并具备选择最佳性能连接的机制。
 - en: Note
+  id: totrans-116
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Happy Eyeballs is one mechanism designed to help in this situation and is implemented
     in different operating systems and browsers. Refer to the DNS section in [Chapter 5](ch05.html
     "Chapter 5. Networking") for more information.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: Happy Eyeballs 是一种旨在帮助解决这一问题的机制，已在不同操作系统和浏览器中实现。有关更多信息，请参阅 [第 5 章](ch05.html
+    "第 5 章. 网络") 中的 DNS 部分。
 - en: 'The following list shows the most important IP dependencies in applications:'
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下列表展示了应用程序中最重要的 IP 依赖：
 - en: Format of the IP address (32-bit dotted decimal or 128-bit hexadecimal with
     colons)
+  id: totrans-119
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: IP 地址的格式（32 位点分十进制或 128 位带冒号的十六进制）
 - en: API functions for the establishment of connections and data exchange
+  id: totrans-120
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于建立连接和数据交换的 API 函数
 - en: DNS, resolving host names to IP addresses and vice versa
+  id: totrans-121
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: DNS，用于将主机名解析为 IP 地址，反之亦然
 - en: IP address selection, caching/storage of addresses
+  id: totrans-122
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: IP 地址选择，地址的缓存/存储
 - en: Multicast applications, depending on situation; correspondence of IPv4 and IPv6
     multicast addresses and selection of correct socket configuration options
+  id: totrans-123
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 多播应用程序，根据情况；IPv4 和 IPv6 多播地址的对应关系以及正确的套接字配置选项选择
 - en: Some applications base licensing control on IPv4 addresses
+  id: totrans-124
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一些应用程序将许可控制基于 IPv4 地址
 - en: The best way to go is to make applications independent of the IP version. This
     means that the source code should not have any IP dependencies. The communication
     library should provide APIs that have no dependencies on IP.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 最好的做法是使应用程序与 IP 版本无关。这意味着源代码不应有任何 IP 依赖。通信库应提供没有 IP 依赖的 API。
 - en: Note
+  id: totrans-126
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Find a more detailed discussion of these issues in RFC 4038, “Application Aspects
     of IPv6 Transition.”
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 RFC 4038《IPv6 过渡的应用方面》中可以找到这些问题的更详细讨论。
 - en: The University of Tokyo and the Yokogawa Electric Corporation started the TAHI
     project in 1998\. They developed tests that can be used by IPv6 developers to
     test their implementations for conformance to the standard and for interoperability.
@@ -732,28 +1024,41 @@
     they believe it has accomplished the mission of “supporting IPv6 developers by
     quality side for a highly interoperable IPv6 world.” The information and testing
     tools are still there (at the time of writing).
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 东京大学和横河电机公司于 1998 年启动了 TAHI 项目。他们开发了可以供 IPv6 开发者使用的测试工具，用于测试其实现是否符合标准并具备互操作性。这些测试可以免费使用。这是他们为
+    IPv6 高效开发和部署做出的贡献。测试结果也免费提供给开发者社区。在 [TAHI 网站](http://www.tahi.org) 上，所有测试均已列出并记录。TAHI
+    项目已于 2012 年 12 月结束，因为他们认为它已经完成了“通过质量支持 IPv6 开发者，推动高度互操作的 IPv6 世界”的使命。信息和测试工具仍然存在（在撰写本文时）。
 - en: 'The TAHI project worked closely with other well-known projects: the [WIDE project](http://www.wide.ad.jp),
     the [KAME project](http://www.kame.net), which has been concluded also (but the
     dancing Kame is still there), and the concluded [USAGI project](http://www.linux-ipv6.org).
     Find some interesting links and some history on the early evolution of IPv6.'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: TAHI 项目与其他知名项目紧密合作：[WIDE 项目](http://www.wide.ad.jp)、[KAME 项目](http://www.kame.net)，该项目也已经结束（但跳舞的
+    Kame 仍然存在），以及已结束的 [USAGI 项目](http://www.linux-ipv6.org)。找到一些有趣的链接以及关于 IPv6 早期演进的一些历史。
 - en: Do’s and Don’ts
+  id: totrans-130
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 应做和不应做的事项
 - en: Based on many years of consulting with large enterprises, here are some viewpoints
     and perspectives I keep seeing that I would like to summarize for you. Some of
     them are successful and others belong to the category of what you should not be
     doing. In any case, they try to give you guidelines for how to go about your project.
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 基于多年的大型企业咨询经验，这里有一些我不断看到的观点和看法，我想总结给你们。有些是成功的，而有些则属于你应该避免的范畴。无论如何，它们都试图为你提供如何开展项目的指导方针。
 - en: Is IPv6 just like IPv4?
+  id: totrans-132
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: IPv6 就像 IPv4 吗？
 - en: Typically, people that have not started on IPv6 yet have one of two viewpoints.
     The first group thinks IPv6 is a no-brainer; after all, it is not that different
     from IPv4 and it will be easy to adapt their IPv4 concepts and make it fly. Based
@@ -763,8 +1068,11 @@
     that IPv6 is a killer, way too complex, and hard to master, and that they will
     never manage to integrate it properly. So they shy away from the project and try
     to avoid it as long as possible, hoping the problem will solve itself.
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，尚未开始使用 IPv6 的人有两种观点。第一组认为 IPv6 是显而易见的；毕竟，它与 IPv4 没有太大区别，适应现有的 IPv4 概念并使其运作应该很容易。因此，他们通常认为自己不需要外部帮助，内部人员就能完成，或者他们选择那些拥有良好
+    IPv4 背景但没有 IPv6 经验的顾问，并假设他们能够完成工作。另一组则认为 IPv6 是一个“杀手”，它过于复杂且难以掌握，认为自己永远无法正确地集成它。因此，他们回避这个项目，并尽可能地避免它，希望问题能自行解决。
 - en: Both viewpoints are extreme and the truth is somewhere in the middle. The first
     group would do well to at least have their IPv6 strategy, address plan, and security
     concept reviewed by someone with good IPv6 experience. It is like getting a second
@@ -779,35 +1087,50 @@
     and the security concept. If you wait too long and have to do all this under time
     pressure, you will not have the time to take advantage of the opportunities of
     an IPv6 integration.
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 这两种观点都比较极端，事实的真相在于它们之间。第一组最好至少让具有良好 IPv6 经验的人来审查他们的 IPv6 策略、地址规划和安全概念。这就像在进行关键治疗前从医生那里获得第二意见。提前修正一些问题远比部署后再去修改或不得不与它共存多年要容易得多。如果审查确认一切正常，那也是一个很好的背景。第二组则只部分正确。虽然
+    IPv6 是 IPv4 的演进，许多方面是相同的，但在架构上有许多优势和新特性，例如地址架构。因此，建议不要回避，而是在所有团队深入进行网络设计、地址规划和安全概念的设计之前，花时间进行全面的教育。如果你拖延太久，并且在时间压力下完成这一切，你将没有时间去利用
+    IPv6 集成的机会。
 - en: Inescapable bugs and why generic assessments are not very useful
+  id: totrans-135
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 无法避免的 bug 以及为何通用评估不太有用
 - en: IPv6 stacks are much younger than most IPv4 stacks. While we are still sometimes
     fixing bugs in IPv4 stacks or finding security holes, we can expect that to be
     way more common in IPv6 stacks simply because we don’t have many years of operational
     experience and years of testing and bug fixing behind us. This leads to two things
     to be aware of.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6 协议栈比大多数 IPv4 协议栈要年轻。虽然我们仍然在修复 IPv4 协议栈中的一些漏洞或寻找安全漏洞，但我们可以预期，在 IPv6 协议栈中这类问题会更为常见，因为我们没有多年操作经验以及多年的测试和修复积累。这导致了两个需要注意的事项。
 - en: One is that you need to allocate enough time in your planning for bug fixing
     with vendors. As soon as you start your labs and pilots, you will see those bugs
     and the vendor needs some time to work on a solution. But the other thing I have
     heard in many IPv6 strategy discussions is that people say, “oh, we don’t use
     this technology; it’s not working, we tested it in our lab.”
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 其中之一是，你需要在规划中为与供应商修复 bug 留出足够的时间。一旦你开始实验室测试和试点项目，你将会发现这些 bug，供应商需要一些时间来提供解决方案。但我在许多
+    IPv6 战略讨论中听到的另一种说法是，人们会说：“哦，我们不使用这项技术，它不起作用，我们在实验室中测试过了。”
 - en: Note
+  id: totrans-138
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: It is not a good idea to base your design and target architecture on bugs in
     current stacks. Design your network and applications as they will best fit your
     business and your needs, and expect your vendors to fix the bugs.
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 不建议将你的设计和目标架构基于当前堆栈中的 bug。设计你的网络和应用程序，以最佳方式适应你的业务和需求，并期待你的供应商修复 bug。
 - en: Closely related to this is the procedure where organizations do a generic assessment
     of the IPv6 capability of their current environment (such as “can I enable IPv6
     or not?”) even before they have an IPv6 strategy. This means that they will base
@@ -816,172 +1139,244 @@
     that support that strategy. If you want a target architecture that supports your
     business, you will not get around defining a strategy first, creating detailed
     RFC requirements, and then using these requirements in your purchasing requirements.
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 与此密切相关的是，许多组织在没有 IPv6 战略的情况下，进行当前环境的 IPv6 能力评估（例如，“我能否启用 IPv6？”）。这意味着他们会根据功能可用性来设计，而不是先有一个支持业务的清晰战略，再确保有支持该战略的设备和应用程序。如果你希望一个支持你业务的目标架构，你就无法绕过先定义战略、创建详细的
+    RFC 要求，然后在采购要求中使用这些要求。
 - en: Vendor strategy and RFC requirements
+  id: totrans-141
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 供应商战略与 RFC 要求
 - en: As already mentioned, if you have vendors that deliver great IPv4 services (be
     it products, Internet access, data center hosting, outsourcing of other services,
     or consulting), don’t assume that they are best in IPv6 also. You need to verify
     this in more detail. Some customers have chosen to take the IPv6 integration as
     a good point to re-evaluate their vendor strategy for the coming years.
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，如果你有提供出色 IPv4 服务的供应商（无论是产品、互联网接入、数据中心托管、外包服务，还是咨询服务），不要假设他们在 IPv6 方面也同样是最优秀的。你需要更详细地验证这一点。一些客户选择将
+    IPv6 集成作为重新评估未来几年供应商战略的一个契机。
 - en: 'The following points should be taken into consideration:'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下几点应当考虑：
 - en: Your vendors face the same challenges as you do. Only they should be ahead of
     the game, but the reality is that many of them are not. So don’t assume they are;
     check it out!
+  id: totrans-144
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你的供应商面临的挑战和你一样。只是他们应该走在前面，但现实是，他们中的许多人并没有。所以不要假设他们做到了，要亲自核实！
 - en: Some customers think that their vendors will know what to do and that they can
     trust the vendor’s recommendations. Not true in most cases. You will face the
     fact that your purchasing team (which is probably not too technical and not up
     to speed with IPv6) will sit at the table with sales guys from vendors that barely
     know how to spell IPv6\. So unless you come up with very specific and informed
     ideas and RFC requirements, you cannot expect to get what you need.
+  id: totrans-145
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一些客户认为他们的供应商知道该做什么，并且可以信任供应商的建议。大多数情况下，这种想法并不成立。你将面对这样的现实：你的采购团队（可能并不太懂技术，且对
+    IPv6 了解不多）将与供应商的销售人员坐在一起，而这些销售人员甚至不懂怎么拼写 IPv6。所以，除非你提出非常具体且有信息支持的想法和 RFC 要求，否则不能指望供应商能满足你的需求。
 - en: In the early stages of your planning project, write letters of intent to your
     strategic vendors, making them aware of the fact that you will require professional
     IPv6 services in the foreseeable future. The more such letters vendors get, the
     faster they will speed up with implementation. After all, their major excuse for
     lack of implementation or richness of features is that customers don’t ask for
     IPv6.
+  id: totrans-146
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在规划项目的初期，向你的战略供应商发送意向书，让他们知道你在可预见的未来需要专业的 IPv6 服务。供应商收到的这种意向书越多，他们就越快加速实施。毕竟，他们缺乏实施或功能丰富的主要借口是因为客户没有要求
+    IPv6。
 - en: Don’t forget to assess outsourcing contracts and SLAs for IPv6 consideration
     and requirements.
+  id: totrans-147
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 别忘了评估外包合同和 SLA 以考虑 IPv6 的需求和要求。
 - en: 'When evaluating vendors, you should look for the following:'
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 在评估供应商时，你应该关注以下几点：
 - en: Check technical features according to RFC list. Get a list of implemented RFCs
     from the vendor, check it against your requirements, and then test in your lab
     whether the features that are critical to your plans work as expected. And remember,
     RFC requirements have to be device specific. An IPAM solution has different requirements
     than a firewall.
+  id: totrans-149
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 根据 RFC 列表检查技术特性。获取厂商提供的已实现 RFC 列表，与你的要求进行对比，然后在实验室中测试那些对你计划至关重要的功能是否按预期工作。记住，RFC
+    要求必须是针对设备的。IPAM 解决方案与防火墙有不同的要求。
 - en: Check the level of IPv6 knowledge in their staff. Do they have one single person
     who knows how to do IPv6? If yes, their support will probably not be sufficient
     for you as a customer. Ensure that they have enough knowledgeable staff in all
     channels (sales, engineering, support).
+  id: totrans-150
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 检查他们员工的 IPv6 知识水平。是否有一个人知道如何操作 IPv6？如果有的话，作为客户，他们的支持可能不足以满足你。确保他们在所有渠道（销售、工程、支持）都有足够的专业人员。
 - en: Ensure that they also have IPv6 implemented in all their processes (upgrade
     processes for consistency of future updates, incident management, etc.).
+  id: totrans-151
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 确保他们在所有流程中也已经实现了 IPv6（升级流程以确保未来更新的一致性、事件管理等）。
 - en: Don’t trust brochures and fact sheets. Test in your lab.
+  id: totrans-152
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 不要相信宣传册和事实表。请在实验室中进行测试。
 - en: Without these steps you may end up buying products that do not support your
     IPv6 strategy or you may become stuck in your deployment, because you suddenly
     find out that key features you need are not supported. And as you probably know
     from other IT projects, this can cost a lot of time and money, especially if critical
     business services or other IT projects are depending on this.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果没有这些步骤，你可能最终购买到不支持你的 IPv6 策略的产品，或者在部署过程中陷入困境，因为你突然发现所需的关键功能不被支持。正如你可能从其他 IT
+    项目中知道的那样，这会花费大量的时间和金钱，尤其是当关键的业务服务或其他 IT 项目依赖于此时。
 - en: Note
+  id: totrans-154
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: 'To build your RFC requirements lists, use RFC 6434, “IPv6 Node Requirements.”
     In addition to that, there are two useful templates available: [RIPE554](http://www.ripe.net/ripe/docs/ripe-554)
     and [USGv6 by NIST](http://www-x.antd.nist.gov/usgv6/index.html). Take it as a
     foundation and adapt it to your IPv6 strategy.'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了建立你的 RFC 要求列表，请使用 RFC 6434，“IPv6 节点要求。”除此之外，还有两个有用的模板可供参考：[RIPE554](http://www.ripe.net/ripe/docs/ripe-554)
+    和 [USGv6 by NIST](http://www-x.antd.nist.gov/usgv6/index.html)。将其作为基础，并根据你的 IPv6
+    策略进行调整。
 - en: There are other documents that may be useful, such as RFC 7084, “Basic Requirements
     for IPv6 Customer Edge Routers.” In April 2014, a discussion was started to update
     RIPE554\. So when you start working with these documents, make sure you use the
     latest version.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有其他可能有用的文档，如 RFC 7084，“IPv6 客户边缘路由器的基本要求。”2014 年 4 月，关于更新 RIPE554 的讨论开始进行。所以，当你开始使用这些文档时，确保你使用的是最新版本。
 - en: General Design Guidelines
+  id: totrans-157
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 一般设计指南
 - en: 'Every environment and business is different and the IPv6 strategy will therefore
     also look different. It is not possible to provide a cookbook that is applicable
     in every organization. But still, there are some very general strategies that
     make sense in most environments, so here’s a list:'
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个环境和业务都是不同的，因此 IPv6 策略也会有所不同。无法提供一种适用于每个组织的方案。然而，仍然有一些在大多数环境中都有效的通用策略，以下是一些建议：
 - en: Do native IPv6 wherever possible, dual-stack as long as necessary (and this
     may be many years).
+  id: totrans-159
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 尽可能使用原生 IPv6，双栈仅在必要时使用（这可能需要很多年）。
 - en: Deploy new internal services IPv6-only whenever possible.
+  id: totrans-160
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 尽可能部署新的内部服务仅支持 IPv6。
 - en: Use tunneling only if necessary and only as a temporary solution. Sometimes
     it is recommendable to wait a little longer and go native IPv6 right from the
     beginning.
+  id: totrans-161
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 仅在必要时使用隧道，并且仅作为临时解决方案。有时建议稍等片刻，从一开始就直接使用原生 IPv6。
 - en: If you do tunnel, prefer stateless over stateful.
+  id: totrans-162
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果你需要使用隧道，优先选择无状态隧道而非有状态隧道。
 - en: Don’t do NAT, no translation (only with a gun to your head).
+  id: totrans-163
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 不要使用 NAT，不要进行转换（除非被迫）。
 - en: If you have to translate, again, prefer stateless over stateful.
+  id: totrans-164
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果必须进行转换，还是优先选择无状态隧道而非有状态隧道。
 - en: Future networks are end-to-end.
+  id: totrans-165
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 未来的网络是端到端的。
 - en: The expanded address architecture allows for new security concepts (you may
     consider embedding service information in the address to simplify access rules
     and operation).
+  id: totrans-166
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 扩展的地址架构允许新的安全概念（你可以考虑将服务信息嵌入地址中，以简化访问规则和操作）。
 - en: Adapt and align your security concept to the new address architecture.
+  id: totrans-167
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 根据新的地址架构调整并对齐你的安全概念。
 - en: Consider new services (monitoring, sensors, health care, Car2Car…depending on
     industry). Many new services have a much higher demand for addresses and mobility
     requirements.
+  id: totrans-168
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 考虑新服务（监控、传感器、健康护理、车与车之间通信……根据行业不同而异）。许多新服务对地址的需求更高，并且有更强的移动性要求。
 - en: Note
+  id: totrans-169
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: More and more customers are considering migrating their infrastructure to IPv6-only
     as soon as possible and treat IPv4 as a service. The main advantage of this IPv6-centric
     strategy is to minimize cost. Operating an IPv6-only network is less costly than
     maintaining two protocols in parallel in a dual-stack network.
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 越来越多的客户正在考虑尽快将其基础设施迁移到仅支持IPv6，并将IPv4视为一种服务。这种以IPv6为中心的策略的主要优势是可以最大限度地降低成本。运营一个仅支持IPv6的网络比在双栈网络中并行维护两个协议的成本要低。
 - en: Address Plan
+  id: totrans-171
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 地址规划
 - en: A good address plan is the cornerstone of a successful IPv6 deployment and can
     substantially help ease network operation and troubleshooting. But the address
     plan is a challenge for most. We have all been well trained to conserve addresses
@@ -989,14 +1384,18 @@
     to overcome this reflex action before we can create a useful IPv6 address concept
     for 128-bit addresses. So what are the rules; how can address concepts be designed
     for IPv6? These are the topics in this section to provide some guidance.
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个好的地址规划是成功部署IPv6的基石，并能大大帮助简化网络运营和故障排除。但地址规划对大多数人来说都是一个挑战。我们都经过了很好的地址节约训练，这种训练高效到让它深入我们的身体细胞。在我们为128位地址创建有用的IPv6地址概念之前，我们必须克服这一反射动作。那么，规则是什么？如何为IPv6设计地址概念？这些是本节要讨论的主题，以提供一些指导。
 - en: 'Before we start, I would like to recall something from [Chapter 2](ch02.html
     "Chapter 2. IPv6 Addressing") on addressing that may help you slowly overcome
     your conservation reflex and free your mind from limited IPv4 thinking. Use this
     as your daily mantra while you work on an address concept:'
+  id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们开始之前，我想回顾一下在[第2章](ch02.html "第2章. IPv6地址分配")中提到的关于地址的一些内容，这些内容可能帮助你逐渐克服节约地址的本能反应，解放你的思维，摆脱有限的IPv4思维。请在你进行地址概念工作时，将其作为你每天的座右铭：
 - en: In [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing"), I showed that usually
     an ISP gets a /32 allocation for its customers and that one single /32 is actually
     more than the whole IPv4 address space (because it has 32 bits to define subnets
@@ -1005,11 +1404,15 @@
     than the whole IPv4 Internet. Even though this sounds astronomically big, this
     amounts to only 0.025% of the currently available public IPv6 address pool (`2000::/3`).
     So let us be a bit generous in designing IPv6 address plans.
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[第2章](ch02.html "第2章. IPv6地址分配")中，我展示了通常一个ISP会为其客户分配/32的地址块，并且一个单独的/32实际上比整个IPv4地址空间还要多（因为它有32位来定义子网，而每个/64子网有64位用于接口ID）。到2013年为止，全球大约已经分配了13万个/32地址块，这意味着比整个IPv4互联网多出13万个地址空间。尽管这听起来极其庞大，但这仅占当前可用公共IPv6地址池（`2000::/3`）的0.025%。因此，在设计IPv6地址规划时，我们可以稍微宽松一些。
 - en: 'To quote Vint Cerf:'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 引用Vint Cerf的话：
 - en: The vast IPv6 address space opens up serious opportunities for the re-examination
     of the notion of “address.” The IETF has only allocated 1/8th of the IPv6 address
     space for current use. The remaining 7/8 of the address space is still to be allocated.
@@ -1017,59 +1420,83 @@
     in ways that are different from topological end points. This is precisely the
     reason that a focus on the future of IPv6 is so important at this point in the
     evolution of the Internet.
+  id: totrans-176
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 广阔的IPv6地址空间为重新审视“地址”这一概念提供了重要机会。IETF只为当前使用分配了IPv6地址空间的1/8，其余的7/8地址空间仍待分配。因此，我们可能可以以不同于拓扑端点的方式来解释IP地址空间的新片段。这正是目前在互联网发展过程中，集中关注IPv6未来的重要性。
 - en: Okay, and now shake your cells and read on. By the way, most of this address
     plan section is taken from my companion book, *Planning for IPv6* (O’Reilly).
     I repeat it here because people always ask many questions about IPv6 address plans.
     So I decided to cover address plans in a section of this book as well. For more
     details on planning, please refer to the companion book.
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 好了，现在动动脑细胞，继续阅读吧。顺便提一句，本节大部分内容取自我的配套书籍，*IPv6规划*（O’Reilly）。我在这里重复这些内容，是因为人们总是会问很多关于IPv6地址规划的问题。因此，我决定在本书的这一部分也涵盖地址规划的内容。有关规划的更多细节，请参阅配套书籍。
 - en: Note
+  id: totrans-178
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: This section assumes you are familiar with the technical aspects of the IPv6
     address architecture described in [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing").
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 本节假设您已经熟悉[第2章](ch02.html "第2章. IPv6地址规划")中描述的IPv6地址架构的技术细节。
 - en: 'Practice shows that in many cases customers choose to group address ranges
     logically, for the following purposes:'
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 实践表明，在许多情况下，客户选择按逻辑分组地址范围，目的是：
 - en: Allow for prefix aggregation.
+  id: totrans-181
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 允许前缀聚合。
 - en: Simplify the configuration, operation, and processing of access lists and firewall
     rules.
+  id: totrans-182
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 简化访问列表和防火墙规则的配置、操作和处理。
 - en: Make addresses traceable, to contain information about the use type or location
     where the address is used.
+  id: totrans-183
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使地址具有可追溯性，以包含地址使用类型或使用地点的信息。
 - en: Make it scalable; create enough space for extensions (more services) and growth
     (more locations and users).
+  id: totrans-184
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使其具有可扩展性；为扩展（更多服务）和增长（更多位置和用户）创造足够的空间。
 - en: Allow for efficient network management and ease of operation.
+  id: totrans-185
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 允许高效的网络管理并简化操作。
 - en: What is new?
+  id: totrans-186
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 有什么新变化？
 - en: 'There are three main differences to consider when designing an IPv6 address
     plan:'
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 在设计IPv6地址规划时，需要考虑三个主要差异：
 - en: One of the most obvious differences (besides the length of the address) is that
     we don’t need variable length subnet masks (VLSMs) anymore. The prefix or network
     part of an IPv6 address should always be 64 bits (/64). Even for point-to-point
@@ -1077,24 +1504,30 @@
     will have to decide for yourself). So, in this respect, IPv6 addresses are simpler.
     No more guessing or misconfiguring of subnet masks. VLSMs have contributed a lot
     to the complexity of managing IPv4 address space.
+  id: totrans-188
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 最明显的区别之一（除了地址长度）是我们不再需要可变长度子网掩码（VLSM）。IPv6地址的前缀或网络部分应该始终是64位（/64）。即使是点对点连接呢？是的，即使是点对点连接（有些人选择更改这一规则——您将需要自己决定）。因此，从这个角度看，IPv6地址更简单。不再需要猜测或错误配置子网掩码。VLSM为管理IPv4地址空间增加了很多复杂性。
 - en: 'The preceding rule also relates to the following: we no longer have to size
     subnets to the number of devices in the subnet (in other words, no more address
     conservation practices are necessary). Each and every subnet can potentially have
     2^(64) devices. The number of devices for each subnet will be determined by your
     switch’s capacity, so consult your vendor to find out what is possible.'
+  id: totrans-189
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 前面的规则还与以下内容相关：我们不再需要根据子网中的设备数量来调整子网的大小（换句话说，不再需要进行地址节省的操作）。每个子网都可能拥有2^(64)个设备。每个子网中的设备数量将由交换机的容量决定，因此请咨询您的供应商以了解可能的容量。
 - en: In IPv6, addresses are assigned to interfaces. So an IPv6 address identifies
     an interface, not a host. And, in many cases, an interface will be multi-addressed
     and choose addresses to initiate connections based on policies or default address
     selection rules.
+  id: totrans-190
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在IPv6中，地址被分配给接口。因此，IPv6地址标识的是接口，而不是主机。而且，在许多情况下，接口会有多个地址，并根据策略或默认地址选择规则选择地址来发起连接。
 - en: Please resist the temptation to use larger masks for your subnets, such as /96,
     in order to preserve address space. While the standard does not prohibit that,
     observing the /64 boundary makes your address plan future proof. Changing this
@@ -1103,156 +1536,226 @@
     with non /64 masks. There may be many other processes or services that fail with
     a nonstandard subnet mask. You have enough address space with IPv6! Optimize it
     for efficient management.
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: 请抵制为子网使用更大掩码（如/96）的诱惑，以便节省地址空间。虽然标准并不禁止这样做，但遵循/64边界可以使您的地址规划面向未来。更改此掩码可能会在未来引发许多问题，因为所有开发都是基于/64掩码的。例如，SLAAC（无状态地址自动配置）在非/64掩码下无法正常工作。可能还有许多其他流程或服务在非标准子网掩码下会失败。IPv6为您提供了足够的地址空间！优化它以实现高效管理。
 - en: Once you are familiar with the IPv6 address architecture, take your list of
     things that you wanted to change in your IPv4 address plan if you could start
     all over, and then you begin to design your IPv6 address concept.
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦熟悉了IPv6地址架构，请列出您如果可以从头开始设计，想要更改的IPv4地址规划事项，然后开始设计您的IPv6地址方案。
 - en: 'The ingredients are:'
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 组成部分如下：
 - en: Review your current IPv4 address plan and the operational lessons learned.
+  id: totrans-194
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 回顾您当前的IPv4地址规划及其运营经验教训。
 - en: Identify the constraints and inconsistencies in your current IPv4 plan.
+  id: totrans-195
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 识别当前IPv4规划中的约束和不一致之处。
 - en: Identify your needs according to your target architecture.
+  id: totrans-196
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 根据目标架构识别您的需求。
 - en: Create different address plan scenarios to address these items.
+  id: totrans-197
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 创建不同的地址规划场景以解决这些问题。
 - en: Have internal reviews and discussions with all IT teams.
+  id: totrans-198
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 与所有IT团队进行内部评审和讨论。
 - en: Take the best options to the lab, including your provisioning tools, and test
     the common operational scenarios.
+  id: totrans-199
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将最佳选项带入实验室，包括您的配置工具，并测试常见的操作场景。
 - en: 'When you define your scenarios, you will have to find a good balance between
     the following two choices:'
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 当定义场景时，您需要在以下两个选择之间找到一个良好的平衡：
 - en: '*Focus on route aggregation*'
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: '*专注于路由聚合*'
 - en: Emphasizing the route aggregation by assigning the higher-order bits to the
     topology (regions, sites) reduces the number of routes in the core routing tables.
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过将高位分配给拓扑结构（区域、站点）来强调路由聚合，从而减少核心路由表中的路由数量。
 - en: '*Focus on policy aggregation*'
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: '*专注于策略聚合*'
 - en: Emphasizing the policy aggregation by assigning the higher-order bits for service-
     or security-related information (services, zones) reduces the number of policies,
     minimizes the risk of user errors, and simplifies management.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过将高位分配给与服务或安全相关的信息（服务、区域）来强调策略聚合，这减少了策略的数量，最小化了用户错误的风险，并简化了管理。
 - en: To generalize, prioritize the most common and most important information in
     the high-order bits and allocate enough space for current and envisioned options.
     They can be new sites, new services, new users, etc.
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 一般来说，将最常见和最重要的信息优先放在高位，并为当前和预见中的选项分配足够的空间。这些选项可以是新站点、新服务、新用户等。
 - en: 'In order to build a useful address plan, consider the following:'
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了构建一个有用的地址规划，请考虑以下几点：
 - en: Prefix aggregation based on your topology.
+  id: totrans-207
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 基于拓扑结构的前缀聚合。
 - en: Policy aggregation based on your services and security concepts.
+  id: totrans-208
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 基于您的服务和安全概念的策略聚合。
 - en: Subnet consistency (don’t include address conservation mechanisms; focus on
     operational ease).
+  id: totrans-209
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 子网一致性（不要包括地址节省机制；关注操作简便性）。
 - en: Use of address types (only global addresses or global plus unique local).
+  id: totrans-210
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用地址类型（仅全球地址或全球地址加唯一本地地址）。
 - en: Consistently assign a /64 to subnets and point-to-point links; no need for host
     planning.
+  id: totrans-211
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 始终为子网和点对点链路分配一个/64前缀；无需进行主机规划。
 - en: If you have many locations and they have local Internet access, it is recommended
     to assign at least a /48 to each of them.
+  id: totrans-212
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果您有多个位置，并且它们有本地互联网接入，建议为每个位置分配至少一个/48的前缀。
 - en: If you are a global organization, consider regional address allocations (RIPE,
     APNIC, ARIN, etc.) for risk mitigation purposes.
+  id: totrans-213
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果您是一个全球性组织，考虑为风险缓解目的使用区域地址分配（RIPE、APNIC、ARIN等）。
 - en: Observe nibble boundaries whenever possible (a nibble is 4 binary digits).
+  id: totrans-214
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 尽可能遵守四位字节边界（一个四位字节是4个二进制位）。
 - en: Use of provisioning mechanisms and tools (DHCPv6, SLAAC, IPAM/DDI).
+  id: totrans-215
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用配置机制和工具（DHCPv6、SLAAC、IPAM/DDI）。
 - en: Don’t create structure for the sake of structure; only truly relevant information
     should be embedded.
+  id: totrans-216
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 不要仅仅为了结构而创建结构；只有真正相关的信息才应该被嵌入。
 - en: Avoid direct mapping of your IPv4 address plan, as it perpetuates legacy issues
     and limits the ability to leverage the IPv6 address space resources.
+  id: totrans-217
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 避免直接映射您的IPv4地址规划，因为这会延续遗留问题，并限制利用IPv6地址空间资源的能力。
 - en: Security aspects.
+  id: totrans-218
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 安全方面。
 - en: Growth (network, users, services).
+  id: totrans-219
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 增长（网络、用户、服务）。
 - en: New services with increased address demand (monitoring, sensors, management,
     etc.).
+  id: totrans-220
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 新服务带来的地址需求增加（监控、传感器、管理等）。
 - en: Your upper limit for address planning is the range that you have received (a
     /48 or a /32 depending on the size of your company). Your lower limit is the /64
     that you have to assign to your subnets. So within that space you can define your
     own structure. You start with identifying your current address inventory and your
     clearly envisioned needs for the foreseeable future, and then you take the bits
     that are left free and use them to support growth.
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: 您的地址规划上限是您已获得的范围（根据公司规模是/48或/32）。您的下限是您必须分配给子网的/64。所以，在这个空间内，您可以定义自己的结构。首先识别您当前的地址库存和对可预见未来的清晰需求，然后使用剩余的位来支持增长。
 - en: Note
+  id: totrans-222
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Don’t forget to define clear processes and rules for allocation of IPv6 address
     space.
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: 不要忘记定义IPv6地址空间分配的清晰流程和规则。
 - en: '[Figure 9-1](ch09.html#example_for_a_high-level_address_plan "Figure 9-1. Example
     of a high-level address plan") shows an example of how such a high-level scenario
     might look.'
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图9-1](ch09.html#example_for_a_high-level_address_plan "图9-1. 高级地址规划示例")展示了这样一个高级场景的示例。'
 - en: '![Example of a high-level address plan](images/ipv6_0901.png)Figure 9-1. Example
     of a high-level address plan'
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: '![高级地址规划示例](images/ipv6_0901.png)图 9-1. 高级地址规划示例'
 - en: In this example, a combination of service-based and topology-based design was
     chosen. The first nibble (the first 4 bits) was chosen to differentiate 16 service
     types that can then be used to assign special rules on a high level. The next
@@ -1263,28 +1766,40 @@
     catalogue, and the security concept of the organization. It is simply an example
     to get you thinking. The main goal of the service-level approach is to make security
     policy design and operation simpler.
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，选择了基于服务和基于拓扑的设计组合。第一个四位（前 4 位）被用来区分 16 种服务类型，然后可以在高级别上为其分配特殊规则。接下来的四位用于区分每种服务类型下的
+    16 个应用程序。第三个四位用于区分 16 个超级区域，每个超级区域可以有 4,096 个位置（12 位）。每个位置都会分配一个 /56 前缀，并且仍然可以创建
+    256 个子网。这个地址规划是否合适完全取决于网络、服务目录和组织的安全概念。它只是一个示例，旨在激发你的思考。服务级别方法的主要目标是使安全策略设计和操作更简单。
 - en: In all aspects you need to integrate the incredibly large IPv6 address space.
     This can’t be repeated enough. So, for instance, when it comes to subnet consistency,
     there is no need to conserve address space.
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 在各个方面，你需要整合非常庞大的 IPv6 地址空间。这一点再强调也不为过。因此，例如，在子网一致性方面，完全没有必要节省地址空间。
 - en: Note
+  id: totrans-228
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: 'For operational ease and simple administration, keep subnets for a certain
     type of location all the same size, regardless of how many users work there. While
     this is the best way to go, it may feel uncomfortable in the beginning. The same
     rule is true if you leave address space free for growth. A good rule to follow
     is: if your cells don’t hurt, your plan isn’t quite big enough yet.'
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了操作方便和简化管理，保持同一类型位置的子网大小一致，无论那里有多少用户。虽然这是最佳做法，但一开始可能会感到不适应。如果你为未来的扩展留出地址空间，同样也适用这个规则。一个好的规则是：如果你的单元没有痛苦，那么你的规划还不够大。
 - en: Global addresses versus ULAs
+  id: totrans-230
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 全局地址与 ULA
 - en: 'As already mentioned, an IPv6 interface can typically have multiple addresses.
     Part of your address design is deciding what address types to use. Specifically,
     you have two options: to generally use global IPv6 addresses (GUAs), or to use
@@ -1293,8 +1808,12 @@
     which means they are routable but should only be used internally and never routed
     to the Internet. They can, for instance, be used for an internal deployment or
     to build a lab when you do not have global IPv6 address space allocated yet.'
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，IPv6 接口通常可以拥有多个地址。你的地址设计的一部分是决定使用哪些地址类型。具体来说，你有两个选择：一般使用全局 IPv6 地址（GUA），或在内部使用唯一本地地址（ULA）。ULA
+    在 RFC 4193 中有定义，前缀为 `fd00::/8`。它们类似于 IPv4 中的 RFC 1918 私有地址，这意味着它们是可路由的，但应仅限于内部使用，绝不应路由到互联网。例如，它们可以用于内部部署或在尚未分配全局
+    IPv6 地址空间时构建实验室。
 - en: There is one big difference between the RFC 1918 concept and how these private
     ULA addresses are used today. Using ULAs does not mean that you need NAT (network
     address translation) to get outside to the Internet. Because IPv6 interfaces are
@@ -1308,54 +1827,74 @@
     outside will be configured only with ULAs. If you want a ULA-only addressing internally,
     you could also use NPTv6 (Network Prefix Translation) described in the NAT section
     in [Chapter 7](ch07.html "Chapter 7. Transition Technologies").
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC 1918概念与当前如何使用这些私有ULA地址之间有一个很大的区别。使用ULA并不意味着你需要NAT（网络地址转换）来访问互联网。因为IPv6接口设计时就支持多种地址类型，所以需要互联网连接的接口将简单地获取一个全球IPv6地址，除了ULA地址。当连接到内部服务器时，接口将使用其ULA地址；当连接到互联网时，则使用全球IPv6地址。RFC
+    6724定义了默认的地址选择规则来处理这个问题。在较大的网络中，你将拥有关于源地址和目标地址选择规则的政策。所以，采用这种设计时，应该无法从外部访问的内部服务器和数据库只会配置ULA地址。如果你想在内部仅使用ULA地址，也可以使用NPTv6（网络前缀转换），该技术在[第7章](ch07.html
+    "第7章 过渡技术")的NAT部分中有描述。
 - en: Note
+  id: totrans-233
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: There is no need to combine ULA addresses with NAT as we did with private addresses
     in IPv4\. In IPv4 the NAT was needed to map many addresses into one or a few.
     In IPv6, hosts that need access to internal services and the Internet simply get
     two addresses, a ULA and a GUA (global address).
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 不需要像IPv4中使用私有地址时那样将ULA地址与NAT结合使用。在IPv4中，NAT需要将多个地址映射到一个或少数几个地址。而在IPv6中，需要访问内部服务和互联网的主机只需获取两个地址，一个是ULA地址，另一个是GUA（全球地址）。
 - en: When it comes to choosing whether you want to use ULAs or go with global addresses,
     there are pros and cons to both approaches and many discussions surrounding them.
     Due to early deployment time, there is not too much operational experience available
     to draw from. From a technical point of view, you could make either choice—you
     will have to decide for yourself.
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: 在选择是否使用ULA或选择全球地址时，这两种方法都有优缺点，并且围绕它们有很多讨论。由于部署较早，目前可供参考的运营经验不多。从技术角度来看，你可以做出任意选择——你需要自己决定。
 - en: 'Here are some of the considerations:'
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是一些考虑事项：
 - en: ULAs make you internally independent of your global prefix, which is advantageous
     if you need to renumber your network. In this case, all your internal systems
     and communications are not affected. If you have a PI (provider-independent) address
     space, this is not a concern.
+  id: totrans-237
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: ULA使你在内部网络中独立于全球前缀，如果需要重新编号网络，这将非常有利。在这种情况下，你的所有内部系统和通信都不会受到影响。如果你拥有PI（提供商独立）地址空间，这也不是问题。
 - en: ULAs add a layer of security to your internal infrastructure, as servers and
     databases with critical data are not reachable from outside. Obviously, you still
     need firewalls to protect systems, but ULAs offer additional protection. Some
     organizations achieve that same goal by setting aside a part of their global prefix
     and use it as internal-only prefix, blocking it at the border in both directions.
+  id: totrans-238
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: ULA为你的内部基础设施增加了一层安全性，因为带有关键数据的服务器和数据库无法从外部访问。显然，你仍然需要防火墙来保护系统，但ULA提供了额外的保护。有些组织通过保留一部分全球前缀并将其作为仅限内部使用的前缀来实现相同的目标，在边界两侧进行屏蔽。
 - en: Attackers who know some of your global addresses cannot derive the addresses
     for internal systems.
+  id: totrans-239
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 知道你的一些全球地址的攻击者无法推导出内部系统的地址。
 - en: ULAs should not be used with NAT, so NAT is not a concern. Systems that need
     access to the Internet can get a global IPv6 address in addition to the ULA address.
     That is the advantage of the IPv6 multiple-addresses-per-interface architecture.
+  id: totrans-240
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 不应将ULA（唯一本地地址）与NAT（网络地址转换）一起使用，因此NAT不是一个问题。需要访问互联网的系统可以获得一个全球IPv6地址，除此之外还可以使用ULA地址。这就是IPv6每个接口多个地址架构的优势。
 - en: Now, whether you want to use ULAs is up to you. They may be useful in isolated
     domains such as manufacturing lines or inter-datacenter traffic for backup. Many
     people decide that with the unlimited IPv6 address space, where they can finally
@@ -1369,12 +1908,16 @@
     prefix and assign it to internal systems only and block that prefix to and from
     the outside world. Even in the case of using ULAs, you will have to specifically
     block them at the border because they are not to be routed to the Internet.
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，是否使用ULA（独立的本地地址）取决于你。它们可能在孤立的领域中非常有用，比如制造生产线或数据中心之间的备份流量。许多人决定，在无限的IPv6地址空间下，既然他们终于可以为所有系统分配全球地址，他们希望选择这个简单的选项——通过防火墙保护内部系统，并且享有仅需管理一个前缀的优势。对于那些决定同时使用全球地址和ULA的人，我希望IPAM（IP地址管理）供应商能够足够聪明，开发出能够管理多个前缀的系统，并将子网设计导入IPAM解决方案中以便于管理。无论如何，你可能会为这两个前缀选择相同的地址规划。而你的第三个选择是，你可以选择从全球前缀中选一个特定的前缀，仅分配给内部系统，并阻止该前缀与外界的通信。即使使用ULA，你也需要在边界上专门阻止它们，因为它们不应被路由到互联网。
 - en: General considerations
+  id: totrans-242
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 一般考虑
 - en: Whenever you translate something from your IPv4 address plan to your IPv6 address
     plan, make sure that you are not copying limitations over to the new concept.
     You are creating an address concept with a future native IPv6 network in mind,
@@ -1382,8 +1925,10 @@
     for some years. But once you start running a native IPv6-only network, you want
     the almost unlimited freedom of the address space without having to renumber the
     network.
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 每当你将某些内容从IPv4地址计划转换到IPv6地址计划时，请确保不要将IPv4中的限制复制到新的概念中。你是在为未来的原生IPv6网络创建一个地址概念，而双栈网络只是一个过渡状态——尽管它可能会存在几年。但一旦你开始运行原生的IPv6-only网络，你将希望享有几乎无限的地址空间自由，而无需重新编号网络。
 - en: For a long time, the recommendation was that ISPs get a /32 from their RIR,
     and organizations and end sites get a /48 from their provider or a /48 as PI space.
     RFC 6177 changes the recommended assignment size to end sites. It states that
@@ -1401,8 +1946,12 @@
     or even more. According to RFC 6177, even home users should get more than just
     a /64 subnet. The development of services in the market suggests that future home
     networks have multiple subnets (smart buildings).
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: 长期以来，建议互联网服务提供商（ISP）从其RIR（区域互联网注册机构）获取一个/32前缀，而组织和终端站点从其提供商处获取一个/48前缀，或者将/48作为PI空间。RFC
+    6177将终端站点推荐的前缀大小改为不再统一为/48。它指出，“一个适用于所有情况的/48推荐前缀对于广泛的终端站点范围来说过于简单，不再建议作为单一默认选项。”该RFC声明，确定终端站点最佳前缀大小的责任在于运营社区。这引入了一些新的考虑因素。当默认前缀为/48时，换服务提供商或来自不同提供商的分配总是有相同的前缀边界。而在新的政策下，终端站点可能需要从更大的前缀迁移到更小的前缀，这意味着需要合并子网。如果你有一个/48并且首先使用低位的位（如果网络大小允许的话），你可以为此做好准备。似乎许多提供商通常为较小站点分配/56或/52的前缀。这条规则不适用于大企业；它们将始终获得/48或更大的前缀。根据RFC
+    6177，即使是家庭用户也应获得比/64子网更大的地址空间。市场上服务的发展表明，未来的家庭网络将有多个子网（智能建筑）。
 - en: With regard to subnet size, there is nothing in the specification that prevents
     you from changing the /64 boundary. But I don’t recommend that, because doing
     so will break many other features of IPv6 where applications and processes assume
@@ -1412,40 +1961,56 @@
     multihoming by IPv6 intermediation (SHIM6), among others. And there may be more
     developments in the future that assume a /64 boundary. If you change that, all
     these features will break.
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于子网大小，规范中并没有禁止你改变/64边界。但我不推荐这样做，因为这样做会破坏IPv6的许多其他功能，应用程序和进程默认假设/64子网大小。这包括邻居发现（ND）、安全邻居发现（SEND）、隐私扩展、部分移动IPv6规范、独立协议的稀疏模式多播（PIM-SM）与嵌入式RP、通过IPv6中介进行的站点多宿（SHIM6）等机制。而且，未来可能还会有更多假设/64边界的功能。如果你改变了这一点，所有这些功能都会受到影响。
 - en: Note
+  id: totrans-246
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: The only benefit of creating prefixes longer than /64 would be address conservation.
     Use your mantra and remember that we don’t need to conserve space anymore. The
     benefit of conserving space would be very small compared to the pain of managing
     a nonstandard subnet prefix.
+  id: totrans-247
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建比/64更长的前缀的唯一好处是节省地址空间。请记住我们的原则：我们不再需要节省空间。相比管理非标准子网前缀的麻烦，节省空间的好处是微不足道的。
 - en: Nevertheless, you can still choose to use high-order bits from the interface
     ID part to denote specific systems, services, or networks to make it easier to
     recognize these IDs.
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管如此，你仍然可以选择使用来自接口ID部分的高位来表示特定的系统、服务或网络，以便更容易识别这些ID。
 - en: A good and helpful practice when grouping bits is to always do it on a 4-bit
     boundary (a *nibble*). This way, it is much easier to decipher the address because
     4 bits represent one hexadecimal digit.
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: 在分组位时，一个良好且有帮助的实践是始终在4位边界上进行分组（*nibble*）。这样，解析地址时会更加容易，因为4个位表示一个十六进制数字。
 - en: Let’s play with some examples to get our brains going. You could group subnets
     by location and then by service or use type, or the other way round (by service
     type first and then by location).
+  id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们通过一些例子来激活大脑。你可以按位置对子网进行分组，然后再按服务或使用类型进行分组，或者反过来（先按服务类型，再按位置）。
 - en: 'So, for instance, with the prefix `2001:db8:1::/48`, you have 16 bits for subnetting.
     You can choose to subnet as follows (L=location, S=service, F=free):'
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，对于前缀`2001:db8:1::/48`，你有16位可用于子网划分。你可以按以下方式进行子网划分（L=位置，S=服务，F=空闲）：
 - en: '[PRE0]'
+  id: totrans-252
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Which option you choose depends on whether your main purpose is to optimize
     routing, in which case you choose the location identifier first, or whether you
     want to optimize security rules and ACLs (which are usually based on filters for
@@ -1453,15 +2018,19 @@
     In some cases, organizations only assign a subnet to a location, and the location
     further manages the prefix and creates its own address plan. In such a case, you
     would also choose the location identifier first.
+  id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: 你选择的选项取决于你的主要目的是否是优化路由，如果是的话，你应该首先选择位置标识符；或者你是否希望优化安全规则和访问控制列表（ACL，通常基于特定服务的过滤器），如果是的话，你应首先选择服务标识符。在某些情况下，组织只为某个位置分配子网，而该位置进一步管理前缀并创建自己的地址规划。在这种情况下，你也应该首先选择位置标识符。
 - en: Or you may want to mix these two options. You may have some specific services
     that you want to filter on at a high level, so you would put identifiers for these
     services in the highest-order bits of your subnet range, perhaps followed by location
     bits to optimize the routing within your network, and ending with bits to identify
     more services.
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，你可能希望将这两种选项结合使用。你可能有一些特定的服务需要在较高层次上进行过滤，因此你会将这些服务的标识符放在子网范围的最高位，接下来是位置位，以优化网络内的路由，最后是识别更多服务的位。
 - en: With the 4 bits used for location and service type in this example, you can
     create 16 locations and services (2⁴). You have to adapt this scheme to the number
     of locations and services you want represented (and add enough room for growth).
@@ -1469,8 +2038,11 @@
     numbering plans. This could also be reflected in your IPv6 addressing plan to
     include the 12-bit VLAN ID in the prefix. You can include it in decimal notation
     (leaving out A–F) or convert it to hexadecimal notation.
+  id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个示例中，使用4个比特位表示位置和服务类型，你可以创建16个位置和服务（2⁴）。你需要根据你想要表示的位置和服务的数量来调整这个方案（并为未来的扩展预留足够的空间）。有时组织会在VLAN编号方案中包含位置或服务描述。你也可以在IPv6地址规划中反映这一点，将12位的VLAN
+    ID包含在前缀中。你可以使用十进制表示法（省略A-F）或将其转换为十六进制表示法。
 - en: These are all general ideas for input on your creative planning. Take the time
     to carefully craft your future addressing design, discuss all possible options
     again and again, have your address concept proposal reviewed by many people—including
@@ -1480,12 +2052,16 @@
     this will add costs and delay the project. In the long term, if you live with
     a suboptimal address design, returning operational costs may be unnecessarily
     high.
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些都是关于你创意规划的一般性思路。花时间仔细设计你未来的地址规划，反复讨论所有可能的选项，让许多人，包括外部顾问，审阅你的地址概念提案，以挑战你的计划，并反复检查，直到感觉合适为止。地址设计是下一代网络的基础。如果没有做好，并且在部署项目期间不得不进行更改，这将增加成本并延迟项目进度。从长远来看，如果你使用了一个次优的地址设计，运营成本可能会不必要地高。
 - en: Configuration of interface IDs
+  id: totrans-257
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 接口ID的配置
 - en: How interface IDs are defined depends on the IP address management process that
     you choose. You can either choose *Stateless Address Autoconfiguration* (SLAAC),
     where interfaces create interface IDs based on MAC address (EUI-64 format defined
@@ -1497,8 +2073,11 @@
     hosts, you may not want to start at a low interface ID and sequentially number
     your interfaces. Instead, you may want to have random interface IDs, because the
     more random and distributed your interface IDs are, the harder it is to scan them.
+  id: totrans-258
   prefs: []
   type: TYPE_NORMAL
+  zh: 接口ID的定义取决于你选择的IP地址管理过程。你可以选择*无状态地址自动配置*（SLAAC），其中接口根据MAC地址生成接口ID（RFC 4291定义的EUI-64格式），或者选择*隐私选项*（如RFC
+    4941所定义），其中接口ID是随机生成并定期更改的。在较新的操作系统中，微软使用通过随机标识符创建的稳定接口ID。你可以使用DHCPv6，并像在IPv4中一样分配地址。通过DHCPv6，该服务可能提供定义接口ID的不同选项。为了最佳地保护你的主机，你可能不希望从低的接口ID开始并按顺序编号接口。相反，你可能希望使用随机的接口ID，因为你的接口ID越随机和分散，就越难以扫描。
 - en: If you have a global IPv6 prefix and use a ULA prefix internally, you may want
     to use the privacy option for the global prefix. This way, users accessing the
     Internet cannot easily be tracked because their interface ID changes regularly.
@@ -1506,59 +2085,85 @@
     the border), it’s preferable to have fixed addresses assigned to make management,
     troubleshooting, security, and logging easier. Again, this also depends on whether
     vendors will provide IP address management solutions that help to deal with this.
+  id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你有一个全球IPv6前缀并且在内部使用ULA前缀，你可能希望为全球前缀使用隐私选项。这样，访问互联网的用户就不容易被追踪，因为他们的接口ID会定期更改。对于ULA前缀（或在边界处过滤的全球前缀的内部部分），最好分配固定的地址，以便于管理、故障排除、安全性和日志记录。同样，这也取决于供应商是否会提供帮助处理这一问题的IP地址管理解决方案。
 - en: Note
+  id: totrans-260
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: There is a recommendation to not use hardware-based interface IDs. Microsoft
     already uses a stable interface ID that is created with a random identifier. RFC
     7217 defines a stable interface ID not based on a hardware identifier. Refer to
     the section [Stateless Address Autoconfiguration (SLAAC)](ch04.html#stateless_address_autoconfiguration_open
     "Stateless Address Autoconfiguration (SLAAC)") for more information.
+  id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: 有建议不要使用基于硬件的接口 ID。微软已经使用一个通过随机标识符创建的稳定接口 ID。RFC 7217 定义了一个不基于硬件标识符的稳定接口 ID。有关更多信息，请参阅[无状态地址自动配置（SLAAC）](ch04.html#stateless_address_autoconfiguration_open
+    "无状态地址自动配置（SLAAC）")章节。
 - en: Where Do You Get Your Address Space From?
+  id: totrans-262
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 你从哪里获得地址空间？
 - en: The IANA (Internet Assigned Numbers Authority) is responsible for the global
     coordination of the IP addressing systems, as well as the ASN (Autonomous System
     Numbers) used for routing Internet traffic.
+  id: totrans-263
   prefs: []
   type: TYPE_NORMAL
+  zh: IANA（互联网号码分配局）负责全球 IP 地址系统的协调工作，以及用于路由互联网流量的 ASN（自治系统号）。
 - en: RIRs (Regional Internet Registries) get their IP address space from IANA. There
     are several RIRs in the world to allocate address space within their region. [Figure 9-2](ch09.html#the_regional_internet_registries
     "Figure 9-2. The Regional Internet Registries") shows the global hierarchy, the
     RIRs and the regions they serve.
+  id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: RIR（区域互联网注册机构）从 IANA 获取其 IP 地址空间。全球有多个 RIR 来分配它们区域内的地址空间。[图 9-2](ch09.html#the_regional_internet_registries
+    "图 9-2. 区域互联网注册机构") 展示了全球层级结构、RIR 和它们所服务的区域。
 - en: '![The Regional Internet Registries](images/ipv6_0902.png)Figure 9-2. The Regional
     Internet Registries'
+  id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: '![区域互联网注册机构](images/ipv6_0902.png)图 9-2. 区域互联网注册机构'
 - en: The RIRs further serve LIRs (Local Internet Registries), NIRs (National Internet
     Registries), ISPs (Internet Service Providers), and in some cases also end customers
     with address space.
+  id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: RIR 还为 LIR（本地互联网注册机构）、NIR（国家互联网注册机构）、ISP（互联网服务提供商）提供地址空间，在某些情况下还直接为最终客户提供地址空间。
 - en: The address policies in the different regions differ slightly from each other.
     ISPs and customers must get the information about the policies in their region
     from their RIR. Each RIR has a website with all the information on address space
     and policies.
+  id: totrans-267
   prefs: []
   type: TYPE_NORMAL
+  zh: 不同地区的地址政策略有不同。ISP 和客户必须从他们的 RIR 获取所在地区的政策信息。每个 RIR 都有一个网站，提供关于地址空间和政策的所有信息。
 - en: Note
+  id: totrans-268
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Links to all the RIRs can be found on [IANA’s website](http://www.iana.org/numbers).
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有 RIR 的链接可以在[IANA 的网站](http://www.iana.org/numbers)上找到。
 - en: Customers have several options to apply for IPv6 address space.
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 客户有几种申请 IPv6 地址空间的选项。
 - en: Currently there is *PA space* (*provider aggregatable*) and *PI space* (*provider
     independent*). PA space is targeted at ISPs, providing Internet connectivity to
     many end customers. In order to receive PA space you must usually be a member
@@ -1568,8 +2173,12 @@
     be taken to another ISP, so in case of switching ISPs, renumbering is needed (or
     the use of NPTv6 prefix translation). For assignment recommendations, refer to
     RFC 6177, which is described in the section below.
+  id: totrans-271
   prefs: []
   type: TYPE_NORMAL
+  zh: 目前有*PA空间*（*提供商聚合*）和*PI空间*（*提供商独立*）。PA 空间面向 ISP，提供互联网连接给多个最终客户。为了获得 PA 空间，通常需要成为
+    RIR 的会员，并支付年费。标准分配大小通常在 /29 到 /32 范围内。然后，提供商将网络分配给他们的客户，通常在 /48 或 /56 范围内。ISP
+    分配给客户的 PA 空间不能转移到另一个 ISP，因此在更换 ISP 时，需要重新编号（或者使用 NPTv6 前缀转换）。有关分配建议，请参阅 RFC 6177，下面的章节中有描述。
 - en: PI space is intended for end users who are not able to or do not want to use
     addresses from their provider’s PA space. This does not require membership but
     an annual fee per prefix. PI space belongs to the end user and can be taken along
@@ -1577,39 +2186,58 @@
     routing table, impacting all routers worldwide. Originally, in the early days
     of IPv6, the plan was to not assign PI space in order to keep routing tables small.
     But it has shown that this policy cannot be sustained in practice.
+  id: totrans-272
   prefs: []
   type: TYPE_NORMAL
+  zh: PI 空间面向那些不能或不愿使用其提供商 PA 空间的最终用户。这不需要会员身份，但每个前缀需要支付年费。PI 空间归最终用户所有，并且可以带到下一个
+    ISP。每一个使用 PI 前缀的互联网地址都会出现在全球路由表中，影响全球所有的路由器。最初，在 IPv6 的早期阶段，计划是不分配 PI 空间，以保持路由表的小巧。但事实证明，这一政策在实践中无法维持。
 - en: 'So as an end customer you have the following choices:'
+  id: totrans-273
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，作为最终客户，你有以下几种选择：
 - en: PA space from a local provider
+  id: totrans-274
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 来自本地提供商的PA空间
 - en: PA space from the RIR (requires membership)
+  id: totrans-275
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 来自RIR的PA空间（需要会员资格）
 - en: PI space from RIR (annual fee)
+  id: totrans-276
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 来自RIR的PI空间（年费）
 - en: Note
+  id: totrans-277
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: You can find the official information from [RIPE](http://www.ripe.net/ripe/docs/ripe-589)
     about their IPv6 Address Allocation and Assignment Policy.
+  id: totrans-278
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以从[RIPE](http://www.ripe.net/ripe/docs/ripe-589)获取有关其IPv6地址分配和分配政策的官方信息。
 - en: Again, this document number is valid in March 2014\. At a later time you may
     want to check if there is a newer version.
+  id: totrans-279
   prefs: []
   type: TYPE_NORMAL
+  zh: 再次提醒，本文件编号有效期至2014年3月。之后你可能需要查看是否有更新版本。
 - en: How Much Space Will You Get?
+  id: totrans-280
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 你将获得多少空间？
 - en: Allocation rules are a work in progress and can still change. The latest update
     of how to use the address space is in RFC 6177, “IPv6 Address Assignment to End
     Sites.” It contains recommendations on how the address space should be further
@@ -1618,18 +2246,25 @@
     As mentioned before, with the new version these rules have been adjusted, because
     the exact assignment of prefix sizes should be in the authority of the operational
     community.
+  id: totrans-281
   prefs: []
   type: TYPE_NORMAL
+  zh: 地址分配规则仍在进行中，可能会有所变化。如何使用地址空间的最新更新内容请参考RFC 6177，《IPv6地址分配给终端站点》。它包含了如何进一步划分地址空间的建议。它软化了先前版本中的规则（即RFC
+    3177），其中家庭网络以及小型和大型企业应获得一个/48地址块。如前所述，在新版本中，这些规则已经调整，因为前缀大小的具体分配应由操作社区来决定。
 - en: 'The RFC further states: “An important goal in IPv6 is to significantly change
     the default and minimal end site assignment, from ‘a single address’ to ‘multiple
     networks’ and to ensure that end sites can easily obtain address space.”'
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
+  zh: RFC进一步指出：“IPv6的一个重要目标是显著改变默认和最小的终端站点分配，从‘单个地址’到‘多个网络’，并确保终端站点可以轻松获得地址空间。”
 - en: 'If you are responsible for allocating addresses or are requesting addresses
     for your network, then the following rules for address allocation in RFC 6177
     can be used:'
+  id: totrans-283
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你负责分配地址或为你的网络请求地址，那么可以使用RFC 6177中关于地址分配的以下规则：
 - en: A key principle for address management is that end sites must always be able
     to obtain a reasonable amount of address space for their actual and planned usage,
     and over ranges of time specified in years rather than just months. In practice,
@@ -1637,60 +2272,80 @@
     situation that must be avoided is having an end site feel compelled to use IPv6-to-IPv6
     Network Address Translation or other burdensome address conservation techniques
     because it could not get sufficient address space.
+  id: totrans-284
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 地址管理的一个关键原则是，终端站点必须始终能够为其实际和计划的使用获得合理数量的地址空间，并且是按年而非按月的时间范围。实际上，这意味着至少需要一个/64地址块，在大多数情况下需要更多。必须避免的一个特定情况是，终端站点由于无法获得足够的地址空间而被迫使用IPv6到IPv6的网络地址转换（NAT）或其他繁琐的地址节省技术。
 - en: It should be easy for an end site to obtain address space to number multiple
     subnets (i.e., a block larger than a single /64) and to support reasonable growth
     projections over long time periods (e.g., a decade or more).
+  id: totrans-285
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 终端站点应能够轻松获得足够的地址空间来编号多个子网（即大于单个/64的地址块），并支持长期（例如十年或更长时间）合理的增长预测。
 - en: The default assignment size should take into consideration the likelihood that
     an end site will have need for multiple subnets in the future and avoid the IPv4
     practice of having frequent and continual justification for obtaining small amounts
     of additional space.
+  id: totrans-286
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 默认分配大小应考虑到终端站点未来可能需要多个子网的可能性，并避免IPv4实践中频繁且持续的申请额外小块地址空间的情况。
 - en: Although a /64 can (in theory) address a practically unlimited number of devices,
     sites should be given sufficient address space to be able to lay out subnets as
     appropriate, and not be forced to use address conservation techniques such as
     using bridging.
+  id: totrans-287
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 尽管一个/64地址块（理论上）可以为几乎无限数量的设备提供地址，但站点应分配足够的地址空间，以便能够适当划分子网，而不是被迫使用地址节省技术，如使用桥接。
 - en: Assigning a longer prefix to an end site, compared with the existing prefixes
     the end site already has assigned to it, is likely to increase operational costs
     and complexity for the end site, with insufficient benefit to anyone.
+  id: totrans-288
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将一个较长的前缀分配给一个终端站点，相较于该终端站点已分配的现有前缀，可能会增加终端站点的运营成本和复杂性，且对任何人都没有足够的好处。
 - en: The operational considerations of managing and delegating the reverse DNS tree
     under ip6.arpa on nibble versus non-nibble boundaries should be given adequate
     consideration.
+  id: totrans-289
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 管理和委派ip6.arpa下的反向DNS树时，应充分考虑在nibble边界与非nibble边界之间的操作性问题。
 - en: Home network subscribers should receive multiple subnets.
+  id: totrans-290
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 家庭网络用户应当接收到多个子网。
 - en: A site that receives a /48 prefix has 16 bits for subnetting, which allows for
     65,536 subnets (default IPv6 subnet size of /64). In special cases, a very large
     enterprise can request a shorter prefix.
+  id: totrans-291
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个获得/48前缀的站点有16位用于子网划分，这允许创建65,536个子网（默认的IPv6子网大小为/64）。在特殊情况下，一个非常大的企业可以申请更短的前缀。
 - en: Note
+  id: totrans-292
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: Your IPv6 address plan is the cornerstone of your future network and should
     support growth for many years and be sustainable and not fragmented. So there
     is no way around sitting down and doing your homework, finding out how much space
     you really need. And then go and request it.
+  id: totrans-293
   prefs: []
   type: TYPE_NORMAL
+  zh: 你的IPv6地址规划是你未来网络的基石，应当支持多年的增长，具有可持续性，并且不应当是支离破碎的。所以，不可能绕过这一点，必须坐下来做作业，弄清楚你到底需要多少空间。然后去申请它。
 - en: I have spoken with many customers from all different sizes, SMEs up to large
     enterprises. And I keep hearing statements such as “Oh, this is what we got [some
     size of prefix]. We will see how we can live with it.” Please don’t do that. At
@@ -1698,8 +2353,10 @@
     can live with it somehow. So again, please don’t do that; you (or the ones that
     will have to operate your network in the future) may be very unhappy about it
     and pay a lot for this in terms of headaches and operational disadvantages.
+  id: totrans-294
   prefs: []
   type: TYPE_NORMAL
+  zh: 我与来自不同规模的许多客户进行了交谈，从中小型企业到大型企业都有。我不断听到类似这样的说法：“哦，这就是我们拥有的[某种前缀大小]。我们会看看如何适应它。”请不要这么做。现在你可能认为这比你以前使用IPv4时拥有的更多，所以你可能能以某种方式适应它。但再说一遍，请不要这么做；你（或者将来需要运营你网络的人）可能会对这个感到非常不满，并且在头痛和运营上的劣势上付出很大的代价。
 - en: By defining an address plan as described in this section you will find out how
     much you really need. There are standard assignments that you can get easily without
     too much documentation. But you don’t know if that is sufficient to support your
@@ -1709,53 +2366,77 @@
     that and base your address plan on too small an allocation, you will pay for it
     in the future. Because redesigning and redoing it will take a lot more effort
     than getting it right from the beginning.
+  id: totrans-295
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过按照本节所描述的方式定义地址规划，你将能够知道自己究竟需要多少地址。有些标准分配可以很容易获得，不需要太多文档。但你不知道这些分配是否足够支持你的目标架构。如果你做好功课，提出一个可持续且良好的规划，发现你需要更多的地址，你可以获得它；这只需要稍微多一点的工作。但这只是开始时的额外工作。如果你回避这点，基于过小的分配来规划地址，你将在未来为此付出代价。因为重新设计和重做会比一开始就做好规划花费更多的精力。
 - en: Multihoming with IPv6
+  id: totrans-296
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用IPv6的多宿主连接
 - en: '*Multihoming* is when a host or a site is reachable over different IP addresses.
     A multihomed host has multiple global IP addresses. These addresses can come from
     one or more different providers, and they can be assigned to one or more different
     interfaces on the host. A multihomed site is connected to the Internet with multiple
     global IP addresses from one or different providers.'
+  id: totrans-297
   prefs: []
   type: TYPE_NORMAL
+  zh: '*多宿主连接*是指一个主机或站点可以通过不同的IP地址访问。一个多宿主连接的主机有多个全局IP地址。这些地址可以来自一个或多个不同的提供商，并且它们可以分配给主机上的一个或多个接口。一个多宿主连接的站点通过来自一个或多个不同提供商的多个全局IP地址连接到互联网。'
 - en: 'The main reasons to configure multihoming are the following:'
+  id: totrans-298
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置多宿主连接的主要原因如下：
 - en: '*Redundancy*'
+  id: totrans-299
   prefs: []
   type: TYPE_NORMAL
+  zh: '*冗余*'
 - en: When a link fails, the connection can be maintained over the alternative link(s).
+  id: totrans-300
   prefs: []
   type: TYPE_NORMAL
+  zh: 当链路失败时，连接可以通过备用链路继续保持。
 - en: '*Load balancing*'
+  id: totrans-301
   prefs: []
   type: TYPE_NORMAL
+  zh: '*负载均衡*'
 - en: Provides more throughput because traffic is balanced over two or more links.
+  id: totrans-302
   prefs: []
   type: TYPE_NORMAL
+  zh: 提供更高的吞吐量，因为流量在两个或更多链路之间进行负载均衡。
 - en: '*Cost*'
+  id: totrans-303
   prefs: []
   type: TYPE_NORMAL
+  zh: '*成本*'
 - en: It may be desirable to have multiple providers—for instance, because one provider
     may have a better offering for certain types of services.
+  id: totrans-304
   prefs: []
   type: TYPE_NORMAL
+  zh: 可能希望使用多个提供商——例如，某个提供商可能在某些类型的服务上提供更好的选择。
 - en: The autoconfiguration features of IPv6 support an easier maintenance of multihoming
     scenarios because devices are more flexible in recognizing network prefixes and
     can configure multiple IPv6 addresses based on Router Advertisements.
+  id: totrans-305
   prefs: []
   type: TYPE_NORMAL
+  zh: IPv6的自动配置功能支持更容易地维护多宿主连接场景，因为设备在识别网络前缀时更为灵活，并且可以根据路由器广告配置多个IPv6地址。
 - en: In the common IPv4 multihoming approach, a site’s local prefixes are announced
     as distinct routing prefixes into the interdomain routing system and propagated
     to the top-level hierarchy of the routing system. This approach works well if
     the address space of the site is provider independent. But even though this approach
     covers most of the requirements for multihoming, it is not scalable.
+  id: totrans-306
   prefs: []
   type: TYPE_NORMAL
+  zh: 在常见的IPv4多宿主接入方法中，站点的本地前缀作为独立的路由前缀宣布到域间路由系统中，并传播到路由系统的顶层层次结构。如果站点的地址空间与提供商无关，这种方法工作得很好。但即使这种方法覆盖了多宿主接入的多数需求，它也不具备可扩展性。
 - en: For these reasons, multihoming is an actively discussed topic in the working
     groups. The goal is to find solutions that provide multihoming without the scalability
     and transport issues. One idea would be to separate the identification of a node
@@ -1764,33 +2445,46 @@
     would be LISP, discussed in [Chapter 7](ch07.html "Chapter 7. Transition Technologies").
     While we wait and hope that an elegant multihoming architecture will be found,
     currently multihoming in IPv6 is done the same way as in IPv4.
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，多宿主接入是工作组中一个活跃讨论的话题。目标是找到能够提供多宿主接入，而不涉及可扩展性和传输问题的解决方案。一种思路是将节点的标识与位置分开。目前，一个IP地址包含了两部分信息，前缀标识位置，IID标识节点。对此的一个方法是LISP，详见[第7章](ch07.html
+    "第7章. 过渡技术")。在我们等待并希望能找到一种优雅的多宿主接入架构时，目前IPv6的多宿主接入与IPv4采用相同的方式进行。
 - en: Cost of Introduction
+  id: totrans-308
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 引入成本
 - en: Some people believe that the introduction of IPv6 is way too expensive, and
     they don’t even start to think about it. Other people just want to know what it
     will cost. The next section contains aspects to consider and some thoughts on
     the business case for IPv6.
+  id: totrans-309
   prefs: []
   type: TYPE_NORMAL
+  zh: 有些人认为引入IPv6的成本过高，因此他们甚至没有开始考虑这个问题。另一些人则只关心它会花费多少成本。下一节将介绍需要考虑的方面以及关于IPv6商业案例的一些思考。
 - en: Note
+  id: totrans-310
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意事项
 - en: Gartner says that the integration of IPv6 costs approximately 6% of an annual
     IT budget divided by the number of years for the migration. In several cases where
     we had a closer look at this from a high-level perspective, the estimation was
     pretty accurate. The ongoing cost after completed migration is estimated at approximately
     1% of the IT budget.
+  id: totrans-311
   prefs: []
   type: TYPE_NORMAL
+  zh: Gartner表示，IPv6的集成大约占年度IT预算的6%，并按迁移年数分摊。在我们从高层次视角仔细审视这一点的几个案例中，这一估算非常准确。完成迁移后的持续成本估计约为IT预算的1%。
 - en: Hardware and Operating Systems
+  id: totrans-312
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 硬件和操作系统
 - en: When planning ahead for IPv6 and making use of refresh cycles, the cost for
     hardware upgrades is not extensive. In many cases, IPv6 is not part of the hardware
     and can be installed as part of the operating system or as a software upgrade.
@@ -1800,37 +2494,49 @@
     though, this can usually be accomplished with the next upgrade in the regular
     life cycle of the product and therefore generates no additional cost. As our case
     studies have shown, this is confirmed by organizations that have deployed IPv6.
+  id: totrans-313
   prefs: []
   type: TYPE_NORMAL
+  zh: 在为IPv6进行规划并利用更新周期时，硬件升级的成本并不高昂。在许多情况下，IPv6并不是硬件的一部分，可以作为操作系统的一部分或软件升级来安装。大多数操作系统和应用程序都包含IPv6，且无需额外费用。如果IP功能完全通过硬件实现，或者系统软件无法升级，那么必须更换硬件以支持IPv6。然而，如果您提前进行规划，这通常可以通过下一次常规生命周期的升级来完成，因此不会产生额外的成本。正如我们的案例研究所示，这一点得到了已经部署IPv6的组织的确认。
 - en: Software
+  id: totrans-314
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 软件
 - en: We covered IPv6 in application development in the section [A Word on Applications](ch09.html#a_word_on_applications
     "A Word on Applications"). Nowadays, many common applications already support
     IPv6 or will do so in their next major upgrade version. In this case, you can
     limit the cost for software by planning early and using the regular life cycles
     of applications. For proprietary and self-developed applications, the situation
     has to be analyzed individually.
+  id: totrans-315
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在[应用开发中的IPv6](ch09.html#a_word_on_applications "应用开发中的IPv6")章节中介绍了IPv6。如今，许多常见的应用程序已经支持IPv6，或者将在下一个重大版本升级中支持IPv6。在这种情况下，您可以通过提前规划并利用应用程序的常规生命周期来限制软件的成本。对于专有和自开发的应用程序，情况需要逐一分析。
 - en: A simple porting of an application makes sure it runs equally well with IPv6
     transport. A creative porting of an application may include using the advanced
     features of IPv6 and thereby extending the flexibility and functionality of the
     application. This can even be seen as a cost associated with introducing advanced
     next generation services based on new technologies more than as cost of introducing
     IPv6.
+  id: totrans-316
   prefs: []
   type: TYPE_NORMAL
+  zh: 简单地迁移一个应用程序，确保它能在IPv6传输下同样运行良好。创造性的迁移应用程序可能包括使用IPv6的高级特性，从而扩展应用程序的灵活性和功能性。这甚至可以被视为引入基于新技术的先进下一代服务的成本，而不仅仅是引入IPv6的成本。
 - en: Education
+  id: totrans-317
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 教育
 - en: 'Every technology upgrade requires education: for developers, vendors, service
     providers, and the infrastructure and systems operators in organizations. For
     home users, it should be their ISP’s job to make the transition simple.'
+  id: totrans-318
   prefs: []
   type: TYPE_NORMAL
+  zh: 每一次技术升级都需要教育：对于开发人员、供应商、服务提供商以及组织中的基础设施和系统运营商来说，都是如此。对于家庭用户来说，应该由他们的ISP来简化过渡过程。
 - en: A well-planned education program according to job responsibilities is essential
     and supports a smooth introduction of IPv6 substantially. For system operators,
     the time and effort needed for the learning is not higher than for maintaining
@@ -1843,35 +2549,47 @@
     the maintenance of an IPv4 network. People that have a good understanding of IP
     and have mastered the previously mentioned technologies will have no problems
     mastering IPv6.
+  id: totrans-319
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据工作职责进行精心规划的教育项目是必不可少的，并能大大促进IPv6的顺利引入。对于系统管理员来说，学习所需的时间和精力与维持IPv4基础设施的成本是相当的。我们习惯于不断整合新技术以保持网络的先进性。过去，我们必须引入DHCP、NAT和VPN，并且成功掌握了这些技术。一些人曾在双栈网络中工作，掌握了IPX（Novell）与TCP/IP的共存。现在我们将引入IPv6，而这项挑战并不比以前更大。并且，这值得投入精力、时间和资金，因为从长远来看，维护IPv6网络的成本将低于维护IPv4网络的成本。那些对IP有深入理解并且掌握了上述技术的人，将不会有任何问题掌握IPv6。
 - en: It is well worth it to take enough time to learn about IPv6 before making detailed
     designs and before going into production. There are new concepts and possibilities
     in IPv6, and we need some time to become familiar with these, learn how to best
     make use of them, and then integrate the things we’ve learned into the planning.
     If you start doing your labs and hands-on tests early as recommended, you will
     build your understanding and experience on the job.
+  id: totrans-320
   prefs: []
   type: TYPE_NORMAL
+  zh: 在进行详细设计并进入生产阶段之前，花足够的时间了解IPv6是非常值得的。IPv6中有许多新概念和新可能性，我们需要一些时间来熟悉这些内容，学习如何最好地利用它们，并将我们所学的知识整合到规划中。如果你按照推荐的方式早早开始做实验和实践测试，你将在实际工作中建立自己的理解和经验。
 - en: Note
+  id: totrans-321
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意事项
 - en: When I talk to organizations who have designed and deployed IPv6 and I ask,
     “what is the biggest risk?”, the answer often is “lack of education.” Early and
     thorough education lets you take advantage of the opportunities IPv6 offers.
+  id: totrans-322
   prefs: []
   type: TYPE_NORMAL
+  zh: 当我与已经设计和部署了IPv6的组织交流时，我问：“最大的风险是什么？”，他们的回答通常是“缺乏教育”。早期且全面的教育让你能够充分利用IPv6所提供的机会。
 - en: Planning
+  id: totrans-323
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 规划
 - en: The most important aspect of integration is the planning. The same rule applies
     here. Extending an infrastructure to keep it state-of-the-art always requires
     planning and should be seen as an investment. Instead of planning the next extension
     of IPv4, we will now plan the integration of IPv6.
+  id: totrans-324
   prefs: []
   type: TYPE_NORMAL
+  zh: 集成的最重要方面是规划。这里同样适用这个规则。扩展基础设施以保持其最先进的状态总是需要规划，并应被视为一种投资。我们不再规划IPv4的下一次扩展，而是将规划IPv6的集成。
 - en: The planning requires network architects and systems engineers with a good understanding
     of IPv4 and networking concepts. The first thing they need is a thorough IPv6
     education and an IPv6 playground. The planning should not focus on how to make
@@ -1882,33 +2600,45 @@
     as with these two ingredients you are laying the foundation for your network for
     many years. And having a good address and security design will save a lot of cost
     and headaches. Here actually lies a lot of the opportunities of an IPv6 integration.
+  id: totrans-325
   prefs: []
   type: TYPE_NORMAL
+  zh: 规划需要网络架构师和系统工程师，他们必须对IPv4和网络概念有良好的理解。他们首先需要的是深入的IPv6教育和一个IPv6测试环境。规划的重点不应该是如何在IPv6上提供相同的服务。它应该包括理解IPv6的新特性，并利用这些特性来创建新的架构、安全性、移动性和管理概念。特别是在IPv6地址设计和IPv6安全设计方面，组织最好花费足够的时间，因为这两者将为你的网络奠定多年的基础。拥有良好的地址和安全设计将节省大量的成本和麻烦。事实上，IPv6集成的机会就在这里。
 - en: Note
+  id: totrans-326
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意
 - en: As practice shows, it takes some time to overcome IPv4 thinking and learn to
     leverage the advantages of IPv6.
+  id: totrans-327
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如实践所示，要克服IPv4思维并学会利用IPv6的优势需要一些时间。
 - en: The introduction of IPv6 is smoother and cheaper the earlier you plan. A step-by-step
     integration is the best way to go, as it gives you time to integrate what you
     learn as you go. Step-by-step integration is possible thanks to the many available
     transition mechanisms.
+  id: totrans-328
   prefs: []
   type: TYPE_NORMAL
+  zh: 提前规划IPv6的引入会更加顺利且便宜。逐步集成是最佳方案，因为它可以给你时间在实践中学习并逐步整合。逐步集成之所以可行，是因为有许多可用的过渡机制。
 - en: Other Costs
+  id: totrans-329
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 其他成本
 - en: Probably the highest costs arise when you wait too long. The longer you wait,
     the more investments you make into maintaining and extending your IPv4 infrastructure.
     This is money and effort you invest in an end-of-life technology. You may need
     to build band aids for IPv4 (e.g., NAT) that later complicate the introduction
     of IPv6.
+  id: totrans-330
   prefs: []
   type: TYPE_NORMAL
+  zh: 最高的成本往往出现在你等待的时间过长时。你等待的时间越长，投入到维护和扩展IPv4基础设施中的投资就越多。这些钱和精力实际上是你在一个即将淘汰的技术上投入的。你可能需要为IPv4构建应急方案（例如，NAT），这些方案日后会使IPv6的引入更加复杂。
 - en: There are no reasons to tear down a performing network that fulfills all the
     requirements, but as soon as you have to invest in fixing or extending your IPv4
     infrastructure, you should stop for a moment and consider IPv6 as an alternative.
@@ -1920,360 +2650,520 @@
     them IPv6-only right from the beginning. Why go through all the cost of testing
     and making them work over IPv4 if you will have to migrate them later anyway?
     This obviously requires a dual-stacked infrastructure.
+  id: totrans-331
   prefs: []
   type: TYPE_NORMAL
+  zh: 没有理由拆除一个已经能够满足所有需求的高效网络，但一旦你需要投入资金修复或扩展IPv4基础设施时，你应该停下来思考一下IPv6是否可以作为替代方案。如前所述，将IPv6作为评估标准列入所有IT采购清单，特别是对于那些生命周期超过两年的产品，是一个明智的选择。你可能明天不打算启用IPv6，但或许明年你会考虑启用。如果你的设备和软件已经准备好，那么当时机来临时，你可以无额外成本地启用它。未来在部署新服务时，考虑从一开始就只部署IPv6。为什么要在IPv4上测试并使其工作，如果你迟早还得迁移到IPv6呢？显然，这需要一个双栈基础设施。
 - en: Another cost factor can be if a business-critical application comes out that
     is based on the advanced functionality of IPv6\. If your infrastructure is IPv6-ready,
     you can introduce that application with moderate cost. If at the same time you
     have to master the transition to IPv6, this might create significant cost and
     put your current infrastructure at risk (plus create some headaches and sleepless
     nights).
+  id: totrans-332
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个成本因素是，如果出现基于IPv6高级功能的业务关键应用。如果你的基础设施已经准备好支持IPv6，你可以以适中的成本引入该应用。如果同时你还需要处理过渡到IPv6的过程，这可能会带来显著的成本，并使你当前的基础设施面临风险（此外还可能带来一些头痛和失眠的夜晚）。
 - en: You have reached the end of this book. Now you know about the essentials of
     the IPv6 specification and have some guidelines on the transition mechanisms and
     the planning process. What you need next is to gather experience, by building
     labs and tests, and by using it. Have fun!
+  id: totrans-333
   prefs: []
   type: TYPE_NORMAL
+  zh: '你已经读完了本书。现在你对IPv6规范的要点有所了解，并且掌握了一些过渡机制和规划过程的指南。接下来你需要通过建立实验室和测试，并亲自使用它，来积累经验。祝你玩得开心！  '
 - en: References
+  id: totrans-334
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '参考文献  '
 - en: Here’s a list of the most important RFCs and drafts mentioned in this chapter.
     Sometimes I include additional subject-related RFCs for your personal further
     study.
+  id: totrans-335
   prefs: []
   type: TYPE_NORMAL
+  zh: '下面是本章提到的最重要的RFC和草案的列表。有时我还会为你提供一些额外的相关RFC，供你个人进一步学习。  '
 - en: RFCs
+  id: totrans-336
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 'RFCs  '
 - en: RFC 2185, “Routing Aspects of IPv6 Transition,” 1997
+  id: totrans-337
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2185，《IPv6过渡的路由方面》，1997年  '
 - en: RFC 2529, “Transmission of IPv6 over IPv4 Domains without Explicit Tunnels,”
     1999
+  id: totrans-338
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2529，《在没有显式隧道的情况下通过IPv4域传输IPv6》，1999年  '
 - en: RFC 2663, “IP Network Address Translator (NAT) Terminology and Considerations,”
     1999
+  id: totrans-339
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 2663，《IP网络地址转换（NAT）术语和考虑事项》，1999年  '
 - en: RFC 3022, “Traditional IP Network Address Translator (Traditional NAT),” 2001
+  id: totrans-340
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3022，《传统IP网络地址转换器（传统NAT）》，2001年  '
 - en: RFC 3053, “IPv6 Tunnel Broker,” 2001
+  id: totrans-341
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3053，《IPv6隧道代理》，2001年  '
 - en: RFC 3056, “Connection of IPv6 Domains via IPv4 Clouds,” 2001
+  id: totrans-342
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3056，《通过IPv4云连接IPv6域》，2001年  '
 - en: RFC 3493, “Basic Socket Interface Extensions for IPv6,” 2003
+  id: totrans-343
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3493，《IPv6的基础套接字接口扩展》，2003年  '
 - en: RFC 3542, “Advanced Sockets Application Program Interface (API) for IPv6,” 2003
+  id: totrans-344
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3542，《IPv6的高级套接字应用程序接口（API）》，2003年  '
 - en: RFC 3582, “Goals for IPv6 Site-Multihoming Architectures,” 2003
+  id: totrans-345
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3582，《IPv6站点多宿架构的目标》，2003年  '
 - en: RFC 3715, “IPsec-Network Address Translation (NAT) Compatibility Requirements,”
     2004
+  id: totrans-346
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3715，《IPsec网络地址转换（NAT）兼容性要求》，2004年  '
 - en: RFC 3789, “Introduction to the Survey of IPv4 Addresses in Currently Deployed
     IETF Standards Track and Experimental Documents,” 2004
+  id: totrans-347
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3789，《当前部署的IETF标准轨道和实验文档中的IPv4地址调查简介》，2004年  '
 - en: RFC 3790, “Survey of IPv4 Addresses in Currently Deployed IETF Internet Area
     Standards Track and Experimental Documents,” 2004
+  id: totrans-348
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 3790，《当前部署的IETF互联网领域标准轨道和实验文档中的IPv4地址调查》，2004年
 - en: RFC 3791, “Survey of IPv4 Addresses in Currently Deployed IETF Routing Area
     Standards Track and Experimental Documents,” 2004
+  id: totrans-349
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3791，《当前部署的IETF路由领域标准轨道和实验文档中的IPv4地址调查》，2004年  '
 - en: RFC 3792, “Survey of IPv4 Addresses in Currently Deployed IETF Security Area
     Standards Track and Experimental Documents,” 2004
+  id: totrans-350
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3792，《当前部署的IETF安全领域标准轨道和实验文档中的IPv4地址调查》，2004年  '
 - en: RFC 3793, “Survey of IPv4 Addresses in Currently Deployed IETF Sub-IP Area Standards
     Track and Experimental Documents,” 2004
+  id: totrans-351
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3793，《当前部署的IETF子IP领域标准轨道和实验文档中的IPv4地址调查》，2004年  '
 - en: RFC 3794, “Survey of IPv4 Addresses in Currently Deployed IETF Transport Area
     Standards Track and Experimental Documents,” 2004
+  id: totrans-352
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3794，《当前部署的IETF传输领域标准轨道和实验文档中的IPv4地址调查》，2004年  '
 - en: RFC 3795, “Survey of IPv4 Addresses in Currently Deployed IETF Application Area
     Standards Track and Experimental Documents,” 2004
+  id: totrans-353
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3795，《当前部署的IETF应用领域标准轨道和实验文档中的IPv4地址调查》，2004年  '
 - en: RFC 3796, “Survey of IPv4 Addresses in Currently Deployed IETF Operations &
     Management Area Standards Track and Experimental Documents,” 2004
+  id: totrans-354
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3796，《当前部署的IETF操作与管理领域标准轨道和实验文档中的IPv4地址调查》，2004年  '
 - en: RFC 3901, “DNS IPv6 Transport Operational Guidelines,” 2004
+  id: totrans-355
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 3901，《DNS IPv6传输操作指南》，2004年  '
 - en: RFC 4029, “Scenarios and Analysis for Introducing IPv6 into ISP Networks,” 2005
+  id: totrans-356
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4029，《在ISP网络中引入IPv6的场景和分析》，2005年  '
 - en: RFC 4038, “Application Aspects of IPv6 Transition,” 2005
+  id: totrans-357
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4038，《IPv6过渡的应用方面》，2005年  '
 - en: RFC 4057, “IPv6 Enterprise Network Scenarios,” 2005
+  id: totrans-358
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4057，《IPv6企业网络场景》，2005年  '
 - en: RFC 4177, “Architectural Approaches to Multi-homing for IPv6,” 2005
+  id: totrans-359
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4177，《IPv6多宿的架构方法》，2005年  '
 - en: RFC 4192, “Procedures for Renumbering an IPv6 Network without a Flag Day,” 2005
+  id: totrans-360
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4192，《没有“标志日”的IPv6网络重新编号程序》，2005年  '
 - en: RFC 4213, “Basic Transition Mechanisms for IPv6 Hosts and Routers,” 2005
+  id: totrans-361
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4213，《IPv6主机和路由器的基本过渡机制》，2005年  '
 - en: RFC 4215, “Analysis on IPv6 Transition in Third Generation Partnership Project
     (3GPP) Networks,” 2005
+  id: totrans-362
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4215，《第三代合作伙伴计划（3GPP）网络中的IPv6过渡分析》，2005年  '
 - en: RFC 4218, “Threats Relating to IPv6 Multihoming Solutions,” 2005
+  id: totrans-363
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4218，《与IPv6多宿解决方案相关的威胁》，2005年  '
 - en: RFC 4219, “Things Multihoming in IPv6 (MULTI6) Developers Should Think About,”
     2005
+  id: totrans-364
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4219，《IPv6多宿(MULTI6)开发者应考虑的事项》，2005年  '
 - en: RFC 4241, “A Model of IPv6/IPv4 Dual Stack Internet Access Service,” 2005
+  id: totrans-365
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 'RFC 4241，《IPv6/IPv4双栈互联网接入服务模型》，2005年  '
 - en: RFC 4472, “Operational Considerations and issues with IPv6 DNS,” 2006
+  id: totrans-366
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4472, “IPv6 DNS的操作考虑事项与问题”，2006年
 - en: RFC 4554, “Use of VLANs for IPv4-IPv6 Coexistence in Enterprise Networks,” 2006
+  id: totrans-367
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4554, “在企业网络中使用VLAN进行IPv4-IPv6共存”，2006年
 - en: RFC 4659, “BGP-MPLS IP Virtual Private Network (VPN) Extension for IPv6 VPN,”
     2006
+  id: totrans-368
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4659, “IPv6 VPN的BGP-MPLS IP虚拟专用网络（VPN）扩展”，2006年
 - en: RFC 4779, “ISP IPv6 Deployment Scenarios in Broadband Access Networks,” 2007
+  id: totrans-369
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4779, “宽带接入网络中的ISP IPv6部署情景”，2007年
 - en: RFC 4787, “Network Address Translation (NAT) Behavioral Requirements for Unicast
     UDP,” 2007
+  id: totrans-370
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4787, “单播UDP的网络地址转换（NAT）行为要求”，2007年
 - en: RFC 4798, “Connecting IPv6 Islands over IPv4 MPLS Using IPv6 Provider Edge Routers
     (6PE),” 2007
+  id: totrans-371
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4798, “通过IPv6提供商边缘路由器（6PE）使用IPv4 MPLS连接IPv6岛屿”，2007年
 - en: RFC 4852, “IPv6 Enterprise Network Analysis—IP Layer 3 Focus,” 2007
+  id: totrans-372
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 4852, “IPv6企业网络分析——IP层3重点”，2007年
 - en: RFC 5181, “IPv6 Deployment Scenarios in 802.16 Networks,” 2008
+  id: totrans-373
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5181, “在802.16网络中的IPv6部署情景”，2008年
 - en: RFC 5375, “IPv6 Unicast Address Assignment Considerations,” 2008
+  id: totrans-374
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5375, “IPv6单播地址分配考虑”，2008年
 - en: RFC 5569, “IPv6 Rapid Deployment on IPv4 Infrastructures (6rd),” 2010
+  id: totrans-375
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5569, “在IPv4基础设施上快速部署IPv6（6rd）”，2010年
 - en: RFC 5902, “IAB Thoughts on IPv6 Network Address Translation,” 2010
+  id: totrans-376
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 5902, “IAB关于IPv6网络地址转换的思考”，2010年
 - en: RFC 6036, “Emerging Service Provider Scenarios for IPv6 Deployment,” 2010
+  id: totrans-377
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6036, “IPv6部署的新兴服务提供商情景”，2010年
 - en: RFC 6052, “IPv6 Addressing of IPv4/IPv6 Translators,” 2010
+  id: totrans-378
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6052, “IPv4/IPv6转换器的IPv6地址分配”，2010年
 - en: RFC 6144, “Framework for IPv4/IPv6 Translation,” 2011
+  id: totrans-379
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6144, “IPv4/IPv6转换框架”，2011年
 - en: 'RFC 6146, “Stateful NAT64: Network Address and Protocol Translation from IPv6
     Clients to IPv4 Servers,” 2011'
+  id: totrans-380
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6146, “有状态NAT64：从IPv6客户端到IPv4服务器的网络地址与协议转换”，2011年
 - en: 'RFC 6147, “DNS64: DNS Extensions for Network Address Translation from IPv6
     Clients to IPv4 Servers,” 2011'
+  id: totrans-381
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6147, “DNS64：从IPv6客户端到IPv4服务器的网络地址转换DNS扩展”，2011年
 - en: RFC 6164, “Using 127-Bit IPv6 Prefixes on Inter-Router Links,” 2011
+  id: totrans-382
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6164, “在路由器间链路上使用127位IPv6前缀”，2011年
 - en: RFC 6177, “IPv6 Address Assignment to End Sites,” 2011
+  id: totrans-383
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6177, “IPv6地址分配到终端站点”，2011年
 - en: RFC 6180, “Guidelines for Using IPv6 Transition Mechanisms during IPv6 Deployment,”
     2011
+  id: totrans-384
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6180, “IPv6部署期间使用IPv6过渡机制的指南”，2011年
 - en: RFC 6250, “Evolution of the IP Model,” 2011
+  id: totrans-385
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6250, “IP模型的演变”，2011年
 - en: RFC 6269, “Issues with IP address sharing,” 2011
+  id: totrans-386
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6269, “IP地址共享的问题”，2011年
 - en: RFC 6296, “IPv6-to-IPv6 Network Prefix Translation,” 2011
+  id: totrans-387
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6296, “IPv6到IPv6网络前缀转换”，2011年
 - en: RFC 6302, “Logging Recommendations for Internet-Facing Servers,” 2011
+  id: totrans-388
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6302, “面向互联网服务器的日志记录建议”，2011年
 - en: RFC 6434, “IPv6 Node Requirements,” 2011
+  id: totrans-389
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6434, “IPv6节点要求”，2011年
 - en: RFC 6459, “IPv6 in 3rd Generation Partnership Project (3GPP) Evolved Packet
     System (EPS),” 2012
+  id: totrans-390
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6459, “IPv6在第3代合作伙伴项目（3GPP）演进分组系统（EPS）中的应用”，2012年
 - en: RFC 6540, “IPv6 Support Required for All IP-Capable Nodes,” 2012
+  id: totrans-391
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6540, “所有支持IP的节点必须支持IPv6”，2012年
 - en: RFC 6586, “Experiences from an IPv6-only Network,” 2012
+  id: totrans-392
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6586, “来自IPv6-only网络的经验”，2012年
 - en: RFC 6724, “Default Address Selection for Internet Protocol Version 6 (IPv6),”
     2012
+  id: totrans-393
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6724, “互联网协议版本6（IPv6）的默认地址选择”，2012年
 - en: RFC 6866, “Problem Statement for Renumbering IPv6 Hosts with Static Addresses
     in Enterprise Networks,” 2013
+  id: totrans-394
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6866, “企业网络中静态地址IPv6主机重新编号的问题声明”，2013年
 - en: RFC 6879, “IPv6 Enterprise Network Renumbering Scenarios, Considerations, and
     Methods,” 2013
+  id: totrans-395
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6879, “IPv6企业网络重新编号情景、考虑因素及方法”，2013年
 - en: RFC 6883, “IPv6 Guidance for Internet Content Providers and Application Service
     Providers,” 2013
+  id: totrans-396
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6883, “面向互联网内容提供商和应用服务提供商的IPv6指南”，2013年
 - en: RFC 6921, “Design Considerations for Faster-Than-Light (FTL) Communication,”
     April 1, 2013
+  id: totrans-397
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 6921, “超光速（FTL）通信的设计考虑”，2013年4月1日
 - en: RFC 7021, “Assessing the Impact of Carrier-Grade NAT on Network Applications,”
     2013
+  id: totrans-398
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7021, “评估载波级NAT对网络应用的影响”，2013年
 - en: RFC 7050, “Discovery of the IPv6 Prefix Used for IPv6 Address Synthesis,” 2013
+  id: totrans-399
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7050, “IPv6地址合成中使用的IPv6前缀发现”，2013年
 - en: RFC 7059, “A Comparison of IPv6-over-IPv4 Tunnel Mechanisms,” 2013
+  id: totrans-400
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7059, “IPv6-over-IPv4隧道机制的比较”，2013年
 - en: RFC 7066, “IPv6 for Third Generation Partnership Project (3GPP) Cellular Hosts,”
     2013
+  id: totrans-401
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7066, “第三代合作伙伴项目（3GPP）蜂窝主机的IPv6应用”，2013年
 - en: RFC 7084, “Basic Requirements for IPv6 Customer Edge Routers,” 2013
+  id: totrans-402
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7084, “IPv6客户边缘路由器的基本要求”，2013年
 - en: RFC 7094, “Architectural Considerations of IP Anycast,” 2014
+  id: totrans-403
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7094, “IP任播的架构考虑”，2014年
 - en: RFC 7098, “Using the IPv6 Flow Label for Load Balancing in Server Farms,” 2013
+  id: totrans-404
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7098, “在服务器集群中使用IPv6流标签进行负载均衡”，2013年
 - en: RFC 7123, “Security Implications of IPv6 on IPv4 Networks,” 2014
+  id: totrans-405
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7123, “IPv6对IPv4网络的安全影响”，2014年
 - en: RFC 7136, “Significance of IPv6 Interface Identifiers,” 2014
+  id: totrans-406
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7136，“IPv6 接口标识符的重要性，”2014年
 - en: RFC 7157, “IPv6 Multihoming without Network Address Translation,” 2014
+  id: totrans-407
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7157，“没有网络地址转换的 IPv6 多宿主，”2014年
 - en: RFC 7168, “The Hyper Text Coffee Pot Control Protocol for Tea Efflux Appliances
     (HTCPCP-TEA),” April 1, 2014
+  id: totrans-408
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7168，“茶漏设备的超文本咖啡壶控制协议（HTCPCP-TEA）”，2014年4月1日
 - en: RFC 7217, “A Method for Generating Semantically Opaque Interface Identifiers
     with IPv6 Stateless Address Autoconfiguration (SLAAC),” 2014
+  id: totrans-409
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: RFC 7217，“一种使用 IPv6 无状态地址自动配置（SLAAC）生成语义上不透明的接口标识符的方法，”2014年
 - en: Drafts
+  id: totrans-410
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 草案
 - en: Drafts can be found at [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html).
     To locate the latest version of a draft, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
     You can enter the draft name without a version number and the most current version
@@ -2281,75 +3171,126 @@
     published as an RFC, the RFC number will be displayed. [http://tools.ietf.org/wg](http://tools.ietf.org/wg)
     is also a very useful site. More information on the process of standardization,
     RFCs, and drafts can be found in the [Appendix A](apa.html "Appendix A. RFCs").
+  id: totrans-411
   prefs: []
   type: TYPE_NORMAL
+  zh: 草案可以在 [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html) 找到。要定位草案的最新版本，请参考
+    [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi)。你可以输入草案名称（不需要版本号），系统将显示最新版本。如果草案没有显示，可能已经被删除。如果它已经发布为
+    RFC，RFC 编号将会显示。[http://tools.ietf.org/wg](http://tools.ietf.org/wg) 也是一个非常有用的网站。有关标准化过程、RFC
+    和草案的更多信息，请参见 [附录 A](apa.html "附录 A. RFCs")。
 - en: 'Here’s a list of drafts I refer to in this chapter, as well as interesting
     drafts that relate to the topics in this chapter:'
+  id: totrans-412
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里列出了我在本章中引用的草案，以及与本章主题相关的有趣草案：
 - en: “Recommendations of Using Unique Local Addresses”
+  id: totrans-413
   prefs: []
   type: TYPE_NORMAL
+  zh: “使用唯一本地地址的建议”
 - en: '*draft-ietf-v6ops-ula-usage-recommendations-02*'
+  id: totrans-414
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-v6ops-ula-usage-recommendations-02*'
 - en: “Mapping of Address and Port with Encapsulation (MAP)”
+  id: totrans-415
   prefs: []
   type: TYPE_NORMAL
+  zh: “地址和端口映射与封装（MAP）”
 - en: '*draft-ietf-softwire-map-10*'
+  id: totrans-416
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-softwire-map-10*'
 - en: “Mapping of Address and Port using Translation (MAP-T)”
+  id: totrans-417
   prefs: []
   type: TYPE_NORMAL
+  zh: “使用转换的地址和端口映射（MAP-T）”
 - en: '*draft-ietf-softwire-map-t-05*'
+  id: totrans-418
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-softwire-map-t-05*'
 - en: “DHCPv6 Options for Configuration of Softwire Address and Port Mapped Clients”
+  id: totrans-419
   prefs: []
   type: TYPE_NORMAL
+  zh: “DHCPv6 配置软线地址和端口映射客户端的选项”
 - en: '*draft-ietf-softwire-map-dhcp-07*'
+  id: totrans-420
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-softwire-map-dhcp-07*'
 - en: '“Lightweight 4over6: An Extension to the DS-Lite Architecture”'
+  id: totrans-421
   prefs: []
   type: TYPE_NORMAL
+  zh: “轻量级 4over6：DS-Lite 架构的扩展”
 - en: '*draft-ietf-softwire-lw4over6-08*'
+  id: totrans-422
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-softwire-lw4over6-08*'
 - en: “IPv4 Residual Deployment via IPv6—a Stateless Solution (4rd)”
+  id: totrans-423
   prefs: []
   type: TYPE_NORMAL
+  zh: “通过 IPv6 实现 IPv4 残余部署——一种无状态解决方案（4rd）”
 - en: '*draft-ietf-softwire-4rd-08*'
+  id: totrans-424
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-softwire-4rd-08*'
 - en: “An Internet Protocol Version 6 (IPv6) Profile for 3GPP Mobile Devices”
+  id: totrans-425
   prefs: []
   type: TYPE_NORMAL
+  zh: “3GPP 移动设备的 IPv6 配置文件”
 - en: '*draft-ietf-v6ops-mobile-device-profile-07*'
+  id: totrans-426
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-v6ops-mobile-device-profile-07*'
 - en: “NAT64 Deployment Options and Experience”
+  id: totrans-427
   prefs: []
   type: TYPE_NORMAL
+  zh: “NAT64 部署选项和经验”
 - en: '*draft-ietf-v6ops-nat64-experience-10*'
+  id: totrans-428
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-v6ops-nat64-experience-10*'
 - en: “IPv6 Operational Guidelines for Datacenters”
+  id: totrans-429
   prefs: []
   type: TYPE_NORMAL
+  zh: “IPv6 数据中心操作指南”
 - en: '*draft-ietf-v6ops-dc-ipv6-01*'
+  id: totrans-430
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-v6ops-dc-ipv6-01*'
 - en: “DHCPv6/SLAAC Interaction Operational Guidance”
+  id: totrans-431
   prefs: []
   type: TYPE_NORMAL
+  zh: “DHCPv6/SLAAC 交互操作指南”
 - en: '*draft-liu-v6ops-dhcpv6-slaac-guidance-01*'
+  id: totrans-432
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-liu-v6ops-dhcpv6-slaac-guidance-01*'
 - en: “IPv6 Home Networking Architecture Principles”
+  id: totrans-433
   prefs: []
   type: TYPE_NORMAL
+  zh: “IPv6 家庭网络架构原则”
 - en: '*draft-ietf-homenet-arch-13*'
+  id: totrans-434
   prefs: []
   type: TYPE_NORMAL
+  zh: '*draft-ietf-homenet-arch-13*'
