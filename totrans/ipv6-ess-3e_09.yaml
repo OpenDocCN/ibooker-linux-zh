@@ -1,0 +1,1987 @@
+- en: Chapter 8. Mobile IPv6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In the past, we were used to making phone calls from home or from the office.
+    Public pay phones allowed us to make phone calls while on the road. Today, the
+    use of mobile phones is common and we make phone calls from almost anywhere and
+    in any life situation. The use of notebook computers, wireless networks, and portable
+    devices is expanding, and we can imagine having smart devices and using them from
+    wherever we are. If these devices are to use IP as a transport protocol, we need
+    Mobile IP to make this work. We expect our device to remain connected when we
+    move around and change our point of attachment to the network, just as we are
+    used to roaming from one cell to the next with our mobile phones today. For example,
+    suppose you have a tablet with an 802.11 (wireless) interface and a UMTS (Universal
+    Mobile Telecommunication System) interface. In your hotel room, you are connected
+    to the network through your wireless interface; when you leave your room and go
+    out to the street, you switch automatically to UMTS without losing your connection.
+    All the applications, such as your Skype session or your voice call running on
+    your tablet, don’t drop. Isn’t this cool? This section about Mobile IP explores
+    the mechanisms needed and shows how IPv6 is ready for this challenge.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With IPv4 and IPv6 alike, the prefix (subnet address) changes depending on the
+    network to which we are attached. When a mobile node changes its point of access
+    to the network, it needs to get a new IP address, which disrupts its TCP or UDP
+    connections. RFC 5944, “IP Mobility Support for IPv4,” describes Mobile IP concepts
+    and specifications for IPv4\. Using Mobile IP with IPv4 has certain limitations,
+    though, which make it unsuitable for the requirements in a global network. One
+    reason is the limited address space. If we even imagine only smartphones having
+    an IP address, the number of addresses required globally to cover the number of
+    devices far exceeds the IPv4 address space available. The other reason is that
+    IPv6 and the use of Extension headers offers the possibility to optimize routing
+    in a mobile world, and this is really necessary if we talk about mobility for
+    large masses of devices. The fact that IPv6 uses Neighbor Discovery (instead of
+    ARP like IPv4) makes IPv6 more independent of the Link layer. Mobile IPv6 takes
+    the experience from Mobile IPv4 and makes use of the advanced features of IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This chapter describes how Mobile IPv6 works and how it is suited to provide
+    the foundation for mobile services of tomorrow. First, I explain the most important
+    terms that will be used throughout the chapter, then I provide an overview of
+    the functionality, and after this I dive into the technical details of the protocol:
+    the new headers, messages, options, processes, and communications. So take a deep
+    breath and read on.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Mobile IPv6 is a protocol that allows a mobile node to move from one network
+    to another without losing its connections. It is specified in RFC 6275.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Most Internet traffic uses TCP connections. A TCP connection is defined by the
+    combination of IP address and port number of both endpoints of the communication.
+    If one of these four numbers changes, the communication is disrupted and has to
+    be reestablished. If a mobile node connects to a different network, it needs a
+    new IP address. Mobile IP addresses the challenge of moving a node to a different
+    connection point without changing its IP address by assigning the interface of
+    the mobile node a new additional IP address. The mobile node now still knows its
+    *home address*, which is static and does not change, and it is therefore used
+    to identify the TCP connection. The new IP address is called the *Care-of address*.
+    It changes depending on the network to which the node is currently attached. So
+    this works within homogeneous networks (if the node moves from an Ethernet segment
+    to another Ethernet segment) but also in heterogeneous networks (if the node moves
+    from an Ethernet segment to a wireless LAN or UMTS).
+  prefs: []
+  type: TYPE_NORMAL
+- en: In a wireless network, we are familiar with the *handover*, the event where
+    a device moves from one access point to another. This is a handover on the Link
+    layer. Mobile IPv6 solves the handover issue on the Network layer and maintains
+    connections to applications and services if a device changes its temporary IP
+    address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mobile IPv6 Terms
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Here are the definitions of some terms that are used throughout the chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Home address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A global unicast address assigned to a mobile node. It is used as the permanent
+    address for this node and is within the mobile node’s home link. Regular routing
+    mechanisms deliver packets to the home address of the mobile node.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Home subnet prefix*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IP subnet prefix corresponding to a mobile node’s home address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Home link*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The link on which a mobile node’s home subnet prefix is defined.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Mobile node*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A node that can change its point of attachment from one link to another while
+    still being reachable via its home address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Correspondent node*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A peer node with which a mobile node is communicating. The correspondent node
+    may be either mobile or stationary.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Foreign subnet prefix*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any IP subnet prefix other than the mobile node’s home subnet prefix.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Foreign link*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any link other than the mobile node’s home link.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Care-of address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A global unicast address for the mobile node while it is in a foreign network
+    (away from home). The subnet prefix of the Care-of address is the foreign subnet
+    prefix. A mobile node may have multiple Care-of addresses. The one being registered
+    with its home agent is the primary Care-of address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Home agent*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A router on a mobile node’s home link with which the mobile node has registered
+    its current Care-of address. While the mobile node is away from home, the home
+    agent intercepts packets on the home link destined to the mobile node’s home address,
+    encapsulates them (IPv6 encapsulation), and tunnels them to the mobile node’s
+    registered Care-of address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Binding*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The association of the home address of a mobile node with a Care-of address
+    for that mobile node, along with the remaining lifetime of that association.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Registration*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The process during which a mobile node sends a Binding Update to its home agent
+    or a correspondent node, causing a binding for the mobile node to be registered.
+    The registration with the correspondent node is called Correspondent Registration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Binding authorization*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A registration with a correspondent node needs to be authorized to allow the
+    recipient to ensure that the sender has the right to specify a new binding.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Return Routability Procedure*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A procedure that authorizes registrations by the use of a cryptographic token
+    exchange.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Keygen token*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A number supplied by a correspondent node in the Return Routability Procedure
+    to enable the mobile node to compute the necessary binding management key for
+    authorizing a Binding Update.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Nonce*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Random numbers used internally by the correspondent node in the creation of
+    keygen tokens related to the Return Routability Procedure. The nonces are not
+    specific to a mobile node and are kept secret within the correspondent node.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Nonce index*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Used to indicate which nonces have been used when creating keygen token values
+    without revealing the nonces themselves.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How Mobile IPv6 Works
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[Figure 8-1](ch08.html#overview_mobile_ipv6 "Figure 8-1. Overview Mobile IPv6")
+    shows the components of Mobile IPv6 and how they interact.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Overview Mobile IPv6](images/ipv6_0801.png)Figure 8-1. Overview Mobile IPv6'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The home address is the IPv6 address within the home link prefix of a *Mobile
+    Node* (*MN*). As long as the mobile node is at home, it receives packets through
+    regular IP routing mechanisms and behaves like any other regular IP host. When
+    the mobile node is away from home on a foreign link, it has an additional Care-of
+    address. It receives the Care-of address through regular IPv6 mechanisms such
+    as SLAAC (Stateless Address Autoconfiguration) or DHCPv6 when connecting to the
+    new link.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The association of a home address and a Care-of address is called a *binding*.
+    While away from home, the mobile node registers its Care-of address with a router
+    on its home link, its *Home Agent* (*HA*). To register its Care-of address, the
+    mobile node sends a binding update message to the home agent. The home agent responds
+    with a binding acknowledgment. Every node communicating with a mobile node is
+    called a *Correspondent Node* (*CN*). Mobile nodes can also send registrations
+    to the correspondent node directly (called a correspondent registration). A correspondent
+    node can also be a mobile node.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two ways to communicate for a correspondent node and a mobile node:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Bidirectional Tunneling*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Packets from the correspondent node are sent to the home agent, which encapsulates
+    them in IPv6 and sends them to the Care-of address of the mobile node. Packets
+    from the mobile node are sent through the reverse tunnel to the home agent that
+    forwards them to the correspondent node through regular routing mechanisms. This
+    mode does not require any Mobile IPv6 support on the correspondent node and works
+    without correspondent registration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Route Optimization*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With Route Optimization, the communication between mobile node and correspondent
+    node can be direct without going through the home agent. This is one of the main
+    advantages of Mobile IPv6 over Mobile IPv4, where Route Optimization is not possible.
+    Route Optimization requires that the mobile node registers its Care-of address
+    with the correspondent node (called Correspondent Registration) and that this
+    binding is authorized through the Return Routability Procedure (discussed in the
+    section Return Routability Procedure later in this chapter). The correspondent
+    node uses a special Routing header (Type 2) when it sends packets to the mobile
+    node directly. The mobile node uses the Home Address option (defined for Mobile
+    IPv6) when sending packets to the correspondent node. The whole process is described
+    in more detail later in the chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The advantage of Route Optimization is that the shortest available path can
+    be used between correspondent node and mobile node. The packets do not have to
+    go through the home agent. This not only ensures shorter communication paths but
+    also reduces the load on the home agent and the home link. This becomes very important
+    when we talk about high numbers of mobile nodes constantly moving around, for
+    instance in a VoIP (Voice over IP) scenario or when moving around with your smartphones.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mobile IPv6 also supports the option to have multiple home agents, and the mobile
+    node can learn about reconfiguration of its home link or a change of IP address
+    of its home agent through Dynamic Home Agent Address Discovery. If the prefix
+    of its home link changes, the mobile node uses the Mobile Prefix Discovery mechanism
+    to learn about the new prefix.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following sections describe the protocol and new messages, options, and
+    flags in more detail. After this, I dive into the communication flows that have
+    just been described in an overview. Some people prefer to learn this way; other
+    people prefer to learn about the processes and flows first and then about the
+    technical details. Please read the sections in the order that best fits your preference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Mobile IPv6 Protocol
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This section describes the components, messages, and options for Mobile IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mobility Header and Mobility Messages
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Mobility Header (MH) has been defined for Mobile IPv6\. It is an Extension
+    header used by mobile node, correspondent node, and home agent. It is used in
+    all messages that are related to establishing and maintaining bindings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Mobility Header is specified by the Next Header value 135 in the preceding
+    header and has the format shown in [Figure 8-2](ch08.html#format_of_the_mobility_header
+    "Figure 8-2. Format of the Mobility Header").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Mobility Header](images/ipv6_0802.png)Figure 8-2. Format of
+    the Mobility Header'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Payload Proto field corresponds to the Next Header field and identifies
+    the following header. It can therefore contain the same values as the Next Header
+    field. The current specification sets the value in this field to 59 decimal, which
+    means “no next header.” It is designed to be used for future extensions. The Header
+    Length field contains the length of the Mobility Header in 8-byte units. The first
+    8 bytes are not counted. The length of the Mobility Header is always a multiple
+    of 8 bytes. The Checksum field contains the checksum for the Mobility Header.
+    It is calculated based on a pseudoheader and follows the rules defined in RFC
+    2460\. The addresses used in the pseudoheader are the Source and Destination address
+    in the IPv6 header. If the Mobility message contains a Home Address Destination
+    option, the home address is used for the calculation of the checksum. The MH Type
+    field identifies the type of Mobility message. The messages defined are listed
+    in [Table 8-1](ch08.html#mobility_message_types "Table 8-1. Mobility message types").
+    The Data field is variable; it depends on the type of message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Table 8-1](ch08.html#mobility_message_types "Table 8-1. Mobility message types")
+    is an overview of the Mobility messages.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 8-1. Mobility message types
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Value | Message type | Description | RFC |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 0 | Binding Refresh Request | Sent by CN requesting the MN to update its
+    binding. | RFC 6275 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | Home Test Init | Sent by the MN to initiate the Return Routability Procedure
+    and request a Home keygen token from a CN. Sent to the CN through the tunnel via
+    HA. | RFC 6275 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2 | Care-of Test Init | Sent by the MN to initiate the Return Routability
+    Procedure and request a keygen token from a CN. Sent to the CN directly. | RFC
+    6275 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 3 | Home Test Message | Response to a Home Test Init message (type 1). Sent
+    from the CN to MN. Contains a cookie and a Home keygen token for the authorization
+    in the Return Routability Process. Sent through the tunnel via HA. | RFC 6275
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 4 | Care-of Test Message | Response to Care-of Test Init message (type 2).
+    Sent from CN to MN. Contains cookie and a Care-of keygen token for the authorization
+    in the Return Routability Procedure. Sent to the MN directly. | RFC 6275 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 5 | Binding Update | Sent by MN to notify a change of its Care-of address.
+    This message is explained in more detail later in the chapter. | RFC 6275 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 6 | Binding Ack | Sent as acknowledgment for receipt of a Binding Update
+    message. This message is explained in more detail later in the chapter. | RFC
+    6275 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 7 | Binding Error | Sent by CN to signal an error related to mobility, such
+    as an inappropriate attempt to use the Home Address Destination option without
+    an existing binding. The status field can have the following values:1 = unkown
+    binding for Home Address Destination option2 = unrecognized MH type value | RFC
+    6275 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 8 | Fast Binding Update | Identical to Binding Update message, only with
+    slightly different processing rules. | RFC 5568 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 9 | Fast Binding Ack | Sent as acknowledgment for receipt of a Fast Binding
+    Update message. | RFC 5568 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 10 | Fast Neighbor Advertisement | Deprecated. | RFC 5568 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 11 | Experimental Mobility Header | Defined for testing of new message types
+    without the risk to collide with standardized values. | RFC 5096 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 12 | Home Agent Switch | Sent from HA to MN. Forces MN to configure a new
+    HA. | RFC 5142 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 13 | Heartbeat | Sent by MAC and LMA to verify status of reachability (Proxy
+    Mobile IPv6). | RFC 5847 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 14 | Handover Initiate | Sent between access routers to initiate the process
+    of handover of MNs. | RFC 5568 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 15 | Handover Ack | Sent by access routers to acknowledge the receipt of
+    the Handover Initiate message. | RFC 5568 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 16 | Binding Revocation | Sent by a mobility node to terminate a binding:1
+    = Binding Revocation Indication2 = Binding Revocation Ack | RFC 5846 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 17 | Localized Routing Initiation | Sent by LMA or MAG to initiate localized
+    routing (Proxy Mobile IPv6). | RFC 6705 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 18 | Localized Routing Ack | Sent by LMA or MAG as response to Localized
+    Routing Initiation. | RFC 6705 |'
+  prefs: []
+  type: TYPE_TB
+- en: To help you understand the binding, the next section explores the Binding Update
+    and the Binding Acknowledgment messages in more detail.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can find all message and option types as well as status codes at [http://www.iana.org/assignments/mobility-parameters](http://www.iana.org/assignments/mobility-parameters).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Binding Update Message
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Binding Update message is used by the mobile node to inform the home agent
+    or a correspondent node about a new Care-of address. The message is also used
+    to extend the lifetime of an existing binding.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Binding Update message is of MH type 5 and has the format shown in [Figure 8-3](ch08.html#format_of_the_binding_update_message
+    "Figure 8-3. Format of the Binding Update message").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Binding Update message](images/ipv6_0803.png)Figure 8-3. Format
+    of the Binding Update message'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Sequence Number is used by the receiving node for sequencing Binding Updates.
+    The sending node uses it to verify whether the Binding Acknowledgments received
+    correspond to its Binding Updates. The Acknowledge bit (A-Bit) is set by the mobile
+    node if it expects an acknowledgment in answer to its Binding Update. The Home
+    Registration bit (H-Bit) is set by the mobile node to request the receiver to
+    act as home agent for this node. This is possible only if the receiver is on the
+    home link of the mobile node. The Link-Local Address Compatibility bit (L-Bit)
+    is set if the home address has the same Interface Identifier as the link-local
+    address of the mobile node. The Key Management Mobility Capability bit (K-Bit)
+    is valid only in Binding Updates sent to the home agent. IPsec Security Associations
+    should survive the move of the mobile node to another network. If that is the
+    case, the K-Bit is set. If that is not possible, the K-Bit is set to 0\. Correspondent
+    nodes ignore the K-Bit. The Lifetime shows for how long the binding for the Care-of
+    address is valid (in four-second units). If the Lifetime is set to 0, the receiver
+    must delete the entry in its Binding Cache. In this case, the mobile node must
+    be on its home link, and the Care-of address is the same as the home address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The M-Bit shown in [Figure 8-3](ch08.html#format_of_the_binding_update_message
+    "Figure 8-3. Format of the Binding Update message") has additionally been created
+    to identify Local Binding Updates sent to a local home agent called a *Mobility
+    Anchor Point* (MAP). This new node is used to improve Mobile IPv6 handover performance,
+    to obtain efficient routing between the mobile node and correspondent nodes within
+    the same geographical area, and to achieve location privacy. The mechanism is
+    defined in RFC 4140, “Hierarchical Mobile IPv6,” and is explained in more detail
+    at the end of this chapter. When the M-Bit is set, the H-Bit cannot be set and
+    vice versa.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A Binding Update can have the following options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binding Authorization Data option (this option is mandatory in Binding Updates
+    sent to a correspondent node)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Nonce Indices option
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Alternate Care-of Address option
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Binding Acknowledgment
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Binding Acknowledgment is sent to confirm receipt of a Binding Update. It
+    has to be sent if the A-Bit is set in the Binding Update. If the A-Bit is not
+    set (which means the sender of the Binding Update does not require an acknowledgment),
+    the Binding Acknowledgment is sent only if there is a problem in the Binding Update.
+    If the receiver accepts the Binding Update and the A-Bit was not set, no acknowledgment
+    is sent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Binding Acknowledgment is of MH type 6 and has the format shown in [Figure 8-4](ch08.html#format_of_the_binding_acknowledgment
+    "Figure 8-4. Format of the Binding Acknowledgment").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Binding Acknowledgment](images/ipv6_0804.png)Figure 8-4. Format
+    of the Binding Acknowledgment'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The status field indicates the status of the Binding Update. [Table 8-2](ch08.html#status_values_in_the_binding_acknowledgm
+    "Table 8-2. Status values in the Binding Acknowledgment") shows the status values.
+    Values in the range of 0 to 127 indicate that the Binding Update has been accepted.
+    Values above 128 indicate that the Binding Update has not been accepted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 8-2. Status values in the Binding Acknowledgment
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Value | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 0 | Binding Update accepted |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | Accepted but prefix discovery necessary |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 128 | Reason unspecified |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 129 | Administratively prohibited |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 130 | Insufficient resources |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 131 | Home Registration not supported |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 132 | Not home subnet |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 133 | Not home agent for this mobile node |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 134 | Duplicate Address Detection failed |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 135 | Sequence Number out of window |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 136 | Expired home nonce index |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 137 | Expired care-of nonce index |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 138 | Expired nonces |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 139 | Registration type change disallowed |'
+  prefs: []
+  type: TYPE_TB
+- en: These are the status values defined in RFC 6275\. There are more status values
+    from other specifications such as NEMO or Proxy Mobile IPv6 (discussed in the
+    sections [NEMO](ch08.html#nemo "NEMO") and [Proxy Mobile IPv6](ch08.html#proxy_mobile_ipv6
+    "Proxy Mobile IPv6")).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Find the full list of status codes at [http://www.iana.org/assignments/mobility-parameters](http://www.iana.org/assignments/mobility-parameters).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The K-Bit is the Key Management Mobility Capability bit (see the description
+    earlier in the section [The Binding Update Message](ch08.html#the_binding_update_message
+    "The Binding Update Message")). This bit is of importance only in bindings between
+    mobile node and home agent. Correspondent nodes ignore this bit. The Sequence
+    Number in the Binding Acknowledgment is copied from the Sequence Number field
+    in the Binding Update. It is used by the mobile node in matching this Binding
+    Acknowledgment with an outstanding Binding Update. The Lifetime shows in 4-second
+    units for how long the binding for the Care-of address is valid. During the time
+    indicated here, either the home agent or the correspondent node keeps the entry
+    for this binding in its Binding Cache. In a Binding Acknowledgment that indicates
+    that the binding has not been accepted (value of 128 or higher), the Lifetime
+    is not specified.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A Binding Acknowledgment can have the following options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binding Authorization Data option (this option is mandatory in Binding Acknowledgments
+    sent by a correspondent node)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Binding Refresh Advice option
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Binding Revocation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In certain cases it may be necessary to inform an MN that it can no longer receive
+    Mobile IPv6 services for its home address. For this purpose a Binding Revocation
+    mechanism has been defined in RFC 5846\. It uses a new Mobility Header (type 16;
+    refer to [Table 8-1](ch08.html#mobility_message_types "Table 8-1. Mobility message
+    types")). This revocation mechanism can be used for Mobile IPv6 as well as for
+    Proxy Mobile IPv6 (RFC 5213; described in the section [Proxy Mobile IPv6](ch08.html#proxy_mobile_ipv6
+    "Proxy Mobile IPv6")).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'New terms have been defined in this specification:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Initiator*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The mobility node that initiates the Binding Revocation process. It sends a
+    Binding Revocation message to its peers (e.g., home agent, local mobility anchor,
+    or mobile access gateway).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Responder*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The mobility node that receives the Binding Revocation message and responds
+    with a Binding Revocation Acknowledgment (e.g., mobile node, mobile access gateway,
+    or local mobility anchor).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To revoke a binding, the HA sends a *Binding Revocation Indication* (BRI) message
+    to the MN. To indicate the binding, the HA includes the home address in the message
+    (in the Type 2 Routing header). In the case of dual-stack Mobile IP (DSMIPv6)
+    the IPv4 home address option may be included also. If the MN has multiple Care-of
+    addresses registered, the HA includes the Binding Identifier (BID) option in the
+    revocation message, to identify which binding is revoked. When an MN receives
+    a Binding Revocation Indication message with its home address in the Type 2 Routing
+    header, it responds with a Binding Revocation Acknowledgment message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similarly, in the case of Proxy Mobile IPv6, the local mobility anchor is sending
+    the revocation message to the mobile access gateway. In this case the local mobility
+    anchor includes the mobile node home network prefix option and the mobile node
+    identifier option.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mobility Options
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A mobility message can contain zero, one, or more options. These options are
+    included in the Variable Data field of the Mobility header. This architecture
+    is very flexible, as options are inserted only if needed and additional options
+    can easily be defined in the future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The presence of options is indicated in the Header Length field of the Mobility
+    header. They have the known TLV format (Type 1 byte, Length 1 byte, Value variable).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Table 8-3](ch08.html#mobility_options-id1 "Table 8-3. Mobility options") contains
+    an overview of the currently defined options for mobility messages.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 8-3. Mobility options
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Value length | Name | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Type 0 | Pad1 | Used to insert one padding byte. This option has a special
+    format; it contains only a Type field, and no fields for length and data. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Type 1 | PadN | Used to insert two or more padding bytes. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Type 2 Length 2 | Binding Refresh Advice | Indicates the remaining time until
+    the MN should send a new Home Registration to HA. Only valid in Binding Acks sent
+    from the HA in response to a Home Registration. The interval must be shorter than
+    the Lifetime value in the Binding Acknowledgment. A time unit is four seconds.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Type 3 Length 16 | Alternate Care-of address | Contains an address to use
+    as the Care-of address for the binding rather than using the Source address of
+    the packet as the Care-of address. Only in Binding Update messages. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Type 4 Length 4 | Nonce Indices | Has two additional fields besides the Type
+    and Length field. The Home Nonce Index field tells the CN which nonce value to
+    use when producing the Home Keygen Token. The Care-of Nonce field indicates the
+    value for generating the Care-of Keygen Token. Valid only in the Binding Update
+    message sent to a CN, and only when present together with a Binding Authorization
+    Data option. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Type 5 Length variable | Binding Authorization Data | Contains a cryptographic
+    value that can be used to determine that the message in question comes from the
+    right authority. Rules for calculating this value depend on the authorization
+    procedure used. Must always be the last option in the MH. Only valid in Binding
+    Update and Binding Acknowledgment. Used for the Return Routability process. In
+    this case, the calculation of the Authenticator value is based on Care-of address
+    of MN, IPv6 address of CN, and data from the MH. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Type 201 Length 16 | Home Address | Contains the home address of MN. Sent
+    by MN when away from home to indicate its home address to the receiver. Carried
+    in a Destination Options header. Must be inserted after Routing header and before
+    Fragment, AH, or ESP header (if present). |'
+  prefs: []
+  type: TYPE_TB
+- en: With the exception of the Binding Authorization Data option, these options can
+    appear in arbitrary order. The Home Address option is an exception, as it is carried
+    in a Destination Options header and not in the Mobility Header (MH).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Again, there is a full list of mobility options including options from other
+    specifications at [http://bit.ly/1nabH2o](http://bit.ly/1nabH2o).
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 4283, “Mobile Node Identifier Option for Mobile IPv6 (MIPv6),” extends the
+    original specification to allow MIPv6 nodes (HA, CN, MN) to use identifiers other
+    than an IP address. It defines an option with a subtype number to specify the
+    identifier type. The identifier type can be a Network Access Identifier (NAI;
+    see RFC 4282), an International Mobile Station Identifier (IMSI), or an application/deployment
+    specific opaque identifier. Additional identifier types will be specified in the
+    future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Routing Header Type 2
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A new Routing header has been defined for Mobile IPv6\. This Extension header
+    allows the data exchange between the Care-of address of a mobile node and a correspondent
+    node without being routed through the home agent. In other words, it is used when
+    communication is performed with Route Optimization after a successful Return Routability
+    Procedure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 6275 defines the Type 2 Routing header. It allows, among other things, the
+    configuration of specific rules for Mobile IPv6 packets on firewalls.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When a correspondent node sends an IPv6 datagram to a mobile node using Route
+    Optimization, the Destination address field in the IPv6 header contains the Care-of
+    address of the mobile node. The Routing header Type 2 inserted contains the home
+    address of the mobile node. The Routing header Type 2 can only contain one unicast
+    address. IPv6 nodes that process these Routing headers must verify that the IPv6
+    address contained corresponds to the home address of the mobile node.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The format of the Routing header Type 2 is shown in [Chapter 3](ch03.html "Chapter 3. The
+    Structure of the IPv6 Protocol") (Figures [3-6](ch03.html#format_of_the_routing_header
+    "Figure 3-6. Format of the Routing header") and [3-7](ch03.html#routing_header_type_2_in_a_trace_file
+    "Figure 3-7. Routing header Type 2 in a trace file")). The Header Extension Length
+    field has the value 2; this header does not have a variable length, as it only
+    contains one address. In the Routing Type field, the value 2 is indicated, and
+    the Segments Left field is set to 1 for one address. The Home Address field carries
+    the home address of the mobile node. How this Routing header Type 2 is used and
+    processed is described later in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ICMPv6 and Mobile IPv6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This section describes two new ICMPv6 message pairs and some modifications to
+    Neighbor Discovery (ND) that have been made to support Mobile IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Home Agent Address Discovery
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Home Agent Address Discovery mechanism is used by the mobile node to determine
+    the address of its home agent on its home link. For this purpose the mobile node
+    uses the two new ICMPv6 message pairs and the home agents list, which is a list
+    maintained by each home agent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ICMPv6 Home Agent Address Discovery messages
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: This message pair consists of a Home Agent Address Discovery Request and Reply
+    message. As the name implies, the mobile node uses these messages to find its
+    home agent on the home link dynamically. Normally, mobile nodes are configured
+    statically with a home agent address. In the case where a home agent is renumbered
+    or goes down and is replaced by another home agent with a different IP address,
+    dynamic discovery of the home agent address may be a useful mechanism.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The mobile node sends a Discovery message to the Home Agent Anycast address
+    (Anycast ID decimal 126, hexadecimal `0x7E`; see [Chapter 2](ch02.html "Chapter 2. IPv6
+    Addressing")) on its home link. The Source address field in the IPv6 header carries
+    the Care-of address of the mobile node.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The home agents on the home link that are configured for the Home Agent Anycast
+    address respond with a Home Agent Address Discovery Reply message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Discovery message has a type value of 144; the Reply message has a type
+    value of 145\. The Code field is always set to 0\. The Identifier field is inserted
+    by the mobile node and copied over by the home agent for the Reply. This allows
+    to identify corresponding messages. The Reply carries a Home Address field, which
+    can carry one or more home agent addresses. This address or list of addresses
+    is generated from the home agents list (described next).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For a detailed description of the header fields in an ICMPv6 message, please
+    refer to [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Home agents list
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Every home agent needs to maintain a home agents list. In this list, every
+    router must be listed that is connected to the same link and provides home agent
+    services. A router advertises itself as a home agent by setting the H-Bit in the
+    Router Advertisement. A router maintains a home agents list for each link on which
+    it acts as a home agent. The list is updated through Router Advertisements and
+    contains the following information:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Link-local address of the HAs on the link. This address is learned from the
+    Source address field in the IPv6 header of Router Advertisements that have the
+    H-Bit set (home agent bit).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: One or more global IPv6 unicast addresses for these HAs. These addresses are
+    learned from the Prefix option in the Router Advertisements.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Remaining Lifetime for this HA entry. When the Lifetime expires, the HA has
+    to be deleted from the list.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Preference for this HA. Higher values means higher preference. This value is
+    learned from the Home Agent Preference field in the Home Agent Information option
+    in a Router Advertisement (if present). If not present, this value is set to 0\.
+    The HA uses this preference to sort the HA list when sending out a Home Agent
+    Address Discovery Reply message.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The HA sending out a Home Agent Address Discovery Reply must list all HAs on
+    the link, sorted by preference. Only the global IPv6 unicast addresses of the
+    home agents are contained in the home agent address field of the Home Agent Address
+    Discovery Reply message. The reply must not be larger than 1,280 bytes. Sorting
+    by preference ensures that HAs with a high priority are listed in this packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mobile Prefix Solicitation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Mobile Prefix Solicitation message is sent by a mobile node away from home
+    to determine changes in the prefix configuration of its home link (i.e., home
+    network renumbering). The HA answers the Solicitation message with a Prefix Advertisement.
+    Based on this reply, the mobile node can adjust its home address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The mobile node sends an ICMPv6 Mobile Prefix Solicitation message to its HA.
+    The IPv6 header carries the Care-of address as Source address. A Home Address
+    Destination option is inserted. IPsec headers are supported and should be used.
+    The Mobile Prefix Solicitation can carry options that have to follow the format
+    described in [Chapter 4](ch04.html "Chapter 4. ICMPv6") (RFC 4861). Currently,
+    there are no specific options defined. The type value field of a Mobile Prefix
+    Solicitation message is set to 146; the Code field is set to 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The HA replies with an ICMPv6 Mobile Prefix Advertisement message to the Care-of
+    address of the mobile node. The HA can also send out unsolicited Advertisements
+    at regular intervals. The Advertisement carries a Routing header Type 2\. The
+    reply is sent to the Source address of the Solicitation message. If the Advertisement
+    is unsolicited, it is sent to the Care-of address of registered mobile nodes.
+    The type value for the Advertisement is set to 147\. If it is the answer to a
+    Solicitation, the Identifier is copied over from the Solicitation. The Advertisement
+    contains the Prefix option described in [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+    It carries all prefixes that should be used by the mobile node to configure its
+    home addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Changes in Neighbor Discovery (ND)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Some changes and new options have been defined in ND for use with Mobile IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Modified Router Advertisement format
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: As already mentioned in [Chapter 4](ch04.html "Chapter 4. ICMPv6"), there is
+    a new flag in the Router Advertisement. The M-Flag and the O-Flag are followed
+    by the H-Flag, which allows a router to advertise that it acts as a home agent
+    on this link.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Modified Prefix option
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: In order to build an updated HA list based on Router Advertisements, a mobile
+    node must know the global unicast address of the routers. A regular Router Advertisement
+    lists only the link-local address of the router. For this purpose, the Prefix
+    option has been modified. The Prefix option now carries an additional flag, the
+    R-Flag (router address). When this flag is set, it indicates that the Prefix option
+    field does not contain a Prefix, but rather a global IPv6 unicast address for
+    the router.
+  prefs: []
+  type: TYPE_NORMAL
+- en: New Advertisement Interval option
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The Advertisement Interval option is used in Router Advertisements. It indicates
+    the interval at which the router will send unsolicited multicast Router Advertisements.
+    The option follows the TLV format (Time, Length, Value) and has a type value of
+    7\. The Advertisement Interval field has 4 bytes and carries the time in milliseconds
+    between unsolicited Router Advertisements. The mobile node uses this information
+    in its Movement Detection Algorithm (described later in this chapter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Neighbor Discovery specification sets a minimum interval of three seconds
+    for unsolicited multicast Router Advertisements. Mobile nodes are dependent on
+    learning as fast as possible when moving to a new network to create new Care-of
+    addresses accordingly and send out Binding Updates. They detect their movement
+    to a new network based on Router Advertisements from routers they don’t know yet.
+    As a consequence, routers supporting Mobile IPv6 must be configurable with a shorter
+    Router Advertisement Interval. Alternatively, mobility information from lower
+    layers (i.e., Layer 2) can be used to aid the mobile node in achieving faster
+    movement detection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: New Home Agent Information option
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The Home Agent Information option is used in Router Advertisements and follows
+    the TLV format. The type value is 8.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The HA Preference field has a length of 2 bytes. In a Router Advertisement,
+    the HA can use this field to indicate which level of preference should be associated
+    to it. A higher value means a higher preference. When this option is not set,
+    the HA has a preference of 0\. This field can be used by the HA to dynamically
+    adjust to different situations, e.g., to the number of mobile nodes currently
+    connected or based on how many resources are available to serve additional mobile
+    nodes. Alternatively, the preference can be configured manually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Home Agent Lifetime field also has a length of 2 bytes. It indicates the
+    lifetime for this HA in seconds. The default value corresponds to the value in
+    the basic Router Advertisement header. The maximum possible value is 18.2 hours.
+    A value of 0 is not accepted. The HA Lifetime field only relates to the HA service
+    of this router, so it can be present only in a Router Advertisement with the H-Bit
+    (home agent) set.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mobile IPv6 Communication
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This section discusses Mobile IPv6 terms and goes into more details on the communication
+    processes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binding Cache
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Every correspondent node and home agent maintains a Binding Cache for each of
+    its global IPv6 addresses. It lists all mobile nodes for which it has a binding.
+    If it wants to send data to a certain destination, it first searches its Binding
+    Cache, and after this, the Destination Cache for an address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A Binding Cache entry carries the following information:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Home address of the mobile node for the entry. This field is used to determine
+    the Destination address when sending a packet.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Care-of address for the mobile node indicated by the Home Address field in this
+    Binding Cache entry.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Lifetime value for the binding.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A flag indicating whether this entry is a home registration entry. Present only
+    on a node that acts as a home agent.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Maximum value of the Sequence Number field of all previous Binding Updates received
+    for this home address.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Information on the use of this entry.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Binding Update List
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Every mobile node maintains a Binding Update List. The list has an entry for
+    each Binding Update the mobile node has sent to its home agent(s) and to correspondent
+    nodes for which the Lifetime has not expired. If it has sent more than one Binding
+    Update, only the last message with the highest Sequence Number is listed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A Binding Update List carries the following information:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 address of the node to which the Binding Update has been sent
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Home address for which the Binding Update has been sent
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Care-of address that was indicated in this Binding Update
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Lifetime that was indicated in the Binding Update
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Remaining Lifetime for the Binding
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Highest used Sequence Number for this Binding
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Time when Binding Update was sent
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: State of any retransmissions needed
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A flag indicating whether further Binding Updates have to be sent to this destination
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Return Routability Procedure
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Return Routability Procedure is designed to allow a correspondent node to
+    detect whether the mobile node is reachable at its Care-of address as well as
+    at its home address. Only when this has been successfully proven can *Route Optimization*
+    (i.e., direct communication between correspondent node and mobile node) be used.
+    The fact that the mobile node can be reached at both addresses indicates that
+    it really is on the foreign link and has a valid registration for the home address.
+    This reduces (but does not eliminate) the risk that this Binding Update is a security
+    attack. Only after a successful Return Routability test does the correspondent
+    node accept Binding Updates from the mobile node and send datagrams to the Care-of
+    address of the mobile node directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The message flow for the Return Routability Procedure consists of the following
+    steps (for MH types, refer to [Table 8-1](ch08.html#mobility_message_types "Table 8-1. Mobility
+    message types")):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: MN sends a Home Test Init message (MH type 1) via HA to the CN. This message
+    carries a Home Init Cookie. This way the CN learns the home address of the MN.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: MN sends a Care-of Test Init message (MH type 2) to the CN. This message carries
+    a Care-of Init Cookie. It is sent to the CN directly (not through HA). This way,
+    the CN learns the Care-of address of the MN.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: CN replies to the Home Test Init message with a Home Test message (MH type 3)
+    sent via HA. It carries the Home Init Cookie, the Home Keygen Token, and the Home
+    Nonce Index. The MN can now generate a Home Keygen Token.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: CN replies to the Care-of Test Init message with a Care-of Test message (MH
+    type 4) sent to the MN’s Care-of address. It carries the Care-of Init Cookie,
+    the Care-of Keygen Token, and the Care-of Nonce Index. The MN can now generate
+    a Care-of Keygen Token.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Once the mobile node has received the Home Test and the Care-of Test messages,
+    the Return Routability Procedure has been accomplished. The mobile node hashes
+    the two tokens and creates a 20-byte Management Key, which is obviously also known
+    to the correspondent node that generated the two tokens in the first place. This
+    key will be used by the mobile node to secure the Binding Update to the correspondent
+    node. Upon a successful security check, the correspondent node can accept the
+    Binding Update since the mobile node has proven that it is reachable on the home
+    and Care-of addresses contained in the Binding Update.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 4225, “Mobile IP Version 6 Route Optimization Security Design Background,”
+    outlines the security considerations and choices that were made when the Return
+    Routability Procedure was defined. The goal of this informational document is
+    to help implementers of MIPv6 understand the design choices and to help people
+    who design mobility of multihoming solutions to avoid some common security pitfalls.
+    The security problems and possible countermeasures are discussed in detail.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Home Agent Operation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When the mobile node is away from home, the HA must intercept all packets destined
+    to the mobile node and tunnel them to the Care-of address of the mobile node.
+    It uses Proxy Neighbor Discovery to do so.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Proxy Neighbor Discovery
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'In order to intercept packets destined to the mobile node on the home link,
+    the HA must pretend to be the mobile node. The HA sends Neighbor Advertisements
+    to the all-nodes multicast address, providing its own link-layer address as link-layer
+    address for the home address of the mobile node. The ND message has the following
+    information:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Source address in the IPv6 header of the Neighbor Advertisement is the address
+    of the HA.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Target Address field in the ND message carries the IPv6 address of the mobile
+    node.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The ND Advertisement contains a Target Link-Layer Address option carrying the
+    link-layer address of the HA.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Router flag (R-Flag) must be set to 0.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Override flag (O-Flag) must be set. All nodes on the link will update their
+    Neighbor Caches and store the link-layer address.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Now the HA receives all packets on this link that are destined to the IPv6 address
+    of the mobile node. The HA acts as a proxy for the mobile node. It must inspect
+    all Neighbor Solicitations it receives and verify whether the Target Address field
+    corresponds to a Home Registration entry in its Binding Cache. If so, it replies
+    with a Neighbor Advertisement indicating its own link-layer address as the link-layer
+    address for the mobile node. This procedure also defends the mobile node’s home
+    address from other home link nodes trying to configure that same address (i.e.,
+    Duplicate Address Detection).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For more details on Neighbor Discovery and the formats of the ND messages and
+    processes mentioned, refer to [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Bidirectional tunneling
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: To forward packets destined to the home address of the mobile node, the HA uses
+    an IPv6 tunnel. It inserts an additional IPv6 header called the Tunnel header.
+    The Source address in the Tunnel header is the IPv6 address of the HA. The destination
+    address is the primary Care-of address of the mobile node. The mobile node processes
+    the Tunnel header and forwards the decapsulated packet internally to the upper-layer
+    protocols and applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In order to receive multicast packets when away from home, the mobile node
+    must register for these group memberships. There are two ways to accomplish this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The mobile node can register with local routers on the Home Link using its Care-of
+    address. In this case, it can receive multicast packets directly. These memberships
+    will not survive if the mobile node moves to another foreign network.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The mobile node can register for multicast group memberships on its Home Link
+    by sending MLD registrations to its HA, which in turn will forward multicast packets
+    to the mobile node using the tunnel. This will always work no matter how many
+    times the mobile node changes the network.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The following packets are not forwarded to the mobile node:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Packets sent to the link-layer address of the mobile node. These packets are
+    answered with an ICMPv6 Destination Unreachable message.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Packets sent to the site-local address of the mobile node. (Site-local addresses
+    have been deprecated after the publication of the Mobile IPv6 specification; this
+    will be removed in a future version of this RFC.)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Multicast packets sent to a link-local, site-local, or organization-local scope.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Packets sent through the Reverse Tunnel from the mobile node to the HA are decapsulated
+    by the HA and forwarded to their destinations through regular routing mechanisms.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When the HA itself sends data to the mobile node, it behaves like a regular
+    correspondent node, which means it does not use the tunnel, but inserts a Routing
+    header Type 2, which carries the home address of the mobile node.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mobile Node Operation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: As long as the MN is at home, no Mobile IPv6 mechanisms are necessary. If the
+    MN is away from home, it uses its home address as well as its Care-of address.
+    For each communication, it must choose which address to use. Applications and
+    processes above the IP layer usually communicate using the home address of the
+    MN.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If a communication has to survive a move of the MN to another network, the home
+    address must be used. As soon as the MN has a communication with a correspondent
+    node for which there is a Binding, the communication can be routed directly. If
+    there is no Binding, all data will be tunneled through the home agent. For certain
+    and specifically for new communications, the MN can also choose to use its Care-of
+    address without Mobile IPv6 functionality, just as a regular unicast address.
+    When the MN communicates with local nodes in a foreign network—e.g., for Neighbor
+    Discovery—it should communicate directly and not use the Home Address Destination
+    option.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The choice of the best communication path and the corresponding address depends
+    on the requirements of the application, and that is where the decision has to
+    be made. This definition is not part of the Mobile IPv6 specification.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Route Optimization in detail
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: When a mobile node away from home communicates with a correspondent node for
+    which it has a Binding, it uses the process called Route Optimization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The MN goes through the following steps: it checks its Binding Update List
+    for an entry of its home address for this correspondent node. This verifies whether
+    the correspondent node can process the Home Address Destination option. Then,
+    it checks the Binding Update List for the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Whether the Source address it wants to use corresponds to the home address in
+    the entry.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Whether the Destination address it wants to use corresponds to the address of
+    the correspondent node in the entry.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Whether its current Care-of address is listed as Care-of address in this entry.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Whether the Binding is valid and the Lifetime is greater than zero.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If all these requirements are met, the mobile node knows that the correspondent
+    node has a valid Binding Cache entry. A packet sent from the MN to this correspondent
+    node contains the following information:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Source address field in the IPv6 header contains the Care-of address.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The packet carries a Destination Options header with a Home Address option containing
+    the home address of the mobile node.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The correspondent node receiving this packet copies the home address from the
+    Destinations Options header into the Source address field of the IPv6 header before
+    processing the packet to upper-layer protocols and applications. To the upper
+    layers and the application, it looks as though the packet was sent from the home
+    address of the mobile node. When the correspondent node wants to send data to
+    an MN, it checks its Binding Cache for an entry for the destination. If there
+    is such an entry, it inserts a Routing header Type 2.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When the correspondent node replies, the addresses are used as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Destination address in the IPv6 header contains the Care-of address of the
+    mobile node.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The packet contains a Routing header Type 2\. The address field in the Routing
+    header contains the home address of the mobile node.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The mobile node exchanges the address in the Destination address field of the
+    IPv6 header with the home address copied from the Routing header, reduces the
+    Segments Left field in the Routing header by one to zero, and processes the packet
+    internally to upper-layer protocols and applications. Again, to the upper layers,
+    it looks as though the packet had been sent to the home address of the mobile
+    node.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Figure 8-5](ch08.html#header_information_with_route_optimizati "Figure 8-5. Header
+    information with Route Optimization") shows the communication between the MN and
+    the CN, as well as the specific headers associated with Route Optimization.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Header information with Route Optimization](images/ipv6_0805.png)Figure 8-5. Header
+    information with Route Optimization'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This figure illustrates the processes described previously. The main goal of
+    Mobile IPv6 is for an MN to keep connectivity to services and applications while
+    moving from one network to another. The goal of Route Optimization is to allow
+    for direct routing between MN and the correspondent node. With the use of Destination
+    options and Routing Type 2 header, both nodes can process the packets internally
+    as though they were in direct communication with the MN on its home link. So to
+    the application, it looks as though the mobile node is on its home link.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This explains why Mobility with IPv6 is much more scalable and well-suited for
+    widespread mobility. The Extension header architecture allows for Route Optimization.
+    Imagine millions of mobile nodes communicating through their home agents to reach
+    their correspondent nodes. The home agent would be a bottleneck, a single point
+    of failure, and the home link unnecessarily overloaded. In many cases, the route
+    from the mobile node to the correspondent node is much shorter than the route
+    going through the home agent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Communication with bidirectional tunneling
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: If the MN wants to communicate with a correspondent node for which it does not
+    have a Binding, it uses the Reverse Tunneling mechanism. In this case, the packet
+    is sent through the tunnel via the home agent. The Source address in the original
+    packet carries the home address of the MN and the correspondent node’s address
+    as a Destination address. This packet is encapsulated in another IPv6 header carrying
+    the Care-of address of the MN in the Source address field and the IPv6 address
+    of the home agent in the Destination Address field. The home agent processes the
+    first header and forwards the original packet to the correspondent node. [Figure 8-6](ch08.html#header_information_with_bidirectional_tu
+    "Figure 8-6. Header information with bidirectional tunneling") illustrates the
+    header information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Header information with bidirectional tunneling](images/ipv6_0806.png)Figure 8-6. Header
+    information with bidirectional tunneling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Movement Detection
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: How does the MN detect that it has moved to another network? Movement Detection
+    is based on the process of Neighbor Unreachability Detection (NUD; described in
+    [Chapter 4](ch04.html "Chapter 4. ICMPv6")). Using NUD, the MN detects when its
+    default router is no longer available. In this case, the MN tries to find a new
+    default router. It performs Duplicate Address Detection (DAD) for its link-local
+    addresses, chooses a new default router based on the Router Advertisements, and
+    builds new Care-of addresses based on the Router prefixes advertised. When the
+    new addresses are initialized, it performs a Binding Update with its home agent
+    first and then with all correspondent nodes for which it has Bindings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The fact that new routers advertise new prefixes is not necessarily a sign
+    that the MN is in a new network. There may be a new router or a prefix change
+    in the current network. Procedures have to be defined to prevent an MN from unnecessarily
+    updating all Bindings when it has not moved to another network. The following
+    procedures have been defined so far:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the MN receives RAs from new routers with new prefixes but its default router
+    is still reachable, it will not perform any Binding Updates. It uses NUD to detect
+    whether its default router is still available.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RAs can carry an Advertisement Interval option. This allows the MN to detect
+    whether this router is still available based on the comparison of the interval
+    in different RAs.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If the default router does not reply to a Neighbor Solicitation, the MN should
+    perform a Multicast Router Solicitation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5568, “Mobile IPv6 Fast Handovers,” describes an update to the Mobile IPv6
+    specification to reduce the handover latency. New ND messages types are defined
+    for this purpose.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returning home
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: When the MN detects that it is back on its home link, it sends a Binding Update
+    to the home agent to inform it that it is back home and that the HA no longer
+    needs to forward packets through the tunnel. This is called a de-registration
+    Binding Update and only after having de-registered can the MN send and receive
+    packets using its home address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This Home Registration looks as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The A-Bit (Acknowledge) and the H-Bit (Home Registration) must be set.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Lifetime field is set to 0.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Care-of address must be the same as the home address.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Source address in the IPv6 header must be the home address of the MN.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Security
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If the data flow between home agent and mobile node is not secured, there are
+    many possibilities for attacks—for example, man-in-the-middle attacks, hijacking,
+    or Denial of Service attacks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To secure the tunnel between home agent and mobile node, an IPsec tunnel is
+    configured. IPsec ESP is required for Mobile IPv6 messages. The Mobile IPv6 specification
+    details this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following data flows have to be secured:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binding Update and Binding Ack between MN and HA
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Home Test Init and Home Test messages sent via HA during the Return Routability
+    Procedure
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ICMPv6 messages between MN and HA used for prefix discovery
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All control messages between mobile node and home agent need authentication,
+    integrity, proper sequencing, and anti-replay protection. This protection requires
+    a Security Association (SA) between home agent and mobile node. IPsec does not
+    provide any means to control the sequence of messages. A correct sequence is given
+    by the Sequence Number in Binding Update and Acknowledgment messages. Greater
+    protection from replay attacks can be provided only when Internet Key Exchange
+    (IKE) is used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For a description of security terms and concepts, refer to [Chapter 6](ch06.html
+    "Chapter 6. Security with IPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binding Updates between the mobile node and correspondent node are protected
+    by the SA established during the Return Routability Procedure. Binding Updates
+    between the mobile node and correspondent node must also be protected by the Binding
+    Authorization Data option. This option includes a Binding Management Key, which
+    is generated during the Return Routability Procedure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A more detailed discussion of security aspects and mechanisms with Mobile IPv6
+    can be found in RFC 6275 (“Mobility Support in IPv6”), RFC 3776 (“Using IPsec
+    to Protect Mobile IPv6 Signaling between mobile nodes and home agents”), and RFC
+    4877 (“Mobile IPv6 Operation with IKEv2 and the Revised IPsec Architecture”),
+    as well as in general security RFCs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 4285, “Authentication Protocol for Mobile IPv6,” specifies an alternate
+    mechanism to secure MIPv6 messages in 3GPP2 networks. It is an informational RFC
+    not reviewed by the IETF and consists of a MIPv6-specific mobility message authentication
+    option that can be added to MIPv6 signaling messages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Extensions to Mobile IPv6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A number of extensions have been defined for Mobile IPv6 to make it more flexible
+    and scalable. The following sections describe them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: NEMO
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: An extension to Mobile IPv6 called Network Mobility (NEMO) has been specified
+    in RFC 3963\. The NEMO Basic Support protocol enables mobile networks to attach
+    to different points in the Internet. It allows session continuity for every node
+    in the mobile network even as the Mobile Router changes its point of attachment
+    to the Internet. It also allows every node in the Mobile Network to be reachable
+    while moving around. The solution supports both mobile nodes and hosts that do
+    not support mobility in the Mobile Network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The processes and messages are basically the same as in Mobile IPv6, except
+    that in this case, the mobile node is a *Mobile Router*. In the current NEMO specification,
+    communication between nodes in the mobile network and correspondent nodes always
+    goes through the home agent. Route Optimization has not been defined yet. Theoretically,
+    nested mobility can be configured where a Mobile Router allows another Mobile
+    Router to attach to its mobile network. This opens ways for many scenarios with
+    high mobility. One use case could be car communication, where the router in the
+    car could be the Mobile Router. The future will show how we use these technologies,
+    and the developments in the past couple years show that sometimes unexpected applications
+    spring up overnight and are used en masse.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hierarchical Mobile IPv6
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With RFC 5380, “Hierarchical Mobile IPv6,” the scalability of Mobile IPv6 is
+    further extended. It is designed to significantly enhance performance of Mobile
+    IPv6 and to reduce the number of messages a mobile node sends over a link in order
+    to update its bindings with the home agent and the correspondent node. It also
+    allows mobile nodes to hide their location from correspondent nodes and home agents
+    when using route optimization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hierarchical Mobile IPv6 introduces a new node type, the *Mobility Anchor Point*
+    (MAP). The MAP can be located anywhere in the hierarchical network of routers.
+    It is essentially a local home agent in the geographical region of the mobile
+    node. The mobile node now sends Binding Updates to the local MAP rather than to
+    the home agent and correspondent nodes. By sending one Binding Update message
+    to the MAP, all further traffic from the home agent and the correspondent nodes
+    is rerouted to the new location of the mobile node. The correspondent node and
+    home agent operation are not affected by this and therefore need no changes. [Figure 8-7](ch08.html#hierarchical_mobile_ipv6-id1
+    "Figure 8-7. Hierarchical Mobile IPv6") illustrates the concept.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Hierarchical Mobile IPv6](images/ipv6_0807.png)Figure 8-7. Hierarchical Mobile
+    IPv6'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When the mobile node enters a MAP domain, it receives Router Advertisements
+    containing information on one or more local MAPs (MAP option). The *Regional Care-of
+    Address* (RCoA) of the MAP corresponds to the Care-of address in the base MIPv6
+    specification. After registering with a MAP, the mobile node registers its RCoA
+    with its home agent and eventually with its current correspondent nodes. The RCoA
+    is now used as the mobile node’s Care-of address. It is the address used by the
+    home agent and correspondent nodes to communicate with the mobile node away from
+    home. When the mobile node moves from one network to another within a MAP domain,
+    it registers its new *On-link Care-of Address* (LCoA) with the MAP. The MAP, acting
+    like a local home agent, receives all packets on behalf of the mobile node and
+    will encapsulate and forward them to the mobile node’s current address. The boundaries
+    of a MAP domain are defined by the Access Routers (AR1 and AR2 in [Figure 8-7](ch08.html#hierarchical_mobile_ipv6-id1
+    "Figure 8-7. Hierarchical Mobile IPv6")). This obviously greatly enhances performance
+    of Mobile IPv6, because Binding Updates do not have to be sent to the home agent
+    and the correspondent nodes every time the mobile node moves to another network
+    within the MAP domain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As mentioned in the section on the Binding Update message, a new bit has been
+    added to the Binding Update message, the M-Bit, which indicates that this is a
+    MAP registration and not a Binding Update with a home agent. There is also an
+    extension to Neighbor Discovery specified to include the MAP’s global IPv6 address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A MAP can exist anywhere in the hierarchical network. Several MAPs can be located
+    within the same domain independently. In addition, overlapping MAP domains are
+    allowed and recommended. Both static and dynamic hierarchies are supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Proxy Mobile IPv6
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Proxy Mobile IPv6 is a network-based mobility management protocol. It is defined
+    in RFC 5213 and provides mobility on the Network layer, which means that network
+    components take over the handling of mobility messages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The elements are the *Local Mobility Anchor* (LMA) and the *Mobile Access Gateway*
+    (MAG). The LMA is responsible for managing the reachability of the MN and its
+    home prefixes. The LMA has the function of a topological anchor point of the MN.
+    The MAG manages the mobility of the MN. The MAG is located on the access network
+    of the MN and is responsible for the movements of the MN and for initiating the
+    binding messages with the LMA. There can be multiple LMAs in a Mobile IPv6 domain,
+    of which each can manage different groups of MNs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alternatively, localized routing can be used (RFC 6705) to allow nodes attached
+    to the MAGs to directly exchange traffic by using localized forwarding or a direct
+    tunnel between the gateways.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multiple Care-of Addresses Registration
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If an MN has multiple active interfaces, it can only bind one of its Care-of
+    addresses with its home address. The specification in RFC 5648 defines extensions
+    that support the binding of multiple Care-of addresses to the home address. For
+    each binding the MN creates, there is a new *Binding Identification Number* (BID)
+    created and included in the Binding Update. The HA creates a separate binding
+    for each BID und stores it accordingly in its Binding Cache. The same mechanism
+    is used in binding messages with a CN.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Flow Binding
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Multiple Care-of addresses registration described above allows the binding
+    of multiple CoAs with the Home address. With the Flow Binding Specification in
+    RFC 6089, it is possible to associate different policies to each binding. This
+    is also possible with bindings with CNs or MAPs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fast Handover
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In RFC 5568, a protocol is specified to reduce the mobile node’s handover latency
+    when moving from one network to another. It is called “Fast Handover for Mobile
+    IPv6.” The handover operationally consists of movement detection, address configuration,
+    and address update. The combined handover latency is often sufficient to affect
+    real-time applications (e.g., VoIP). This specification describes a set of protocols
+    and procedures to significantly reduce the handover latency. All throughput-sensitive
+    applications can benefit from the Fast Handover.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 4260, “Mobile IPv6 Fast Handovers for 802.11 Networks,” discusses and gives
+    some deployment examples for Mobile IPv6 Fast Handovers on 802.11 networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Support for Dual-Stack Hosts and Routers
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The original Mobile IPv6 and NEMO specification describe the use of Mobility
+    with IPv6 only. RFC 5555 extends this and allows the registration of IPv4 addresses
+    and prefixes and also the transport of IPv4 and IPv6 packets across the tunnel
+    to the HA. The MN can move from an IPv4 network to an IPv6 network and vice versa,
+    even if there is a NAT in the path between the MN and the HA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now you have reached the end of the technical chapters in this book. [Chapter 9](ch09.html
+    "Chapter 9. Planning for IPv6") puts all the pieces together and explains what
+    planning and designing your future network is all about. It integrates more than
+    10 years of experience, education, and consulting, with many recommendations based
+    on best practices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: References
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Here’s a list of the most important RFCs and drafts mentioned in this chapter.
+    Sometimes I include additional subject-related RFCs for your personal further
+    study.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFCs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 2710, “Multicast Listener Discovery (MLD) for IPv6,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3776, “Using IPsec to Protect Mobile IPv6 Signaling Between Mobile Nodes
+    and Home Agents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3963, “Network Mobility (NEMO) Basic Support Protocol,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4065, “Instructions for Seamoby and Experimental Mobility Protocol IANA
+    Allocations,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4140, “Hierarchical Mobile IPv6,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4225, “Mobile IP Version 6 Route Optimization Security Design Background,”
+    2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4260, “Mobile IPv6 Fast Handovers for 802.11 Networks,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4282, “The Network Access Identifier,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4283, “Mobile Node Identifier Option for Mobile IPv6 (MIPv6),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4285, “Authentication Protocol for Mobile IPv6,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4303, “IP Encapsulating Security Payload (ESP),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4306, “The Internet Key Exchange (IKEv2),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4449, “Securing Mobile IPv6 Route Optimization Using a Static Shared Key,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4487, “Mobile IPv6 and Firewalls: Problem Statement,” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4555, “IKEv2 Mobility and Multihoming Protocol (MOBIKE),” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4584, “Extensions to Sockets API for Mobile IPv6,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4621, “Design of the IKEv2 Mobility and Multihoming (MOBIKE) Protocol,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4831, “Goals for Network-Based Localized Mobility Management (NETLMM),”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4866, “Enhanced Route Optimization for Mobile IPv6,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4877, “Mobile IPv6 Operation with IKEv2 and the Revised IPsec Architecture,”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4885, “Network Mobility Support Terminology,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4887, “Network Mobility Home Network Models,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4908, “Multi-homing for small scale fixed network Using Mobile IP and NEMO,”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5094, “Mobile IPv6 Vendor Specific Option,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5096, “Mobile IPv6 Experimental Messages,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5142, “Mobility Header Home Agent Switch Message,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5149, “Service Selection for Mobile IPv6,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 5164, “Mobility Services Transport: Problem Statement,” 2008'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5213, “Proxy Mobile IPv6,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5270, “Mobile IPv6 Fast Handovers over IEEE 802.16e Networks,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5271, “Mobile IPv6 Fast Handovers for 3G CDMA Networks,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5380, “Hierarchical Mobile IPv6 (HMIPv6) Mobility Management,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5555, “Mobile IPv6 Support for Dual Stack Hosts and Routers,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5568, “Mobile IPv6 Fast Handovers,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5637, “Authentication, Authorization, and Accounting (AAA) Goals for Mobile
+    IPv6,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5648, “Multiple Care-of Addresses Registration,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5844, “IPv4 Support for Proxy Mobile IPv6,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5846, “Binding Revocation for IPv6 Mobility,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5847, “Heartbeat Mechanism for Proxy Mobile IPv6,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5944, “IP Mobility Support for IPv4,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6089, “Flow Bindings in Mobile IPv6 and Network Mobility (NEMO) Basic Support,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6275, “Mobility Support in IPv6,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6279, “Proxy Mobile IPv6 (PIMPv6) Localized Routing Problem Statement,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6463, “Runtime Local Mobility Anchor (LMA) Assignment Support for Proxy
+    Mobile IPv6,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6543, “Reserved IPv6 Interface Identifier for Proxy Mobile IPv6,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6572, “RADIUS Support for Proxy Mobile IPv6,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6610, “DHCP Options for Home Information Discovery in Mobile IPv6 (MIPv6),”
+    2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6611, “Mobile IPv6 (MIPv6) Bootstrapping for the Integrated Scenario,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6618, “Mobile IPv6 Security Framework Using Transport Layer Security for
+    Communication between the Mobile Node and Home Agent,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6705, “Localized Routing for Proxy Mobile IPv6,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6909, “IPv4 Traffic Offload Selector Option for Proxy Mobile IPv6,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7077, “Update Notifications for Proxy Mobile IPv6,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7109, “Flow Bindings Initiated by Home Agents for Mobile IPv6,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7148, “Prefix Delegation Support for Proxy Mobile IPv6,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7156, “Diameter Support for Proxy Mobile IPv6 Localized Routing,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7161, “Proxy Mobile IPv6 (PMIPv6) Multicast Handover Optimization by the
+    Subscription Information Acquisition through the LMA (SIAL),” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7222, “Quality-of-Service Option for Proxy Mobile IPv6,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

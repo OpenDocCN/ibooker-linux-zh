@@ -1,0 +1,68 @@
+- en: Foreword
+  id: totrans-0
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 前言
+- en: Vint Cerf
+  id: totrans-1
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 文特·瑟夫
+- en: Internet Pioneer, Woodhurst, February 2014
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 互联网先驱，伍德赫斯特，2014年2月
+- en: It is no exaggeration to say that the Internet has become an integral part of
+    the lives of nearly three billion people on the planet. More important, it touches
+    nearly everyone thanks to the ramifications of transactions, information exchange,
+    and other Internet-based applications that produce indirect effects. The original
+    Internet Protocol provided for a maximum of 4.3 billion terminal identifiers (addresses).
+    This limit was stretched using a mechanism called Network Address Translation
+    that permitted multiple parties to use private address space that would not be
+    exposed in the public Internet but rather translated into a shared, publicly routable
+    IPv4 address. The IPv4 address space was exhausted at the Internet Corporation
+    for Assigned Names and Numbers (ICANN) in February 2011, leaving Regional Internet
+    Registries to deal with the allocation of their remaining address space. IPv6
+    was developed in the mid-1990s and standardized by the Internet Engineering Task
+    Force (IETF). It has provision for 340 trillion trillion trillion addresses. Its
+    implementation has been slow, but two milestones are triggering an increased rate
+    of uptake. One is the running out of the IPv4 address space. The other is the
+    growing demand for Internet addresses to be assigned to mobiles, set-top boxes,
+    automobiles, and literally tens of billions of other programmable devices. This
+    is the so-called *Internet of Things*.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 毫不夸张地说，互联网已经成为全球近三十亿人生活中不可或缺的一部分。更重要的是，互联网通过交易、信息交换和其他基于互联网的应用程序所产生的间接影响，几乎触及了每一个人。最初的互联网协议支持最多43亿个终端标识符（地址）。这一限制通过一种叫做网络地址转换（NAT）的机制得以扩展，该机制允许多个方使用私人地址空间，这些地址不会暴露在公共互联网中，而是转换为一个共享的、公开可路由的IPv4地址。IPv4地址空间在2011年2月被互联网名称与数字地址分配机构（ICANN）用尽，留下了区域互联网注册机构来处理剩余地址空间的分配。IPv6在1990年代中期被开发出来，并由互联网工程任务组（IETF）标准化。它为340万亿万亿个地址提供了支持。尽管其实施进展缓慢，但有两个里程碑正在推动IPv6的采用率加快。一个是IPv4地址空间的耗尽，另一个是对分配互联网地址给移动设备、机顶盒、汽车以及数十亿其他可编程设备的需求不断增长。这就是所谓的*物联网*。
+- en: In addition to satisfying what will become an insatiable demand for address
+    space, IPv6 has features that improve the Internet Protocol format for easier
+    processing and provides for additional functionality in the way of configuration
+    convenience and flow management, among other useful properties. Readers will find
+    this book an easily approached guide to IPv6 implementation. That IPv6 must coexist
+    for an uncertain period of time with IPv4 is a given, so attention is drawn to
+    so-called dual-stack implementations. A thorough implementation of IPv6, however,
+    must also demonstrate that the implementation can operate in a pure IPv6 environment
+    in addition to coping with a mixed IPv4/IPv6 environment.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 除了满足将成为对地址空间的无尽需求外，IPv6还具有改善互联网协议格式的特点，使处理更加简便，并且在配置便利性和流量管理等方面提供了额外的功能，以及其他一些有用的特性。读者会发现本书是一本易于接近的IPv6实施指南。IPv6必须与IPv4在一段不确定的时间内共存，这是一个不争的事实，因此特别关注所谓的双栈实现。然而，IPv6的彻底实施必须证明它不仅能够在混合的IPv4/IPv6环境中运行，还能够在纯IPv6环境中正常工作。
+- en: Like many exponential phenomena, IPv6 may well come to surprise us. It has been
+    many years since its development, but there is indication that it is approaching
+    3% of traffic on the Internet. While this seems very small, it will grow rapidly
+    if history is any guide, presuming continued compounding growth of need for the
+    larger address space.
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 像许多指数型现象一样，IPv6可能会让我们感到惊讶。尽管它的发展已有多年，但有迹象表明，IPv6正在占据互联网流量的3%。虽然这个比例看起来很小，但如果历史能提供借鉴，它将迅速增长，前提是对更大地址空间需求的增长会继续加速。
+- en: Anyone serious about making a career in Internet-related applications and services
+    will be wise to become familiar with this new protocol and its functionality and
+    capability. You have this opportunity before you in Silvia Hagen’s work.
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 任何认真考虑在互联网相关应用和服务领域发展职业的人，都会明智地熟悉这一新协议及其功能和能力。你可以通过Silvia Hagen的作品抓住这个机会。

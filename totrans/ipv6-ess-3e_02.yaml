@@ -1,0 +1,886 @@
+- en: Chapter 1. Why IPv6?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The IP version currently used in networks and the Internet is IP version 4 (IPv4).
+    IPv4 was developed in the early ’70s to facilitate communication and information
+    sharing between government researchers and academics in the United States. At
+    the time, the system was closed with a limited number of access points, and consequently
+    the developers didn’t envision requirements such as security or quality of service.
+    To its credit, IPv4 has survived for over 30 years and has been an integral part
+    of the Internet revolution. But even the most cleverly designed systems age and
+    eventually become obsolete. This is certainly the case for IPv4\. Today’s networking
+    requirements extend far beyond support for web pages and email. Explosive growth
+    in network device diversity and mobile communications, along with global adoption
+    of networking technologies, new services, and social networks, are overwhelming
+    IPv4 and have driven the development of a next-generation Internet Protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 has been developed based on the rich experience we have from developing
+    and using IPv4\. Proven and established mechanisms have been retained, known limitations
+    have been discarded, and scalability and flexibility have been extended. IPv6
+    is a protocol designed to handle the growth rate of the Internet and to cope with
+    the demanding requirements on services, mobility, and end-to-end security.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When the Internet was switched from using Network Control Protocol (NCP) to
+    Internet Protocol (IP) in one day in 1983, IP was not the mature protocol that
+    we know today. Many of the well-known and commonly used extensions were developed
+    in subsequent years to meet the growing requirements of the Internet. In comparison,
+    hardware vendors and operating system providers have been supporting IPv6 since
+    1995 when it became a Draft Standard. In the decade since then, those implementations
+    have matured, and IPv6 support has spread beyond the basic network infrastructure
+    and will continue to be extended.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is very important for organizations to pay attention to the introduction
+    of IPv6 as early as possible because its use is inevitable in the long term. If
+    IPv6 is included in strategic planning; if organizations think about possible
+    integration scenarios ahead of time; and if its introduction is considered when
+    investing in IT capital expenditures, organizations can save considerable cost
+    and can enable IPv6 more efficiently when it is needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An interesting and humorous overview of the history of the Internet can be found
+    in RFC 2235, “Hobbes’ Internet Timeline.” The account starts in 1957 with the
+    launch of *Sputnik* in Russia and the formation of the Advanced Research Projects
+    Agency (ARPA) by the Department of Defense (DoD) in the United States. The RFC
+    contains a list of yearly growth rate of hosts, networks, and domain registrations
+    in the Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some excerpts from the RFC:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '1969: Steve Crocker makes the first Request for Comment (RFC 1): “Host Software.”'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1970: ARPANET hosts start using Network Control Protocol (NCP).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1971: 23 hosts connect with ARPANET (UCLA, SRI, UCSB, University of Utah, BBN,
+    MIT, RAND, SDC, Harvard, Lincoln Lab, Stanford, UIU©, CWRU, CMU, NASA/Ames).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1972: InterNetworking Working Group (INWG) is created with Vinton Cerf as Chairman
+    to address the need for establishing agreed-upon protocols. Telnet specification
+    (RFC 318) is published.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1973: First international connections to the ARPANET are made at the University
+    College of London (England) and Royal Radar Establishment (Norway). Bob Metcalfe’s
+    Harvard PhD thesis outlines the idea for Ethernet. File transfer specification
+    (RFC 454) is published.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1976: Queen Elizabeth II sends an email.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1981: Minitel (Teletel) is deployed across France by France Telecom.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1983: The cutover from NCP to TCP/IP happens on January 1.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1984: The number of hosts breaks 1,000.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1987: An email link is established between Germany and China using CSNET protocols,
+    with the first message from China sent on September 20\. The thousandth RFC is
+    published. The number of hosts breaks 10,000.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1988: An Internet worm burrows through the Net, affecting 10 percent of the
+    60,000 hosts on the Internet.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1989: The number of hosts breaks 100,000\. Clifford Stoll writes *Cuckoo’s
+    Egg*, which tells the real-life tale of a German cracker group that infiltrated
+    numerous U.S. facilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1991: The World Wide Web (WWW) is developed by Tim Berners-Lee and released
+    by CERN.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1992: The number of hosts breaks 1,000,000\. The World Bank comes online.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1993: The White House comes online during President Bill Clinton’s time in
+    office. Worms of a new kind find their way around the Net—WWW Worms (W4) are joined
+    by Spiders, Wanderers, Crawlers, and Snakes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1994: Internet shopping is introduced; the first spam mail is sent; Pizza Hut
+    comes online.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1995: The Vatican comes online. Registration of domain names is no longer free.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1996: 9,272 organizations find themselves unlisted after the InterNIC drops
+    their name service as a result of their not having paid their domain name fees.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1997: The 2,000th RFC is published.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is how far the RFC goes. But history goes on. According to [http://www.internetworldstats.com/emarketing.htm](http://www.internetworldstats.com/emarketing.htm),
+    the worldwide online population reached 361 million users in 2000 (a penetration
+    rate of 5.8%) and 587 million users in 2002\. In 2003, the U.S. Department of
+    Defense announced that they would be migrating the DoD network to IPv6 by 2008,
+    and the [Moonv6 project](http://www.moonv6.org) was started (now concluded). In
+    2005, Google registered a /32 IPv6 prefix, and Vint Cerf, known as “Father of
+    the Internet,” joined Google. By that time the number of Internet users had reached
+    1.08 billion. Today, at the time of writing in 2014, we are at approximately 2.4
+    billion Internet users, which corresponds to a penetration rate of 34%.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So while these numbers reflect all Internet users, independent of the IP protocol
+    version, now we are starting to watch the growth of the IPv6 Internet. It is in
+    its early days, but according to the growth numbers of the last two years, we
+    expect growth to be exponential, and probably much faster than even the enthusiasts
+    among us expect. The growth of the IPv6 Internet can be seen on the [Google IPv6
+    Adoption statistics](http://www.google.com/ipv6/statistics.html) and the stats
+    as of spring 2014 are shown in [Figure 1-1](ch01.html#googleas_global_ipv6_adoption_statistics
+    "Figure 1-1. Google’s global IPv6 adoption statistics as of spring 2014").
+  prefs: []
+  type: TYPE_NORMAL
+- en: The stats show that in early 2011 (when the IANA IPv4 pool ran out), the percentage
+    of native IPv6 Internet users was at approximately 0.2%. The stats also show that
+    the percentage of users that were not native IPv6 (e.g., 6to4 or Teredo, red line)
+    dropped to almost zero and are since then insignificant. Within one year the number
+    of IPv6 Internet users doubled to 0.4%—a small number but still growth. In January
+    2013, the IPv6 Internet had crossed the 1% mark, and we entered 2014 with almost
+    3% IPv6 Internet users, which corresponds to approximately 72 million users. At
+    the time of delivering this chapter, in April 2014, we were at 3.5%. The number
+    of IPv6 Internet users currently doubles approximately every nine months.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These are just a few selected events and milestones of the Internet’s history.
+    Keep watching as more history unfolds. We are all creating it together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Google’s global IPv6 adoption statistics as of spring 2014](images/ipv6_0101.png.jpg)Figure 1-1. Google’s
+    global IPv6 adoption statistics as of spring 2014'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The History of IPv6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The Internet Engineering Task Force (IETF) began the effort to develop a successor
+    protocol to IPv4 in the early 1990s. Several parallel efforts to solve the foreseen
+    address space limitation and to provide additional functionality began simultaneously.
+    The IETF started the Internet Protocol Next Generation (or *IPng*) area in 1993
+    to investigate the different proposals and to make recommendations for further
+    procedures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPng area directors of the IETF recommended the creation of IPv6 at the
+    Toronto IETF meeting in 1994\. Their recommendation is specified in RFC 1752,
+    “The Recommendation for the IP Next Generation Protocol.” The Directors formed
+    an Address Lifetime Expectation (ALE) working group to determine whether the expected
+    lifetime for IPv4 would allow the development of a protocol with new functionality,
+    or if the remaining time would allow only the development of an address space
+    solution. In 1994, the ALE working group projected that the IPv4 address exhaustion
+    would occur sometime between 2005 and 2011 based on the available statistics.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For those of you who are interested in the different proposals, here’s some
+    more information about the process (from RFC 1752). There were four main proposals:
+    CNAT, IP Encaps, Nimrod, and Simple CLNP. Three more proposals followed: the P
+    Internet Protocol (PIP), the Simple Internet Protocol (SIP), and TP/IX. After
+    the March 1992 San Diego IETF meeting, Simple CLNP evolved into TCP and UDP with
+    Bigger Addresses (TUBA), and IP Encaps became IP Address Encapsulation (IPAE).
+    IPAE merged with PIP and SIP and called itself Simple Internet Protocol Plus (SIPP).
+    The TP/IX working group changed its name to Common Architecture for the Internet
+    (CATNIP). The main proposals were now CATNIP, TUBA, and SIPP. For a short discussion
+    of the proposals, refer to RFC 1752.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: CATNIP is specified in RFC 1707; TUBA in RFCs 1347, 1526, and 1561; and SIPP
+    in RFC 1710.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Internet Engineering Steering Group approved the IPv6 recommendation and
+    drafted a Proposed Standard on November 17, 1994\. RFC 1883, “Internet Protocol,
+    Version 6 (IPv6) Specification,” was published in 1995\. The core set of IPv6
+    protocols became an IETF Draft Standard on August 10, 1998\. This included RFC
+    2460, which obsoleted RFC 1883.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Why isn’t the new protocol called IPv5? The version number 5 could not be used,
+    because it had been allocated to the experimental stream protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the big challenges but also one of the main opportunities of IPv6 is
+    the fact that we can redesign our networks for the future. This is what enterprises
+    should focus on most when planning their IPv6 integration in order to make sure
+    they don’t just copy old concepts onto a new protocol. We have to rethink our
+    architectures. This once-in-a-lifetime opportunity can be used to get rid of a
+    lot of legacy. An interesting RFC that helps in the process of seeing the big
+    picture is RFC 6250, “Evolution of the IP Model.” It shows how much this model
+    has changed in the many years of operating our networks. So it helps to free our
+    minds for thinking in new ways. One funny little quote that demonstrates what
+    I am talking about is included below.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this RFC there is mention of the first IP model and addressing architecture,
+    and it quotes RFC 791, which defined IPv4 and the IPv4 address:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Addresses are fixed length of four octets (32 bits). An address begins with
+    a one-octet network number, followed by a three-octet local address. This three-octet
+    field is called the “rest” field.*'
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: This is how far we have come. Now project this into the future with the vast
+    IPv6 address space in mind. Making meaningful use of the new address architecture
+    and the enormous space will write the next chapter of the evolution of the IP
+    model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Here’s a quote from Vint Cerf:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The vast IPv6 address space opens up serious opportunities for the re-examination
+    of the notion of address. The IETF has only allocated 1/8^(th) of the IPv6 address
+    space for current use. The remaining 7/8^(ths) of the address space is still to
+    be allocated. In consequence we may be able to interpret new segments of the IP
+    address space in ways that are different from topological end points. This is
+    precisely the reason that a focus on the future of IPv6 is so important at this
+    point in the evolution of the Internet.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: What’s New in IPv6?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: IPv6 is an evolution of IPv4\. The protocol is installed as a software upgrade
+    in most devices and operating systems. If you buy up-to-date hardware and operating
+    systems, IPv6 is usually supported and needs only activation or configuration.
+    In many cases it is activated by default. Currently available transition mechanisms
+    allow the step-by-step introduction of IPv6 without putting the current IPv4 infrastructure
+    at risk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is an overview of the main changes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Extended address space*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The address format is extended from 32 bits to 128 bits. This provides multiple
+    IP addresses for every grain of sand on the planet. In addition, it also allows
+    for hierarchical structuring of the address space in favor of optimized global
+    routing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Autoconfiguration*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Perhaps the most intriguing new feature of IPv6 is its *Stateless Address Autoconfiguration
+    (SLAAC)* mechanism. When a booting device in the IPv6 world comes up and asks
+    for its network prefix, it can get one or more network prefixes from an IPv6 router
+    on its link. Using this prefix information, it can autoconfigure for one or more
+    valid global IP addresses by using either its MAC identifier or a private random
+    number to build a unique IP address. In the IPv4 world, we have to assign a unique
+    IP address to every device, either by manual configuration or by using DHCP. SLAAC
+    should make the lives of network managers easier and save substantial cost in
+    maintaining IP networks. Furthermore, if we imagine the number of devices we may
+    have in our homes that will need an IP address in the future, this feature becomes
+    indispensable. Imagine reconfiguring your DHCP server at home when you buy a new
+    television! Stateless Address Autoconfiguration also allows for easy connection
+    of mobile devices, such as a smartphone, when moving to foreign networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Simplification of header format*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv6 header is much simpler than the IPv4 header and has a fixed length
+    of 40 bytes. This allows for faster processing. It basically accommodates two
+    times 16 bytes for the Source and Destination address and only 8 bytes for general
+    header information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Improved support for options and extensions*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv4 integrates options in the base header, whereas IPv6 carries options in
+    so-called *Extension headers*, which are inserted only if they are needed. Again,
+    this allows for faster processing of packets. The base specification describes
+    a set of six Extension headers, including headers for routing, Quality of Service,
+    and security.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Why Do We Need IPv6?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For historic reasons, organizations and government agencies in the United States
+    used the largest part of the allocatable IPv4 address space. The rest of the world
+    had to share what was left over. Some organizations used to have more IPv4 address
+    space than the whole of Asia (where more than 50% of the world’s population live).
+    This is one explanation of why the deployment of IPv6 in Asia is much more common
+    than in Europe and the United States.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'An interesting resource site for statistics can be found at the following link:
+    [http://www.internetworldstats.com/stats.htm](http://www.internetworldstats.com/stats.htm).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv4 address space has a theoretical limit of 4.3 billion addresses. However,
+    early distribution methods allocated addresses inefficiently. Consequently, some
+    organizations obtained address blocks much larger than they needed, and addresses
+    that could be used elsewhere are now unavailable. If it were possible to reallocate
+    the IPv4 address space, it could be used much more effectively, but this process
+    is not possible, and a global reallocation and renumbering is simply not practical.
+    In addition to that it would not buy much, as even 4.3 billion addresses would
+    not suffice for long at the current growth rate. We have to take into account
+    that in the future we will need IP addresses for billions of devices. Vendors
+    in all industries are developing monitoring, control, and management systems based
+    on IP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As the previous section shows, the IPv6 working group has done more than just
+    extend the address space. For many complex networks of today and tomorrow, and
+    for the number of IP devices of all types, the Autoconfiguration capability of
+    IPv6 will be a necessity. The management of such services can’t be accomplished
+    with traditional addressing methods, and Stateless Address Autoconfiguration will
+    also help to reduce administrative costs for organizations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The extended address space and the restoration of the original end-to-end model
+    of the Internet allows for the elimination of Network Address Translation (NAT),
+    in which a single or a few public IPv4 address(es) are used to connect a high
+    number of users with private addresses to the Internet by mapping the internal
+    addresses to the public address(es). NATs were introduced as a short-term fix
+    for solving the address space limitations with IPv4, since IPv6 was not ready
+    yet (refer to RFC 1631; the original NAT specification was obsoleted by RFC 3022
+    in 2001). NATs have become pretty common in IPv4 networks, but they create serious
+    disadvantages in management and operation: in order to do the address mapping,
+    NATs modify end node addresses in the IP header. Very often, Application Level
+    Gateways (ALG) are used in conjunction with NAT to provide application-level transparency.
+    There is a long list of protocols and applications that create problems when used
+    in a NAT environment. IPsec and peer-to-peer applications are two well-known examples.
+    Another known issue with NAT is the overlapping of private address space when
+    merging networks, which requires either the renumbering of one of the networks
+    or the creation of a complex address-mapping scheme. The amplification of limited
+    address space, the primary benefit of NAT, is not needed with IPv6 and therefore
+    is not supported by design.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: By introducing a more flexible header structure (Extension headers), the protocol
+    has been designed to be open and extensible. In the future, new extensions can
+    easily be defined and integrated in the protocol set. Based on the fact that IPv4
+    has been in use for almost 30 years, the development of IPv6 was based on the
+    experience with IPv4 and focused on creating an extensible foundation; you can
+    expect it to last a long time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Broadband penetration rates in many countries continue to accelerate and, in
+    some cases, have reached 65% or more. This level of always-on connectivity with
+    substantial bandwidth capacity means that there is greater opportunity for devices
+    to be connected. And many consumer electronic manufacturers have taken advantage
+    of this. Online gaming is no longer the sole purview of games on PCs. Gaming stations,
+    such as Sony’s PlayStation 4, Xbox One, or Nintendo Wii U, have added capabilities
+    to take them online. Many telecommunication carriers are providing television-type
+    services (movies, audio content, etc.) over their IP networks. Even appliances,
+    such as refrigerators, stoves, water heaters, and bathtubs, are getting connected.
+    While it may seem rather silly to network-enable a bathtub, many of these devices
+    are being connected to facilitate things such as power management, remote control,
+    and troubleshooting, and for telemetry/monitoring purposes. We are entering the
+    age of smart buildings and smart cities. The end result of this network-enablement
+    process is a greater number of devices that need addressing, many of which will
+    not have standard user interfaces. In these cases, the IPv6 address space, coupled
+    with features such as Neighbor Discovery, Stateless Autoconfiguration, and Mobile
+    IPv6, will help to usher in a new era of computerization in the home, but hopefully
+    without the enormous deployment headache that it would cause if it were attempted
+    with the current protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The growth of the wireless industry (both cellular and wireless networks) has
+    been nothing short of phenomenal. In more and more countries the number of cell
+    phones actually exceeds the number of people. In this world of continuous reachability
+    and reliance on the ability to access information at any time, the mobility requirements
+    for end users have become exceptionally important. From the carriers’ perspective,
+    especially those supporting multiple media access types (e.g., 3G, WiMax, LTE),
+    leveraging IP as the method of transporting and routing packets makes sense. Smartphones
+    access the Internet, play games with other users, make phone calls, and even stream
+    video content. Instead of supporting all of these functions using different transport
+    protocols and creating intermediary applications to facilitate communications,
+    it is far more efficient to leverage the existing network infrastructure of the
+    Internet and a company’s network. We will see later that from a technical perspective,
+    Mobile IPv6 is very elegant in its design, supporting mobile users in a highly
+    efficient manner and providing the overlay mechanisms for users to maintain their
+    connections when moving between networks, even if those networks do not use the
+    same type of media access.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There still remain some questions about the value of IPv6 to the enterprise,
+    and it is worth conceding that each organization needs to evaluate the benefits
+    and best timing of IPv6 for their own internal use. In many instances, organizations
+    can find clever ways to use IPv6 to solve “pain” issues without migrating their
+    entire network. Adoption can occur in an incremental fashion with a plan that
+    minimizes integration pain but also ensures that everything is ready when the
+    time comes to “flip the switch.” As many case studies show, well-planned introduction
+    costs substantially less than you would expect; the main cost-saving aspect is
+    the fact that the advance planning lets you use all your refresh cycles, which
+    minimizes cost. The step-by-step introduction allows you to learn as you go, thereby
+    saving a lot of money and headaches, and you can do it without putting the current
+    IPv4 infrastructure at risk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But with all these thoughts and considerations, let’s not forget the most essential
+    advantage of IPv6\. With its new structure and extensions, IPv6 provides the foundation
+    for a new generation of services. There will be devices and services on the market
+    in the near future that cannot be developed with IPv4\. This opens up new markets
+    and business opportunities for vendors and service providers alike. The first-mover
+    opportunities are substantial, as are the opportunities to extend current product
+    life cycles by refreshing their technology with IPv6\. On the other hand, it means
+    that organizations and users will require such services in the mid-term. It is
+    therefore advisable to integrate the new protocol carefully and in a nondisruptive
+    manner, by taking one step at a time to prepare the infrastructure for these new
+    services. This protects you from having to introduce a business-critical application
+    based on IPv6 at unreasonably high cost with no time for thorough planning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Common Misconceptions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When considering all these advantages, maybe the question should be: “Why not
+    IPv6?” When talking to customers, we often find that they share a similar set
+    of misconceptions preventing them from considering IPv6\. Here are the most common
+    ones:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “The introduction of IPv6 puts our current IP infrastructure—our networks and
+    services—at risk.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: This concern is unsubstantiated. A major focus in IPv6’s development was to
+    create integration mechanisms that allow both protocols to coexist peacefully.
+    You can use IPv6 both in tandem with and independently of IPv4\. It is possible
+    to introduce IPv6 and use it for access to new services while retaining IPv4 to
+    access legacy services. This not only ensures undisrupted access to IPv4 services,
+    but it also allows a step-by-step introduction of IPv6\. I discuss these mechanisms
+    in [Chapter 7](ch07.html "Chapter 7. Transition Technologies"). Your biggest risk
+    is to not take advantage of all the opportunities IPv6 offers. You can only use
+    these opportunities if you plan while there is time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: “The IPv6 protocol is immature and hasn’t proven that it stands the test of
+    time or whether it is capable of handling the requirements.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: This was a concern of many people back in 2006 when we published the second
+    edition of this book. Now in 2014 this is not true anymore. Many ISPs and organizations
+    are deploying IPv6, vendors are getting up to speed, and the working groups have
+    developed and optimized mechanisms that help with the integration. There is no
+    technical reason not to do IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: “The costs of introducing IPv6 are too high.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: There will certainly be costs associated with adopting IPv6\. In many cases,
+    newer networks will find that the level of IPv6 support in their current infrastructure
+    is actually high. Regardless, the transition will necessitate some hardware and
+    software costs. Organizations will need to create new designs, review current
+    concepts, train their IT staff, and may need to seek outside expertise in order
+    to take full advantage of IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, the cost savings associated with IPv6 are becoming easier to define.
+    Networks based on IPv4 are becoming increasingly more complex. New IT services
+    such as VoIP, instant messaging, video teleconferencing, IPTV, and unified communications
+    are adding layers of middleware and complexity. Merging organizations or those
+    conducting B2B transactions are implementing NAT overlap solutions that have high
+    management costs and are difficult to troubleshoot. And a growing market of mobile
+    devices and network appliances requires robust access models that are expensive
+    and difficult to implement in an IPv4 world. In all of these cases, IPv6 presents
+    a cleaner and more cost-effective model in the long run than IPv4 can provide.
+    And the fact is that an investment in IPv4 is an investment in an end-of-life
+    technology, while an investment in IPv6 is an investment in the future technology.
+  prefs: []
+  type: TYPE_NORMAL
+- en: “With Stateless Address Autoconfiguration, we will not be able to control or
+    monitor network access.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: While this statement may generally be true for networks that widely utilize
+    Stateless Address Autoconfiguration, administrators will have a choice about their
+    level of control. DHCPv6 as defined in RFC 3315 has been extended to support two
+    general modes of operation, Stateful and Stateless. Stateful mode is what those
+    who currently utilize DHCP (for IPv4) are familiar with, in which a node (DHCP
+    client) requests an IP address and configuration options dynamically from a DHCP
+    server. DHCPv6 also offers a Stateless mode in which DHCPv6 clients simply request
+    configuration options from a DHCPv6 server and use other means, such as Stateless
+    Address Autoconfiguration, to obtain an IPv6 address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Our Internet Service Provider (ISP) does not offer IPv6 services, so we can’t
+    use it.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: You do not have to wait for your ISP to use IPv6 in your corporate or private
+    network. If you want to connect to the global IPv6 Internet, you can use one of
+    the transition mechanisms and tunnel your IPv6 packets over the IPv4 infrastructure
+    of your ISP. This may be doable for smaller organizations. On the other hand,
+    at the time of writing in 2014, you could expect a large ISP targeting enterprise
+    customers to support IPv6\. And this should be your standard requirement in any
+    renewal of contract and SLAs (Service Level Agreements). If your ISP does not
+    provide IPv6 services, consider finding a new provider.
+  prefs: []
+  type: TYPE_NORMAL
+- en: “It would be too expensive and complex to upgrade our backbone.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: The transition mechanisms make it possible to use IPv6 where appropriate without
+    dictating an order of upgrade. Usually for the backbone it is advisable to wait
+    for the regular life cycle, when hardware needs to be exchanged anyway. Make sure
+    to choose hardware that supports performance IPv6 routing. In the meantime, you
+    can tunnel your IPv6 packets over the IPv4 backbone. Networks that use MPLS have
+    an easy way to tunnel IPv6 packets over their IPv4 MPLS backbone. Read more about
+    it in [Chapter 7](ch07.html "Chapter 7. Transition Technologies"). More and more
+    organizations are considering migrating their backbone and data centers to IPv6
+    only with the next refresh or redesign cycle, because it substantially reduces
+    operational cost. In this scenario we will start to tunnel IPv4 packets over IPv6
+    backbones. IPv4 as a service is the new keyword.
+  prefs: []
+  type: TYPE_NORMAL
+- en: “It would be too complex and expensive to port all of our applications to IPv6.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: The effort necessary to port applications to run over IPv6 is often much lower
+    than expected. If an application is well written, it may simply run over IPv6
+    without modification. Instead of assuming that it won’t work, test it to find
+    out. For applications that need modifications that are not yet available, or for
+    applications in which porting does not make sense, there are mechanisms available
+    that support IPv4 applications in IPv6 networks and IPv6 applications in IPv4
+    networks. Alternatively, you can run a dual-stack network, in which you use IPv4
+    to access IPv4 applications and IPv6 to access IPv6 applications. In any case
+    it is recommendable for enterprise customers to start the planning process early
+    and provide good labs for the application teams to test their applications before
+    there is time pressure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: “We have enough IPv4 addresses; we don’t need IPv6.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: True—if you have enough IPv4 addresses, there may be no immediate need to integrate
+    IPv6 today. But ignoring IPv6 for this reason is a perspective that assumes that
+    your network stands completely isolated from the rest of the world, including
+    your vendors, partners, and customers. IPv6 adoption is further along in Asia
+    and Europe than in the United States, so even though you may have adequate address
+    space for your operations in Denver, interconnecting with a partner organization
+    in Tokyo may eventually become complicated if you do not support IPv6\. Plus,
+    the assumption that IPv6 is about address space only doesn’t account for the advanced
+    features that IPv6 brings to the table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When Is It Time for IPv6?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The answer in 2014 is *now*! If the rest of the world moves to IPv6 while you
+    insist on continuing to use IPv4, you will exclude yourself from global communication
+    and reachability. The risks if you wait too long include losing potential customers
+    and access to new markets and the inability to use new IPv6-based business applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There is a golden rule in IT: “Never touch a running system.” As long as your
+    IPv4 infrastructure runs well and fulfills your needs, there is no reason to change
+    anything. But from now on, whenever you invest in your infrastructure, you should
+    consider IPv6\. An investment in the new technology gives it a much longer lifetime
+    and keeps your network state-of-the-art.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'These are the main indicators that it may be time for you to consider switching
+    to or integrating IPv6:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You need to extend or fix your IPv4 network or NAT implementation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You are running out of address space.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You want to prepare your network for applications that are based on advanced
+    features of IPv6.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You need end-to-end security for a large number of users and you do not have
+    the address space, or you struggle with a NAT implementation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You need to replace your hardware or applications that are at the end of their
+    life cycles. Make sure you buy products that support IPv6 adequately, even if
+    you don’t enable it right away.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You want to introduce IPv6 while there is no time pressure.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The following provisions can be taken in order to prepare for IPv6 adequately:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build internal knowledge, educate IT staff, and create a test network.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Include IPv6 in your IT strategy.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Design future-proof network, security, and service concepts while you have time.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Create integration scenarios based on your network and requirements.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Put IPv6 support on all of your hardware and software purchasing guidelines.
+    Be specific about which features (RFCs) must be supported. Don’t forget to add
+    IPv6 requirements to outsourcing and service contracts, as well as SLAs.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Compel your vendors to add IPv6 support to their products.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you do this, you can determine the right moment for the introduction of IPv6
+    in your network. You can also assess whether a further investment in your IPv4
+    infrastructure makes sense or whether introducing IPv6 would be a better way to
+    go.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There will be no “flag day” for IPv6 like there was for the 1983 move from NCP
+    to IPv4\. Probably there will be no killer application either, so don’t wait for
+    one. Or as some people like to say, the killer application for IPv6 is the Internet.
+    IPv6 will slowly and gradually grow into our networks and the Internet. Taking
+    a step-by-step approach to IPv6 may be the most cost-efficient way to integrate
+    it, depending on your requirements. This method does not put your current infrastructure
+    at risk or force you to exchange hardware or software before you are ready, and
+    it allows you to become familiar with the protocol, to experiment, to learn, and
+    to integrate what you’ve learned into your strategy.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You may want to enable IPv6 in your public services first. Due to the lack of
+    IPv4 addresses, ISPs that want to grow their customer base (and who does not want
+    to do that?) make use of NAT-type mechanisms to extend their IPv4 address space.
+    This includes CGN (Carrier Grade NAT), which means multiple customers share one
+    single public IPv4 address and sit behind multiple layers of NAT.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These users may have a bad user experience accessing your IPv4 website, and
+    for e-commerce or other more complex services it may even fail. The users will
+    not know that it is the provider’s CGN causing the issue and will blame your website
+    for their problems. If you provide your website dual-stack, these users can access
+    it over IPv6 and bypass the IPv4 NATs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Find more information on CGN in the “NAT to extend IPv4 address space” section
+    in [Chapter 7](ch07.html "Chapter 7. Transition Technologies").
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 Status and Vendor Support
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: As previously mentioned, IPv6 is implemented in most up-to-date versions of
+    routing and operating systems. For standard applications, assume that IPv6 support
+    has already been added or will be added with their next major release at the latest.
+    For creating an IPv6 integration plan for your corporate network, you will need
+    to assess the status and degree of IPv6 support with each vendor individually.
+    Many vendors have an information site that can often be found at *http://www.<vendor>.com/ipv6*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It can be said that IPv6 support up to the network layer is mature, tested,
+    and optimized. This includes routing, transition mechanisms, DNS, and DHCPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Development is most active in the security, transition mechanism, IPv4/IPv6
+    MIB integration, and Mobile IPv6 areas. More work needs to be done in the areas
+    of network management and firewalls. Vendors such as Cisco, Checkpoint, Juniper,
+    and many others are working on these areas. The application area is continuously
+    developing, and new applications will appear on the market that will make use
+    of the advanced features of IPv6\. Thanks to the transition mechanisms, you can
+    still use IPv4 applications in IPv6 networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Find more information on the planning process in [Chapter 9](ch09.html "Chapter 9. Planning
+    for IPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now you know why you should care about IPv6\. The following chapters in this
+    book aim to make learning about IPv6 a joy. So please read on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: References
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Here’s a list of the most important RFCs mentioned in this chapter. Sometimes
+    I include additional subject-related RFCs for your further personal study.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFCs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 1, “Host Software,” 1969
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 791, “Internet Protocol,” 1981
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1347, “TCP and UDP with Bigger Addresses (TUBA),” 1992
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1526, “Assignment of System Identifiers for TUBA/CLNP Hosts,” 1993
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1561, “Use of ISO CLNP in TUBA Environments,"1993
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1631, “The IP Network Address Translator (NAT),” 1994
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 1707, “CATNIP: Common Architecture for the Internet,” 1994'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1710, “Simple Internet Protocol Plus White Paper,” 1994
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1752, “The Recommendation for the IP Next Generation Protocol,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1883, “Internet Protocol, Version 6 (IPv6) Specification,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2235, “Hobbes’ Internet Timeline,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2324, “Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0),” April 1, 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2460, “Internet Protocol, Version 6 (IPv6) Specification,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2555, “30 Years of RFCs,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2663, “IP Network Address Translator (NAT) Terminology and Considerations,”
+    1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3022, “Traditional IP Network Address Translator (Traditional NAT),” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3027, “Protocol Complications with the IP Network Address Translator,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4677, “The Tao of IETF: A Novice’s Guide to the Internet Engineering Task
+    Force,” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5902, “IAB Thoughts on IPv6 Network Address Translation,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6250, “Evolution of the IP Model,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6269, “Issues with IP address sharing,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6921, “Design Considerations for Faster-Than-Light (FTL) Communication,”
+    April 1, 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7168, “The Hyper Text Coffee Pot Control Protocol for Tea Efflux Appliances
+    (HTCPCP-TEA),” April 1, 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

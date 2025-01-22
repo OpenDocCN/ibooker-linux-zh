@@ -1,0 +1,640 @@
+- en: Preface
+  id: totrans-0
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 前言
+- en: This book is about the next-generation Internet Protocol. We have become familiar
+    with the strengths and weaknesses of IPv4; we know how to design and configure
+    it, and we have learned how to troubleshoot it. And now we have to learn a new
+    protocol? Start from scratch? Not really. The designers of IPv6 have learned a
+    lot from over 15 years of experience with IPv4, and they have been working on
+    the new protocol since the early 1990s. They retained the strengths of IPv4, extended
+    the address space from 32 bits to 128 bits, and added functionality that is missing
+    in IPv4\. They developed transition mechanisms that make IPv4 and IPv6 coexist
+    peacefully and that guarantee a smooth transition between the protocols. In fact,
+    this was one of the major requirements for the development of the new protocol
+    version.
+  id: totrans-1
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书讲述的是下一代互联网协议。我们已经熟悉了IPv4的优缺点；我们知道如何设计和配置它，也学会了如何排除故障。现在我们还要学习一个新协议吗？从头开始吗？其实不需要。IPv6的设计者们从超过15年的IPv4经验中汲取了大量教训，并自1990年代初开始着手研发新协议。他们保留了IPv4的优点，将地址空间从32位扩展到128位，并添加了IPv4中缺失的功能。他们还开发了过渡机制，使得IPv4和IPv6能够和平共存，并确保协议间的平稳过渡。事实上，这是新协议版本开发的一个重要要求。
+- en: So you do not need to forget what you know about IPv4; many things will feel
+    familiar with IPv6\. When you get started, you will discover new features and
+    functionalities that will make your life a lot easier. IPv6 has features that
+    you will need in tomorrow’s networks—features that IPv4 does not provide.
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所以你不需要忘记你对IPv4的了解；许多东西在IPv6中会显得很熟悉。当你开始使用时，你会发现一些新特性和功能，这些将大大简化你的生活。IPv6拥有一些IPv4所没有的特性，这些特性是你未来网络中所需要的。
+- en: One of the cool features built into IPv6 is the Stateless Autoconfiguration
+    capability. Haven’t we always struggled with IP address assignment? The advent
+    of DHCP made our lives easier, but now we need to maintain and troubleshoot DHCP
+    servers. And when our refrigerator, swimming pool, and heating system as well
+    as our smartphones and the TV set each have IP addresses, will we need a DHCP
+    server at home? Not with Stateless Autoconfiguration. If you have an IPv6-enabled
+    host, you can plug it into your network, and it will configure automatically for
+    a valid IPv6 address. ICMP (Internet Control Message Protocol), which is a networker’s
+    best friend, has become much more powerful with IPv6\. Many of the new features
+    of IPv6, such as Stateless Autoconfiguration, optimized multicast routing and
+    multicast group management, Neighbor Discovery, Path MTU Discovery, and Mobile
+    IPv6, are based on ICMPv6.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: IPv6中的一个酷炫功能是无状态自动配置功能。我们不是一直在为IP地址分配而苦恼吗？DHCP的出现让我们的生活变得更简单，但现在我们需要维护和排除DHCP服务器的故障。而当我们的冰箱、游泳池、暖气系统以及智能手机和电视都需要拥有IP地址时，我们还需要家里有DHCP服务器吗？不需要，使用无状态自动配置就能解决。如果你有一台支持IPv6的主机，你可以将它插入到网络中，它会自动配置一个有效的IPv6地址。ICMP（互联网控制报文协议），作为网络工程师的好帮手，随着IPv6变得更加强大。IPv6的许多新特性，如无状态自动配置、优化的组播路由和组播组管理、邻居发现、路径MTU发现和移动IPv6，都是基于ICMPv6的。
+- en: I hope that this book will help you to become familiar with the protocol and
+    provide an easy-to-understand entry point and guide to exploring this new area.
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我希望这本书能帮助你熟悉这个协议，并为你提供一个易于理解的切入点，带你探索这一新领域。
+- en: Audience
+  id: totrans-5
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 读者
+- en: 'This book covers a broad range of information about IPv6 and is an excellent
+    resource for anybody who wants to understand or implement the protocol. It is
+    also a good read for people who develop applications. IPv6 offers functionality
+    that we did not have with IPv4, so it may open up new possibilities for applications.
+    Whether you are the owner or manager of a company or an IT department; whether
+    you are a system or network administrator, an engineer, or a network designer;
+    or whether you are just generally interested in learning about the important changes
+    with IPv6, this book discusses economic and strategic aspects as well as technical
+    details. I describe interoperability mechanisms and scenarios that ensure a smooth
+    introduction of IPv6\. If you are a company owner or manager, you will be most
+    interested in Chapters [7](ch07.html "Chapter 7. Transition Technologies") and
+    [9](ch09.html "Chapter 9. Planning for IPv6"). If you need to plan your corporate
+    network strategy, you will be most interested in Chapters [1](ch01.html "Chapter 1. Why
+    IPv6?"), [4](ch04.html "Chapter 4. ICMPv6"), [5](ch05.html "Chapter 5. Networking"),
+    [7](ch07.html "Chapter 7. Transition Technologies"), and [9](ch09.html "Chapter 9. Planning
+    for IPv6"). If you manage the infrastructure in your company, you will especially
+    be interested in Chapters [4](ch04.html "Chapter 4. ICMPv6") and [5](ch05.html
+    "Chapter 5. Networking"), which cover ICMPv6, Layer 2 issues, and routing, and
+    in Chapters [7](ch07.html "Chapter 7. Transition Technologies") and [9](ch09.html
+    "Chapter 9. Planning for IPv6"), which address transition mechanisms, interoperability,
+    and planning. If you are a system or network administrator, all chapters are relevant:
+    this book provides a foundation for IPv6 implementation and integration with IPv4.'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书涵盖了关于IPv6的广泛信息，是任何希望理解或实施该协议的人的优秀资源。它对于开发应用程序的人来说也是一本不错的读物。IPv6提供了我们在IPv4中没有的功能，因此可能为应用程序打开新的可能性。无论你是公司的所有者或经理，还是IT部门的负责人；无论你是系统或网络管理员、工程师或网络设计师；或是对IPv6带来的重要变化感兴趣的人，本书都会讨论经济和战略方面的内容，以及技术细节。我描述了确保IPv6平稳引入的互操作机制和场景。如果你是公司所有者或经理，你会对第[7](ch07.html
+    "第7章 过渡技术")章和第[9](ch09.html "第9章 IPv6规划")章最感兴趣。如果你需要规划企业网络战略，第[1](ch01.html "第1章
+    为什么选择IPv6?")章、第[4](ch04.html "第4章 ICMPv6")章、第[5](ch05.html "第5章 网络")章、第[7](ch07.html
+    "第7章 过渡技术")章和第[9](ch09.html "第9章 IPv6规划")章将是你最关注的内容。如果你管理公司的基础设施，你尤其会对第[4](ch04.html
+    "第4章 ICMPv6")章和第[5](ch05.html "第5章 网络")章感兴趣，这些章节涵盖了ICMPv6、第二层问题和路由，还包括第[7](ch07.html
+    "第7章 过渡技术")章和第[9](ch09.html "第9章 IPv6规划")章，这些章节涉及过渡机制、互操作性和规划。如果你是系统或网络管理员，那么本书的所有章节都与您相关：它为IPv6的实施和与IPv4的集成提供了基础。
+- en: About This Book
+  id: totrans-7
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 关于本书
+- en: This book covers IPv6 in detail and explains all the new features and functions.
+    It will show you how to plan for, design, and integrate IPv6 in your current IPv4
+    infrastructure.
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书详细介绍了IPv6，解释了所有新的特性和功能。它将展示如何在当前的IPv4基础设施中规划、设计和集成IPv6。
+- en: This book assumes that you have a good understanding of network issues in general
+    and a familiarity with IPv4\. It is beyond the scope of this book to discuss IPv4
+    concepts in detail. I refer to them when necessary, but if you want to learn more
+    about IPv4, there are a lot of good resources on the market. You can find a list
+    of books in [Appendix B](apb.html "Appendix B. Recommended Reading").
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书假定你对网络问题有较好的理解，并熟悉IPv4。书中不涉及详细讨论IPv4的概念。必要时我会提到它们，但如果你想深入了解IPv4，市场上有许多优秀的资源可供参考。你可以在[附录B](apb.html
+    "附录B 推荐阅读")中找到书单。
+- en: In explaining all the advanced features of IPv6, this book aims to inspire you
+    to rethink your networking and service concepts for the future and create the
+    foundation for a real nex-generation network.
+  id: totrans-10
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书旨在通过解释IPv6的所有高级功能，激发你重新思考未来的网络和服务概念，并为真正的下一代网络奠定基础。
+- en: Organization
+  id: totrans-11
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 组织结构
+- en: 'This book is organized so that a reader familiar with IPv4 can easily learn
+    about the new features in IPv6 by reading Chapters [2](ch02.html "Chapter 2. IPv6
+    Addressing") through [7](ch07.html "Chapter 7. Transition Technologies"). These
+    chapters cover what you need to know about addressing, the new IPv6 header, ICMPv6,
+    Layer 2, routing protocols, DNS and DHCPv6, security, Quality of Service (QoS),
+    and the transition mechanisms that make IPv6 work with IPv4 in different stages
+    of transition. Mobile IPv6 is discussed in [Chapter 8](ch08.html "Chapter 8. Mobile
+    IPv6"). [Chapter 9](ch09.html "Chapter 9. Planning for IPv6") covers the planning
+    process and considerations to make, and puts all the technical pieces together.
+    Here is a chapter-by-chapter breakdown of the book:'
+  id: totrans-12
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书的组织方式是，熟悉IPv4的读者可以通过阅读第[2](ch02.html "第2章。IPv6寻址")章到第[7](ch07.html "第7章。过渡技术")章，轻松了解IPv6中的新特性。这些章节涵盖了你需要了解的内容，包括寻址、新的IPv6头部、ICMPv6、第二层、路由协议、DNS和DHCPv6、安全性、服务质量（QoS），以及使IPv6与IPv4在不同过渡阶段协同工作的过渡机制。移动IPv6将在[第8章](ch08.html
+    "第8章。移动IPv6")中讨论。[第9章](ch09.html "第9章。IPv6规划")涉及规划过程和需要考虑的事项，并将所有技术要素整合在一起。以下是本书的章节分解：
+- en: '[Chapter 1, *Why IPv6?*](ch01.html "Chapter 1. Why IPv6?"), briefly explains
+    the history of IPv6 and gives an overview of the new functionality. It draws a
+    bigger picture of Internet and service evolution, showing that the large address
+    space and the advanced functionality of IPv6 are much needed for different reasons.
+    It then discusses the most common misconceptions that prevent people from exploring
+    and integrating the protocol. Finally, it explains when it would be the right
+    moment for you to start your IPv6 project and drive the integration.'
+  id: totrans-13
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第1章，*为什么选择IPv6？*](ch01.html "第1章。为什么选择IPv6？")，简要说明了IPv6的历史，并概述了新功能。它勾画了互联网和服务演进的宏大图景，展示了IPv6的大地址空间和先进功能在不同方面的需求。接着讨论了阻碍人们探索和集成该协议的最常见误解。最后，解释了何时是启动IPv6项目并推动集成的合适时机。'
+- en: '[Chapter 2, *IPv6 Addressing*](ch02.html "Chapter 2. IPv6 Addressing"), explains
+    everything you need to know about the new address architecture, the address format,
+    address notation, address types, international registry services, and prefix allocation.'
+  id: totrans-14
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第2章，*IPv6寻址*](ch02.html "第2章。IPv6寻址")，解释了你需要了解的关于新地址架构、地址格式、地址表示法、地址类型、国际注册服务和前缀分配的所有内容。'
+- en: '[Chapter 3, *The Structure of the IPv6 Protocol*](ch03.html "Chapter 3. The
+    Structure of the IPv6 Protocol"), describes the new IPv6 header format with a
+    discussion of each field and trace file examples. It also describes what Extension
+    headers are, what types of Extension headers have been defined, and how they are
+    used.'
+  id: totrans-15
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第3章，*IPv6协议的结构*](ch03.html "第3章。IPv6协议的结构")，描述了新的IPv6头部格式，并讨论了每个字段以及跟踪文件示例。还介绍了扩展头部是什么、已定义的扩展头部类型以及如何使用它们。'
+- en: '[Chapter 4, *ICMPv6*](ch04.html "Chapter 4. ICMPv6"), describes the new ICMPv6
+    message format, the ICMPv6 Error messages and Informational messages, and the
+    ICMPv6 header in the trace file. This chapter also discusses the extended functionality
+    based on ICMPv6, such as Neighbor Discovery, Autoconfiguration, Path MTU Discovery,
+    and Multicast Listener Discovery (MLD). You will learn how ICMPv6 makes an administrator’s
+    life easier.'
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第4章，*ICMPv6*](ch04.html "第4章。ICMPv6")，描述了新的ICMPv6消息格式、ICMPv6错误消息和信息消息，以及跟踪文件中的ICMPv6头部。本章还讨论了基于ICMPv6的扩展功能，如邻居发现、自动配置、路径MTU发现和多播侦听器发现（MLD）。你将学习ICMPv6如何使管理员的工作变得更加轻松。'
+- en: '[Chapter 5, *Networking*](ch05.html "Chapter 5. Networking"), covers several
+    network-related aspects and services, such as Layer 2 support for IPv6, Upper
+    Layer Protocols and Checksums, an overview of all multicast-related topics, an
+    overview of routing protocols, Quality of Service (QoS), DHCPv6, and DNS.'
+  id: totrans-17
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第5章，*网络*](ch05.html "第5章。网络")，涵盖了多个与网络相关的方面和服务，例如IPv6的第二层支持、上层协议和校验和、所有多播相关主题的概述、路由协议概述、服务质量（QoS）、DHCPv6和DNS。'
+- en: '[Chapter 6, *Security with IPv6*](ch06.html "Chapter 6. Security with IPv6"),
+    begins with a short discussion of basic security concepts and requirements. It
+    then covers the IPsec framework, security elements available in IPv6 for authentication
+    and encryption, and how they are used. Our future networks will require new security
+    architectures. This chapter provides an overview of considerations to make when
+    defining the IPv6 security concept.'
+  id: totrans-18
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第6章，*IPv6安全性*](ch06.html "第6章。IPv6安全性")，从简要讨论基本安全概念和需求开始。然后介绍IPsec框架、IPv6中可用于身份验证和加密的安全元素，以及如何使用它们。我们的未来网络将需要新的安全架构。本章提供了在定义IPv6安全概念时需要考虑的事项概述。'
+- en: '[Chapter 7, *Transition Technologies*](ch07.html "Chapter 7. Transition Technologies"),
+    discusses the different transition mechanisms that have been defined, such as
+    dual-stack operation and different tunneling, and translation techniques. It also
+    shows how they can be used and combined to ensure peaceful coexistence and smooth
+    transition. This is your toolkit to plan a cost- and labor-efficient transition.'
+  id: totrans-19
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第7章，*过渡技术*](ch07.html "第7章。过渡技术")，讨论了已定义的不同过渡机制，如双栈操作和不同的隧道及翻译技术。它还展示了如何使用和组合这些技术，以确保和平共存和平稳过渡。这是你规划高效且节省成本的过渡工具包。'
+- en: '[Chapter 8, *Mobile IPv6*](ch08.html "Chapter 8. Mobile IPv6"), covers Mobile
+    IPv6\. This chapter explains why this technology could become the foundation for
+    a new generation of mobile services. It also shows how the Extension header support
+    of IPv6 can provide functionality that IPv4 can’t.'
+  id: totrans-20
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第8章，*移动IPv6*](ch08.html "第8章。移动IPv6")，介绍了移动IPv6。本章解释了为什么这项技术可能成为新一代移动服务的基础。它还展示了IPv6的扩展头部支持如何提供IPv4无法实现的功能。'
+- en: '[Chapter 9, *Planning for IPv6*](ch09.html "Chapter 9. Planning for IPv6"),
+    puts it all together in a big picture. It discusses the planning process, success
+    criteria, integration scenarios, best practices, and a summary of do’s and don’ts
+    based on my long-time consulting experience.'
+  id: totrans-21
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[第9章，*IPv6规划*](ch09.html "第9章。IPv6规划")，将所有内容汇总成一个大局面。它讨论了规划过程、成功标准、集成场景、最佳实践，并根据我长期的咨询经验总结了该做与不该做的事项。'
+- en: '[Appendix A](apa.html "Appendix A. RFCs"), includes a short introduction to
+    the RFC process and authorities, and provides a list of relevant RFCs for IPv6.'
+  id: totrans-22
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[附录A](apa.html "附录A。RFC")，包括对RFC过程和相关机构的简短介绍，并提供了与IPv6相关的RFC列表。'
+- en: '[Appendix B](apb.html "Appendix B. Recommended Reading"), provides a list of
+    books that I recommend.'
+  id: totrans-23
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[附录B](apb.html "附录B。推荐阅读")，提供了我推荐的书籍列表。'
+- en: Note
+  id: totrans-24
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 注意
+- en: Some important topics and information appear in multiple places in the book.
+    This is not because I want to bore you, but because I assume that most readers
+    will not read the book from the first page to the last page, but rather will pick
+    and choose chapters and sections depending on interest. So if the information
+    is important with regard to different sections and contexts, I may mention it
+    again.
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一些重要的主题和信息在书中出现多次。这不是因为我想让你感到无聊，而是因为我假设大多数读者不会从第一页读到最后一页，而是根据兴趣选择章节和部分。因此，如果信息在不同部分和上下文中都很重要，我可能会再次提到它。
+- en: Conventions Used in This Book
+  id: totrans-26
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 本书中使用的约定
+- en: 'The following typographical conventions are used in this book:'
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书中使用了以下排版约定：
+- en: '*Italic*'
+  id: totrans-28
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*斜体*'
+- en: Indicates new terms, URLs, email addresses, filenames, and file extensions.
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 表示新术语、网址、电子邮件地址、文件名和文件扩展名。
+- en: '`Constant width`'
+  id: totrans-30
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`常量宽度`'
+- en: Used for program listings, as well as within paragraphs to refer to program
+    elements such as variable or function names, databases, data types, environment
+    variables, statements, and keywords.
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 用于程序列表展示，以及在段落中引用程序元素，如变量名、函数名、数据库、数据类型、环境变量、语句和关键字。
+- en: '**`Constant width bold`**'
+  id: totrans-32
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '**`常量宽度粗体`**'
+- en: Shows commands or other text that should be typed literally by the user.
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示用户应按字面输入的命令或其他文本。
+- en: '*`Constant width italic`*'
+  id: totrans-34
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*`常量宽度斜体`*'
+- en: Shows text that should be replaced with user-supplied values or by values determined
+    by context.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 显示应由用户提供的值或由上下文决定的值所替换的文本。
+- en: Tip
+  id: totrans-36
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 提示
+- en: This element signifies a tip or suggestion.
+  id: totrans-37
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该元素表示一个提示或建议。
+- en: Note
+  id: totrans-38
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 注意
+- en: This element signifies a general note.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该元素表示一般性说明。
+- en: Warning
+  id: totrans-40
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 警告
+- en: This element indicates a warning or caution.
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该元素表示警告或注意事项。
+- en: Safari® Books Online
+  id: totrans-42
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: Safari® 在线图书
+- en: Note
+  id: totrans-43
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+  zh: 注意
+- en: '[Safari Books Online](http://my.safaribooksonline.com/?portal=oreilly) is an
+    on-demand digital library that delivers expert [content](http://www.safaribooksonline.com/content)
+    in both book and video form from the world’s leading authors in technology and
+    business.'
+  id: totrans-44
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[Safari Books Online](http://my.safaribooksonline.com/?portal=oreilly) 是一个按需数字图书馆，提供来自世界顶尖技术和商业作者的专家
+    [内容](http://www.safaribooksonline.com/content)，包括书籍和视频形式。'
+- en: Technology professionals, software developers, web designers, and business and
+    creative professionals use Safari Books Online as their primary resource for research,
+    problem solving, learning, and certification training.
+  id: totrans-45
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 技术专业人员、软件开发人员、网页设计师以及商业和创意专业人士使用 Safari Books Online 作为他们进行研究、解决问题、学习和认证培训的主要资源。
+- en: Safari Books Online offers a range of [product mixes](http://www.safaribooksonline.com/subscriptions)
+    and pricing programs for [organizations](http://www.safaribooksonline.com/organizations-teams),
+    [government agencies](http://www.safaribooksonline.com/government), and [individuals](http://www.safaribooksonline.com/individuals).
+    Subscribers have access to thousands of books, training videos, and prepublication
+    manuscripts in one fully searchable database from publishers like O’Reilly Media,
+    Prentice Hall Professional, Addison-Wesley Professional, Microsoft Press, Sams,
+    Que, Peachpit Press, Focal Press, Cisco Press, John Wiley & Sons, Syngress, Morgan
+    Kaufmann, IBM Redbooks, Packt, Adobe Press, FT Press, Apress, Manning, New Riders,
+    McGraw-Hill, Jones & Bartlett, Course Technology, and dozens [more](http://www.safaribooksonline.com/publishers).
+    For more information about Safari Books Online, please visit us [online](http://www.safaribooksonline.com/).
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Safari Books Online 提供多种 [产品组合](http://www.safaribooksonline.com/subscriptions)
+    和定价方案，适用于 [组织](http://www.safaribooksonline.com/organizations-teams)、[政府机构](http://www.safaribooksonline.com/government)
+    和 [个人](http://www.safaribooksonline.com/individuals)。订阅者可以访问成千上万本书籍、培训视频和预发布手稿，这些内容来自如
+    O’Reilly Media、Prentice Hall Professional、Addison-Wesley Professional、Microsoft
+    Press、Sams、Que、Peachpit Press、Focal Press、Cisco Press、John Wiley & Sons、Syngress、Morgan
+    Kaufmann、IBM Redbooks、Packt、Adobe Press、FT Press、Apress、Manning、New Riders、McGraw-Hill、Jones
+    & Bartlett、Course Technology 等出版商的数据库，并且这个数据库完全可以搜索。有关 Safari Books Online 的更多信息，请访问我们的网站
+    [在线](http://www.safaribooksonline.com/)。
+- en: How to Contact Us
+  id: totrans-47
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 联系我们方式
+- en: 'Please address comments and questions concerning this book to the publisher:'
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请将有关本书的评论和问题发送给出版商：
+- en: '| O’Reilly Media, Inc. |'
+  id: totrans-49
+  prefs: []
+  type: TYPE_TB
+  zh: '| O''Reilly Media, Inc. |'
+- en: '| 1005 Gravenstein Highway North |'
+  id: totrans-50
+  prefs: []
+  type: TYPE_TB
+  zh: '| 1005 Gravenstein Highway North |'
+- en: '| Sebastopol, CA 95472 |'
+  id: totrans-51
+  prefs: []
+  type: TYPE_TB
+  zh: '| Sebastopol, CA 95472 |'
+- en: '| 800-998-9938 (in the United States or Canada) |'
+  id: totrans-52
+  prefs: []
+  type: TYPE_TB
+  zh: '| 800-998-9938（美国或加拿大） |'
+- en: '| 707-829-0515 (international or local) |'
+  id: totrans-53
+  prefs: []
+  type: TYPE_TB
+  zh: '| 707-829-0515（国际或本地） |'
+- en: '| 707-829-0104 (fax) |'
+  id: totrans-54
+  prefs: []
+  type: TYPE_TB
+  zh: '| 707-829-0104（传真） |'
+- en: We have a web page for this book, where we list errata, examples, and any additional
+    information. You can access this page at [http://bit.ly/ipv6-3e](http://bit.ly/ipv6-3e).
+  id: totrans-55
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本书有一个网页，我们在此列出了勘误表、示例以及任何其他信息。您可以通过以下链接访问该页面 [http://bit.ly/ipv6-3e](http://bit.ly/ipv6-3e)。
+- en: To comment or ask technical questions about this book, send email to [bookquestions@oreilly.com](mailto:bookquestions@oreilly.com).
+  id: totrans-56
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果您对本书有评论或技术问题，请发送电子邮件至 [bookquestions@oreilly.com](mailto:bookquestions@oreilly.com)。
+- en: For more information about our books, courses, conferences, and news, see our
+    website at [http://www.oreilly.com](http://www.oreilly.com).
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 有关我们的书籍、课程、会议和新闻的更多信息，请访问我们的网站 [http://www.oreilly.com](http://www.oreilly.com)。
+- en: 'Find us on Facebook: [http://facebook.com/oreilly](http://facebook.com/oreilly)'
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Facebook 上找到我们：[http://facebook.com/oreilly](http://facebook.com/oreilly)
+- en: 'Follow us on Twitter: [http://twitter.com/oreillymedia](http://twitter.com/oreillymedia)'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 Twitter 上关注我们：[http://twitter.com/oreillymedia](http://twitter.com/oreillymedia)
+- en: 'Watch us on YouTube: [http://www.youtube.com/oreillymedia](http://www.youtube.com/oreillymedia)'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在 YouTube 上观看我们：[http://www.youtube.com/oreillymedia](http://www.youtube.com/oreillymedia)
+- en: Acknowledgments
+  id: totrans-61
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 致谢
+- en: There are many people all over the world who have contributed to this book.
+    Without their help and input, it would not be what it is.
+  id: totrans-62
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 世界各地有许多人为本书做出了贡献。没有他们的帮助和意见，这本书不会变成现在的样子。
+- en: 'For the first edition: many thanks go out to Anja Spittler (Maggy). She spent
+    hours, days, and weeks in our lab in the early days of IPv6, setting up SuSE Linux,
+    getting BIND and other services to work, and writing parts of Chapters 9 and 12
+    in the first edition. I also want to thank the technical editors, who have made
+    this book much better with their invaluable comments, corrections, and clarifications.
+    They were great resources when I was struggling with a topic and needed some answers.
+    The technical reviewers of the first edition were Patrick Grossetete, who worked
+    as a product manager for the Internet Technology Division (ITD) at Cisco, and
+    Neil Cashell, who is a great TCP/IP guy at Novell, today SuSE. Thanks also to
+    Brian McGehee, who has been working with IPv6 for many years and has written numerous
+    courses for IPv6\. He did the final technical edits of the first edition and added
+    a lot of useful information. I’d like to thank Cisco Switzerland, especially René
+    Räber, both for providing an updated router and access to their technical resources,
+    as well as for his support of my work for IPv6\. Thanks to the guys at SuSE for
+    providing software and supporting us in getting our SuSE host ready for IPv6;
+    Microsoft for providing software and information about their implementations;
+    Network General for providing Sniffer Pro Software for the trace files; Bob Fink
+    for running the 6Bone website; Cricket Liu for answering my DNS questions; and
+    Peter Bieringer for running a great Internet resource site and for answering my
+    questions with lightning speed.'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于第一版，特别感谢Anja Spittler（Maggy）。在IPv6的早期，她在我们的实验室里花费了数小时、数天和数周的时间，设置SuSE Linux，调试BIND和其他服务，并编写了第一版第9章和第12章的部分内容。我还要感谢技术编辑们，正是他们宝贵的评论、修正和澄清使得这本书变得更加完善。当我在某个话题上遇到困难并需要一些答案时，他们是我宝贵的资源。第一版的技术审阅者是Patrick
+    Grossetete，他曾在Cisco的互联网技术部门（ITD）担任产品经理；还有Neil Cashell，他是Novell（现为SuSE）的一位出色的TCP/IP专家。同时也感谢Brian
+    McGehee，他多年来一直从事IPv6的工作，并编写了大量关于IPv6的课程。他为第一版进行了最终的技术编辑，并添加了许多有用的信息。我还要感谢Cisco瑞士分公司，特别是René
+    Räber，既为我们提供了更新的路由器和技术资源的访问权限，也为我在IPv6方面的工作提供了支持。感谢SuSE的伙伴们提供软件并支持我们准备好IPv6的SuSE主机；感谢微软提供软件和关于其实现的信息；感谢Network
+    General提供Sniffer Pro软件用于跟踪文件；感谢Bob Fink运营6Bone网站；感谢Cricket Liu解答我的DNS问题；感谢Peter
+    Bieringer运营一个很棒的互联网资源网站，并以闪电般的速度回答我的问题。
+- en: 'There were many additional supporters, writers, and reviewers for the second
+    edition. They include: Jim Bound from HP, CTO of the IPv6 Forum and Chair of the
+    NAv6TF; Latif Ladid, President of the IPv6 Forum; Tim Chown, Department of Electronics
+    and Computer Science at the University of Southampton; and Vijayabhaskar from
+    McAfee. Yurie Rich, John Spence, and Mike Owen from Native6 Inc. in Seattle provided
+    substantial input into Chapters 1, 5, 6, and 10 of the second edition. Gene Cronk
+    from the Robin Shepherd Group gave substantial input into Chapters 5 and 10, and
+    John Jason Brzozowski, North American IPv6 Task Force and Chair of the Mid-Atlantic
+    IPv6 Task Force, contributed great input into Chapters 1 and 9\. Thanks to David
+    B. Green from SRI International for the permission to quote his Enterprise Security
+    Model presentation in Chapter 5 and for reviewing different parts of the book.
+    Thanks to Merike Kaeo, Chief Network Security Architect at Double Shot Security,
+    for all her inputs and comments to Chapter 5\. And thanks to Chris Engdahl from
+    Microsoft for his review of Chapter 10\. Thanks to Jimmy Ott from Sunny Connection
+    for researching and writing all updates for Chapter 12\. David Malone, author
+    of the companion book *IPv6 Network Administration*, reviewed the whole book—thank
+    you, David, for your great and clarifying comments. A great thank you goes out
+    to all the people who were ready to share their experience with me and have provided
+    case studies. They are Paolo Vieira from the University of Porto, Pierre David
+    from the University of Strasbourg, Cody Christman from NTT Communications, and
+    Flavio Curti and Ueli Heuer from Cyberlink AG in Zurich. Wolfgang Fritsche from
+    IABG Germany and Karim El-Malki from Ericsson AB in Stockholm reviewed and provided
+    input on Chapter 8 about Mobility. Thanks to the people at Checkpoint for providing
+    information and connections, especially Patrik Honegger and Yoni Appel; and thanks
+    also to Jean-Marc Uzé at Juniper for his information and connections. I also want
+    to thank all the people and developers in the international working groups. Without
+    their visionary power, enthusiasm, and tireless work, we would not have IPv6 ready.'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 第二版有许多额外的支持者、作者和审阅者，他们包括：来自惠普的Jim Bound，IPv6论坛的首席技术官以及NAv6TF的主席；IPv6论坛主席Latif
+    Ladid；南安普顿大学电子与计算机科学系的Tim Chown；以及来自McAfee的Vijayabhaskar。来自Seattle的Native6公司，Yurie
+    Rich、John Spence和Mike Owen对第二版的第1章、第5章、第6章和第10章提供了重要意见。Robin Shepherd集团的Gene Cronk对第5章和第10章提供了重要建议，北美IPv6工作组和中大西洋IPv6工作组主席John
+    Jason Brzozowski对第1章和第9章做出了重要贡献。感谢SRI国际的David B. Green，感谢他授权引用他在第5章中展示的《企业安全模型》演示文稿，并审阅了书中的不同部分。感谢Double
+    Shot Security的首席网络安全架构师Merike Kaeo对第5章提出的所有意见和评论。感谢微软的Chris Engdahl审阅第10章。感谢Sunny
+    Connection的Jimmy Ott研究并撰写了第12章的所有更新内容。伴随书籍《IPv6网络管理》的作者David Malone审阅了整本书——感谢你，David，提供的宝贵且具有启发性的评论。非常感谢所有愿意与我分享经验并提供案例研究的人们，他们分别是：来自波尔图大学的Paolo
+    Vieira，来自斯特拉斯堡大学的Pierre David，来自NTT Communications的Cody Christman，以及来自苏黎世Cyberlink
+    AG的Flavio Curti和Ueli Heuer。来自IABG德国的Wolfgang Fritsche和来自爱立信AB的Karim El-Malki审阅并提供了关于移动性的第8章的意见。感谢Checkpoint的工作人员提供信息和联系，特别是Patrik
+    Honegger和Yoni Appel；也感谢Juniper的Jean-Marc Uzé提供的信息和联系。我还要感谢所有国际工作组中的人员和开发者，没有他们的远见卓识、热情和不懈努力，我们就无法实现IPv6的准备工作。
+- en: I would like to honor *Jim Bound*, mentioned in the acknowledgments for the
+    second edition. He was the key developer and driver of IPv6 for many years. He
+    was the CTO of the International IPv6 Forum and a member of the IETF (Internet
+    Engineering Task Force) IP Next Generation directorate. Without his drive, knowledge,
+    and passion, IPv6 would not be where it is today. Unfortunately, Jim left this
+    world way too early in 2009 at the age of 58\. In honor of Jim, the *International
+    IPv6 Forum* has created the *Jim Bound Award*, which is given to countries for
+    World Leadership in IPv6 Deployment. I was honored to receive the first Jim Bound
+    Award for the Swiss IPv6 Council, for Switzerland being the first country in the
+    world reaching a double-digit IPv6 user penetration rate in April of 2013.
+  id: totrans-65
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我想特别纪念*Jim Bound*，他在第二版的致谢中有提到。他多年来是 IPv6 的关键开发者和推动者。他曾是国际 IPv6 论坛的首席技术官（CTO）以及
+    IETF（互联网工程任务组）IP 下一代委员会的成员。如果没有他的推动、知识和热情，IPv6 也不会有今天的成就。不幸的是，Jim 在 2009 年以 58
+    岁的年龄过早离世。为了纪念 Jim，*国际 IPv6 论坛*创建了*Jim Bound 奖*，该奖项授予在 IPv6 部署方面具有世界领导力的国家。我有幸获得了第一个
+    Jim Bound 奖，代表瑞士 IPv6 委员会，瑞士是世界上第一个在 2013 年 4 月达到双位数 IPv6 用户渗透率的国家。
+- en: For this third edition, I was happy to have many great and knowledgeable helpers.
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 对于这第三版，我很高兴能有许多伟大且知识渊博的帮助者。
+- en: First of all, I would like to thank my three main reviewers who reviewed all
+    chapters. They are Ed Horley, David Malone, and Niall Murphy. Thank you guys for
+    your great inputs, your thoughts, and inspirations, and for taking the time to
+    do this and answer my questions. Ed Horley is also the author of *Practical IPv6
+    for Microsoft Administrators*, a must-read for all who deal with Microsoft operating
+    systems. I would like to thank Mark Townsley, Cameron Byrne, and Jan Zorz for
+    reviewing and providing important input to Chapters [7](ch07.html "Chapter 7. Transition
+    Technologies") and [9](ch09.html "Chapter 9. Planning for IPv6"), Chip Popoviciu
+    for writing the MPLS section, Gerd Pflüger for writing the LISP section, and Eric
+    Vyncke for his inputs and review of [Chapter 6](ch06.html "Chapter 6. Security
+    with IPv6"). I would also like to thank Jasper Bongertz, my network analysis guru
+    and IPv6 trainer, for helping with Wireshark cosmetics, and Uwe Lenz, my second
+    IPv6 instructor. He created an awesome lab for my hands-on class and used it to
+    create all sorts of trace files for this book. Thanks to Andrew Yourtchenko and
+    Gert Döring for responding to my many questions and to Jeff Carrell for many interesting
+    discussions about the inner workings of SLAAC and the subtleties of what we see
+    in trace files. I would also like to thank Bea Leonhardt for managing my office
+    when I was writing and for help with updating the RFC lists. And Robin Huber for
+    being an enthusiastic IT guy helping me with my infrastructure, solving my PC
+    issues, taking care of the logistics at our IPv6 conferences, and for updating
+    me on the latest gaming devices. And last but not least, Latif Ladid for all his
+    continuing work for the IPv6 community, for cheering me up when working on weekends,
+    and for getting Vint Cerf on board for the foreword.
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 首先，我要感谢我的三位主要审阅者，他们审阅了所有章节。他们是 Ed Horley、David Malone 和 Niall Murphy。感谢你们的宝贵意见、思考和启发，也感谢你们抽出时间来做这些工作并回答我的问题。Ed
+    Horley 还是*《Microsoft 管理员实用 IPv6》*的作者，这本书是所有处理 Microsoft 操作系统的人的必读书籍。我还要感谢 Mark
+    Townsley、Cameron Byrne 和 Jan Zorz，他们审阅并为第 [7](ch07.html "第 7 章：过渡技术") 章和第 [9](ch09.html
+    "第 9 章：IPv6 规划") 章提供了重要意见，Chip Popoviciu 撰写了 MPLS 部分，Gerd Pflüger 撰写了 LISP 部分，Eric
+    Vyncke 提供了他的意见并审阅了 [第 6 章](ch06.html "第 6 章：IPv6 安全性")。我还要感谢我的网络分析大师和 IPv6 培训师
+    Jasper Bongertz，他帮助改善了 Wireshark 的界面，Uwe Lenz，我的第二位 IPv6 教练。他为我的动手实验课创建了一个很棒的实验室，并用它为本书制作了各种跟踪文件。感谢
+    Andrew Yourtchenko 和 Gert Döring 回答我提出的许多问题，以及 Jeff Carrell 就 SLAAC 的内部工作机制和我们在跟踪文件中看到的细微差别与我展开了许多有趣的讨论。我还要感谢
+    Bea Leonhardt，在我写书时管理我的办公室并帮助更新 RFC 列表。还要感谢 Robin Huber，他是一个热情的 IT 人员，帮助我解决基础设施问题，处理我的电脑问题，负责我们
+    IPv6 会议的后勤工作，并且时刻更新我关于最新游戏设备的信息。最后但同样重要的是，感谢 Latif Ladid，感谢他为 IPv6 社区所做的一切持续贡献，感谢他在我周末工作时给我鼓励，感谢他让
+    Vint Cerf 为本书的前言提供支持。
+- en: 'And to all the great people at O’Reilly: for the first edition, a special thank
+    you goes to Jim Sumser, Mike Loukides, and Tatiana Apandi. Jim Sumser guided me
+    through the whole writing process of the first edition with a lot of enthusiasm,
+    patience, and experience. Thank you, Jim, for being there, and thank you for never
+    hassling me when I was already struggling. You made a difference! Mike and Tatiana,
+    with whom I worked on the second edition, have also been very supportive throughout
+    the whole process. I also want to thank all the other folks at O’Reilly who contributed
+    to this book, especially Tim O’Reilly for making it possible in the first place.
+    For this third edition, I was mostly working with Meghan Blanchette. Meghan, I
+    thank you for all your great work, your support, your humor, and your patience
+    with my crazy schedule. You were always there when I reached out and helped me
+    stay on track.'
+  id: totrans-68
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 还有所有在O'Reilly的伟大人物：对于第一版，特别感谢吉姆·萨姆瑟（Jim Sumser）、迈克·卢基德斯（Mike Loukides）和塔蒂安娜·阿潘迪（Tatiana
+    Apandi）。吉姆·萨姆瑟以极大的热情、耐心和经验引导我完成了第一版的整个写作过程。谢谢你，吉姆，感谢你在我已经在挣扎时依然陪伴在我身边，感谢你从未催促我。你真的起到了关键作用！迈克和塔蒂安娜是我在第二版中合作的伙伴，他们在整个过程中也给予了我很大的支持。我还想感谢所有在O'Reilly为这本书做出贡献的其他人，特别是蒂姆·欧赖利（Tim
+    O'Reilly），是他让这一切成为可能。对于第三版，我主要是与梅根·布兰切特（Meghan Blanchette）一起合作。梅根，感谢你所做的所有出色工作，感谢你的支持、幽默和在我疯狂的日程安排下对我的耐心。每当我向你求助时，你总是及时出现，帮助我保持进度。
+- en: Another very special thank you goes to Hanspeter Bütler, who was my teacher
+    back in school, for teaching me the beauty of the ancient Greek language. His
+    insightful and sensitive way of guiding me into understanding and feeling the
+    richness of old languages laid the foundation for my understanding of language
+    in general, of different cultures and how the differences in viewing the world
+    are expressed in language. I can probably make him partially responsible for my
+    becoming an author. Language is made to communicate, and the more precisely we
+    use our language, the better we can understand and be understood. Without communication,
+    there can be no understanding. On a different level, TCP/IP is the protocol that
+    enables communication in the network and therefore creates the foundation for
+    Internet communication. And the Internet creates the physical foundation for global
+    communication. It offers a great opportunity to communicate, share, and understand
+    globally across all cultures. That is how we should be using it.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 另一个特别的感谢送给汉斯彼得·比特勒（Hanspeter Bütler），他曾是我在学校时的老师，感谢他教我古希腊语言的美妙。他那富有洞察力和敏感的方式引导我理解并感受古老语言的丰富性，为我对语言的一般理解、对不同文化的认识以及不同视角如何通过语言表达的理解奠定了基础。我或许可以部分归功于他，才使我成为了一名作家。语言是用来沟通的，越精确地使用我们的语言，我们就越能理解和被理解。没有沟通，就没有理解。在另一个层面上，TCP/IP是网络中实现沟通的协议，从而为互联网通信奠定了基础。而互联网为全球沟通创造了物理基础。它为跨越所有文化进行全球交流、分享和理解提供了一个伟大的机会。这就是我们应该如何使用它。

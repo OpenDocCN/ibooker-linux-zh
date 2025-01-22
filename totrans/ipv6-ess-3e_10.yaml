@@ -1,0 +1,2355 @@
+- en: Chapter 9. Planning for IPv6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: After all these chapters describing the features of IPv6 from a technical perspective,
+    this final chapter puts it all together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It summarizes all I have learned in more than 10 years of studying, working,
+    playing, teaching, and consulting for IPv6\. It puts at your disposal all that
+    is relevant to understand what it takes to plan the integration of IPv6\. It is
+    a summary of all the answers to the most frequent questions I get when talking
+    with customers. And I hope to make you feel a little enthusiastic about the opportunities
+    that IPv6 offers. So I wish you a good read and lots of fun learning about and
+    planning for IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While it is true that the integration in a larger network presents some challenges
+    and takes a lot of time and careful planning, there is no need to panic or think
+    that it could not be mastered. Every decent engineer that mastered the introduction
+    of DHCP, VPNs, and NATs will also master the introduction of IPv6\. The main difference
+    is in the fact that IPv6 as the transport protocol touches almost every component
+    in the network, so the complexity comes from considering all interactions between
+    the different network components, services, and departments. The challenge is
+    in the organizational aspects, the design of the future architecture, and the
+    interdependencies of all groups and parts of the network and applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But the process can be broken down in single doable steps and they do not have
+    to be accomplished in three months if you start early enough. This chapter provides
+    an outline to help you determine how you want to go about it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When to Choose IPv6?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A golden rule says to “never touch a running system.” This rule also applies
+    to your IPv4 networks. As long as they do what they need to do, let them run.
+    But when an IPv4 network hits the limits for some reason, or as soon as an upgrade
+    is due, choose IPv6\. IPv6 is mature enough to be used in corporate and commercial
+    networks, as many case studies and deployments worldwide show. High investments
+    in new IPv4 setups, fixes, or complex configurations for IPv4 (especially NATs)
+    should be avoided if possible because they are investments in a technology that
+    will slowly be phased out and is actually end-of-life. Getting familiar with the
+    new protocol early, taking some time to play with it before you really need it,
+    and planning for it early saves a lot of cost, time, and headaches.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Whatever you invest in IPv6 is an investment in future technology. An investment
+    in IPv4 is an investment in an end-of-life technology.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As already mentioned in [Chapter 1](ch01.html "Chapter 1. Why IPv6?"), here’s
+    the list of indicators that it may be time for you to consider integrating IPv6:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Your IPv4 network or NAT implementation needs to be fixed or extended.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A major hardware upgrade or redesign is on the schedule. Redesign for IPv6 and
+    support IPv4 as needed.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You are running out of address space.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You want to prepare your network for acquisitions that might suddenly require
+    IPv6 support.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You want to prepare your network for applications that are based on advanced
+    features of IPv6.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You need end-to-end security for a large number of users and you do not have
+    the address space, or you struggle with a NAT implementation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Your hardware (backbone, DMZ, data center, etc.) or applications reach the end
+    of their life cycle and must be replaced. Make sure you buy products that support
+    IPv6, even if you don’t enable it right away. In order to determine the level
+    of support your products need, you need to have an IPv6 strategy.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Integration Scenarios
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: As the discussion of the different techniques in this chapter shows, there are
+    numerous mechanisms that support a step-by-step introduction of IPv6\. There is
+    no one mechanism that can cover all requirements or be optimal for all scenarios.
+    In most cases, a combination of different mechanisms will be chosen. What the
+    best combination and sequence is depends on the infrastructure of the current
+    environment and the goals and requirements for the transition/integration. In
+    the IETF, the work on the basic protocol is completed. They now focus on developing
+    practical scenarios for different types of environments, and the results are published.
+    We offer a summary here, not with the intent to deliver a cookbook for your environment,
+    but rather to provide food for thought that you can apply to your requirements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you want to follow what is going on in the IPv6 operational and maintenance
+    working groups, refer to [http://www.ietf.org/html.charters/v6ops-charter.html](http://www.ietf.org/html.charters/v6ops-charter.html)
+    and [http://www.ietf.org/html.charters/6man-charter.html](http://www.ietf.org/html.charters/6man-charter.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Organizations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To connect a single host or a small network with the IPv6 Internet is not a
+    big challenge and can be done either natively, if your Internet provider offers
+    this, or with one of the tunnel mechanisms described earlier. It is easy to implement
+    with most operating systems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you need a tunnel, have a public IPv4 address, and want access to the IPv6
+    Internet, 6rd or a Tunnel Broker can be used. If you have NAT in place and make
+    use of private IPv4 addresses, you may choose to use Proto 41 Forwarding if the
+    NAT box supports it. Organizations that have the privilege of their providers
+    offering native IPv6 connections can have a dual-stack Internet connection. Dual-stack
+    is in many cases the easiest way to go if your devices and operating systems support
+    IPv6 (and they do if they are on an up-to-date level).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Many organizations have a number of IPv4 Virtual LANs (VLANs). In such situations,
+    an IPv6 router can advertise one single IPv6 prefix into all VLANs that support
+    dual-stack communication. This is only advisable for a transition period, though.
+    All the IPv6 nodes in the VLANs can autoconfigure for an IPv6 address using the
+    prefix advertised by the IPv6 router.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The tunnel mechanisms do not only support the transport of IPv6 over the IPv4
+    Internet, but also internally over an IPv4 backbone. A backbone upgrade is not
+    something you choose to do every year; you probably want to wait for the end of
+    the backbone router life cycle before touching it. This does not prevent rolling
+    out IPv6 at the edge of the network. As long as the backbone is based on IPv4,
+    IPv6 packets are tunneled to IPv6 islands on the other side.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you want to integrate IPv6 in a more complex DMZ for your public services
+    and/or in your internal network including multiple locations, possibly multiple
+    data centers, and different types of applications and services used across the
+    whole network, you need to define an enterprise transition strategy. Refer to
+    the section [Planning for IPv6](ch09.html#planning_for_ipv6-id1 "Planning for
+    IPv6") for more details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'RFC 4057, “IPv6 Enterprise Network Scenarios,” can assist you in your first
+    steps. It describes different scenarios for IPv6 deployment within enterprise
+    networks and provides guidance and checklists of how to approach this task. The
+    following scenarios are covered in this RFC:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deploy IPv6 in conjunction with IPv4.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Deploy IPv6 because of a specific set of applications to be used over an IPv6
+    network.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Build a new network or restructure an existing network and deploy IPv6 as the
+    predominant protocol within the enterprise in coexistence with IPv4.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The document then reviews a set of network infrastructure components common
+    to most enterprises that must be analyzed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 4852, “IPv6 Enterprise Network Analysis—IP Layer 3 Focus,” is based on RFC
+    4057 and analyzes the transition to IPv6 in enterprise networks focusing on Layer
+    3 for the scenarios given in RFC 4057\. There is a table with a good overview
+    of different scenarios and then each scenario is discussed in terms of how it
+    could be addressed and what the transition mechanisms could be. Note that this
+    RFC was written in 2007\. In some sections mechanisms such as ISATAP, 6to4, and
+    Teredo are mentioned. We strongly recommend that you do not use these in production
+    environments, but replace them with newer technologies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ISPs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: IPv6 is designed to enable Internet Service Providers (ISPs) to meet the challenges
+    associated with the exponential growth of the Internet, allowing them to provide
+    new services to their customers. The number of devices will explode in the coming
+    years, a challenge that can be met only with the address space of IPv6\. Cable,
+    DSL, wireless, and other always-on technologies can also benefit from the address
+    space. Other benefits of IPv6 include the capability to enhance end-to-end security
+    and mobile communications, and to ease system management burdens. Some examples
+    include peer-to-peer communication without NAT traversal problems, being able
+    to securely access devices and applications at work from home or vice versa, enhanced
+    IP mobility, and many more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Therefore, ISPs have to evaluate the capabilities of IPv6 to meet these needs.
+    Some countries have taken a lead role in this area and moved from testing and
+    evaluation to real deployments of IPv6 in the broadband arena. Japan is a prime
+    example, along with other countries that are looking at moving toward large-scale
+    production deployments of IPv6\. Since the exhaustion of the IPv4 pool in 2011,
+    many large providers in Europe and the U.S. have also started to deploy IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Globally, the number of IPv6 transit AS (Autonomous System) has increased substantially.
+    [As of 2014, more than 80% of the top 300 transit AS in the world are IPv6 enabled](http://6lab.cisco.com).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'ISPs will have to offer both IPv4 and IPv6 services in the coming years. To
+    provide access to IPv6 networks to customers in a first phase (as long as their
+    backbones are still IPv4), tunnel mechanisms can be used. Many large ISPs have
+    chosen to use 6rd, the mechanism that is based on 6to4 but provides more or less
+    native performance (refer to the 6rd section in [Chapter 7](ch07.html "Chapter 7. Transition
+    Technologies")). This is a simpler and more economical method to start offering
+    IPv6 services. Depending on customer needs and requirements, a native IPv6 deployment
+    option might be more scalable and provide better service performance. You may
+    be able to use the next backbone upgrade cycle and introduce dual-stack. All other
+    services such as web hosting, email, and FTP are best if offered for both protocols
+    (IPv4 and IPv6). The migration steps should be well planned, and a useful combination
+    of mechanisms chosen and implemented. The main goal for an ISP is to offer all
+    of the services over both protocols: this is the only way to cover the whole market.
+    Especially for ISPs, the introduction of IPv6 offers the possibility to create
+    business opportunities and new service offerings. You as a customer want dual-stack
+    if you buy Internet services, because only dual-stack makes you a full member
+    of both Internets (IPv4 and IPv6).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 4029, “Scenarios and Analysis for Introducing IPv6 into ISP Networks,” analyzes
+    the challenges and opportunities for ISPs and discusses different integration
+    and transition scenarios, divided into exploring backbone transition actions,
+    customer connection transition actions, and network and service operation actions.
+    RFC 4779, “ISP IPv6 Deployment Scenarios in Broadband Access Networks,” presents
+    the options available in deploying IPv6 services in the access part of a broadband
+    Service Provider network, namely cable/HFC, broadband Ethernet, xDSL, WLAN, and
+    PLC/BPL. It briefly discusses the other elements of a provider network as well.
+    It provides different viable IPv6 deployment and integration techniques and models
+    for each of the previously mentioned broadband technology. RFC 5181, “IPv6 Deployment
+    Scenarios in 802.16 Networks,” extends the discussion and goes into deployment
+    scenarios for wireless broadband access networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some ISPs shy away from deploying IPv6 and hope they can get away with extending
+    their NATs and implementing CGNs. An IDC study commissioned by Cisco analyzed
+    the capital cost (capex) over 5 years for an ISP with 5 million residential subscribers,
+    comparing a CGN-only scenario with a scenario where 6rd was deployed in parallel
+    to CGN. It shows that the business case for introducing IPv6 in parallel with
+    CGN is much better. The reason is that the native IPv6 offloads traffic from the
+    CGN. With the increasing number of IPv6-capable websites, the 6rd deployment offloads
+    substantial traffic from the CGN, which reduces the maintenance on the CGN side.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The comparison shows that over the period of 5 years an ISP can save up to 69%
+    in capex investment by choosing the right IPv6 strategy. If you are interested
+    in the study, “The Business Case for Delivering IPv6 Service Now,” you can find
+    it at [http://bit.ly/1nac2SH](http://bit.ly/1nac2SH).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mobile networks
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: For a long time IPv6 deployment in mobile networks was not happening. Early
+    smartphones such as the once-sexy Sony Ericsson P900 had a Symbian stack with
+    IPv6 support. But none of the mobile providers would deploy IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This has changed in the last two years. Two of the well-known and often discussed
+    deployments are by T-Mobile U.S. and Verizon Wireless. T-Mobile has several million
+    IPv6 users already in 2014\. Other providers, such as China Mobile and also some
+    European providers, have deployed IPv6\. With the implementation of 464XLAT in
+    Android 4.3 and higher, it becomes attractive for mobile operators to provide
+    IPv6-only services. Demos have showed that with 464XLAT, IPv4 applications run
+    well on IPv6-only devices. Other smartphone vendors will hopefully jump onto this
+    bandwagon soon.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For more details on 464XLAT, refer to [Chapter 7](ch07.html "Chapter 7. Transition
+    Technologies").
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 3574 discusses transition scenarios for 3GPP networks. RFC 4215 goes into
+    more details for 3GPP networks and is a supplemental document to RFC 3574\. RFC
+    6459, “IPv6 in 3rd Generation Partnership Project (3GPP) Evolved Packet System
+    (EPS),” describes the IPv6 support in different 3GPP architectures, and RFC 7066,
+    “IPv6 for Third Generation Partnership Project (3GPP) Cellular Hosts,” describes
+    requirements for cellular devices that go beyond the standard node requirements
+    for IPv6 (RFC 6434), because the characteristics of cellular links in terms of
+    bandwidth, cost, and delay put special requirements on how IPv6 is used. And RFC
+    *draft-ietf-v6ops-mobile-device-profile-07* defines an IPv6 profile that a number
+    of operators recommend in order to connect 3GPP mobile devices to an IPv6-only
+    or dual-stack wireless network (including 3GPP cellular network and IEEE 802.11
+    network). It defines a different profile than the one for general connection to
+    IPv6 cellular networks defined in RFC 7066\. In particular, it also describes
+    features to deliver IPv4 connectivity service over an IPv6-only transport.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Home networks
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: In the early days of the Internet, a home “network” consisted of one PC with
+    a dial-up modem. The connection had one single IP address. Today this scenario
+    has drastically changed and with all the different increasing number and types
+    of devices, as well as increased internal routing, challenges increase also. Now
+    we add IPv6 to the mix and this again adds complexity and requires new designs,
+    new addressing principles, and new operational measures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One big difference between the IPv4 and the IPv6 addressing architecture is
+    that in IPv6 interfaces can and often do have multiple addresses. They have at
+    least a link-local address, but in addition to that they have one or multiple
+    global unicast addresses (GUAs) and possibly even a unique local address (ULA).
+    If a homenet has multiple ISPs, the homenet may get an IPv6 prefix through various
+    channels from each of the ISPs (let’s say a 6rd /60 prefix from one ISP and a
+    /48 prefix via DHCP prefix delegation, etc.). So all the devices in the network
+    may end up with two GUAs, one from each prefix. And the home network may typically
+    have multiple subnets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Several new aspects have to be taken into consideration. There is a homenet
+    working group at IETF, and this group is developing a new architecture for the
+    more complex home networks of the future. The homenet group is defining a general
+    architecture for IPv6-based home networking and describing the associated principles,
+    considerations, and requirements. They discuss specific implications of the introduction
+    of IPv6 for home networking, describe the elements of the architecture, and suggest
+    how standard IPv6 mechanisms and addressing can be employed in home networking.
+    The architecture developed in one of their first documents, “IPv6 Home Networking
+    Architecture Principles,” describes the need for specific protocol extensions
+    for certain additional functionality. It is assumed that the IPv6 home network
+    is not actively managed, and runs as an IPv6-only or dual-stack network. If you
+    are an ISP and have to design home networks, the documents of this group are surely
+    a good source.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can find the homenet group at [http://bit.ly/1nac5Om](http://bit.ly/1nac5Om).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Planning for IPv6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In February 2011, the global IPv4 address pool was exhausted. Since April 2011,
+    APNIC has been running on the last /8\. Since September 2012, RipeNCC has been
+    running on the last /8\. This was a wake-up call for the whole industry. Since
+    then many large enterprises started IPv6 projects with different levels of intensity.
+    Many of them are still in the planning phase. As you will see in the coming sections,
+    for a large enterprise the planning and deployment can take as long as three to
+    five years.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Most enterprises have overcome the business case discussion. There are many
+    reasons to do IPv6 and to do it now. By “now” I mean you have to do the planning
+    now. Once you know what it will take to deploy IPv6, how long it will take in
+    different areas of your network and services, and how you will design your address
+    plan and security concept, you may put these plans aside until the day comes where
+    you need to turn it on. But if you don’t plan and wait until that day comes, you
+    will not be able to create decent and operationally useful designs under time
+    pressure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Planning and designing the integration of IPv6 in your network provides a unique
+    opportunity to establish a new foundation for your next-generation IT environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: IPv6 offers the opportunity to clean the existing inconsistencies, drive standardization,
+    and implement new architectures and operational models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The most common reasons for enterprises that started their IPv6 projects are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Business continuity
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Reachability (from outside)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Life cycle management
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Investment protection
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Time for education and to build experience
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'What are the advantages of planning early? There are many areas where you can
+    save a lot of money with early planning and make good use of the opportunities
+    that an IPv6 integration offers. So here’s a list of advantages:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make use of product life cycles, refresh cycles, and other IT projects.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Investment protection by having clear IPv6 requirements for purchasing of new
+    equipment, tools, and applications, and for negotiating outsourcing contracts
+    and SLAs. All these must be adjusted to cover IPv6 requirements appropriately.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Integrating IPv6 will take up to three or even more years (mostly in order to
+    make use of refresh cycles). If you don’t plan early, you won’t be ready when
+    you need it. Especially the design and concept for addressing and security take
+    a lot of time and should be done carefully. They need to be updated to take advantage
+    of the new addressing architecture and usually require a thorough discussion and
+    multiple iterations until all IT departments can identify with it. Usually the
+    security people are challenged most and need time to learn about IPv6 and adjust
+    their concepts. But they also have a big opportunity to clean out and redesign
+    the IPv4-based security concept.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You need time to educate all IPv6 team members and IT staff.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You want to use all the opportunities IPv6 offers!
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You need sufficient time for labs, testing, and pilots.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You need time for bug fixing with vendors (early stacks).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When you run a larger or even global network, most IT decision makers wonder
+    where to start and how to go about it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The fact that the introduction of IPv6 touches each and every aspect and device
+    in your network makes this an IT project of a larger scale than any other IT project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So let me try to give you a quick start into planning for IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A more detailed discussion of the planning process can be found in my companion
+    book, *Planning for IPv6* (O’Reilly).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where to Start
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: One of the main success factors is that the IPv6 project needs management attention
+    and an enterprise IPv6 project manager. All devices, services, and aspects of
+    your network are affected and it is important to have an overall picture and be
+    aware of the interfaces and dependencies (both organizational and technical).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Get management attention.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Appoint an IPv6 project manager and establish an IPv6 transition office.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Educate all groups participating in the process.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Get an overall perspective.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Involve all teams.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Include business vision, business strategy, and IT strategy, and base the IPv6
+    strategy on this foundation to make it sustainable.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Your IPv6 strategy is supposed to support the business.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Develop a communication and internal marketing strategy for the IPv6 project.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The following steps are recommended:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Create a layout of your current situation*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the first step analyze your business vision, your business strategy, and
+    your IT strategy as well as your IT infrastructure, IT services and projects,
+    life cycles of hard- and software, tools, and also contracts and service agreements.
+    Create an overview of processes, policies, and standards, and the impact an IPv6
+    integration will have on all of these aspects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Define your IPv6 strategy*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this second step define your target architecture, your high-level IPv6 strategy,
+    including a high-level address plan and a high-level security concept (which must
+    be aligned with each other). Next define a roadmap, aligning it with other IT
+    projects and refresh cycles. Get a clear picture of the adoption plan, milestones,
+    and dependencies. Based on your IPv6 design, create *RFC requirements* for all
+    types of devices and applications. Assess your *vendor strategy* and find out
+    if it needs adjustments for IPv6\. Don’t assume that the vendors who were great
+    for IPv4 are automatically the best for IPv6 too.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Assess current environment*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Based on the RFC requirements, assess your current infrastructure, hard- and
+    software, operating systems, applications, services, and contracts for their IPv6
+    readiness. Only now will you be able to determine the cost of deploying IPv6,
+    based on the information from the assessment. It may also be possible that you
+    have to adjust your design or roadmap, or both, based on the findings in the assessment.
+    Use this opportunity to build IPv6 experience in your team.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Create detailed concepts and deployment plans*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For all the different areas in your network, detailed design and deployment
+    plans have to be created and tested in labs and pilots. All these processes may
+    need several iterations. Enough time has to be allocated for testing, bug fixing,
+    and vendor evaluation. Also, don’t forget to adjust all processes, such as testing
+    of upgrades, all levels of support, change management, security processes, monitoring,
+    address management, etc.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Deploy and document*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As mentioned, the deployment of IPv6 in an enterprise network can take up to
+    three or even five years. You will not deploy in all areas at once; you will have
+    a roadmap and deploy in specific areas aligned with other projects or life cycles.
+    So the last steps, such as detailed design, deployment plans, and finally deployment,
+    are usually executed for specific areas. Finally, make sure that all is well documented.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Word on Applications
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Enabling IPv6 in the network is doable. But as long as applications don’t run
+    over IPv6, it is not of much use having an IPv6-enabled network. So you need to
+    start working on applications early in the process while enabling the network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Third-party applications should usually be IPv6-enabled in the current release,
+    and if not, IPv6 support should be on a clear roadmap. Talk to your vendor, and
+    if necessary evaluate alternatives. It is a different story for self-developed
+    applications, though. Here you need to differentiate between two cases: a) the
+    application is used in-house only, and b) the application is a market application.
+    In case a) you have control over how users are utilizing the applications. Applications
+    developed for the market should be running in IPv4 networks, in IPv6 networks,
+    and also in dual-stack networks, as the vendor has no control over how users are
+    accessing the application.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you develop applications for the market, it is important to start planning
+    early, as often these applications have very long life cycles. If the developers
+    don’t understand the impacts of IPv6, the applications may either not run at all,
+    or not be optimized for an IPv6 network. So whether you develop applications in-house
+    or with a partner, ensure adequate IPv6 education of the developer team with focus
+    on how to develop for a dual-stack network and update the application design specification
+    to support the future IPv6 network. If you buy custom-developed applications on
+    the market, you have to update your RFC requirements specifically.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This section is not a guide to porting applications. The goal here is to make
+    you aware of situations that you will face and what to look out for.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You will encounter the following situations:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv4 applications on dual-stack nodes
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: IPv6 applications on dual-stack nodes
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Applications supporting IPv4 and IPv6 on dual-stack nodes
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Applications supporting IPv4 and IPv6 on IPv4-only nodes
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Applications supporting IPv4 and IPv6 on IPv6-only nodes
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The challenge for developers that develop for the market is to create applications
+    that work well in all situations. DNS names should be used whenever a service
+    has to be called. But the DNS reply is not a reliable indicator of which protocol
+    to use. For example, a host may be dual-stack and have an A record with an IPv4
+    address and a AAAA record with an IPv6 address in DNS. But on this host, there
+    may be an IPv4-only application. So even though resolving the host name returns
+    an IPv6 address, the application is not reachable over IPv6\. So you need to enter
+    services names in DNS, with corresponding record types (A records for IPv4 services
+    and AAAA records for IPv6 services) in DNS. But how this is handled by DNS administrators
+    depends on operational practice and is therefore not reliable. A DNS request can
+    also return a AAAA record, but the host may have no IPv6 path to get there. A
+    node resolving a DNS name and getting multiple addresses in the reply should try
+    them all and have a mechanism to choose the connection with the best performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Happy Eyeballs is one mechanism designed to help in this situation and is implemented
+    in different operating systems and browsers. Refer to the DNS section in [Chapter 5](ch05.html
+    "Chapter 5. Networking") for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following list shows the most important IP dependencies in applications:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Format of the IP address (32-bit dotted decimal or 128-bit hexadecimal with
+    colons)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: API functions for the establishment of connections and data exchange
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DNS, resolving host names to IP addresses and vice versa
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: IP address selection, caching/storage of addresses
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Multicast applications, depending on situation; correspondence of IPv4 and IPv6
+    multicast addresses and selection of correct socket configuration options
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Some applications base licensing control on IPv4 addresses
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The best way to go is to make applications independent of the IP version. This
+    means that the source code should not have any IP dependencies. The communication
+    library should provide APIs that have no dependencies on IP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Find a more detailed discussion of these issues in RFC 4038, “Application Aspects
+    of IPv6 Transition.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: The University of Tokyo and the Yokogawa Electric Corporation started the TAHI
+    project in 1998\. They developed tests that can be used by IPv6 developers to
+    test their implementations for conformance to the standard and for interoperability.
+    The tests can be used at no cost. This is their contribution to an efficient development
+    and deployment of IPv6\. The results of the tests are also provided to the developer
+    community at no cost. On the [TAHI website](http://www.tahi.org), all tests are
+    listed and documented. The TAHI project has been concluded by December 2012, because
+    they believe it has accomplished the mission of “supporting IPv6 developers by
+    quality side for a highly interoperable IPv6 world.” The information and testing
+    tools are still there (at the time of writing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The TAHI project worked closely with other well-known projects: the [WIDE project](http://www.wide.ad.jp),
+    the [KAME project](http://www.kame.net), which has been concluded also (but the
+    dancing Kame is still there), and the concluded [USAGI project](http://www.linux-ipv6.org).
+    Find some interesting links and some history on the early evolution of IPv6.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Do’s and Don’ts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Based on many years of consulting with large enterprises, here are some viewpoints
+    and perspectives I keep seeing that I would like to summarize for you. Some of
+    them are successful and others belong to the category of what you should not be
+    doing. In any case, they try to give you guidelines for how to go about your project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Is IPv6 just like IPv4?
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Typically, people that have not started on IPv6 yet have one of two viewpoints.
+    The first group thinks IPv6 is a no-brainer; after all, it is not that different
+    from IPv4 and it will be easy to adapt their IPv4 concepts and make it fly. Based
+    on that, they often decide that they need no external help and their internal
+    people can do it, or they choose consultants that have a good IPv4 background
+    but no IPv6 experience and assume they will do the job. The other group thinks
+    that IPv6 is a killer, way too complex, and hard to master, and that they will
+    never manage to integrate it properly. So they shy away from the project and try
+    to avoid it as long as possible, hoping the problem will solve itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both viewpoints are extreme and the truth is somewhere in the middle. The first
+    group would do well to at least have their IPv6 strategy, address plan, and security
+    concept reviewed by someone with good IPv6 experience. It is like getting a second
+    opinion from a doctor before undergoing a critical treatment. It is much easier
+    to fix a few things before deployment than to try to change it after or have to
+    live with it for many years. And if the review confirms all is fine, that is a
+    good background, too. The second group is only partially right. Although IPv6
+    is an evolution of IPv4 and many things are the same, architecturally there are
+    many advantages and new features, such as the address architecture. And it is
+    a good advice to not shy away but take the time for thorough education of all
+    teams before they have to dive into designs of the network, the address plan,
+    and the security concept. If you wait too long and have to do all this under time
+    pressure, you will not have the time to take advantage of the opportunities of
+    an IPv6 integration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inescapable bugs and why generic assessments are not very useful
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: IPv6 stacks are much younger than most IPv4 stacks. While we are still sometimes
+    fixing bugs in IPv4 stacks or finding security holes, we can expect that to be
+    way more common in IPv6 stacks simply because we don’t have many years of operational
+    experience and years of testing and bug fixing behind us. This leads to two things
+    to be aware of.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One is that you need to allocate enough time in your planning for bug fixing
+    with vendors. As soon as you start your labs and pilots, you will see those bugs
+    and the vendor needs some time to work on a solution. But the other thing I have
+    heard in many IPv6 strategy discussions is that people say, “oh, we don’t use
+    this technology; it’s not working, we tested it in our lab.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: It is not a good idea to base your design and target architecture on bugs in
+    current stacks. Design your network and applications as they will best fit your
+    business and your needs, and expect your vendors to fix the bugs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Closely related to this is the procedure where organizations do a generic assessment
+    of the IPv6 capability of their current environment (such as “can I enable IPv6
+    or not?”) even before they have an IPv6 strategy. This means that they will base
+    their design on availability of features, instead of having a clear strategy that
+    supports the business and then making sure they have the equipment and applications
+    that support that strategy. If you want a target architecture that supports your
+    business, you will not get around defining a strategy first, creating detailed
+    RFC requirements, and then using these requirements in your purchasing requirements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Vendor strategy and RFC requirements
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: As already mentioned, if you have vendors that deliver great IPv4 services (be
+    it products, Internet access, data center hosting, outsourcing of other services,
+    or consulting), don’t assume that they are best in IPv6 also. You need to verify
+    this in more detail. Some customers have chosen to take the IPv6 integration as
+    a good point to re-evaluate their vendor strategy for the coming years.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following points should be taken into consideration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Your vendors face the same challenges as you do. Only they should be ahead of
+    the game, but the reality is that many of them are not. So don’t assume they are;
+    check it out!
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Some customers think that their vendors will know what to do and that they can
+    trust the vendor’s recommendations. Not true in most cases. You will face the
+    fact that your purchasing team (which is probably not too technical and not up
+    to speed with IPv6) will sit at the table with sales guys from vendors that barely
+    know how to spell IPv6\. So unless you come up with very specific and informed
+    ideas and RFC requirements, you cannot expect to get what you need.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In the early stages of your planning project, write letters of intent to your
+    strategic vendors, making them aware of the fact that you will require professional
+    IPv6 services in the foreseeable future. The more such letters vendors get, the
+    faster they will speed up with implementation. After all, their major excuse for
+    lack of implementation or richness of features is that customers don’t ask for
+    IPv6.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Don’t forget to assess outsourcing contracts and SLAs for IPv6 consideration
+    and requirements.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'When evaluating vendors, you should look for the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check technical features according to RFC list. Get a list of implemented RFCs
+    from the vendor, check it against your requirements, and then test in your lab
+    whether the features that are critical to your plans work as expected. And remember,
+    RFC requirements have to be device specific. An IPAM solution has different requirements
+    than a firewall.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Check the level of IPv6 knowledge in their staff. Do they have one single person
+    who knows how to do IPv6? If yes, their support will probably not be sufficient
+    for you as a customer. Ensure that they have enough knowledgeable staff in all
+    channels (sales, engineering, support).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Ensure that they also have IPv6 implemented in all their processes (upgrade
+    processes for consistency of future updates, incident management, etc.).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Don’t trust brochures and fact sheets. Test in your lab.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Without these steps you may end up buying products that do not support your
+    IPv6 strategy or you may become stuck in your deployment, because you suddenly
+    find out that key features you need are not supported. And as you probably know
+    from other IT projects, this can cost a lot of time and money, especially if critical
+    business services or other IT projects are depending on this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To build your RFC requirements lists, use RFC 6434, “IPv6 Node Requirements.”
+    In addition to that, there are two useful templates available: [RIPE554](http://www.ripe.net/ripe/docs/ripe-554)
+    and [USGv6 by NIST](http://www-x.antd.nist.gov/usgv6/index.html). Take it as a
+    foundation and adapt it to your IPv6 strategy.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are other documents that may be useful, such as RFC 7084, “Basic Requirements
+    for IPv6 Customer Edge Routers.” In April 2014, a discussion was started to update
+    RIPE554\. So when you start working with these documents, make sure you use the
+    latest version.
+  prefs: []
+  type: TYPE_NORMAL
+- en: General Design Guidelines
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Every environment and business is different and the IPv6 strategy will therefore
+    also look different. It is not possible to provide a cookbook that is applicable
+    in every organization. But still, there are some very general strategies that
+    make sense in most environments, so here’s a list:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Do native IPv6 wherever possible, dual-stack as long as necessary (and this
+    may be many years).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Deploy new internal services IPv6-only whenever possible.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use tunneling only if necessary and only as a temporary solution. Sometimes
+    it is recommendable to wait a little longer and go native IPv6 right from the
+    beginning.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you do tunnel, prefer stateless over stateful.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Don’t do NAT, no translation (only with a gun to your head).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you have to translate, again, prefer stateless over stateful.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Future networks are end-to-end.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The expanded address architecture allows for new security concepts (you may
+    consider embedding service information in the address to simplify access rules
+    and operation).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Adapt and align your security concept to the new address architecture.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Consider new services (monitoring, sensors, health care, Car2Car…depending on
+    industry). Many new services have a much higher demand for addresses and mobility
+    requirements.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: More and more customers are considering migrating their infrastructure to IPv6-only
+    as soon as possible and treat IPv4 as a service. The main advantage of this IPv6-centric
+    strategy is to minimize cost. Operating an IPv6-only network is less costly than
+    maintaining two protocols in parallel in a dual-stack network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Address Plan
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A good address plan is the cornerstone of a successful IPv6 deployment and can
+    substantially help ease network operation and troubleshooting. But the address
+    plan is a challenge for most. We have all been well trained to conserve addresses
+    and the training has been so efficient that this sits in our body cells. We have
+    to overcome this reflex action before we can create a useful IPv6 address concept
+    for 128-bit addresses. So what are the rules; how can address concepts be designed
+    for IPv6? These are the topics in this section to provide some guidance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before we start, I would like to recall something from [Chapter 2](ch02.html
+    "Chapter 2. IPv6 Addressing") on addressing that may help you slowly overcome
+    your conservation reflex and free your mind from limited IPv4 thinking. Use this
+    as your daily mantra while you work on an address concept:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing"), I showed that usually
+    an ISP gets a /32 allocation for its customers and that one single /32 is actually
+    more than the whole IPv4 address space (because it has 32 bits to define subnets
+    and each /64 subnet has 64 more bits for interface IDs). Up to 2013, we have globally
+    allocated approximately 130,000 /32s, which means 130,000 times more address space
+    than the whole IPv4 Internet. Even though this sounds astronomically big, this
+    amounts to only 0.025% of the currently available public IPv6 address pool (`2000::/3`).
+    So let us be a bit generous in designing IPv6 address plans.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To quote Vint Cerf:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The vast IPv6 address space opens up serious opportunities for the re-examination
+    of the notion of “address.” The IETF has only allocated 1/8th of the IPv6 address
+    space for current use. The remaining 7/8 of the address space is still to be allocated.
+    In consequence we may be able to interpret new segments of the IP address space
+    in ways that are different from topological end points. This is precisely the
+    reason that a focus on the future of IPv6 is so important at this point in the
+    evolution of the Internet.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: Okay, and now shake your cells and read on. By the way, most of this address
+    plan section is taken from my companion book, *Planning for IPv6* (O’Reilly).
+    I repeat it here because people always ask many questions about IPv6 address plans.
+    So I decided to cover address plans in a section of this book as well. For more
+    details on planning, please refer to the companion book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: This section assumes you are familiar with the technical aspects of the IPv6
+    address architecture described in [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing").
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Practice shows that in many cases customers choose to group address ranges
+    logically, for the following purposes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Allow for prefix aggregation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Simplify the configuration, operation, and processing of access lists and firewall
+    rules.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Make addresses traceable, to contain information about the use type or location
+    where the address is used.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Make it scalable; create enough space for extensions (more services) and growth
+    (more locations and users).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Allow for efficient network management and ease of operation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: What is new?
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'There are three main differences to consider when designing an IPv6 address
+    plan:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the most obvious differences (besides the length of the address) is that
+    we don’t need variable length subnet masks (VLSMs) anymore. The prefix or network
+    part of an IPv6 address should always be 64 bits (/64). Even for point-to-point
+    links? Yes, even for point-to-point links (some people choose to change that rule—you
+    will have to decide for yourself). So, in this respect, IPv6 addresses are simpler.
+    No more guessing or misconfiguring of subnet masks. VLSMs have contributed a lot
+    to the complexity of managing IPv4 address space.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The preceding rule also relates to the following: we no longer have to size
+    subnets to the number of devices in the subnet (in other words, no more address
+    conservation practices are necessary). Each and every subnet can potentially have
+    2^(64) devices. The number of devices for each subnet will be determined by your
+    switch’s capacity, so consult your vendor to find out what is possible.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In IPv6, addresses are assigned to interfaces. So an IPv6 address identifies
+    an interface, not a host. And, in many cases, an interface will be multi-addressed
+    and choose addresses to initiate connections based on policies or default address
+    selection rules.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Please resist the temptation to use larger masks for your subnets, such as /96,
+    in order to preserve address space. While the standard does not prohibit that,
+    observing the /64 boundary makes your address plan future proof. Changing this
+    mask may create many problems in the future, as all development is based on the
+    /64 mask. For instance, SLAAC (Stateless Address Autoconfiguration) won’t work
+    with non /64 masks. There may be many other processes or services that fail with
+    a nonstandard subnet mask. You have enough address space with IPv6! Optimize it
+    for efficient management.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you are familiar with the IPv6 address architecture, take your list of
+    things that you wanted to change in your IPv4 address plan if you could start
+    all over, and then you begin to design your IPv6 address concept.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The ingredients are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Review your current IPv4 address plan and the operational lessons learned.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Identify the constraints and inconsistencies in your current IPv4 plan.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Identify your needs according to your target architecture.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Create different address plan scenarios to address these items.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Have internal reviews and discussions with all IT teams.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Take the best options to the lab, including your provisioning tools, and test
+    the common operational scenarios.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'When you define your scenarios, you will have to find a good balance between
+    the following two choices:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Focus on route aggregation*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Emphasizing the route aggregation by assigning the higher-order bits to the
+    topology (regions, sites) reduces the number of routes in the core routing tables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Focus on policy aggregation*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Emphasizing the policy aggregation by assigning the higher-order bits for service-
+    or security-related information (services, zones) reduces the number of policies,
+    minimizes the risk of user errors, and simplifies management.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To generalize, prioritize the most common and most important information in
+    the high-order bits and allocate enough space for current and envisioned options.
+    They can be new sites, new services, new users, etc.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In order to build a useful address plan, consider the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prefix aggregation based on your topology.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Policy aggregation based on your services and security concepts.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Subnet consistency (don’t include address conservation mechanisms; focus on
+    operational ease).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use of address types (only global addresses or global plus unique local).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Consistently assign a /64 to subnets and point-to-point links; no need for host
+    planning.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you have many locations and they have local Internet access, it is recommended
+    to assign at least a /48 to each of them.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you are a global organization, consider regional address allocations (RIPE,
+    APNIC, ARIN, etc.) for risk mitigation purposes.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Observe nibble boundaries whenever possible (a nibble is 4 binary digits).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use of provisioning mechanisms and tools (DHCPv6, SLAAC, IPAM/DDI).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Don’t create structure for the sake of structure; only truly relevant information
+    should be embedded.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Avoid direct mapping of your IPv4 address plan, as it perpetuates legacy issues
+    and limits the ability to leverage the IPv6 address space resources.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Security aspects.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Growth (network, users, services).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: New services with increased address demand (monitoring, sensors, management,
+    etc.).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Your upper limit for address planning is the range that you have received (a
+    /48 or a /32 depending on the size of your company). Your lower limit is the /64
+    that you have to assign to your subnets. So within that space you can define your
+    own structure. You start with identifying your current address inventory and your
+    clearly envisioned needs for the foreseeable future, and then you take the bits
+    that are left free and use them to support growth.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Don’t forget to define clear processes and rules for allocation of IPv6 address
+    space.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 9-1](ch09.html#example_for_a_high-level_address_plan "Figure 9-1. Example
+    of a high-level address plan") shows an example of how such a high-level scenario
+    might look.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Example of a high-level address plan](images/ipv6_0901.png)Figure 9-1. Example
+    of a high-level address plan'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this example, a combination of service-based and topology-based design was
+    chosen. The first nibble (the first 4 bits) was chosen to differentiate 16 service
+    types that can then be used to assign special rules on a high level. The next
+    nibble is used to differentiate 16 applications per service type. The third nibble
+    is used for 16 super regions, and per super region, 4,096 locations are possible
+    (12 bits). Each location then gets a /56 prefix and can still create 256 subnets.
+    Whether this is a good address plan totally depends on the network, the service
+    catalogue, and the security concept of the organization. It is simply an example
+    to get you thinking. The main goal of the service-level approach is to make security
+    policy design and operation simpler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In all aspects you need to integrate the incredibly large IPv6 address space.
+    This can’t be repeated enough. So, for instance, when it comes to subnet consistency,
+    there is no need to conserve address space.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'For operational ease and simple administration, keep subnets for a certain
+    type of location all the same size, regardless of how many users work there. While
+    this is the best way to go, it may feel uncomfortable in the beginning. The same
+    rule is true if you leave address space free for growth. A good rule to follow
+    is: if your cells don’t hurt, your plan isn’t quite big enough yet.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Global addresses versus ULAs
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'As already mentioned, an IPv6 interface can typically have multiple addresses.
+    Part of your address design is deciding what address types to use. Specifically,
+    you have two options: to generally use global IPv6 addresses (GUAs), or to use
+    unique local addresses (ULAs) internally. ULAs are defined in RFC 4193 and have
+    a prefix of `fd00::/8`. They are similar to RFC 1918 private addresses in IPv4,
+    which means they are routable but should only be used internally and never routed
+    to the Internet. They can, for instance, be used for an internal deployment or
+    to build a lab when you do not have global IPv6 address space allocated yet.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is one big difference between the RFC 1918 concept and how these private
+    ULA addresses are used today. Using ULAs does not mean that you need NAT (network
+    address translation) to get outside to the Internet. Because IPv6 interfaces are
+    designed to work with multiple address types, interfaces that need Internet connectivity
+    will simply have a global IPv6 address in addition to the ULA address. When connecting
+    to an internal server, the interface will use its ULA address; and when connecting
+    to the Internet, it will use its global IPv6 address. RFC 6724 defines default
+    address selection rules to deal with this. In larger networks you will have your
+    own policies about source and destination address selection rules. So, with this
+    design, internal server systems and databases that should not be reached from
+    outside will be configured only with ULAs. If you want a ULA-only addressing internally,
+    you could also use NPTv6 (Network Prefix Translation) described in the NAT section
+    in [Chapter 7](ch07.html "Chapter 7. Transition Technologies").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There is no need to combine ULA addresses with NAT as we did with private addresses
+    in IPv4\. In IPv4 the NAT was needed to map many addresses into one or a few.
+    In IPv6, hosts that need access to internal services and the Internet simply get
+    two addresses, a ULA and a GUA (global address).
+  prefs: []
+  type: TYPE_NORMAL
+- en: When it comes to choosing whether you want to use ULAs or go with global addresses,
+    there are pros and cons to both approaches and many discussions surrounding them.
+    Due to early deployment time, there is not too much operational experience available
+    to draw from. From a technical point of view, you could make either choice—you
+    will have to decide for yourself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are some of the considerations:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ULAs make you internally independent of your global prefix, which is advantageous
+    if you need to renumber your network. In this case, all your internal systems
+    and communications are not affected. If you have a PI (provider-independent) address
+    space, this is not a concern.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ULAs add a layer of security to your internal infrastructure, as servers and
+    databases with critical data are not reachable from outside. Obviously, you still
+    need firewalls to protect systems, but ULAs offer additional protection. Some
+    organizations achieve that same goal by setting aside a part of their global prefix
+    and use it as internal-only prefix, blocking it at the border in both directions.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attackers who know some of your global addresses cannot derive the addresses
+    for internal systems.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ULAs should not be used with NAT, so NAT is not a concern. Systems that need
+    access to the Internet can get a global IPv6 address in addition to the ULA address.
+    That is the advantage of the IPv6 multiple-addresses-per-interface architecture.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Now, whether you want to use ULAs is up to you. They may be useful in isolated
+    domains such as manufacturing lines or inter-datacenter traffic for backup. Many
+    people decide that with the unlimited IPv6 address space, where they can finally
+    address all systems with global addresses, they want to go for this simple option—securing
+    their internal systems with firewalls and having the advantage of administering
+    only one prefix. For those who decide to use both global and ULA, I would hope
+    that IPAM vendors are clever enough to develop systems that can manage multiple
+    prefixes and import the subnet design to the IPAM solution for easy administration.
+    You can probably choose the same addressing plan for both prefixes anyway. And
+    your third option is that you can choose to use a specific prefix from your global
+    prefix and assign it to internal systems only and block that prefix to and from
+    the outside world. Even in the case of using ULAs, you will have to specifically
+    block them at the border because they are not to be routed to the Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: General considerations
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Whenever you translate something from your IPv4 address plan to your IPv6 address
+    plan, make sure that you are not copying limitations over to the new concept.
+    You are creating an address concept with a future native IPv6 network in mind,
+    and the dual-stack network is only a transitional state—although it may exist
+    for some years. But once you start running a native IPv6-only network, you want
+    the almost unlimited freedom of the address space without having to renumber the
+    network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a long time, the recommendation was that ISPs get a /32 from their RIR,
+    and organizations and end sites get a /48 from their provider or a /48 as PI space.
+    RFC 6177 changes the recommended assignment size to end sites. It states that
+    “a one-size-fits-all recommendation of /48 is not nuanced enough for the broad
+    range of end sites and is no longer recommended as a single default.” The RFC
+    states that it is in the domain of the operational community to determine the
+    best prefix size for end sites. This introduces some new considerations. When
+    the default prefix was a /48, a change of provider or assignments from different
+    providers always had the same prefix boundary. With the new policy, it is possible
+    that an end site may have to renumber from a larger prefix into a smaller prefix,
+    which means having to collapse subnets. You can prepare for this if you have a
+    /48 and use only the low-order bits first (if the network size allows you to do
+    that). It seems that many providers often assign /56 or /52 prefixes to smaller
+    sites. This rule does not apply to large enterprises; they will always get a /48
+    or even more. According to RFC 6177, even home users should get more than just
+    a /64 subnet. The development of services in the market suggests that future home
+    networks have multiple subnets (smart buildings).
+  prefs: []
+  type: TYPE_NORMAL
+- en: With regard to subnet size, there is nothing in the specification that prevents
+    you from changing the /64 boundary. But I don’t recommend that, because doing
+    so will break many other features of IPv6 where applications and processes assume
+    the /64 subnet size. This includes mechanisms such as Neighbor Discovery (ND),
+    SEcure Neighbor Discovery (SEND), privacy extensions, parts of Mobile IPv6 specifications,
+    protocol-independent multicast sparse mode (PIM-SM) with embedded RP, and site
+    multihoming by IPv6 intermediation (SHIM6), among others. And there may be more
+    developments in the future that assume a /64 boundary. If you change that, all
+    these features will break.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The only benefit of creating prefixes longer than /64 would be address conservation.
+    Use your mantra and remember that we don’t need to conserve space anymore. The
+    benefit of conserving space would be very small compared to the pain of managing
+    a nonstandard subnet prefix.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Nevertheless, you can still choose to use high-order bits from the interface
+    ID part to denote specific systems, services, or networks to make it easier to
+    recognize these IDs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A good and helpful practice when grouping bits is to always do it on a 4-bit
+    boundary (a *nibble*). This way, it is much easier to decipher the address because
+    4 bits represent one hexadecimal digit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s play with some examples to get our brains going. You could group subnets
+    by location and then by service or use type, or the other way round (by service
+    type first and then by location).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, for instance, with the prefix `2001:db8:1::/48`, you have 16 bits for subnetting.
+    You can choose to subnet as follows (L=location, S=service, F=free):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Which option you choose depends on whether your main purpose is to optimize
+    routing, in which case you choose the location identifier first, or whether you
+    want to optimize security rules and ACLs (which are usually based on filters for
+    specific services), in which case you would choose the service identifier first.
+    In some cases, organizations only assign a subnet to a location, and the location
+    further manages the prefix and creates its own address plan. In such a case, you
+    would also choose the location identifier first.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Or you may want to mix these two options. You may have some specific services
+    that you want to filter on at a high level, so you would put identifiers for these
+    services in the highest-order bits of your subnet range, perhaps followed by location
+    bits to optimize the routing within your network, and ending with bits to identify
+    more services.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the 4 bits used for location and service type in this example, you can
+    create 16 locations and services (2⁴). You have to adapt this scheme to the number
+    of locations and services you want represented (and add enough room for growth).
+    Sometimes organizations include a location or service description in their VLAN
+    numbering plans. This could also be reflected in your IPv6 addressing plan to
+    include the 12-bit VLAN ID in the prefix. You can include it in decimal notation
+    (leaving out A–F) or convert it to hexadecimal notation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These are all general ideas for input on your creative planning. Take the time
+    to carefully craft your future addressing design, discuss all possible options
+    again and again, have your address concept proposal reviewed by many people—including
+    external consultants to challenge your plans—and go over it repeatedly until it
+    feels right. The address design is the foundation for your next-generation network.
+    If you don’t get it right and have to change it during the deployment project,
+    this will add costs and delay the project. In the long term, if you live with
+    a suboptimal address design, returning operational costs may be unnecessarily
+    high.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration of interface IDs
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: How interface IDs are defined depends on the IP address management process that
+    you choose. You can either choose *Stateless Address Autoconfiguration* (SLAAC),
+    where interfaces create interface IDs based on MAC address (EUI-64 format defined
+    in RFC 4291), or with the *Privacy Option* (as defined in RFC 4941), where the
+    interface ID is randomly generated and changed regularly. In newer operating systems,
+    Microsoft uses a stable interface ID created with a random identifier. You can
+    use DHCPv6 and assign addresses just as you do in IPv4\. With DHCPv6, the service
+    may have options to define interface IDs in different ways. To best secure your
+    hosts, you may not want to start at a low interface ID and sequentially number
+    your interfaces. Instead, you may want to have random interface IDs, because the
+    more random and distributed your interface IDs are, the harder it is to scan them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you have a global IPv6 prefix and use a ULA prefix internally, you may want
+    to use the privacy option for the global prefix. This way, users accessing the
+    Internet cannot easily be tracked because their interface ID changes regularly.
+    For the ULA prefix (or for the internal part of your global prefix filtered at
+    the border), it’s preferable to have fixed addresses assigned to make management,
+    troubleshooting, security, and logging easier. Again, this also depends on whether
+    vendors will provide IP address management solutions that help to deal with this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There is a recommendation to not use hardware-based interface IDs. Microsoft
+    already uses a stable interface ID that is created with a random identifier. RFC
+    7217 defines a stable interface ID not based on a hardware identifier. Refer to
+    the section [Stateless Address Autoconfiguration (SLAAC)](ch04.html#stateless_address_autoconfiguration_open
+    "Stateless Address Autoconfiguration (SLAAC)") for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where Do You Get Your Address Space From?
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The IANA (Internet Assigned Numbers Authority) is responsible for the global
+    coordination of the IP addressing systems, as well as the ASN (Autonomous System
+    Numbers) used for routing Internet traffic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RIRs (Regional Internet Registries) get their IP address space from IANA. There
+    are several RIRs in the world to allocate address space within their region. [Figure 9-2](ch09.html#the_regional_internet_registries
+    "Figure 9-2. The Regional Internet Registries") shows the global hierarchy, the
+    RIRs and the regions they serve.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The Regional Internet Registries](images/ipv6_0902.png)Figure 9-2. The Regional
+    Internet Registries'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The RIRs further serve LIRs (Local Internet Registries), NIRs (National Internet
+    Registries), ISPs (Internet Service Providers), and in some cases also end customers
+    with address space.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The address policies in the different regions differ slightly from each other.
+    ISPs and customers must get the information about the policies in their region
+    from their RIR. Each RIR has a website with all the information on address space
+    and policies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Links to all the RIRs can be found on [IANA’s website](http://www.iana.org/numbers).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Customers have several options to apply for IPv6 address space.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Currently there is *PA space* (*provider aggregatable*) and *PI space* (*provider
+    independent*). PA space is targeted at ISPs, providing Internet connectivity to
+    many end customers. In order to receive PA space you must usually be a member
+    of the RIR and pay an annual membership fee. Standard allocation sizes are in
+    the range of /29 to /32\. Providers then assign networks to their customers, usually
+    in the range of /48 or /56\. PA space handed out to customers by an ISP cannot
+    be taken to another ISP, so in case of switching ISPs, renumbering is needed (or
+    the use of NPTv6 prefix translation). For assignment recommendations, refer to
+    RFC 6177, which is described in the section below.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PI space is intended for end users who are not able to or do not want to use
+    addresses from their provider’s PA space. This does not require membership but
+    an annual fee per prefix. PI space belongs to the end user and can be taken along
+    to the next ISP. Every single PI prefix used on the Internet shows up in the global
+    routing table, impacting all routers worldwide. Originally, in the early days
+    of IPv6, the plan was to not assign PI space in order to keep routing tables small.
+    But it has shown that this policy cannot be sustained in practice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So as an end customer you have the following choices:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PA space from a local provider
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: PA space from the RIR (requires membership)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: PI space from RIR (annual fee)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can find the official information from [RIPE](http://www.ripe.net/ripe/docs/ripe-589)
+    about their IPv6 Address Allocation and Assignment Policy.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Again, this document number is valid in March 2014\. At a later time you may
+    want to check if there is a newer version.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How Much Space Will You Get?
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Allocation rules are a work in progress and can still change. The latest update
+    of how to use the address space is in RFC 6177, “IPv6 Address Assignment to End
+    Sites.” It contains recommendations on how the address space should be further
+    divided. It softens the rules defined in the previous version, which was RFC 3177,
+    where home networks as well as small and large enterprises should receive a /48\.
+    As mentioned before, with the new version these rules have been adjusted, because
+    the exact assignment of prefix sizes should be in the authority of the operational
+    community.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The RFC further states: “An important goal in IPv6 is to significantly change
+    the default and minimal end site assignment, from ‘a single address’ to ‘multiple
+    networks’ and to ensure that end sites can easily obtain address space.”'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you are responsible for allocating addresses or are requesting addresses
+    for your network, then the following rules for address allocation in RFC 6177
+    can be used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A key principle for address management is that end sites must always be able
+    to obtain a reasonable amount of address space for their actual and planned usage,
+    and over ranges of time specified in years rather than just months. In practice,
+    that means at least one /64, and in most cases significantly more. One particular
+    situation that must be avoided is having an end site feel compelled to use IPv6-to-IPv6
+    Network Address Translation or other burdensome address conservation techniques
+    because it could not get sufficient address space.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It should be easy for an end site to obtain address space to number multiple
+    subnets (i.e., a block larger than a single /64) and to support reasonable growth
+    projections over long time periods (e.g., a decade or more).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The default assignment size should take into consideration the likelihood that
+    an end site will have need for multiple subnets in the future and avoid the IPv4
+    practice of having frequent and continual justification for obtaining small amounts
+    of additional space.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Although a /64 can (in theory) address a practically unlimited number of devices,
+    sites should be given sufficient address space to be able to lay out subnets as
+    appropriate, and not be forced to use address conservation techniques such as
+    using bridging.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Assigning a longer prefix to an end site, compared with the existing prefixes
+    the end site already has assigned to it, is likely to increase operational costs
+    and complexity for the end site, with insufficient benefit to anyone.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The operational considerations of managing and delegating the reverse DNS tree
+    under ip6.arpa on nibble versus non-nibble boundaries should be given adequate
+    consideration.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Home network subscribers should receive multiple subnets.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A site that receives a /48 prefix has 16 bits for subnetting, which allows for
+    65,536 subnets (default IPv6 subnet size of /64). In special cases, a very large
+    enterprise can request a shorter prefix.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Your IPv6 address plan is the cornerstone of your future network and should
+    support growth for many years and be sustainable and not fragmented. So there
+    is no way around sitting down and doing your homework, finding out how much space
+    you really need. And then go and request it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: I have spoken with many customers from all different sizes, SMEs up to large
+    enterprises. And I keep hearing statements such as “Oh, this is what we got [some
+    size of prefix]. We will see how we can live with it.” Please don’t do that. At
+    the moment you may think this is more than you previously had with IPv4, so you
+    can live with it somehow. So again, please don’t do that; you (or the ones that
+    will have to operate your network in the future) may be very unhappy about it
+    and pay a lot for this in terms of headaches and operational disadvantages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By defining an address plan as described in this section you will find out how
+    much you really need. There are standard assignments that you can get easily without
+    too much documentation. But you don’t know if that is sufficient to support your
+    target architecture. If you do your homework and come up with a sustainable and
+    good plan and find out that you need more, you will get it; it just requires a
+    little more work. But it is a little more work in the beginning. If you avoid
+    that and base your address plan on too small an allocation, you will pay for it
+    in the future. Because redesigning and redoing it will take a lot more effort
+    than getting it right from the beginning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multihoming with IPv6
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Multihoming* is when a host or a site is reachable over different IP addresses.
+    A multihomed host has multiple global IP addresses. These addresses can come from
+    one or more different providers, and they can be assigned to one or more different
+    interfaces on the host. A multihomed site is connected to the Internet with multiple
+    global IP addresses from one or different providers.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The main reasons to configure multihoming are the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Redundancy*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When a link fails, the connection can be maintained over the alternative link(s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Load balancing*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Provides more throughput because traffic is balanced over two or more links.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Cost*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It may be desirable to have multiple providers—for instance, because one provider
+    may have a better offering for certain types of services.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The autoconfiguration features of IPv6 support an easier maintenance of multihoming
+    scenarios because devices are more flexible in recognizing network prefixes and
+    can configure multiple IPv6 addresses based on Router Advertisements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the common IPv4 multihoming approach, a site’s local prefixes are announced
+    as distinct routing prefixes into the interdomain routing system and propagated
+    to the top-level hierarchy of the routing system. This approach works well if
+    the address space of the site is provider independent. But even though this approach
+    covers most of the requirements for multihoming, it is not scalable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For these reasons, multihoming is an actively discussed topic in the working
+    groups. The goal is to find solutions that provide multihoming without the scalability
+    and transport issues. One idea would be to separate the identification of a node
+    from the location. An IP address currently contains both information, the prefix
+    identifying the location and the IID identifying the node. One approach to this
+    would be LISP, discussed in [Chapter 7](ch07.html "Chapter 7. Transition Technologies").
+    While we wait and hope that an elegant multihoming architecture will be found,
+    currently multihoming in IPv6 is done the same way as in IPv4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cost of Introduction
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Some people believe that the introduction of IPv6 is way too expensive, and
+    they don’t even start to think about it. Other people just want to know what it
+    will cost. The next section contains aspects to consider and some thoughts on
+    the business case for IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Gartner says that the integration of IPv6 costs approximately 6% of an annual
+    IT budget divided by the number of years for the migration. In several cases where
+    we had a closer look at this from a high-level perspective, the estimation was
+    pretty accurate. The ongoing cost after completed migration is estimated at approximately
+    1% of the IT budget.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hardware and Operating Systems
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When planning ahead for IPv6 and making use of refresh cycles, the cost for
+    hardware upgrades is not extensive. In many cases, IPv6 is not part of the hardware
+    and can be installed as part of the operating system or as a software upgrade.
+    Most operating systems and applications ship with IPv6 included at no extra cost.
+    If IP functions are implemented purely in hardware or if a system’s software cannot
+    be upgraded, the hardware must be replaced to support IPv6\. If you plan ahead,
+    though, this can usually be accomplished with the next upgrade in the regular
+    life cycle of the product and therefore generates no additional cost. As our case
+    studies have shown, this is confirmed by organizations that have deployed IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Software
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We covered IPv6 in application development in the section [A Word on Applications](ch09.html#a_word_on_applications
+    "A Word on Applications"). Nowadays, many common applications already support
+    IPv6 or will do so in their next major upgrade version. In this case, you can
+    limit the cost for software by planning early and using the regular life cycles
+    of applications. For proprietary and self-developed applications, the situation
+    has to be analyzed individually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A simple porting of an application makes sure it runs equally well with IPv6
+    transport. A creative porting of an application may include using the advanced
+    features of IPv6 and thereby extending the flexibility and functionality of the
+    application. This can even be seen as a cost associated with introducing advanced
+    next generation services based on new technologies more than as cost of introducing
+    IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Education
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Every technology upgrade requires education: for developers, vendors, service
+    providers, and the infrastructure and systems operators in organizations. For
+    home users, it should be their ISP’s job to make the transition simple.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A well-planned education program according to job responsibilities is essential
+    and supports a smooth introduction of IPv6 substantially. For system operators,
+    the time and effort needed for the learning is not higher than for maintaining
+    the IPv4 infrastructure. We are used to integrating new technologies all the time
+    to keep our networks state-of-the-art. We had to introduce DHCP, NAT, and VPNs
+    in the past, and we mastered them. Some of us have worked in dual-stack networks
+    mastering the coexistence of IPX (Novell) and TCP/IP. Now we are going to introduce
+    IPv6 and the challenge is no bigger. And it is worth effort, time, and money because
+    in the long term, the maintenance of an IPv6 network will be less costly than
+    the maintenance of an IPv4 network. People that have a good understanding of IP
+    and have mastered the previously mentioned technologies will have no problems
+    mastering IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is well worth it to take enough time to learn about IPv6 before making detailed
+    designs and before going into production. There are new concepts and possibilities
+    in IPv6, and we need some time to become familiar with these, learn how to best
+    make use of them, and then integrate the things we’ve learned into the planning.
+    If you start doing your labs and hands-on tests early as recommended, you will
+    build your understanding and experience on the job.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When I talk to organizations who have designed and deployed IPv6 and I ask,
+    “what is the biggest risk?”, the answer often is “lack of education.” Early and
+    thorough education lets you take advantage of the opportunities IPv6 offers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Planning
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The most important aspect of integration is the planning. The same rule applies
+    here. Extending an infrastructure to keep it state-of-the-art always requires
+    planning and should be seen as an investment. Instead of planning the next extension
+    of IPv4, we will now plan the integration of IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The planning requires network architects and systems engineers with a good understanding
+    of IPv4 and networking concepts. The first thing they need is a thorough IPv6
+    education and an IPv6 playground. The planning should not focus on how to make
+    the same services available over IPv6\. It should include understanding the new
+    features of IPv6 and making use of them to create new concepts of architecture,
+    security, mobility, and administration. Especially for IPv6 addressing concepts
+    and IPv6 security concepts, an organization is well advised to take a lot of time,
+    as with these two ingredients you are laying the foundation for your network for
+    many years. And having a good address and security design will save a lot of cost
+    and headaches. Here actually lies a lot of the opportunities of an IPv6 integration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: As practice shows, it takes some time to overcome IPv4 thinking and learn to
+    leverage the advantages of IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The introduction of IPv6 is smoother and cheaper the earlier you plan. A step-by-step
+    integration is the best way to go, as it gives you time to integrate what you
+    learn as you go. Step-by-step integration is possible thanks to the many available
+    transition mechanisms.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Other Costs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Probably the highest costs arise when you wait too long. The longer you wait,
+    the more investments you make into maintaining and extending your IPv4 infrastructure.
+    This is money and effort you invest in an end-of-life technology. You may need
+    to build band aids for IPv4 (e.g., NAT) that later complicate the introduction
+    of IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are no reasons to tear down a performing network that fulfills all the
+    requirements, but as soon as you have to invest in fixing or extending your IPv4
+    infrastructure, you should stop for a moment and consider IPv6 as an alternative.
+    As mentioned earlier, putting IPv6 as an evaluation criterion on all your IT shopping
+    lists for products that have more than two years’ lifetime is a good idea. You
+    may not want to turn IPv6 on tomorrow, but you may want to do so next year. If
+    your equipment and software are ready, you can do it without additional cost when
+    the right moment comes. When you deploy new services in the future, consider deploying
+    them IPv6-only right from the beginning. Why go through all the cost of testing
+    and making them work over IPv4 if you will have to migrate them later anyway?
+    This obviously requires a dual-stacked infrastructure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another cost factor can be if a business-critical application comes out that
+    is based on the advanced functionality of IPv6\. If your infrastructure is IPv6-ready,
+    you can introduce that application with moderate cost. If at the same time you
+    have to master the transition to IPv6, this might create significant cost and
+    put your current infrastructure at risk (plus create some headaches and sleepless
+    nights).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You have reached the end of this book. Now you know about the essentials of
+    the IPv6 specification and have some guidelines on the transition mechanisms and
+    the planning process. What you need next is to gather experience, by building
+    labs and tests, and by using it. Have fun!
+  prefs: []
+  type: TYPE_NORMAL
+- en: References
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Here’s a list of the most important RFCs and drafts mentioned in this chapter.
+    Sometimes I include additional subject-related RFCs for your personal further
+    study.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFCs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 2185, “Routing Aspects of IPv6 Transition,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2529, “Transmission of IPv6 over IPv4 Domains without Explicit Tunnels,”
+    1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2663, “IP Network Address Translator (NAT) Terminology and Considerations,”
+    1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3022, “Traditional IP Network Address Translator (Traditional NAT),” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3053, “IPv6 Tunnel Broker,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3056, “Connection of IPv6 Domains via IPv4 Clouds,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3493, “Basic Socket Interface Extensions for IPv6,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3542, “Advanced Sockets Application Program Interface (API) for IPv6,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3582, “Goals for IPv6 Site-Multihoming Architectures,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3715, “IPsec-Network Address Translation (NAT) Compatibility Requirements,”
+    2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3789, “Introduction to the Survey of IPv4 Addresses in Currently Deployed
+    IETF Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3790, “Survey of IPv4 Addresses in Currently Deployed IETF Internet Area
+    Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3791, “Survey of IPv4 Addresses in Currently Deployed IETF Routing Area
+    Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3792, “Survey of IPv4 Addresses in Currently Deployed IETF Security Area
+    Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3793, “Survey of IPv4 Addresses in Currently Deployed IETF Sub-IP Area Standards
+    Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3794, “Survey of IPv4 Addresses in Currently Deployed IETF Transport Area
+    Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3795, “Survey of IPv4 Addresses in Currently Deployed IETF Application Area
+    Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3796, “Survey of IPv4 Addresses in Currently Deployed IETF Operations &
+    Management Area Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3901, “DNS IPv6 Transport Operational Guidelines,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4029, “Scenarios and Analysis for Introducing IPv6 into ISP Networks,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4038, “Application Aspects of IPv6 Transition,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4057, “IPv6 Enterprise Network Scenarios,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4177, “Architectural Approaches to Multi-homing for IPv6,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4192, “Procedures for Renumbering an IPv6 Network without a Flag Day,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4213, “Basic Transition Mechanisms for IPv6 Hosts and Routers,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4215, “Analysis on IPv6 Transition in Third Generation Partnership Project
+    (3GPP) Networks,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4218, “Threats Relating to IPv6 Multihoming Solutions,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4219, “Things Multihoming in IPv6 (MULTI6) Developers Should Think About,”
+    2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4241, “A Model of IPv6/IPv4 Dual Stack Internet Access Service,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4472, “Operational Considerations and issues with IPv6 DNS,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4554, “Use of VLANs for IPv4-IPv6 Coexistence in Enterprise Networks,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4659, “BGP-MPLS IP Virtual Private Network (VPN) Extension for IPv6 VPN,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4779, “ISP IPv6 Deployment Scenarios in Broadband Access Networks,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4787, “Network Address Translation (NAT) Behavioral Requirements for Unicast
+    UDP,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4798, “Connecting IPv6 Islands over IPv4 MPLS Using IPv6 Provider Edge Routers
+    (6PE),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4852, “IPv6 Enterprise Network Analysis—IP Layer 3 Focus,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5181, “IPv6 Deployment Scenarios in 802.16 Networks,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5375, “IPv6 Unicast Address Assignment Considerations,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5569, “IPv6 Rapid Deployment on IPv4 Infrastructures (6rd),” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5902, “IAB Thoughts on IPv6 Network Address Translation,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6036, “Emerging Service Provider Scenarios for IPv6 Deployment,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6052, “IPv6 Addressing of IPv4/IPv6 Translators,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6144, “Framework for IPv4/IPv6 Translation,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6146, “Stateful NAT64: Network Address and Protocol Translation from IPv6
+    Clients to IPv4 Servers,” 2011'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6147, “DNS64: DNS Extensions for Network Address Translation from IPv6
+    Clients to IPv4 Servers,” 2011'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6164, “Using 127-Bit IPv6 Prefixes on Inter-Router Links,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6177, “IPv6 Address Assignment to End Sites,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6180, “Guidelines for Using IPv6 Transition Mechanisms during IPv6 Deployment,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6250, “Evolution of the IP Model,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6269, “Issues with IP address sharing,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6296, “IPv6-to-IPv6 Network Prefix Translation,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6302, “Logging Recommendations for Internet-Facing Servers,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6434, “IPv6 Node Requirements,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6459, “IPv6 in 3rd Generation Partnership Project (3GPP) Evolved Packet
+    System (EPS),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6540, “IPv6 Support Required for All IP-Capable Nodes,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6586, “Experiences from an IPv6-only Network,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6724, “Default Address Selection for Internet Protocol Version 6 (IPv6),”
+    2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6866, “Problem Statement for Renumbering IPv6 Hosts with Static Addresses
+    in Enterprise Networks,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6879, “IPv6 Enterprise Network Renumbering Scenarios, Considerations, and
+    Methods,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6883, “IPv6 Guidance for Internet Content Providers and Application Service
+    Providers,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6921, “Design Considerations for Faster-Than-Light (FTL) Communication,”
+    April 1, 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7021, “Assessing the Impact of Carrier-Grade NAT on Network Applications,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7050, “Discovery of the IPv6 Prefix Used for IPv6 Address Synthesis,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7059, “A Comparison of IPv6-over-IPv4 Tunnel Mechanisms,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7066, “IPv6 for Third Generation Partnership Project (3GPP) Cellular Hosts,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7084, “Basic Requirements for IPv6 Customer Edge Routers,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7094, “Architectural Considerations of IP Anycast,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7098, “Using the IPv6 Flow Label for Load Balancing in Server Farms,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7123, “Security Implications of IPv6 on IPv4 Networks,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7136, “Significance of IPv6 Interface Identifiers,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7157, “IPv6 Multihoming without Network Address Translation,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7168, “The Hyper Text Coffee Pot Control Protocol for Tea Efflux Appliances
+    (HTCPCP-TEA),” April 1, 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7217, “A Method for Generating Semantically Opaque Interface Identifiers
+    with IPv6 Stateless Address Autoconfiguration (SLAAC),” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Drafts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Drafts can be found at [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html).
+    To locate the latest version of a draft, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
+    You can enter the draft name without a version number and the most current version
+    will come up. If a draft does not show up, it was possibly deleted. If it was
+    published as an RFC, the RFC number will be displayed. [http://tools.ietf.org/wg](http://tools.ietf.org/wg)
+    is also a very useful site. More information on the process of standardization,
+    RFCs, and drafts can be found in the [Appendix A](apa.html "Appendix A. RFCs").
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s a list of drafts I refer to in this chapter, as well as interesting
+    drafts that relate to the topics in this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Recommendations of Using Unique Local Addresses”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-v6ops-ula-usage-recommendations-02*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Mapping of Address and Port with Encapsulation (MAP)”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-softwire-map-10*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Mapping of Address and Port using Translation (MAP-T)”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-softwire-map-t-05*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “DHCPv6 Options for Configuration of Softwire Address and Port Mapped Clients”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-softwire-map-dhcp-07*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '“Lightweight 4over6: An Extension to the DS-Lite Architecture”'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-softwire-lw4over6-08*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “IPv4 Residual Deployment via IPv6—a Stateless Solution (4rd)”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-softwire-4rd-08*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “An Internet Protocol Version 6 (IPv6) Profile for 3GPP Mobile Devices”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-v6ops-mobile-device-profile-07*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “NAT64 Deployment Options and Experience”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-v6ops-nat64-experience-10*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “IPv6 Operational Guidelines for Datacenters”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-v6ops-dc-ipv6-01*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “DHCPv6/SLAAC Interaction Operational Guidance”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-liu-v6ops-dhcpv6-slaac-guidance-01*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “IPv6 Home Networking Architecture Principles”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-homenet-arch-13*'
+  prefs: []
+  type: TYPE_NORMAL

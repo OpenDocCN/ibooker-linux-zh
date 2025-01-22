@@ -1,0 +1,1364 @@
+- en: Chapter 3. The Structure of the IPv6 Protocol
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This chapter explains the structure of the IPv6 header and compares it to the
+    IPv4 header. It also discusses Extension headers, which are new in IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding the structure of a protocol header and the type of information
+    that comes with it is the best foundation for working with a protocol. This understanding
+    helps you to identify how the protocol can best be configured and what the options
+    are. It also helps you to identify possible sources of problems and issues when
+    troubleshooting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The header structure of an IPv6 packet is specified in RFC 2460\. The header
+    has a fixed length of 40 bytes. The two fields for Source and Destination addresses
+    each use 16 bytes (128 bits), so there are only 8 bytes for general header information.
+    The base IPv6 header is therefore much simpler and leaner than the IPv4 header,
+    allowing for more efficient processing and, as we will see, more flexibility in
+    extending the protocol to meet future needs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: General Header Structure
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In IPv6, five fields from the IPv4 header have been removed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Header Length
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Identification
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Flags
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Fragment Offset
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Header Checksum
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Header Length field was removed because it is not needed in a header with
+    a fixed length. In IPv4, the minimum header length is 20 bytes, but if options
+    are added, it can be extended in 4-byte increments up to 60 bytes. Therefore,
+    with IPv4, the information about the total length of the header is important.
+    In IPv6, options are defined in Extension headers (covered later in this chapter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Identification, Flags, and Fragment Offset fields are the fields that are
+    used for the fragmentation of a packet in the IPv4 header. *Fragmentation* happens
+    if a large packet has to be sent over a network that supports only smaller packet
+    sizes. In that case, the IPv4 router splits the packet into smaller slices and
+    forwards multiple packets. The destination host collects the packets and reassembles
+    them. If only one packet is missing or has an error, the whole transmission has
+    to be redone; this is very inefficient. In IPv6, a host learns the Path Maximum
+    Transmission Unit (MTU) size through a procedure called *Path MTU Discovery*,
+    which has been defined in RFC 1981\. In IPv4 the *Don’t Fragment Bit* (DF Bit)
+    was used for Path MTU Discovery. If a router could not forward a packet due to
+    its size and could not fragment it because the DF Bit was set, it sent back an
+    ICMP “Packet Too Big” message to the source node. If a sending IPv6 host wants
+    to fragment a packet, it will use an Extension header to do so. IPv6 routers along
+    the path of a packet do not provide fragmentation as they did with IPv4\. So the
+    router always sends back a “Packet Too Big” message to the source node. This is
+    the reason that the Identification, Flags, and Fragment Offset fields were removed
+    from the IPv6 header and will be inserted in an Extension header by the source
+    host if needed. I explain Extension headers later in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Path MTU Discovery is explained in [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Header Checksum field was removed to improve processing speed. If routers
+    do not have to check and update checksums, processing becomes much faster. At
+    the time when IPv4 was developed, checksumming at the media access level wasn’t
+    common, so the checksum field in the IPv4 header made sense. Today, the risk for
+    undetected errors and misrouted packets is minimal. There is also a checksum field
+    at the transport layer (UDP and TCP). With IPv4, a UDP checksum is optional; with
+    IPv6, a UDP checksum is mandatory. Since IP is a *best-effort delivery protocol*,
+    it is the responsibility of upper layer protocols to ensure integrity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Traffic Class field replaces the “Type of Service” field in IPv4\. IPv6
+    has a different mechanism to handle preferences. The Protocol Type field in IPv4
+    has been renamed to Next Header field and the Time-to-Live (TTL) field has been
+    renamed to Hop Limit. A Flow Label field was added.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Fields in the IPv6 Header
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: By becoming familiar with the fields of the IPv6 header, you will better understand
+    how IPv6 works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 3-1](ch03.html#fields_in_the_ipv6_header "Figure 3-1. Fields in the
+    IPv6 header") provides an overview of the IPv6 header. The fields are discussed
+    in detail in the following list.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Fields in the IPv6 header](images/ipv6_0301.png)Figure 3-1. Fields in the
+    IPv6 header'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 3-1](ch03.html#fields_in_the_ipv6_header "Figure 3-1. Fields in the
+    IPv6 header") shows that even though the header has a total size of 40 bytes,
+    which is twice as long as a default IPv4 header, it has actually been streamlined
+    because most of the header is taken up by the two 16-byte IPv6 addresses. That
+    leaves only 8 bytes for other header information.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Version (4 bits)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This 4-bit field contains the version of the protocol. In the case of IPv6,
+    the number is 6\. Version number 5 could not be used because it was already assigned
+    to the experimental stream protocol (RFC 1819).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Traffic class (1 byte)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field replaces the Type of Service field in IPv4\. It facilitates the handling
+    of real-time data and any other data that requires special handling, and sending
+    nodes and forwarding routers can use it to identify and distinguish between different
+    classes or priorities of IPv6 packets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 2474, “Definition of the Differentiated Services Field (DS Field) in the
+    IPv4 and IPv6 Headers,” explains how the Traffic Class field in IPv6 can be used.
+    RFC 2474 uses the term *DS Field* to refer to the Type of Service field in the
+    IPv4 header, as well as to the Traffic Class field in the IPv6 header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Refer to [Chapter 5](ch05.html "Chapter 5. Networking") for more information
+    on the use of the Traffic Class field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Flow label (20 bits)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field distinguishes packets that require the same treatment in order to
+    facilitate the handling of real-time traffic. A sending host can label sequences
+    of packets with a set of options. Routers keep track of flows and can process
+    packets belonging to the same flow more efficiently because they do not have to
+    reprocess each packet’s header. The flow label and address of the source node
+    uniquely identify the flow. Nodes that do not support the functions of the Flow
+    Label field are required to pass the field unchanged when forwarding a packet
+    and to ignore the field when receiving a packet. All packets belonging to the
+    same flow must have the same Source and Destination IP address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The use of the Flow Label field is experimental and is currently still under
+    discussion at the IETF at the time of writing. Refer to [Chapter 5](ch05.html
+    "Chapter 5. Networking") for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Payload length (2 bytes)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field specifies the *payload*—i.e., the length of data carried after the
+    IP header. The calculation in IPv6 is different from the one in IPv4\. The Length
+    field in IPv4 includes the length of the IPv4 header, whereas the Payload Length
+    field in IPv6 contains only the data following the IPv6 header. Extension headers
+    are considered part of the payload and are therefore included in the calculation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The fact that the Payload Length field has 2 bytes limits the maximum packet
+    payload size to 64 KB. IPv6 has a *Jumbogram Option*, which supports bigger packet
+    sizes if needed. The Jumbogram Option is carried in a Hop-by-Hop Option header
+    (discussed later in this chapter). Jumbograms are relevant only when IPv6 nodes
+    are attached to links that have a link MTU greater than 64 KB; they are specified
+    in RFC 2675.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next Header (1 byte)
+  prefs: []
+  type: TYPE_NORMAL
+- en: In IPv4, this field is called the Protocol Type field, but it was renamed in
+    IPv6 to reflect the new organization of IP packets. If the next header is UDP
+    or TCP, this field will contain the same protocol numbers as in IPv4—for example,
+    protocol number 6 for TCP or 17 for UDP. But if Extension headers are used with
+    IPv6, this field contains the type of the next Extension header. Extension headers
+    are located between the IP header and the TCP or UDP header. [Table 3-1](ch03.html#values_in_the_next_header_field
+    "Table 3-1. Values in the Next Header field") lists possible values in the Next
+    Header field. The new IPv6-related headers are bold.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 3-1. Values in the Next Header field
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Value | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 0 | In an IPv4 header: reserved and not used**In an IPv6 header: Hop-by-Hop
+    Option header following** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | Internet Control Message Protocol (ICMPv4)—IPv4 support |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2 | Internet Group Management Protocol (IGMPv4)—IPv4 support |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 4 | IPv4 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 5 | Stream Protocol (RFC 1819) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 6 | TCP |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 8 | Exterior Gateway Protocol (EGP) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 9 | IGP—any private interior gateway (used by Cisco for their IGRP) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 17 | UDP |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 41 | **IPv6** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 43 | **Routing header** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 44 | **Fragmentation header** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 45 | Interdomain Routing Protocol (IDRP) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 46 | Resource Reservation Protocol (RSVP) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 47 | General Routing Encapsulation (GRE) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 50 | **Encapsulating Security Payload header** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 51 | **Authentication header** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 58 | **ICMPv6** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 59 | **No Next Header for IPv6** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 60 | **Destination Options header** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 88 | EIGRP |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 89103 | OSPFPIM |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 108 | IP Payload Compression Protocol |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 115 | Layer 2 Tunneling Protocol (L2TP) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 132 | Stream Control Transmission Protocol (SCTP) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 135 | *Mobility Header (Mobile IPv6)* |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 140 | Shim6 (RFC 5533) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 143–252 | Unassigned |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 253, 254 | Used for experimentation and testing (RFC 3692) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 255 | Reserved |'
+  prefs: []
+  type: TYPE_TB
+- en: Header type numbers derive from the same range of numbers as protocol type numbers,
+    and therefore should not conflict with them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Go to [http://www.iana.org/assignments/protocol-numbers](http://www.iana.org/assignments/protocol-numbers)
+    for the current list.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hop limit (1 byte)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field is analogous to the TTL field in IPv4\. Originally, the IPv4 TTL
+    field contained a number of seconds, indicating how long a packet can remain in
+    the network before being destroyed. In fact, IPv4 routers simply decrement this
+    value by one at each hop. This field has been renamed to Hop Limit in IPv6 to
+    reflect the purpose. The value in this field expresses a number of hops. Every
+    forwarding node decrements the number by one. If a router receives a packet with
+    a Hop Limit of 1, it decrements it to 0, discards the packet, and sends the ICMPv6
+    message “Hop Limit exceeded in transit” back to the sender.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Source address (16 bytes)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field contains the IP address of the originator of the packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Destination address (16 bytes)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field contains the IP address of the intended recipient of the packet.
+    This can be the ultimate destination or if, for example, a Routing header is present,
+    the address of the next hop router.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 3-2](ch03.html#the_ipv6_header_in_a_trace_file "Figure 3-2. The IPv6
+    header in a trace file") shows the IPv6 header in the trace file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The IPv6 header in a trace file](images/ipv6_0302.png)Figure 3-2. The IPv6
+    header in a trace file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This trace file shows all of the header fields discussed and how they can be
+    presented in a trace file. The Version field is set to 6 for IPv6\. The Traffic
+    Class (Priority) and Flow Label fields are not used in this packet and are set
+    to 0\. The Payload Length is 40, and the Next Header value is set to 58 for ICMPv6\.
+    The Hop Limit is set to 128, and the Source and Destination addresses contain
+    the link-local addresses of my IPv6 nodes. The first line in the detail window
+    shows `Ethertype 0x86DD`. This value indicates that this is an IPv6 packet. For
+    IPv4, the value would be `0x0800`. This field can be used to set an analyzer filter
+    for all native IPv6 packets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Analyzer tools can decode packets in different ways. If you use another version
+    or another type of analyzer, your decode may look slightly different. The difference
+    is not in the packet, but in the way the packet is presented in the analyzer interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Extension Headers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The IPv4 header can be extended from a minimum of 20 bytes to a maximum of 60
+    bytes in order to specify options such as Security Options, Source Routing, or
+    Timestamping. This capacity has rarely been used because it causes a performance
+    hit. For example, IPv4 hardware forwarding implementations have to pass the packet
+    containing options to the main processor (software handling).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The simpler a packet header, the faster the processing is. IPv6 has a new way
+    to deal with options that has substantially improved processing: it handles options
+    in additional headers called *Extension headers*. Extension headers are inserted
+    into a packet only if the options are needed. And in most cases, the Extension
+    headers are only processed by the final destination, not by intermediate devices.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The current IPv6 specification defines six Extension headers, which must be
+    supported by all IPv6 nodes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hop-by-Hop Options header
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Routing header
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Fragment header
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Destination Options header
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Authentication header
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Encapsulating Security Payload header
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: There can be zero, one, or more than one Extension header in an IPv6 packet.
+    Extension headers are placed between the IPv6 header and the upper-layer protocol
+    header. Each Extension header is identified by the Next Header field in the preceding
+    header. The Extension headers are examined or processed only by the node identified
+    in the Destination address field of the IPv6 header. If the address in the Destination
+    address field is a multicast address, the Extension headers are examined and processed
+    by all the nodes belonging to that multicast group. Extension headers must be
+    strictly processed in the order in which they appear in the packet header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is one exception to the rule that only the destination node will process
+    an Extension header. If the Extension header is a Hop-by-Hop Options header, the
+    information it carries must be examined and processed by every node along the
+    path of the packet. The Hop-by-Hop Options header, if present, must immediately
+    follow the IPv6 header. It is indicated by the value 0 in the Next Header field
+    of the IPv6 header (see [Table 3-1](ch03.html#values_in_the_next_header_field
+    "Table 3-1. Values in the Next Header field") earlier in this chapter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The first four Extension headers are described in RFC 2460\. The Authentication
+    header is described in RFC 4302, and the Encapsulating Security Payload header
+    in RFC 4303\. An update to the format of future Extension headers has been defined
+    in RFC 6564.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This architecture is very flexible for developing additional Extension headers
+    for future uses as needed. New Extension headers can be defined and used without
+    changing the IPv6 header. A good example is the Mobility header defined for Mobile
+    IPv6 (RFC 6275), which is discussed in [Chapter 8](ch08.html "Chapter 8. Mobile
+    IPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 3-3](ch03.html#the_use_of_extension_headers "Figure 3-3. The use of
+    Extension headers") shows how Extension headers are used.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The use of Extension headers](images/ipv6_0303.png)Figure 3-3. The use of
+    Extension headers'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each Extension header’s length is a multiple of eight bytes so that subsequent
+    headers can always be aligned. If a node is required to process the next header
+    but cannot identify the value in the Next Header field, it is required to discard
+    the packet and send an ICMPv6 Parameter Problem message back to the source of
+    the packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For details on ICMPv6 messages, refer to [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If more than one Extension header is used in a single packet, the following
+    header order should be used (RFC 2460):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 header
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Hop-by-Hop Options header
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Destination Options header (for options to be processed by the first destination
+    that appears in the IPv6 Destination address field, plus subsequent destinations
+    listed in the Routing header)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Routing header
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Fragment header
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Authentication header
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Encapsulating Security Payload header
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Destination Options header (for options to be processed only by the final destination
+    of the packet)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Upper-Layer header
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: RFC 2460 leaves some space for interpretation. Although this is the recommended
+    order, IPv6 nodes must attempt to process Extension headers in any order. But
+    it is still strongly advised that sources of IPv6 packets use the recommended
+    order unless newer specifications revise it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In cases when IPv6 is encapsulated in IPv4, the Upper-Layer header can be another
+    IPv6 header and can contain Extension headers that have to follow the same rules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hop-by-Hop Options Header
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Hop-by-Hop Options header carries optional information that must be examined
+    by every node along the path of the packet. It must immediately follow the IPv6
+    header and is indicated by a Next Header value of 0\. For example, the Router
+    Alert (RFC 2711) uses the Hop-by-Hop Options header for protocols such as Resource
+    Reservation Protocol (RSVP), Multicast Listener Discovery (MLD) messages, or the
+    Jumbogram Option. With IPv4, the only way for a router to determine whether it
+    needs to examine a datagram is to at least partially parse upper-layer data in
+    all datagrams. This process slows down the routing process substantially. With
+    IPv6, in the absence of a Hop-by-Hop Options header, a router knows that it does
+    not need to process router-specific information and can route the packet immediately
+    to the final destination. If there is a Hop-by-Hop Options header, the router
+    needs only to examine this header and does not have to look further into the packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The format of the Hop-by-Hop Options header is shown in [Figure 3-4](ch03.html#format_of_the_hop-by-hop_options_header
+    "Figure 3-4. Format of the Hop-by-Hop Options header").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Hop-by-Hop Options header](images/ipv6_0304.png)Figure 3-4. Format
+    of the Hop-by-Hop Options header'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following list describes each field:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Next Header (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Next Header field identifies the type of header that follows the Hop-by-Hop
+    Options header. The Next Header field uses the values listed in [Table 3-1](ch03.html#values_in_the_next_header_field
+    "Table 3-1. Values in the Next Header field"), shown earlier in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Extension Header Length (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field identifies the length of the Hop-by-Hop Options header in eight-byte
+    units. The length calculation does not include the first eight bytes. So if the
+    header is shorter than eight bytes, this field contains the value 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Options (variable size)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There can be one or more options. The length of the options is variable and
+    is determined in the Header Extension Length field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The Option Type field, the first byte of the Options fields, contains information
+    about how this option must be treated in case the processing node does not recognize
+    the option. The value of the first two bits specifies the actions to be taken:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '00: Skip and continue processing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '01: Discard the packet.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '10: Discard the packet and send ICMP Parameter Problem, Code 2, message to
+    the packet’s Source address pointing to the unrecognized option type.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '11: Discard the packet and send ICMP Parameter Problem, Code 2, message to
+    the packet’s Source address only if the destination is not a multicast address.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The third bit of the Options Type field specifies whether the option information
+    can change en route (value 1) or does not change en route (value 0).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Option Type Jumbogram
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: This Hop-by-Hop Option Type supports the sending of IPv6 Jumbograms. The IPv6
+    Payload Length field supports a maximum packet size of 65,535 bytes. The Jumbo
+    Payload Option (RFC 2675) allows for larger packets to be sent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the IPv6 header of a packet with the Jumbo Payload option, the Payload Length
+    field is set to 0\. The Next Header field contains the value 0, which indicates
+    a Hop-by-Hop Options header. The Option Type value of 194 indicates the Jumbo
+    Payload option. The Jumbo Payload Length field has 32 bits and therefore supports
+    the transmission of packets that are between 65,536 and 4,294,967,295 bytes. RFC
+    2675 also defines extensions to UDP and TCP that have to be implemented on hosts
+    that need to support the sending of Jumbograms. All devices on the path of a Jumbogram
+    must support the option.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Option Router Alert
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: This Option Type indicates to the router that the packet contains important
+    information to be processed when forwarding the packet. The option is currently
+    used mostly for MLD (Multicast Listener Discovery) and RSVP (Resource Reservation
+    Protocol). It is specified in RFC 2711, which has been updated by RFC 6398.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RSVP uses control packets containing information that needs to be interpreted
+    or updated by routers along the path. These control packets use a Hop-by-Hop Options
+    header, so only routers process the packet. Regular data packets do not have this
+    Extension header and are therefore forwarded immediately without further inspection
+    by the router.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first three bits of the Option Type field are set to 0\. A router that doesn’t
+    know this option ignores it and forwards the packet. In the remaining five bits
+    of the first byte, the option type 5 is specified. The Option Data Length field
+    contains the value 2, which indicates that the following value field has a length
+    of two bytes (refer to [Figure 3-4](ch03.html#format_of_the_hop-by-hop_options_header
+    "Figure 3-4. Format of the Hop-by-Hop Options header")).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The list of Router Alert values can be found at the following link: [http://www.iana.org/assignments/ipv6-routeralert-values](http://www.iana.org/assignments/ipv6-routeralert-values).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 3-5](ch03.html#the_hop-by-hop_options_header_in_a_trace "Figure 3-5. The
+    Hop-by-Hop Options header in a trace file") show the Hop-by-Hop Options header
+    in the trace file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The Hop-by-Hop Options header in a trace file](images/ipv6_0305.png.jpg)Figure 3-5. The
+    Hop-by-Hop Options header in a trace file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The screenshot shows the details of packet number 10\. It is an MLDv2 Multicast
+    Listener Report Message. As mentioned before, these multicast registration messages
+    always have a Hop-by-Hop Options header (Next Header value zero), because this
+    is a packet that the router doesn’t have to forward, but that contains information
+    that it must process. You can see the Hop Limit set to 1 for MLD messages; the
+    Destination address of `ff02::16` is the multicast address for MLDv2 routers;
+    the Hop-by-Hop Options header contains the next header field with the value 58
+    for ICMPv6; the Length field and the Router Alert option type 5 with the value
+    field zero for MLD.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Routing Header
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The *Routing header* is used to give a list of one or more intermediate nodes
+    that should be visited on the packet’s path to its destination. In the IPv4 world,
+    this is called the *Loose Source Route* option. The Routing header is identified
+    by a Next Header value of 43 in the preceding header. [Figure 3-6](ch03.html#format_of_the_routing_header
+    "Figure 3-6. Format of the Routing header") shows the format of the Routing header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Routing header](images/ipv6_0306.png)Figure 3-6. Format of
+    the Routing header'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following list describes each field:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Next Header (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Next Header field identifies the type of header that follows the Routing
+    header. It uses the same values as the IPv4 Protocol Type field (see [Table 3-1](ch03.html#values_in_the_next_header_field
+    "Table 3-1. Values in the Next Header field") earlier in this chapter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Extension Header Length (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field identifies the length of the Routing header in 8-byte units. The
+    length calculation does not include the first 8 bytes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Routing Type (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field identifies the type of Routing header. RFC 2460 describes Routing
+    Type 0, which has been deprecated by RFC 5095 for security reasons. The Mobile
+    IPv6 specification defines a Routing Type 2\. (This specification is discussed
+    in [Chapter 8](ch08.html "Chapter 8. Mobile IPv6").) At the time of writing there
+    are some drafts in progress, which define a new segment routing architecture and
+    a new routing header type called Segment Routing header. Find the links to these
+    drafts in the draft section at the end of this chapter. Whether this specification
+    is going to see the light of day you may know by the time you read these lines.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Segments Left (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field identifies how many nodes are left to be visited before the packet
+    reaches its final destination.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Type-Specific Data (variable length)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The length of this field depends on the Routing Type. The complete header is
+    always a multiple of 8 bytes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If a node processing a Routing header cannot identify a Routing Type value,
+    the action taken depends on the content of the Segments Left field. If the Segments
+    Left field does not contain any nodes to be visited, the node must ignore the
+    Routing header and process the next header in the packet, which is determined
+    by the Next Header field’s value. If the Segments Left field is not zero, the
+    node must discard the packet and send an ICMP Parameter Problem, Code 0 message
+    to the packet’s Source address pointing to the unrecognized Routing Type. If a
+    forwarding node cannot process the packet because the next link MTU size is too
+    small, it discards the packet and sends an ICMP Packet Too Big message back to
+    the source of the packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 3-7](ch03.html#routing_header_type_2_in_a_trace_file "Figure 3-7. Routing
+    header Type 2 in a trace file") shows the Type 2 Routing header in a trace file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Routing header Type 2 in a trace file](images/ipv6_0307.png.jpg)Figure 3-7. Routing
+    header Type 2 in a trace file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To show the Type 2 Routing header we must take a Mobile IPv6 trace, the specification
+    that defines this type of Routing header. The Next Header field within the IPv6
+    header shows the value 43 for the Routing header. The Routing header contains
+    the fields discussed earlier in this section. Next Header is a Mobility header
+    indicated by a Next Header value of 135 in the routing header. The Header Length
+    contains two 8-byte units, which add up to a total length of 16 bytes (one address).
+    The Segments Left field contains the value 1 because there is one address entry
+    in the Options field. Finally, the Options field lists the Home Address option
+    with the home address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Refer to [Chapter 8](ch08.html "Chapter 8. Mobile IPv6") to find out how the
+    Routing header is used for Mobility.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For an example of a new Routing header option, refer to RFC 6554, “An IPv6 Routing
+    Header for Source Routes with the Routing Protocol for Low-Power and Lossy Networks
+    (RPL).” In Low-power and Lossy Networks (LLNs), routers typically have very constrained
+    memory that only allows for a small number of default routes and no other destinations.
+    This RFC defines the *Source Routing Header* (SRH), which is strictly to be used
+    between RPL routers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fragment Header
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: An IPv6 host that wants to send a packet to an IPv6 destination uses Path MTU
+    discovery to determine the maximum packet size that can be used on the path to
+    that destination. If the packet to be sent is larger than the supported MTU, the
+    source host fragments the packet. Unlike in IPv4, with IPv6 a router along the
+    path does not fragment packets. Fragmentation occurs only at the source host sending
+    the packet. The destination host handles reassembly. A Fragment header is identified
+    by a Next Header value of 44 in the preceding header. The format of the Fragment
+    header is shown in [Figure 3-8](ch03.html#format_of_the_fragment_header "Figure 3-8. Format
+    of the Fragment header").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Fragment header](images/ipv6_0308.png)Figure 3-8. Format of
+    the Fragment header'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following list describes each field:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Next Header (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Next Header field identifies the type of header that follows the Fragment
+    header. It uses the same values as the IPv4 Protocol Type field. (See [Table 3-1](ch03.html#values_in_the_next_header_field
+    "Table 3-1. Values in the Next Header field").)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Reserved (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Not used; set to 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Fragment Offset (13 bits)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The offset in 8-byte units of the data in this packet relative to the start
+    of the data in the original packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Reserved (2 bits)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Not used; set to 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*M-Flag (1 bit)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Value 1 indicates more fragments; a value of 0 indicates the last fragment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Identification (4 Bytes)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generated by the source host in order to identify all packets belonging to the
+    original packet. This field is usually implemented as a counter, increasing by
+    one for every packet that needs to be fragmented by the source host.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Fragment header does not contain a Don’t Fragment field as in IPv4\. It
+    is not necessary, because routers no longer fragment in IPv6\. Only the source
+    host can fragment a packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The initial unfragmented packet is referred to as the *original packet*. It
+    has an unfragmentable part that consists of the IPv6 header plus any Extension
+    headers that must be processed by nodes along the path to the destination (i.e.,
+    Hop-by-Hop Options header). The fragmentable part of the original packet consists
+    of any Extension headers that need only to be processed by the final destination,
+    plus the Upper-Layer headers and any data. [Figure 3-9](ch03.html#fragmentation_with_ipv6
+    "Figure 3-9. Fragmentation with IPv6") (RFC 2460) illustrates the fragmenting
+    process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Fragmentation with IPv6](images/ipv6_0309.png)Figure 3-9. Fragmentation with
+    IPv6'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The unfragmentable part of the original packet appears in every fragment, followed
+    by the Fragmentation header and then the fragmentable data. The IPv6 header of
+    the original packet has to be slightly modified. The Length field reflects the
+    length of the fragment (excluding the IPv6 header) and not the length of the original
+    packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The destination node collects all the fragments and reassembles them. The fragments
+    must have identical Source and Destination addresses and the same identification
+    value in order to be reassembled. If all fragments do not arrive at the destination
+    within 60 seconds after the first fragment, the destination will discard all packets.
+    If the destination has received the first fragment (Offset = zero), it sends back
+    an ICMPv6 Fragment Reassembly Time Exceeded message to the source.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 3-10](ch03.html#fragment_header_in_a_trace_file "Figure 3-10. Fragment
+    header in a trace file") shows a Fragment header.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Fragment header in a trace file](images/ipv6_0310.png.jpg)Figure 3-10. Fragment
+    header in a trace file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The whole fragment set consists of two packets, the first of which is shown
+    in [Figure 3-10](ch03.html#fragment_header_in_a_trace_file "Figure 3-10. Fragment
+    header in a trace file"). In the IPv6 header, the Payload Length field has a value
+    of 1,456, which is the length of the fragmentation header and this one fragment,
+    not the length of the whole original packet. The Next Header field specifies the
+    value 44, which is the value for the Fragment header. This field is followed by
+    the Hop Limit field and the Source and Destination IP addresses. The first field
+    in the Fragment header is the Next Header field. Because this is a ping, it contains
+    the value 58 for ICMPv6\. And because this is the first packet in the fragment
+    set, the value in the Offset field is 0 and the M-Flag is set to 1, which means
+    there are more fragments to come. The Identification field is set to 1 and has
+    to be identical in all packets belonging to this fragment set. [Figure 3-11](ch03.html#the_last_packet_in_the_fragment_set
+    "Figure 3-11. The last packet in the fragment set") shows the second packet of
+    the fragment set.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The last packet in the fragment set](images/ipv6_0311.png.jpg)Figure 3-11. The
+    last packet in the fragment set'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The second and last packet of this fragment set has an Offset value of `0x00b5`,
+    which translates to 181 in decimal notation, the length of the first fragment.
+    The M-Flag is set to 0, which indicates that it is the last packet and tells the
+    receiving host that it is time to reassemble the fragments. The Identification
+    field is set to 1 in both packets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The specification in RFC 2460 allows for overlapping fragments, which creates
+    a security issue. RFC 5722, “Handling of Overlapping IPv6 Fragments,” explains
+    the security issue, updates RFC 2460 and forbids overlapping fragments. RFC 6980
+    describes how IPv6 fragmentation can become a security issue by eliminating the
+    effectiveness of securing mechanisms such as RA Guard and forbids the use of IPv6
+    Fragmentation for traditional Neighbor Discovery messages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Refer to [Chapter 4](ch04.html "Chapter 4. ICMPv6") for a description of Neighbor
+    Discovery and to [Chapter 6](ch06.html "Chapter 6. Security with IPv6") for a
+    discussion of RA Guard and the security implications of the Fragment header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Destination Options Header
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A *Destination Options* header carries optional information that is examined
+    by the destination node only (the Destination address in the IPv6 header). A Next
+    Header value of 60 identifies this type of header. As mentioned previously, the
+    Destination Options header can appear twice in an IPv6 packet. When inserted before
+    a Routing header, it contains information to be processed by the routers listed
+    in the Routing header. When inserted before the upper-layer protocol headers,
+    it contains information for the final destination of the packet. [Figure 3-12](ch03.html#format_of_the_destination_options_header
+    "Figure 3-12. Format of the Destination Options header") shows the format of the
+    Destination Options header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Destination Options header](images/ipv6_0312.png)Figure 3-12. Format
+    of the Destination Options header'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As you can see, the format is similar to the format of the Hop-by-Hop Options
+    header. The following list describes each field:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Next Header (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Next Header field identifies the type of header that follows the Destination
+    Options header. It uses the same values listed in [Table 3-1](ch03.html#values_in_the_next_header_field
+    "Table 3-1. Values in the Next Header field"), shown earlier in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Extension Header Length (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field identifies the length of the Destination Options header in 8-byte
+    units. The length calculation does not include the first 8 bytes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Options (variable size)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There can be one or more options. The length of the options is variable and
+    is determined in the Header Extension Length field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Options field is used in a similar way as with the Hop-by-Hop Options header,
+    which I discussed earlier in this chapter. An example of the use of the Destination
+    Options header is Mobile IPv6\. You can find a detailed description of Mobile
+    IPv6 in [Chapter 8](ch08.html "Chapter 8. Mobile IPv6"). Another defined Destination
+    Option Header option is the *Tunnel Encapsulation Limit Option* in RFC 2473, “Generic
+    Packet Tunneling in IPv6 Specification,” which is used to limit the number of
+    times that a packet can be further encapsulated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Find the most current list of defined options for the Routing and the Destination
+    Options header at [http://www.iana.org/assignments/ipv6-parameters/](http://www.iana.org/assignments/ipv6-parameters/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 3-13](ch03.html#destination_options_header_in_the_trace "Figure 3-13. Destination
+    Options header in the trace file") shows the Destination Options header in the
+    trace file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Destination Options header in the trace file](images/ipv6_0313.png.jpg)Figure 3-13. Destination
+    Options header in the trace file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To show the Destination Options header, we refer to the Mobile IPv6 trace again.
+    This is a Binding Update message. It uses the Destination Options header with
+    value 60 in the Next Header field of the IP header. The Destination Options header
+    has a Next Header field with the value 135 for a Mobile IPv6 message and contains
+    the Home Address option and the home address for the mobile node.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Refer to [Chapter 8](ch08.html "Chapter 8. Mobile IPv6") to find out how the
+    Destination Options header is used for Mobility.
+  prefs: []
+  type: TYPE_NORMAL
+- en: New Extension Header Format
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With the exception of the Hop-by-Hop and Routing header, Extension headers are
+    usually only processed by the final destination of a packet. In practice there
+    are devices on the path of a packet, such as routers and firewalls, which are
+    capable of parsing past or ignoring Extension headers at wire speed. In order
+    to accommodate real-world implementations and to optimize Extension header processing
+    and inspection of Extension headers, a new format for Extension headers has been
+    defined in RFC 6564, “A Uniform Format for IPv6 Extension Headers.” [Figure 3-14](ch03.html#the_new_extension_header_format
+    "Figure 3-14. The new Extension header format") shows the new format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The new Extension header format](images/ipv6_0314.png)Figure 3-14. The new
+    Extension header format'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following list describes each field:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Next Header (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Next Header field identifies the type of header that follows the Extension
+    header. It uses the same values listed in [Table 3-1](ch03.html#values_in_the_next_header_field
+    "Table 3-1. Values in the Next Header field"), shown earlier in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Extension Header Length (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field identifies the length of the Extension header in 8-byte units. The
+    length calculation does not include the first 8 bytes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Options (variable size)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The length of the options is variable and is determined in the Header Extension
+    Length field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The format of the basic Extension headers described in this chapter will not
+    change. But if new Extension headers are defined in the future, they must follow
+    this format. This means that any device that deals with Extension headers, such
+    as firewalls, must be capable of properly processing the basic Extension headers,
+    but also new Extension headers using the new format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Several rules are defined in RFC 6564 and summarized below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If possible, no new Extension headers should be defined, but rather new options
+    for the Destination Options header. Only if that is not possible can a new Extension
+    header be defined.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: No new header with hop-by-hop behavior must be created, and new options for
+    the existing Hop-by-Hop Options header should only be created under limited circumstances.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Processing of Extension Headers and Header Chain Length
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The base specification in RFC 2460 says that Extension headers are only processed
+    by end nodes (with the exception of the Hop-by-Hop Options header). The goal of
+    this architecture was that new Extension headers can be introduced and only end
+    nodes need to be updated. This process would be transparent to forwarding nodes
+    along the path of the packet. Practice has shown that this is not always applicable.
+    Some routers and a variety of intermediate boxes such as firewalls, load balancers,
+    and packet classifiers, also called middleware, might inspect other parts of the
+    IP header beyond the IPv6 base header. Very often, if they do not recognize an
+    Extension header, they simply drop the packet, which leads to connectivity failures.
+    Also the Hop-by-Hop Extension header is often not handled by high-speed routers
+    or is processed on a slow path.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 7045, “Transmission and Processing of Extension Headers,” discusses these
+    issues. While according to the base specification, end nodes should discard Extension
+    headers that they don’t recognize, this should not be done by forwarding devices
+    on the path of a packet. Otherwise, these forwarding devices may discard packets
+    with newly defined Extension headers that they don’t recognize yet. The RFC says
+    that there should be a policy on these devices to be individually configurable.
+    The default configuration should allow all standard Extension headers. For firewalls,
+    the RFC requires that, in particular, packets containing standard Extension headers
+    are only to be discarded as a result of an intentionally configured policy. For
+    the Hop-by-Hop Extension header the requirement is that all forwarding devices
+    should process it, but implementers have to be aware that this usually happens
+    on a slow path.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another problem was that there was not one single place where all Extension
+    headers can be found and the number may increase regularly as new specifications
+    come out. So it is difficult for vendors to identify what Extension headers they
+    have to support in their implementations. The RFC therefore defines that there
+    must be a new section in the IANA (Internet Assigned Numbers Authority) IPv6 Parameters
+    section to list all IPv6 Extension header types.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The new IANA registry section for [IPv6 Extension header](ch05.html#ipv6_extension_header
+    "IPv6 Extension header") can be found at [http://bit.ly/1na7H1Q](http://bit.ly/1na7H1Q).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With regard to the header chain (which includes the IPv6 header, any Extension
+    headers, plus the upper protocol header), note the following: in IPv4 we had a
+    fixed upper limit for the size of all IPv4 options in an IPv4 packet. In the IPv6
+    base specification there is no limit to the number of Extension headers in a packet.
+    So it is possible that when a packet is fragmented, the header chain may span
+    multiple fragments. This causes problems, specifically if firewalls cannot apply
+    rules to fragments, because the information they need is missing in the first
+    fragment. RFC 7112, “Implications of Oversized IPv6 Header Chains,” describes
+    the issue and updates RFC 2460 such that the first fragment of a fragmented datagram
+    is required to contain the entire IPv6 header chain.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that you are familiar with the IPv6 header and the Extension headers, the
+    next chapter introduces the advanced features of ICMPv6, which offer management
+    functionality not known with ICMPv4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: References
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The following is a list of the most important RFCs and drafts mentioned in this
+    chapter. Sometimes I include additional subject-related RFCs for your personal
+    further study.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFCs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 791, “Internet Protocol,” 1981
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1812, “Requirements for IP Version 4 Routers,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1819, “Internet Stream Protocol Version 2,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1981, “Path MTU Discovery for IP version 6,” 1996
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2460, “Internet Protocol, Version 6 (IPv6) Specification,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2473, “Generic Packet Tunneling in IPv6 Specification,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2474, “Definition of the Differentiated Services Field (DS Field),” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2475, “An Architecture for Differentiated Services,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2507, “IP Header Compression,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2675, “IPv6 Jumbograms,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2711, “IPv6 Router Alert Option,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3168, “The Addition of Explicit Congestion Notification (ECN) to IP,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3175, “Aggregation of RSVP for IPv4 and IPv6 Reservations,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3514, “The Security Flag in the IPv4 Header,” April 1, 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4301, “Security Architecture for the Internet Protocol,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4302, “IP Authentication Header,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4303, “IP Encapsulating Security Payload (ESP),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4305, “Cryptographic Algorithm Implementation Requirements for Encapsulating
+    Security Payload (ESP) and Authentication Header (AH),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4727, “Experimental Values in IPv4, IPv6, ICMPv4, ICMPv6, UDP, and TCP Headers,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5095, “Deprecation of Type 0 Routing Headers in IPv6,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5350, “IANA Considerations for the IPv4 and IPv6 Router Alert Options,”
+    2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5722, “Handling of Overlapping IPv6 Fragments,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5871, “IANA Allocation Guidelines for the IPv6 Routing Header,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6105, “IPv6 Router Advertisement Guard,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6275, “Mobility Support in IPv6,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6398, “IP Router Alert Considerations and Usage,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6434, “IPv6 Node Requirements,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6437, “IPv6 Flow Label Specification,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6553, “The Routing Protocol for Low-Power and Lossy Networks (RPL) Option
+    for Carrying RPL Information in Data-Plane Datagrams,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6554, “An IPv6 Routing Header for Source Routes with the Routing Protocol
+    for Low-Power and Lossy Networks (RPL),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6564, “A Uniform Format for IPv6 Extension Headers,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6621, “Simplified Multicast Forwarding,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6946, “Processing of IPv6 ‘Atomic’ Fragments,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6980, “Security Implications of IPv6 Fragmentation with IPv6 Neighbor Discovery,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7045, “Transmission and Processing of IPv6 Extension Headers,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7112, “Implications of Oversized IPv6 Header Chains,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7113, “Implementation Advice for IPv6 Router Advertisement Guard (RA Guard),”
+    2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7136, “Significance of IPv6 Interface Identifiers,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Drafts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Drafts can be found at [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html).
+    To locate the latest version of a draft, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
+    You can enter the draft name without a version number and the most current version
+    will come up. If a draft does not show up, it was possibly deleted. If it was
+    published as an RFC, the RFC number will be displayed. [http://tools.ietf.org/wg](http://tools.ietf.org/wg)
+    is also a very useful site. More information on the process of standardization,
+    RFCs, and drafts can be found in [Appendix A](apa.html "Appendix A. RFCs").
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s a list of drafts I refer to in this chapter, as well as interesting
+    drafts that relate to the topics in this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Segment Routing Architecture”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-filsfils-spring-segment-routing-02*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Segment Routing Use Cases”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-filsfils-spring-segment-routing-use-cases-00*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “IPv6 Segment Routing Header (SRH)”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-previdi-6man-segment-routing-header-00*'
+  prefs: []
+  type: TYPE_NORMAL

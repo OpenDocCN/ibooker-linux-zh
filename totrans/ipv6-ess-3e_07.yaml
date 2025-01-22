@@ -1,0 +1,1997 @@
+- en: Chapter 6. Security with IPv6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The developers of IPv4 did not rack their brains about security. The “Internet”
+    in those early days connected a few trusted networks of some visionary researchers.
+    The individuals who controlled these networks, as well as those who were allowed
+    to use the networked resources, were implicitly trusted to not cause any malicious
+    or destructive behavior. This is the reason why the original IP architecture does
+    not include a security framework that can be used by all applications. If security
+    was needed, it was usually rudimentary authentication/authorization and was included
+    in the application code (e.g., the password for Telnet and FTP). Many years later,
+    IPsec was introduced when IPv4 had already been widely deployed. Therefore, it
+    needed to be retrofitted into existing deployments. Due to interoperability and
+    performance issues and to the fact that it was developed later, IPsec is not as
+    widely deployed as it could be in many IPv4 scenarios. This is in contrast to
+    IPv6, which from the beginning had the notion that fundamental security functionality
+    had to be included in the base protocol in order to be used on any Internet platform.
+    In the early days of IPv6, a standards-conforming IPv6 implementation had to include
+    IPsec to allow more secured communication once it was appropriately configured.
+    This strict rule has been loosened recently, but more about this later. Before
+    we dive into the technical details, I want to talk about some general security
+    concepts and practices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: General Security Concepts
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In order to protect data, one has to be aware of the possible threats. People
+    often focus solely on malicious attacks from foreign networks. A comprehensive
+    security concept needs to consider many other aspects. The following is a list
+    of some possible points of weakness:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Insufficient or nonexistent IT security concepts and corresponding provisions
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Nonobservance or insufficient control of IT security provisions
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Usurping of rights (password theft, privilege escalation)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Incorrect use or faulty administration of IT systems
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Abuse of rights
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Weaknesses in software (e.g., buffer/heap overflows in conjunction with applications
+    running with superuser rights, cross-site scripting)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Manipulation, theft, or destruction of IT devices, software, or data (physical
+    security)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Network eavesdropping (sniffing wired or wireless networks) or replaying of
+    messages
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Trojan horses, viruses, and worms
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Security attacks such as masquerading, IP spoofing, Denial of Service (DoS)
+    attacks, man-in-the-middle attacks, or DNS poisoning
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Routing misuse
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: There are many statistics showing that malicious attacks from the outside are
+    only a smaller fraction of all the possible risks. Many threats come from within
+    the internal network and can in many cases be related to human misconduct or faulty
+    administration. Many of these risks cannot be controlled by technical mechanisms.
+    This chapter is not a guide to an overall security concept; it discusses the technology
+    aspects of security with IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: General Security Practices
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Standard security practices involve two “triads” of thought, CIA and AAA. The
+    CIA triad includes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Confidentiality*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stored or transmitted information cannot be read or altered by an unauthorized
+    party.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Integrity*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any alteration of transmitted or stored information can be detected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Availability*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The information in question is readily accessible to authorized users at all
+    times.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The AAA triad includes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Authentication*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ensuring an individual or group is who they say they are. The act of clarifying
+    a claimed identity. Common forms of authentication include usernames and passwords
+    or ATM card/PIN combinations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Authorization*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ensuring that the authenticated user or group has the proper rights to access
+    the information they are attempting to access. Common implementations include
+    Access Control Lists (ACLs).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Accounting*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The act of collecting information on resource usage. The log of an HTTP server
+    would be a common form of accounting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Nonrepudiation* is not included in the CIA/AAA triads. Nonrepudiation means
+    a specified action, such as sending, receiving, or deleting of information, cannot
+    be denied by any of the parties involved.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'These security requirements need to be provided by two basic security elements:
+    encryption (to provide confidentiality) and secure checksums or hash (to provide
+    integrity). Suitable combinations of these two elements may then be used to provide
+    more complex services, such as authenticity and nonrepudiation.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are two forms of encryption that are commonly used. The first is called
+    *Secret Key Cryptography*, also termed *symmetric key encryption*, which requires
+    the sender and recipient to agree on a shared secret (i.e., a key or password)
+    that is then used to encrypt and decrypt the information exchanged. Common symmetric
+    key algorithms are AES, DES, 3DES, IDEA, and RC-4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The second is called *Public Key Cryptography*, also termed *asymmetric encryption*.
+    An asymmetric encryption algorithm uses a key pair consisting of a known and distributed
+    public key and an individual private key. When a message is encrypted using the
+    public key and decrypted by the receiver with the corresponding private key, only
+    the intended recipient is capable of seeing the encrypted message. This form of
+    encryption can be used to establish a confidential data exchange. If in addition,
+    the message was also encrypted with the sender’s private key and then decrypted
+    by the recipient with a corresponding public key, the security services of data
+    origin authentication and nonrepudiation are added. Common asymmetric key algorithms
+    are RSA, ElGamal, and elliptic curves cryptography (ECC).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Secure checksums or hash functions often provide data integrity. A hash function
+    takes input of an arbitrary length and outputs fixed-length code. The fixed-length
+    output is called the *message digest*, or the *hash*, of the original input message.
+    These hashes are unique and thereby provide the integrity of the message. Common
+    one-way hash functions are SHA-1 and MD-5.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPsec standard uses a combination of algorithmic choices based on symmetric
+    and asymmetric cryptography, as well as one-way hash functions. This chapter describes
+    the IPsec framework and the security elements in IPv6 and includes a discussion
+    about special issues to be aware of when securing an IPv6 network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPsec Basics
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: IPsec, described in RFC 4301, defines a security architecture for both versions
+    of IP for IPv4 and IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following elements are part of the IPsec framework:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A general description of security requirements and mechanisms at the network
+    layer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A protocol for encryption (Encapsulating Security Payload, or ESP)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A protocol for authentication (Authentication Header, or AH)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A definition for the use of cryptographic algorithms for encryption and authentication
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A definition of security policies and security associations between communication
+    peers
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Key management
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The configuration of IPsec creates a boundary between a protected and an unprotected
+    area. The boundary can be around a single host or a network. The access control
+    rules specified by the administrator determine what happens to packets traversing
+    the boundary. The security requirements are defined by a *Security Policy Database*
+    (SPD). Generally, each packet is either protected using IPsec security services,
+    discarded, or allowed to bypass IPsec protection, based on the applicable SPD
+    policies identified by the *selectors*. The selectors are the specific traffic-match
+    criteria defined by an administrator—for example, a specific application being
+    transmitted from a subnet to a specific end-host.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Security Associations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Security Associations* (SA) are agreements between communication peers. Three
+    elements are part of the agreement: a key, an encryption or authentication mechanism,
+    and additional parameters for the algorithm. SAs are unidirectional, and each
+    separate security service requires an SA. This means that two communication peers
+    who want to encrypt and authenticate a two-way communication need four SAs (one
+    pair for encryption and one pair for authentication). Bidirectional application
+    traffic—for example, a bidirectional Telnet connection—also requires four SAs
+    at each communication peer. Peer A must protect the traffic it initiates and the
+    return traffic from Peer B. It also requires two additional SAs to ensure that
+    if Peer B initiates a Telnet session, both it and the return traffic for this
+    scenario are protected.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'IPsec differentiates two modes of transport:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Transport mode*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The SA is made between two end nodes and defines the encryption or authentication
+    for the payload of all IP packets for that connection. The IP header is not encrypted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Tunnel mode*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The SA is usually made between two security gateways (usually a firewall). The
+    whole packet including the original IP header is encrypted or authenticated by
+    encapsulating it in a new header. This is the foundation for a virtual private
+    network (VPN).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Key Management
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Most of the security mechanisms provided by IPsec require the use of cryptographic
+    keys. A separate set of mechanisms has been defined for putting the keys in place.
+    Support for both manual and automated distribution of keys is a requirement. RFC
+    4301 specifies IKEv2 (described later in this section) as an automated key distribution
+    mechanism. Other mechanisms may be used. IKEv1 is actually officially deprecated
+    and to be replaced with IKEv2, but as it is still used widely today, we describe
+    both versions in this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In order to establish a Security Association (SA), the communication peers have
+    to agree on a cryptographic algorithm and negotiate keys. The negotiation of an
+    SA often happens over insecure paths. Internet Key Exchange (IKE) specifies a
+    protocol that allows for the exchange and negotiation of parameters for an SA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IKEv1
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'IKEv1 is specified in RFC 2409 and updated in RFC 4109\. It consists of selected
+    functions from three different protocols:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*ISAKMP (Internet Security Association and Key Management Protocol)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ISAKMP specifies a framework for the management of SAs and key exchange without
+    describing the process in detail. It therefore supports different key exchange
+    mechanisms. It is specified in RFC 5996.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Oakley Key Determination Protocol*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Oakley Key Determination protocol is used for the exchange of keys and is
+    specified in RFC 2412\. It is an extension of the Diffie-Hellman algorithm. It
+    uses only a subset of the functions of the Oakley protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*SKEME (Versatile Secure Key Exchange Mechanism for the Internet)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'SKEME is a fast key exchange technique described in “SKEME: A Versatile Secure
+    Key Exchange Mechanism for the Internet,” from *IEEE Proceedings of the 1996 Symposium
+    on Network and Distributed Systems Security* by H. Krawczyk. IKE uses only a subset
+    of the functions defined for the SKEME protocol.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IKEv1 uses UDP on port 500 or 4500 and goes through two phases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In phase one, the ISAKMP communication peers negotiate a secure, authenticated
+    communication channel called ISAKMP Security Association. Note that some implementations
+    use the term “IKE SA,” which is synonymous with the ISAKMP SA. The phase one exchange
+    is based on the Diffie-Hellman algorithm and encrypted identification tokens.
+    The authentication can be provided by either preshared keys, an RSA checksum encrypted
+    with the private key of the sender, or the public key of the receiver combined
+    with its X.509 certificate.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In phase two, the cryptographic algorithms and the keys for other protocols
+    (e.g., ESP and/or AH) can be exchanged over the secure communication channel established
+    in phase one. The outcome of IKE phase two results in an IPsec SA. These IPsec
+    SAs define the security services to be used for protecting the traffic in transit.
+    Multiple IPsec SAs can be negotiated via the secure channel set up in phase one.
+    This allows for more granular and more flexible security services to be negotiated.
+    Both the IPsec SAs and ISAKMP SAs generate new cryptographic keys on a periodic
+    basis to provide greater security. Typically, the IPsec SAs are rekeyed at a faster
+    rate than the ISAKMP SAs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 4109 updates the original specification. The changes are made to ensure
+    that the suggested and required algorithms reflect the current market situation.
+    The changes are intended to be deployed for all IKEv1 implementations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can find all IKEv1 relevant and updated numbers and codes at [http://www.iana.org/assignments/ipsec-registry](http://www.iana.org/assignments/ipsec-registry).
+  prefs: []
+  type: TYPE_NORMAL
+- en: IKEv2
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'IKEv2 is specified in RFC 5996, which combines and therefore obsoletes the
+    following RFCs: RFC 4306, “Internet Key Exchange (IKEv2) Protocol,” RFC 2407,
+    “The Internet IP Security Domain of Interpretation for ISAKMP,” RFC 2408, “Internet
+    Security Association and Key Management Protocol (ISAKMP),” and RFC 2409, “The
+    Internet Key Exchange (IKE).” IKEv2 brings, among other things, enhancements for
+    the use of IPsec in combination with NAT traversal, for Extensible Authentication,
+    and for Remote Address acquisition.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IKEv2 runs over UDP ports 500 and 4500, and a host running IKEv2 must accept
+    packets from any ports and respond to those same ports.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The initial exchange (called *phase one* in IKEv1 terminology) normally consists
+    of two pairs of messages. The first message pair negotiates cryptographic algorithms,
+    exchanges nonces (number used once to prevent replay attack), and does a Diffie-Hellman
+    exchange. The second message pair authenticates the previous messages, exchanges
+    identities and certificates, and establishes the first `CHILD_SA`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In IKEv1, SA lifetimes were negotiated. In IKEv2, each end of the SA is responsible
+    for enforcing its own lifetime policy on the SA and rekeying the SA when necessary.
+    The end with the shorter lifetime will have to request the rekeying if the lifetime
+    policies are different. Another difference between the two IKE versions is that
+    IKEv2 allows parallel SAs with the same traffic selectors between common endpoints.
+    This difference, among other things, supports traffic with different Quality of
+    Service (QoS) requirements among the SAs. Hence, unlike IKEv1, the combination
+    of the endpoints and the traffic selectors may not uniquely identify an SA between
+    those endpoints. Therefore, with IKEv2, SAs can no longer be deleted based on
+    duplicate traffic selectors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Opening an IPsec connection through a NAT creates some special problems. The
+    changing of IP addresses changes the checksums, so they will fail and cannot be
+    corrected by the NAT, because they are cryptographically protected. IKEv2 has
+    improved support for such situations by negotiating UDP encapsulation of IKE and
+    ESP packets. Port 4500 is reserved for UDP-encapsulated ESP and IKE. Because NATs
+    often translate TCP and UDP port numbers, IPsec packets must be accepted from
+    any port and sent back to that same port. The good news is that we don’t build
+    NATs in IPv6 networks, so this is not an issue anymore.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can find all relevant and updated IKEv2 numbers and codes at [http://www.iana.org/assignments/ikev2-parameters](http://www.iana.org/assignments/ikev2-parameters).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A summary of the changes to IKEv2 can be taken from RFC 5996\. Here are some
+    of the main points (refer to the RFC for the whole list):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To define the entire IKE protocol in a single document, replacing RFCs 2407,
+    2408, and 2409, and incorporating subsequent changes to support NAT Traversal,
+    Extensible Authentication, and Remote Address acquisition.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To simplify IKE by replacing the eight different initial exchanges with a single
+    four-message exchange.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To decrease IKE’s latency in the common case by making the initial exchange
+    two round trips (four messages) and allowing the ability to piggyback setup of
+    a `CHILD_SA` on that exchange. It also adds Denial of Service resistance to the
+    initial exchange.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To reduce the number of possible error states by making the protocol reliable.
+    This is done by requiring all messages to be acknowledged and sequenced. This
+    allows shortening `CREATE_CHILD_SA` exchanges from three messages to two.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To maintain existing syntax and magic numbers to the extent possible to make
+    it likely that implementations of IKEv1 can be enhanced to support IKEv2 with
+    minimum effort.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A list of algorithms to be used with IKEv2 is specified as mandatory to implement
+    in RFC 4307 “Cryptographic Algorithms for Use in the Internet Key Exchange Version
+    2 (IKEv2).” This is in order to ensure interoperability between different implementations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For a good overview of the relevant security RFCs and drafts, go to the IETF
+    Security working groups at [http://www.ietf.org/html.charters/wg-dir.html](http://www.ietf.org/html.charters/wg-dir.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 Security Elements
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: IPsec describes general security mechanisms that can be used with both protocols,
+    IPv6 and IPv4\. This means that IPv6 is not more secure than IPv4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the early days of IPv6, the implementation of IPsec in every IPv6 stack was
+    mandated and the use of IKE for key management recommended. With RFC 6434, “IPv6
+    Node Requirements,” this strict rule was downgraded to “SHOULD.” It is now up
+    to the vendors to decide whether their IPv6 products require IPsec or not (or
+    up to the customer to demand it). The main reasons for this were that it seemed
+    impractical to demand full IPsec implementations on all sorts of special device
+    types, for instance, sensors where resources are very limited, or device types
+    with very special applications that may have an application-based security approach.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the other hand, the same RFC states that nodes that implement IPsec have
+    stronger requirements than before. Support for RFC 4301, “Security Architecture
+    for the Internet Protocol,” is now mandatory, which includes the use of IKEv2
+    for automatic key management and requires support for a minimum set of cryptographic
+    algorithms, making IPsec more interoperable across vendor implementations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPsec specification defines protocols for the Authentication Header (AH)
+    and the Encapsulating Security Payload Header (ESP). With IPv6, these headers
+    are included as Extension headers. An IPsec implementation must support ESP and
+    may support AH. With the older specification, support for both protocols was required.
+    The requirement for AH support has been removed because ESP can be used to provide
+    integrity, which in most cases has proven to be sufficient.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To understand Extension headers and Next Header values, refer to [Chapter 3](ch03.html
+    "Chapter 3. The Structure of the IPv6 Protocol").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Authentication Header
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Authentication Header (AH) provides integrity and authentication (no confidentiality)
+    for all end-to-end data transported in an IP packet. It supports different authentication
+    mechanisms. It is specified in RFC 4302 and is indicated by the Next Header value
+    51 in the preceding header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The AH is located between the IPv6 header and upper-layer headers (e.g., TCP,
+    UDP, ICMP). If Extension headers are present, it has to be placed after the Hop-by-Hop,
+    Routing, and Fragment Extension headers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The format of the AH is shown in [Figure 6-1](ch06.html#the_format_of_the_authentication_header
+    "Figure 6-1. The format of the Authentication Header").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The format of the Authentication Header](images/ipv6_0601.png)Figure 6-1. The
+    format of the Authentication Header'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Each field is discussed in the following list:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Next Header (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Next Header field identifies the type of header that follows the Authentication
+    Header. It uses the values listed in [Table 3-1](ch03.html#values_in_the_next_header_field
+    "Table 3-1. Values in the Next Header field").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Payload Length (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Describes the length of the header in four-byte units, not including the first
+    eight bytes in the calculation. This length indication is necessary because the
+    authentication data in the AH may differ in length depending on the algorithm
+    used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Reserved (2 bytes)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Not used; set to 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Security Parameter Index (SPI) (4 bytes)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Arbitrary 32-bit value. Used by the receiver to identify the SA to which an
+    incoming packet belongs. The SPI field is mandatory, and this mechanism for mapping
+    inbound traffic to unicast SAs must be supported by all AH implementations. If
+    an IPsec implementation supports multicast, it must additionally support multicast
+    SAs using the de-multiplex algorithm specified for this purpose for mapping inbound
+    IPsec datagrams to SAs. SPI values in the range of 1 through 255 are reserved
+    by the Internet Assigned Numbers Authority (IANA) for future use. The SPI value
+    of 0 is reserved for local, implementation-specific use and must not be sent on
+    the wire.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Sequence Number (4 bytes)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This 32-bit sequence number is a monotonically increasing counter value. It
+    has to be set by the sender, but it is the choice of the receiver whether to act
+    on it. It ensures that packets with identical data are not resent repeatedly.
+    This prevents replay attacks in a unicast or single-sender SA. For a multisender
+    SA, the anti-replay features of AH are not available, because the AH does not
+    have a means to synchronize packet counters among multiple senders. On establishment
+    of an SA, the value is set to 0 at the sender and at the receiver. The first packet
+    always has the value 1, which is increased by one for every consecutive packet.
+    When the value 232 is reached, the counter is reinitialized to 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Integrity Check Value (variable length)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field contains the checksum (Integrity Check Value, or ICV) for the packet.
+    The length depends on the algorithm chosen on establishing the SA. It is always
+    a multiple of four bytes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The AH Specification in RFC 4302 defines a new Extended (64-bit) Sequence Number
+    (ESN). It cannot be seen in [Figure 6-1](ch06.html#the_format_of_the_authentication_header
+    "Figure 6-1. The format of the Authentication Header") because only the low-order
+    32 bits of the Extended Sequence Number are transmitted. The high-order 32 bits
+    are maintained as part of the sequence number counter by both transmitter and
+    receiver, and are included in the computation of the ICV. The 64-bit sequence
+    number is a new option designed to support high-speed IPsec implementations. The
+    use of an Extended Sequence Number is negotiated on setup of the SA. The default
+    with IKEv2 is ESN, unless 32-bit is explicitly negotiated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The checksum is calculated over the following fields:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All fields of the IP header or Extension header fields before the AH that do
+    not change in transit or whose value when arriving at the destination can be predicted.
+    For example, if a Routing Extension header is present, the last address in the
+    Routing Extension header is used for the calculation. The Traffic Class field,
+    the Flow Label, and the Hop Limit are not included in the calculation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All fields of the Authentication Header.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Other Extension headers present and the payload.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The high-order bits of the ESN (if employed) and any implicit padding required
+    by the integrity algorithm.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The following algorithms are considered suitable for IPsec:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Keyed Message Authentication Codes (MACs) based on symmetric encryption algorithms.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: One-way hash functions (e.g., MD5, SHA-1, SHA-256).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Other algorithms can be negotiated. RFC 4305, “Cryptographic Algorithm Implementation
+    Requirements for Encapsulating Security Payload (ESP) and Authentication Header
+    (AH),” lists the following implementation rules for AH:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: MUST, HMAC-SHA1-96 (RFC 2404)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: SHOULD, AES-XCBC-MAC-96 (RFC 3566)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: MAY, HMAC-MD5-96 (RFC 2403)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Weaknesses have become apparent in MD5; however, they should not affect the
+    use of MD5 with HMAC.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Authentication Header can be used in both transport and tunnel modes, as
+    shown in [Figure 6-2](ch06.html#authentication_header_in_transport_and "Figure 6-2. Authentication
+    Header in transport and tunnel mode").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Authentication Header in transport and tunnel mode](images/ipv6_0602.png)Figure 6-2. Authentication
+    Header in transport and tunnel mode'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In transport mode, the whole payload, including the fields of the IPv6 header,
+    which do not change in transit, is secured. In tunnel mode, the inner packet contains
+    the IP address of sender and receiver. The outer IP header contains the IP address
+    of the tunnel endpoints. In this case, the complete original packet, including
+    the fields of the outer header that do not change in transit, is secured.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encapsulating Security Payload Header
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Encapsulating Security Payload (ESP) header provides Integrity, Confidentiality,
+    Data Origin Authentication, Anti-Replay Service, and limited Traffic Flow Confidentiality
+    for all end-to-end data transported in an IP packet. The set of services provided
+    is negotiated on establishment of the SA. The ESP is defined in RFC 4303 and indicated
+    by a Next Header value of 50 in the preceding header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The ESP header is located in front of the transport (e.g., UDP or TCP), network
+    control (e.g., ICMP), or routing (e.g., OSPF) protocol header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The format of the ESP is shown in [Figure 6-3](ch06.html#format_of_the_encapsulating_security_pay
+    "Figure 6-3. Format of the Encapsulating Security Payload header").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Encapsulating Security Payload header](images/ipv6_0603.png)Figure 6-3. Format
+    of the Encapsulating Security Payload header'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Security Parameter Index (SPI) (4 bytes)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Arbitrary 32-bit value. Used by the receiver to identify the SA to which an
+    incoming packet belongs. The SPI field is mandatory, and this mechanism for mapping
+    inbound traffic to unicast SAs must be supported by all ESP implementations. If
+    an IPsec implementation supports multicast, it must additionally support multicast
+    SAs using the de-multiplex algorithm specified for this purpose for mapping inbound
+    IPsec datagrams to SAs. SPI values in the range of 1 through 255 are reserved
+    by the Internet Assigned Numbers Authority (IANA) for future use. The SPI value
+    of 0 is reserved for local, implementation-specific use and must not be sent on
+    the wire.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Sequence Number (4 bytes)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This 32-bit sequence number is a monotonically increasing counter value. It
+    has to be set by the sender, but it is the choice of the receiver whether to act
+    on it. It ensures that packets with identical data are not resent repeatedly.
+    This prevents replay attacks in a unicast or single-sender SA. For a multisender
+    SA, the anti-replay features of ESP are not available, because the ESP does not
+    have a means to synchronize packet counters among multiple senders. On establishment
+    of an SA, the value is set to 0 at the sender and at the receiver. The first packet
+    always has the value 1, which is increased by one for every consecutive packet.
+    When the value 2^(32) is reached, the counter is reinitialized to 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Payload Data (variable length)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contains the encrypted data as well as the encryption Initialization Vector
+    (IV) if required by the encryption mechanism.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Padding (0 to 255 bytes)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Used to align the packet to a multiple of 4 bytes and to reach a minimum packet
+    size if the encryption mechanism requires one.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Pad Length (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Indicates the number of preceding padding *bytes*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Next Header (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Identifies the type of header that follows the ESP header. It uses the values
+    listed in [Table 3-1](ch03.html#values_in_the_next_header_field "Table 3-1. Values
+    in the Next Header field"). To facilitate the rapid generation and discarding
+    of the padding traffic in support of traffic flow confidentiality, the protocol
+    value 59 (no next header) designates a *dummy* packet. The receiver of a dummy
+    packet must discard it without creating an error message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Integrity Check Value (variable length)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Integrity Check Value (ICV) is a variable-length field containing a checksum
+    computed over the ESP header, Payload, and ESP Trailer fields. The ICV field is
+    optional. It is present only if the integrity service is selected, and it is provided
+    by either a separate integrity algorithm or a combined mode algorithm that uses
+    an ICV. The length of the field is specified by the integrity algorithm selected
+    and associated with the SA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Padding, Pad Length, and Next Header fields are part of the ESP Trailer.
+    The encryption algorithm is either specified manually and included in the SA for
+    the packet stream or negotiated dynamically by the key exchange protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The ESP specification in RFC 4303 defines an Extended (64-bit) Sequence Number
+    (ESN). It cannot be seen in [Figure 5-3](ch05.html#mac_header_for_an_ipv6_multicast_destina
+    "Figure 5-3. MAC header for an IPv6 multicast Destination address"), because only
+    the low-order 32 bits of the Extended Sequence Number are transmitted. The high-order
+    32 bits are maintained as part of the sequence number counter by both transmitter
+    and receiver and are included in the computation of the ICV. The 64-bit sequence
+    number is a new option designed to support high-speed IPsec implementations. The
+    use of an Extended Sequence Number is negotiated on setup of the SA. The default
+    with IKEv2 is ESN unless 32-bit is explicitly negotiated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 4835, “Cryptographic Algorithm Implementation Requirements for Encapsulating
+    Security Payload (ESP) and Authentication Header (AH),” lists the implementation
+    rules for ESP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Combined Mode algorithms provide both confidentiality and authentication services.
+    They are expected to provide significant throughput and efficiency advantages.
+    AES-CM (Advanced Encryption Standard Counter Mode), which has been adopted as
+    the preferred mode for security in IEEE 802.11i, is defined in RFC 5084 and RFC
+    6655.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since ESP authentication and encryption are both optional, support for NULL
+    algorithms must be given for both. Note that only one of them can be set to NULL
+    at a time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The ESP can be used in both transport and tunnel modes, as shown in [Figure 6-4](ch06.html#encapsulating_security_payload_header_in
+    "Figure 6-4. Encapsulating Security Payload header in transport and tunnel mode").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Encapsulating Security Payload header in transport and tunnel mode](images/ipv6_0604.png)Figure 6-4. Encapsulating
+    Security Payload header in transport and tunnel mode'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In transport mode, the IP header and the Extension headers that follow are not
+    encrypted; otherwise, the packet could not be forwarded. If the complete packet
+    has to be encrypted, tunnel mode is the way to go. Just as with the AH in tunnel
+    mode, the inner packet contains the IP address of sender and receiver, whereas
+    the outer IP header contains the IP address of the tunnel endpoints.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The ESP header can be used with a NULL encryption option, which is defined in
+    RFC 2410\. With NULL encryption, only the authentication option of the ESP is
+    used, and the packet is not encrypted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Combination of AH and ESP
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The two headers can be used in combination as well. In that case, the AH has
+    to precede the ESP header to verify authenticity and integrity before the packet
+    is decrypted. The authentication option has been included in the ESP header to
+    allow for authentication of encrypted packets with only one header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the AH header is used in tunnel mode, the first IP header is included in
+    the authentication. If the ESP header is used, only the part of the packet following
+    the ESP header is authenticated. If encryption and integrity of the IP addresses
+    are required, both headers must be combined. If both headers are used, it is obviously
+    not necessary to use the authentication in the ESP header. On the other hand,
+    an ESP header with NULL encryption can be used if the given authentication is
+    sufficient.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Interaction of IPsec with IPv6 Elements
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The use of IPsec for IPv6 provides the same security as IPsec for IPv4 in the
+    Internet. But there are some areas where IPsec cannot easily be combined with
+    other services:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Tunneling*, a fundamental element of both IPsec and multiple transition mechanisms,
+    creates difficulties for existing firewalls and security gateways at the edge
+    of the internal network. An encrypted IPsec tunnel built through a firewall providing
+    end-to-end security for hosts on either side makes it impossible for the firewall
+    to detect dangerous or unauthorized content. One way to solve this issue is to
+    define the SAs between the security gateways, not between the end nodes. Another
+    issue is that the inner packet can contain information that presents a threat
+    for the internal network. This could be routing information or network control
+    messages (e.g., ICMP redirect).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The extended mobility options with constantly changing IP addresses can lead
+    to situations that are difficult to manage and control in IPsec environments.
+    Dynamic addresses such as privacy addresses (RFC 4941) create difficulties if
+    they are used for IKE identity checks.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: IPv6 Security “Gotchas”
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Security in an IPv6 network is not substantially different from security in
+    an IPv4 network. Many of the existing well-known IPv4 attacks can be performed
+    with IPv6, so our means for securing data is similar.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Just like in the IPv4 world, there will always be unethical hackers who find
+    new ways to break into our networks. The designers of security concepts and the
+    entire computer security community will have to stay alert and keep finding mechanisms
+    to keep pace with the hackers and find ways to protect their networks from new
+    attacks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If both protocols (IPv4 and IPv6) are used in a network, each protocol needs
+    its own security concept and provisions, which need to be coordinated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Having a strong and well-thought-out security design in your dual-stack network
+    is a must. But even before you deploy IPv6, you must make a first step of protection.
+    IPv6 is included in most operating systems, usually rather simple to configure,
+    and often activated by default. Often even tunnel mechanisms are activated by
+    default. IPv4 network administrators may believe that they do not have to worry
+    about IPv6, but they don’t realize that there may be IPv6 traffic in their network
+    already. This fact is used by IPv6 hackers to intrude into IPv4 networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Find the IPv6 traffic in your network by filtering your trace files for `0x86DD`
+    in the MAC header or for protocol 41 in the IPv4 protocol type field. You may
+    find a surprising number of Neighbor Discovery messages—a good indicator that
+    you have active IPv6 nodes on your network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a first step of protection, while you have not deployed IPv6 yet, make sure
+    you filter all IPv6 traffic coming into and going out from your network. This
+    includes native IPv6 traffic and tunneled traffic. And in addition to this it
+    could be wise to monitor and audit IPv6 traffic, specifically ND messages such
+    as Router or Neighbor Advertisements that could be used to misconfigure your clients.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 7123, “Security Implications of IPv6 on IPv4 Networks,” provides useful
+    suggestions on how to protect such an “unmanaged” IPv6 enterprise network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPsec, while being a good security mechanism, is not the be-all and end-all
+    for security. Most security professionals agree that there is no *silver bullet*
+    in securing a network from internal or external attacks. Combinations of best
+    practices and user training can minimize risks. If you are deploying IPv6 in the
+    near future, there are some security concerns that should be addressed. Be advised
+    that this is not a complete list, as entire volumes of information could be written
+    on the subject.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Native IPv6
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When connecting to IPv6 natively, some security issues that should be considered
+    are discussed in the following sections.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Public Key Infrastructure (PKI)
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: While RFC 4301 specifies the requirement for IPSec in the IPv6 protocol, it
+    does not cover how the keys will be exchanged. You could manually set up preshared
+    keying, but in large enterprises, this task becomes tedious and time consuming.
+    In such environments, using a central certificate server is ideal. With IPv6,
+    there were no such centralized certificate servers until recently. This has changed
+    with servers that are based on the IKEv2 protocol, which is specified in RFC 5996\.
+    Benefits of IKEv2 are its usability on both IPv4 and IPv6 and its simpler implementation.
+    It is not compatible with the first version of IKE, but both versions’ header
+    formats are similar enough to run them both unambiguously over the same UDP port.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Firewalls and intrusion detection/prevention systems
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: While end-to-end IPsec is considered one of the major advantages of IPv6, it
+    also introduces new problems with existing firewalling and IDS/IPsec if ESP is
+    used with encryption turned on. If the packets are encrypted from end to end,
+    how does a middle device inspect the packets without decrypting them? Storing
+    all the encryption keys in a central location leaves both a central point of failure
+    and a central location for a blackhat hacker to break into and steal all the encryption
+    keys for the network. Issues in current IPv4 IDS/IPS systems include lack of detection
+    of tunneled IPv6 protocols and a general lack of attack signatures for IPv6-based
+    attacks, although as IPv6 proliferates to more networks, these issues should eventually
+    be solved.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Firewalls that support IPv6 are included in most of the major operating systems,
+    but firewalls that keep the state of connections (*stateful firewalls*) are not
+    available in older implementations. Cisco, Checkpoint, and Netscreen (Juniper),
+    among others, have stateful inspection of IPv6 packets. Firewall products must
+    be carefully evaluated and tested against a specific list of RFC requirements.
+    Refer to [Chapter 9](ch09.html "Chapter 9. Planning for IPv6") for more information.
+    Even though most implementations have some basic features available, often important
+    features that are needed in an IPv6 network are still lacking support.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The draft “Requirements for IPv6 Enterprise Firewalls” (*draft-gont-opsec-ipv6-firewall-reqs-01*)
+    specifies a set of requirements for IPv6 firewalls, in order to establish some
+    common-ground in terms of what features can be expected and should be requested
+    in RFPs (Request for Proposal).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Implementation issues
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Many IPv6 implementations are fairly new. This leads to two other possible security
+    issues. The first issue is a lack of IPv6 assessment tools. It is a common practice
+    in the information security field to audit your own network with well-known security
+    auditing tools, and then secure the flaws found with those tools. Many of these
+    popular tools are in the process of being ported to audit IPv6 networks, so you
+    have to check the maturity level of your favorite tools. The second issue is untested
+    code in IPv6 implementations (which also ties into not having the tools to test
+    the implementations). Code that has not been “put through the wringer” is probably
+    going to have more security flaws than code that has been used in production environments
+    for a long time. Vendors have to wait for market response and incident reports
+    to fix their implementations. In your planning you need to allow for enough time
+    to test stacks and security implementations in your lab before you go to production,
+    and then establish a process for rapidly addressing security implementation risks
+    and flaws coming up.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: On the other hand we have to understand that in many cases transport layer security
+    is overemphasized, while much more efficient measures such as phishing, Trojans,
+    etc., are underestimated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Neighbor Discovery issues
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'ARP in IPv4 has been replaced with ICMP messages in IPv6\. Without using IPsec
+    AH or SEND, however, NDP has many of the security problems that ARP presented
+    in IPv4, such as redirect attacks (malicious nodes redirecting packets away from
+    legitimate receivers), Denial of Service (DoS) attacks, and flooding attacks (redirecting
+    other hosts’ traffic to a victim node creating a flood of bogus traffic). Duplicate
+    Address Detection and Router Advertisements can also be abused. These attacks
+    are similar to the ARP/DHCP attacks in IPv4\. A quote from RFC 4862 (IPv6 Stateless
+    Autoconfiguration) states:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If a node determines that its tentative link-local address is not unique, autoconfiguration
+    stops and manual configuration of the interface is required.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: This poses a possible Denial of Service attack, as multiple IPv6 addresses can
+    be assigned to a single interface. A rogue workstation could be assigned several
+    thousand addresses and deny other workstations the ability to acquire a link-local
+    address. Or even much simpler, a software responder can be built that always responds
+    with “address in use” such as new IPv6 tools from The Hacker’s Choice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another point is that link-local addresses can be acquired without preconfiguration.
+    An attacker can get access to a link without any further knowledge about the network.
+    This feature gives a malicious node the opportunity to mount an attack on any
+    other node attached to this link. Possible ways to protect from this are either
+    link-layer authentication (Network Access Control) or the use of Cryptographically
+    Generated Addresses (see below).
+  prefs: []
+  type: TYPE_NORMAL
+- en: First-hop security
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Router Advertisement spoofing is another security concern also known as *rogue
+    RA*. Since multiple addresses are allowed on a single interface, multiple routes
+    are allowed as well. A booting node sends a Router Solicitation to the all-routers
+    link-local multicast address (`ff02::2`). Each router on the link replies with
+    a Router Advertisement containing configuration information for the client. This
+    offers the possibility of sending traffic through a router through which it’s
+    not supposed to be sent (allowing traffic sniffing on the rogue router with the
+    potential of mounting a man-in-the-middle attack). An attacker can use other options
+    in the RA to misguide clients, for instance configuration of wrong DNS server
+    information (if supported by the client stack), a very small MTU size for all
+    nodes on the link, or a hop limit of 1 for all nodes. Obviously, this type of
+    attack happens in the IPv4 world also; it differs only in the mechanisms used.
+    Using the IPsec’s AH component, SEcure Neighbor Discovery (SEND), or RA Guard
+    are ways to mitigate this risk, among others.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*RA Guard* (Router Advertisement Guard) is defined in RFC 6105\. The purpose
+    of RA Guard is to filter Router Advertisements on Layer 2, based on a set of criteria,
+    before they reach the target. The criteria can be to allow RAs from a set of defined
+    sources, to disallow it on a given interface, to allow it from authenticated sources,
+    etc. It can run in a stateful or stateless mode. The specification also defines
+    the concept of a router authorization proxy that would check RAs on behalf of
+    the clients according to the criteria defined. And then only send out RAs from
+    the link that has been approved as coming from a legitimate source.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The efficiency of RA Guard depends on the capability of the Layer 2 device to
+    detect Router Advertisement messages. Practice has shown that in some implementations
+    it is possible to circumvent that capability with Extension headers, namely Fragmentation
+    headers. When packets are fragmented into multiple fragments, Layer 2 devices
+    may not find all the necessary information to perform packet filtering. RFC 6980,
+    “Security Implications of IPv6 Fragmentation with IPv6 Neighbor Discovery,” updates
+    RFC 4861 such that the use of the IPv6 Fragment header with traditional Neighbor
+    Discovery is forbidden. RFC 7113, “Implementation Advice for IPv6 Router Advertisement
+    Guard (RA Guard),” describes the issues and proposes filtering rules. It is an
+    update to RFC 6105 on RA Guard.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The specification in NDP suggests using IPsec to protect from attacks, without
+    providing more detailed information on how to do this. In many cases, especially
+    in public and wireless networks, the key management used with IPsec is too complex
+    and impractical.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A reference that outlines the possible threats with NDP and provides guidelines
+    is RFC 3756, “IPv6 Neighbor Discovery (ND) Trust Models and Threats.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 6946 discusses the issue of *atomic fragments*. An atomic fragment is a
+    packet that contains a Fragment header but is actually not fragmented. This can
+    happen if a host receives an ICMPv6 “Packet Too Big” message with a next-hop MTU
+    of less than 1,280 bytes. The Fragment header contains “Fragment Offset” and “M-Bit”
+    set to zero. This can then be used to cause the host to fragment packets and then
+    launch a fragmentation-based attack against such traffic. Many implementations
+    treat these atomic fragments like regular fragments. This can be used for attacks.
+    It would be better to process them as regular packets, with no need to queue them
+    and wait for more fragments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Fragment header is described in [Chapter 3](ch03.html "Chapter 3. The Structure
+    of the IPv6 Protocol") and Neighbor Discovery in [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*SEcure Neighbor Discovery* (SEND) is defined in RFC 3971 to secure NDP without
+    using IPsec. This approach involves the use of new NDP options to carry public
+    key-based signatures. A zero-configuration mechanism is used for showing address
+    ownership on individual nodes; routers are certified by a trust anchor. SEND is
+    a protocol-established trust between IPv6 Layer 2 adjacent nodes, but it suffers
+    from a lack of implementation in generic hosts such as Windows or Mac OS X and
+    only a couple of routers have implemented it. This renders SEND a generally unusable
+    solution.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can find a description of SEND and Cryptographically Generated Addresses
+    (CGA) in [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: As part of your *first-hop security* strategy you will also configure mechanisms
+    such as *ICMP Snooping*, *DHCPv6 Guard*, and *IPv6 Destination Guard*. Refer to
+    your vendor’s configuration guide to learn how to configure these features.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fragmentation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'As the section on ND and first-hop security have shown, there are several cases
+    where Extension headers and especially the Fragment header can cause security
+    issues. RFC 6980, “Security Implications of IPv6 Fragmentation with IPv6 Neighbor
+    Discovery,” describes these issues and forbids the use of Fragmentation with Neighbor
+    Discovery. The RFC specifies that nodes MUST NOT employ IPv6 fragmentation for
+    sending any of the following Neighbor Discovery and SEcure Neighbor Discovery
+    messages:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Neighbor Solicitation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Neighbor Advertisement
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Router Solicitation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Router Advertisement
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Redirect
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Certification Path Solicitation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If an IPv6 host receives ND messages with fragmentation, the message should
+    be silently discarded. So this is an update to the original ND specification in
+    RFC 4861\. If you notice that ND messages are discarded, verify that fragmentation
+    is the cause and find out where it is coming from.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Address and port scanning
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Address scanning has become much more complex, if not impractical. The interface
+    identifier in IPv6 has 64 bits. RFC 4846, “Local Network Protection for IPv6,”
+    states that “an attacker has to send out a simply unrealistic number of pings
+    to map the network, and virus/worm propagation will be thwarted in the process.
+    At full rate 40 Gbps (400 times the typical 100 Mbps LAN, and 13,000 times the
+    typical DSL/Cable access link) it takes over 5,000 years to scan a single 64-bit
+    space.” Go figure! If Autoconfiguration is used without the Privacy option, some
+    parts of the address (e.g., Vendor ID) can be guessed, but it is still a vast
+    space. A simple and good protection is to avoid easy-to-guess addressing schemes,
+    not using words such as `BEEF`, `F00D`, `CAFE`, `1234`, and `ABCD` as part of
+    an IPv6 address, and not using sequentially numbered or easy-to-guess addresses
+    to key infrastructure devices (such as `x::1` for routers).
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the other hand, getting an easy-to-remember address such as `x::1` for routers
+    makes network operations easier, hence more reliable, hence more secure as well.
+    The network operator has to balance the risk and the benefit of using predictable
+    addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 5157, “IPv6 Implications for Network Scanning,” discusses this topic and
+    explains alternative methods attackers may use. It also makes recommendations
+    on how you can address these issues in your design.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because an IPv6 network cannot be scanned, this also renders network inventory
+    more complex, and knowing who uses your network is, of course, also a key security
+    ingredient. Netflow or periodic NDP cache scans by SNMP can help with making your
+    network inventory. You may also use your IPAM (IP address management) or DDI (DNS,
+    DHCP, IP Address Management) tools for information on your network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Port scanning, on the other hand, commonly refers to scanning the TCP and UDP
+    port space on a particular IP address to determine which services are running.
+    Since IPv6 doesn’t change the TCP or UDP port space from its existing 16 bits,
+    port scanning is still a threat.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multicast issues
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: IPv6 supports multicast addresses with site scope, which can potentially allow
+    an attacker to identify certain important resources on the site if misused. Particular
+    examples are the all-routers (`ff05::2`) and all-DHCP-Servers (`ff05::1:3`) addresses.
+    An attacker that is able to infiltrate a message destined for these addresses
+    onto the site will potentially receive in return information identifying key resources
+    on the site. This information can then be used for directed attacks ranging from
+    simple flooding to more specific mechanisms designed to subvert the device. The
+    risk can be minimized by ensuring that all firewalls and site boundary routers
+    are configured to drop packets with site scope Destination addresses. Also, nodes
+    should not join multicast groups for which there is no legitimate use on the site,
+    and site routers should be configured to drop packets directed to these unused
+    addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Transition and Tunneling Mechanisms
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: IPv4 is not expected to go away anytime soon. It is very likely that there will
+    be IPv4 nodes on networks for many years to come. IPv4 hosts cannot communicate
+    with IPv6 hosts without some sort of transition or tunnel mechanism, which can
+    add complexity to the existing network topology and the underlying code for the
+    network stack. Transition and tunnel mechanisms can also be used as backdoors
+    into normally IPv4-only networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using IPv6 as a back door into IPv4 networks has been a known practice since
+    2002\. On December 17, one of the HoneyNet Project’s ([http://www.honeynet.org](http://www.honeynet.org))
+    Solaris 8 servers was compromised. The difference between this attack and earlier
+    ones was that this attacker set up an IPv6 tunnel to another country and tunneled
+    out the data he was trying to steal. This bypassed many intrusion detection systems
+    of the time, and it may do so today. This practice has been made easier with the
+    advent of UDP-based tunneling mechanisms designed to allow IPv6 from behind NATs
+    (a practice that was almost impossible before these mechanisms were available).
+    Teredo and Tunnel Setup Protocol (TSP) are two such mechanisms.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generally, with tunneling one has to make sure that packets that enter the network
+    through a tunnel cannot circumvent incoming packet filters. An attacker from the
+    Internet could, for instance, send an IPv4 packet to the tunnel endpoint (the
+    entry point to your network) that contains an IPv6 packet with an IPv6 Source
+    address from the range of your internal network. The tunnel endpoint decapsulates
+    the packet and forwards the IPv6 packet to the internal network. The receiver
+    believes that this packet originates from a host from the internal network. Automatic
+    tunnels are more dangerous in that respect because they have to accept packets
+    from any source. So a partial protection can be to configure the tunnel endpoint
+    to accept only packets from a configured tunnel entry point or to use only manually
+    configured tunnels. But the attacker can still spoof that address. Additional
+    filter mechanisms have to be implemented on the tunnel endpoint. It has to be
+    treated like any other ingress point into your network. RFC 4891, “Using IPsec
+    to Secure IPv6-in-IPv4 Tunnels,” goes into more details and gives guidance on
+    securing manually configured IPv6-in-IPv4 tunnels using IPsec.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6to4 tunneling* is a well-known transition mechanism for networks that do
+    not currently have native IPv6 connectivity. It consists of using a dual-stacked
+    border router with a routable IPv4 address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Refer to [Chapter 7](ch07.html "Chapter 7. Transition Technologies") for a detailed
+    discussion of 6to4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the 6to4 scenarios, there are special considerations discussed in RFC 3964,
+    “Security Considerations for 6to4.” The issues here are that: a) all 6to4 routers
+    must accept and decapsulate IPv4 packets from every other 6to4 router and from
+    6to4 relays, and b) all 6to4 relay routers must accept traffic from any native
+    IPv6 node. The routing scenarios to be analyzed are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: From 6to4 to 6to4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: From native IPv6 to 6to4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: From 6to4 to native IPv6
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Please refer to the RFC for a detailed discussion of the scenarios and best
+    practices to protect your network. And if applying our general design guidelines,
+    you will not deploy 6to4 in a production network anyway.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 6to4 router can be used for a Distributed Denial of Service (DDoS) attack
+    using a tool called *4to6DDoS*. 4to6DDoS does not require an IPv6 stack to be
+    installed on either the attacking or the victim host. It sends IPv6 in IPv4 encapsulated
+    packets directly from v4 to v4\. The routers used for 6to4 tunneling can also
+    be DoS attacked by simply connecting to the router several times with a private
+    IPv4 address. These routers must accept and decapsulate IPv4 packets even if they
+    are forged. They must also accept traffic from any native IPv6 node. 6to4 also
+    does not guarantee symmetric routing, meaning that traffic can take one routing
+    path going to its destination, and take a completely different path upon return.
+    This situation may not be optimal from a security and performance standpoint.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Automatic tunnels* can create another vulnerability. If a packet comes in
+    through a tunnel and the destination IPv6 address does not match a valid interface
+    within the IPv6 network, it can bounce back in and out of the tunnel until the
+    hop limit is exceeded. This applies to all automatic tunnels such as 6to4, ISATAP,
+    and 6rd (all protocol 41 tunnels). It can be abused as a vehicle for traffic amplifications
+    to facilitate DoS attacks. RFC 6324 describes the issues and mitigation measures
+    such as verification of endpoint existence, Destination and Source address checks,
+    and operational measures.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A good reference with an overview of security issues is RFC 4942, “IPv6 Transition/Coexistence
+    Security Considerations.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enterprise Security Models for IPv6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: End-to-end transparency and security has been lost in many IPv4 networks due
+    to the need to introduce NAT because of the shortage of IPv4 addresses. IPv6 can
+    restore the transparency. However, some people have become used to seeing NAT
+    and private addressing schemes to provide security in enterprise networks by hiding
+    the network topology from the outside. These people may perceive the IPv6 transparency
+    as a threat to their network and may even plan to deploy IPv6 networks with private
+    local addressing schemes and translators only for this reason.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The goal with IPv6 is to restore end-to-end connectivity by using the abundant
+    address space. To secure an IPv6 network, a security concept has to be created
+    and the security mechanisms have to be implemented. NAT should no longer be used
+    with IPv6\. If hiding network topology from the outside is a requirement, other
+    mechanisms should be used, such as privacy extensions for Stateless Address Autoconfiguration
+    (RFC 4941), Unique Local Addresses (ULAs, RFC 4193), or untraceable IPv6 addresses
+    as described in RFC 4864, “Local Network Protection for IPv6.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: The New Model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In IPv4 networks, the common model for security is to have perimeter firewalls
+    and integrate NATs. Applying this same approach in an IPv6 network may be a good
+    starting point, but is limiting in the long term. In IPv6 networks, you should
+    aim to design an improved security model that increases the overall security of
+    the network but also facilitates end-to-end communication. IPv6 provides IPsec
+    capability in each node. Relying on one perimeter firewall can be dangerous. An
+    attacker who manages to get behind the firewall will usually find an open unsecured
+    field. The optimal security concept for IPv6 networks is most likely to be “defense
+    in depth,” a combination of centralized security policy repositories and distribution
+    mechanisms that, in conjunction with trusted hosts, will allow network managers
+    to place more reliance on security mechanisms at the end points and allow end
+    points to influence the behavior of perimeter firewalls. Perimeter firewalls will
+    be responsible for securing the network from general attacks, and the end node
+    will be responsible for securing itself from node-related attacks. The new security
+    policy model for IPv6/IPsec networks must be an identity-based model in order
+    to separate security policy from network IDs. This is crucial for networks that
+    want to allow for automation, autoconfiguration, and mobility without compromising
+    security. This new distributed security model is emerging, and some of the technologies
+    required are still under development, including protocols to allow end nodes to
+    control and inform firewalls. Initial IPv6 deployments probably make use of similar
+    firewall and intrusion detection techniques as used in today’s IPv4 networks (with
+    the exception of NATs, which should not be used at all in IPv6 networks). But
+    the final goal to introduce a new type of distributed security concept should
+    be kept in mind as you go along, and the development of these technologies should
+    be followed closely.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Directory Services for Controlling Access
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With the address architecture of IPv6, we have to learn to detach identity from
+    IP address. An IPv6 interface has usually multiple IPv6 addresses and can change
+    them frequently (depending on address plan). So having security rules and ACLs
+    based on IPv6 addresses is probably not easy to manage. And a user (identity)
+    is often accessing systems from different devices. One approach to take care of
+    this is to have two different prefixes, one for access to the outside world, where
+    we want changing interface IDs so that we cannot easily be tracked on the Internet,
+    and another prefix for access to internal systems where we have fixed interface
+    IDs, so our users are trackable. This other internal prefix could be the ULA prefix
+    or just a slice of the public prefix set aside for internal use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A new approach is to base rule definitions on identities in a directory service.
+    After all, we want to control access for specific groups, specific machines, or
+    maybe specific users, depending on what machine they are coming from. With IP-based
+    access rules, this can become very complicated in a dual-stacked or IPv6 world.
+    So, if we instead assigned rules based on identities, controlling access would
+    be a lot easier, and the security device could resolve the rule by querying directory
+    services.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It seems that the market is going in this direction. Leading firewall vendors,
+    including Checkpoint and Cisco, are developing what is currently called *identity-based
+    firewalls*. This connects the firewall with a directory service (often Active
+    Directory) and matches users and machine identities. It can show IP addresses
+    related to a user or machine name and lets you define rules based on any of these
+    properties. You can define a firewall rule for specific users when they send traffic
+    from specific machines, or a firewall rule for a specific user regardless of which
+    machine he sends traffic from.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, when you design your future network, allow yourself to think in new ways.
+    Directory services are a great example where leveraging an existing, powerful
+    tool can change the operational paradigm of the environment. Especially with the
+    introduction of IPv6, there are many possible connections. For instance, using
+    directory services and a well-designed implementation of Identity Management,
+    you can centralize access control to your DMZ, letting partners, customers, and
+    employees access certain services and displaying content based on who they are.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 Firewall Filter Rules
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'When you live in a dual-stack network, you will have two security concepts:
+    one for the IPv4 world and another for the IPv6 world. The two concepts should
+    be congruent, but need to respect the requirements of each protocol. So, for instance,
+    where administrators often choose to completely block ICMP traffic in IPv4 networks,
+    it is not possible to do that with IPv6, because it may break some IPv6 features,
+    such as Path MTU Discovery.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Without trying to provide a full-fledged security and firewall guide, here
+    are some ideas for IPv6 security provisions and firewall filters that should be
+    considered:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ingress filter at perimeter firewall for internally used addresses to prevent
+    spoofing.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Filter unneeded services at the perimeter firewall.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Deploy host-based firewalls for a defense in depth.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Critical systems should have static, nonobvious (randomly generated) IPv6 addresses,
+    even at the expense of more complex operations. Consider using static neighbor
+    entries for critical systems (versus letting them participate in ND).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hosts for Mobile IPv6 operations should be separate systems (to protect them
+    by separate rules).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Ensure that end nodes do not forward packets with Routing Extension type 0 headers.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Layer 3 firewalls should never forward link-local addressed packets.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Firewalls should support filtering based on Source and Destination address,
+    IPv6 Extension headers, and upper-layer protocol information.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Check your network for external packets that did not enter through your main
+    perimeter firewall as an indication of backdoor connections or surreptitious tunneling.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In IPv6 networks, ICMPv6 plays a fundamental role and provides great functionality.
+    Uncontrolled forwarding of ICMP messages also creates security risks. RFC 4890,
+    “Recommendations for Filtering ICMPv6 Messages in Firewalls,” provides recommendations
+    for the configuration of ICMPv6 firewall filtering rules (specifically, allowing
+    the forwarding of messages that are important for the functioning of the network
+    and dropping messages that are potential security risks).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another draft is on the way, called “Requirements for IPv6 Enterprise Firewalls”
+    (*draft-gont-opsec-ipv6-firewall-reqs-01*). It is in an early stage at the time
+    of writing. Its goal is to initialize a more in-depth discussion about what the
+    requirements for IPv6 firewalls are. Not only for the network operator who must
+    write requests for proposal, but also for firewall vendors, to help them identify
+    the important options they need to implement. If you operate, buy, deploy, or
+    manage firewalls, or if you are a firewall vendor, I highly recommend going through
+    the lists of requirements in this draft. I assume that it will become an RFC in
+    the near future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For those of you who work in security, you will want to dive a lot deeper than
+    a security chapter in a general IPv6 book can cover. The best advice I can give
+    you is to take your time to plan your IPv6 security concept and to dive into the
+    topics using a lab and testing it all. Most vendors by today (2014) have some
+    type of security implementations, but as the real-world implementations are still
+    in an early stage, there is not enough feedback from the market right now. So
+    most implementations are not in a very mature state.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A good read on IPv6 security is the book *IPv6 Security* by Scott Hogg and Eric
+    Vyncke (Cisco Press), two renowned industry experts. It’s been a while since it’s
+    been published and I am hoping for a second edition soon, but I consider it a
+    must-read for IPv6 security people.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next chapter describes integration and transition mechanisms and scenarios
+    that allow for a smooth, step-by-step introduction of IPv6 into your network.
+    It also covers important aspects of the planning and design process as well as
+    lessons learned by organizations who have already done the planning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: References
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Here’s a list of the most important RFCs and drafts mentioned in this chapter.
+    Sometimes I include additional subject-related RFCs for your personal further
+    study.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFCs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 1828, “IP Authentication using Keyed MD5,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1829, “The ESP DES-CBC Transform,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1918, “Address Allocation for Private Internets,” 1996
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2085, “HMAC-MD5 IP Authentication with Replay Prevention,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2403, “The Use of HMAC-MD5-96 within ESP and AH,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2404, “The Use of HMAC-SHA-1-96 within ESP and AH,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2405, “The ESP DES-CBC Cipher Algorithm With Explicit IV,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2407, “The Internet IP Security Domain of Interpretation for ISAKMP,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2408, “Internet Security Association and Key Management Protocol (ISAKMP),”
+    1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2409, “The Internet Key Exchange (IKE),” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2410, “The NULL Encryption Algorithm and Its Use With IPsec,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2412, “The OAKLEY Key Determination Protocol,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2451, “The ESP CBC-Mode Cipher Algorithms,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2474, “Definition of the Differentiated Services Field (DS Field) in the
+    IPv4 and IPv6 Headers,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3056, “Connection of IPv6 Domains Via IPv4 Clouds,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3068, “An Anycast Prefix for 6to4 Relay Routers,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3168, “The Addition of Explicit Congestion Notification (ECN) to IP,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3260, “New Terminology and Clarification for DiffServ,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3493, “Basic Socket Interface Extensions for IPv6,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3526, “More Modular Exponential (MODP) Diffie-Hellman groups for Internet
+    Key Exchange (IKE),” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3602, “The AES-CBC Cipher Algorithm and Its Use with IPsec,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3631, “Security Mechanisms for the Internet,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3715, “IPsec-Network Address Translation (NAT) Compatibility Requirements,”
+    2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 3739, “Internet X.509 Public Key Infrastructure: Qualified Certificates
+    Profile,” 2004'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3740, “The Multicast Group Security Architecture,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3748, “Extensible Authentication Protocol (EAP),” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3754, “IP Multicast in Differentiated Services (DS) Networks,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3756, “IPv6 Neighbor Discovery (ND) Trust Models and Threats,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3765, “NOPEER Community for Border Gateway Protocol (BGP) Route Scope Control,”
+    2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3947, “Negotiation of NAT-Traversal in the IKE,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3948, “UDP Encapsulation of IPsec ESP Packets,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3964, “Security Considerations for 6to4,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3971, “Secure Neighbor Discovery,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3972, “Cryptographically Generated Addresses (CGA),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4033, “DNS Security Introduction and Requirements,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4035, “Protocol Modifications for the DNS Security Extensions,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4106, “The Use of Galois/Counter Mode (GCM) in IPsec Encapsulating Security
+    Payload (ESP),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4107, “Guidelines for Cryptographic Key Management,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4109, “Algorithms for Internet Key Exchange version 1 (IKEv1),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4285, “Authentication Protocol for Mobile IPv6,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4301, “Security Architecture for the Internet Protocol,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4302, “IP Authentication Header,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4303, “IP Encapsulating Security Payload (ESP),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4307, “Cryptographic Algorithms for Use in the Internet Key Exchange Version
+    2 (IKEv2),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4308, “Cryptographic Suites for IPsec,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4309, " Using Advanced Encryption Standard (AES) CCM Mode with IPsec Encapsulating
+    Security Payload (ESP),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4359, “The Use of RSA/SHA-1 Signatures within Encapsulating Security Payload
+    (ESP) and Authentication Header (AH),” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4380, “Teredo: Tunneling IPv6 over UDP through Network Address Translations
+    (NATs),” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4581, “Cryptographically Generated Addresses (CGA) Extension Field Format,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4835, “Cryptographic Algorithm Implementation Requirements for Encapsulating
+    Security Payload (ESP) and Authentication Header (AH),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4862, “IPv6 Stateless Address Autoconfiguration,"2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4864, “Local Network Protection for IPv6,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4890, “Recommendations for Filtering ICMPv6 Messages in Firewalls,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4891, “Using IPsec to Secure IPv6-in-IPv4 Tunnels,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4941, “Privacy Extensions for Stateless Address Autoconfiguration in IPv6,”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4942, “IPv6 Transition/Coexistence Security Considerations,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4982, “Support for Multiple Hash Algorithms in Cryptographically Generated
+    Addresses (CGAs),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5084, “Using AES-CCM and AES-GCM Authenticated Encryption in the Cryptographic
+    Message Syntax (CMS),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5095, “Deprecation of Type 0 Routing Headers in IPv6,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5157, “IPv6 Implications for Network Scanning,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5247, “Extensible Authentication Protocol (EAP) Key Management Framework,”
+    2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5722, “Handling of Overlapping IPv6 Fragments,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5739, “IPv6 Configuration in Internet Key Exchange Protocol Version 2 (IKEv2),”
+    2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 5909, “Securing Neighbor Discovery Proxy: Problem Statement,” 2010'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5991, “Teredo Security Updates,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5996, “Internet Key Exchange Protocol Version 2 (IKEv2),” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6014, “Cryptographic Algorithm Identifier Allocation for DNSSEC,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6040, “Tunneling of Explicit Congestion Notification,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6071, “IP Security (IPsec) and Internet Key Exchange (IKE) Document Roadmap,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6081, “Teredo Extensions,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6092, “Recommended Simple Security Capabilities in Customer Premises Equipment
+    (CPE) for Providing Residential IPv6 Internet Service,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6104, “Rogue IPv6 Router Advertisement Problem Statement,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6105, “IPv6 Router Advertisement Guard,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6151, “Updated Security Considerations for the MD5 Message-Digest and the
+    HMAC-MD5 Algorithms,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6169, “Security Concerns with IP Tunneling,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6273, “The Secure Neighbor Discovery (SEND) Hash Threat Analysis,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6324, “Routing Loop Attack Using IPv6 Automatic Tunnels,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6434, “IPv6 Node Requirements,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6494, “Certificate Profile and Certificate Management for SEcure Neighbor
+    Discovery (SEND),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6495, “Subject Key Identifier (SKI) SEcure Neighbor Discovery (SEND) Name
+    Type Fields,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6620, “FCFS SAVI: First-Come, First-Served Source Address Validation Improvement
+    for Locally Assigned IPv6 Addresses,” 2012'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6655, “AES-CCM Cipher Suites for Transport Layer Security (TLS),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6946, “Processing of IPv6 ‘Atomic’ Fragments,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6959, “Source Address Validation Improvement (SAVI) Threat Scope,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6980, “Security Implications of IPv6 Fragmentation with IPv6 Neighbor Discovery,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7039, “Source Address Validation Improvement (SAVI) Framework,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7112, “Implications of Oversized IPv6 Header Chains,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7113, “Implementation Advice for IPv6 Router Advertisement Guard (RA-Guard),”
+    2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7123, “Security Implications of IPv6 on IPv4 Networks,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7219, “SEcure Neighbor Discovery (SEND) Source Address Validation Improvement
+    (SAVI),” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Drafts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Drafts can be found at [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html).
+    To locate the latest version of a draft, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
+    You can enter the draft name without a version number and the most current version
+    will come up. If a draft does not show up, it was possibly deleted. If it was
+    published as an RFC, the RFC number will be displayed. [http://tools.ietf.org/wg](http://tools.ietf.org/wg)
+    is also a very useful site. More information on the process of standardization,
+    RFCs, and drafts can be found in the [Appendix A](apa.html "Appendix A. RFCs").
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s a list of drafts I refer to in this chapter, as well as interesting
+    drafts that relate to the topics in this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “SAVI Solution for DHCP”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-savi-dhcp-25*, binding table for DHCP assigned addresses'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “SAVI for Mixed Address Assignment Methods Scenario”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-savi-mix-06*, binding table for coexisting ND, DHCP, and SEND addresses'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Requirements for IPv6 Enterprise Firewalls”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-gont-opsec-ipv6-firewall-reqs-01*'
+  prefs: []
+  type: TYPE_NORMAL

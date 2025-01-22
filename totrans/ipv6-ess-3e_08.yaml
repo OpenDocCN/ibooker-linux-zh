@@ -1,0 +1,3581 @@
+- en: Chapter 7. Transition Technologies
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This chapter provides an overview of the various transition mechanisms that
+    are available. IPv6 and IPv4 will coexist for many years, and there are a wide
+    range of techniques that make coexistence possible and provide an easy transition.
+    It is important to make the right choices and find the best migration path. There
+    is not an easy one-size-fits-all strategy. The migration path has to be adjusted
+    to the individual requirements of each organization and network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The available techniques that support you in your transition are separated
+    into three main categories:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Dual-stack techniques*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Allow IPv4 and IPv6 to coexist in the same devices and networks
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Tunneling techniques*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Allow the transport of IPv6 traffic over the existing IPv4 infrastructure
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Translation techniques*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Allow IPv6-only nodes to communicate with IPv4-only nodes
+  prefs: []
+  type: TYPE_NORMAL
+- en: These techniques can and likely will be used in combination with one another.
+    The migration to IPv6 can be done step-by-step, starting with single hosts or
+    subnets. You can migrate your corporate network or parts of it while your ISP
+    still runs only IPv4, or your ISP can upgrade to IPv6 while your corporate network
+    still runs IPv4\. This first section describes the techniques available today
+    for each of these categories. RFC 4213, “Basic Transition Mechanisms for IPv6
+    Hosts and Routers,” describes the dual-stack technique and configured tunneling.
+    There has been a lot of change in this area; transition mechanisms that were key
+    technologies at some point (such as 6to4) have been replaced by newer mechanisms,
+    such as 6rd in the case of 6to4\. New technologies have been defined and even
+    more are soon to come. This is the fulfillment of the promise that the IETF will
+    develop new and adjusted transition mechanisms to provide solutions for enterprises
+    as the need becomes obvious.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dual-Stack
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A *dual-stack node* has complete support for both protocol versions. This type
+    of node is often referred to as an *IPv6/IPv4 node*. In communication with an
+    IPv6 node, such a node behaves like an IPv6-only node; in communication with an
+    IPv4 node, it behaves like an IPv4-only node. Implementations may allow you to
+    enable or disable one of the stacks, so this node type can have three modes of
+    operation. When the IPv4 stack is enabled and the IPv6 stack is disabled, the
+    node behaves like an IPv4-only node. When the IPv6 stack is enabled and the IPv4
+    stack disabled, it behaves like an IPv6-only node. When both the IPv4 and IPv6
+    stacks are enabled, the node can use both protocols. An IPv6/IPv4 node has at
+    least one address for each enabled protocol version. It uses IPv4 mechanisms to
+    be configured for an IPv4 address (static configuration or DHCP) and uses IPv6
+    mechanisms to be configured for an IPv6 address (static configuration, SLAAC,
+    or DHCPv6).
+  prefs: []
+  type: TYPE_NORMAL
+- en: DNS is used with both protocol versions to resolve names and IP addresses. An
+    IPv6/IPv4 node needs a DNS resolver that is capable of resolving both types of
+    DNS address records. The DNS A record represents IPv4 addresses, and the DNS AAAA
+    (referred to as quad-A) record represents IPv6 addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Depending on how a service is reachable (over IPv4 or IPv6 or both), DNS may
+    return only an IPv4 or only an IPv6 address, or both. Default address selection
+    mechanisms and profiles will have to ensure that connections can be established
+    efficiently in any case. Hopefully, both the DNS resolver on the client and an
+    application using DNS will have configuration options that let us specify orders
+    or filters of how to use the addresses (i.e., preferred protocol settings). Happy
+    Eyeballs is a specification that has been developed to optimize connection setup
+    in a dual-stacked world. Note that the DNS resolver may run over an IPv4 or IPv6
+    network to resolve either type of address record.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For a detailed discussion of IPv6 DNS and Happy Eyeballs, refer to [Chapter 5](ch05.html
+    "Chapter 5. Networking").
+  prefs: []
+  type: TYPE_NORMAL
+- en: A *dual-stack network* is an infrastructure in which both IPv4 and IPv6 forwarding
+    is enabled on routers. The advantage of dual-stack is that you run both protocols
+    in native mode. Once the infrastructure runs dual-stack you can start to migrate
+    applications from IPv4 to IPv6 as they become available. And your traffic shifts
+    from IPv4 to IPv6 smoothly. No tunneling and no translation is involved. This
+    is best for performance, scalability, and efficiency. And there is no need to
+    design, test, and deploy temporary transition mechanisms that need to be removed
+    later on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this technique you must perform a full network upgrade to run the two separate
+    protocol stacks. All tables (e.g., routing tables) are kept simultaneously with
+    routing protocols being configured for both protocols. For security, you need
+    two concepts, one for IPv4 and one for IPv6, as you have two inroads into your
+    network. For network management, on some operating systems you may still have
+    separate commands depending on the protocol (e.g., *ping* for IPv4 and *ping6*
+    for IPv6), and it takes more memory and CPU power. But with state-of-the-art hardware,
+    this should not be an issue and the advantages of dual-stack outweigh the disadvantages
+    by far.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Dual-stack is a good way to go for IPv6 deployment. But it requires that IPv4
+    addresses are available for all hosts. If that is not the case, IPv6-only options
+    such as NAT64, DS-Lite, MAP, or 464XLAT have to be used. These methods decouple
+    edge network growth from IPv4 availability. They are discussed later in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another aspect to keep in mind is that dual-stack makes troubleshooting problems
+    more complicated. For instance, did an application that has problems with IPv6
+    attempt to connect via IPv4 instead of IPv6 and fail? How do you have to adjust
+    your troubleshooting approaches to test and figure that out? Your helpdesk and
+    IT support staff also need to understand how to use specific tools for IPv4 and
+    IPv6 so they can rule out one protocol versus the other. So from an operational
+    and support perspective, it may cost more to run a dual-stack network. This is
+    one of the main reasons more and more enterprises consider migrating to an IPv6-only
+    infrastructure as soon as possible. But more about this in [Chapter 9](ch09.html
+    "Chapter 9. Planning for IPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tunneling Techniques
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Tunneling mechanisms can be used to deploy an IPv6 forwarding infrastructure
+    while the overall IPv4 infrastructure is still the basis and either should not
+    or cannot be modified or upgraded.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Tunneling is also called *encapsulation*. With encapsulation, one protocol
+    (in our case, IPv6) is encapsulated in the header of another protocol (in our
+    case, IPv4) and forwarded over the infrastructure of the second protocol (IPv4).
+    The process of encapsulation has three components:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encapsulation at the tunnel entry point
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Decapsulation at the tunnel exit point
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Tunnel management
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'So tunneling can be used to carry IPv6 traffic by encapsulating it in IPv4
+    packets and tunneling it over the IPv4 routing infrastructure. For instance, if
+    your provider still has an IPv4-only infrastructure, tunneling allows you to have
+    a corporate IPv6 network and tunnel through your ISP’s IPv4 network to reach other
+    IPv6 hosts or networks. Or you can deploy IPv6 islands in your corporate network
+    while the backbone is still IPv4\. IPv6 packets traveling from one IPv6 island
+    to another can traverse the backbone encapsulated in IPv4 packets. General tunneling
+    techniques and the encapsulation of IPv6 packets in IPv4 packets are defined in
+    several RFCs, such as RFC 2473, “Generic Packet Tunneling in IPv6 Specification,”
+    and RFC 4213, “Basic Transition Mechanisms for IPv6 Hosts and Routers.” We differentiate
+    two general types of tunneling:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Manually configured tunneling of IPv6 over IPv4*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 packets are encapsulated in IPv4 packets to be carried over IPv4 routing
+    infrastructures. These are point-to-point tunnels that need to be configured manually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Automatic tunneling of IPv6 over IPv4*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 nodes can use different types of addresses, such as 6to4, 6rd, or ISATAP
+    addresses, to dynamically tunnel IPv6 packets over an IPv4 routing infrastructure.
+    These special IPv6 unicast addresses carry an IPv4 address in some parts of the
+    IPv6 address fields, which can be used to determine the IPv4 address of the destination
+    or the tunnel endpoint, respectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How Tunneling Works
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The concepts discussed in this section apply to tunneling in general. The next
+    two paragraphs discuss the difference between configured tunnels and automatic
+    tunneling. [Figure 7-1](ch07.html#encapsulation_and_tunneling "Figure 7-1. Encapsulation
+    and tunneling") shows two IPv6 networks connected through an IPv4-only network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Encapsulation and tunneling](images/ipv6_0701.png)Figure 7-1. Encapsulation
+    and tunneling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Host Marvin is on an IPv6 network and wants to send an IPv6 packet to host Ford
+    on another IPv6 network. The network between router R1 and router R2 is an IPv4-only
+    network. Router R1 is the *tunnel entry point*. Marvin sends the IPv6 packet to
+    router R1 (step 1 in [Figure 7-1](ch07.html#encapsulation_and_tunneling "Figure 7-1. Encapsulation
+    and tunneling")). When router R1 receives the packet addressed to Ford, it encapsulates
+    the packet in an IPv4 header and forwards it to router R2 (step 2 in [Figure 7-1](ch07.html#encapsulation_and_tunneling
+    "Figure 7-1. Encapsulation and tunneling")), which is the *tunnel exit point*.
+    Router R2 decapsulates the packet and forwards it to its final destination (step
+    3 in [Figure 7-1](ch07.html#encapsulation_and_tunneling "Figure 7-1. Encapsulation
+    and tunneling")). Between R1 and R2, any number of IPv4 routers is possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A tunnel has two endpoints: the tunnel entry point and the tunnel exit point.
+    In the scenario in [Figure 7-1](ch07.html#encapsulation_and_tunneling "Figure 7-1. Encapsulation
+    and tunneling"), the tunnel end points are two routers, but the tunnel can be
+    configured in different ways. It can be set up router-to-router, host-to-router,
+    host-to-host, or router-to-host. Depending on which scenario is used, the tunnel
+    entry and exit point can be either a host or a router.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The steps for the encapsulation of the IPv6 packet are the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The entry point of the tunnel decrements the IPv6 hop limit by one, encapsulates
+    the packet in an IPv4 header, and transmits the encapsulated packet through the
+    tunnel. If necessary, the IPv4 packet is fragmented.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The exit point of the tunnel receives the encapsulated packet. It checks whether
+    the source of the packet (tunnel entry point) is an acceptable source (according
+    to its configuration). If the packet was fragmented, the exit point reassembles
+    it. Then, the exit point removes the IPv4 header and processes the IPv6 packet
+    to its original destination.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[Figure 7-2](ch07.html#encapsulation "Figure 7-2. Encapsulation") shows the
+    encapsulation of an IPv6 packet in an IPv4 packet.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Encapsulation](images/ipv6_0702.png)Figure 7-2. Encapsulation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following fields in the IPv4 header are interesting to note: the Total
+    Length field in the IPv4 header contains the length of the IPv4 header plus the
+    length of the IPv6 packet, which is treated as the payload. If the encapsulated
+    packet has to be fragmented, there will be corresponding values in the Flags and
+    Fragment Offset fields. The value of the Time to Live (TTL) field depends on the
+    implementation used. The Protocol Number is set to 41, the value assigned for
+    IPv6\. Thus, if you want to analyze your tunneled IPv6 traffic, you can set a
+    filter in your analyzer to display the packets containing the value 41 in the
+    Protocol Number field. The IPv4 Source address is the address of the outgoing
+    interface of the tunnel entry point. It should also be configurable for cases
+    where automatic address selection may produce different results over time (multiple
+    addresses/interfaces). The IPv4 Destination address is the IPv4 address of the
+    tunnel exit point. The IPv6-over-IPv4 tunnel is considered a single hop. The Hop
+    Limit field in the IPv6 header is therefore decremented by one. This hides the
+    existence of a tunnel to the end user, and is not detectable by common tools such
+    as *traceroute*. [Figure 7-3](ch07.html#encapsulation_in_the_trace_file "Figure 7-3. Encapsulation
+    in the trace file") shows an encapsulated IPv6 packet in the trace file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Encapsulation in the trace file](images/ipv6_0703.png)Figure 7-3. Encapsulation
+    in the trace file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Ethertype is set to 0800, the value for IPv4\. The TTL in the IPv4 header
+    is set to 128\. The Protocol field shows value 41 for IPv6, which identifies this
+    packet as an encapsulated packet. The Source address `62.2.84.115` is the IPv4
+    address of the tunnel entry point. The Destination address is the IPv4 address
+    of a 6to4 relay router (explained later in this chapter) in the Internet, the
+    tunnel exit point. This router can forward IPv6 packets to an IPv6 network. Compare
+    these IPv4 addresses with the IPv6 Source and Destination addresses (which can
+    be seen in the highlighted summary line above the detail screen). Use your Windows
+    calculator to find out that the IPv6 Source and Destination addresses have the
+    6to4 prefix of `2002` plus the IPv4 address in hexadecimal notation in the low-order
+    32 bits. This is an example of a host-to-host automatic tunnel because we were
+    actually pinging the 6to4 router.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If an IPv4 router from within the tunnel generates an ICMPv4 error message,
+    the router sends the message to the tunnel entry point because that host is the
+    source of that packet. If the packet contains enough information about the original
+    encapsulated IPv6 packet, the tunnel entry point may send an ICMPv6 message back
+    to the original source of the packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When the tunnel exit point receives an IPv4 datagram with a protocol value
+    of 41, it knows that this packet has been encapsulated. Before forwarding a decapsulated
+    IPv6 packet, the tunnel endpoint must verify that the tunnel Source address is
+    acceptable. Thus, unacceptable ingress into the network can be avoided. If the
+    tunnel is a bidirectionally configured tunnel, this check is done by comparing
+    the Source address of the encapsulated packet with the configured address of the
+    other side of the tunnel. For unidirectionally configured tunnels, the tunnel
+    must be configured with a list of source IPv4 address prefixes that are acceptable.
+    By default, this list is empty, which means that the tunnel endpoint has to be
+    explicitly configured to allow forwarding of decapsulated packets. In the case
+    of fragmentation, the tunnel exit point reassembles the packets and removes the
+    IPv4 header. Before delivering the IPv6 packet to the final destination, it checks
+    to see if the IPv6 Source address is valid. The following Source addresses are
+    considered invalid:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All multicast addresses (`ff00::/8`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The loopback address (`::1`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All IPv4-compatible IPv6 addresses (`::/96`), excluding the unspecified address
+    for Duplicate Address Detection (`::/128`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All IPv4-mapped IPv6 addresses (`::ffff:0:0/96`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Both tunnel endpoints need to have a link-local IPv6 address. The IPv4 address
+    of that same interface may be the interface identifier for the IPv6 address. For
+    example, a host with an IPv4 address of `192.168.0.2` may have a link-local address
+    of `fe80::192.168.0.2/64.`
+  prefs: []
+  type: TYPE_NORMAL
+- en: The specification contains rules that apply tunnel Source address verification
+    and ingress filtering (RFCs 2827 and 3704) in general to packets before they are
+    decapsulated. If further security mechanisms are desirable, a tunneling scheme
+    with authentication can be used—for example, IPsec (preferable) or Generic Routing
+    Encapsulation (GRE) with a preconfigured secret key (RFC 2890). Since the configured
+    tunnels are set up manually, setting up the keying material is not a problem.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Automatic Tunneling
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Automatic tunneling allows IPv6/IPv4 nodes to communicate over an IPv4 infrastructure
+    without the need for tunnel destination preconfiguration. The tunnel configuration
+    information is extracted from an IPv4 address embedded in an IPv6 address. In
+    a previous specification (RFC 2893, obsoleted by RFC 4213), the tunnel endpoint
+    address was determined by an IPv4-compatible Destination address. RFC 4213 removes
+    the description of automatic tunneling and IPv4-compatible addresses and refers
+    to 6to4 (discussed later in this chapter), which does not use IPv4-compatible
+    IPv6 addresses. 6to4 has its own IPv6 address format, which includes the IPv4
+    address of the tunnel endpoint in the prefix and therefore allows for automatic
+    tunneling. These days, 6to4 is not a recommended tunnel mechanism anymore; it
+    has been replaced by 6rd. But more about this in the sections 6to4 and 6rd later
+    in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configured Tunneling (RFC 4213)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Configured tunneling is IPv6-over-IPv4 tunneling where the IPv4 tunnel endpoint
+    addresses are determined by configuration information on the tunnel endpoints.
+    All tunnels are assumed to be bidirectional. The tunnel provides a virtual point-to-point
+    link to the IPv6 layer using the configured IPv4 addresses as the lower layer
+    endpoint addresses. The administrative work to manage configured tunnels is higher
+    than with automatic tunnels, but for security reasons it may be desirable, as
+    it provides more possibilities to control the forwarding path of IPv6 packets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 4213 discusses the configuration and issues to be taken care of, such as
+    determination of valid tunnel endpoint addresses (ingress filtering), how to deal
+    with ICMPv4 or ICMPv6 messages, how to optimize tunnel MTU sizes, fragmentation,
+    the header fields, Neighbor Discovery (ND) over tunnels, and security considerations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6/IPv4 hosts connected to network segments with no IPv6 routers can be configured
+    with a static route to an IPv6 router in the Internet at the other side of an
+    IPv4 tunnel; this enables communication with a remote IPv6 world. In this case,
+    the IPv6 address of an IPv6/IPv4 router at the other end of the tunnel is added
+    into the routing table as a default route. Now all IPv6 Destination addresses
+    match the route and can be tunneled through the IPv4 infrastructure. This default
+    route has a mask of zero and is used only if there are no other routes with a
+    more specific matching mask.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encapsulation in IPv6 (RFC 2473)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 2473 specifies the model and the generic mechanisms for encapsulation with
+    IPv6\. Most of the rules discussed in this chapter about tunneling in IPv4 apply
+    to tunneling in IPv6\. The main difference is that in tunneling in IPv6, the packets
+    are encapsulated in an IPv6 header and sent through an IPv6 network. The packet
+    being encapsulated can be an IPv4 packet, an IPv6 packet, or any other protocol.
+    The tunnel entry point prepends the IPv6 header and, if needed, one or a set of
+    Extension headers in front of the original packet header. Whatever the tunnel
+    entry point prepends are called the *Tunnel IPv6 headers*. [Figure 7-4](ch07.html#tunnel_ipv6_headers_from_the_packet_view
+    "Figure 7-4. Tunnel IPv6 headers from the packet view") shows the Tunnel IPv6
+    headers in the packet view.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Tunnel IPv6 headers from the packet view](images/ipv6_0704.png)Figure 7-4. Tunnel
+    IPv6 headers from the packet view'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the IPv6 header applied by the tunnel entry point, the Source address is
+    the address of the tunnel entry point node, and the Destination address is the
+    address of the tunnel exit point node. The source node of the original packet
+    can be the same node as the tunnel entry point. The original packet, including
+    its header, becomes the payload of the encapsulated packet. The header of the
+    original packet is treated according to standard forwarding rules. If the header
+    is an IPv4 header, the TTL field is decremented by one. If it is an IPv6 header,
+    the Hop Limit field is decremented by one. The network between the tunnel entry
+    point and the tunnel exit point is thus virtually just one hop, no matter how
+    many actual hops there are in between.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Tunnel IPv6 header is processed according to the IPv6 protocol rules. Extension
+    headers, if added, are processed as though the packet were a standard IPv6 packet.
+    For example, a Hop-by-Hop Options header would be processed by every node listed
+    in the Hop-by-Hop Options field. A Destination Options header would be processed
+    by the destination host—i.e., the tunnel exit point. All these options are configured
+    on the tunnel entry point. An example of the use of a Destination Options header
+    is the configuration of a Tunnel Encapsulation Limit Option (RFC 2473). This option
+    may be used when tunnels are nested. One hop of a tunnel can be the entry point
+    of another tunnel. In this case, we have *nested tunnels*. The first tunnel is
+    called the *outer tunnel*, and the second tunnel is called the *inner tunnel*.
+    The inner tunnel entry point treats the whole packet received from the outer tunnel
+    as the original packet and applies the same rules as shown in [Figure 7-6](ch07.html#the_tunnel_ipv6_header
+    "Figure 7-6. The Tunnel IPv6 header"). The only natural limit to the number of
+    nested tunnels is the maximum IPv6 packet size. Every encapsulation adds to the
+    size of the tunnel IPv6 headers. This would allow for something around 1,600 nested
+    tunnels, which is not realistic. Also, consider the case in which the packet has
+    to be fragmented. If it has to be fragmented again because the additional tunnel
+    IPv6 headers have increased the packet size, the number of fragments is doubled.
+    So a mechanism was needed to limit the number of nested tunnels. It is specified
+    in RFC 2473 and is called the Tunnel Encapsulation Limit Option. This option is
+    carried in a Destination Option header and has the format shown in [Figure 7-5](ch07.html#format_of_the_tunnel_encapsulation_limit
+    "Figure 7-5. Format of the Tunnel Encapsulation Limit Option").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Tunnel Encapsulation Limit Option](images/ipv6_0705.png)Figure 7-5. Format
+    of the Tunnel Encapsulation Limit Option'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Option Type field has 1 byte and the decimal value 4, specifying the Tunnel
+    Encapsulation Limit Option. The Option Data Length field has the decimal value
+    1, specifying the length of the following Option field. In this case, the Option
+    field has a size of 1 byte and contains the actual value for the Tunnel Encapsulation
+    Limit Option. The value in this field specifies how many further levels of encapsulation
+    are permitted. If the value is zero, the packet is discarded and an ICMP Parameter
+    Problem message is sent back to the source (the tunnel entry point of the previous
+    tunnel). If the value is nonzero, the packet is encapsulated and forwarded. In
+    this case, a new Tunnel Encapsulation Limit Option has to be applied with a value
+    of one less than the limit received in the packet being encapsulated. If the packet
+    received does not have a tunnel encapsulation limit, but this tunnel entry point
+    has one configured, the tunnel entry point must apply a destination options header
+    and include the configured value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Loopback encapsulation* should be avoided. Loopback encapsulation happens
+    when a node encapsulates a packet originating from itself and destined to itself.
+    IPv6 implementations should prevent this by checking and rejecting configurations
+    of tunnels where both the entry and exit points belong to the same host. Another
+    undesirable situation is a *routing-loop nested encapsulation*. This situation
+    happens if a packet from an inner tunnel reenters an outer tunnel from which it
+    has not yet exited. This can be controlled only by a combination of the original
+    packet’s hop limit and the configuration of tunnel encapsulation limits.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s have a closer look at a Tunnel IPv6 Header in [Figure 7-6](ch07.html#the_tunnel_ipv6_header
+    "Figure 7-6. The Tunnel IPv6 header").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The Tunnel IPv6 header](images/ipv6_0706.png)Figure 7-6. The Tunnel IPv6
+    header'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The fields of a standard IPv6 header were discussed in [Chapter 3](ch03.html
+    "Chapter 3. The Structure of the IPv6 Protocol"). Interesting values here are
+    the following: the values for Traffic Class, Flow Label, and Hop Limit can be
+    preconfigured on the tunnel entry point. The Payload Length has the value for
+    the packet length of the original packet plus the size of any Extension headers
+    prepended by the tunnel entry point. The Source and Destination Addresses of the
+    Tunnel IPv6 header contain the IPv6 addresses of the tunnel entry and exit points,
+    respectively. Note that a host configured as a tunnel entry point must support
+    fragmentation of packets that it encapsulates. Encapsulated packets may exceed
+    the Path MTU of the tunnel. Because the tunnel entry point is considered the source
+    of the encapsulated packet, it must fragment it if needed. The tunnel exit point
+    node will reassemble the packet. If the original packet is an IPv4 packet with
+    the Don’t Fragment Bit set, the tunnel entry point discards the packet and sends
+    an ICMP Destination Unreachable message with the code “fragmentation needed and
+    DF set” back to the source of the packet.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tunneling Mechanisms
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The next sections describe a set of tunneling mechanisms available today. They
+    are to be seen as a set of tools in your IPv6 toolbox. Analyze your environment
+    and your requirements to find the optimal tools or combination of tools that meet
+    your goals.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6to4
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: RFC 3056, “Connection of IPv6 Domains via IPv4 Clouds,” specifies a mechanism
+    for IPv6 sites to communicate with each other over the IPv4 network without explicit
+    tunnel setup. This mechanism is called *6to4* and is one of the automatic tunneling
+    mechanisms. The wide area IPv4 network is treated as a unicast point-to-point
+    link layer, and the native IPv6 domains communicate via 6to4 routers, also referred
+    to as 6to4 gateways. Note that only the 6to4 router needs to be 6to4 aware. No
+    changes have to be made to the hosts within the 6to4 network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This was intended as a transition mechanism used during the period of coexistence
+    of IPv4 and IPv6\. It will not be used as a permanent solution. 6to4 will also
+    not be one of the strategic tunnel mechanisms. There are some disadvantages in
+    the design that will be discussed later in this section. We still discuss the
+    mechanism as it has not been deprecated, because there is a newer mechanism called
+    *6rd*, which is based on 6to4 and is implemented in production networks. 6rd resolves
+    some of the disadvantages of 6to4 and is also discussed later in this chapter.
+    So back to 6to4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The IPv6 packets are encapsulated in IPv4 at the 6to4 gateway. At least one
+    globally unique IPv4 unicast address is required for this configuration. The IANA
+    has assigned a special prefix for the 6to4 scheme: `2002::/16`. [Figure 7-7](ch07.html#format_of_the_6to4_prefix
+    "Figure 7-7. Format of the 6to4 prefix") shows the format of the 6to4 prefix in
+    detail.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the 6to4 prefix](images/ipv6_0707.png)Figure 7-7. Format of the
+    6to4 prefix'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 32 bits after the prefix `2002::/16` are the IPv4 address of the gateway
+    in hex representation. This leaves you with 80 bits of address space for your
+    internal network. 16 bits are used for the local network addressing, so you can
+    create 65,536 networks! The remaining 64 bits are used for the interface identifier
+    of the nodes on your network; that is, 2^(64) nodes per subnet. It looks like
+    getting familiar with the extended address space has some advantages. Now all
+    the hosts on your network can communicate with other 6to4 hosts on the Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In [Figure 7-7](ch07.html#format_of_the_6to4_prefix "Figure 7-7. Format of the
+    6to4 prefix"), there are terms such as FP (Format Prefix), TLA (Top Level Aggregator),
+    and SLA (Site Level Aggregator). They come from an older IPv6 address architecture
+    specification (RFC 2374). At the time when 6to4 was specified, RFC 2374 was still
+    valid.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When a node in a 6to4 network wants to communicate with a node in another 6to4
+    network, no tunnel configuration is necessary (automatic tunneling). The tunnel
+    entry point takes the IPv4 address of the tunnel exit point from the IPv6 address
+    of the destination. To communicate with an IPv6 node in a remote IPv6 network
+    (which is not a 6to4 network), you need a *6to4 relay router*. The relay router
+    is a router configured for 6to4 and IPv6\. It connects your 6to4 network to the
+    native IPv6 network. It announces the 6to4 prefix of `2002::/16` into the native
+    IPv6 network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 7-8](ch07.html#to4_components "Figure 7-8. 6to4 components") shows
+    the 6to4 components and how they play together.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![6to4 components](images/ipv6_0708.png)Figure 7-8. 6to4 components'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The figure shows the different possible communication paths. Within site 1,
+    hosts A and B can communicate using IPv6\. To communicate with host C in site
+    2 (another 6to4 site), the packets are sent to router R1 in site 1\. Router R1
+    encapsulates them in IPv4 and forwards them to Router R2 in site 2\. Router R1
+    learns the IPv4 address of Router R2 from the IPv6 Destination address. Router
+    R2 decapsulates the packet and forwards the original IPv6 packet to host C. To
+    communicate with an IPv6-only host in the Internet, host A or B sends its IPv6
+    packets to Router R1\. Router R1 encapsulates them in IPv4 and forwards them to
+    the Relay Router R3\. Router R3 decapsulates the packet and forwards the original
+    IPv6 packet over the IPv6 routing infrastructure to host D.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Router R1 internally advertises the 6to4 prefix in its Router Advertisements
+    (if configured to do so). The IPv6 hosts in site 1 can use the RA for Stateless
+    Address Autoconfiguration of their IPv6 address. The prefix announced has the
+    format `2002:IPv4-address-R1:subnet-ID::/64`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To connect a 6to4 network with the IPv6 Internet, a convenient 6to4 relay can
+    be evaluated and manually configured. The manual configuration has the advantage
+    of providing control over the relays used but creates more administrative work.
+    In case the preconfigured relay is not available, another relay needs to be configured.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 3068 defines a 6to4 relay router anycast address to simplify the configuration
+    of 6to4 gateways that need a default route to find a 6to4 relay router on the
+    Internet. IANA assigned an IPv4 6to4 Relay anycast prefix of `192.88.99.0/24`.
+    The assigned anycast address corresponds to the first node in the prefix, e.g.,
+    `192.88.99.1`. The 6to4 routers have to be configured with a default route pointing
+    to this anycast address. Using this address means that 6to4 packets are routed
+    to the nearest available 6to4 relay router automatically. If one 6to4 relay goes
+    down, you do not need to reconfigure your 6to4 gateway; packets will automatically
+    be rerouted to the next available relay.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As mentioned before, 6to4 has some problems. Deployments showed that there are
+    several cases where communication failures can occur. These failures can lead
+    to long retry delays or to total communication failures for users trying to access
+    services. The users are usually not aware of the fact that they use 6to4 and blame
+    the applications and services for the failure. There were discussions going on
+    to move 6to4 to historic status, but this would not eliminate the multitude of
+    implementations out in the market. As 6to4 was one of the early and main transition
+    technologies, it has been implemented widely. RFC 6343, “Advisory Guidelines for
+    6to4 Deployment,” describes the observed issues and gives recommendations for
+    6to4 deployment. In fact, implementations on many hosts and consumer routers now
+    de-preference or eliminate 6to4 such that websites that enable native IPv6 see
+    very little 6to4 traffic in practice today. You can see this in the [Google Statistics](http://www.google.com/intl/en/ipv6/statistics.html),
+    where 6to4 and Teredo traffic is displayed in the red curve, which is down to
+    zero basically since 2011\. The green curve that increases constantly is native
+    IPv6 traffic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 Rapid Deployment—6rd
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Let me give you some background on the story behind 6rd before we dive into
+    the workings of it. I kept preaching that providers and vendors should not wait
+    until customers ask for IPv6, because customers would usually not care about transport
+    protocols, but rather about services. So why should they ask for IPv6? But then
+    the exception happened in France. Back in 2007, customers of Free (a French ISP
+    belonging to the Iliad Group) made a request to Free, initiated by Remi Despres.
+    More than 20,000 people signed a petition that they would pay one Euro more per
+    month for getting IPv6 services. Within the incredibly short period of five weeks,
+    Free provided IPv6 Internet access to 1.5 million users. They started from zero
+    and did the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Obtained a /32 IPv6 prefix from their Regional Internet Registry (RIR)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Added 6rd support to the software of their Freebox home-gateway (based on the
+    widely available 6to4 code)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Provisioned PC-compatible platforms with a 6to4 gateway software
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Modified it to support 6rd
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Tested IPv6 operation with several operating systems and applications
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Finished operational deployment, by providing downloadable software to their
+    Freeboxes
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Announced IPv6 Internet connectivity, at no extra charge, for all their customers
+    wishing to activate it
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: IPv6 availability was limited in December 2007 to only one IPv6 link per customer
+    site (with /64 site-prefix assignments). A few months later, after Free had detailed
+    its achievement and plans to its RIR, and then obtained from it a /26 prefix,
+    up to 16 IPv6 links per customer became possible (with /60 site-prefix assignments).
+    At the IPv6 World Congress in 2011, Free announced that they would now enable
+    IPv6 for all new users and after that for all users. This was a very significant
+    announcement, as it was one of the first providers to provide IPv6 not just to
+    users asking for IPv6, but to all users without asking.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a long time, France has been leading in the percentage of IPv6-enabled Internet
+    users, thanks to this. In 2013, Switzerland jumped up to number one, being the
+    first country with a double digit user penetration rate (more than 10% of IPv6-enabled
+    users). This was mainly possible thanks to Swisscom, who has also deployed 6rd.
+    But let’s continue the Free story first.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So why did Free not simply use 6to4? For reasons mentioned before in the 6to4
+    section there are certain limitations in 6to4 that prevented ISPs from using it.
+    The first reason is the communication issues. Packets coming from a 6to4 network
+    can easily reach nodes in other 6to4 networks or in the IPv6 Internet. But it
+    is not always possible that packets coming from an IPv6 network can reach a 6to4
+    site. The reason for this is that somewhere on their path these packets must traverse
+    a 6to4 relay router. And there is no guarantee or control that routes toward such
+    a relay router exist from anywhere and that all such relays forward packets toward
+    the complete IPv4 Internet. Also, even if the ISP operates one or several 6to4
+    relays and has them advertise the 6to4 prefix of `2002::/16` toward the IPv6 Internet,
+    it may receive packets destined to an unknown number of other 6to4 ISPs. Furthermore,
+    ISPs prefer to assign their customers addresses out of their public ISP range
+    and not out of the 6to4 prefix. So Free has slightly modified 6to4 and made the
+    following changes in order to improve the situation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: They replaced the standard 6to4 prefix with their IPv6 prefix that belongs to
+    the ISP-assigned address space.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: They chose to replace the 6to4 anycast address by another anycast address chosen
+    by the ISP.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The ISP operates one or several 6rd gateways (which are upgraded 6to4 routers)
+    at its border between its IPv4 infrastructure and the IPv6 Internet.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: CPEs (Customer Premises Equipment) support IPv6 on the customer-site side and
+    support 6rd (which is upgraded 6to4 functionality) on the provider side.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This creative and efficient deployment has been described in RFC 5569, if you
+    are interested in more details. But as you can guess, this is not the end of the
+    story.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IETF took notice of this rapid deployment and today 6rd is an official protocol
+    specification defined in RFC 5969\. It has been adopted fast, and there are many
+    implementations out there, and more and more providers are using it in production
+    (such as Swisscom in Switzerland) or are considering it. To make it clear, this
+    is an automatic tunneling mechanism that can be used by providers if their backbone
+    does not support IPv6 natively yet. If the ISP doesn’t want to wait until he can
+    upgrade his backbone he can choose to use 6rd in order to tunnel customer IPv6
+    traffic over his IPv4-based backbone. But it should be a temporary solution. The
+    final goal is to be native end-to-end.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let us have a closer look at how 6rd is designed to work. And remember, many
+    of the processes are similar to 6to4, so we describe the changes here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s first define the terminology used in the RFC and in this section:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6rd Prefix*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An IPv6 prefix selected by the service provider. There is exactly one 6rd prefix
+    for a given 6rd domain. A service provider can deploy 6rd with one or multiple
+    6rd domains.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6rd Customer Edge (CE)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The customer edge router in a 6rd deployment. Sometimes also referred to as
+    customer premises equipment (CPE). Usually has one WAN-side interface, one or
+    more LAN-side interfaces, and a 6rd virtual interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6rd Delegated Prefix*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv6 prefix calculated by the CE to be used within the customer network.
+    It is built by combining the 6rd prefix with the IPv4 address of the CE received
+    by IPv4 configuration methods. This is equivalent to the DHCPv6 delegated prefix
+    described in RFC 3633 and in [Chapter 5](ch05.html "Chapter 5. Networking").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6rd Domain*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A set of 6rd CEs and BRs connected to the same virtual 6rd link. Each 6rd domain
+    requires a separate 6rd prefix.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*CE LAN side*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This interface serves the customer-facing side of the CE and is fully IPv6 enabled.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*CE WAN side*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This interface serves the WAN side of the CE and is IPv4 only.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6rd Border Relay (BR)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A 6rd-enabled router managed by the SP, sitting at the border between the SP’s
+    IPv4 network and the native IPv6 Internet (or another IPv6 network). It has at
+    least an IPv4-enabled interface toward the SP network, a 6rd virtual interface
+    acting as an endpoint for the 6rd tunnel, and an IPv6 interface connecting to
+    the native IPv6 network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6rd Virtual Interface*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Internal tunnel interface that encapsulates and decapsulates IPv6 packets. A
+    typical CE or BR requires only one 6rd virtual interface, but no more than one
+    per 6rd domain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the most obvious changes is the fact that 6rd does not use the 6to4 prefix
+    (`2002::/16`). It uses the service provider’s IPv6 prefix. This way the operational
+    domain is limited to the SP’s network and he has direct control over it. The RFC
+    states that from the customer perspective and the IPv6 Internet, 6rd can be seen
+    as equivalent to native IPv6\. Addresses assigned from the 6rd-delegated prefix
+    are treated like native IPv6 in the default address selection rules (RFC 6724).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 7-9](ch07.html#a_6rd_network "Figure 7-9. A 6rd network") shows the
+    layout of a 6rd network.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![A 6rd network](images/ipv6_0709.png)Figure 7-9. A 6rd network'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A 6rd domain consists of 6rd customer edge routers (CE) and one or more 6rd
+    border relays (BR). 6rd packets are encapsulated in an IPv4 header and therefore
+    follow IPv4 routing within the SP’s IPv4 network. The BR is traversed if the packet
+    is destined to or coming from networks outside of the SP’s network. 6rd works
+    stateless, and thus, similar to 6to4, the BR can be reached using anycast for
+    failover. In this case the BR’s IPv4 address can be an anycast address shared
+    within the 6rd domain. The BR will use this address as a source address in packets
+    relayed to CEs. Since 6rd uses provider address space, no specific routes need
+    to be advertised externally for 6rd to operate.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s have a look at how prefix delegation works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 6rd prefix is created by combining the IPv6 prefix defined by the SP with
+    all or a part of the IPv4 address of the CE. From these two elements the 6rd delegated
+    prefix is automatically configured by the CE and is used in the same manner as
+    a prefix obtained via DHCPv6 prefix delegation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Refer to [Chapter 5](ch05.html "Chapter 5. Networking") for details on DHCPv6
+    and prefix delegation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In 6to4, we have a well-known /16 prefix (`2002::/16`) followed by a 32-bit
+    IPv4 address at a fixed location within the prefix. The 6to4 prefix is a /48 prefix.
+    In 6rd, the IPv6 prefix and also the position and number of bits of the IPv4 address
+    can vary. With 6rd the SP can adjust the size of the 6rd prefix. He can choose
+    how many bits are used by the 6rd mechanism and how many bits are left to be delegated
+    to the customer sites. To allow for Stateless Address Autoconfiguration, the prefix
+    assigned to the customer site should be at least a /64\. It would be preferable
+    to assign an even shorter prefix, such as a /60 or even a /56, in order to allow
+    the customer to further subnet his IPv6 network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 7-10](ch07.html#the_format_of_the_6rd_address "Figure 7-10. The format
+    of the 6rd address") shows the format of the 6rd address.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The format of the 6rd address](images/ipv6_0710.png)Figure 7-10. The format
+    of the 6rd address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The length of the delegated 6rd prefix is the sum of the number of bits of the
+    6rd prefix (n) plus the number of bits of the IPv4 address (o). If the SP uses
+    his /32 provider prefix and the full IPv4 address of the CE (32 bits), the customer
+    will get a /64 prefix. If the SP wants to delegate a shorter prefix such as a
+    /60 or /56, he can vary the number of bits in the prefix. Using less than the
+    full 32 bits of an IPv4 address is possible, if a block of aggregatable IPv4 addresses
+    is available for a 6rd domain (depending on the ISP’s IPv4 address plan). So as
+    an example, if the IPv4 addresses can be aggregated as 10.1.0.0/8, the prefix
+    for 6rd will be a /56 (32 + 24 = 56). In this case the customer network has 8
+    bits for subnetting available (64 − 56 = 8).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Since 6rd delegated prefixes are selected algorithmically from an IPv4 address,
+    changing the IPv4 address also changes the IPv6 prefix, which could be disruptive
+    for the customer network. It is recommended to have either static IPv4 addresses
+    on the CE or assign IPv4 addresses with long lifetimes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While the protocol mechanism in 6rd allows for use within smaller allocations,
+    it is much simpler operationally to support mapping of the full 32 bits of the
+    IPv4 address into the 6rd prefix. This is what operators often prefer to do. The
+    worry is that operators will use a /32 and give a customer only a /64, which is
+    very problematic for any home network that has more than a single subnet. We expect
+    that the home network in the future needs multiple subnets, for example, for guest
+    plus home Wi-Fi support and to manage smart building components and multimedia
+    devices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is the reason the developers are putting so much effort into changing the
+    allocation policies. In the RIPE region as an ISP you can currently get a /29,
+    which allows you to assign a /30 to be used for 6rd customers. ARIN currently
+    has a special policy that allows for a /24 “separate allocation” with some special
+    provisions associated. Other regions may have different rules. This is work and
+    discussion in progress, so check with your local registry what the current rules
+    are.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The 6rd CEs and BRs must be configured with the following elements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv4 Mask Length*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The number of high-order bits that are identical across all CE IPv4 addresses
+    within the 6rd domain. For example, if there are no identical bits, the IPv4 mask
+    length is zero and the entire CE IPv4 address is used in the 6rd prefix (32 bits).
+    If there are 8 identical bits, the IPv4 mask length is 8 and the 8 high-order
+    bits from the IPv4 address are stripped off before constructing the 6rd delegated
+    prefix.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6rd Prefix*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 6rd prefix for the given 6rd domain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6rd Prefix Length*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The length of the 6rd IPv6 prefix for the given 6rd domain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6rd BR IPv4 address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv4 address of the 6rd BR for the given 6rd domain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is a 6rd DHCPv4 option with Option Code 212 and it looks as shown in [Figure 7-11](ch07.html#the_format_of_the_6rd_dhcpv4_option
+    "Figure 7-11. The format of the 6rd DHCPv4 option").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The format of the 6rd DHCPv4 option](images/ipv6_0711.png)Figure 7-11. The
+    format of the 6rd DHCPv4 option'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 6rd Option Code is set to 212\. The Option Length field shows the length
+    of the DHCP option in octets (22 octets with one BR IPv4 address). The IPv4 Mask
+    Length field shows the number of high-order bits that are identical across all
+    CE IPv4 addresses within a given 6rd domain. This can be a value between 0 and
+    32\. The 6rd Prefix Length field shows the IPv6 prefix length of the SP’s 6rd
+    prefix in number of bits. The 6rd BR IPv4 Address field contains one or more IPv4
+    addresses of the 6rd Border Relay(s) for a given 6rd domain. And finally the 6rd
+    Prefix field contains the 6rd prefix as a 16-octet IPv6 address. The number of
+    bits in the prefix after the number of bits specified in the 6rd prefix length
+    field must be set to zero by the sender and ignored by the receiver.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When 6rd is enabled, a typical CE router will create a default route to the
+    BR, a black hole route for the 6rd delegated prefix, and routes for any LAN-side
+    assigned and advertised prefixes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ISATAP
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The *Intra-Site Automatic Tunnel Addressing Protocol* (ISATAP) is designed to
+    provide IPv6 connectivity for dual-stack nodes over an IPv4-based network. It
+    treats the IPv4 network as one large link-layer network and allows those dual-stack
+    nodes to automatically tunnel between each other. You can use this automatic tunneling
+    mechanism regardless of whether you have global or private IPv4 addresses. ISATAP
+    addresses embed an IPv4 address in the EUI-64 interface identifier. Note that
+    all nodes in an ISATAP network need to support ISATAP. ISATAP is specified in
+    RFC 5214.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 7-12](ch07.html#the_format_of_the_isatap_address "Figure 7-12. The
+    format of the ISATAP address") shows the format of the ISATAP address.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The format of the ISATAP address](images/ipv6_0712.png)Figure 7-12. The format
+    of the ISATAP address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The ISATAP address has a standard 64-bit prefix that can be link-local, site-local,
+    a 6to4 prefix, or can belong to the global unicast range. The interface identifier
+    is built using the IANA OUI `00-00-5E`, which follows the prefix. The following
+    byte is a type field, and the value `fe` indicates that this address contains
+    an embedded IPv4 address. The last four bytes contain the IPv4 address, which
+    can be written in dotted decimal notation. The format of the address can thus
+    be summarized as `64bitPrefix:5efe:IPv4address`. For instance, if you have an
+    assigned prefix of `2001:db8:510::/64` and an IPv4 address of `62.2.84.115`, your
+    ISATAP address is `2001:db8:510::200:5efe:3e02:5473`. Alternatively, you can write
+    `2001:db8:510::200:5efe:62.2.84.115`. The corresponding link-local address would
+    be `fe80::200:5efe:62.2.84.115`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ISATAP interfaces form ISATAP interface identifiers from their IPv4 addresses
+    and use them to create link-local ISATAP addresses. The Neighbor Discovery mechanisms
+    specified in RFC 4861 are used (router and prefix discovery).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'An ISATAP router is an IPv6 router that is also reachable over IP4 and performs
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Advertises address prefixes to identify the logical ISATAP subnet on which ISATAP
+    hosts are located.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Forwards packets between ISATAP hosts on the logical ISATAP subnet and IPv6
+    hosts on other subnets (IPv4 subnets or IPv6 subnets).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Acts as a default router for ISATAP hosts.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Configures hosts on the logical subnet with router advertisements.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using ISATAP, IPv6 hosts within an IPv4 intranet can communicate with each other.
+    If they want to communicate with IPv6 hosts on the Internet, a border router must
+    be configured; it can be an ISATAP router or a 6to4 gateway. The IPv4 addresses
+    of the hosts within the site do not need to be public. They are embedded in the
+    address with the standard prefix and are therefore unique and routable. Large
+    numbers of ISATAP hosts can be assigned to one ISATAP prefix. If you deploy IPv6
+    on a segment in your corporate network, you configure one of the native IPv6 nodes
+    with an ISATAP interface, and it acts as a router between the native IPv6 segment
+    and ISATAP hosts in the IPv4 segments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ISATAP is an easy-to-deploy mechanism if you want to test and play quickly and
+    have an IPv4-routed network only. It can also easily give access to the IPv6 Internet
+    for a number of IPv6 users in an IPv4 network. But it is not recommended to use
+    in production networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In an unmanaged IPv6 network, you should make sure to disable ISATAP on all
+    hosts and block IPv6 traffic at the border for security reasons.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Teredo
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 6to4 makes IPv6 available over an IPv4 infrastructure using public IPv4 addresses.
+    ISATAP enables deployment of IPv6 hosts within an IPv4 site regardless of whether
+    it uses public or private IPv4 addresses. Teredo is designed to make IPv6 available
+    to hosts through one or more layers of NAT by tunneling packets over UDP. It is
+    specified in RFC 4380\. There are extensions defined in RFC 6081 to support more
+    types of NAT and RFC 5991 contains security extensions for Teredo.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Many Internet users, especially many home users, can access the Internet only
+    through NATs (Network Address Translation). NATs create issues when tunneling
+    IPv6 over an IPv4 infrastructure mainly for two reasons: first, NAT users have
+    a private IPv4 address, and second, many NATs are configured to perform ingress
+    filtering and do not allow many types of payload to go through. With tunneling,
+    the IPv6 packet is the payload of IPv4\. Mechanisms such as 6to4 often fail in
+    these environments because they require a public IPv4 address. 6to4 can be used
+    in NAT environments if the 6to4 router runs on the same box as NAT. In all other
+    cases, other mechanisms have to be chosen. In our future IPv6 world, we will no
+    longer need NATs, but for the coming transition time, we will have to deal with
+    them. Therefore, IPv6 developers are working on mechanisms to allow users sitting
+    behind NATs to access the IPv6 world by tunneling IPv6 packets in UDP. One of
+    these mechanisms is Teredo.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following terms are used with Teredo:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo Service*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The transmission of IPv6 packets over UDP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo Client*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A node that has access to the IPv4 Internet and needs access to the IPv6 Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo Server*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A node that has access to the IPv4 Internet through a public IPv4 address and
+    is used to provide IPv6 connectivity to Teredo clients.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo Relay*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An IPv6 router that can receive traffic destined to Teredo clients and forward
+    it using the Teredo service.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo IPv6 Service Prefix*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An IPv6 addressing prefix used to construct the IPv6 address of Teredo clients.
+    The global Teredo prefix assigned by IANA is `2001:0000::/32`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo UDP port*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The UDP port number at which Teredo servers are waiting for packets. The default
+    value of this port is 3544.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo Bubble*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A minimal IPv6 packet made of an IPv6 header and a null payload (payload type
+    is set to 59, No Next Header). Teredo clients and relays use bubbles to create
+    a mapping in a NAT.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo Service port*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The port from which the Teredo client sends Teredo packets. This port is attached
+    to one of the client’s IPv4 addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo Server Address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv4 address of the Teredo server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo-mapped Address and Teredo-mapped Port*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A global IPv4 address and a UDP port that results from the translation of the
+    IPv4 address and UDP port of a client’s Teredo service port by one or more NATs.
+    The client learns these values through the Teredo protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo IPv6 Client Prefix*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A global IPv6 prefix composed of the Teredo IPv6 service prefix and the Teredo
+    server address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo Node Identifier*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A 64-bit identifier that contains the UDP port and IPv4 address at which a client
+    can be reached through the Teredo service. A flag indicates the type of NAT through
+    which the client accesses the IPv4 Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo IPv6 Address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Teredo IPv6 address obtained by combining a Teredo IPv6 client prefix and
+    a Teredo node identifier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo Refresh Interval*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The interval during which a Teredo IPv6 address is expected to remain valid
+    in the absence of “refresh” traffic. The interval depends on configuration parameters
+    of the local NAT(s) in the path to the Teredo server. By default, clients assume
+    an interval value of 30 seconds.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo Secondary Port*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A UDP port used to send or receive packets in order to determine the appropriate
+    value of the refresh interval, but not used to carry any Teredo traffic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Teredo IPv6 Discovery Address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An IPv4 multicast address used to discover other Teredo clients on the IPv4
+    subnet. The multicast address is `224.0.0.253`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Teredo service transports IPv6 packets as payload of UDP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Teredo design aims to provide robust access to IPv6 networks. This design
+    creates some overhead. Teredo is only to be used if no other, more direct access
+    is possible. For instance, if it is possible to implement a 6to4 or even a 6rd
+    gateway on a NAT, this is the preferable solution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Teredo address has the format shown in [Figure 7-13](ch07.html#format_of_the_teredo_address-id1
+    "Figure 7-13. Format of the Teredo address").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Teredo address](images/ipv6_0713.png)Figure 7-13. Format of
+    the Teredo address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Teredo service prefix has 32 bits and is `2001:0000::/32`. The Server IPv4
+    field has a length of 32 bits and contains the IPv4 address of the Teredo server.
+    The Flags field has 16 bits and defines the address and the NAT type used. The
+    16-bit Port field contains the mapped UDP port of the Teredo Service on the client;
+    the Client IPv4 field contains the mapped IPv4 address of the client. The bits
+    in the Port and Client address field are all obfuscated. Each bit in the address
+    and port number is reversed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 7-14](ch07.html#teredo_communication "Figure 7-14. Teredo communication")
+    shows the Teredo communication.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Teredo communication](images/ipv6_0714.png.jpg)Figure 7-14. Teredo communication'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Teredo client must be preconfigured with the IPv4 address of its Teredo server.
+    On booting, it sends a Router solicitation to the all-routers multicast address
+    from its link-local IPv6 address. The Router solicitation is sent to the IPv4
+    address of the Teredo server over UDP. The Router advertisement coming back from
+    the Teredo server contains the Teredo IPv6 Service prefix. The client builds its
+    Teredo IPv6 address by combining the prefix with the reversed values for address
+    and port.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When the Teredo server forwards packets from Teredo clients, it encapsulates
+    the IPv6 packet in a UDP packet. It builds the IPv4 address and the UDP port for
+    the destination from the destination IPv6 address. It uses its own IPv4 address
+    as Source address and the Teredo UDP port (3544) as source port. The Teredo server’s
+    job is to forward packets from Teredo clients over UDP to the right Destination
+    address and to forward packets for Teredo clients coming from outside to the right
+    client internally.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Teredo Relay is an IPv6 router announcing the Teredo Service prefix to the
+    outside world using regular IPv6 routing mechanisms.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Teredo was one of the early transition mechanisms and like 6to4 is widely implemented.
+    It is not recommended to use Teredo in production networks. Your Microsoft Windows
+    clients often have Teredo activated by default (depending on OS version and patch
+    level). Make sure, whatever operating system you are using, to verify that Teredo
+    is turned off.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In an unmanaged IPv6 network, you should make sure to disable Teredo on all
+    hosts and block IPv6 traffic at the border for security reasons.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tunnel Broker
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Tunnel Brokers can be seen as virtual IPv6 providers providing IPv6 Internet
+    connectivity to users that already have an IPv4 connection to the Internet. The
+    Tunnel Broker is specified in RFC 3053.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 7-15](ch07.html#how_the_tunnel_broker_works "Figure 7-15. How the Tunnel
+    Broker works") illustrates how the Tunnel Broker works.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![How the Tunnel Broker works](images/ipv6_0715.png)Figure 7-15. How the Tunnel
+    Broker works'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A user desiring an IPv6 connection registers with the Tunnel Broker. The Tunnel
+    Broker manages the establishment, maintenance, and deletion of the tunnel on behalf
+    of the user. The Tunnel Broker can share the data load across several *Tunnel
+    Servers*. The Tunnel Broker sends the configuration information to a Tunnel Server
+    when it wants to establish, change, or delete a tunnel. The Tunnel Broker also
+    registers the addresses in DNS if it is configured to do so. A Tunnel Broker must
+    be reachable with an IPv4 address. It can also have an IPv6 address, but it is
+    not required. The communication between Tunnel Broker and Tunnel Server can run
+    over either IPv4 or IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Tunnel Server is a dual-stack router connected to the global Internet. When
+    it receives configuration information from the Tunnel Broker, it establishes,
+    changes, or deletes the server part of the tunnel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The client is a dual-stack host or router connected to the Internet over IPv4\.
+    When it wants to register for an IPv6 connection with the Tunnel Broker, it should
+    authenticate with standard procedures (e.g., with RADIUS). This way, unauthorized
+    use of the tunnel service can be avoided. So the Tunnel Broker provides access
+    control to the tunnel service. Once the client is authorized, it provides its
+    IPv4 address, a name for the registration of its IPv6 address in DNS, and an indication
+    of whether it is a host or a router. If the client is a router, it should send
+    additional information about the number of IPv6 addresses that it wants to be
+    served. The Tunnel Broker needs this information in order to assign an appropriate
+    prefix to the client.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The Tunnel Broker fulfills the following tasks:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Choosing a Tunnel Server as a tunnel exit point. If it has more than one option,
+    it chooses based on preconfigured load-sharing criteria.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Choosing a prefix for the client. The prefix can be any length. The most common
+    values are /48 (site prefix), /64 (subnet prefix), or /128 (single host).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Defining a lifetime for the tunnel.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Registering the global IPv6 addresses it has assigned in DNS.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Configuring the Tunnel Server.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Sending the configuration information back to the client. This information includes
+    the tunnel parameters and DNS names.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This concludes the tunnel configuration. The clients now have access to all
+    IPv6 networks to which the Tunnel Server has access.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are a number of ISPs that offer Tunnel Broker services. Often, users can
+    register through the browser by filling out a form and receiving the configuration
+    information displayed or sent by email. The client can now manually configure
+    its tunnel entry point or use script files from the provider that automate the
+    configuration process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There are different lists on the Internet to find a suitable Tunnel Broker.
+    Two well-known providers are [Hurricane Electrics](http://www.tunnelbroker.net)
+    and [SixXS](https://www.sixxs.net). Wikipedia has a list of [Tunnel Brokers](http://en.wikipedia.org/wiki/List_of_IPv6_tunnel_brokers).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Tunnel Broker model is designed for smaller and isolated IPv6 networks and
+    especially for single, isolated IPv6 hosts. It works only with public IPv4 addresses.
+    If private addresses are used, another mechanism such as Protocol 41 Forwarding
+    must be used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv4/IPv6 coexistence by using VLANs
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: VLANs, which are quite common in enterprise networks, can be used to deploy
+    IPv6 in a situation where IPv6-capable router and switch equipment is not available
+    yet. The VLAN standard allows separate LANs to be deployed over a single bridged
+    LAN. It uses virtual LAN tagging or membership information, which is inserted
+    into the Ethernet frames. So to introduce IPv6 in such an environment, a parallel
+    IPv6 routing infrastructure can be deployed, and the IPv6 links can be overlaid
+    onto the IPv4 infrastructure by using VLAN technology. This setup doesn’t require
+    any changes to the IPv4 environment. Find a detailed description of this scenario
+    and possible configurations in RFC 4554, “Use of VLANs for IPv4-IPv6 Coexistence
+    in Enterprise Networks.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 in MPLS networks
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: MPLS (MultiProtocol Label Switching) technology was introduced originally to
+    enhance the forwarding performance of Service Provider network cores. It is basically
+    a tunneling mechanism where forwarding is done hop-by-hop based on locally relevant
+    labels prepended to the IP packet. This means shorter lookups and easier hardware
+    implementation. Since its inception, however, the capabilities of routing platforms
+    have dramatically increased with respect to forwarding IP packets at line rate.
+    At this point the value of MPLS does not reside as much in forwarding performance
+    gains as it does in its ability to segment (MPLS-based VPNs) and organize traffic
+    (Traffic Engineering) over a network core. These capabilities also made MPLS attractive
+    to large enterprises that deploy their own network backbone.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The operation of MPLS depends on the existence of an IGP that ensures IP routing
+    is properly set up in the backbone and a label exchange protocol. The label exchange
+    protocol enables the P (Provider) and PE (Provider Edge) routers to define a label
+    for each hop a packet would take from one edge of the MPLS core to another. As
+    an IP packet enters the MPLS core, it is fitted with a locally relevant label
+    that tells the next hop where the packet is going. The next-hop router (or MPLS
+    switch as it might sometimes be called) swaps the label with a label relevant
+    for the next hop and so on to the destination PE. The P router before the destination
+    PE will strip the label and present the PE router with the IP packet that entered
+    the MPLS core. The PE router will in turn IP route the packet further toward its
+    final destination.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MPLS is a generic tunneling mechanism. So regardless of the control plane implementation
+    (IGP plus label exchange), it can forward IPv6 packets just as easily as it would
+    forward IPv4 packets. However, the options for transporting IPv6 over an IPv4
+    MPLS core were particularly easy to expand when the MPLS labels are complemented
+    with labels specific to particular functionality relevant at the edge of the MPLS
+    core. In other words, an additional label that tells the destination PE what type
+    of IP packet this is or in what routing context the packet should be placed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Most MPLS deployments today leverage MP-iBGP (MultiProtocol interior BGP; RFC
+    3107) to enhance functionality. Address families relevant to various protocols
+    (such as IPv4 and IPv6) and various functionalities (VPNs, multicast, etc.) can
+    be defined on the PE routers and the related traffic tagged with specific labels.
+    MP-iBGP exchanges these labels between the PE routers, enabling them to recognize
+    and properly process the tagged packets. These protocol or functional labels are
+    stacked on top of the MPLS labels. Extending this functionality to IPv6 was easy.
+    An IPv6 address family had to be identified and functionality similar to IPv4
+    (VPN, multicast, etc.) associated to the IPv6 address family. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Address Family Identifier (AFI) for IPv6 = 2
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Subsequent Address Family Identifier for transporting IPv6 traffic over MPLS
+    = 4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Subsequent Address Family Identifier for transporting VPN IPv6 traffic over
+    MPLS = 128
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'For these reasons, IPv6 can easily and very effectively be transported over
+    existing MPLS backbones. In general, IPv6 transport over an MPLS infrastructure
+    can be done in three ways:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv6 over IPv6/MPLS core*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The MPLS core can be enabled directly for IPv6, meaning it runs IPv6 natively.
+    It uses an IPv6 IGP and it exchanges labels for and over IPv6\. In this case,
+    IPv6 runs over the IPv6 MPLS core the same way as IPv4 runs over an IPv4 MPLS
+    core. IPv4 can be tunneled over this IPv6-based infrastructure as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Layer 2 tunneling over MPLS*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Layer 2 tunnels can be set up across MPLS cores. These tunnels simplify the
+    network architecture of the organizations using the MPLS backbone for connectivity.
+    They will carry any Layer 3 protocol, including IPv6 between the PE endpoints.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv6 over IPv4/MPLS core*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method is based on the distribution of IPv6 prefixes (along with the corresponding
+    labels) between the Edge Label Switching routers using MP-iBGP4 over IPv4\. The
+    next hop is identified by an IPv4 address and the packet is forwarded over the
+    MPLS core based on the labels for the IPv4 address of the target PE router (RFC
+    4798). Cisco calls their implementation of this mechanism 6PE (IPv6 Provider Edge
+    Router). The same concept is used to enable IPv6 VPNs over an IPv4 MPLS core (RFC
+    4659).
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is important to note that transporting IPv6 over an IPv4 MPLS core is a very
+    effective transition mechanism. The changes required consist only of configuration
+    adjustments for the PE routers (assuming the functionality is supported). In this
+    type of deployment, IPv6 benefits from all the value provided by the MPLS infrastructure,
+    from line rate forwarding to traffic engineering.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6PE
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: The concept for 6PE is based on the hierarchical routing structure of MPLS shown
+    in [Figure 7-16](ch07.html#mpls_routing_hierarchy "Figure 7-16. MPLS routing hierarchy").
+    I do not aim to discuss general MPLS technology here; the goal is to show how
+    MPLS can support an easy introduction of IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![MPLS routing hierarchy](images/ipv6_0716.png)Figure 7-16. MPLS routing hierarchy'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the center of the MPLS network are the Provider routers (P). They switch
+    the MPLS packets, which means that they do not process the Layer 3 header. At
+    the edge of the core network are the Provider Edge routers (PE). They receive
+    regular IP packets from the Customer Edge routers (CE), apply an MPLS label, and
+    forward them to the Provider routers. MPLS packets are sent only between Provider
+    Edge routers and Provider routers in [Figure 7-16](ch07.html#mpls_routing_hierarchy
+    "Figure 7-16. MPLS routing hierarchy").
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this environment, routing works as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The PE and CE routers use the common routing protocols (RIP, OSPF, BGP, or static
+    routing). The PE router learns the prefixes that it can reach through the CE routers
+    through these routing protocols.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Each PE router announces the prefixes learned from its CE routers over MP-iBGP
+    to the other PE routers and inserts itself as next hop for these prefixes. If
+    a global routing domain is established across the MPLS core for IPv6 (6PE) then
+    MP-iBGP will use SAFI 4 when exchanging prefixes. Along with the prefixes, the
+    PE advertises labels that should be used on packets sent to those prefixes.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The MPLS core uses an IGP, typically IS-IS or OSPF, to establish reachability
+    between the PEs. In conjunction with the label exchange protocol, Label Switched
+    Paths (LSPs) can be set up between PEs.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Forwarding of IPv6 traffic works as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An LSP (Label Switched Path; think the equivalent of a tunnel) already exists
+    between the ingress and egress PEs, established by the IPv4-based control plane
+    in the MPLS core.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: MP-iBGP already informed the ingress PE (PE1) who the next-hop PE is (PE4 identified
+    by its IPv4 address) and about the label that should be used for the IPv6 destination
+    prefix.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The label for the destination address prefix (CE3) is first appended by PE1
+    to the incoming IPv6 traffic received from CE1\. The ingress PE1 also appends
+    in front of that the label for the IPv4 address of the egress PE4 and sends the
+    packet to the next hop P router.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The P1 router swaps the top label (the one relevant for the egress PE4 IPv4
+    address) and forwards the packet to the next P router.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The process continues hop by hop until the packet reaches the P router connected
+    to the egress router. The P router eliminates the top label and forwards the packet
+    to the PE router.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The egress PE4 receives the packet with only one label; however, based on that
+    label it will know what to do with it. If this is a 6PE deployment, it will drop
+    the label and hand the IPv6 packet to the global IPv6 forwarding process
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The IPv6 packet is then natively forwarded to CE3 and further on to the destination.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you are familiar with the concept of MPLS-VPNs, you can think of 6PE as one
+    global VPN dedicated to transporting IPv6 between all PEs where it is enabled.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6VPE
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: Once we understand how 6PE works, and we are comfortable with MPLS-VPNs, then
+    6VPE will seem to be a very natural extension. For those who are not familiar
+    with MPLS-VPN, the key concept to know is that of a Virtual Routing and Forwarding
+    (VRF) instance. Across the MPLS backbone, if we define domains that should not
+    share or see each other’s traffic, we define Virtual Private Networks (VPNs).
+    The PE routers must maintain that separation so the traffic for each VPN instantiated
+    on a PE is routed and forwarded using dedicated tables that are maintained within
+    a respective VRF (Virtual Routing and Forwarding).
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the case of 6VPE, we create MPLS-VPNs specifically for IPv6 or we dual-stack
+    the existing VPNs. The control plane is very similar to 6PE. The MP-iBGP will
+    exchange labels (using SAFI 128) that now not only are related to an IPv6 prefix
+    but that are also related to the VRF to which that IPv6 prefix belongs. At the
+    PEs, IPv6 interfaces are bound to a VRF and so the IPv6 traffic is maintained
+    within the defined VPN. Forwarding is also similar to 6PE, the IPv6 packets are
+    fitted with a top-level label (exchanged via the label exchange protocol) used
+    for switching within the MPLS core and a second label (exchanged via MP-iBGP)
+    used to indicate to the receiving PE in which VRF the IPv6 packet should go.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Referring to [Figure 7-12](ch07.html#the_format_of_the_isatap_address "Figure 7-12. The
+    format of the ISATAP address"), unlike the 6PE scenario where all CEs are part
+    of the same global routing domain, CE1 and CE3 belong to the red VRF while CE2
+    belongs to blue VRF. PE1 will maintain separate routing and forwarding instances
+    for CE1 and CE2\. Moreover, PE1 exchanges labels for the IPv6 prefixes belonging
+    to each VRF. Forwarding is similar to 6PE:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When CE1 sends a packet toward CE3, the packet enters PE1 through an interface
+    associated to the red VRF.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The packet is fitted with the label for the CE3 destination IPv6 prefix (also
+    in the red VRF) and with the label for MPLS forwarding.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: PE1 sends the labeled packet to P1, and P1 swaps the top label and then forwards
+    it to P2.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: P2 pops the top label and sends the packet to PE4.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: PE4 receives a labeled packet and, based on it, PE4 knows what VRF this packet
+    belongs to and even where to send it within that VRF.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: PE4 strips the last label and lets the typical IP routing and forwarding functions
+    within the red VRF to take it to CE3.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The use of 6PE or 6VPE depends on the service that is supported by the IPv6
+    traffic. If you simply want to offer IPv6 access to the Internet for all CEs,
+    then 6PE will be a quick and easy solution. If you have multiple customers or
+    organizations on your MPLS backbone who are separated in distinct VPNs, then 6VPE
+    is the right solution for IPv6 enablement of these VPNs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The fact that MPLS can be used to transport IPv6 packets over IPv4 does not
+    mean that you should implement MPLS for this purpose. If you do not have an MPLS
+    infrastructure in place, other tunneling mechanisms may be better suited to reach
+    your goal. But if you already have MPLS, it is a great foundation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you would like to delve deeper into this, refer to the book *Deploying IPv6
+    Networks* by Ciprian Popoviciu, Patrick Grossetete, and Eric Levy-Abegnoli (Cisco
+    Press). It is a practical guide to IPv6 concepts, service implementations, and
+    interoperability with IPv4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Locator ID Separation Protocol (LISP)
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: LISP (Locator ID Separation Protocol) is a new and innovative architecture,
+    which was not purely designed to support IPv6\. However, the ability to register
+    IPv6 addresses and use IPv4 as a transport makes LISP a very useful tool for IPv6
+    transport over IPv4, connecting IPv6 islands or attaching IPv6 network elements
+    directly to the IPv6 Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Many challenges with the current addressing structure of IP come from the fact
+    that an IP address (IPv4 and IPv6) contains two different types of information.
+    One is about the location of a device (in the subnet information, prefix) and
+    the other about the identity of a device (host ID and interface ID, respectively).
+    Every time you boot your notebook, you may get a different IP address; the prefix
+    changes depending on which network you are in, and the host ID may change also
+    (depending on the configuration). LISP enables this “level of indirection,” by
+    separating the IP addresses into two namespaces: *Endpoint Identifiers* (EID)
+    and *Routing Locators* (RLOCs), which are assigned to a router, called *Tunnel
+    Router*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'LISP creates an overlay network with the following benefits:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multihoming with ingress traffic engineering
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Address family independence (IPv4 and IPv6; MAC address registration on roadmap)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: High-scale virtualization and multitenancy support
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Datacenter mobility including session persistence with mobility events
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: LISP is an IETF standard defined in the RFCs 6830 to 6836 and RFC 7052\. There
+    is still ongoing work on LISP, which is documented in various drafts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 7-17](ch07.html#lisp_architectural_network_elements "Figure 7-17. LISP
+    architectural network elements") shows the basic architectural elements of LISP.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The EID (Endpoint Identifier) space is the hosts/servers identifier’s IP address
+    space. It could be IPv4 or IPv6\. There are no special changes for the hosts/servers
+    or the branch, campus, or datacenter network. The EID is the identity of the host.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The RLOC (Routing Locator) space is the transport’s IP address space (identifying
+    the location). It could be IPv4 or IPv6\. There are no special changes for the
+    transport network, which could be the Internet, a Service Provider, or a private
+    WAN.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As LISP is a pure network-based solution, the only box that is aware of LISP
+    is the Tunnel Router (xTR), which comes in two flavors: ingress Tunnel Router
+    (iTR) and egress Tunnel Router (eTR). The iTR gets an IP packet from the branch,
+    campus, or datacenter and encapsulates the original packet into an IPv4/IPv6 UDP
+    packet with either two destination ports (UDP 4341 for data and UDP 4342 for control).
+    The source and destination of this encapsulated packet is defined by the RLOC
+    (transport IP address of the xTRs) of the iTR and the eTR. The eTR will receive
+    an encapsulated packet and will do the decapsulation. The basic configs for the
+    xTR is minimal and LISP is very lightweight to the control plane (LISP is data
+    driven and follows a pull model).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![LISP architectural network elements](images/ipv6_0717.png.jpg)Figure 7-17. LISP
+    architectural network elements'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The *Mapping Database* consists of two functions: the *Map Resolver* (MR) and
+    the *Map Server* (MS). The eTR will register the EIDs (either IPv4 or IPv6) with
+    its RLOC addresses (either IPv4 or IPv6) to the Map Server (map-register message).
+    The iTR will ask the MR, in case of any EID traffic, which destination RLOC to
+    use for the destination EID (map-request message). The MR forwards the map-request
+    to the MS and the MS checks its database and forwards the map-request to the eTR,
+    which will then do a more advanced answer (map-reply message) to the iTR. The
+    MR/MS can be configured on an xTR or can be a standalone router or server (like
+    a BGP route-reflector). The mapping database is very scalable and can be compared
+    with DNS for scalability and performance.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make LISP incrementally deployable there is a special xTR called *Proxy Tunnel
+    Router* (PxTR). The Proxy ingress Tunnel Router (PiTR) announces the EID space
+    into the Internet or non-LISP WAN and campus, and the Proxy egress Tunnel Router
+    (PeTR) is used to send encapsulated traffic to the non-LISP world. The trigger
+    to use the PeTR is a negative map-reply message from the MR.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Many advantages come with LISP:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Optimizes routing from push to pull
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Works as an overlay technology
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Uses stateless UDP encapsulation for optimized transport
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Calculates the source UDP LISP port from the original IP packet and helps with
+    ECMP (Equal Cost Multiple Path) load balancing in the RLOC space
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Makes deployment very easy as it only touches the network equipment at the edge
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These advantages come in addition to the use cases for multihoming with real
+    load balancing in the ingress. It supports virtualization for VRF transport and
+    unique mobility features.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But the most important part in this context is the capability to use IPv4 as
+    a transport for IPv6\. LISP can be used to connect IPv6 islands over an IPv4 network
+    or deliver a scalable and lightweight solution to connect to the IPv6 Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 7-18](ch07.html#lisp_ipv6_over_ipv4 "Figure 7-18. LISP IPv6 over IPv4")
+    shows the concept for transport of IPv6 over IPv4.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![LISP IPv6 over IPv4](images/ipv6_0718.png.jpg)Figure 7-18. LISP IPv6 over
+    IPv4'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The LISP router on the left will do a map-register with the LISP mapping-database
+    (not shown here). It will register the IPv6 address (IPv6 EID) of the IPv6 service
+    with the IPv4 RLOC (Internet IP address) of the LISP router.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Proxy Tunnel Router (PxTR; LISP router on the right) is connected to the
+    IPv4 and IPv6 Internet. The PiTR will announce the IPv6 EID to the IPv6 Internet
+    to attract the traffic for the IPv6 service. When a packet for the IPv6 service
+    arrives on the PiTR it will do a map-request for the IPv6 EID. The LISP router
+    on the left (eTR) will get the map-request from the MR/MS and will answer with
+    its IPv4 RLOC. The PiTR will now create a map-cache with the IPv6 EID and the
+    next-hop IPv4 RLOC. Now the packet from the IPv6 Internet will be encapsulated
+    in IPv4 and forwarded over the IPv4 Internet. The eTR will then decapsulate the
+    packet and deliver this natively as an IPv6 packet to the IPv6 service.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The return traffic from the IPv6 EID to the IPv6 Internet works similarly. The
+    iTR gets the IPv6 packet and depending on the configuration, it will issue a map-request
+    or it will send the packet directly to the PeTR (static map-cache). In case of
+    a map-request, a negative map-reply message will be received from the MR including
+    the PeTR IPv4 RLOC. The iTR can now encapsulate the IPv6 packet into IPv4 with
+    its source IPv4 RLOC and the IPv4 RLOC of the PeTR. The PeTR gets the encapsulated
+    LISP packet, strips off the IPv4 transport header and forwards the IPv6 packet
+    natively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'These examples show the ease of LISP IPv6 over IPv4 transport. You can use
+    the LISP control-plane or you can configure it statically as a direct map cache.
+    So if you want to enable IPv6 over IPv4 with LISP, all it takes is: switch on
+    LISP for xTR, configure your control-plane info (MR and MS), and define the IPv6
+    prefix that is to be transported over IPv4\. Additionally, you can add a static
+    map-entry to the iTR.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: LISP is available on all Cisco routers, on Catalyst 6500/6800, and Nexus7000\.
+    The German CPE vendor AVM implemented LISP for IPv6 transport in their Fritz!Box,
+    and there are a couple of open source versions (OpenLISP or LISPmob). There are
+    also plans from other vendors to adopt LISP soon.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The solution from [Figure 7-18](ch07.html#lisp_ipv6_over_ipv4 "Figure 7-18. LISP
+    IPv6 over IPv4") can be combined with other LISP use cases to create a real network
+    architecture, such as adding virtualization for transporting different VRFs or
+    increasing availability and load balancing with multihoming.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For further information on LISP, check out [http://www.lisp4.net](http://www.lisp4.net)
+    or [http://www.lisp6.net](http://www.lisp6.net) (this link only works if your
+    IPv6 connection works).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The LISP workgroup can be found at [http://www.tools.ietf.org/wg/lisp](http://www.tools.ietf.org/wg/lisp).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generic Routing Encapsulation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Another Tunneling mechanism that can be used is Generic Routing Encapsulation
+    (GRE). GRE is specified in RFC 2784 and is designed to encapsulate any protocol
+    in another protocol. The protocol being encapsulated—in our case IPv6—is called
+    the Passenger Protocol. The protocol that is used to encapsulate—in our case IPv4—is
+    called the Carrier Protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The configuration of a GRE tunnel is manual. On both tunnel endpoints (the GRE
+    routers), the IPv4 address of the tunnel peer is preconfigured. So for each route
+    where IPv6 has to be tunneled, a tunnel must be configured separately. In a more
+    complex network, this can lead to a high initial configuration effort. A GRE tunnel
+    cannot traverse NATs. It is useful when multiple protocols have to be tunneled
+    through the same tunnel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Softwire Hub and Spoke Deployment Framework
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: This framework uses Layer 2 Tunneling Protocol version 2 (L2TPv2) and is basically
+    L2TP tunneling. This works well in ISPs which have PPP deployed. In the “Hub and
+    Spoke” solution space, a softwire is established to provide the home network with
+    IPv4 connectivity across an IPv6-only access network, or IPv6 connectivity across
+    an IPv4-only access network. A softwire is a tunnel that is created on the basis
+    of a control protocol setup between softwire endpoints with a shared point-to-point
+    or multipoint-to-point state.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Just like any tunnel mechanism, it can be used until the rest of the infrastructure
+    can be updated to support native IPv6\. It has been deployed by many ISPs, as
+    it allows them to use a lot of their existing infrastructure. It is defined in
+    RFC 5571.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Proto 41 forwarding
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Some NAT implementations allow the configuration of IPv6 tunnels from inside
+    of the private LAN to routers or tunnel servers in the Internet. This is a simple
+    and helpful way to provide IPv6 nodes and IPv6 networks behind a NAT with access
+    to the IPv6 Internet. This should only be used if no other mechanisms such as
+    6to4 or native IPv6 are possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A tunnel client (host or router) with a private IPv4 address and a connection
+    to the Internet through an IPv4-only NAT box can use a Tunnel Broker or an IPv6
+    router to create an IPv6 tunnel. Many NAT boxes can be configured to forward packets
+    based on the protocol value of 41 (for IPv6) in the IPv4 header. This provides
+    an opportunity to rapidly deploy a huge number of IPv6 nodes and networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Most of the existing solutions for the transition to IPv6 rely on tunnels, assuming
+    that the client endpoint is an IPv6-capable router. However, nowadays the installed
+    base of IPv4-only NAT boxes/routers is still quite large, while most of the client
+    operating systems already support IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: SSH (Secure Shell) Tunnels
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: You won’t find SSH Tunnels as an official IPv6 transition mechanism, but they
+    can be very practical and offer useful solutions in different situations. This
+    section describes what they are and how you can use them in an IPv6 environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The aim of two projects, the [commercial OpenSSH](http://www.openssh.com) and
+    the [closed source SSH](http://www.ssh.com), was to eliminate the use of unencrypted
+    protocols such as Telnet, rlogin, and rsh. This section is by no means a complete
+    overview of SSH, but it shows how SSH tunnels can be used as a simple transition
+    mechanism for IPv4 to IPv6 and vice versa.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For a more precise look at SSH, we recommend *SSH—The Secure Shell, The Definitive
+    Guide*, Second Edition, written by Daniel J. Barrett et al. (O’Reilly).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both projects allow for a practice called *port forwarding*, which essentially
+    allows TCP ports to be forwarded between machines. It is also loosely referred
+    to as the Poor Man’s VPN. In the scenario shown in [Figure 7-19](ch07.html#ipv4_client_connects_to_ipv6-only_server
+    "Figure 7-19. IPv4 client connects to IPv6-only server through a dual-stacked
+    SSH host"), we have an IPv4-only client connecting to a dual-stacked host running
+    either version of SSH (both versions of SSH are IPv6 compliant).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![IPv4 client connects to IPv6-only server through a dual-stacked SSH host](images/ipv6_0719.png)Figure 7-19. IPv4
+    client connects to IPv6-only server through a dual-stacked SSH host'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv4 client wishes to send mail via the IPv6-only server. With SSH’s flexibility,
+    this can be accomplished one of two ways, described next. The examples that follow
+    show how to do this using the command-line SSH client available from both vendors,
+    but this can also be easily accomplished with GUI tools (please check your vendor’s
+    documentation for your GUI tool).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Port forwarding TCP port 25 back to the client*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Typing the following command on the SSH server allows a single IPv4 client
+    to access the IPv6 mail server: `ssh -L 25:[2001:db8::11]:25 [user@192.168.1](mailto:user@192.168.1).101`.
+    After typing in a password, this command will forward TCP port 25 from the IPv6
+    server back to the IPv4-only client. On the client side, a simple `telnet 127.0.0.1
+    25` shows that the data is actually initiated on the local host, then forwarded
+    to the IPv6-only SMTP server via the SSH server. It may sound a bit complex, but
+    it works very well.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Port forwarding TCP port 25 to the SSH server and allowing clients to connect
+    to port 25 on the SSH server*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This method, while a bit more complex on the initial setup, can ease administration
+    issues; the connection only has to be initiated once, and then each client can
+    connect to the SSH server. The following commands are typed on the SSH server:
+    `ssh -g -L 25:[2001:db8::11]:25 [user@127.0.0](mailto:user@127.0.0).1`. After
+    typing this on the server and logging in, you should be able to type `telnet 127.0.0.1
+    25` and get the SMTP prompt from the IPv6-only SMTP server. The difference here
+    is the `-g` in the SSH command, which allows Gateway mode. In Gateway mode, clients
+    other than localhost can connect to that port. Typing the command `telnet 192.168.1.101
+    25` at the IPv4-only workstation allows that client to connect to the IPv4 side
+    of the dual-stacked SSH server, which relays the data to the IPv6-only SMTP server.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The flexibility of SSH tunnels allows for many other combinations, including
+    the client being able to forward the port and allowing use of pregenerated keys
+    for ease of administration (no logging in required). Disadvantages of using SSH
+    as a transition mechanism include being able to forward only TCP connections and
+    a possibility of high processing overhead in forwarding many ports using the same
+    machine.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv4 Residual Deployment via IPv6 (4rd)
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 4rd is a stateless automatic tunneling mechanism to transparently tunnel IPv4
+    packets over IPv6 networks. It is the reverse mechanism of 6rd. While IPv6 headers
+    are too long to be mapped into IPv4 headers, so that 6rd requires encapsulation
+    of full IPv6 packets in IPv4 packets, IPv4 headers can be reversibly translated
+    into IPv6 headers in such a way that, during IPv6 domain traversal, UDP packets
+    with checksums and TCP packets are valid IPv6 packets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 4rd is in draft status at the time of writing. The draft is called “IPv4 Residual
+    Deployment via IPv6—a Stateless Solution (4rd)” (*draft-ietf-softwire-4rd-08*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Network Address and Protocol Translation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: NAT (Network Address Translation) and Protocol Translation are the most debated
+    areas in IPv6 deployment scenarios. This section discusses the different forms
+    of NAT that are available for the IPv4 address depletion problem and the integration
+    of IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Network Address and Protocol Translation techniques offer transition mechanisms
+    in addition to dual-stack and tunneling techniques. The goal is to provide transparent
+    routing for nodes in IPv6 networks to communicate with nodes in IPv4 networks
+    and vice versa.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: While with tunneling, the original IPv6 packet remains untouched, simply encapsulated
+    in an IPv4 header and then decapsulated again at the tunnel endpoint, a translated
+    packet is modified at the translator, according to the rules defined in what is
+    called Stateless IP/ICMP Translation Algorithm (SIIT; RFC 6145).
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the IPv4 world, Network Address and Port Translation (NAPT, usually simply
+    called NAT) was defined many years ago to map between private addresses inside
+    a network with a public address toward the outside world, in order to address
+    the ongoing depletion of the public IPv4 address pool. This is a stateful technique,
+    because the gateway needs to maintain state in order to route return packets correctly.
+    Today, in our dual-stack world, this type of NAT is often called *NAT44*. In order
+    to provide always-on connectivity to many devices, NAT not just maps devices and
+    addresses, but also uses ports for each address to map multiple private addresses
+    to one public address. There are 65,636 port numbers available for UDP and TCP
+    each, many of which are unused. So NAT actually maps the internal private address
+    and the port number to the outside public address and port number. This way it
+    can map a large number of sessions for each public address. This NAT usually sits
+    at the customer edge and runs on the CPE (Customer Premises Equipment).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The fact that we have waited too long with the deployment of IPv6 and are now
+    running out of IPv4 address space will force us to use this type of transition
+    technology to deal with the exponential growth of the Internet. The problem is
+    that if new Internet users only get IPv6 addresses, they will not be able to access
+    the still predominantly IPv4-accessible web content. So the IETF working groups
+    decided to define standard translation methods to prevent the industry from developing
+    an ungovernable variety of nonstandard methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before we go into the different types of NAT available today, let us have a
+    look at the specification for IP and ICMP translation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stateless IP/ICMP Translation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For the case in which IPv4-only hosts want to communicate with IPv6-only hosts
+    or vice versa, RFC 6145 defines how a protocol translator has to translate the
+    IP and ICMP headers for both parties to understand each other. For example, you
+    might have a new network segment and want to roll out native IPv6 hosts. With
+    the implementation of a protocol translator, it is possible to set up the new
+    IPv6-only network internally and have those IPv6-only clients access the standard
+    IPv4 Internet or any other IPv4-only node.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this discussion, we need to introduce a few terms. They are defined in RFC
+    6052, “IPv6 Addressing of IPv4/IPv6 Translators,” which is a part of a series
+    of documents about IPv4/IPv6 translation. It specifies how an individual IPv6
+    address is translated to an IPv4 address and vice versa, in cases where an algorithmic
+    mapping is used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Address translator*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A device that derives an IPv4 address from an IPv6 address or vice versa. This
+    applies to devices that do IPv4/IPv6 translation, and also to other devices that
+    manipulate addresses such as name-resolution proxies (e.g., DNS64 described later)
+    and possibly other types of Application Layer Gateways (ALGs).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv4-converted IPv6 address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An IPv6 address used to represent an IPv4 node in an IPv6 network. It is a variant
+    of IPv4-embedded IPv6 addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv4-embedded IPv6 address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An IPv6 address in which 32 bits represent an IPv4 address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv4/IPv6 translator*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A device that translates IPv4 packets to IPv6 packets and vice versa. The translation
+    can be *stateless* (no per-flow state required) or *stateful* (per-flow state
+    is created when first packet in a flow is received).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv4-translatable IPv6 address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An IPv6 address assigned to an IPv6 node for use with stateless translation.
+    It is a variant of IPv4-embedded IPv6 addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Network-specific prefix*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An IPv6 prefix assigned by an organization for use in algorithmic mapping.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Well-known prefix*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The well-known prefix to be used for algorithmic mappings is `64:ff9b::/96`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All IPv4-embedded addresses follow the same format described in a table in RFC
+    6052\. A table, because they are composed of a variable-length prefix, the embedded
+    IPv4 address, and a variable-length suffix (depending on the total length of the
+    prefix, which can vary from 32 bits to 96 bits). The table in the RFC outlines
+    all possible options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The prefix can either be a network-specific prefix or the well-known translation
+    prefix. For stateless translation, a network-specific prefix should be used. For
+    stateful translation, an organization can choose between a network-specific prefix
+    or the well-known prefix. The well-known prefix should be used in most cases,
+    except if it deems appropriate for management and operational reasons, or in the
+    scenario where the IPv6 Internet connects to an IPv4 network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The companion RFC 6144, “Framework for IPv4/IPv6 Translation,” describes eight
+    different scenarios and outlines the requirements and rules for stateful or stateless
+    translation. They are listed in the section [NAT64 scenarios](ch07.html#nat64_scenarios
+    "NAT64 scenarios").
+  prefs: []
+  type: TYPE_NORMAL
+- en: TCP and UDP headers generally do not need to be modified by the translator.
+    One exception is UDP headers that need a checksum for IPv6 because a UDP checksum
+    is required for IPv6\. The same is true for ICMPv4 messages that need a checksum
+    for ICMPv6\. In addition to the checksum, ICMP error messages contain the IP header
+    of the original packet in the payload that needs to be modified by the translator;
+    otherwise, the receiving node cannot understand it. IPv4 options and IPv6 Routing
+    headers, Hop-by-Hop Options headers, and Destination Option headers are not translated.
+    Also, the translation techniques cannot be used for multicast traffic, because
+    IPv4 multicast addresses cannot be mapped into IPv6 multicast addresses and vice
+    versa.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Just as with dual-stack nodes, applications running on nodes that use IP/ICMP
+    translation need a mechanism to determine which protocol version to use for communication
+    with their peers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Translating IPv4 to IPv6
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: An IPv4-to-IPv6 translator receives an IPv4 datagram. Because it has been configured
+    to know the pool of IPv4 addresses that represent the internal IPv6 nodes, the
+    translator knows that the packet needs translation. It removes the IPv4 header
+    and replaces it with an IPv6 header by translating all the information from the
+    IPv4 header into the IPv6 header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Path MTU Discovery is optional in IPv4 but mandatory in IPv6\. If an IPv4 host
+    does Path MTU Discovery by setting the Don’t Fragment Bit in the header, Path
+    MTU Discovery works even through the translator. The sender may receive Packet
+    Too Big messages from both IPv4 and IPv6 routers. If the Don’t Fragment Bit is
+    not set in the IPv4 packet, an IPv6 translator has to ensure that the packet can
+    safely travel through the IPv6 network. It does this by fragmenting the IPv4 packet
+    if necessary, using the minimum MTU for IPv6, 1,280 bytes. IPv6 guarantees that
+    1,280-byte packets will be delivered without a need for further fragmentation.
+    In this case, the translator always includes a fragment header to indicate that
+    the sender allows fragmentation. Should this packet travel through an IPv6-to-IPv4
+    translator, the translator knows it can fragment the packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a UDP packet with a zero checksum, the translator must calculate a valid
+    checksum for IPv6\. If a translator receives the first fragment of a fragmented
+    UDP packet with a zero checksum, it should drop the packet and generate a system
+    message specifying the IP address and port number. Further fragments should be
+    silently discarded.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Translating ICMPv4 to ICMPv6 and vice versa
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: For all ICMPv4 messages, the translator has to compute a valid checksum because
+    it is required with ICMPv6\. In addition to this, the type values have to be translated
+    and, for error messages, the included IP header also needs to be translated. Internet
+    Group Management Protocol (IGMP) messages are single-hop messages and should not
+    be forwarded over routers. Therefore, they do not require translation and are
+    silently discarded.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The same translation rules apply to the translation of ICMPv6 messages to ICMPv4
+    messages, only in reverse order.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Translating IPv6 to IPv4
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: This process is not much different from the translation discussed previously.
+    In this case, the translator knows that it has to translate from IPv6 to IPv4
+    based on the IPv4-mapped Destination address. It removes the IPv6 header and replaces
+    it with an IPv4 header. The minimum MTU for IPv4 is 576 bytes; the minimum MTU
+    for IPv6 is 1,280 bytes. If a translator receives a packet for an IPv4 network
+    with a smaller MTU, it creates 1,280-byte packets and fragments them after translation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: NAT to Extend IPv4 Address Space
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: This section is not really about IPv6 transition. It explains the ways NAT is
+    used today in order to extend IPv4 address space (and this is what NAT was originally
+    designed for). These mechanisms will be used by ISPs all over the world because
+    we waited too long and the IPv4 address space is now exhausted. These mechanisms
+    have a major impact on how users access IPv4 websites.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Carrier Grade NAT
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: As providers run out of IPv4 addresses and cannot cover Internet growth with
+    IPv4, they have to deploy IPv6\. But users want to be dual-stacked as they want
+    to be able to access the IPv4 content on the Internet. So why not NAT the IPv4
+    part of the Internet connection? This lets users access IPv6 content over IPv6,
+    but still get to IPv4 content over their NATed IPv4 connection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This can be achieved by using what we call Carrier Grade NAT (CGN, also called
+    LSN for Large Scale NAT), or *NAT444*. It means we add another layer of NAT to
+    the NAT44 by adding a NAT44 inside the ISP’s network. Traditional NAT44 is between
+    the customer network and the ISP network. CGN is between the customer networks
+    and the ISP network and allows the ISP to assign a private IPv4 address to the
+    customers, not a public one. Or in other words, the traditional customer-side
+    NAT now translates from private IPv4 inside to private IPv4 outside. [Figure 7-20](ch07.html#carrier_grade_nat-id1
+    "Figure 7-20. Carrier Grade NAT") shows this in a diagram.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Carrier Grade NAT](images/ipv6_0720.png)Figure 7-20. Carrier Grade NAT'
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the bottom part we see the traditional NAT connecting a customer’s privately
+    addressed networks through NAT with the provider network. In this NAT444 scenario,
+    the translation is from private IPv4 to private IPv4\. This allows the ISP to
+    connect many customers through a single public IPv4 address on the outside.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s follow a packet. It originates inside the customer site. Its address is
+    converted from private inside to a private address from within the CGN. When leaving
+    the ISP network, it gets the public address assigned to the outside interface
+    of the CGN. The packet goes through address translation and port mapping twice.
+    This mechanism is called NAT444 because it only translates IPv4 to IPv4, with
+    the goal to expand the address space. The advantage is that it can mostly be achieved
+    with current equipment and implementations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Experience will have to show how this scales with large numbers of users. The
+    processing it takes for all the translations and mappings for a large number of
+    users will have its limits that are yet to be determined. There may also be issues
+    with overlapping private space, if an organization internally uses the same range
+    as the provider within the CGN. Another issue might occur if customers connected
+    to the same CGN want to send traffic to each other. Their packets may have to
+    be routed to the outside and come back with a public IPv4 source address; otherwise,
+    they may be filtered by traditional ACLs based on their private source address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where with traditional NAT, users in one site shared one public IPv4 address,
+    with CGN multiple customers share one public IPv4 address. This can create some
+    critical issues. For instance, if somebody successfully attacks the public IPv4
+    address, not just one customer, but all customers using that CGN IPv4 address
+    may be affected. If one of the customers is a bad guy and blacklisted, all of
+    the customers sharing the same address will be affected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another issue is the fact that all these customers share a fixed pool of ports
+    and so only a limited number of ports per customer will be available to a probably
+    increasing number of customers. When users run applications that use a large number
+    of multiple simultaneous sessions, such as Google Maps or iTunes to name two examples,
+    the CGN gateway may run out of port numbers and sessions. And the fact is that
+    today’s applications have an increasing appetite for parallel sessions. This leads
+    to the fact that applications or services may not run well or even fail. For a
+    user sitting behind a CGN this is usually not traceable. The user will assume
+    that the website is not running or has issues.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: From the perspective of a content provider, you want to offer your public services
+    dual-stack in order to bypass CGNs and make sure your customers have a good experience
+    when they visit your website. If your content is dual-stack, Internet users with
+    IPv4 CGN access can come to your site using native IPv6 (if their provider offers
+    IPv6 Internet access).
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is an interesting RFC, RFC 7021, “Assessing the Impact of Carrier-Grade
+    NAT on Network Applications,” which summarizes CGN tests performed by CableLabs,
+    Time Warner Cable, and Rogers Communications. They independently tested the impacts
+    of NAT444 on many popular Internet services using a variety of test scenarios,
+    network topologies, and vendor equipment. The RFC identifies areas where adding
+    a second layer of NAT disrupts the communication channel for common Internet applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: NAT464
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Another way to solve this problem can be to deploy IPv6-only between the customer
+    edge and the provider network. This requires translation from IPv4 to IPv6 at
+    the customer edge and translation again from IPv6 to IPv4 at the CGN. This reduces
+    the need for IPv4 addresses on the provider side. Translation becomes more difficult
+    as translation across protocols (from IPv4 to IPv6) is more complex than address
+    translation within one protocol family. Also NAT444 is widely implemented and
+    available while implementations for NAT464 are not so widespread at the time of
+    writing. [Figure 7-21](ch07.html#nat464-id1 "Figure 7-21. NAT464") shows the NAT464
+    network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![NAT464](images/ipv6_0721.png)Figure 7-21. NAT464'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this case, the provider conserves IPv4 address space not by assigning private
+    IPv4 addresses to the customer CPEs, but rather by using an IPv6-only network
+    and translating the customer’s IPv4 traffic to IPv6 with NAT46 and translating
+    it back to IPv4 with NAT64 at the CGN. In both cases, with CGN and NAT464, multiple
+    customers share one public IPv4 address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The main disadvantage of this type of translation in general is, besides the
+    fact that a NAT device is always a bottleneck, that when you have to translate
+    IPv6 to IPv4, you lose all the advanced features of IPv6, because they cannot
+    be translated to IPv4\. So, for instance, if the packet has Extension headers,
+    not all the information can be translated into IPv4 options. But in this scenario,
+    where the applications are IPv4 and the tunnel is used to get from one IPv4 island
+    to the next, there are probably no advanced IPv6 features to be lost.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DS-Lite
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'DS-Lite is another mechanism to allow for IPv6-only connection between the
+    customer site and the CGN. Instead of translating from IPv4 to IPv6 and vice versa,
+    such as in NAT464, the IPv4 packets are tunneled in IPv6 to the CGN. That is to
+    say, one level of translation from IPv4 to IPv6 and IPv6 to IPv4, as in NAT464,
+    is removed. DS-Lite is specified in RFC 6333\. New terms in the specification
+    are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*DS-Lite Basic Bridging BroadBand element (B4)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: B4 is a function implemented on a dual-stack capable node. This node can be
+    either a directly connected node or a CPE (Customer Premise Equipment) that creates
+    a tunnel to the AFTR (defined below).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*DS-Lite Address Family Transition Router (AFTR)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An AFTR is the combination of an IPv4-in-IPv6 tunnel endpoint and an IPv4-IPv4
+    NAT implemented on the same node. The AFTR can be provisioned with different NAT
+    pools and serve different groups of clients with different address pools.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DS-Lite is shown in [Figure 7-22](ch07.html#ds-lite-id1 "Figure 7-22. DS-Lite").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![DS-Lite](images/ipv6_0722.png)Figure 7-22. DS-Lite'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The diagram shows that the private customer network is connected to the ISP
+    private network through an IPv6 tunnel. The NAT maps the combination of IPv6 source
+    address, IPv4 source address plus port to the outside IPv4 address plus port.
+    Several customers are sharing one IPv4 public address. All IPv4 in IPv6 tunnels
+    end on the AFTR. When customers communicate using IPv6, there are no tunnels,
+    the AFTR is bypassed and the traffic goes out natively. The trick here is to ensure
+    that source addresses are unique. If many customers using private RFC 1918 addresses
+    connect, their source address isn’t distinguishable anymore. DS-Lite solves this
+    problem by linking the IPv4 source address with the unique IPv6 address used for
+    the tunnel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usually the CPE has DHCPv4 functionality handing out private IPv4 address space
+    to hosts in the home network. It also advertises itself as a DNS server and should
+    run a DNS proxy to resolve DNS queries from IPv4 hosts with the service providers
+    DNS servers over the IPv6 network. In order to establish the tunnel to the AFTR,
+    the B4 element is configured with the IPv6 address of the AFTR either through
+    manual configuration or through DHCPv6\. RFC 6334 defines a DHCPv6 DS-Lite option.
+    A well-known IPv4 subnet address has been defined by the IANA to represent the
+    B4 element. The range is `192.0.0.0/29`. `192.0.0.1` is reserved for the AFTR
+    element and `192.0.0.2` is reserved for the B4 element.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DS-Lite removes one level of NAT compared to NAT444 or NAT464\. The disadvantage
+    is that single users cannot be identified by their IP address anymore. Currently
+    DS-Lite only specifies IPv4 in IPv6 tunnels. Other types of encapsulation could
+    be defined in the future. RFC 6619, “Scalable Operation of Address Translators
+    with Per-Interface Bindings,” for instance, defines a solution to use protocol
+    translation during the migration period to IPv6 to deploy these mechanisms in
+    a way that allows the support of a large user base without the need for a correspondingly
+    large IPv4 address block.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 6908, “Deployment Considerations for DS-Lite,” refers to the scenarios for
+    DS-Lite mentioned in the Appendix of RFC 6333 and describes problems that can
+    arise when deploying DS-Lite and how they can be mitigated. The information and
+    recommendations in this RFC are based on real-world experience and can be useful
+    for operators.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is an extension to DS-Lite underway (in draft status at the time of writing),
+    called *Lightweight 4over6* (LW46). It moves the Network Address and Port Translation
+    (NAPT) function from the centralized DS-Lite tunnel concentrator to the tunnel
+    client located in the CPE. This removes the requirement for a Carrier Grade NAT
+    function in the tunnel concentrator and reduces the amount of centralized state
+    that must be held to a per-subscriber level.
+  prefs: []
+  type: TYPE_NORMAL
+- en: NAT as an IPv6 Translation Mechanism
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In the early days of IPv6 there was one main translation mechanism defined in
+    RFC 2766, “NAT-PT, Network Address Translation—Protocol Translation.” It was moved
+    to historic with RFC 4966 because it was too complex. The SIIT (Stateless IP/ICMP
+    Translation) RFC is still active and the specification is used in newer forms
+    of translators, such as in NAT64.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following sections describe a number of different translation techniques,
+    some of them still in draft status. Depending on when you read this book, they
+    may be published as an RFC.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Expect to see more types and flavors of translation mechanisms to appear. But
+    note that the main recommendation is to not use them if possible and go native
+    IPv6 wherever you can, especially in the enterprise network. Providers may have
+    to use translation mechanisms, mainly due to IPv4 address shortage. As an Internet
+    customer you want to know what kind of access your provider gives you, from an
+    IPv4 and IPv6 perspective.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stateless NAT64
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Stateless NAT64 provides a translation mechanism that translates IPv6 headers
+    into IPv4 headers and vice versa. It is based on RFC 6144, which defines a framework
+    for IPv4/IPv6 translation and provides an overview and discussion of all possible
+    scenarios. Due to the stateless character, this mechanism is very efficient. It
+    supports end-to-end transparency and has a better scalability than stateful translation.
+    Multiple translators can be deployed in parallel without the need to synchronize
+    state between them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For the stateless mechanism the translation information is carried in the address
+    itself. To perform stateless translation, there must be a rule how an IPv6 address
+    is translated to a corresponding IPv4 address and vice versa. A specific IPv6
+    address range represents the IPv4 systems in the IPv6 world. This range is manually
+    configured on the NAT device. In the IPv4 world all the IPv6 systems have directly
+    correlated IPv4 addresses that can be mapped to a subset of the service provider’s
+    IPv4 addresses. The IPv6 hosts are assigned IPv6 addresses through either manual
+    configuration or DHCPv6\. The IPv4-embedded IPv6 address format is described in
+    section 2.2 of RFC 6052\. The well-known prefix to use for an algorithmic mapping
+    is `64:ff9b::/96`. Common implementations often allow you to configure your own
+    prefix taken from your IPv6 address range.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With stateless NAT64, sessions can be initiated from both sides, from IPv4 to
+    IPv6 and vice versa. The disadvantage is that it consumes an IPv4 address for
+    each IPv6 device that needs translation. So it is not a solution to address IPv4
+    address depletion. It can be used to provide public servers with an IP address
+    for both protocols. But to aggregate many IPv6 users to a single IPv4 address,
+    stateful NAT64 has to be used. Another limitation of stateless NAT64 is that only
+    IPv4 options that have direct counterparts in IPv6 are translated, and it does
+    not translate IPv6 Extension headers except for the Fragmentation header. The
+    best use case for stateless NAT64 is probably to provide access to an IPv6 server
+    to IPv4 clients.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stateful NAT64 and DNS64
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: This scenario is used where users only have IPv6 addresses but need to connect
+    to IPv4 networks and to the IPv4 Internet. One or more public IPv4 addresses are
+    assigned to the translator to be shared among the IPv6 clients. When stateful
+    NAT64 is used with DNS64, no changes are usually required in the IPv6 client or
+    the IPv4 server. To have support for DNS64, use BIND 9.8.0\. Stateful NAT64 is
+    specified in RFC 6146 and DNS64 in RFC 6147.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 7-23](ch07.html#stateful_nat64_and_dns64-id1 "Figure 7-23. Stateful
+    NAT64 and DNS64") shows how this works.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Stateful NAT64 and DNS64](images/ipv6_0723.png)Figure 7-23. Stateful NAT64
+    and DNS64'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv6 client sends a DNS AAAA request to the DNS64 server for a certain domain
+    name. If the name server has an AAAA record, it will pass the information and
+    the client will connect over IPv6\. If the DNS64 server does not have a AAAA record,
+    because it is an IPv4-only service, it finds the corresponding A record and creates
+    a synthetic record. The name server uses the well-known prefix of `64:ff9b::/96`
+    or the specific prefix chosen and configured for this purpose and inserts the
+    IPv4 address learned from the A record into the 32 low-order bits of the IPv6
+    address. So if the A record was `203.10.100.2`, the IPv6 address will be `64:ff9b::203.10.100.2`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When the client initializes a connection to this address it will be routed through
+    the NAT64 gateway, which will use an IPv4 address from its pool with an associated
+    port number, creating a mapping entry for the two addresses. It will then translate
+    the IPv6 header into an IPv4 header using the translation mechanisms described
+    in RFC 6145, and send it to the destination IPv4 address, learned from the IPv6
+    address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stateful NAT64 only supports IPv6-initiated connections and is therefore suited
+    for IPv6-only hosts to provide access to an IPv4 host. The advantage is that many
+    IPv6-only hosts can connect to the IPv4 Internet through a single IPv4 public
+    address. If an IPv4 device needs to speak to an IPv6-only device, the translation
+    must be configured manually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This has been tested and works well for general Internet access. Problems arise
+    when IPv4 addresses are embedded in applications or when IPv4 literals are used.
+    RFC 7050 defines a method how clients can discover a NAT64 prefix if they can’t
+    query a DNS64 server. Application developers should stick to using FQDNs (Fully
+    Qualified Domain Names) in applications instead of IP addresses. A variety of
+    vendors have implemented stateful NAT64 and large mobile providers are doing trials.
+    In the mobile world this mechanism may be preferred as it uses less power on the
+    mobile client (battery) than a dual-stack client.
+  prefs: []
+  type: TYPE_NORMAL
+- en: NAT64 scenarios
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'As listed in RFC 6144, NAT64 can translate eight different scenarios. The following
+    list shows which type of NAT64 supports the translation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*An IPv6 network to the IPv4 Internet*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both stateless and stateful NAT64 can support this scenario.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The IPv4 Internet to an IPv6 network*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this scenario to work with stateful NAT64, a DNS Application Level Gateway
+    (ALG) would have to be used. This was deprecated with RFC 4966\. Stateless NAT64
+    can be used for this scenario as it supports connections initiated by IPv4 nodes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The IPv6 Internet to an IPv4 network*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stateless NAT64 does not work with this scenario because stateless NAT64 only
+    supports 1:1 address translation. The IPv4 address space could only support a
+    small subset of the IPv6 address space. But IPv6-initiated connections can be
+    supported through stateful NAT64\. A network-specific prefix will be assigned
+    to the translator that assigns the hosts IPv4-converted IPv6 addresses. Static
+    AAAA records can be put into DNS to represent these IPv4-only hosts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*An IPv4 network to the IPv6 Internet*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this scenario to work with stateful NAT64, a DNS Application Level Gateway
+    (ALG) would have to be used. This was deprecated with RFC 4966\. This scenario
+    is not considered viable as these requirements will only occur in a later deployment
+    state of the IPv6 Internet. For this scenario, other techniques should be considered.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*An IPv6 network to an IPv4 network*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this scenario, both networks are within the same organization. This scenario
+    is the same as scenario one from a translation perspective. So both stateless
+    and stateful translation can be used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*An IPv4 network to an IPv6 network*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this scenario, both networks are within the same organization. This scenario
+    is the same as scenario two from a translation perspective. So the same rules
+    apply here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The IPv6 Internet to the IPv4 Internet and vice versa*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Due to the huge difference in size between the two address spaces, there is
+    no viable translation technique to handle unlimited IPv6 address translation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you are interested in operational experience with NAT64 in combination with
+    CGN or as a server frontend (FE) mechanism, please refer to RFC xxxx (*draft-ietf-v6ops-nat64-experience-10.txt*).
+    It is a report of operational deployment and testing of a NAT64 service between
+    an IPv6-only mobile network and the larger IPv4 Internet as well as a NAT64 service
+    in an IDC environment. This testing includes the use of NAT64 CGN and NAT64 FE;
+    its coexistence with more traditional NAT44; reliability, availability, and maintainability
+    issues; the transparency or lack of it regarding source addresses; quality of
+    experience; MTU issues; and ULA-related issues.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 6889, “Analysis of Stateful 64 Translation,” analyzes how stateful NAT64
+    solves the issues that led to the deprecation of NAT-PT (RFC 2766).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 464XLAT
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 464XLAT is not a separate transition mechanism. RFC 6877 describes an architecture
+    that combines stateful translation in the core with stateless translation at the
+    edge of the network. This provides IPv4 connectivity for IPv4-only applications
+    across an IPv6-only network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To discuss 464XLAT, we have to introduce two terms:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*PLAT*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PLAT is a provider-side translator (XLAT) that complies with RFC 6146 on stateful
+    NAT64\. It translates N:1 global IPv6 addresses to global IPv4 addresses and vice
+    versa.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*CLAT*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CLAT is the customer-side translator (XLAT). It complies with RFC 6145 on IP/ICMP
+    Translation Algorithms. It translates 1:1 private IPv4 addresses to global IPv6
+    addresses and vice versa. The CLAT can run on a router or on an end device such
+    as a mobile phone. It performs IP routing to forward packets through the stateless
+    translation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 464XLAT provides easy-to-use transition services as it requires no new protocols.
+    It encourages the deployment of IPv6-only networks that are less expensive to
+    operate than dual-stack networks. It is also needed in cases where there are no
+    IPv4 addresses available anymore, but IPv6-only hosts need access to IPv4 applications.
+    So it decouples network growth at the edge from IPv4 address availability.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 7-24](ch07.html#xlat_architecture "Figure 7-24. 464XLAT architecture")
+    shows the 464XLAT architecture.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![464XLAT architecture](images/ipv6_0724.png)Figure 7-24. 464XLAT architecture'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'On the left side of the diagram, you see three different types of clients:
+    an IPv6-only host, a dual-stack host with a private IPv4 address, and an IPv4-only
+    host, also with a private IPv4 address. The IPv6 hosts can reach the IPv6 Internet
+    directly without translation. IPv6 hosts can reach global IPv4 hosts through the
+    PLAT (NAT64). The IPv4 hosts can reach global IPv4 hosts via stateless translation
+    on the CLAT and stateful translation on the PLAT.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 464XLAT address format follows the IPv4-embedded IPv6 address format described
+    in the table in section 2.2 of RFC 6052, “IPv6 Addressing of IPv4/IPv6 Translators.”
+    The CLAT needs a /64 IPv6 prefix for the uplink interface and a /64 prefix for
+    each downlink interface and a dedicated /64 prefix for the purpose of sending
+    and receiving statelessly translated packets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An IPv6-only host that wants to discover a NAT64 prefix sends a DNS query for
+    a AAAA record for the domain `ipv4only.arpa` (RFC 7050) to its DNS server. If
+    there is a NAT64 prefix, the host gets a DNS reply with a synthesized AAAA record.
+    This AAAA record contains the IPv6 prefix plus the 32 bits of the IPv4 address
+    for `ipv4only.arpa`. The CLAT uses the prefix to send packets to the translator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This architecture supports IPv4 in the client-server model. It is not designed
+    for IPv4 peer-to-peer communication or inbound IPv4 connections. It is based on
+    IPv6 transport and supports native IPv6 communication. The advantage is that it
+    also works for IPv4 applications that contain literals, as only the IP header
+    is translated and the payload of the packet is encapsulated in the translated
+    header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MAP
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: A new mechanism has been developed called *MAP*. It comes in two flavors, both
+    specifying mechanisms to map IPv4 to IPv6\. Draft *“draft-ietf-softwire-map,”*
+    called MAP-E, specifies the encapsulation of IPv4 packets in IPv6 including the
+    address mapping with independence between IPv6 and IPv4 addresses. The other draft,
+    *“draft-ietf-softwire-map-t,”* specifies the MAP-T mechanism, which uses the same
+    address- and port-mapping algorithm and offers the same functionality as MAP-E,
+    but does translation instead of encapsulation. Both mechanisms serve the purpose
+    of delivering IPv4 services across an IPv6-only infrastructure, a situation and
+    requirement which will become more and more common in the future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The big advantage of MAP compared with CGN, NAT464, and DS-Lite is that it requires
+    no central stateful translator on the service provider’s network. This allows
+    providers to deploy native IPv6 and share the scarce IPv4 address resources with
+    much less overhead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MAP is shown in [Figure 7-25](ch07.html#map-id1 "Figure 7-25. MAP").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![MAP](images/ipv6_0725.png)Figure 7-25. MAP'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you can see in the figure, the translation is moved to the CPE. All traffic
+    through the provider network is now IPv6-only. This removes the need for a stateful
+    CGN; the IPv6 traffic is forwarded by the Border Router (BR). The BR handles the
+    traffic from a given MAP domain and is reachable via anycast.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MAP uses an IPv6-address-to-IPv4-address mapping with port-mapping algorithm.
+    Specific bits in the IPv6 address space are used to represent both IPv4 addresses
+    and ports. With MAP-T, the IP header is translated; with MAP-E, the IPv4 datagram
+    is encapsulated in an IPv6 header. NAT44 as used with MAP differs slightly from
+    traditional NAT44, as it allows assigning a port range to each of the CPEs sharing
+    the same public IPv4 address. This address and port combination is then translated
+    into the IPv6 address space on the MAP CPE. This stateless address mapping between
+    IPv4 and IPv6 addresses removes the need for a large stateful translator in the
+    provider network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All nodes in a MAP domain must be provisioned with a set of parameters, which
+    are used to implement the MAP functions. They can be configured manually or provisioned
+    by DHCP. There are three rules, the *Basic Mapping Rule* (BMR), the *Default Mapping
+    Rule* (DMR), and the *Forwarding Mapping Rules* (FMR). The mapping rules define
+    the forwarding behavior for a MAP domain and make up the *Mapping Rule Table*
+    (MRT), which serves as a routing table for the BR and CE.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MAP-E is going to be a standards track RFC, while MAP-T is going to be an informational
+    or experimental RFC. There is also a draft specifying DHCPv6 options for address
+    mapping, so a DHCP server can provision the information needed for the address-mapping
+    algorithm (*draft-ietf-softwire-map-dhcp-07*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: NPTv6 and NAT66
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'A frequently asked question is whether there is or will be a counterpart to
+    NAT (in this case, people usually refer to what we call NAT44) in IPv6\. Given
+    the fact that NAT was originally designed as a temporary solution to the IPv4
+    address depletion problem, you would expect a simple answer: no, because IPv6
+    is the long-term solution to the address exhaustion problem. And by design, the
+    developers of IPv6 had end-to-end IPv6 networks in mind with no NAT.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now, unfortunately people got very used to NAT in general and there are some
+    use cases where some form of IPv6 NAT could be useful. So we can’t get around
+    discussing NAT for IPv6\. Let us have a closer look at NPTv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6-to-IPv6 Prefix Translation (NPTv6)
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'In the introduction to RFC 6296, “IPv6-to-IPv6 Network Prefix Translation,”
+    the IETF clearly states that they do not recommend the use of NAT technology for
+    IPv6\. So why do they publish a specification? One of the reasons is that they
+    learned from the experience with IPv4 NAT. They did not publish a specification
+    for NAT44 for the same reason: they did not think it was a good idea. This led
+    to the fact that vendors started to implement their proprietary version of NAT44,
+    which again led to the situation we face today, with multiple flavors of NAT44\.
+    This adds a lot to the complexity. So the IETF decided that even though they do
+    not want to encourage NAT in IPv6 networks, it would be better to still have a
+    specification, so that at least everybody who was doing it used the same mechanism.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: NPTv6 is a stateless IPv6-to-IPv6 network-prefix translation mechanism. It provides
+    address independence to the network. Address independence means that addresses
+    used inside the local network do not need to be renumbered in case the global
+    prefix changes (due to a provider change, for instance). Sessions can be initiated
+    from both sides (internal or external). You can also connect multiple NPTv6 Translators
+    and also use them in multihoming scenarios. Section 2 in RFC 6296 describes some
+    use cases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is a major difference between NPTv6 and NAT44, stemming from the fact
+    that NPTv6 is not designed to save addresses. So the address-mapping is a 1:1
+    mapping and there is no need to modify port numbers and rewrite transport layer
+    headers. In this respect, NPTv6 is less complex than traditional NAT44, but some
+    issues still remain. For instance, it does not work with the IPsec Authentication
+    Header, which provides protection for the IP header. Applications that transmit
+    IP addresses in the payload may also stumble. The deployment of NPTv6 may also
+    require configuring split DNS, as internal hosts want to resolve names for internal
+    services to internal addresses, while external nodes need to obtain external addresses
+    for the services. Some people perceive NAT44 to be a security feature due to the
+    fact that it lets you hide your internal topology. NPTv6 does not hide your topology
+    because the address mapping is 1:1\. Only the prefix is translated and it must
+    be a prefix of the same size. So if you want to translate a /48 internally, you
+    also need a /48 externally. But you may choose to only translate a subset of your
+    prefix, such as one or several /64 out of your /48 (for instance, the client subnets
+    that need Internet access).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another option to have independence in your address space is to apply for Provider
+    Independent (PI) address space. But not all organizations qualify to receive a
+    PI allocation. If you do qualify you have to ensure that your ISP(s) are willing
+    to install specific routes for your prefix. This can be especially difficult or
+    troublesome if you have locations in different geographical regions. It is not
+    guaranteed that you will get a U.S. ISP to route a PI prefix that was allocated
+    from RIPE (Europe region).
+  prefs: []
+  type: TYPE_NORMAL
+- en: NAT66
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: NAT66 is the equivalent to NAT44\. The difference to NPTv6 is that this translator
+    is stateful. An IPv6 address on one interface is translated to a new IPv6 address
+    on another interface of the router or firewall. Return traffic has to come the
+    same way back, as the device keeps a state table of all the translations. With
+    NAT66 the internal and external prefixes do not need to be of the same size. Whether
+    this is a good idea or not is your choice. Most will probably choose to deal with
+    prefixes of the same size anyway, for simplicity reasons. There are implementations
+    from different vendors on the market. NAT66 has the same problems as NAT44 and
+    there will be many workarounds needed to make all applications work through it.
+    Going back to our design recommendations, this means carefully evaluate whether
+    you really need and want this and only do this if there is no simpler solution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Other Translation Techniques
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There are additional translation mechanisms, which I describe in this section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Bump-in-the-Host
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Bump-in-the-Host (BIH) is a host-based IPv4-to-IPv6 protocol translation mechanism
+    that allows a class of IPv4-only applications that work through NATs to communicate
+    with IPv6-only peers. It is defined in RFC 6535\. The host on which applications
+    are running may be connected to IPv6-only or dual-stack access networks. BIH hides
+    IPv6 and makes the IPv4-only applications think they are talking with IPv4 peers
+    by local synthesis of IPv4 addresses. This document obsoletes RFC 2767 (Bump-in-the-Stack)
+    and RFC 3338 (Bump-in-the-API).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Transport Relay Translator
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The Transport Relay Translator (TRT; see RFC 3142) is a translation mechanism
+    to be used in an IPv6-only network on the transport layer. It sits in the IPv6
+    network and allows communication between IPv6 nodes and IPv4 nodes. Every communication
+    of an IPv6 client with an IPv4 application needs to go through the Relay Translator.
+    In case of a TCP connection, the relay terminates the connection to the client
+    and makes a new TCP connection on the other side to the IPv4 application. Internally,
+    the translator translates between the two sessions. In case of a UDP connection,
+    the translator simply translates and forwards the packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All translation techniques should be used only if there is no other choice.
+    The overview in this chapter aims to give an idea of the variety of mechanisms
+    to enable coexistence and smooth transition. The most important goal the developers
+    had in mind was to provide mechanisms to give customers the possibility to move
+    to an IPv6 network as soon as possible. The sooner you have an IPv6-dominant network,
+    the better, because maintaining one protocol is always less costly than maintaining
+    two.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load Balancing
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you have either IPv4 servers and applications and want to give access for
+    IPv6 users, or the other way around, there are two potential options that cover
+    this scenario:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use stateless NAT64 (or NAT46, respectively)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use load balancers
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The stateless NAT is easy to implement and does not require much resources.
+    The load balancer choice is a common one and a good short-term solution, since
+    load balancers are essentially mandatory pieces of equipment for the frontend
+    in data centers anyway. Different load balancer vendors offer high-performance
+    load balancers that support many different mechanisms and can be used in most
+    scenarios. But make sure to test your specific planned scenario for performance
+    under load and in dual-stack mode if that is going to be used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Comparison
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that you have an overview of the available techniques, I’ll summarize them
+    by listing advantages and disadvantages. This summary should help you determine
+    which way to go and which combinations to choose.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dual-Stack
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: This technique is easy to use and flexible. It is your best option. Hosts can
+    communicate with IPv4 hosts using IPv4 or communicate with IPv6 hosts using IPv6\.
+    When everything has been upgraded to IPv6, the IPv4 stack can simply be disabled
+    or removed. Whenever you can, deploying dual-stack hosts and routers offers the
+    greatest flexibility in dealing with islands of IPv4-only applications, equipment,
+    and networks. Dual-stack is also the basis for other transition mechanisms. Tunnels
+    need dual-stacked endpoints, and translators need dual-stacked gateways.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Disadvantages of this technique include the following: you have two separate
+    protocol stacks running, so you need additional CPU power and memory on the host.
+    All the tables are kept twice: one per protocol stack. Generally, all applications
+    running on the dual-stack host must be capable of determining whether this host
+    is communicating with an IPv4 or IPv6 peer. In a dual-stack network, you need
+    to have a routing protocol for each version of IP. If you are using dual-stack
+    techniques, make sure that you have firewalls in place that protect not only your
+    IPv4 network, but also your IPv6 network, and remember that you need separate
+    security concepts and firewall rules for each protocol.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It also makes troubleshooting problems more complicated. For instance, did an
+    application that has problems with IPv6 attempt to connect via IPv4 instead of
+    IPv6 and fail? How do you have to adjust your troubleshooting approaches to test
+    and figure that out? Your helpdesk and IT support staff also need to understand
+    how to use specific tools for IPv4 and IPv6 so they can rule out one protocol
+    versus the other. So from an operational and support perspective, it may cost
+    more to run a dual-stack network. This is one of the main reasons many enterprises
+    consider to migrate to an IPv6-only infrastructure as soon as possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tunneling
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Tunneling allows you to migrate to IPv6 just the way you like. There is no specific
+    upgrade order that needs to be followed. You can even upgrade single hosts or
+    single subnets within your corporate network and connect separated IPv6 clouds
+    through tunnels. You don’t need your ISP to support IPv6 in order to access remote
+    IPv6 networks because you can tunnel through their IPv4 infrastructure. And you
+    don’t need to upgrade your backbone first. As long as your backbone is IPv4, you
+    can use tunnels to transport IPv6 packets over the backbone. If you have an MPLS
+    infrastructure, you have the best foundation for using this to tunnel IPv6 packets
+    as long as you do not want to upgrade the backbone routers to support IPv6 natively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The disadvantages are known from other tunneling techniques used in the past.
+    Additional load is put on the router. A general rule is that stateless tunnels
+    are preferred over stateful tunnels. The tunnel entry and exit points need time
+    and CPU power for encapsulating and decapsulating packets. They also represent
+    single points of failure. Troubleshooting gets more complex because you might
+    run into hop count or MTU size issues, as well as fragmentation problems. Management
+    of encapsulated traffic (e.g., per-protocol accounting) is also more difficult
+    due to encapsulation. Tunnels also offer points for security attacks. Find more
+    information on security issues in [Chapter 6](ch06.html "Chapter 6. Security with
+    IPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 7059, “A Comparison of IPv6-over-IPv4 Tunnel Mechanisms,” provides a nice
+    overview of currently available tunnel mechanisms, including considerations to
+    make when choosing a suitable tunnel mechanism.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Translation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Translation should be used only if no other technique is possible and should
+    be viewed as a temporary solution until one of the other techniques can be implemented.
+    The disadvantages are that translation between IPv4 and IPv6 does not support
+    the advanced features of IPv6, such as Extension headers and end-to-end security.
+    It poses limitations on the design topology because replies have to come through
+    the same NAT router from which they were sent. The NAT router is a single point
+    of failure, and flexible routing mechanisms cannot be used. All applications that
+    have IP addresses in the payload of the packets will stumble. The advantage of
+    this method is that it allows IPv6 hosts to communicate directly with IPv4 hosts
+    and vice versa. In certain cases NAT may help to deploy IPv6-only networks in
+    an early stage. Pros and cons have to be considered, but this may be a viable
+    solution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that you have mastered the IPv6 basics and your integration options, it
+    is time to put it all in place and start the planning of your transition. Refer
+    to [Chapter 9](ch09.html "Chapter 9. Planning for IPv6") for putting all the pieces
+    together and understanding the planning process. It also contains some guidelines
+    on IPv6 addressing concepts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You may also refer to my companion book, *Planning for IPv6* (O’Reilly), to
+    get more details on planning and the design considerations that are important.
+  prefs: []
+  type: TYPE_NORMAL
+- en: References
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Here’s a list of the most important RFCs and drafts mentioned in this chapter.
+    Sometimes I include additional subject-related RFCs for your personal further
+    study.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFCs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 2185, “Routing Aspects of IPv6 Transition,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2473, “Generic Packet Tunneling in IPv6 Specification,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2529, “Transmission of IPv6 over IPv4 Domains without Explicit Tunnels,”
+    1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2553, “Basic Socket Interface Extensions for IPv6,” March 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2663, “IP Network Address Translator (NAT) Terminology and Considerations,”
+    1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2784, “Generic Routing Encapsulation (GRE),” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3022, “Traditional IP Network Address Translator (Traditional NAT),” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3053, “IPv6 Tunnel Broker,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3056, “Connection of IPv6 Domains via IPv4 Clouds,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3068, “An Anycast Prefix for 6to4 Relay Routers,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3107, “Carrying Label Information in BGP-4,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3142, “An IPv6-to-IPv4 Transport Relay Translator,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3162, “RADIUS and IPv6,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3484, “Default Address Selection for Internet Protocol version 6 (IPv6),”
+    2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3489, “STUN—Simple Traversal of User Datagram Protocol (UDP) Through Network
+    Address Translators (NATs),” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3493, “Basic Socket Interface Extensions for IPv6,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3542, “Advanced Sockets Application Program Interface (API) for IPv6,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3582, “Goals for IPv6 Site-Multihoming Architectures,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3715, “IPsec-Network Address Translation (NAT) Compatibility Requirements,”
+    2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3901, “DNS IPv6 Transport Operational Guidelines,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3964, “Security Considerations for 6to4,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3971, “Secure Neighbor Discovery,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3972, “Cryptographically Generated Addresses (CGA),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4007, “IPv6 Scoped Address Architecture,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4029, “Scenarios and Analysis for Introducing IPv6 into ISP Networks,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4038, “Application Aspects of IPv6 Transition,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4057, “IPv6 Enterprise Network Scenarios,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4159, “Deprecation of ‘ip6.int,’” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4177, “Architectural Approaches to Multihoming for IPv6,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4191, “Default Router Preferences and More-Specific Routes,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4192, “Procedures for Renumbering an IPv6 Network without a Flag Day,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4213, “Basic Transition Mechanisms for IPv6 Hosts and Routers,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4215, “Analysis on IPv6 Transition in Third Generation Partnership Project
+    (3GPP) Networks,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4218, “Threats Relating to IPv6 Multihoming Solutions,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4219, “Things Multihoming in IPv6 (MULTI6) Developers Should Think About,”
+    2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4241, “A Model of IPv6/IPv4 Dual Stack Internet Access Service,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4282, “The Network Access Identifier,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4380, “Teredo: Tunneling IPv6 over UDP through Network Address Translations
+    (NATs),” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4554, “Use of VLANs for IPv4-IPv6 Coexistence in Enterprise Networks,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4659, “BGP-MPLS IP Virtual Private Network (VPN) Extension for IPv6 VPN,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4779, “ISP IPv6 Deployment Scenarios in Broadband Access Networks,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4787, “Network Address Translation (NAT) Behavioral Requirements for Unicast
+    UDP,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4798, “Connecting IPv6 Islands over IPv4 MPLS Using IPv6 Provider Edge Routers
+    (6PE),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4852, “IPv6 Enterprise Network Analysis—IP Layer 3 Focus,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4966, “Reasons to Move the Network Address Translator—Protocol Translator
+    (NAT-PT) to Historic Status,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5157, “IPv6 Implications for Network Scanning,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5181, “IPv6 Deployment Scenarios in 802.16 Networks,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5214, “Intra-Site Automatic Tunnel Addressing Protocol (ISATAP),” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5220, “Problem Statement for Default Address Selection in Multi-Prefix Environments,”
+    2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5375, “IPv6 Unicast Address Assignment Considerations,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5569, “IPv6 Rapid Deployment on IPv4 Infrastructures (6rd),” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5571, “Softwire Hub and Spoke Deployment Framework with Layer Two Tunneling
+    Protocol Version 2 (L2TPv2),” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5572, “IPv6 Tunnel Broker with the Tunnel Setup Protocol,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5902, “IAB Thoughts on IPv6 Network Address Translation,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5969, “IPv6 Rapid Deployment on IPv4 Infrastructures (6rd)—Protocol Specification,”
+    2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5991, “Teredo Security Updates,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6036, “Emerging Service Provider Scenarios for IPv6 Deployment,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6052, “IPv6 Addressing of IPv4/IPv6 Translators,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6081\. “Teredo Extensions,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6144, “Framework for IPv4/IPv6 Translation,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6145, “Stateless IP/ICMP Translation,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6146, “Stateful NAT64: Network Address and Protocol Translation from IPv6
+    Clients to IPv4 Servers,” 2011'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6147, “DNS64: DNS Extensions for Network Address Translation from IPv6
+    Clients to IPv4 Servers,” 2011'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6164, “Using 127-Bit IPv6 Prefixes on Inter-Router Links,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6177, “IPv6 Address Assignment to End Sites,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6180, “Guidelines for Using IPv6 Transition Mechanisms during IPv6 Deployment,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6250, “Evolution of the IP Model,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6269, “Issues with IP address sharing,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6296, “IPv6-to-IPv6 Network Prefix Translation,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6302, “Logging Recommendations for Internet-Facing Servers,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6333, “Dual-Stack Lite Broadband Deployments Following IPv4 Exhaustion,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6334, “Dynamic Host Configuration Protocol for IPv6 (DHCPv6) Option for
+    Dual-Stack Lite,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6343, “Advisory Guidelines for 6to4 Deployment,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6434, “IPv6 Node Requirements,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6459, “IPv6 in 3rd Generation Partnership Project (3GPP) Evolved Packet
+    System (EPS),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6535, “Dual-Stack Hosts Using “Bump-in-the-Host” (BIH),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6540, “IPv6 Support Required for All IP-Capable Nodes,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6586, “Experiences from an IPv6-only Network,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6619, “Scalable Operation of Address Translators with Per-Interface Bindings,”
+    2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6791, “Stateless Source Address Mapping for ICMPv6 Packets,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6830, “The Locator/ID Separation Protocol (LISP),” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6831, “The Locator/ID Separation Protocol (LISP) for Multicast Environments,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6832, “Interworking between Locator/ID Separation Protocol (LISP) and Non-LISP
+    Sites,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6833, “Locator/ID Separation Protocol (LISP) Map-Server Interface,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6834, “Locator/ID Separation Protocol (LISP) Map-Versioning,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6835, “The Locator/ID Separation Protocol Internet Groper (LIG),” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6836, “Locator/ID Separation Protocol Alternative Logical Topology (LISP+ALT),”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6866, “Problem Statement for Renumbering IPv6 Hosts with Static Addresses
+    in Enterprise Networks,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6877, “464XLAT: Combination of Stateful and Stateless Translation,” 2013'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6879, “IPv6 Enterprise Network Renumbering Scenarios, Considerations, and
+    Methods,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6883, “IPv6 Guidance for Internet Content Providers and Application Service
+    Providers,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6886, “NAT Port Mapping Protocol /NAT-PMP), 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6888, “Common Requirements for Carrier-Grade NATs (CGNs),” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6889, “Analysis of Stateful 64 Translation,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6908, “Deployment Considerations for Dual-Stack Lite,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6911, “RADIUS Attributes for IPv6 Access Networks,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6921, “Design Considerations for Faster-Than-Light (FTL) Communication,”
+    April 1, 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7021, “Assessing the Impact of Carrier-Grade NAT on Network Applications,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7040, “Public IPv4-over-IPv6 Access Network,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7050, “Discovery of the IPv6 Prefix Used for IPv6 Address Synthesis,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7051, “Analysis of Solution Proposals for Hosts to Learn NAT64 Prefix,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7059, “A Comparison of IPv6-over-IPv4 Tunnel Mechanisms,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7084, “Basic Requirements for IPv6 Customer Edge Routers,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7157, “IPv6 Multihoming without Network Address Translation,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7225, “Discovering NAT64 IPv6 Prefixes Using the Port Control Protocol (PCP),”
+    2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Drafts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Drafts can be found at [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html).
+    To locate the latest version of a draft, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
+    You can enter the draft name without a version number and the most current version
+    will come up. If a draft does not show up, it was possibly deleted. If it was
+    published as an RFC, the RFC number will be displayed. [http://tools.ietf.org/wg](http://tools.ietf.org/wg)
+    is also a very useful site. More information on the process of standardization,
+    RFCs, and drafts can be found in the [Appendix A](apa.html "Appendix A. RFCs").
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s a list of drafts I refer to in this chapter, as well as interesting
+    drafts that relate to the topics in this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Mapping of Address and Port with Encapsulation (MAP)”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-softwire-map-10*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Mapping of Address and Port using Translation (MAP-T)”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-softwire-map-t-05*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “DHCPv6 Options for Configuration of Softwire Address and Port Mapped Clients”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-softwire-map-dhcp-07*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '“Lightweight 4over6: An Extension to the DS-Lite Architecture”'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-softwire-lw4over6-08*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “IPv4 Residual Deployment via IPv6 - a Stateless Solution (4rd)”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-softwire-4rd-08*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “NAT64 Deployment Options and Experience”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-v6ops-nat64-experience-10*'
+  prefs: []
+  type: TYPE_NORMAL

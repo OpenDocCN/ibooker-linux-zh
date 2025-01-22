@@ -1,0 +1,2005 @@
+- en: Chapter 2. IPv6 Addressing
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: An IPv4 address has 32 bits and looks familiar. An IPv6 address has 128 bits
+    and looks wild at first glance. Extending the address space was one of the driving
+    reasons to develop IPv6, along with optimization of routing tables, especially
+    on the Internet. This chapter will help you become familiar with the extended
+    address space and will also explain how IPv6 addressing works and why it has been
+    designed to be the way it is. There is a lot more to understand than just the
+    128-bit address. The address architecture has been extended and the large address
+    space offers opportunity for new address designs. So make sure that you dive into
+    this before you work on an IPv6 address plan. The IPv6 addressing architecture
+    is defined in RFC 4291.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv6 Address Space
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The 32 bits of the IPv4 address space provide a theoretical maximum of 2^(32)
+    addresses, equal to approximately 4.29 billion addresses. The current world population
+    is over 7 billion people. So even if it were possible to use 100 percent of the
+    IPv4 address space, we would not be able to provide an IP address for everyone
+    on the planet. As a matter of fact, only a small fraction of this address space
+    can be used. In the early days of IP, nobody foresaw the existence of the Internet
+    as we know it today. Therefore, large address blocks were allocated without considerations
+    for global routing and address conservation issues. These address ranges cannot
+    be easily reclaimed, so consequently there are many unused addresses that are
+    not available for allocation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Are you aware that today (in 2014) only about 2.4 billion people have Internet
+    access? They represent approximately 34 percent of the world’s population.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The heated discussions about the end of the IPv4 address pool came to an end
+    when the IANA (Internet Assigned Numbers Authority) declared on February 3, 2011,
+    that the free pool was empty. This happened after IPv4 address consumption had
+    more than doubled in 2010\. On average the world had consumed approximately 10
+    /8 blocks per year for the last 10 years. In January 2010 there were 24 /8 blocks
+    still available. So it should have lasted more than two years. But only one year
+    later, in January 2011, the pool was empty. This is an indication of how fast
+    the Internet is growing. And the Internet will continue to grow at that pace,
+    if not faster. Only now, because the IPv4 pool is empty, the Internet’s growth
+    will to a large part happen over IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The evolution of the Internet and our services shows that in the future, not
+    only will we need addresses for users and computers, but we’ll also need more
+    and more addresses for all sorts of devices that need permanent Internet connections,
+    such as smartphones, tablets, webcams, refrigerators, cars, infusion pumps, water
+    and electric meters, and many more items. Car manufacturers, as one example, which
+    are designing the networked car of the future, need many IP addresses per car.
+    How many cars do we have? According to [http://howmanyarethere.net](http://howmanyarethere.net)
+    there were about 1 billion cars in the world in 2011\. So, multiply this with,
+    let’s say, 50 IP addresses…there we go! These addresses will be used for monitoring
+    and maintenance as well as for access to services such as weather and traffic
+    information. There was a prototype Renault car with an integrated Cisco router
+    and a Mobile IPv6 implementation built in the early years of the last decade.
+    Most of the big car manufacturers have similar plans and prototypes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv6 address space uses a 128-bit address, meaning that we have a maximum
+    of 2^(128) addresses available. Do you want to know what this number looks like?
+    It equals 340,282,366,920,938,463,463,374,607,431,768,211,456, or in other words
+    6.65 × 10^(23) addresses per square meter on earth. It is pronounced as 340 undecillion
+    addresses. For all of you who, like me, cannot imagine how much this is, it can
+    be compared to providing multiple IP addresses for every grain of sand on the
+    planet. The IPv4 address space with the originally defined address classes (A,
+    B, C, D, E) allows for 2,113,389 network IDs. With the introduction of Classless
+    Interdomain Routing (CIDR), this number was slightly extended. Let’s compare this
+    with IPv6\. The address space with the current prefix for global unicast addresses
+    (binary 001) allows for 2^(45) network IDs with a /48 prefix, or 35,184,372,088,832
+    networks. Each of these networks can further be divided into 65,536 subnets using
+    the remaining 16 bits of the prefix.
+  prefs: []
+  type: TYPE_NORMAL
+- en: And in a little while, when we are deeper into this chapter and discuss the
+    address format, I’ll show you another comparison that will help you to understand
+    how big this address space really is.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Address Types
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: IPv4 knows unicast, broadcast, and multicast addresses. With IPv6, the broadcast
+    address is not used anymore; multicast addresses are used instead. This is good
+    news because broadcasts are a problem in most networks. The anycast address, a
+    type of address introduced with RFC 1546, has already been used in the IPv4 world
+    but will probably be used on a wider basis with IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unicast, Multicast, and Anycast Addresses
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'An IPv6 address can be classified into one of three categories:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Unicast*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A unicast address uniquely identifies an interface of an IPv6 node. A packet
+    sent to a unicast address is delivered to the interface identified by that address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Multicast*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A multicast address identifies a group of IPv6 interfaces. A packet sent to
+    a multicast address is processed by all members of the multicast group.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Anycast*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An anycast address is assigned to multiple interfaces (usually on multiple nodes).
+    A packet sent to an anycast address is delivered to only one of these interfaces,
+    usually the nearest one.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some General Rules
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: IPv6 addresses are assigned to interfaces as in IPv4, not to nodes as in OSI,
+    so each interface of a node needs at least one unicast address. A single interface
+    can also be assigned multiple IPv6 addresses of any type (unicast, multicast,
+    and anycast). A node can therefore be identified by the address of any of its
+    interfaces. It is also possible to assign one unicast address to multiple interfaces
+    for load-sharing reasons, but if you do this, you need to make sure that the hardware
+    and drivers support it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With IPv6, all zeros and ones are legal values for any field in an address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 supports addresses of different *scopes*. There are global and nonglobal
+    (e.g., link-local) scopes. Operationally, the use of nonglobal addresses has been
+    introduced with IPv4 by using IP addresses from the private range or administratively
+    scoped multicast addresses. The design of IPv6 includes the address scope in the
+    base architecture. Every IPv6 address other than the unspecified address has a
+    specific scope, which is a topological span within which the address may be used
+    as a unique identifier for an interface or set of interfaces. The scope of an
+    address is encoded as part of the address. You can find a description of scopes
+    in the section [Multicast Address](ch02.html#multicast_address "Multicast Address"),
+    and refer to RFC 4007, “IPv6 Scoped Address Architecture” for an explanation of
+    scopes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Address Notation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'An IPv6 address has 128 bits, or 16 bytes. The address is divided into eight
+    16-bit hexadecimal blocks separated by colons. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To make life easier, some abbreviations are possible. For instance, leading
+    zeros in a 16-bit block can be skipped. The example address now looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A double colon can replace consecutive zeros or leading or trailing zeros within
+    the address. If we apply this rule, our address looks as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Note that the double colon can appear only once in an address. The reason for
+    this rule is that the computer always uses a full 128-bit binary representation
+    of the address, even if the displayed address is simplified. When the computer
+    finds a double colon, it expands it with as many zeros as are needed to get 128
+    bits. If an address had two double colons, the computer would not know how many
+    zeros to add for each colon. So the IPv6 address `2001:db8:0000:0000:0056:abcd:0000:1234`
+    can be represented in the following ways (note the two possible positions for
+    the double colon):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: There are so many different ways to write and abbreviate IPv6 addresses and
+    this can cause operational troubles. If you want to do lookups in a database or
+    a spreadsheet, you have to make sure that everybody uses the same format to store
+    addresses; otherwise, you won’t be able to find out if an address is already in
+    the list. For this purpose the best option is probably to just use the full format,
+    as it’s the only unambiguous format. Also be aware that some systems are case
+    sensitive, so you need to define whether to use capitals or not.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For the purpose of making administration easier, an RFC was written to standardize
+    IPv6 address representation. It also discusses the issues that can arise when
+    storing IPv6 addresses in databases and spreadsheets for lookup. You need solid
+    rules for address representation to be able to find addresses. Probably for these
+    cases it is best to use the full address representation, as it is the only unambiguous
+    one. For all other cases, RFC 5952 recommends using the following rules:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Leading zeros must be suppressed.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A single 16-bit 0000 field must be represented as 0 and should not be replaced
+    by a double colon.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Shorten as much as possible. Use a double colon whenever possible.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Always shorten the largest number of zeros.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If two blocks of zero are equally long, shorten the first one.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use lowercase for a, b, c, d, e, f.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In environments where IPv4 and IPv6 nodes are mixed, another convenient form
+    of IPv6 address notation is to put the values of an IPv4 address into the four
+    low-order bytes of the address. An IPv4 address of `192.168.0.2` can be represented
+    as `x:x:x:x:x:x:192.168.0.2`, and an address of `0:0:0:0:0:0:192.168.0.2` can
+    be written as `::192.168.0.2`. If you prefer, you can also write `::c0a8:2`. This
+    is the hex representation for 192.168.0.2.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For the representation of an IPv6 address followed by a port number, the best
+    way is to put the IPv6 address in square brackets, followed by a colon and the
+    port number. So it may look like this: `[2001:db8::1]:80`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: These recommendations are fully compliant with RFC 4291\. But there are many
+    more choices offered by RFC 4291\. An IPv6 implementation must always be able
+    to process an address written in any format possible as per RFC 4291.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prefix Notation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The notation for prefixes has also been specified in RFC 4291\. A *global routing
+    prefix* is the high-order bits of an IP address used to identify the subnet or
+    a specific type of address (refer to [Table 2-2](ch02.html#list_of_assigned_prefixes
+    "Table 2-2. List of assigned prefixes")). It was called the *format prefix* in
+    earlier RFCs. The prefix notation is very similar to the way IPv4 addresses are
+    written in CIDR (Classless Interdomain Routing) notation, and it is also commonly
+    used for subnetted IPv4 addresses. The notation appends the prefix length, written
+    as a number of bits with a slash, which leads to the following format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The prefix length specifies how many leftmost bits of the address specify the
+    prefix. This is another way of noting a *subnet mask*. Remember, a subnet mask
+    specifies the bits of the IPv4 address that belong to the network ID. The prefix
+    is used to identify the subnet that an interface belongs to and is used by routers
+    for forwarding. The following example explains how the prefix is interpreted.
+    Consider the IPv6 prefix notation `2001:db8:1200::/40`. To understand this address,
+    let’s convert the hex into binary as shown in [Table 2-1](ch02.html#understanding_prefix_notation
+    "Table 2-1. Understanding prefix notation").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 2-1. Understanding prefix notation
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Hex notation | Binary notation | Number of bits |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2001 | 0010 0000 0000 0001 | 16 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 0db8 | 0000 1101 1011 1000 | 16 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1200 | 0001 0010 | 8 |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  |  | Total: 40 |'
+  prefs: []
+  type: TYPE_TB
+- en: The *compressed notation* (replacing a sequence of zeros with a double colon)
+    is also applicable to the prefix representation. It should be used carefully,
+    though, because there are often two or more ranges of zeros within an address,
+    and only one can be compressed. The rules in RFC 5952 dictate how to do it, but
+    an IPv6 interface must still be capable of dealing with addresses not complying
+    with RFC 5952, as mentioned above.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Global Routing Prefixes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Table 2-2](ch02.html#list_of_assigned_prefixes "Table 2-2. List of assigned
+    prefixes") outlines the current assignment of reserved prefixes and special addresses,
+    such as link-local addresses or multicast addresses. The major part of the address
+    space (over 80 percent) is unassigned with the exception of a few special cases,
+    mentioned below. This leaves room for future assignments.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 2-2. List of assigned prefixes
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Allocation | Prefix binary | Prefix hex | Fraction of address space |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Global unicast | 001 | 2000::/3 | 1/8 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Link-local unicast | 1111 1110 10 | fe80::/10 | 1/1024 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Unique-local IPv6 address | 1111 110 | fc00::/7 |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Multicast | 1111 1111 | ff00::/8 | 1/256 |'
+  prefs: []
+  type: TYPE_TB
+- en: All address ranges not listed in [Table 2-2](ch02.html#list_of_assigned_prefixes
+    "Table 2-2. List of assigned prefixes") are currently reserved or unassigned (with
+    the exceptions mentioned just below). The Internet Assigned Numbers Authority
+    (IANA) currently assigns only out of the binary range starting with 001.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The updated list of address allocations can be found at the following link:
+    [http://www.iana.org/assignments/ipv6-address-space](http://www.iana.org/assignments/ipv6-address-space).
+    You can also find an updated IANA list of special-purpose prefixes here: [http://bit.ly/1pDkTzo](http://bit.ly/1pDkTzo).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some special addresses are assigned out of the reserved address space with the
+    binary prefix `0000 0000`. These include the *unspecified address*, the *loopback
+    address*, and IPv6 addresses with embedded IPv4 addresses, which I discuss in
+    detail later in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unicast addresses can be distinguished from multicast addresses by their prefixes.
+    Globally unique unicast addresses have a high-order byte starting with `001`.
+    An IPv6 address with a high-order byte of `1111 1111` (`ff` in hex) is always
+    a multicast address. For more information about multicast addresses, refer to
+    the section [Multicast Address](ch02.html#multicast_address "Multicast Address").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Anycast addresses are taken from the unicast address space, so they can’t be
+    identified as anycast just by looking at the prefix. If you assign the same unicast
+    address to multiple interfaces, thereby making it an anycast address, you have
+    to configure the interfaces so they all know that this address is an anycast address.
+    For more information about anycast addresses, refer to the section [Anycast Address](ch02.html#anycast_address
+    "Anycast Address").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Global Unicast Address
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Global unicast addresses are identified by the binary prefix `001`, as shown
+    earlier in [Table 2-2](ch02.html#list_of_assigned_prefixes "Table 2-2. List of
+    assigned prefixes"). RFC 4291 defines the global unicast address format as shown
+    in [Figure 2-1](ch02.html#format_of_the_global_unicast_address "Figure 2-1. Format
+    of the global unicast address").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the global unicast address](images/ipv6_0201.png)Figure 2-1. Format
+    of the global unicast address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *global routing prefix* identifies the address range allocated to a site.
+    This part of the address is assigned by the international registry services and
+    the Internet Service Providers (ISPs) and has a hierarchical structure. The *subnet
+    ID* identifies a link within a site. A link can be assigned multiple subnet IDs.
+    A local administrator of a site assigns this part of the address. The *interface
+    ID* identifies an interface on a subnet and must be unique within that subnet.
+    The interface ID is always 64 bits, so therefore an IPv6 subnet is always a /64
+    subnet. No more subnet mask issues with IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: International Registry Services and Current Address Allocations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The international allocation of IPv6 addresses has been delegated to several
+    regional registry services: ARIN (American Registry for Internet Numbers) for
+    North America and Sub-Saharan Africa; RIPE NCC (Réseau IP Européens Network Coordination
+    Centre) for Europe, the Middle East, Central Asia, and North Africa; APNIC (Asia
+    Pacific Network Information Centre) for the Asia/Pacific region; and LACNIC (Latin
+    American and Caribbean Internet Addresses Registry) for Latin America. AfriNIC
+    (African Network Information Centre) went into operation in 2005 to cover Africa
+    in the future.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each of these registries has information on its site about address allocation
+    issues, current practices, and procedures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Several allocations have been made, as listed in [Table 2-3](ch02.html#current_allocations
+    "Table 2-3. Current allocations").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 2-3. Current allocations
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Prefix | Allocation | RFC |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 0100::/64 | Discard-Only Address Block | RFC 6666 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 64:ff9b::/96 | IPv4-IPv6 Translator | RFC 6052 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2000::/3 | Global Unicast Address spaceAllocations made out of the `2000::/3`
+    space can be viewed at [http://bit.ly/ipv6-add](http://bit.ly/ipv6-add) | RFC
+    4291 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2001::/32 | Teredo | RFC 4380 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2001:db8::/32 | For documentation purposes only, nonroutable | RFC 3849 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2002::/16 | 6to4 | RFC 3056 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| fc00::/7 | Unique-local (ULA) | RFC 4193 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| fe80::/10 | Link-scoped unicast | RFC 4291 |'
+  prefs: []
+  type: TYPE_TB
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[http://www.iana.org/numbers](http://www.iana.org/numbers) is a great entry
+    point for global IP address services, current address allocations for both IPv4
+    and IPv6, and information about how to request IPv6 address services. You can
+    also find an updated IANA list of special-purpose prefixes here: [http://bit.ly/1pDkTzo](http://bit.ly/1pDkTzo).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The address space for 6Bone operation (`3ffe::/16`) was phased out by June 2006
+    and the prefix returned to the unassigned address pool. It was created in order
+    to allow for global testing of IPv6 while address allocation had not been standardized.
+    Since IPv6 address allocation has been defined, 6Bone hosts have been moved to
+    the official IPv6 address space.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For information on where and how to get IPv6 address space, refer to [Chapter 9](ch09.html
+    "Chapter 9. Planning for IPv6") on Planning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So How Large Is This Address Space Again?
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In the introduction to this chapter, when we discussed how many addresses IPv6
+    provides, I promised to make another example later on. So here it comes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If an ISP gets a /32 prefix, this means there are 32 more bits in the prefix
+    that can be administered by the ISP or its customers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Imagine: one single /32 is more address space than we ever had with IPv4, because
+    in IPv4 the 32 bits in the address include the host ID, whereas in IPv6 each of
+    these /64 subnets has 64 bits for interface IDs.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Is this a lot? Well, obviously a lot more than we ever had in IPv4\. But we
+    still don’t know how much it really is.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let us have a look at the IANA IPv6 pool. By March 2014, there were 138,786
+    /32 blocks allocated. That seems like a lot if we consider that one of these is
+    more than we ever had in IPv4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If we calculate how much this is of the total IPv6 address space currently available
+    (`2000::/3`), it makes up for 0.026%.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the 138,786 /32 blocks, more than 9 billion customers can receive a /48,
+    with which each can create 65,536 /64 subnets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At [http://www.bgpexpert.com/addrspace-ipv6.php](http://www.bgpexpert.com/addrspace-ipv6.php)
+    you can find updated numbers about IPv6 allocations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So I kindly ask you to use these numbers as your daily mantra when you start
+    working on an IPv6 address plan. One of the biggest challenges when doing that
+    is to get rid of all the address conservation rules that are ingrained in our
+    body cells. Even if something feels really wasteful, it’s probably not. And if
+    we have to realize that we were too wasteful, because we have used up the `2000::/3`
+    in 20 years, we still have 7 times more space available to do better. The `2000::/3`
+    is only the binary 001 block, which is currently used for globally unique unicast
+    IPv6 addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Interface ID
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Addresses in the prefix range `001` to `111` should use a 64-bit interface identifier
+    that follows the EUI-64 (Extended Unique Identifier) format (except for multicast
+    addresses with the prefix `1111 1111`). The [EUI-64](http://bit.ly/1mOVk9G) is
+    a unique identifier defined by the Institute of Electrical and Electronics Engineers
+    (IEEE). [Appendix A](apa.html "Appendix A. RFCs") of RFC 4291 explains how to
+    create EUI-64 identifiers, and more details can be found in the link-specific
+    RFCs, such as “IPv6 over Ethernet” or “IPv6 over FDDI.” [Chapter 5](ch05.html
+    "Chapter 5. Networking") contains a short discussion and a list of these RFCs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An interface uses an identifier following the EUI-64 format during Stateless
+    Address Autoconfiguration. For example, when an interface autoconfigures for a
+    link-local address on an Ethernet interface using its MAC address, the 64-bit
+    interface identifier has to be created from the 48-bit (6-byte) Ethernet MAC address.
+    First, the hex digits `0xff-fe` are inserted between the third and fourth bytes
+    of the MAC address. Then the universal/local bit, the second low-order bit of
+    `0x00` (the first byte) of the MAC address, is complemented. The second low-order
+    bit of `0x00` is `0`, which, when complemented, becomes `1`; as a result, the
+    first byte of the MAC address becomes `0x02`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Therefore, the IPv6 interface identifier corresponding to the Ethernet MAC address
+    `00-02-b3-1e-83-29` is `02-02-b3-ff-fe-1e-83-29`. This example discusses only
+    the EUI-64 creation process. Many other steps occur during Stateless Address Autoconfiguration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To learn how IPv6 Stateless Address Autoconfiguration works, refer to [Chapter 4](ch04.html
+    "Chapter 4. ICMPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: The link-local address of an interface is the combination of the prefix `fe80::/64`
+    and a 64-bit interface identifier expressed in IPv6 colon-hexadecimal notation.
+    Therefore, the MAC-based link-local address of the previous example interface,
+    with prefix `fe80::/64` and interface identifier `02-02-b3-ff-fe-1e-83-29`, is
+    `fe80::202:b3ff:fe1e:8329`. This is shown in [Figure 2-2](ch02.html#how_the_mac_address_is_converted_to_an
+    "Figure 2-2. How the MAC address is converted to an interface ID") and described
+    in RFC 2464, “Transmission of IPv6 Packets over Ethernet Networks.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![How the MAC address is converted to an interface ID](images/ipv6_0202.png)Figure 2-2. How
+    the MAC address is converted to an interface ID'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The figure shows how this Interface Identifier is combined with the link-local
+    prefix. As indicated, it can be combined with any other prefix received. (More
+    on this in [Chapter 4](ch04.html "Chapter 4. ICMPv6") on Neighbor Discovery.)
+    There is a discussion going on at the time of writing that advises against using
+    Interface IDs that are based on hardware information. See below for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Address Privacy
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The privacy of autoconfigured IPv6 addresses using the interface identifier
+    was an issue discussed in the IETF in the early days of IPv6\. If an IPv6 address
+    is built using the MAC identifier, your Internet access could be traced even across
+    networks, because this identifier is unique to your interface. It is important
+    to understand that an IPv6 node can have an address based on the interface identifier,
+    but this is not a requirement. As an alternative, the IPv6 device can have an
+    address like the ones currently used with IPv4, either static and manually configured
+    or dynamically assigned by a DHCP server. RFC 4941, “Privacy Extensions for Stateless
+    Address Autoconfiguration in IPv6,” introduces another type of address available
+    only in IPv6 that contains a random number in place of the hardware address. This
+    interface ID can also change over time. It is sometimes also called a *temporary
+    address*. It is generated in addition to the EUI-64 interface ID. The temporary
+    address is then used for outgoing communications and the EUI-64 based address
+    for server functions and incoming connections.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An Internet device that is a target for IP communication—for instance, a web
+    or FTP server—needs a unique and stable IP address. But a host running a browser
+    or an FTP client does not need to have the same address every time it connects
+    to the Internet. Some DHCPv6 implementations support the generation of random
+    interface identifiers according to RFC 4941\. This way, they use DHCPv6 to manage
+    their address space but prevent anyone from topology mapping their network or
+    tracking their nodes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With the address architecture in IPv6, you can choose between two types of
+    addresses:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Unique stable IP addresses*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Assigned through manual configuration, a DHCP server, or Stateless Address Autoconfiguration
+    using the EUI-64 interface identifier or another address type created with a permanent
+    IID (see below).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Temporary transient IP addresses*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Assigned using a random number that changes in regular intervals and can be
+    used in place of the stable interface identifier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While the temporary privacy addresses provide some security by complicating
+    the task of eavesdroppers and other information collectors (e.g., in logfiles,
+    headers) to correlate the activities of a host, they can become challenging in
+    other areas. From a network management perspective, they increase the complexity
+    of event logging, troubleshooting, access control, and quality of service. As
+    a result, some organizations disabled the use of temporary addresses even at the
+    expense of reduced privacy. The need to have stable addresses that do not frequently
+    change the way Privacy addresses do leads to the definition of stable privacy
+    addresses in RFC 7217, “A Method for Generating Semantically Opaque Interface
+    Identifiers with IPv6 Stateless Address Autoconfiguration (SLAAC).” The goal is
+    to have IPv6 addresses that are stable within a subnet, but change when the host
+    moves from one network to another and are not based on any hardware identifier.
+    This method then applies to all prefixes a host may use, such as link-local, global,
+    or unique-local.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At the same time there is currently a draft in discussion (at the time of writing
+    in early 2014) with the title “Recommendation on Stable IPv6 Interface Identifiers”
+    (*draft-ietf-6man-default-iids-00*). It recommends using stable SLAAC addresses,
+    which are not based on hardware identifiers. As mentioned before, concerns have
+    been raised that embedding hardware information in an IPv6 address creates security
+    and privacy risks. Draft “Privacy Considerations for IPv6 Address Generation Mechanisms”
+    (*draft-ietf-6man-ipv6-address-generation-privacy-01.txt*) offers a great discussion
+    on the pros and cons of each Interface ID generation option.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Be aware, when going through all these considerations, that the Interface ID
+    is not the only way to track users. DNS names, cookies, browser fingerprints,
+    and application-layer usernames can all be used to link a host’s activities together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Special Addresses
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are a number of special addresses that we need to discuss. The first
+    part of the IPv6 address space with the prefix of `0000 0000` is reserved. Out
+    of this prefix, special addresses have been defined as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The unspecified address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The unspecified address has a value of `0:0:0:0:0:0:0:0` and is therefore also
+    called the *all-zeros address*. It is comparable to `0.0.0.0` in IPv4\. It indicates
+    the absence of a valid address, and it can, for example, be used as a Source address
+    by a host during the boot process when it sends out a request for address configuration
+    information. If you apply the notation conventions discussed earlier in this chapter,
+    the unspecified address can also be abbreviated as `::`. It should never be statically
+    or dynamically assigned to an interface, and it should not appear as a Destination
+    IP address or within an IPv6 Routing header. It is sometimes used in configuration
+    files for software to tell a program to use any IPv6 address configured on an
+    interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The loopback address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv4 loopback address, `127.0.0.1`, is probably familiar to you. It is helpful
+    in troubleshooting and testing the IP stack because it can be used to send a packet
+    to the protocol stack without sending it out on the subnet. With IPv6, the loopback
+    address works the same way and is represented as `0:0:0:0:0:0:0:1`, abbreviated
+    as `::1`. It should never be statically or dynamically assigned to an interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next sections describe different types of addresses that have been specified
+    to be used with different transition mechanisms, which can be used in the migration
+    to IPv6\. These virtual interfaces are commonly called *pseudo-interfaces*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A description of the transition mechanisms can be found in [Chapter 7](ch07.html
+    "Chapter 7. Transition Technologies").
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 Addresses with Embedded IPv4 Addresses
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Because the transition to IPv6 will be gradual, two special types of addresses
+    have been defined for backward compatibility with IPv4\. Both are described in
+    RFC 4291:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv4-compatible IPv6 address (deprecated)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This type of address is used to tunnel IPv6 packets dynamically over an IPv4
+    routing infrastructure. IPv6 nodes that use this technique are assigned a special
+    IPv6 unicast address that carries an IPv4 address in the low-order 32 bits. This
+    address type has so far rarely been used and was deprecated in RFC 4291\. New
+    or updated implementations will no longer need to support this type of address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv4-mapped IPv6 address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This type of address is used to represent the addresses of IPv4-only nodes as
+    IPv6 addresses. An IPv6 node can use this address to send a packet to an IPv4-only
+    node. The address also carries the IPv4 address in the low-order 32 bits of the
+    address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 2-3](ch02.html#format_of_ipv6_addresses_with_an_embedde "Figure 2-3. Format
+    of IPv6 addresses with an embedded IPv4 address") shows the format of both these
+    addresses.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of IPv6 addresses with an embedded IPv4 address](images/ipv6_0203.png)Figure 2-3. Format
+    of IPv6 addresses with an embedded IPv4 address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The two addresses are pretty much the same. The only difference is the 16 bits
+    in the middle. When they are set to 0, the address is an IPv4-compatible IPv6
+    address; if these bits are set to 1, it is an IPv4-mapped IPv6 address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6to4 Addresses
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The IANA has permanently assigned a 13-bit TLA identifier for 6to4 operations
+    within the global unicast address range (001). 6to4 is one of the mechanisms defined
+    to let IPv6 hosts or networks communicate over an IPv4-only infrastructure. I
+    describe 6to4 in [Chapter 7](ch07.html "Chapter 7. Transition Technologies"),
+    and it is specified in RFC 3056\. The 6to4 TLA identifier is `0x0002`. The address
+    format is shown in [Figure 2-4](ch02.html#format_of_the_6to4_address "Figure 2-4. Format
+    of the 6to4 address").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the 6to4 address](images/ipv6_0204.png)Figure 2-4. Format of the
+    6to4 address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The prefix has a total length of 48 bits. The IPv4 address in the prefix must
+    be a public IPv4 address and is represented in hexadecimal notation. For instance,
+    if you configure an interface for 6to4 with an IPv4 address of `62.2.84.115`,
+    the 6to4 prefix is `2002:3e02:5473::/48`. Through this interface, all IPv6 hosts
+    on this link can tunnel their packets over the IPv4 infrastructure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The 6to4 specification was written when the global unicast address format according
+    to RFC 2374 was current, so it uses the old terms and formats (format prefix,
+    TLA, SLA).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6rd Addresses
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In 2010, a specification was published called 6rd (IPv6 Rapid Deployment). It
+    is described in [Chapter 7](ch07.html "Chapter 7. Transition Technologies") and
+    specified in RFC 5969\. The address format is based on 6to4 and shown in [Figure 2-5](ch02.html#format_of_the_6rd_address
+    "Figure 2-5. Format of the 6rd address").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the 6rd address](images/ipv6_0205.png)Figure 2-5. Format of the
+    6rd address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The main difference in the address is that 6rd does not use a special prefix
+    like 6to4 and also doesn’t have a fixed boundary at /48\. The prefix has a total
+    length of 64 bits and is divided into the ISP prefix and the site IPv4 address.
+    As the figure shows, these two parts are of variable length. If the provider would
+    use his /32 prefix and add the full IPv4 address of the site, he would end up
+    giving out /64 subnets to his customers. In most cases this is not recommended.
+    Even home sites will need multiple subnets in the future. Depending on the ISP’s
+    environment, address architecture, and customer structure, there are many ways
+    to design the 6rd address. One option could be if the ISP has a /28, he can then
+    add 32 bits of IPv4 address and give out /60 to his customers. Or, if his IPv4
+    address plan allows to aggregate customers in, let’s say, a /8 prefix (the customer’s
+    IPv4 addresses), the size of the 6rd prefix would be one of the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A /52 if the provider has a /28 (28 + 24 for the aggregated customer IPv4 block)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A /56 if the provider has a /32 (32 + 24 for the aggregated customer IPv4 block)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: There are discussions going on in several regions, such as RIPE and ARIN, to
+    make this easier by assigning larger 6rd prefixes to ISPs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The important point here is to assign prefixes to home users that allow them
+    to have multiple subnets. Refer to [Chapter 9](ch09.html "Chapter 9. Planning
+    for IPv6") for a description of regional Registry policies and home networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ISATAP Addresses
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The *Intra-Site Automatic Tunnel Addressing Protocol* (ISATAP) is an automatic
+    tunneling mechanism specified in RFC 5214\. It is designed for dual-stack nodes
+    that are separated by an IPv4-only infrastructure. It treats the IPv4 network
+    as one large link-layer network and allows those dual-stack nodes to automatically
+    tunnel between each other using any format of IPv4 address. ISATAP uses a type
+    identifier of `0xFE` for specifying an IPv6 address with an embedded IPv4 address.
+    The format of an ISATAP address is shown in [Figure 2-6](ch02.html#format_of_the_isatap_address
+    "Figure 2-6. Format of the ISATAP address").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the ISATAP address](images/ipv6_0206.png)Figure 2-6. Format of
+    the ISATAP address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first 64 bits follow the format of the global unicast address. IANA owns
+    the IEEE Organizationally Unique Identifier (OUI) `00-00-5E` and specifies the
+    EUI-48 format interface identifier assignments within that OUI. Within the first
+    16 bits, a type identifier shows whether the IPv4 address is from the private
+    range (`0000`) or a globally unique address (`0200`). The next eight bits contain
+    a type identifier to indicate that this is an IPv6 address with an embedded IPv4
+    address. The type identifier is `0xFE`. The last 32 bits contain the embedded
+    IPv4 address, which can be written in dotted decimal notation or in hexadecimal
+    representation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Assume we have a host with an IPv4 address of `192.168.0.1` and the host is
+    assigned a 64-bit prefix of `2001:db8:510:200::/64`. The ISATAP address for this
+    host is `2001:db8:510:200:0:5efe:192.168.0.1`. Alternatively, you can use the
+    hexadecimal representation for the IPv4 address, in which case the address is
+    written `2001:db8:510:200:0:5efe:c0a8:1`. The link-local address for this host
+    is `fe80::5efe:192.168.0.1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Teredo Addresses
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Teredo* is a mechanism designed to provide IPv6 connectivity to hosts that
+    sit behind one or more NATs. This is done by tunneling the IPv6 packet within
+    UDP. The mechanism consists of Teredo clients, servers, and relays. The Teredo
+    relays are IPv6 routers sitting between the Teredo service and the native IPv6
+    network. Teredo is specified in RFC 4380\. It was expected that this service would
+    be common until ISPs upgraded to native IPv6 services. Current Internet statistics
+    show that this is not the case. You can refer to the [Google statistics](http://www.google.com/ipv6/statistics.html)
+    to see how the red line representing 6to4 and Teredo traffic declined to almost
+    zero.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Teredo address has the format shown in [Figure 2-7](ch02.html#format_of_the_teredo_address
+    "Figure 2-7. Format of the Teredo address").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the Teredo address](images/ipv6_0207.png)Figure 2-7. Format of
+    the Teredo address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The prefix has a length of 32 bits. The global Teredo IPv6 Service Prefix is
+    `2001:0000:/32`. The server IPv4 address field has a length of 32 bits and contains
+    the IPv4 address of a Teredo server. The flags field has 16 bits and specifies
+    the type of address and NAT in use. The 16-bit port field contains the mapped
+    UDP port of the Teredo service on the client and the client IPv4 address field
+    contains the mapped IPv4 address of the client. In this format, both the mapped
+    UDP port and the mapped IPv4 address of the client are obfuscated: each bit in
+    the address and port number is reversed.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To learn how IPv6 and IPv4 can coexist using these addresses, refer to [Chapter 7](ch07.html
+    "Chapter 7. Transition Technologies").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cryptographically Generated Addresses
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To increase security for Neighbor Discovery (ND), which is discussed in [Chapter 4](ch04.html
+    "Chapter 4. ICMPv6"), RFC 3972 defines cryptographically generated addresses (CGAs).
+    RFC 3972 has been updated by RFCs 4581 and 4982\. CGAs contain a cryptographic
+    hash of the public key as part of the Interface ID. The corresponding private
+    key can then be used to sign messages sent from this address. This prevents attackers
+    from taking over an IPv6 address and can be used in environments where no PKI
+    (Public Key) infrastructure is present.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Link-Local and Unique Local IPv6 Addresses
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: With IPv4, organizations often use IP addresses from the private ranges as defined
+    in RFC 1918\. The addresses reserved for private use should never be forwarded
+    over Internet routers but should instead be confined to the organization’s network.
+    For connection to the Internet, Network Address Translation (NAT) maps internal
+    private addresses to publicly registered IPv4 addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The original IPv6 specification allocated two separate address spaces (scopes)
+    for link- and site-local use, both identified by their prefixes. The prefix for
+    site-local addresses was `fec0::/10`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The site-local address has been deprecated in RFC 3879\. Too many potential
+    problems arose in the application of this address. It has been replaced by the
+    Unique Local IPv6 Address, also called ULA (see below).
+  prefs: []
+  type: TYPE_NORMAL
+- en: A *link-local* address is for use on a single link and should never be routed.
+    It doesn’t need a global prefix and can be used for Autoconfiguration mechanisms,
+    for Neighbor Discovery, and on networks with no routers, so it is useful for creating
+    temporary networks. Let’s say you meet your friend in a conference room and you
+    want to share files on your computers. You can connect your computers using a
+    wireless network or a cross cable between your Ethernet interfaces, and you can
+    share files without any special configuration by using the link-local address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The replacement for site-local addresses is called *Unique Local IPv6 Unicast
+    Address (ULA)*, or *Local IPv6 Address* for short. It is specified in RFC 4193\.
+    These addresses are globally unique but should not be routed to the global Internet.
+    They are designed to be used within corporate sites or confined sets of networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The characteristics of unique local IPv6 unicast addresses are the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Have a unique, global prefix, which allows for filtering at network boundaries
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Allow for private connection of networks without the risk of address conflicts
+    and the consequence of having to renumber one of the sites
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Are independent of ISP
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Can be used for internal communication without an Internet connection
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Can be used by applications just like regular global unicast addresses
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The format of these addresses is shown in [Figure 2-8](ch02.html#address_formats_for_link-_and_site-local
+    "Figure 2-8. Address formats for link- and site-local use").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Address formats for link- and site-local use](images/ipv6_0208.png)Figure 2-8. Address
+    formats for link- and site-local use'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In hexadecimal notation, a link-local address is identified by the prefix `fe80::/10`.
+    For the unique local IPv6 address, RFC 4193 specifies a prefix of `fc00::/7`.
+    The 8th bit is currently set to `1` and specifies local administration of the
+    prefix. Setting the 8th bit to `0` may be used in the future for centrally administrated
+    addresses. For the moment, it was decided to standardize only a locally assigned
+    version. The centrally assigned form may be defined in the future if a strong
+    need is identified.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In the meantime, you can use the [Sixxs unofficial registration site](http://www.sixxs.net/tools/grh/ula/)
+    and find out. You will also find other cool IPv6 information and tools there.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So for locally administered addresses, we currently have a hexadecimal prefix
+    of `fd00::/8`. It is followed by the 40 bits for the global ID, which is randomly
+    created to ensure a high probability of uniqueness; 16 bits used for subnet ID;
+    and 64 bits for the interface identifier. You may still find the deprecated site-local
+    address with the prefix `fec0::/10` if you use older implementations, but it should
+    not be used for new implementations or deployments but be replaced by either global
+    unicast addresses or ULAs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make sure that your global ID is generated using the *Pseudo-Random Global ID
+    Algorithm* defined in RFC 4193\. This algorithm includes values such as time,
+    hardware identifiers, and other system-specific values, among others. This is
+    to ensure that your prefix is going to be unique and there should be no ULA collision
+    when merging your network with any other ULA network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As mentioned previously, these local addresses should not be routed to the Internet.
+    Border routers should be configured to filter these prefixes. Local addresses
+    should not appear in global DNS servers. They can be used on your internal, private
+    DNS server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Link-local addresses (`fe80::/10`) are by default assigned through Autoconfiguration.
+    ULAs have to be assigned by configuring the local prefix on your routers (Router
+    Advertisement) or through DHCPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you are interested in the reasons for deprecating the site-local address,
+    refer to RFC 3879\. Find a discussion about whether and when to use ULAs in [Chapter 9](ch09.html
+    "Chapter 9. Planning for IPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Anycast Address
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Anycast addresses are designed to provide redundancy and load balancing in situations
+    where multiple hosts or routers provide the same service. Anycast was not created
+    for IPv6; it was defined in RFC 1546 in 1993 as an experimental specification
+    to be used with IPv4\. The RFC allots a special prefix for anycast, which would
+    make an anycast address recognizable as such based on the prefix. Anycast was
+    meant to be used for services such as DNS and HTTP. The RFC discusses possible
+    modifications to TCP to deal with these addresses that are not globally unique.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In practice, anycast has not been implemented as it was designed to be. Often
+    a method called *shared unicast address* is chosen. This method is implemented
+    by assigning a regular unicast address to multiple interfaces and creating multiple
+    entries in the routing table. In this case, the network and transport layer assume
+    that it is a globally unique IP address. If it is not, the mechanism to deal with
+    ambiguous addresses needs to be built into the application. An exception to this
+    rule is if the application uses independent stateless request/reply transactions—for
+    instance, DNS over UDP. The root DNS servers in the Internet are set up using
+    shared unicast addresses. As this procedure does not require any support from
+    the network layer, it can also be used with IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: From the beginning, the IPv6 developers considered anycast to be incorporated
+    in the network layer according to RFC 1546\. No special prefix was assigned. IPv6
+    anycast addresses are in the same address range as global unicast addresses, and
+    each participating interface must be configured to have an anycast address. Within
+    the region where the interfaces containing the same anycast addresses are, each
+    host must be advertised as a separate entry in the routing tables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Within one network where a group of routers can provide access to a common routing
+    domain, they can be assigned a single address. When a client sends a packet to
+    this address, it will be forwarded to the next available router. One example is
+    the 6to4 relay anycast address that is specified in RFC 3068 and described in
+    [Chapter 7](ch07.html "Chapter 7. Transition Technologies"). The Mobile IPv6 specification
+    also uses anycast addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When using anycast addresses, we have to be aware that the sender has no control
+    over which interface the packet will be delivered to. This decision is taken on
+    the level of the routing protocol. When a sender sends multiple packets to an
+    anycast address, the packets may arrive at different destinations due to routing
+    table instability or changes during the requests. If there is a series of requests
+    and replies or if the packet has to be fragmented, this may cause problems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *subnet-router anycast address*, which is defined in RFC 4291 and shown
+    in [Figure 2-9](ch02.html#format_of_the_subnet-router_anycast_addr "Figure 2-9. Format
+    of the subnet-router anycast address"), is a required anycast address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the subnet-router anycast address](images/ipv6_0209.png)Figure 2-9. Format
+    of the subnet-router anycast address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Basically, the address looks like a regular unicast address with a prefix specifying
+    the subnet and an identifier set to all zeros. A packet sent to this address will
+    be delivered to one router on that subnet. All routers are required to support
+    the subnet-router anycast address for subnets to which they have interfaces.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A reserved subnet anycast address can have one of two formats, as shown in [Figure 2-10](ch02.html#general_format_of_anycast_addresses
+    "Figure 2-10. General format of anycast addresses").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![General format of anycast addresses](images/ipv6_0210.png)Figure 2-10. General
+    format of anycast addresses'
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 2526 specifies that within each subnet, the highest 128 interface identifier
+    values are reserved for assignment as subnet anycast addresses. Currently, the
+    anycast IDs listed in [Table 2-4](ch02.html#reserved_anycast_ids "Table 2-4. Reserved
+    anycast IDs") have been reserved.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 2-4. Reserved anycast IDs
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Decimal | Hexadecimal | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 127 | 7F | Reserved |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 126 | 7E | Mobile IPv6 Home-Agents anycast |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 0–125 | 00–7D | Reserved |'
+  prefs: []
+  type: TYPE_TB
+- en: The main difference between this form of using anycast and the shared unicast
+    address is that in the latter, the application needs to support anycast, while
+    in the former, this support is avoided if possible. Guidelines of how to use this
+    and modifications to existing stateful transport protocols are needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you are interested in more information and background on anycast, refer to
+    RFC 7094, “Architectural Considerations of IP Anycast.” It provides an overview
+    of the history of anycast, discusses different architectural models and principles,
+    and covers anycast in IPv6 as well as deployment considerations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multicast Address
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This section covers the multicast address format. For a description of multicast
+    and Multicast Listener Discovery (MLD), also known as Multicast Group Management,
+    refer to [Chapter 4](ch04.html "Chapter 4. ICMPv6"). For a general overview and
+    summary of multicast topics, refer to [Chapter 5](ch05.html "Chapter 5. Networking").
+  prefs: []
+  type: TYPE_NORMAL
+- en: A multicast address is an identifier for a group of nodes identified by the
+    high-order byte `ff`, or `1111 1111` in binary notation (refer to [Table 2-2](ch02.html#list_of_assigned_prefixes
+    "Table 2-2. List of assigned prefixes") earlier in the chapter). The multicast
+    prefix is `ff00::/8`. A node can belong to more than one multicast group. When
+    a packet is sent to a multicast address, all members of the multicast group process
+    the packet. Multicast exists in IPv4, but it has been redefined and improved for
+    IPv6\. The multicast address format is shown in [Figure 2-11](ch02.html#format_of_the_multicast_address
+    "Figure 2-11. Format of the multicast address").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the multicast address](images/ipv6_0211.png)Figure 2-11. Format
+    of the multicast address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first byte identifies the address as a multicast address. The next four
+    bits are used for Flags, defined as follows: the first bit of the Flag field must
+    be zero; it is reserved for future use. The second bit indicates whether this
+    multicast address embeds the *Rendezvous Point*. A Rendezvous Point is a point
+    of distribution for a specific multicast stream in a multicast network (RFC 3956).
+    The third bit indicates whether this multicast address embeds prefix information
+    (discussed later in this chapter; see also RFC 3306). The last bit of the Flag
+    field indicates whether this address is permanently assigned—i.e., one of the
+    well-known multicast addresses assigned by the IANA—or a temporary multicast address.
+    A value of zero for the last bit defines a well-known address; a value of one
+    indicates a temporary address. The Scope field is used to limit the scope of a
+    multicast address. The possible values are shown in [Table 2-5](ch02.html#values_for_the_scope_field
+    "Table 2-5. Values for the Scope field").'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 2-5. Values for the Scope field
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Value | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 0 | Reserved |'
+  prefs: []
+  type: TYPE_TB
+- en: '| *1* | *Interface-local scope (used to be called node-local scope in earlier
+    specs)* |'
+  prefs: []
+  type: TYPE_TB
+- en: '| *2* | *Link-local scope* |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 3 | Reserved |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 4 | Admin-local scope |'
+  prefs: []
+  type: TYPE_TB
+- en: '| *5* | *Site-local scope* |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 6, 7 | Unassigned |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 8 | Organization-local scope |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 9, A, B, C, D | Unassigned |'
+  prefs: []
+  type: TYPE_TB
+- en: '| *E* | *Global scope* |'
+  prefs: []
+  type: TYPE_TB
+- en: '| F | Reserved |'
+  prefs: []
+  type: TYPE_TB
+- en: The boundaries of zones of a scope other than interface-local, link-local, and
+    global must be defined and configured by network administrators. The reserved
+    scopes should not be used. RFC 4007, “IPv6 Scoped Address Architecture,” specifies
+    the architectural characteristics, expected behavior, textual representation,
+    and usage of IPv6 addresses of different scopes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Well-Known Multicast Addresses
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: According to RFC 4291, the last 112 bits of the address carry the multicast
+    group ID. RFC 3307, “Allocation Guidelines for IPv6 Multicast Addresses,” refers
+    to a 32-bit group ID.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 2375 defines the initial assignment of IPv6 multicast addresses that are
+    permanently assigned. Some assignments are made for fixed scopes, and some assignments
+    are valid over all scopes. [Table 2-6](ch02.html#well-known_multicast_addresses-id1
+    "Table 2-6. Well-known multicast addresses") gives an overview of the addresses
+    that have been assigned for fixed scopes. Note the scope values that are listed
+    in [Table 2-5](ch02.html#values_for_the_scope_field "Table 2-5. Values for the
+    Scope field") in the byte just following the multicast identifier of `ff` (first
+    byte).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 2-6. Well-known multicast addresses
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Address | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Interface-local scope** |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff01::1 | All-nodes address |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff01::2 | All-routers address |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff01::fb | mDNSv6 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Link-local scope** |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::1 | All-nodes address |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::2 | All-routers address |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::4 | DVMRP routers |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::5 | OSPFIGP |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::6 | OSPFIGP designated routers |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::7 | ST routers |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::8 | ST hosts |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::9 | RIP routers |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::a | EIGRP routers |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::b | Mobile agents |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::d | All PIM routers |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::e | RSVP encapsulation |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::16 | All MLDv2-capable routers |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::6a | All snoopers |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::fb | mDNSv6 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::1:1 | Link name |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::1:2 | All DHCP agents |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::1:3 | Link-local Multicast Name Resolution (LLMNR) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::1:4 | DTCP Announcement |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::1:ffXX:XXXX | Solicited-node address |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff02::2:ff00::/104 | Node Information Queries |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Site-local scope** |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff05::2 | All-routers address |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff05::fb | mDNSv6 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff05::1:3 | All DHCP servers |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ff05::1:1000 to ff05::1:13ff | Service location (SLP) version 2 |'
+  prefs: []
+  type: TYPE_TB
+- en: The term *node-local scope* from RFC 2375 has been changed to *interface-local
+    scope*, so you may encounter both terms. The list for the permanently assigned
+    multicast addresses that are independent of scopes is long, and it is available
+    in [Appendix B](apb.html "Appendix B. Recommended Reading") and in RFC 2375\.
+    All those addresses are noted beginning with `ff0X`; `X` is the placeholder for
+    a variable scope value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv4 broadcast address is replaced by the link-local all-nodes multicast
+    address `ff02::1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Find the most updated list of multicast address assignments here: [http://www.iana.org/assignments/ipv6-multicast-addresses](http://www.iana.org/assignments/ipv6-multicast-addresses).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As an example, let’s look at the one described in RFC 2373\. There is a multicast
+    group ID defined for all NTP servers. The multicast group ID is `0x101`. This
+    group ID can be used with different scope values as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ff01::101`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All NTP servers on the same node as the sender.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ff02::101`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All NTP servers on the same link as the sender.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ff05::101`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All NTP servers on the same site as the sender.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ff0e::101`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All NTP servers in the Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Temporarily assigned multicast addresses are meaningful only within a defined
+    scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Multicast addresses should not be used as a Source address in IPv6 packets or
+    appear in any routing header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For the management of multicast, IPv6 uses Multicast Listener Discovery (MLD)
+    based on ICMPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To learn how multicast addresses are managed, refer to the section [Multicast
+    Listener Discovery](ch04.html#multicast_listener_discovery "Multicast Listener
+    Discovery") in [Chapter 4](ch04.html "Chapter 4. ICMPv6"). To get a general overview
+    and summary of multicast, refer to [Chapter 5](ch05.html "Chapter 5. Networking").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solicited-Node Multicast Address
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The *solicited-node multicast address* is a multicast address that every node
+    must join for every unicast and anycast address it is assigned. It is used in
+    Neighbor Discovery, which is described in [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+    RFC 4291 specifies the solicited-node multicast address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the IPv4 world, an ARP request (used to determine the MAC address of an interface)
+    is sent to the MAC-layer broadcast address and therefore examined by every interface
+    on the link. In the IPv6 world, resolving the MAC address of an interface is done
+    by sending a Neighbor Solicitation message (discussed in [Chapter 4](ch04.html
+    "Chapter 4. ICMPv6")) to the solicited-node multicast address, and not to the
+    link-local all-nodes multicast address. This way only the node registered to this
+    multicast address will examine the packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This address is formed by taking the low-order 24 bits of an IPv6 address (the
+    last part of the host ID) and appending those bits to the well-known prefix `ff02:0:0:0:0:1:ff00::/104`.
+    Thus, the range for solicited-node multicast addresses goes from `ff02:0:0:0:0:1:ff00:0000`
+    to `ff02:0:0:0:0:1:ffff:ffff`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, our host Marvin has the IPv6 address `fe80::202:b3ff:fe1e:8329`.
+    The corresponding solicited-node multicast address is `ff02::1:ff1e:8329`. If
+    this host has other IPv6 unicast or anycast addresses, each one will have a corresponding
+    solicited-node multicast address for which the host must be registering.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mapping Multicast Addresses to MAC Addresses
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When a packet is sent to an IPv6 multicast address, the IPv6 address must be
+    mapped to a MAC address on the link layer. The format of the Ethernet MAC multicast
+    address is specified in RFC 2464\. The first two bytes of an IPv6 MAC multicast
+    address are `0x3333`. The following four bytes correspond to the last four bytes
+    of the IPv6 multicast address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 2-12](ch02.html#mac_representation_of_an_ipv6_multicast "Figure 2-12. MAC
+    representation of an IPv6 multicast address") shows how a multicast address is
+    mapped to a MAC address.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![MAC representation of an IPv6 multicast address](images/ipv6_0212.png)Figure 2-12. MAC
+    representation of an IPv6 multicast address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The link-local scoped multicast address of `ff02::1:3` is mapped to the MAC
+    address of `33:33:00:01:00:03`. The mapping for other media types is specified
+    in separate RFCs. You can find more information about other media types in [Chapter 5](ch05.html
+    "Chapter 5. Networking") or by searching the RFC database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dynamic Allocation of Multicast Addresses
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The multicast address architecture has been extended in RFC 3306\. It contains
+    definitions that allow the allocation of unicast prefix-based addresses and of
+    source-specific multicast addresses. It is based on a modified multicast address
+    format that contains prefix information. The goal of this specification is to
+    reduce the number of protocols needed for the allocation of multicast addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 2-13](ch02.html#format_of_the_extended_multicast_address "Figure 2-13. Format
+    of the extended multicast address") shows the format of the extended multicast
+    address.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the extended multicast address](images/ipv6_0213.png)Figure 2-13. Format
+    of the extended multicast address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the original specification, the Flags field only uses the last bit (T) to
+    specify whether the multicast address is a well-known or temporary one. The extended
+    format shown here uses the second last bit (P) to indicate whether the multicast
+    address assignment is based on the network prefix (value 1) or not (value 0).
+    A P setting of 1 indicates that it is a multicast address following the extended
+    format. The use of the scope field has not changed. If the P flag is set to 1,
+    the eight bits following the Scope field are reserved and set to 0\. The next
+    eight bits (PLen) specify the length of the prefix in the prefix field. If the
+    prefix length is smaller than 64 bits, the unused bits in the prefix field should
+    be set to 0\. The group ID uses 32 bits. Note that when P is set to 1 (extended
+    multicast address), the T flag should also be set to 1 (temporary multicast address).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multicast Listener Discovery is used for multicast management. There are two
+    versions, MLDv1 and MLDv2\. MLDv2 supports *source-specific multicast*. For an
+    overview of source-specific multicast, refer to RFC 3569\. In the traditional
+    multicast model called any-source multicast (ASM), a multicast listener cannot
+    control the source of the data it wants to receive. With source-specific multicast
+    (SSM), an interface can register for a multicast group and specify the source(s)
+    for the data. SSM can be implemented using MLDv2 and the extended multicast address
+    format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a source-specific multicast address, the T and the P flag are set to 1\.
+    Prefix length and network prefix are both set to 0\. This leads to a multicast
+    prefix of `ff3x:/32`, where `x` is a scope value. The source address in the IPv6
+    header identifies the owner of the multicast address. All SSM addresses have the
+    format `ff3X::/96`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Refer to RFC 3307, “Allocation Guidelines for IPv6 Multicast Addresses,” for
+    more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 4489, “Link-Scoped Multicast Address Format,” defines an extension to the
+    multicast addressing architecture of the IPv6 protocol. The extension allows for
+    the use of interface identifiers to allocate link-local scoped multicast addresses.
+    In this multicast address, the flags field is set to binary `0011`; the Scope
+    field is set to 2 for link-local scope; the pLen field is set to `ff` (all ones
+    in binary); and the 64 bits of the network ID field are used for the interface
+    identifier. The group ID is generated to indicate a multicast application and
+    needs to be unique only on this host. It is designed for environments in which
+    link-local scope multicast addresses are used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Required Addresses
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The standard specifies that each host must assign the following addresses to
+    identify itself:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Its link-local address for each interface
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Any assigned unicast and anycast addresses
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The loopback address
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The all-nodes multicast address
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Solicited-node multicast address for each of its assigned unicast and anycast
+    addresses
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Multicast addresses of all other groups to which the host belongs
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'A router needs to recognize all of the previous addresses, plus the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The subnet-router anycast address for the interfaces for which it is configured
+    to act as a router on each link
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All anycast addresses with which the router has been configured
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The all-routers multicast address
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Multicast addresses of all other groups to which the router belongs
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Default Address Selection
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The architecture of IPv6 allows an interface to have multiple addresses. The
+    addresses may differ in scope (link-local, global) or state (preferred, deprecated);
+    they may be part of mobility (home-address, care-of-address) or multihoming situation;
+    or they may be permanent public addresses or virtual tunnel interfaces. Dual-stack
+    hosts have IPv6 and IPv4 addresses. The result is that IPv6 implementations that
+    need to initiate a connection are often faced with a choice between multiple Source
+    and Destination addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Imagine a situation where a client issues a DNS request for an external service
+    and receives a global IPv6 and a public IPv4 address back. If this client has
+    a private IPv4 address and a global IPv6 address, it might make sense to use IPv6
+    to access this external service. But if the client has a tunneled IPv6 address
+    and a public IPv4 address, it should choose the IPv4 address for connecting to
+    the service. These are types of situations and choices that will have to be dealt
+    with in the future world of mixed networks, some IPv4-only, some IPv6-only, and
+    some dual-stack. The way this is dealt with depends on the implementations. Application
+    developers have to be aware of this and try to provide mechanisms that will make
+    their applications behave optimally in every possible environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 6724, “Default Address Selection for IPv6,” defines two general algorithms,
+    one for Source address selection and the other for Destination address selection.
+    All IPv6 nodes (host and router) have to implement RFC 6724\. The algorithms specify
+    default behavior for IPv6 nodes. The algorithms do not override choices made by
+    applications, upper-layer protocols, or other policies. The RFC contains a policy
+    table that, similar to a routing table, is a longest-matching-prefix lookup table.
+    To each prefix listed, a *precedence* and a *label* are assigned. The precedence
+    is used for sorting Destination addresses; the label value is used to define policies
+    that associate a specific Source address to a given Destination address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s a summary of the most important rules:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Address pairs of the same scope or type (link-local, global) are preferred.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A smaller scope for the Destination address is preferred (use the smallest scope
+    possible).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A preferred (nondeprecated) address is preferred.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Transitional addresses (e.g., ISATAP or 6to4 addresses) are not used if native
+    IPv6 addresses are available.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If all criteria are similar, address pairs with the longest common prefix are
+    preferred.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prefer outgoing interface.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prefer addresses in a prefix advertised by the next hop.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prefer matching label.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For the Source address, temporary addresses are preferred over public addresses.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use longest matching prefix.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In Mobile IP situations, home addresses are preferred over care-of addresses.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In short, the default table prefers native IPv6 over native IPv4 and NATed IPv4
+    over 6to4 and other tunnels.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The rules in RFC 6724 are to be used in all situations when nothing else is
+    specified. Implementations should provide mechanisms to override the default policy
+    and to configure address selection individually to adapt default address selection
+    to the specifics of the network. RFC 7078 defines a DHCP option that allows the
+    administrator to distribute an address selection policy which overrides the default
+    policy from RFC 6724.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that you are familiar with the extended address space and the IPv6 address
+    types, the next chapter discusses the IPv6 header and the Extension headers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: References
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The following are lists of the most important RFCs and drafts mentioned in this
+    chapter. Sometimes I include additional subject-related RFCs for your personal
+    further study.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFCs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 1546, “Host Anycasting Service,” 1993
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1918, “Address Allocation for Private Internets,” 1996
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2101, “IPv4 Address Behaviour Today,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2365, “Administratively Scoped IP Multicast,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2464, “Transmission of IPv6 Packets over Ethernet Networks,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2471, “IPv6 Testing Address Allocation (6Bone), " 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2526, “Reserved IPv6 Subnet Anycast Addresses,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2710, “Multicast Listener Discovery (MLD)” for IPv6,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2908, “The Internet Multicast Address Allocation Architecture,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3056, “Connection of IPv6 Domains via IPv4 Clouds” (6to4), 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3068, “An Anycast Prefix for 6to4 Relay Routers,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3306, “Unicast-Prefix-based IPv6 Multicast,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3307, “Allocation Guidelines for IPv6 Multicast Addresses,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3569, “An Overview of Source-Specific Multicast (SSM),” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3587, “IPv6 Global Unicast Address Format,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3590, “Source Address Selection for the Multicast Listener Discovery (MLD)
+    Protocol,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3810, “Multicast Listener Discovery Version 2 (MLDv2) for IPv6,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3849, “IPv6 Documentation Address,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3879, “Deprecating Site Local Addresses,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3956, “Embedding the Rendezvous Point (RP) Address in an IPv6 Multicast
+    Address,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3972, “Cryptographically Generated Addresses (CGA),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4007, “IPv6 Scoped Address Architecture,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4192, “Procedures for Renumbering an IPv6 Network without a Flag Day,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4193, “Unique Local IPv6 Unicast Addresses,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4291, “IPv6 Addressing Architecture,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4380, “Teredo: Tunneling IPv6 over UDP through Network Address Translations
+    (NATs),” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4489, “A Method for Generating Link-Scoped IPv6 Multicast Addresses,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4581, “Cryptographically Generated Addresses (CGA) Extension Field Format,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4795, “Link-Local Multicast Name Resolution (LLMNR),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4941, “Privacy Extensions for Stateless Address Autoconfiguration in IPv6,”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4982, “Support for Multiple Hash Algorithms in Cryptographically Generated
+    Addresses (CGAs),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5156, “Special Use IPv6 Addresses,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5214, “Intra-Site Automatic Tunnel Addressing Protocol (ISATAP),” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5375, “IPv6 Unicast Address Assignment Considerations,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5453, “Reserved IPv6 Interface Identifiers,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5569, “IPv6 Rapid Deployment on IPv4 Infrastructures (6rd),” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5952, “A Recommendation for IPv6 Address Text Representation,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5991, “Teredo Security Updates,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6052, “IPv6 Addressing of IPv4/IPv6 Translators,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6081, “Teredo Extensions,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6085, “Address Mapping of IPv6 Multicast Packets on Ethernet,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6164, “Using 127-Bit IPv6 Prefixes on Inter-Router Links,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6177, “IPv6 Address Assignment to End Sites,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6724, “Default Address Selection for Internet Protocol version 6 (IPv6),”
+    2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7078, “Distributing Address Selection Policy Using DHCPv6,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7094, “Architectural Considerations of IP Anycast,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7108, “A Summary of Various Mechanisms Deployed at L-Root for the Identification
+    of Anycast Nodes,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7136, “Significance of IPv6 Interface Identifiers,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7217, “A Method for Generating Semantically Opaque Interface Identifiers
+    with IPv6 Stateless Address Autoconfiguration (SLAAC),” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Drafts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Drafts can be found at [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html).
+    To locate the latest version of a draft, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
+    You can enter the draft name without a version number and the most current version
+    will come up. If a draft does not show up, it was possibly deleted. If it was
+    published as an RFC, the RFC number will be displayed. [http://tools.ietf.org/wg](http://tools.ietf.org/wg)
+    is also a very useful site. More information on the process of standardization,
+    RFCs, and drafts can be found in [Appendix A](apa.html "Appendix A. RFCs").
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s a list of drafts I refer to in this chapter, as well as interesting
+    drafts that relate to the topics in this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Privacy Considerations for IPv6 Address Generation Mechanisms”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-6man-ipv6-address-generation-privacy-01*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Recommendation on Stable IPv6 Interface Identifiers”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-6man-default-iids-00*'
+  prefs: []
+  type: TYPE_NORMAL

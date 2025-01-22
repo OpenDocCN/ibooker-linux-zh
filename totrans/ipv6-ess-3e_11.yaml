@@ -1,0 +1,2104 @@
+- en: Appendix A. RFCs
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you want to learn more about IPv6 or any other standardized protocol, you
+    need to read RFCs. They are the most accurate source of information—but yes, I
+    do agree, not always fun reading (except if you read the ones published on April
+    1). This appendix provides a short overview of the standards and the RFC process.
+    It also includes a list of IPv6-relevant RFCs mentioned throughout this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: General RFC Information
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The Internet Engineering Task Force (IETF) and the Internet Engineering Steering
+    Group (IESG) are the organizations that define the official specification documents
+    of the Internet Protocol suite. These documents are recorded and published as
+    standards track Request for Comment (RFC). If you want to understand the role
+    of the IETF and the standardization process, if you need a list of all the organizations
+    involved in the process and a description of what they do, or if you wish to attend
+    an IETF meeting, there is an interesting and humorous RFC that describes the background,
+    processes, and rules: RFC 4677, titled “The Tao of IETF—A Novice’s Guide to the
+    Internet Engineering Task Force.”'
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFCs are written reports describing most of the information regarding TCP/IP
+    and the architecture, protocols, and history of the Internet. There are many sites
+    on the Internet where RFCs are electronically accessible. The sites are very different,
+    but most of them support some form of search mechanism. Find the site that best
+    suits your preferences.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A good starting point is [http://www.rfc-editor.org](http://www.rfc-editor.org).
+    There used to be a tribute to Jon Postel, one of the fathers of the Internet,
+    who died in October 1998\. He was *the* RFC editor. Besides this information,
+    there is also an overview of the RFC series and process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the search and retrieve page of this site, there are many ways to access
+    the wealth of information. RFCs can be viewed by number or in an index; they can
+    be in forward or reverse chronological order; and they can be searched by author,
+    title, number, or keyword. Of course, there is also a link to alternative RFC
+    repositories.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 2555 is an interesting overview of 30 years of RFC history and a good description
+    of the contribution of Jon Postel’s services to the Internet community. There
+    is even more information about Jon Postel at [http://www.postel.org/postel.html](http://www.postel.org/postel.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first RFC, RFC 0001, was published by Steve Crocker on April 7, 1969\. Today,
+    the number of RFCs continues to rise quickly and has exceeded 7,000\. RFCs can
+    have different statuses, such as standard, informational, experimental, and historic.
+    A good overview of the different statuses and current level of standardization
+    can be found at [http://www.rfc-editor.org](http://www.rfc-editor.org).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'At one time, the RFC Editor published snapshots of the “Internet Official Protocol
+    Standards.” These documents were known as xx00 documents, the last of which was
+    published in May 2008\. These snapshots have been replaced by a web page, so the
+    RFC Editor will no longer be publishing these snapshots as RFCs. As a result,
+    the RFC Editor will classify unpublished RFC xx00 numbers through 7000 as “never
+    issued.” Starting with the RFC number 7100, xx00 numbers will be available for
+    assignment. This is published in RFC 7101, “List of Internet Official Protocol
+    Standards: Replaced by a Web Page.”'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Drafts
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: I refer to drafts often throughout this book. Drafts always have version numbers
+    in their names, and this number often increases frequently during the process.
+    So let us have a closer look at the draft process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: During the standardization process, the drafts are published on the Internet.
+    Drafts may eventually become RFCs. At the [IETF website](http://www.ietf.org),
+    click on Internet Drafts to find all documents. To use the search engine and find
+    the most updated status of any document, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
+    You can also click on “IETF Working Group” to find all groups sorted by areas
+    (application, operation, routing, security, etc.). Within the groups, you find
+    all relevant RFCs and drafts. This is the best place to find out what is in the
+    queue and what groups are working on. The goal of this process is to make a specification
+    under development accessible to a large audience in order to get reviews and comments.
+    Another good link to get an overview of RFCs and active drafts with regard to
+    specific working groups is [http://tools.ietf.org](http://tools.ietf.org).
+  prefs: []
+  type: TYPE_NORMAL
+- en: So let us understand the draft version numbers. As you have noted, it can change
+    frequently. When you enter a draft name in the search engine, it will always show
+    you the latest version. The rules for draft numbers are as follows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every time a draft is updated, it receives a new version number. At some point,
+    a draft may be published as an RFC and then removed from the draft directory.
+    A draft with a specific version number has a lifetime of six months at a maximum.
+    After this, if it has not been updated or become an RFC, it is removed from the
+    draft directory. As this book is going to be on the market for some time, some
+    drafts mentioned in here might not be active when you try to find them. They may
+    have been removed or published as RFCs. RFC 7221, “Handling of Internet-Drafts
+    by IETF Working Groups,” is the latest update on drafts, the documents, and the
+    processes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Drafts are not standards and should not be implemented in commercial products,
+    because they are going to change for sure in the case they ever become an RFC.
+    This can also lead to incompatibility issues, such as when vendors implement drafts
+    at different maturity levels of development or if one implementation is based
+    on draft and another on RFC. In practice, you will find draft implementations
+    in commercial products, but now you know to be careful when using them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC Index for IPv6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This is a list of all RFCs relevant to IPv6 and RFCs regarding related technologies
+    published as of April 2014\. It is sorted by RFC number.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 1, “Host Software,” 1969
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 318, “Telnet Protocol,” 1972
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 791, “Internet Protocol,” 1981
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 854, “TELNET PROTOCOL SPECIFICATION,” 1983
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 855, “TELNET OPTION SPECIFICATIONS,” 1983
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 959, “FILE TRANSFER PROTOCOL (FTP),” 1985
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1058, “Routing Information Protocol,” 1988
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1191, “Path MTU Discovery,” 1991
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1195, “Use of OSI IS-IS for Routing in TCP/IP and Dual Environments,” 1990
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1321, “The MD5 Message Digest Algorithm,” 1992
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1546, “Host Anycasting Service,” 1993
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1700, “Assigned Numbers,” 1994
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 1707, “CATNIP: Common Architecture for the Internet,” 1994'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1710, “Simple Internet Protocol Plus White Paper,” 1994
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1745, “BGP4/IDRP for IP—OSPF Interaction,” 1994
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1752, “The Recommendation for the IP Next Generation Protocol,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1771, “A Border Gateway Protocol 4 (BGP-4),” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1793, “Extending OSPF to Support Demand Circuits,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1812, “Requirements for IP Version 4 Routers,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1819, “Internet Stream Protocol Version 2,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1828, “IP Authentication using Keyed MD5,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1829, “The ESP DES-CBC Transform,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1883, “Internet Protocol, Version 6 (IPv6) Specification,” 1995
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1918, “Address Allocation for Private Internets,” 1996
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1981, “Path MTU Discovery for IP version 6,” 1996
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1997, “BGP Communities Attribute,” 1996
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2003, “IP Encapsulation within IP” (October, 1996)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2080, “RIPng” for IPv6,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2085, “HMAC-MD5 IP Authentication with Replay Prevention,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2101, “IPv4 Address Behaviour Today,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 2104, “HMAC: Keyed-Hashing for Message Authentication,” 1997'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2136, “Dynamic Updates in the Domain Name System,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2149, “Multicast Server Architectures for MARS-based ATM multicasting,”
+    1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2185, “Routing Aspects Of IPv6 Transition,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2205, “Resource ReSerVation Protocol (RSVP)—Version 1 Functional Specification,”
+    1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2207, “RSVP Extensions for IPSEC Data Flows,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2210, “The Use of RSVP with IETF Integrated Services,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2233, “The Interfaces Group MIB using SMIv2,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2235, “Hobbes’ Internet Timeline,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2324, “Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0),” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2328, “OSPF Version 2,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 2362, “Protocol Independent Multicast-Sparse Mode (PIM-SM): Protocol Specification,”
+    1998'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2365, “Administratively Scoped IP Multicast,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2375, “IPv6 Multicast Address Assignments,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2403, “The Use of HMAC-MD5-96 within ESP and AH,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2404, “The Use of HMAC-SHA-1-96 within ESP and AH,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2405, “The ESP DES-CBC Cipher Algorithm With Explicit IV,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2410, “The NULL Encryption Algorithm and Its Use With IPsec,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2412, “The OAKLEY Key Determination Protocol,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2428, “FTP Extensions for IPv6 and NATs,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2430, “A Provider Architecture for Differentiated Services and Traffic Engineering
+    (PASTE),” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2450, “Proposed TLA and NLA Assignment Rules,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2451, “The ESP CBC-Mode Cipher Algorithms,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2453, “RIP Version 2,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2460, “Internet Protocol, Version 6 (IPv6) Specification,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2464, “Transmission of IPv6 Packets over Ethernet Networks,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2467, “Transmission of IPv6 Packets over FDDI Networks,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 2465, “Management Information Base for IP Version 6: Textual Conventions
+    and General Group,” 1998'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 2466, “Management Information Base for IP Version 6: ICMPv6 Group,” 1998'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2471, “IPv6 Testing Address Allocation” (6Bone), 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2473, “Generic Packet Tunneling in IPv6 Specification,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2474, “Definition of the Differentiated Services Field (DS Field) in the
+    IPv4 and IPv6 Headers,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2475, “An Architecture for Differentiated Services,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2491, “IPv6 over Non-Broadcast Multiple Access (NBMA) networks,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2492, “IPv6 over ATM Networks,” January, 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2507, “IP Header Compression,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2526, “Reserved IPv6 Subnet Anycast Addresses,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2529, “Transmission of IPv6 over IPv4 Domains without Explicit Tunnels,”
+    1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2545, “Use of BGP-4 Multiprotocol Extensions for IPv6 Inter-Domain Routing,”
+    1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2555, “30 Years of RFCs,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2590, “Transmission of IPv6 Packets over Frame Relay Networks Specification,”
+    1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2597, “Assured Forwarding PHB Group,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2608, “Service Location Protocol, Version 2,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2663, “IP Network Address Translator (NAT) Terminology and Considerations,”
+    1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2675, “IPv6 Jumbograms,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2710, “Multicast Listener Discovery (MLD) for IPv6,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2711, “IPv6 Router Alert Option,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2715, “Interoperability Rules for Multicast Routing Protocols,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2784, “Generic Routing Encapsulation (GRE),” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2845, “Secret Key Transaction Authentication for DNS (TSIG),” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2884, “Performance Evaluation of Explicit Congestion Notification (ECN)
+    in IP Networks,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2894, “Router Renumbering for IPv6,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2914, “Congestion Control Principles,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2921, “6BONE pTLA and pNLA Formats (pTLA),” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2925, “Definitions of Managed Objects for Remote Ping, Traceroute, and Lookup
+    Operations,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2928, “Initial IPv6 Sub-TLA ID Assignments,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2963, “A Rate Adaptive Shaper for Differentiated Services,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2983, “Differentiated Services and Tunnels,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2993, “Architectural Implications of NAT,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2998, “A Framework for Integrated Services Operation over Diffserv Networks,”
+    2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3006, “Integrated Services in the Presence of Compressible Flows,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3007, “Secure Domain Name System (DNS) Dynamic Update,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3019, “IP Version 6 Management Information Base for The Multicast Listener
+    Discovery Protocol,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3022, “Traditional IP Network Address Translator (Traditional NAT),” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3027, “Protocol Complications with the IP Network Address Translator,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3041, “Privacy Extensions for Stateless Address Autoconfiguration in IPv6,”
+    2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3053, “IPv6 Tunnel Broker,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3056, “Connection of IPv6 Domains via IPv4 Clouds,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3068, “An Anycast Prefix for 6to4 Relay Routers,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3086, “Definition of Differentiated Services Per Domain Behaviors and Rules
+    for their Specification,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3101, “The OSPF NSSA Option,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3107, “Carrying Label Information in BGP-4,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3111, “Service Location Protocol Modifications for IPv6,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3118, “Authentication for DHCP Messages,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3122, “Extensions to IPv6 Neighbor Discovery for Inverse Discovery Specification,”
+    2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3124, “The Congestion Manager,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3140, “Per Hop Behavior Identification Codes,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3142, “An IPv6-to-IPv4 Transport Relay Translator,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3146, “Transmission of IPv6 Packets over IEEE 1394 Networks,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3162, “RADIUS and IPv6,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3168, “The Addition of Explicit Congestion Notification (ECN) to IP,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3175, “Aggregation of RSVP for IPv4 and IPv6 Reservations,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3178, “IPv6 Multihoming Support at Site Exit Routers,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3226, “DNSSEC and IPv6 A6 aware server/resolver message size requirements,”
+    2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 3232, “Assigned Numbers: RFC 1700 is Replaced by an On-line Database,”
+    2002'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3246, “An Expedited Forwarding PHB,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3247, “Supplemental Information for the New Definition of the EF PHB (Expedited
+    Forwarding Per-Hop Behavior),” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3260, “New Terminology and Clarifications for Diffserv,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3289, “Management Information Base for the Differentiated Services Architecture,”
+    2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3290, “An Informal Management Model for Diffserv Routers,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3306, “Unicast-Prefix-based IPv6 Multicast,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3307, “Allocation Guidelines for IPv6 Multicast Addresses,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3315, “Dynamic Host Configuration Protocol for IPv6 (DHCPv6),” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3317, “Differentiated Services Quality of Service Policy Information Base,”
+    2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3319, “Dynamic Host Configuration Protocol (DHCPv6) Options for Session
+    Initiation Protocol (SIP) Servers,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3353, “Overview of IP Multicast in a Multi-Protocol Label Switching (MPLS)
+    Environment,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3376, “Internet Group Management Protocol, Version 3,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3493, “Basic Socket Interface Extensions for IPv6” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3514, “The Security Flag in the IPv4 Header,” April 1, 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3526, “More Modular Exponential (MODP) Diffie-Hellman groups for Internet
+    Key Exchange (IKE),” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3542, “Advanced Sockets Application Program Interface (API) for IPv6,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3569, “An Overview of Source-Specific Multicast (SSM),” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3582, “Goals for IPv6 Site-Multihoming Architectures,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3587, “IPv6 Global Unicast Address Format,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3590, “Source Address Selection for the Multicast Listener Discovery (MLD)
+    Protocol,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3596, “DNS Extensions to Support IP Version 6,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3602, “The AES-CBC Cipher Algorithm and Its Use with IPsec,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3631, “Security Mechanisms for the Internet,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3633, “IPv6 Prefix Options for Dynamic Host Configuration Protocol (DHCP)
+    version 6,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3646, “DNS Configuration options for Dynamic Host Configuration Protocol
+    for IPv6 (DHCPv6),” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3701, “6bone (IPv6 Testing Address Allocation) -Phaseout,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3715, “IPsec-Network Address Translation (NAT) Compatibility Requirements,”
+    2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 3717, “IP over Optical Networks: A Framework,” 2004'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3736, “Stateless Dynamic Host Configuration Protocol (DHCP) Service for
+    IPv6,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 3739, “Internet X.509 Public Key Infrastructure: Qualified Certificates
+    Profile,” 2004'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3740, “The Multicast Group Security Architecture,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3748, “Extensible Authentication Protocol (EAP),” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3754, “IP Multicast in Differentiated Services (DS) Networks,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3756, “IPv6 Neighbor Discovery (ND) Trust Models and Threats,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3765, “NOPEER Community for Border Gateway Protocol (BGP) Route Scope Control,”
+    2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3769, “Requirements for IPv6 Prefix Delegation,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3776, “Using IPsec to Protect Mobile IPv6 Signaling Between Mobile Nodes
+    and Home Agents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3789, “Introduction to the Survey of IPv4 Addresses in Currently Deployed
+    IETF Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3790, “Survey of IPv4 Addresses in Currently Deployed IETF Internet Area
+    Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3791, “Survey of IPv4 Addresses in Currently Deployed IETF Routing Area
+    Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3792, “Survey of IPv4 Addresses in Currently Deployed IETF Security Area
+    Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3793, “Survey of IPv4 Addresses in Currently Deployed IETF Sub-IP Area Standards
+    Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3794, “Survey of IPv4 Addresses in Currently Deployed IETF Transport Area
+    Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3795, “Survey of IPv4 Addresses in Currently Deployed IETF Application Area
+    Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3796, “Survey of IPv4 Addresses in Currently Deployed IETF Operations &
+    Management Area Standards Track and Experimental Documents,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3810, “Multicast Listener Discovery Version 2 (MLDv2) for IPv6,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3849, “IPv6 Documentation Address,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3879, “Deprecating Site Local Addresses,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3898, “Network Information Service (NIS) Configuration Options for Dynamic
+    Host Configuration Protocol for IPv6 (DHCPv6),” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3901, “DNS IPv6 Transport Operational Guidelines,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3936, “Procedures for Modifying the Resource reSerVation Protocol (RSVP),”
+    2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3947, “Negotiation of NAT-Traversal in the IKE,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3948, “UDP Encapsulation of IPsec ESP Packets,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3956, “Embedding the Rendezvous Point (RP) Address in an IPv6 Multicast
+    Address,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3963, " Network Mobility (NEMO) Basic Support Protocol,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3964, “Security Considerations for 6to4,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3971, “Secure Neighbor Discovery,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3972, “Cryptographically Generated Addresses (CGA),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 3973, “Protocol Independent Multicast, Dense Mode (PIM-DM): Protocol Specification
+    (Revised),” 2005'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 3986, “Uniform Resource Identifier (URI): Generic Syntax,” 2005'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4007, “IPv6 Scoped Address Architecture,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4029, “Scenarios and Analysis for Introducing IPv6 into ISP Networks,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4033, “DNS Security Introduction and Requirements,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4034, “Resource Records for the DNS Security Extensions,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4035, “Protocol Modifications for the DNS Security Extensions,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4038, “Application Aspects of IPv6 Transition,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4057, “IPv6 Enterprise Network Scenarios,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4065, “Instructions for Seamoby and Experimental Mobility Protocol IANA
+    Allocations,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4074, “Common Misbehavior Against DNS Queries for IPv6 Addresses,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4075, “Simple Network Time Protocol (SNTP) Configuration Option for DHCPv6,”
+    2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4076, “Renumbering Requirements for Stateless Dynamic Host Configuration
+    Protocol for IPv6 (DHCPv6),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4094, “Analysis of Existing Quality-of-Service Signaling Protocols,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4106, “The Use of Galois/Counter Mode (GCM) in IPsec Encapsulating Security
+    Payload (ESP),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4107, “Guidelines for Cryptographic Key Management,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4109, “Algorithms for Internet Key Exchange version 1 (IKEv1),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4113, “Management Information Base for the User Datagram Protocol,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4135, “Goals of Detecting Network Attachment in IPv6,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4140, “Hierarchical Mobile IPv6,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4159, “Deprecation of ‘ip6.int,’” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4177, “Architectural Approaches to Multi-homing for IPv6,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4191, “Default Router Preferences and More-Specific Routes,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4192, “Procedures for Renumbering an IPv6 Network without a Flag Day,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4193, “Unique Local IPv6 Unicast Addresses,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4213, “Basic Transition Mechanisms for IPv6 Hosts and Routers,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4215, “Analysis on IPv6 Transition in Third Generation Partnership Project
+    (3GPP) Networks,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4218, “Threats Relating to IPv6 Multihoming Solutions,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4219, “Things Multihoming in IPv6 (MULTI6) Developers Should Think About,”
+    2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4225, “Mobile IP Version 6 Route Optimization Security Design Background,”
+    2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4241, “A Model of IPv6/IPv4 Dual Stack Internet Access Service,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4242, “Information Refresh Time Option for Dynamic Host Configuration Protocol
+    for IPv6 (DHCPv6),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4243, “Vendor-Specific Information Suboption for the Dynamic Host Configuration
+    Protocol (DHCP) Relay Agent Option,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4260, “Mobile IPv6 Fast Handovers for 802.11 Networks,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4280, “Dynamic Host Configuration Protocol (DHCP) Options for Broadcast
+    and Multicast Control Servers,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4282, “The Network Access Identifier,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4283, “Mobile Node Identifier Option for Mobile IPv6 (MIPv6),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4285, “Authentication Protocol for Mobile IPv6,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4286, “Multicast Router Discovery (MRD),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4291, “IP Version 6 Addressing Architecture,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4301, “Security Architecture for the Internet Protocol,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4302, “IP Authentication Header,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4303, “IP Encapsulating Security Payload (ESP),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4305, “Cryptographic Algorithm Implementation Requirements for Encapsulating
+    Security Payload (ESP) and Authentication Header (AH),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4306, “Internet Key Exchange (IKEv2) Protocol,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4307, “Cryptographic Algorithms for Use in the Internet Key Exchange Version
+    2 (IKEv2),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4308, “Cryptographic Suites for IPsec,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4309, “Using Advanced Encryption Standard (AES) CCM Mode with IPsec Encapsulating
+    Security Payload (ESP),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4338, “Transmission of IPv6, IPv4, and Address Resolution Protocol (ARP)
+    Packets over Fibre Channel,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4339, “IPv6 Host Configuration of DNS Server Information Approaches,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4359, “The Use of RSA/SHA-1 Signatures within Encapsulating Security Payload
+    (ESP) and Authentication Header (AH),” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4380, “Teredo: Tunneling IPv6 over UDP through Network Address Translations
+    (NATs),” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4429, “Optimistic Duplicate Address Detection (DAD) for IPv6,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4443, “Internet Control Message Protocol (ICMPv6) for the Internet Protocol
+    Version 6 (IPv6) Specification,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4449, “Securing Mobile IPv6 Route Optimization Using a Static Shared Key,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4456, “BGP Route Reflection,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4472, “Operational Considerations and Issues with IPv6 DNS,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4477, “Dynamic Host Configuration Protocol (DHCP): IPv4 and IPv6 Dual-Stack
+    Issues,” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4487, “Mobile IPv6 and Firewalls: Problem Statement,” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4489, “A Method for Generating Link-Scoped IPv6 Multicast Addresses,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4554, “Use of VLANs for IPv4-IPv6 Coexistence in Enterprise Networks,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4555, “IKEv2 Mobility and Multihoming Protocol (MOBIKE),” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4581, “Cryptographically Generated Addresses (CGA) Extension Field Format,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4584, “Extensions to Sockets API for Mobile IPv6,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4601, “Internet Group Management Protocol, Version 2,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4604, “Using MLDv2 for Source Specific Multicast,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4620, “IPv6 Node Information Queries,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4621, “Design of the IKEv2 Mobility and Multihoming (MOBIKE) Protocol,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4659, “BGP-MPLS IP Virtual Private Network (VPN) Extension for IPv6 VPN,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4677, “The Tao of IETF: A Novice’s Guide to the Internet Engineering Task
+    Force,” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4703, “Resolution of Fully Qualified Domain Name (FQDN) Conflicts among
+    Dynamic Host Configuration Protocol (DHCP) Clients,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4727, “Experimental Values in IPv4, IPv6, ICMPv4, ICMPv6, UDP, and TCP Headers,”
+    2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4760, “Multiprotocol Extensions for BGP-4,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4779, “ISP IPv6 Deployment Scenarios in Broadband Access Networks,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4787, “Network Address Translation (NAT) Behavioral Requirements for Unicast
+    UDP,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4795, “Link-Local Multicast Name Resolution (LLMNR),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4798, “Connecting IPv6 Islands over IPv4 MPLS Using IPv6 Provider Edge Routers
+    (6PE),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4822, “RIPv2 Cryptographic Authentication,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4831, “Goals for Network-Based Localized Mobility Management (NETLMM),”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4835, “Cryptographic Algorithm Implementation Requirements for Encapsulating
+    Security Payload (ESP) and Authentication Header (AH),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4852, “IPv6 Enterprise Network Analysis—IP Layer 3 Focus,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4861, “Neighbor Discovery for IP Version 6,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4862, “IPv6 Stateless Address Autoconfiguration,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4864, “Local Network Protection for IPv6,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4866, “Enhanced Route Optimization for Mobile IPv6,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4877, “Mobile IPv6 Operation with IKEv2 and the Revised IPsec Architecture,”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4884, “Extended ICMP to Support Multi-Part Messages,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4885, “Network Mobility Support Terminology,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4887, “Network Mobility Home Network Models,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4890, “Recommendations for Filtering ICMPv6 Messages in Firewalls,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4891, “Using IPsec to Secure IPv6-in-IPv4 Tunnels,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4908, “Multi-homing for small scale fixed network Using Mobile IP and NEMO,”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4941, “Privacy Extensions for Stateless Address Autoconfiguration in IPv6,”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4942, “IPv6 Transition/Coexistence Security Considerations,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4944, “Transmission of IPv6 Packets over IEEE 802.15.4 Networks,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4957, “Link-Layer Event Notifications for Detecting Network Attachments,”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4966, “Reasons to Move the Network Address Translator - Protocol Translator
+    (NAT-PT) to Historic Status,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4982, “Support for Multiple Hash Algorithms in Cryptographically Generated
+    Addresses (CGAs),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5015, “Bidirectional Protocol Independent Multicast (BIDIR-PIM),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5059, “Bootstrap Router (BSR) Mechanism for Protocol Independent Multicast
+    (PIM),” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5065, “Autonomous System Confederations for BGP,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5072, “IP Version 6 over PPP,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5084, “Using AES-CCM and AES-GCM Authenticated Encryption in the Cryptographic
+    Message Syntax (CMS),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5094, “Mobile IPv6 Vendor Specific Option,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5095, “Deprecation of Type 0 Routing Headers in IPv6,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5096, “Mobile IPv6 Experimental Messages,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 5120, “M-ISIS: Multi Topology (MT) Routing in Intermediate System to Intermediate
+    Systems (IS-ISs),” 2008'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5142, “Mobility Header Home Agent Switch Message,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5149, “Service Selection for Mobile IPv6,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5156, “Special Use IPv6 Addresses,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5157, “IPv6 Implications for Network Scanning,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 5164, “Mobility Services Transport: Problem Statement,” 2008'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5172, “Negotiation for IPv6 Datagram Compression using IPv6 Control Protocol,”
+    2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5181, “IPv6 Deployment Scenarios in 802.16 Networks,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5213, “Proxy Mobile IPv6,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5214, “Intra-Site Automatic Tunnel Addressing Protocol (ISATAP),” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5220, “Problem Statement for Default Address Selection in Multi-Prefix Environments,”
+    2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5247, “Extensible Authentication Protocol (EAP) Key Management Framework,”
+    2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5268, “Mobile IPv6 Fast Handovers,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5270, “Mobile IPv6 Fast Handovers over IEEE 802.16e Networks,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5271, “Mobile IPv6 Fast Handovers for 3G CDMA Networks,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5308, “Routing IPv6 with IS-IS,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5340, “OSPF for IPv6 (OSPFv3),” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5350, “IANA Considerations for the IPv4 and IPv6 Router Alert Options,”
+    2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5375, “IPv6 Unicast Address Assignment Considerations,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5380, “Hierarchical Mobile IPv6 (HMIPv6) Mobility Management,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5453, “Reserved IPv6 Interface Identifiers,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5492, “Capabilities Advertisement with BGP-4,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5555, “Mobile IPv6 Support for Dual Stack Hosts and Routers,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5568, “Mobile IPv6 Fast Handovers,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5569, “IPv6 Rapid Deployment on IPv4 Infrastructures (6rd),” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5571, “Softwire Hub and Spoke Deployment Framework with Layer Two Tunneling
+    Protocol Version 2 (L2TPv2),” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5572, “IPv6 Tunnel Broker with the Tunnel Setup Protocol,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5637, “Authentication, Authorization, and Accounting (AAA) Goals for Mobile
+    IPv6,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5648, “Multiple Care-of Addresses Registration,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5722, “Handling of Overlapping IPv6 Fragments,” 2009
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5739, “IPv6 Configuration in Internet Key Exchange Protocol Version 2 (IKEv2),”
+    2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5796, “Authentication and Confidentiality in Protocol Independent Multicast
+    Sparse Mode (PIM-SM) Link-Local Messages,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5838, “Support of Address Families in OSPFv3,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5844, “IPv4 Support for Proxy Mobile IPv6,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5846, “Binding Revocation for IPv6 Mobility,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5847, “Heartbeat Mechanism for Proxy Mobile IPv6,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5871, “IANA Allocation Guidelines for the IPv6 Routing Header,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5887, “Renumbering Still Needs Work,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5902, “IAB Thoughts on IPv6 Network Address Translation,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 5909, “Securing Neighbor Discovery Proxy: Problem Statement,” 2010'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 5942, “IPv6 Subnet Model: the Relationship between Links and Subnet Prefixes,”
+    2010'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5944, “IP Mobility Support for IPv4,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5952, “A Recommendation for IPv6 Address Text Representation,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5969, “IPv6 Rapid Deployment on IPv4 Infrastructures (6rd)—Protocol Specification,”
+    2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5991, “Teredo Security Updates,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5996, “Internet Key Exchange Protocol Version 2 (IKEv2),” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6014, “Cryptographic Algorithm Identifier Allocation for DNSSEC,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6036, “Emerging Service Provider Scenarios for IPv6 Deployment,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6040, “Tunneling of Explicit Congestion Notification,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6052, “IPv6 Addressing of IPv4/IPv6 Translators,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6071, “IP Security (IPsec) and Internet Key Exchange (IKE) Document Roadmap,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6081, “Teredo Extensions,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6085, “Address Mapping of IPv6 Multicast Packets on Ethernet,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6089, “Flow Bindings in Mobile IPv6 and Network Mobility (NEMO) Basic Support,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6092, “Recommended Simple Security Capabilities in Customer Premises Equipment
+    (CPE) for Providing Residential IPv6 Internet Service,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6104, “Rogue IPv6 Router Advertisement Problem Statement,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6105, “IPv6 Router Advertisement Guard,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6106, “IPv6 Router Advertisement Options for DNS Configuration,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6119, “IPv6 Traffic Engineering in IS-IS,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6144, “Framework for IPv4/IPv6 Translation,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6145, “Stateless IP/ICMP Translation,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6146, “Stateful NAT64: Network Address and Protocol Translation from IPv6
+    Clients to IPv4 Servers,” 2011'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6147, “DNS64: DNS Extensions for Network Address Translation from IPv6
+    Clients to IPv4 Servers,” 2011'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6151, “Updated Security Considerations for the MD5 Message-Digest and the
+    HMAC-MD5 Algorithms,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6164, “Using 127-Bit IPv6 Prefixes on Inter-Router Links,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6169, “Security Concerns with IP Tunneling,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6177, “IPv6 Address Assignment to End Sites,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6180, “Guidelines for Using IPv6 Transition Mechanisms during IPv6 Deployment,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6221, “Lightweight DHCPv6 Relay Agent,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6226, “PIM Group-to-Rendezvous-Point Mapping,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6250, “Evolution of the IP Model,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6269, “Issues with IP address sharing,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6273, “The Secure Neighbor Discovery (SEND) Hash Threat Analysis,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6275, “Mobility Support in IPv6,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6279, “Proxy Mobile IPv6 (PIMPv6) Localized Routing Problem Statement,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6282, “Compression Format for IPv6 Datagrams over IEEE 802.15.4-Based Networks,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6294, “Survey of Proposed Use Cases for the IPv6 Flow Label,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6296, “IPv6-to-IPv6 Network Prefix Translation,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6302, “Logging Recommendations for Internet-Facing Servers,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6308, “The Internet Multicast Address Allocation Architecture,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6324, “Routing Loop Attack Using IPv6 Automatic Tunnels,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6326, “Transparent Interconnection of Lots of Links (TRILL) Use of IS-IS,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6333, “Dual-Stack Lite Broadband Deployments Following IPv4 Exhaustion,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6334, “Dynamic Host Configuration Protocol for IPv6 (DHCPv6) Option for
+    Dual-Stack Lite,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6343, “Advisory Guidelines for 6to4 Deployment,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6398, “IP Router Alert Considerations and Usage,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6422, “Relay Supplied DHCP Options,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6434, “IPv6 Node Requirements,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6436, “Rationale for Update to the IPv6 Flow Label Specification,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6437, “IPv6 Flow Label Specification,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6438, “Using the IPv6 Flow Label for Equal Cost Multipath Routing and Link
+    Aggregation in Tunnels,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6459, “IPv6 in 3rd Generation Partnership Project (3GPP) Evolved Packet
+    System (EPS),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6494, “Certificate Profile and Certificate Management for SEcure Neighbor
+    Discovery (SEND),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6495, “Subject Key Identifier (SKI) SEcure Neighbor Discovery (SEND) Name
+    Type Fields,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6535, “Dual Stack Hosts using the ‘Bump-in-the-Host’ Technique (BIHS),”
+    2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6540, “IPv6 Support Required for All IP-Capable Nodes,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6543, “Reserved IPv6 Interface Identifier for Proxy Mobile IPv6,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6553, “The Routing Protocol for Low-Power and Lossy Networks (RPL) Option
+    for Carrying RPL Information in Data-Plane Datagrams,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6554, “An IPv6 Routing Header for Source Routes with the Routing Protocol
+    for Low-Power and Lossy Networks (RPL),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6555, “Happy Eyeballs: Success with Dual-Stack Hosts,” 2012'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6556, “Testing Eyeball Happiness,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6564, “A Uniform Format for IPv6 Extension Headers,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6572, “RADIUS Support for Proxy Mobile IPv6,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6583, “Operational Neighbor Discovery Problems,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6586, “Experiences from an IPv6-only Network,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6603, “Prefix Exclude Option for DHCPv6-based Prefix Delegation,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6610, “DHCP Options for Home Information Discovery in Mobile IPv6 (MIPv6),”
+    2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6611, “Mobile IPv6 (MIPv6) Bootstrapping for the Integrated Scenario,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6618, “Mobile IPv6 Security Framework Using Transport Layer Security for
+    Communication between the Mobile Node and Home Agent,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6619, “Scalable Operation of Address Translators with Per-Interface Bindings,”
+    2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6620, “FCFS SAVI: First-Come, First-Served Source Address Validation Improvement
+    for Locally Assigned IPv6 Addresses,” 2012'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6621, “Simplified Multicast Forwarding,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6655, “AES-CCM Cipher Suites for Transport Layer Security (TLS),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6705, “Localized Routing for Proxy Mobile IPv6,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6724, “Default Address Selection for Internet Protocol Version 6 (IPv6),
+    2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6775, “Neighbor Discovery Optimization for IPv6 over Low-Power Wireless
+    Personal Area Networks (6LoWPANs),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6791, “Stateless Source Address Mapping for ICMPv6 Packets,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6822, “IS-IS Multi-Instance,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6830, “The Locator/ID Separation Protocol (LISP),” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6831, “The Locator/ID Separation Protocol (LISP) for Multicast Environments,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6832, “Interworking between Locator/ID Separation Protocol (LISP) and Non-LISP
+    Sites,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6833, “Locator/ID Separation Protocol (LISP) Map-Server Interface,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6834, “Locator/ID Separation Protocol (LISP) Map-Versioning,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6835, “The Locator/ID Separation Protocol Internet Groper (LIG),” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6836, “Locator/ID Separation Protocol Alternative Logical Topology (LISP+ALT),”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6845, “OSPF Hybrid Broadcast and Point-to-Multipoint Interface Type,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6853, “DHCPv6 Redundancy Deployment Considerations,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6860, “Hiding Transit-Only Networks in OSPF,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6866, “Problem Statement for Renumbering IPv6 Hosts with Static Addresses
+    in Enterprise Networks,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6874, “Representing IPv6 Zone Identifiers in Address Literals and Uniform
+    Resource Identifiers,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6877, “464XLAT: Combination of Stateful and Stateless Translation,” 2013'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6879, “IPv6 Enterprise Network Renumbering Scenarios, Considerations, and
+    Methods,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6883, “IPv6 Guidance for Internet Content Providers and Application Service
+    Providers,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6886, “NAT Port Mapping Protocol (NAT-PMP), 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6888, “Common Requirements for Carrier-Grade NATs (CGNs),” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6889, “Analysis of Stateful 64 Translation,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6895, “Domain Name System (DNS) IANA Considerations,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6908, “Deployment Considerations for Dual-Stack Lite,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6909, “IPv4 Traffic Offload Selector Option for Proxy Mobile IPv6,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6911, “RADIUS Attributes for IPv6 Access Networks,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6921, “Design Considerations for Faster-Than-Light (FTL) Communication,”
+    April 1, 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6939, “Client Link-Layer Address Option in DHCPv6,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6946, “Processing of IPv6 ‘Atomic’ Fragments,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6959, “Source Address Validation Improvement (SAVI) Threat Scope,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6977, “Triggering DHCPv6 Reconfiguration from Relay Agents,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6980, “Security Implications of IPv6 Fragmentation with IPv6 Neighbor Discovery,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6992, “Routing for IPv4-Embedded IPv6 Packets,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7010, “IPv6 Site Renumbering Gap Analysis,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7021, “Assessing the Impact of Carrier-Grade NAT on Network Applications,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7031, “DHCPv6 Failover Requirements,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7039, “Source Address Validation Improvement (SAVI) Framework,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7040, “Public IPv4-over-IPv6 Access Network,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7045, “Transmission and Processing of IPv6 Extension Headers,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7048, “Neighbor Unreachability Detection Is Too Impatient,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7050, “Discovery of the IPv6 Prefix Used for IPv6 Address Synthesis,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7051, “Analysis of Solution Proposals for Hosts to Learn NAT64 Prefix,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7059, “A Comparison of IPv6-over-IPv4 Tunnel Mechanisms,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7066, “IPv6 for Third Generation Partnership Project (3GPP) Cellular Hosts,”
+    2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7077, “Update Notifications for Proxy Mobile IPv6,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7078, “Distributing Address Selection Policy Using DHCPv6,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7084, “Basic Requirements for IPv6 Customer Edge Routers,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7094, “Architectural Considerations of IP Anycast,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7098, “Using the IPv6 Flow Label for Load Balancing in Server Farms,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 7101, “List of Internet Official Protocol Standards: Replaced by a Web
+    Page,” 2013'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7108, “A Summary of Various Mechanisms Deployed at L-Root for the Identification
+    of Anycast Nodes,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7109, “Flow Bindings Initiated by Home Agents for Mobile IPv6,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7112, “Implications of Oversized IPv6 Header Chains,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7113, “Implementation Advice for IPv6 Router Advertisement Guard (RA Guard),”
+    2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7123, “Security Implications of IPv6 on IPv4 Networks,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7136, “Significance of IPv6 Interface Identifiers,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7148, “Prefix Delegation Support for Proxy Mobile IPv6,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7156, “Diameter Support for Proxy Mobile IPv6 Localized Routing,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7157, “IPv6 Multihoming without Network Address Translation,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7161, “Proxy Mobile IPv6 (PMIPv6) Multicast Handover Optimization by the
+    Subscription Information Acquisition through the LMA (SIAL),” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7168, “The Hyper Text Coffee Pot Control Protocol for Tea Efflux Appliances
+    (HTCPCP-TEA),” April 1, 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7217, “A Method for Generating Semantically Opaque Interface Identifiers
+    with IPv6 Stateless Address Autoconfiguration (SLAAC),” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7219, “SEcure Neighbor Discovery (SEND) Source Address Validation Improvement
+    (SAVI),” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7221, “Handling of Internet-Drafts by IETF Working Groups,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7222, “Quality-of-Service Option for Proxy Mobile IPv6,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7225, “Discovering NAT64 IPv6 Prefixes Using the Port Control Protocol (PCP),”
+    2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7279, “An Acceptable Use Policy for New ICMP Types and Codes,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

@@ -1,0 +1,4006 @@
+- en: Chapter 5. Networking
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you have read the previous chapters, you now know about the IPv6 basics,
+    the new addressing architecture, the header format, and the Extension header architecture,
+    as well as all about the new ICMPv6-based processes such as Neighbor Discovery
+    (ND), Stateless Address Autoconfiguration (SLAAC), Path MTU Discovery, and Multicast
+    Listener Discovery (MLD).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before we dive into transition mechanisms and integration of IPv6 into the IPv4
+    network, this chapter covers several topics that are important in the network,
+    such as Layer 2 support for IPv6, checksumming, multicast and how it has been
+    extended for IPv6, available routing protocols, and quality of service. Last but
+    not least, I discuss DHCPv6 and DNS. Even though IPv6 supports SLAAC, we expect
+    DHCPv6 to be used in the enterprise networks, mainly due to the fact that organizations
+    want to be able to log address use, which is not easily done if using SLAAC. And
+    with the IPv6 address space coming into our networks in addition to still using
+    IPv4, DNS becomes even more important than before.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Layer 2 Support for IPv6
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: IP sits between the Data Link layer and the Transport layer. One of the goals
+    in the development of IPv6 was to be able to support as many different physical
+    networks as possible and to require no changes in the Transport layer. This approach
+    is called “IP over Everything.” To make IP as independent as possible from the
+    Data Link layer, it needs an interface to this layer, which can be Ethernet, ATM,
+    Token Ring, or any other media. The interface needs to be flexible and must be
+    able to adapt to different requirements. For this purpose, features such as Path
+    MTU Discovery and Fragmentation have been optimized. For UDP and TCP, it should
+    not matter whether IPv4 or IPv6 is used. Obviously, changes are needed whenever
+    IP addresses are used because of the difference in the address format. All these
+    requirements lead to changes within the IP layer itself. This section discusses
+    the interface to the Data Link layer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Different terms are used when the Data Link layer is discussed. The TCP/IP
+    model has four layers, the first of which is called the Link layer. The OSI model
+    has seven layers. It subdivides the Link layer of the TCP/IP model into two layers:
+    the Physical layer and the Data Link layer. Thus, the term *Layer 2 Support for
+    IPv6* refers to the second layer of the OSI model.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6’s independence from the physical network media is important. When a packet
+    is sent from one network to another, we do not usually know in advance the kind
+    of physical networks through which the packet will travel. IP cares only about
+    the Destination address and finding a way to get there regardless of the network
+    hardware used. IP then passes the packet to the Data Link layer. In 802 networks,
+    the interface driver on the Data Link layer applies a Media Access Control (MAC)
+    header to the datagram and sends it out to the physical network. The interface
+    driver needs to be aware of the physical requirements for transmission. Each network’s
+    hardware technology defines a specific addressing mechanism. Neighbor Discovery,
+    as described in [Chapter 4](ch04.html "Chapter 4. ICMPv6"), is used to map between
+    IPv6 addresses and MAC addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The rules and packet sizes for the transport of IPv6 datagrams differ depending
+    on the Link layer technology. There is an RFC covering each technology in detail.
+    This chapter summarizes the main points to consider; a list of the RFCs can be
+    found in [Appendix B](apb.html "Appendix B. Recommended Reading").
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the previous edition we covered some of the RFCs in more detail, some that
+    aren’t even much used anymore today, such as Token Ring. I have changed the format
+    of this chapter. I still cover Ethernet in more detail, as this is the probably
+    most used and serves as an example. The others I will summarize shortly so you
+    have a reference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ethernet (RFC 2464)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Ethernet is a widely used LAN technology developed in the early 1970s at Xerox.
+    There are many different variants used: in the early days, Twisted Pair Ethernet,
+    also known as 10Base-T and operating at 10 Mbps, and Fast Ethernet, also known
+    as 100Base-T and operating at 100 Mbps, were common; today Gigabit Ethernet, also
+    known as 1,000Base-T and operating at 1 Gbps, and 10 Gigabit Ethernet, also known
+    as 10GE and operating at 10 Gbps, are common. And now even 40 and soon 100 Gigabit
+    Ethernet are showing up. The race will go on. The Institute of Electrical and
+    Electronic Engineers (IEEE) together with a number of IT and telecom companies
+    have defined a new standard called “Ethernet for the First Mile” (EFM, IEEE 802.3ah),
+    which could allow usage of the Ethernet standard for first-mile connections to
+    homes and companies.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 2464 describes the format of IPv6 datagrams transmitted over Ethernet and
+    how link-local and stateless autoconfigured addresses are formed. It obsoletes
+    RFC 1972 and supports all Ethernet variants and VLAN technologies, such as 802.1Q
+    and Cisco’s Inter-Switch Link (ISL). WiFi looks much like Ethernet from higher
+    layers, so there is not even a specific RFC to cover it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ethernet hardware addresses use a 48-bit addressing scheme. Ethernet hardware
+    manufacturers are assigned blocks of Ethernet addresses, known as *OUI* or *company
+    ID*. No two Ethernet hardware interfaces should have the same address, because
+    each vendor assigns the addresses within its block in sequence. An Ethernet frame
+    can be of variable size, but it can be no smaller than 64 bytes and no larger
+    than 1,518 bytes (header, data, and CRC). Packets over Ethernet have a default
+    MTU of 1,500 bytes, although many devices support jumbo frames, which can be up
+    to 9,000 bytes. A smaller MTU can be configured through Router Advertisements
+    containing an MTU option or through manual configuration of each device. If a
+    Router Advertisement contains an MTU larger than 1,500 bytes or larger than a
+    manually configured MTU, the Router Advertisement must be ignored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Ethernet header contains the source and destination Ethernet addresses and
+    the Ethernet type code. The Ethernet type code for IPv6 is `0x86DD`. [Figure 5-1](ch05.html#the_ethernet_header_for_an_ipv6_datagram
+    "Figure 5-1. The Ethernet header for an IPv6 datagram") shows the Ethernet header
+    for an IPv6 datagram.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The Ethernet header for an IPv6 datagram](images/ipv6_0501.png)Figure 5-1. The
+    Ethernet header for an IPv6 datagram'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Destination and Source Address fields each have six bytes, and the Ethernet
+    Type field takes two bytes, containing the value `0x86DD` for IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For Stateless Address Autoconfiguration (SLAAC), the MAC address can be used
+    to build the IPv6 interface ID. [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing")
+    explains how this process works. If the Destination address in the IPv6 header
+    is a multicast address, the first two bytes of the MAC address are set to `3333`
+    and the last four bytes are the last four bytes of the IPv6 destination multicast
+    address. [Figure 5-2](ch05.html#relation_of_the_ipv6_multicast_address "Figure 5-2. Relation
+    of the IPv6 multicast address to Ethernet MAC address") shows the format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Relation of the IPv6 multicast address to Ethernet MAC address](images/ipv6_0502.png)Figure 5-2. Relation
+    of the IPv6 multicast address to Ethernet MAC address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 5-3](ch05.html#mac_header_for_an_ipv6_multicast_destina "Figure 5-3. MAC
+    header for an IPv6 multicast Destination address") shows how this looks in a trace
+    file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![MAC header for an IPv6 multicast Destination address](images/ipv6_0503.png.jpg)Figure 5-3. MAC
+    header for an IPv6 multicast Destination address'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the summary line at the top of the figure, you can see the IPv6 Source address,
+    which is the address of my router. The Destination address is the all-nodes multicast
+    address. The Ethernet destination prefix shows `3333`, which identifies this MAC
+    address as a multicast address, and the remaining four bytes contain the last
+    four bytes of the IPv6 Destination address—in this case `00-00-00-01`. The Ethernet
+    Source address contains the MAC address of the router, and the Ethertype has the
+    value for IPv6, which is `0x86DD`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is an update to RFC 2464, one of the shortest RFCs I ever read; it is
+    RFC 6085, “Address Mapping of IPv6 Multicast Packets on Ethernet.” It allows the
+    mapping of a multicast address into an Ethernet link-layer unicast address in
+    the case where it is clear that only one address is relevant.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'For useful information about Ethernet, refer to [Charles E. Spurgeon’s site](http://www.ethermanage.com/ethernet/ethernet.html).
+    He is also the author of *Ethernet: The Definitive Guide* (O’Reilly).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Point-to-Point Protocol (RFC 5072)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Point-to-Point Protocol* (PPP) is a mechanism for running IP and other network
+    protocols over a serial link. It supports synchronous and asynchronous lines.
+    RFC 5072 describes the method for transmitting IPv6 packets over PPP and how IPv6
+    link-local addresses are formed on PPP links. RFC 5172 defines the compression
+    parameter for use in IPv6 datagram compression.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PPP’s control protocol for IPv6, IPV6CP, is responsible for establishing and
+    configuring IPv6 communication over PPP. One IPv6 packet can be encapsulated in
+    a PPP Data Link layer frame, and the protocol field is set to `0x0057` for IPv6\.
+    If the PPP link is to support IPv6, the MTU size must be configured to IPv6’s
+    minimum MTU size of IPv6, which is 1,280 bytes. A higher value (1,500 bytes) is
+    recommended.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPV6CP has a distinct set of options for the negotiation of IPv6 parameters.
+    Currently, the only defined options for IPV6CP are Interface-Identifier and IPv6-Compression
+    Protocol. A PPP interface does not have a MAC address. The Interface-Identifier
+    option provides a way to negotiate a 64-bit interface identifier, which must be
+    unique within the PPP link. The IPv6-Compression option is used to negotiate a
+    specific packet compression protocol, which applies only to IPv6 packets transmitted
+    over the PPP link. The option is not enabled by default.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 address negotiation is different from IPv4\. It is done through ICMPv6
+    Neighbor Discovery and not through PPP, as it is with IPv4\. For ISPs, PPP in
+    combination with IPv6 offers many advantages. For instance, it is no longer a
+    problem to assign static addresses to customers, because the IPv6 address space
+    is large enough. With IPv4, due to the shortage of addresses, ISPs often have
+    to use dynamic addresses. The IPv6 functionality for address autoconfiguration
+    supports easy administration and customer configuration with minimal cost. Prefix
+    assignment to the customer site can be done through Router Discovery or through
+    IPv6 Prefix Options for DHCPv6 (RFC 3633). To get IPv6 to work over ADSL, ISPs
+    need to choose an encapsulation that meets their needs, such as PPP over ATM (PPPoA)
+    or PPP over Ethernet (PPPoE). IPv6 also has an impact on the Authentication, Authorization,
+    Accounting (AAA) process. With IPV6CP, the address assignment occurs after the
+    authentication. ISPs should note that Radius must support IPv6 attributes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IEEE 802.15.4 (RFC 4944)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: This standard specifies the physical layer and media access control for *low-rate
+    wireless personal area networks* (LR-WPANs). It is designed to offer the lower
+    fundamental network layers to support low-cost, low-speed communication between
+    any type of devices. This standard does not define higher layers. There are specifications
+    such as 6LoWPAN, ZigBee and others, which build on this standard.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*6LoWPAN* is the acronym for *IPv6 over Low power Wireless Personal Area Networks*.
+    There is an IEEE working group. RFC 6282 defines a compression format for IPv6
+    datagrams over IEEE 802.15.4 networks. RFC 6775 defines optimizations to the Neighbor
+    Discovery protocol (see [Chapter 4](ch04.html "Chapter 4. ICMPv6")) to work in
+    low-power and lossy networks.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*ZigBee* is a specification for communication protocols using small, low-power
+    radios. ZigBee allows networks to be formed ad hoc. Applications include light
+    switches, electrical meters, traffic management systems, and any type of system
+    that requires short-range wireless transfer of data at low rates. ZigBee is not
+    optimized for IPv6 like 6LoWPAN is.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This type of technology will be the base for many future services, mostly sensor-based
+    types of communication. They can be used in any area: industrial, safety (earthquake
+    detection), health, fun, and entertainment. Typically these devices will have
+    very limited resources; this is why they need lean, optimized stacks.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ATM (RFC 2492)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Asynchronous Transfer Mode* (ATM) is a connection-oriented, high-speed network
+    technology that is used in both LANs and WANs. It works over optical fiber and
+    operates at up to gigabit speed by using special hardware and software mechanisms.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 2492 describes the transmission of IPv6 packets over an ATM network in a
+    companion document to RFC 2491, “IPv6 over Non-Broadcast Multiple Access (NBMA)
+    Networks.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: Frame Relay (RFC 2590)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Frame Relay* is a connection-oriented, high-speed network technology used
+    in WANs. It was developed in the Bell Labs in the late 1980s as part of the ISDN
+    specification. The standard was refined in the early 1990s. By using a short,
+    two-byte header, Frame Relay is very efficient in forwarding packets.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 2590 specifies how IPv6 packets are transmitted over Frame Relay links,
+    how IPv6 link-local addresses are formed, and how IPv6 addresses are mapped to
+    Frame Relay addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next chapter covers routing and routing protocols in an overview. There
+    are several choices you will have to make and we discuss the available options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Upper-Layer Protocols
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The impact of IPv6 on upper-layer protocols is minimal because the datagram
+    service has not changed substantially. This chapter discusses UDP and TCP over
+    IPv6, and describes changes for upper-layer protocols such as DNS, DHCP, SLP,
+    FTP, Telnet, and HTTP when used over IPv6\. The most important changes are always
+    needed where an IP address is used. Any process or application that uses an IP
+    address needs to be updated to be able to handle the extended 128-bit address
+    format. Applications that use a hardcoded 32-bit IPv4 address should be updated
+    to use a DNS name instead, so that DNS can return either an IPv4 or an IPv6 address
+    to make the IP protocol fully transparent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: UDP/TCP and Checksums
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Checksumming is done on different layers. Remember from [Chapter 3](ch03.html
+    "Chapter 3. The Structure of the IPv6 Protocol"), the IPv6 header does not have
+    a checksum. But a checksum is important on the transport layer to determine packet
+    delivery problems. Other upper-layer protocols may use a checksum, too. All checksum
+    calculations that include the IP address in the calculation must be modified for
+    IPv6 to accommodate the new 128-bit address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Transport protocols such as UDP and TCP attach checksums to their packets. A
+    checksum is generated using a *pseudoheader*. The TCP and UDP pseudoheader for
+    IPv6 contains fields for Source and Destination address, payload length, and Next
+    Header value (RFC 2460). If the IPv6 packet contains a routing header, the Destination
+    address used in the pseudoheader is the address of the final destination. If the
+    Source or Destination address was changed in transit, the value of the pseudoheader
+    at the destination will not match the value of the initial packet, which causes
+    checksum calculation failure and an error report.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because the IPv6 address is so much longer than the IPv4 address, the IPv6 specification
+    includes a new version of the pseudoheader. The IPv6 pseudoheader specification
+    takes into account that an unknown number of Extension headers can be present
+    before the UDP or TCP layer, which is essential when calculating the payload length
+    for the pseudoheader. IPv6 nodes that receive a UDP packet with a value of 0 in
+    the checksum field should discard the packet and log the error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With IPv4, a checksum in the UDP header was optional. With IPv6, the computation
+    of a checksum is mandatory for UDP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The source node calculates and stores the checksum, and the destination node
+    verifies it. [Figure 5-4](ch05.html#format_of_the_pseudoheader "Figure 5-4. Format
+    of the pseudoheader") shows the format of the pseudoheader that is built and used
+    to calculate TCP and UDP checksums.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the pseudoheader](images/ipv6_0504.png)Figure 5-4. Format of the
+    pseudoheader'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following list describes each of the fields:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Source Address (16 bytes)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Source address of the IPv6 packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Destination Address (16 bytes)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Destination address of the IPv6 packet. If there is a routing header in
+    the packet, the address of the final destination is used for the checksum calculation.
+    On the first node, this address is the last address in the list of the routing
+    header. At the final destination, this is the Destination address in the IPv6
+    header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Upper Layer Packet Length (4 bytes)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field contains the length of the Upper-Layer Protocol header plus data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Next Header (1 byte)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Next Header field identifies the type of the header using the values listed
+    in [Table 3-1](ch03.html#values_in_the_next_header_field "Table 3-1. Values in
+    the Next Header field") in [Chapter 3](ch03.html "Chapter 3. The Structure of
+    the IPv6 Protocol").
+  prefs: []
+  type: TYPE_NORMAL
+- en: The same algorithm used with IPv4 is used to calculate the checksum with IPv6\.
+    The 16-bit checksum is computed over the entire pseudoheader. By including the
+    Source and Destination addresses in the checksum calculation, any alteration of
+    the addresses en route would be detected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multicast
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Multicast is discussed in different chapters of the book. Multicast addresses
+    are described in [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing"), while all
+    the multicast-based Neighbor Discovery functions are discussed in [Chapter 4](ch04.html
+    "Chapter 4. ICMPv6"). This section here aims to consolidate it all and emphasize
+    the importance of multicast in an IPv6 network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multicast is an efficient way to deliver data whenever it is one source distributing
+    the same data to multiple receivers. This can be video or audio streaming, conferencing,
+    distribution of financial information, or sports games, software updates, e-learning,
+    and many more. With multicast, data packets do not have to be sent individually
+    to each receiver. A single multicast packet can reach all receivers and therefore
+    reduces the number of packets significantly, especially with a large number of
+    receivers. Each multicast data stream is uniquely identified by its Source address
+    (IPv6 unicast address) and its group or multicast IPv6 address. Multicast routing
+    ensures packet delivery from the sender to all receivers. It must be enabled on
+    all routers between the sender and the receivers. The router receives the multicast
+    packet on the receiving interface and forwards it out over all other interfaces
+    with registered receivers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv4 multicast was not an integral part of the original IPv4 specification.
+    It has been introduced later and then optimized based on experience and operational
+    practice. The IPv6 multicast specification builds on that experience and has some
+    advanced features that make it more efficient and scalable. Multicast is extensively
+    used in IPv6 to perform basic functions, such as Neighbor Discovery.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Find information on how multicast is used for Neighbor Discovery in [Chapter 4](ch04.html
+    "Chapter 4. ICMPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multicast Addressing
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The format of the multicast address makes use of the larger addressing space.
+    The official prefix for multicast addresses is `ff00::/8`. The most important
+    difference to IPv4 multicast is that the IPv6 multicast address has 4 bits to
+    identify a scope. The scope determines how far the multicast will reach. A scope
+    of 2 (`ff02`) is a link-local scope and will only be distributed on the link.
+    A scope of 5 (`ff05`) is a site-local scope and will be routed to the border of
+    the site. The global multicast scope is E (`ff0e`). Other scopes can be defined
+    and configured by the network administrator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Find all details about the multicast address and the flags and scope field in
+    [Chapter 2](ch02.html "Chapter 2. IPv6 Addressing").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Group Membership Management
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In order to receive data destined to a multicast group, a node must register
+    for the multicast group. This is done through the use of a multicast management
+    protocol. In IPv4 this is IGMP (Internet Group Management Protocol). In IPv6 it
+    is called *MLD* (*Multicast Listener Discovery*) and is based on ICMP messages.
+    There is MLDv1 (corresponding to the functionality of IGMPv2) and MLDv2 (corresponding
+    to the functionality of IGMPv3). In most cases, MLDv2 is used. The main difference
+    in MLDv2 is that it supports source-specific multicast. With source-specific multicast,
+    a node cannot only register for a group, it can specify the desired source from
+    which it wants to receive the data (or specific sources from which it does not
+    want to receive the data).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The ICMPv6 messages defined are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multicast Listener Query
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Multicast Listener Report
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Multicast Listener Done
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can find a detailed description of MLDv1 and MLDv2 messages in [Chapter 4](ch04.html
+    "Chapter 4. ICMPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: The multicast messages to register or deregister from a group are relevant only
+    for the next hop router and therefore have a multicast scope of link-local (`ff02`).
+    The router needs to know which multicast groups are listening on each of its interfaces.
+    For this purpose the router keeps a list of registered receivers for each multicast
+    group, or in case of a more granular registration, for each data stream (sender/group).
+    It will then only forward multicast data over an interface if the group is in
+    its multicast list. As soon as the last member of a group has left the group,
+    the router will stop forwarding that data for this group over this interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multicast Layer 2 Protocols
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With Layer 2 Multicast Management protocols, switches can be made multicast-aware,
+    so that they don’t have to flood all interfaces with multicast messages. *MLD
+    snooping*, the IPv6 version of IGMP snooping, is available. With MLD snooping,
+    switches will forward multicast messages only to ports that have listeners for
+    the multicast group, as IPv6 multicast data is selectively forwarded to a list
+    of ports that want to receive the data, instead of being flooded to all ports
+    in a VLAN. This list is dynamically constructed by snooping IPv6 multicast control
+    packets. Be aware and careful about the fact that multicast is essential to the
+    basic functionality of IPv6\. So make sure that your switch is aware of all the
+    groups that a node must listen to.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multicast Routing
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With MLD, routers learn about listeners that are directly connected to their
+    interfaces. To build the best path for multicast traffic from source to listeners,
+    routers must exchange information about their listeners with each other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this purpose, an *MDT* (*Multicast Distribution Tree*) is used. The branches
+    of the tree lead to the listeners. As listeners join and leave, branches are added
+    or deleted. The tree has the root at the source of the traffic and is called *SPT*
+    (*Shortest Path Tree*). The SPT is identified by the source address and the multicast
+    group address. All routers that are part of a tree must maintain state for it.
+    When multiple sources share the same group address, the *ST* (*Shared Tree*) is
+    rooted in an administratively selected router called *Rendezvous Point*. A rendezvous
+    point can handle multiple groups.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Control messages are always sent from the receiving end up toward the root of
+    the tree. The process of finding the upstream neighbor is called *RPF* (*Reverse-Path
+    Forwarding*) calculation. So while unicast routing is concerned about where the
+    packet is going, multicast routing is concerned about where the packet is coming
+    from. For each multicast data stream, only a single receiving interface is allowed
+    on any given router. If a data stream were accepted over multiple interfaces,
+    packet duplication would occur.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Protocol Independent Multicast
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Multicast routing is the process of building the MDT. The topology information
+    is maintained in the *TIB* (*Tree Information Base*). Many protocols had been
+    developed to support this process. With deployment experience, the choice was
+    cut down to several flavors of *PIM* (*Protocol Independent Multicast*). For IPv6
+    three multicast routing protocols have been adopted:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*PIM-SM (PIM Sparse Mode)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Used when multiple sources transmit to the same group (videoconferencing, peer-to-peer
+    gaming).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*PIM-SSM (PIM Source-Specific Multicast)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Subset of PIM-SM. Used when a single source transmits to multiple groups (content
+    delivery such as video or audio).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*PIM-Bidir (Bidirectional PIM)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Used when all members of the group can be both receivers and sources.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For more information on Multicast and Multicast routing, refer to *Deploying
+    IPv6 Networks* (Cisco Press) by Ciprian Popoviciu, Patrick Grossetete, and Eric
+    Levy-Abegnoli.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Routing Protocols
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Forwarding an IPv6 datagram beyond a directly attached subnet requires a router.
+    Routers look at the datagram’s destination IPv6 address and search for a matching
+    prefix in their local routing tables. It is very important for the router to have
+    all relevant destinations in its routing table. But how do they get there? We
+    can enter them manually on all routers, which is called *static routing*, but
+    this is not very economical. A much more efficient automatic approach can be achieved
+    by deploying routing protocols. *Routing protocols* define exchange procedures
+    to synchronize the routing table between routers dynamically (called *dynamic
+    routing*). So the obvious advantage of using routing protocols is that they automatically
+    adjust the routing tables to changes in the network without administrative intervention.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Routing information needs to be distributed either within an *Autonomous System*
+    (*AS*) or between Autonomous Systems. An AS is defined as a set of networks governed
+    by a single authority. Routing protocols that distribute information within an
+    AS are called *Interior Gateway Protocols* (*IGP*). OSPF version 3 for IPv6, RIPng,
+    IPv6 support on integrated IS-IS, and EIGRP for IPv6 belong to this category.
+    Protocols that distribute information between Autonomous Systems are called *Exterior
+    Gateway Protocols* (*EGP*). BGP-4 and its extensions for IPv6 represent such a
+    protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This section gives a short overview of common routing protocols such as RIPng,
+    OSPF for IPv6, IS-IS, EIGRPv6, and BGP-4 support for IPv6\. They represent the
+    most important routing protocols in use today. I don’t describe the protocols
+    in detail, but simply mention the most important features that provide IPv6 support.
+    This is followed by a final summary of what routing protocol choices you will
+    have to make for your future network environment with IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This chapter in previous editions of the book included in-depth coverage of
+    OSPFv3 and IS-IS. At the time of writing this third edition there are many excellent
+    books on the market that are focused on routing protocols (which was not so much
+    the case back in 2005). I have therefore decided to shorten this chapter, as I
+    do not see routing to be part of *IPv6 Essentials* anymore.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Most of the routing protocols mentioned here can be used only for the exchange
+    of IPv6 routing information. If IPv4 and IPv6 are deployed on the same network,
+    separate routing protocols must be implemented: one for IPv4 and one for IPv6—for
+    example, OSPFv2 for IPv4 routing and OSPFv3 for IPv6 routing. Currently, the exceptions
+    are the routing protocols BGP-4 and IS-IS. They can exchange routing information
+    for both IP protocols within the same instance. In the future, OSPFv3 will also
+    support both address families in one process (RFC 5838, “Support of Address Families
+    for OSPFv3.”)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The term *router* in this book stands for any device capable of IPv6 packet
+    forwarding and/or processing the appropriate routing protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Routing Table
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Each router maintains a routing table (also known as forwarding table) for each
+    protocol it is configured to route. So a dual-stack router will usually have two
+    routing tables, an IPv4 routing table and an IPv6 routing table. An IPv6 routing
+    table is not so much different from an IPv4 routing table. The structure of an
+    IPv6 address is simpler in the way that the first 64 bits are network information
+    and the last 64 bits are the interface ID.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this section when we mention routing table, we usually refer to the IPv6
+    routing table. Each entry in the IPv6 routing table represents an IPv6 destination,
+    from now on called an IPv6 route. Each IPv6 route in the table is stored in the
+    form of an IPv6 address prefix and its length. For each IPv6 route, additional
+    information is stored in the routing table. The next hop information, for instance,
+    tells the router where to forward a packet destined for this particular IPv6 route.
+    Another type of information would be the metric of the IPv6 route, allowing the
+    router to select the best path (smallest metric) to each IPv6 route in case of
+    multiple entries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Routing table lookup and content
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: For each incoming IPv6 packet, the router inspects the Destination address and
+    looks it up in the routing table. For each IPv6 route in the routing table, the
+    router applies the prefix length to the Destination address to calculate a Destination
+    address prefix. If this calculated prefix corresponds with the prefix of the IPv6
+    route, a match was found. To optimize the lookup, the searching algorithm looks
+    through the entries based on prefix length, starting with longest prefix. If a
+    match was found, the rest of the routing table can be ignored, as the longest
+    matched prefix is always the preferred IPv6 route. Of course, this is a simplified
+    representation of the lookup process. The actual algorithms behind it are complex
+    and highly optimized.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once the router has found a matching entry, the datagram is forwarded according
+    to the next-hop information associated with this entry. In addition, the value
+    of the hop limit within the datagram’s IPv6 header is decremented by one. If no
+    match is found in the routing table, there may be a default route (see below),
+    or if there is no default route or the hop limit value has reached zero, the datagram
+    is dropped. [Figure 5-5](ch05.html#an_ipv6_routing_table "Figure 5-5. An IPv6
+    routing table") shows an example of such a routing table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![An IPv6 routing table](images/ipv6_0505.png.jpg)Figure 5-5. An IPv6 routing
+    table'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For each route, the router keeps the following entries in the routing table:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv6 prefix and prefix length*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The prefix length defines the number of relevant bits of the IPv6 prefix. Normally
+    the nonrelevant bits are set to zero in the routing table. The prefix length is
+    also used to determine whether the Destination address of an incoming datagram
+    matches this route.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Next Hop address*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IPv6 address (normally link-local) of the first router along the path to
+    the IPv6 route. If the route is directly connected to the router through a local
+    interface, there is no need for a Next Hop address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Next Hop interface*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The local interface of the router that is used to reach the Next Hop address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Metric*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A number indicating the total distance to the destination. This metric depends
+    on the routing protocol that has put this entry into the routing table. Metric
+    calculations done by the different routing protocols cannot be compared to each
+    other. If the same route is known by different routing protocols, the router must
+    prefer one routing protocol over the other. This is done by assigning a priority
+    value to each routing protocol (e.g., Cisco Systems calls this priority the *administrative
+    distance*). Directly connected routes always have the best priority and are assigned
+    the metric of the Next Hop interface (normally set to zero).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Timer*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The amount of time since the information about the route was last updated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Route Source, also known as protocol*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The entity that provided information for this entry. For example, this may be
+    a static entry, a directly connected route, or a route from a routing protocol,
+    such as RIPng, OSPF for IPv6, BGP, etc.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Default route
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: A *default route* represents a route to all Destination addresses that are not
+    explicitly listed in the routing table. It can be used when a router does not
+    need to know all destinations specifically—for example, a router connecting a
+    remote branch office to the main site. It does not need to know all routes of
+    the entire autonomous systems. It only needs to know the local routes of the remote
+    office; all other routes can be reached only via the connection to the main site,
+    hence a default route.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A default route must be entered into the routing table just like any other route.
+    The Next Hop address of the default route is also called the *default router*
+    or *default gateway*. The entire data traffic for unknown routes is sent to the
+    default router. It is assumed that the default router knows all the routes or
+    has a default router itself. It is at the discretion of the network designer to
+    determine whether and how such a chain of default routers should be implemented.
+    The top router of such a chain is typically a boundary router to another network
+    area or autonomous system. It is here that the default route is entered statically
+    and then distributed over the appropriate network area via a routing protocol.
+    The advantage of distributing the default route is to reduce the number of routing
+    updates to be distributed throughout the network area. Default routes should not
+    be propagated further than intended—that is, they should not leave the network
+    area or the autonomous system. A metric is assigned to the default route at its
+    origin to establish precedence among multiple default routers. Default routes
+    and distribution must be planned and implemented with care to avoid routing inconsistencies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any prefix with a length of zero is considered to be a default route, but normally
+    an IPv6 prefix of `0:0:0:0:0:0:0:0` (or simply `::`) with a prefix length of zero
+    is used. A Destination address of an incoming datagram will always match the default
+    route, as the number of relevant bits for comparison is zero. The default route,
+    however, is always the last route in the routing table, and hence a match is found
+    only if no other routes in the routing table produce a match.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The most common use of a default route is on the endsystems attached to the
+    network, such as PCs, servers, printers, etc. Each system must have a *default
+    gateway* to send traffic to destinations outside the local subnet. Unlike with
+    IPv4, there is no DHCPv6 option for a default gateway. An IPv6 node learns the
+    default route through the Router Advertisement.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RIPng
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: History is repeating itself. Just as with IPv4, the first dynamic routing protocol
+    to reach production was RIP, in this instance called *RIPng*. RIPng is a routing
+    protocol based on a distance-vector algorithm known as the Bellman-Ford algorithm.
+    Most of the concepts for RIPng have been taken over from RIPv1 and RIPv2, which
+    have been implemented for IPv4 for quite some time. RIPv1 is defined in RFC 1058;
+    RIPv2 in RFC 2453\. RIPng is defined in RFC 2080 (January 1997). It is rarely
+    used for reasons explained below.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Distance-Vector Algorithm for RIPng
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: RIPng uses a simple mechanism to determine the metric (cost) of a route. It
+    basically counts the number of routers (hops) to the destination. Each router
+    counts as one hop. Routes with a distance greater than or equal to 16 are considered
+    to be unreachable. The router periodically distributes information about its routes
+    to its directly connected neighbors using RIPng response messages. Upon receiving
+    RIPng response messages from its neighbor, the router adds the distance between
+    the neighbor and itself (usually one, as in one hop) to the metric of each route
+    received. The router then processes the newly received route entry using the Bellman-Ford
+    algorithm.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When the routers are first initialized, they know only their directly connected
+    routes. This information is passed to all neighbors, processed, and then distributed
+    to their neighbors. Eventually, all IPv6 routes are known by all routers. The
+    routers keep sending response messages periodically to prevent valid routes from
+    expiring. The time it takes for all routers to learn about the new routes is called
+    *convergence time*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Limitations of the protocol
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'RIPng, like the earlier versions of RIP, is primarily designed for use as an
+    IGP in networks of moderate size. The limitations specified for RIP versions 1
+    and 2 apply to RIPng as well. They are described in the following list:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The RIPng diameter is limited*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The longest path to any IPv6 route is limited to a metric of 15 when propagated
+    with RIPng. Normally this corresponds with a path over a maximum of 15 hops. The
+    protocol allows for larger costs to be assigned to any link, limiting the number
+    of hops even further. Routes with a metric of 16 or greater are unreachable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Routing loops can cause high convergence time*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When IPv6 routes that are no longer valid are being propagated in a looped environment,
+    RIPng continues to increase the metric by one. The routes would be passed around
+    indefinitely (“counting to infinity”). The mechanism of limiting the metric to
+    16 prevents this from happening. The routes will circle until they reach the maximum
+    metric and are eventually eliminated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The metric does not reflect line speed*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: RIPng uses a fixed metric normally set to one for each link crossed. A route
+    cannot be chosen based on bandwidth or real-time parameters such as measured delay,
+    load, or reliability.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Changes in topology and preventing instability
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: A change in topology happens when a route is newly added or has gone down. Newly
+    added routes are advertised within the next response message sent by the router
+    having the direct connection to that route. Its neighbors process the route and
+    pass it on to their neighbors. Eventually, all routers know about the newly added
+    route.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What happens if a route goes down or a router crashes? These routes will eventually
+    time out, as they are no longer being advertised. The questions are just how long
+    this process will take and whether this time is acceptable for the network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In certain scenarios, RIP has serious limitations. To overcome some of these
+    limitations, two processes have been defined: with *split horizon* a router never
+    advertises a route back over its next hop interface. An additional option is *split
+    horizon with poison reverse*. With this option, a router always advertises a route
+    back over its next hop interface with a metric of 16\. Although RIPng supports
+    IPv6, we do not recommend using it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: OSPF for IPv6 (OSPFv3)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: OSPF for IPv6 modifies the existing OSPF for IPv4 to support IPv6\. The fundamentals
+    of OSPF for IPv4 remain unchanged. Some changes have been necessary to accommodate
+    the increased address size of IPv6 and the changes in protocol semantics between
+    IPv4 and IPv6\. OSPF for IPv6 is defined in RFC 5340, which emphasizes the differences
+    between OSPF for IPv4 and OSPF for IPv6\. It contains a large number of references
+    to the documentation of OSPF for IPv4, which makes it hard to read.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview of OSPF for IPv6
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'OSPF for IPv4 (OSPFv2) is standardized in RFC 2328\. In addition to this document,
+    several extensions to OSPF have been defined. RFC 1584 describes IPv4 multicast
+    extensions to OSPF. RFC 3101 adds Not-So-Stubby Areas (NSSAs) to OSPF. RFC 5340
+    modifies OSPF to support the exchange of routing information for IPv6\. OSPF for
+    IPv6 has a new version number: version 3.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: OSPF is classified as an IGP, which are used within autonomous systems. It was
+    designed to overcome some of the limitations introduced by RIP, such as the small
+    diameter, long convergence time, and a metric that does not reflect the characteristics
+    of the network. In addition, OSPF handles a much larger routing table to accommodate
+    large number of routes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Differences between OSPF for IPv4 and OSPF for IPv6
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Most of the concepts of OSPF for IPv4 have been retained; following is a brief
+    overview of the changes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Protocol processing per-link, not per-subnet*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 connects interfaces to links. Multiple IP subnets can be assigned to a
+    single link, and two nodes can talk directly over a single link even if they do
+    not share a common IP subnet. OSPF for IPv6 runs per-link instead of per-subnet.
+    The terms *network* and *subnet* used in OSPF for IPv4 should be replaced with
+    the term *link*, i.e., an OSPF interface now connects to a link instead of an
+    IP subnet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Removal of addressing semantics*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 addresses are no longer present in OSPF packet headers. They are only allowed
+    as payload information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Router-LSA and Network-LSA do not contain IPv6 addresses. OSPF Router ID, Area
+    ID, and Link State ID remain at 32 bits, so they cannot take the value of an IPv6
+    address. Designated Routers (DRs) and Backup Designated Routers (BDRs) are now
+    always identified by their Router ID and not their IP address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Flooding scope*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Each LSA type contains an explicit code to specify its flooding scope. This
+    code is embedded in the LS type field. Three flooding scopes have been introduced:
+    link-local, area, and AS.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Explicit support for multiple instances per link*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multiple OSPF protocol instances can now run over a single link. This allows
+    for separate Autonnomous Systems, each running OSPF, to use a common link. Another
+    use of this feature is to have a single link belong to multiple areas.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Use of link-local addresses*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: OSPF assumes that each interface has been assigned a link-local unicast address.
+    All OSPF packets use the link-local address as the Source address. The routers
+    learn the link-local addresses of all their neighbors and use these addresses
+    as the next hop address. Packets sent on virtual links, however, must use either
+    the global or local IP address as the source for OSPF packets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Authentication*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because OSPF for IPv6 runs over IPv6, it relies on the IP Authentication Header
+    and the IP Encapsulating Security Payload to ensure integrity and authentication
+    of routing exchanges. The authentication of OSPF for IPv4 has been removed. One
+    integrity check remains, which comes in the form of the checksum that is calculated
+    over the entire OSPF packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*OSPF packet format changes*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: See the section [Encapsulation in IP datagrams](ch05.html#encapsulation_in_ip_datagrams
+    "Encapsulation in IP datagrams").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*LSA format changes*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Type 3 (Summary Link) has been renamed Inter-Area-Prefix-LSA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Type 4 (AS Summary Link) has been renamed Inter-Area-Router-LSA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Two new LSAs carry IPv6 prefix information in their payload. Link-LSA (type
+    8) carries the IPv6 address information of the local links, and Intra-Area-Prefix-LSA
+    (type 9) carries the IPv6 prefixes of the router and network links.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For other changes, such as Link State ID and the Options field, see the section
+    “The Link State Database.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Handling unknown LSA types*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instead of simply discarding them, OSPF for IPv6 introduces a more flexible
+    way of handling unknown LSA types. A new LSA handling bit has been added to the
+    LS Type field to allow flooding of unknown LSA types.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Stub area support*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The concept of stub areas has been retained in OSPF for IPv6\. An additional
+    rule specifies the flooding of unknown LSAs within the stub area.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encapsulation in IP datagrams
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The routers use OSPF packets to exchange LSA information and to establish and
+    maintain neighbor relations (adjacencies). OSPF packets are directly encapsulated
+    in IPv6, specified by protocol number 89 in the Next Header field of the IPv6
+    header. This means that OSPF does not run over TCP or UDP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: OSPF doesn’t use fragmentation, therefore relying entirely on IP fragmentation
+    when sending packets larger than the MTU. Fragmentation should be avoided whenever
+    possible. Potentially large OSPF packets such as Database Description packets
+    or Link State Update packets can easily be split into multiple packets by OSPF
+    itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'OSPF messages normally use the link-local IPv6 address of the outgoing interface
+    as their Source addresses. The exceptions are messages sent on a virtual link.
+    They use the local or global unicast address of the virtual link as their source.
+    Depending on the situation, OSPF messages can be sent as a unicast to a specific
+    neighbor or as a multicast to multiple neighbors. The following two multicast
+    addresses are set aside for this purpose:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*AllSPFRouters (* `ff02::5`*)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All routers running OSPF must listen to this multicast address. Hello packets
+    are always sent to this address, with the exception of nonbroadcast-capable networks.
+    This address is also used for some packets during LSA flooding.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*AllDRouters (* `ff02::6`*)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both the DR and the BDR on a multiaccess medium must listen to this multicast
+    address. This address is used for some packets during LSA flooding.
+  prefs: []
+  type: TYPE_NORMAL
+- en: OSPF packets sent to the multicast address have link-local scope, and their
+    IPv6 hop limit is set to 1\. They will never be sent over multiple hops.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Support for multiple address families
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: In the original OSPFv3 specification, there was no support for IPv4\. This means
+    that in a dual-stacked network you have to run OSPFv2 for IPv4 and OSPFv3 for
+    IPv6\. OSPFv2 has some limitations, especially for mobile operations. OSPFv3 can
+    overcome some of these limitations. RFC 5838, “Support of Address Families in
+    OSPFv3,” adds multiprotocol support for OSPFv3\. With this RFC implemented, you
+    can run two instances of OSPFv3, one for IPv4 and one for IPv6\. Each OSPFv3 instance
+    maintains its own adjacencies, link state database, and shortest path computation.
+    The protocols are differentiated by using the Instance ID field in the packet
+    header. Address-family enabled routers can establish peer relations based on IPv6
+    link-local addresses and advertise IPv4 routes. This way IPv4 routers in different
+    subnets can peer with each other through the IPv6 network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The alternative to this choice is to use IS-IS (described next), which also
+    has multiple address family support. Some larger organizations have chosen to
+    migrate their OSPFv2 environment to IS-IS for this reason, to have one protocol
+    to manage their transitional dual-stack network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Routing IPv6 with IS-IS
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: IPv6 support with IS-IS is defined in RFC 5308\. This document is based on the
+    specifications for integrated IS-IS as defined in RFC 1195\. Without in-depth
+    knowledge of integrated IS-IS, the IPv6 extension cannot be understood.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IS-IS originally defines the exchange of routing information between *Intermediate
+    Systems* (ISs, otherwise known as routers) for the OSI network layer protocols
+    *CLNP* (*Connectionless Network Protocol*) and *CONP* (*Connection-Oriented Network
+    Protocol*). Other protocols use other routing protocols. Having separate routing
+    protocols for each network layer is sometimes referred to as “ships in the night.”
+    Each routing protocol uses its own resources, such as CPU and memory, and therefore
+    operate independent from each other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Integrated IS-IS is an interior routing protocol based on link state updates.
+    OSPF and IS-IS have many similarities: if you know one, the other is easy to grasp.
+    OSPF runs within an AS, and i/IS-IS runs within a routing domain.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Integrated IS-IS provides for the inclusion of variable-length fields (Type,
+    Length, Value fields, or TLVs) in all IS-IS packets (Hello, LSP, and SNP). Relevant
+    addressing information is stored in TLV fields. Hello packets and LSP packets
+    carry a field specifying the network layer protocols. Each supported network layer
+    protocol is specified by its NLPID, assigned by ISO. The value of the IPv6 NLPID
+    is 142 (`0x8E`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The RFC defines two new TLVs for IPv6\. They are described in the following
+    list:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The IPv6 Reachability TLV (type 236)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Defines the IPv6 prefix advertised within L1-LSP and L2-LSP. Within an L2-LSP,
+    it can also be used to advertise an IPv6 prefix external to the routing domain
+    by setting the external bit in the Control field. The following fields make up
+    this TLV: Prefix Length, IPv6 Prefix, Metric (4 bytes), and the Control field.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IPv6 Interface Address TLV (type 232)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defines the IPv6 addresses of one or more interfaces of the router. It is advertised
+    in Hello packets, L1-LSP, and L2-LSP. For Hello packets, it must contain the link-local
+    IPv6 address assigned to the interface that is sending the Hello packet. In LSP,
+    it must contain the global/unique-local addresses assigned to the router.
+  prefs: []
+  type: TYPE_NORMAL
+- en: EIGRP for IPv6
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Enhanced Interior Gateway Protocol (EIGRP) is an interior routing protocol (IGP)
+    developed by Cisco Systems, Inc. It runs in an autonomous system called EIGRP
+    domain. The main objective of EIGRP was to eliminate limitations of a distance
+    vector routing protocol (see the discussion of RIP, earlier in this section) without
+    developing another link state based protocol. Link state protocols with their
+    complexity and database demand higher CPU performance and more memory of the routers.
+    EIGRP was therefore developed as a hybrid protocol combining the best of both
+    worlds. It uses a so-called *Diffuse Update Algorithm (DUAL)* to calculate the
+    routes. It allows for fast convergence and ensures loop-free operations at every
+    instant throughout route computation. Only routers affected by a change are involved.
+  prefs: []
+  type: TYPE_NORMAL
+- en: EIGRP has always supported different network layer protocols. For each network
+    layer protocol, EIGRP runs a separate instance in a “ships in the night” fashion.
+    There are modules for IPv4, IPX, Appletalk, and now also for IPv6\. The basic
+    functions for all protocols are the same. The semantics of the different protocols
+    are implemented using protocol-dependent TLVs (Type, Length, Value) fields.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cisco is opening up EIGRP as an open stack. It is in draft status at the time
+    of writing. It remains to be seen if it is standardized and if other vendors are
+    picking up on it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BGP-4 Support for IPv6
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There is no actual BGP for IPv6\. The IPv6 support derives from the capability
+    of BGP-4 to exchange information about network layer protocols other than IPv4\.
+    These multiprotocol extensions of BGP-4 are defined in RFC 4760\. The base RFC
+    that defines BGP-4 is RFC 4271\. BGP-4 is the primary interdomain routing protocol
+    used in the Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BGP-4 overview
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Each AS runs its interior routing protocol (RIP, OSPF, etc.) to distribute all
+    routing information within the AS. BGP is an exterior routing protocol whose primary
+    function is to exchange information about the reachability of networks between
+    Autonomous Systems. Each AS receives a unique AS number assigned by the numbering
+    authority, such as IANA and RIRs like ARIN, RIPE NCC etc.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BGP messages are carried on top of TCP connections, which can be established
+    over either IPv4 or IPv6\. The source and destination IP addresses of the datagram
+    depend on the peer configuration. They are always unicast. BGP connections use
+    the well-known TCP port 179\. Remember that only one TCP connection is established
+    between two peering routes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BGP Multiprotocol Extension for IPv6
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'BGP-4 carries only three pieces of information that are truly IPv4-specific:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`NLRI` (feasible and withdrawn) in the `UPDATE` message contains an IPv4 prefix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`NEXT_HOP` path attribute in the `UPDATE` message contains an IPv4 address.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: BGP Identifier is in the `OPEN` message and in the `AGGREGATOR` attribute.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To make BGP-4 available for other network layer protocols, the multiprotocol
+    NLRI and its next-hop information must be added. RFC 4760 extends BGP to support
+    multiple network layer protocols. IPv6 is one of the protocols supported, as emphasized
+    in a separate document (RFC 2545). To accommodate the new requirement for multiprotocol
+    support, BGP-4 adds two new attributes to advertise and withdraw multiprotocol
+    NLRI. The BGP Identifier stays unchanged. BGP-4 routers with IPv6 extensions therefore
+    still need a local IPv4 address. To establish a BGP connection exchanging IPv6
+    prefixes, the peering routers need to advertise the optional parameter BGP capability
+    to indicate IPv6 support. BGP connections and route selection remain unchanged.
+    Each implementer needs to extend the RIB to accommodate IPv6 routes. Policies
+    need to take IPv6 NLRI and next-hop information into consideration for route selection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An `UPDATE` message advertising only IPv6 NLRI sets the unfeasible route length
+    field to 0 and carries no IPv4 NLRI. All advertised or withdrawn IPv6 routes are
+    carried within the `MP_REACH_NLRI` and `MP_UNREACH_NLRI`. The `UPDATE` must carry
+    the path attributes `ORIGIN` and `AS_PATH`; in IBGP connections it must also carry
+    `LOCAL_PREF`. The `NEXT_HOP` attribute should not be carried. If the `UPDATE`
+    message contains the `NEXT_HOP` attribute, the receiving peer must ignore it.
+    All other attributes can be carried and are recognized.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An `UPDATE` message can advertise both IPv6 NLRI and IPv4 NLRI having the same
+    path attributes. In this case, all fields can be used. For IPv6 NLRI, however,
+    the `NEXT_HOP` attribute should be ignored. IPv4 and IPv6 NLRI are separated in
+    the corresponding RIB.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Routing Protocol Choices for Network Designs with IPv6
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: While creating your network design for your future network including IPv6, you
+    have many choices to make. Take your time to analyze and understand the new features
+    of IPv6, because only then can you unfold its potential. If you simply try to
+    mirror your IPv4 designs to the IPv6 world, you lose the opportunity to create
+    networks that will not only be ready to support similar network services, but
+    which scale to support future applications and services.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Routing principles in general are not different in an IPv6 network. We have
+    some features that should optimize routing efficiency, such as a fixed length
+    IPv6 header, the use of Extension headers that are only inserted if the options
+    are needed, and the fact that IPv6 routers do not fragment anymore. We can eventually
+    use the flow label to optimize data flows (once the community has agreed on a
+    common practice).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The original plan for IPv6 was to not allocate Provider Independent (PI) addresses.
+    It was an early design goal for IPv6 to not only solve the address situation,
+    but also the problem with overflowing Internet routing tables. So the IPv6 address
+    space is distributed to the RIRs based on geography in order to keep the root
+    routing tables as small as possible. However, it turned out that the zero PI space
+    wasn’t a sustainable policy in the real world. So we are back to having PI space,
+    which partially breaks the hierarchical model based on geography and thereby creates
+    more entries in global routing tables. Also, the IPv6 routing tables do not contain
+    32-bit address entries, but 128-bit address entries. And during the transition
+    time in dual-stack networks, routers will maintain two routing tables, one for
+    IPv4 and one for IPv6\. The vendors will have to make sure that forwarding is
+    efficient, done in hardware, and that the routers make efficient use of the resources
+    so the routing tables use the minimum possible memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To summarize the information about the different routing protocols, we provide
+    the following overview.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For IPv6 networks, the following IGPs are available:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*RIPng (RFC 2080)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: RIP is a distance-vector protocol. It uses the Bellman-Ford algorithm. It is
+    an easy-to-use protocol but it is far less efficient than OSPF and IS-IS. It has
+    all the limitations that RIPv4 always had, such as a limited diameter, routing
+    loops can create long convergence times, and the metrics don’t represent line
+    speeds because they are based on hop counts. It is not a recommended routing protocol
+    for enterprise networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*OSPFv3 (RFC 5340)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: OSPFv3 is a link-state based protocol. It uses the Dijkstra Algorithm to calculate
+    a tree of shortest paths (SPF). It uses link-local addresses to exchange routing
+    information (which is very helpful in the case of renumbering) and OSPFv2 authentication
+    was removed, because it now uses standard IPv6 authentication. OSPFv3 as defined
+    in RFC 5340 runs as a separate process. You still need OSPFv2 to manage your IPv4
+    network and each version maintains its separate routing tables. RFC 5838 defines
+    extensions that support multiple address families in OSPFv3\. At the time of writing,
+    there is limited vendor support. Ask for the vendor’s roadmaps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*IS-IS (RFC 5308)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IS (Intermediate System) is OSI’s term for router. IS-IS is a link-state protocol
+    and also uses the Dijkstra Algorithm. It is an ISO protocol and does not rely
+    on IP to exchange routing information. It is similar to OSPF but is considered
+    to be easier to configure and manage by many administrators. IPv6 is fully integrated,
+    and does not run as a separate process like in the current OSPF versions. For
+    many years it has mainly been used in provider networks and wasn’t so common in
+    the United States. In the last years it became more common and has started to
+    be used more and more in the enterprise space.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*EIGRP for IPv6*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: EIGRP was developed by Cisco Systems. It is a hybrid protocol taking the best
+    of both the distance-vector and link-state based world and is based on the Diffuse
+    Update Algorithm (DUAL). It runs as a separate process, so to manage IPv4 and
+    IPv6 two instances must be used. For larger environments we recommend the use
+    of OSPF or IS-IS. Besides being more scalable, EIGRPv6 is currently only supported
+    on Cisco gear, which creates a vendor lock-in and can also cause delays when updates
+    are necessary, which are often faster in a competitive multivendor-supported standard.
+    Cisco is opening up EIGRP and it is in draft status for standardization. It remains
+    to be seen if it will be adopted by other vendors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For your dual-stack network of the future the choices are most probably OSPFv2
+    and OSPFv3 versus IS-IS. RIPng doesn’t scale in enterprise networks, and EIGRP
+    is currently a proprietary solution that comes with a vendor lock-in.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are probably not any real technically based pros or cons for OSPF versus
+    IS-IS. Some companies decide to run both OSPF versions and have no issue with
+    that. As multifamily support for OSPFv3 is on the horizon, this may become another
+    option. Other companies prefer to migrate their OSPFv2 to IS-IS in order to have
+    one single instance in the future. We expect IS-IS to become more and more popular
+    in enterprise multiprotocol environments. Having one single instance also means
+    that IPv4 and IPv6 are sharing fate. If you have a clear requirement that the
+    routing of IPv4 and IPv6 should be independent of each other, two instances of
+    OSPF may be your choice. The routing protocol decision will also be influenced
+    by other factors such as building new know-how if you want to integrate IS-IS
+    and have used OSPF so far. You will also have to learn about OSPFv3, but the difference
+    to OSPFv2 is not so big. It also depends on corporate culture and market factors
+    such as available know-how and resources on the market.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quality of Service
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In the beginning, the Internet was designed to be a simple communications platform,
+    mainly used to support file transfer and email. Over the past 25+ years, it has
+    grown to be a very complex global communications infrastructure with a multitude
+    of applications and services. IPv4 is based on a simple packet switching model,
+    delivering packets with best effort and no guarantee for delivery. TCP adds guaranteed
+    delivery but has no options to control parameters such as delay and jitter or
+    to do bandwidth allocation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multimedia services (such as voice over IP and videoconferencing) can have significant
+    bandwidth demands and are often very sensitive to timely delivery. The Type of
+    Service byte (ToS) in the IPv4 header was designed to provide prioritized treatment
+    of certain traffic. However, it was never widely implemented, one reason being
+    that its use would delay the forwarding of packets on routers. As there were almost
+    no real-time services in those days, there was little pressure to find better
+    solutions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The development of IPv6, combined with the growing demand for real-time services—and,
+    therefore, Quality of Service (QoS) features—was an opportunity to look for other
+    solutions. Despite the availability of several different approaches, the topic
+    of QoS is still a matter of research, and there are many ideas under development.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let me begin by saying that implementing QoS with IPv6 is not really different
+    from implementing QoS with IPv4\. This section aims to give a short introduction
+    into QoS for readers that are not familiar with the concepts and then discuss
+    the features in IPv6 that support QoS.
+  prefs: []
+  type: TYPE_NORMAL
+- en: QoS Basics
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The default IP model treats all packets alike. They are all forwarded with best-effort
+    treatment according to the *first-come, first-served* principle. Which path a
+    packet takes through the network depends on the available routers, routing tables,
+    and general network load.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'QoS protocols have the task of providing different data streams with priorities
+    and guaranteeing qualities such as bandwidth and delay times. There are currently
+    two main architectures: Integrated Services (IntServ) and Differentiated Services
+    (DiffServ). Both architectures use traffic policies and can be combined to allow
+    for QoS in the LAN as well as in the WAN.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Traffic policies can be used to make the transmission of data dependent on certain
+    criteria—for example, whether there are enough resources available to forward
+    the data according to its QoS requirements. Traffic policies can also monitor
+    data streams and make adjustments or restrictions if necessary. Besides ensuring
+    QoS requirements for delay-sensitive traffic, they can also be used for commercial
+    reasons, such as controlling cost depending on different service levels.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Integrated Services
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The Integrated Services architecture (IntServ) is based on the paradigm that
+    bandwidth and all related resources per flow are reserved on an end-to-end basis.
+    This presupposes that routers store information about flows and analyze each packet
+    to determine whether it belongs to a specific flow in order to forward the packet
+    according to the criteria for that specific flow.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RSVP (Resource Reservation Protocol, RFC 2205) is part of the IntServ architecture.
+    RFC 2210, “The Use of RSVP with IETF Integrated Services,” describes the use of
+    RSVP with IntServ. RSVP is a signaling protocol used to reserve bandwidth and
+    other QoS resources across an IP network. IntServ combined with RSVP can be complex
+    to implement and, because of its limited scalability, is inadequate to offer a
+    general QoS solution for the global Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To find an updated list of IntServ service and parameter names and their associated
+    values, go to [http://bit.ly/1na8Lmh](http://bit.ly/1na8Lmh).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you are interested in further reading about RSVP and other QoS signaling
+    protocols, refer to the informational RFC 4094, “Analysis of Existing Quality-of-Service
+    Signaling Protocols.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: Differentiated Services
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: While IntServ offers the capability to allocate bandwidth to different flows,
+    the Differentiated Services (DiffServ) architecture was designed to make a less
+    granular differentiation of classes in order to increase its scalability and usability
+    in large networks and in the Internet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Differentiated Services is specified in RFCs 2474 and 2475\. RFC 2474, “Definition
+    of the Differentiated Services Field (DS Field) in the IPv4 and IPv6 Headers,”
+    specifies the DS field. This is implemented in the ToS field in the IPv4 header
+    and the Traffic Class field in the IPv6 header. The DS field is used by DiffServ
+    routers to determine the QoS forwarding requirements of packets. Communicating
+    nodes can categorize their communication through a so-called *Per-Hop Behavior*
+    (*PHB*). Based on the PHB, packets receive specific treatment on DiffServ routers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A *DiffServ (DS) domain* is a contiguous group of DS routers that work with
+    a common service policy implemented on all routers. A DS domain is defined by
+    DS boundary routers. The boundary routers classify incoming data streams and ensure
+    that all packets traversing the domain are labeled appropriately and use a Per-Hop
+    Behavior from the set available for the domain. Routers within the domain choose
+    the forwarding rules based on the DiffServ values in packets, which they map to
+    the corresponding PHBs. The Differentiated Services Codepoint (*DSCP*; refer to
+    [Figure 5-6](ch05.html#format_of_the_ds_field "Figure 5-6. Format of the DS field"),
+    shown later) value can use either the default mapping (`DSCP=0`) or an individually
+    configured mapping for the domain. A DS domain usually consists of one network
+    or a set of networks, which constitute an administrative unit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A *DS region* is a set of contiguous DS domains. DS regions can ensure DS services
+    for domain spanning paths. The single domains can use individual PHB definitions
+    and PHB-codepoint mappings internally. Between the domains within a region, Traffic
+    Conditioners are responsible for providing correct translation of the different
+    PHBs and mappings. If the policies, PHB groups, and codepoint mappings are the
+    same in all the domains within the region, no Traffic Conditioners are needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Packet classifiers* choose packets from a data stream based on information
+    in the packet headers and according to predefined rules. There are two types of
+    classifiers: the Behavior Aggregate classifier (BA) classifies packets based on
+    the DS field, and the Multi Field classifier (MF) classifies packets based on
+    either different header fields or a combination of header fields, such as Source
+    or Destination address, DS field, protocol number, source or destination port,
+    or information such as incoming interface.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: QoS in IPv6 Protocols
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The designers of IPv6 have focused not on requiring specific mechanisms for
+    QoS, but on offering as much flexibility as possible to support different QoS
+    mechanisms. This section describes the elements in the IPv6 header and the Extension
+    headers that can be used for QoS services.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 Header
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'There are two fields in the IPv6 header that can be used for QoS: the Traffic
+    Class and the Flow Label field.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Traffic Class
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: The use of the 1-byte Traffic Class field is specified in RFC 2474\. As already
+    mentioned, this RFC introduces the term *DS field* for the Traffic Class field.
+    The goal of this specification is that DiffServ routers have a known set of DS
+    routines, which are determined by the value in the DS field. These DSCP values
+    are mapped to Per-Hop Behaviors (PHB) and can be either performance- or class-based.
+    [Figure 5-6](ch05.html#format_of_the_ds_field "Figure 5-6. Format of the DS field")
+    shows the DS field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the DS field](images/ipv6_0506.png)Figure 5-6. Format of the DS
+    field'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The DSCP field within the DS field (the six most significant bits of the DS
+    field) is used for the codepoint, which specifies the PHB. With this field, 64
+    different codepoints can be specified. This codepoint pool has been divided into
+    three parts to control the assignment of PHBs. [Table 5-1](ch05.html#the_codepoint_pools
+    "Table 5-1. The codepoint pools") shows the division of the DSCP pools.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 5-1. The codepoint pools
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Pool | Codepoint space | Assignment policy |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | xxxxx0 | Standard use |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2 | xxxx11 | Experimental/local use |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 3 | xxxx01 | Experimental/local use; potential standard use in the future
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: A pool of 32 recommended codepoints (pool 1) is assigned through formal standardization;
+    a pool of 16 more codepoints (pool 2) is reserved for experimental or local use;
+    the final pool of 16 codepoints (pool 3) is initially available for experimental
+    or local use but should be used as an overflow pool if pool 1 is used up.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The PHBs specify how packets should be forwarded. A default PHB denominated
+    by an all-zeros DS codepoint must be provided by any DS router. The default PHB
+    describes the common, best-effort forwarding behavior available in existing routers.
+    Such packets are forwarded without adhering to any priority policy; in other words,
+    the network will deliver as many of these packets as possible as soon as possible,
+    based on existing resources such as memory or processing capacity. Packets received
+    with an undefined codepoint should also be forwarded as though they were marked
+    for the default behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The DS field does not specify PHBs; it specifies codepoints. The number of codepoints
+    is limited to 64, whereas the number of PHBs is unlimited. There are recommended
+    mappings of codepoints to PHBs. These mappings can be defined individually within
+    administrative domains, which makes the number of possible PHBs unlimited. The
+    coding rules for PHB IDs are specified in RFC 3140, “Per Hop Behavior Identification
+    Codes.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 2597 defines a PHB group called *Assured Forwarding (AF)*. Assured Forwarding
+    PHB group is a means for a provider DS domain to offer different levels of forwarding
+    assurances for IP packets received from a customer DS domain. Four AF classes
+    are defined, where each AF class is in each DS node allocated a certain amount
+    of forwarding resources (buffer space and bandwidth). IP packets that wish to
+    use the services provided by the AF PHB group are assigned by the customer or
+    the provider DS domain into one or more of these AF classes according to the services
+    that the customer has subscribed to. RFC 3246 defines a PHB called *Expedited
+    Forwarding (EF)*. The intent of the EF PHB is to provide a building block for
+    low loss, low delay, and low jitter services.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Recommended codepoints and PHB IDs are assigned by IANA. The list of codepoints
+    can be found at [http://www.iana.org/assignments/dscp-registry](http://www.iana.org/assignments/dscp-registry),
+    and the list of PHB IDs at [http://www.iana.org/assignments/phbid-codes](http://www.iana.org/assignments/phbid-codes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 5-7](ch05.html#the_ds_field_in_a_trace_file "Figure 5-7. The DS field
+    in a trace file") shows the DS field in a trace file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The DS field in a trace file](images/ipv6_0507.png.jpg)Figure 5-7. The DS
+    field in a trace file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is a RIPng (RIP Next Generation) Response from our router. It is sent to
+    the RIP Routers Multicast address of `ff02::9`. The DS field is set to `0xE0`
+    (decimal notation `224`, binary notation `1110 0000`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The remaining two bits of the DS field (see [Figure 5-6](ch05.html#format_of_the_ds_field
+    "Figure 5-6. Format of the DS field")) are not used according to RFC 2474, and
+    are specified in RFC 3168, “The Addition of Explicit Congestion Notification (ECN)
+    to IP.” They provide four possible codepoints (`00` to `11`) that are used for
+    Congestion Notification. Traditionally the overload of a router could only be
+    determined based on packet loss. With the use of these Congestion Notification
+    codepoints, a router can signal overload before packet loss. This method is similar
+    to Frame Relay’s use of BECNs and FECNs (Backwards and Forwards Explicit Congestion
+    Notification, respectively).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The two bits are used as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '00: Packet does not use ECN.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '01/10: Sender and receiver are ECN-enabled.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '11: Router signals congestion.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It should be mentioned that it has become more and more common that even cheaper
+    switches can interpret the DSCP values and put packets in different queues as
+    a consequence.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Flow Label
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: The 20-bit Flow Label field in the IPv6 header may be used by a source to label
+    packets for which it requests special handling by the IPv6 routers, such as nondefault
+    QoS or real-time service. A flow label is assigned to a flow by the flow’s source
+    node. Between a sender and a receiver, there can be multiple flows active in parallel,
+    along with the exchange of packets with no QoS requirements. New flow labels must
+    be chosen randomly from the range `00001` to `FFFFF`. The purpose of the random
+    allocation is to make any combination of bits within the Flow Label field suitable
+    for use as a hash key by routers for looking up the state associated with the
+    flow.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hosts or routers that do not support the functions of the Flow Label field (most
+    of today’s applications, which will not be modified to use the Flow Label, or
+    which do not need QoS handling) are required to set the field to all zeros when
+    sending a packet, to pass the field on unchanged when forwarding a packet, and
+    to ignore the field content when receiving a packet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All packets belonging to the same flow must be sent with the same IP Source
+    address, IP Destination address, identical source and destination ports, and a
+    nonzero flow label. If any of these packets includes a Hop-By-Hop Options header,
+    they all must be originated with the same Hop-By-Hop Options header contents (excluding
+    the Next Header field of the Hop-By-Hop Options header, which is allowed to differ).(((“Hop-by-Hop
+    Options header”))) If any packet includes a Routing Extension header, they all
+    must be created with the same contents in all Extension headers up to and including
+    the Routing Extension header (again excluding the Next Header field in the Routing
+    Extension header). The routers or receivers are allowed to verify that these conditions
+    are satisfied. If a violation of these consistency rules is detected, a corresponding
+    error message is returned, indicating the exact location of the rule violation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The handling of the flow label on routers is efficient, and when IPsec is used,
+    it is always available because the IPv6 header is not encrypted by ESP or authenticated
+    by AH (in transport mode). This implies that the integrity of the information
+    in the DS field cannot be guaranteed by IPsec.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 6437, “IPv6 Flow Label Specification,” is a new specification of the Flow
+    Label. A *flow* is defined as a sequence of packets from a sender to a specific
+    unicast, anycast, or multicast address labeled as a flow by the sender. A flow
+    is not necessarily associated with a transport connection. A host running multiple
+    sessions with another host should be able to assign a different flow label to
+    each session. Where the original specification defines a flow based on five criteria,
+    the new specification defines a flow based on three criteria (Source and Destination
+    address and Flow Label). The reason for this is that these three fields are always
+    available for examination by routers, whereas the source and destination port
+    number can be hidden by ESP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The use of the Flow Label
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: The Flow Label is the only new field in the IPv6 header. 20 Bits are set aside,
+    but in practice it is not used. There was a lot of debate in the IETF about the
+    best use of this label and, partially through these uncertainties and other more
+    pressing priorities, it has been ignored by most vendors. RFC 6294, “Survey of
+    Proposed Use Cases for the IPv6 Flow Label,” discusses the variety of proposals
+    that have been published, and whether they are compatible with the existing standard.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the meantime two specifications were published that offer alternative uses.
+    RFC 7098, “Using the IPv6 Flow Label for Load Balancing in Server Farms,” describes
+    how the flow label can be used for load balancing and how it can enhance layer
+    3/4 load balancers. RFC 6438, “Using the IPv6 Flow Label for Equal Cost Multipath
+    Routing and Link Aggregation in Tunnels,” describes how to use the flow label
+    for load balancing by equal cost multipath routing and for link aggregation, particularly
+    for IP-in-IPv6 tunneled traffic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IPv6 Extension header
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The Hop-By-Hop Options header can be used to transport a maximum of one router
+    alert signaling message per IP packet (RFC 2711) to every router on the path of
+    QoS-sensitive traffic, indicating that each router should specifically process
+    the IP packet. The use of the Hop-By-Hop Options header allows fast processing
+    by the router because no analysis of higher-level protocol headers is required.
+    Routers that are unable to recognize the router alert option type are required
+    to ignore this option and continue processing the header. Also, routers are not
+    allowed to change the option while the packet is in transit. Router alert types
+    that have been defined so far are shown in [Table 5-2](ch05.html#currently_defined_router_types
+    "Table 5-2. Currently defined router types").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 5-2. Currently defined router types
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Value | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 0 | IP packet contains a Multicast Listener Discovery message. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | IP packet contains an RSVP message. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2 | IP packet contains an Active Networks message—the sender is attempting
+    to load a program into the router for executing customized functions. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 3–35 | IP packet contains an Aggregated Reservation Nesting Level (RFC 3175,
+    RSVP). |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 36–65,535 | Reserved to IANA for future use. |'
+  prefs: []
+  type: TYPE_TB
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A detailed description of these headers can be found in [Chapter 3](ch03.html
+    "Chapter 3. The Structure of the IPv6 Protocol"). An updated list of router alert
+    types can be found at [http://www.iana.org/assignments/ipv6-routeralert-values](http://www.iana.org/assignments/ipv6-routeralert-values).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Provisioning
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Two main network services are indispensable when it comes to operating an IP
+    network, DHCPv6 for addressing systems and DNS for locating services. I expect
+    DHCPv6 to be widely used in IPv6 enterprise networks, even though IPv6 provides
+    SLAAC. The reason is that most organizations want to have the possibility to log
+    and account for address use. This is not easily doable when using SLAAC. And when
+    running IPv6 networks with the long addresses and even more while operating dual-stack
+    networks and expecting applications running over both protocol versions to be
+    accessible for all users, DNS becomes more important than ever.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DHCP
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: DHCP is widely used to configure hosts with their IPv4 addresses and additional
+    information. If you have an IPv6 network, you do not need DHCP to configure your
+    hosts with address information. The Stateless Address Autoconfiguration mechanism
+    (SLAAC) will configure your hosts for their IPv6 addresses without the need to
+    set up a DHCP server. All you need to do is configure your IPv6-enabled routers
+    with the prefix information for the links to which they are attached. But you
+    might still choose to have DHCP servers in many cases. Host configuration that
+    includes the assignment of IPv6 addresses using DHCP is called *Stateful Address
+    Autoconfiguration* or *Stateful DHCPv6*. Maybe you have a specific IPv6 addressing
+    scheme; or you need dynamic assignment of DNS servers; or you wish to implement
+    dynamic updates to DNS (RFC 2136); or you need traceability-reporting features
+    for the use of your IP addresses. In these cases, you can use DHCP for address
+    configuration. You can also combine SLAAC and DHCPv6 configuration by using SLAAC
+    for the IPv6 address configuration and DHCP servers to provide additional configuration
+    information including DNS server IP addresses, DNS domains, or other DHCPv6 options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 3736 offers an additional configuration option. It defines a Stateless DHCP
+    service for IPv6\. A Stateless DHCP server can configure hosts that already have
+    an IP address with additional information such as DNS or SIP servers. It cannot
+    do address assignment, though. Stateless DHCP is explained later in this chapter,
+    after this section on Stateful DHCPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DHCPv6 and DHCPv4 are independent. If you want to configure hosts with DHCP
+    in a dual-stack network, currently you will need two separate DHCP services running,
+    one for each protocol. In this case, you will also have to watch out for configuration
+    conflicts. In the DHCPv4 world, the client is configured to know whether to use
+    DHCP. In the DHCPv6 world, the Router Advertisement has options to inform the
+    client whether to use DHCP. There may be differing configuration information arriving
+    at the client from different sources, or a node may have multiple interfaces,
+    e.g., one being IPv4-only and one being dual-stacked. DHCPv6 uses a unique identifier
+    (DUID), which does not exist for DHCPv4\. In the realm of DHCPv4, MAC address
+    and client ID resemble the DUID in DHCPv6 but are not synonymous. There is RFC
+    4361, which makes the DUID available for DHCPv4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In RFC 4477, the DHCP working group is further assessing requirements and evaluating
+    solutions, which will allow dual-stack hosts to be configured for both protocols
+    by one or more DHCP server. The RFC describes issues identified with dual IP version
+    DHCP interactions. The most important aspect is how to handle potential problems
+    in clients processing configuration information received from both DHCPv4 and
+    DHCPv6 servers. It includes a possible solution that would be to specify IPv4
+    options for DHCPv6 servers so that in a dual-stack environment you could run a
+    DHCPv6 server and have it also configure IPv4 options for the dual-stack clients.
+    In such a scenario, having DUIDs for DHCPv4 would be helpful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'DHCPv6 is specified in RFC 3315\. All references in this chapter relate to
+    DHCPv6\. For the development of DHCPv6, the following guidelines were originally
+    defined:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It must be possible to combine DHCP and SLAAC.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The configuration of DHCP and the interaction with other mechanisms (e.g., SLAAC)
+    are the responsibility of the administrator.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The clients do not need to be configured manually.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DHCP must be able to configure multiple addresses per interface.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A DHCP server is not needed in every subnet. Relay agents must be able to forward
+    DHCP packets.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A client must be able to deal with multiple DHCP replies coming back from different
+    DHCP servers.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It must be possible to have subnets where only some of the clients are configured
+    by DHCP.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DHCP must be able to do dynamic DNS updates to register allocated addresses
+    in DNS. The administrator can decide to update DNS manually.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DHCP must support and simplify the renumbering of a network.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The DHCPv6 specification includes authentication for DHCPv6 messages, which
+    must be supported on the DHCPv6 client and server. Refer to the respective section
+    on DHCPv6 authentication in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DHCP Terms
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Let us define some common terms used for DHCPv6:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*DHCP Client*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A DHCP client sends requests to a DHCP server to get configuration information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*DHCP Server*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A DHCP server is preconfigured to reply to client requests. It knows the configuration
+    for each client. When it receives a client request, it sends the information back
+    to the client. A DHCP server may or may not be on the same link as the client.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*DHCP Relay Agent*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If there is no DHCP server on the client link, a relay agent must be configured
+    on the client link. The relay agent receives the client request and forwards it
+    to one or more DHCP server(s) on another subnet. When the relay agent receives
+    the answer from the DHCP server, it forwards it to the client.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*DHCP Unique Identifier (DUID)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each DHCP client and server has a DUID. DHCP servers use DUIDs to identify clients
+    for the selection of configuration parameters and in the association of IAs (see
+    below) with clients. DHCP clients use DUIDs to identify a server in messages where
+    a server needs to be identified.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Identity Association (IA)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A collection of addresses assigned to a client. Each IA has an associated Identity
+    Association Identifier (IAID), which is assigned by the client. A client can have
+    multiple IAs—for example, one for each interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Identity Association Identifier (IAID)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An identifier for an IA chosen by the client. Each IA has an IAID, which is
+    chosen to be unique among all IAIDs for IAs belonging to that client.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Transaction ID*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A value used to match requests and replies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'DHCP uses the following multicast addresses:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*All_DHCP_Relay_Agents_and_Servers* (`ff02::1:2`)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All DHCP agents (servers and relays) are members of this multicast group. DHCP
+    clients use this link-scoped multicast address to reach DHCP agents on their link.
+    So clients do not need to know the agent’s link-local address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*All_DHCP_Servers address* (`ff05::1:3`)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All DHCP servers within a site are members of this multicast group. This site-scoped
+    address is used by DHCP relays to reach all DHCP servers within a site. They either
+    do not know the server’s unicast address, or they want to reach all DHCP servers
+    within the site.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following UDP ports are used with DHCPv6:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*UDP port 546—Client port*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Clients listen on port 546 for DHCP messages. DHCP servers and relays use it
+    as the destination port to reach DHCP clients.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*UDP port 547—Server/Agent por*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: DHCP servers and relays listen on port 547 for DHCP messages. DHCP clients use
+    this port as the destination port to reach DHCP servers and relay agents. DHCP
+    relays use this port as the destination port to reach DHCP servers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The message types shown in [Table 5-3](ch05.html#dhcpv6_message_types "Table 5-3. DHCPv6
+    message types") have been specified in RFC 3315.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 5-3. DHCPv6 message types
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Message type | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SOLICIT (1) | Used by clients to locate DHCP servers. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ADVERTISE (2) | Used by servers as a response to Solicit. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| REQUEST (3) | Used by clients to get information from servers. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| CONFIRM (4) | Used by clients to verify that their address and configuration
+    parameters are still valid for their link. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| RENEW (5) | Used by clients to extend the lifetime of their IP address and
+    renew their configuration parameters with their original DHCP server when their
+    lease is about to expire. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| REBIND (6) | Used by clients to extend the lifetime of their address(es)
+    and renew their configuration parameters with any DHCP server when their lease
+    is about to expire and they have not received a reply to their Renew message.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| REPLY (7) | Used by DHCP servers to respond to Solicit messages with a Rapid
+    Commit Option, as well as to Request, Renew, and Rebind messages. A Reply to an
+    Information Request message contains only configuration parameters, but no IP
+    address. A Reply to a Confirm message contains a confirmation that the client’s
+    IP address(es) are still valid for the link (or a Decline). A server sends a Reply
+    as an acknowledgment for a Release or Decline message. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| RELEASE (8) | Used by clients to release their IP address. The message is
+    sent to the server from which the address was received. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| DECLINE (9) | Used by clients to indicate to the server that one or more
+    addresses assigned to them are already in use on the link. This is determined
+    by the client through Duplicate Address Detection (DAD). |'
+  prefs: []
+  type: TYPE_TB
+- en: '| RECONFIGURE (10) | Used by DHCP servers to inform clients that the server
+    has new or updated configuration information. The clients then must initiate a
+    Renew or Information Request message in order to obtain the updated information.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| INFORMATION REQUEST (11) | Sent by clients to request additional configuration
+    parameters (without IP address information). |'
+  prefs: []
+  type: TYPE_TB
+- en: '| RELAY-FORW (12) | Used by DHCP relays to forward client messages to servers.
+    The relay encapsulates the client message in an option in the Relay Forward message.
+    The message can be sent directly to a DHCP server or via other relay agents. If
+    a DHCP message is relayed multiple times, it is encapsulated multiple times. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| RELAY-REPL (13) | Used by DHCP servers to send messages to clients through
+    a relay. The client message is encapsulated as an option in the Relay Reply message.
+    The relay decapsulates the message and forwards it to the client. The Relay Reply
+    message takes the same path back through which the Relay Forward message traveled
+    and may therefore also be encapsulated multiple times if there is more than one
+    relay agent on the path. |'
+  prefs: []
+  type: TYPE_TB
+- en: The DHCP server-initiated configuration exchange is a great new feature. It
+    can be used, for example, when links in the DHCP domain have to be renumbered
+    or when new services or applications have been added and need to be configured
+    on the clients. When services or applications need to be configured on the client,
+    the DHCP server sends out a Reconfigure message (type 10) to the unicast address
+    of each client. A client receiving this message must initiate a Renew or Information
+    Request message exchange to get the updated information. Haven’t we been waiting
+    for this? This is an IPv6 implementation feature that solves a long-standing problem
+    we had with DHCPv4\. It can be done with DHCPv4, but it has rarely been implemented.
+    The IPv4 way of doing this is defined in RFC 3203\. A DHCPv4 server sends a DHCPforcerenew
+    message, which triggers the client to the Renew state in which it tries to renew
+    its lease.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DHCPv6 header format
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The general DHCPv6 header format is much simpler than the one used with DHCPv4\.
+    I describe it next.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Client-server messages
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: All DHCP messages exchanged between server and client have a fixed header with
+    a variable part for options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 5-8](ch05.html#format_of_the_dhcp_header "Figure 5-8. Format of the
+    DHCP header") shows the header format.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Format of the DHCP header](images/ipv6_0508.png)Figure 5-8. Format of the
+    DHCP header'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Message Type field defines the type of message. You saw the list of message
+    types in [Table 5-3](ch05.html#dhcpv6_message_types "Table 5-3. DHCPv6 message
+    types"). For each request, the client generates a new transaction ID and writes
+    it into the Transaction ID field. It is used in all messages relating to this
+    specific request. When troubleshooting DHCP, it is important to check the transaction
+    ID and make sure to associate the corresponding requests and replies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Options are used to provide configuration information and parameters. The options
+    fields have an identical base format, which is shown in [Figure 5-9](ch05.html#dhcp_option_fields
+    "Figure 5-9. DHCP option fields").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![DHCP option fields](images/ipv6_0509.png)Figure 5-9. DHCP option fields'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *Option Code field* defines the type of the option. Find an overview of
+    the available option types in [Table 5-4](ch05.html#dhcp_options "Table 5-4. DHCP
+    options"). The *Option Length field* indicates the length of the option in bytes.
+    The *Option Data field* finally contains the information configured for the option.
+    Its format and length varies depending on the option type.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The options defined in RFC 3315 are a base set of options. In the future, additional
+    options will be defined and specified in separate RFCs. [Table 5-4](ch05.html#dhcp_options
+    "Table 5-4. DHCP options") shows an overview.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 5-4. DHCP options
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Option | Value | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Client Identifier | 1 | Used for the client DUID. A DUID is a unique identifier
+    (described later in this chapter). |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Server Identifier | 2 | Used for the server DUID. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Identity Association for Nontemporary Addresses (IA_NA) | 3 | Used to indicate
+    the IA_NA, the parameters, and the nontemporary addresses associated with it.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Identity Association for Temporary Addresses (IA_TA) | 4 | Used to indicate
+    the IA_TA, the parameters, and the temporary addresses associated to it. All addresses
+    contained in this option are used as temporary addresses by the client (according
+    to RFC 3041, “Privacy Extensions for Stateless Address Autoconfiguration”). |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IA Address | 5 | Used to indicate the addresses associated with an IA_NA
+    or IA_TA. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Option Request | 6 | Used in a message between client and server to identify
+    a list of options. Can be contained in a Request, Renew, Rebind, Confirm, or Information
+    Request message. The server can use this option in a Reconfigure message to indicate
+    which options have been changed or added. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Preference | 7 | Sent by the server to influence the choice of a client for
+    a DHCP server. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Elapsed Time | 8 | Contains the time when the client started the DHCP transaction.
+    Indicated in hundredths of a second. In the first message sent by a client it
+    is set to `0`. Can be used by a secondary DHCP server to detect whether a primary
+    server responds in time. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Relay Message | 9 | Contains the original message in a Relay Forward or Relay
+    Reply message (remember that the original message is encapsulated in a Relay Forward
+    or Reply message). |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Authentication | 11 | Contains information to authenticate the identity and
+    the content of DHCP messages. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Server Unicast | 12 | The server sends this option to the client to indicate
+    that unicast can be used for communication. The option contains the IP address
+    of the DHCP server, which is to be used by the client. |'
+  prefs: []
+  type: TYPE_TB
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can find an updated list of all defined DHCPv6 options at [http://bit.ly/1na92Wj](http://bit.ly/1na92Wj).
+    For general DHCP information refer to the DHCP working group at [http://www.ietf.org/html.charters/dhc-charter.html](http://www.ietf.org/html.charters/dhc-charter.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Relay Agent—server message format
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Relay Agents forward client and server messages if the two are not on the same
+    link. A DHCP message can be forwarded by more than one Relay Agent to one or more
+    server(s). The reply by the server has to follow the same path back through which
+    the original request came in, and it has to be forwarded by the same Relay Agents.
+    [Figure 5-10](ch05.html#header_fields_in_relay_agent_and_server "Figure 5-10. Header
+    fields in Relay Agent and server messages") shows the header fields in the Relay
+    Agent and server messages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Header fields in Relay Agent and server messages](images/ipv6_0510.png)Figure 5-10. Header
+    fields in Relay Agent and server messages'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Relay Forward and Relay Reply messages have the same format and are identified
+    by the value in the *Message Type field*. Type 12 is a Relay Forward message,
+    type 13 a Relay Reply message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *Hop Count field* in a Relay Forward message shows how many Relays have
+    already forwarded this message. Each forwarding Relay increases the value by one.
+    The Relay can be preconfigured with a Hop Count Limit to limit the number of Relays
+    that forward the message. When a Relay receives a message in which the Hop Count
+    has reached the value configured in the Hop Count Limit, it discards the message.
+    The default value for the Hop Count Limit is 32\. In a Relay Reply message, the
+    Hop Count field value is taken from the Hop Count field in the corresponding Relay
+    Forward message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *Link Address field* contains a global IPv6 address. Based on this field
+    in a Relay Forward message, the server can identify the link where the requesting
+    client sits. The RFC also mentions the site-local address as a possible value
+    for this field because the DHCPv6 RFC was published before the site-local address
+    was deprecated. In a Relay Reply message, the value in this field is taken from
+    the corresponding Relay Forward message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *Peer Address field* contains the address of the client or the Relay from
+    which the message was received. This field is copied from the Relay Forward message
+    into the corresponding field in the Relay Reply message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The variable size *Options field* contains a Relay Message Option (option type
+    9). In a Relay Forward message, it contains the client request; in a Relay Reply
+    message, it contains the server reply.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This field can also contain additional information that can be preconfigured
+    on Relay Agents and that they insert when forwarding the message. This is specified
+    in RFC 6422, “Relay-Supplied DHCP Options.” It is described in the section [Relay
+    Agent communication](ch05.html#relay_agent_communication "Relay Agent communication").
+  prefs: []
+  type: TYPE_NORMAL
+- en: DHCP Unique Identifier (DUID)
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Each DHCP client and server has a DHCP Unique Identifier (DUID) that is used
+    to identify each other. A server uses the client DUID to choose the corresponding
+    client configuration to be sent. The DUID has to be unique across all servers
+    and clients and should not be changed after initial assignment. RFC 3315 specifies
+    three different types of DUIDs. Additional types may be specified in the future.
+    A DUID contains a 2-byte type code followed by a variable number of bytes containing
+    the identifier. The three types specified currently are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Link-layer address plus time (DUID-LLT)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Vendor-specific unique ID based on enterprise number (DUID-EN)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Link-layer address (DUID-LL)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Identity Association
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: An *Identity Association* (IA) is an object used by the server and the client
+    to identify and manage a group of addresses. Each IA is identified by a corresponding
+    IAID and contains individual configuration information. A client has at least
+    one IA per interface, which is to be configured by a DHCP server. The client uses
+    the IA to get the right configuration for the interface from the server. Each
+    IA has to be associated to only one interface. It is the client that chooses the
+    IAID, and it must be unique among all IAIDs for IAs belonging to that client.
+    The configuration information of an IA contains one or more IPv6 addresses plus
+    the T1/T2 timers (Renewal and Rebinding timers, explained in [Renew/Rebind](ch05.html#renew_solidus_rebind
+    "Renew/Rebind")).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A DHCP server chooses the configuration information for the IA according to
+    the address allocation policies defined by the administrator. It chooses the configuration
+    based on the following criteria:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The link to which the client is connected
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The DUID of the client
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Other information provided by the options from the client
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Other information taken from the options, which have been added by Relay Agents
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DHCP communication
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: There are different processes in the DHCP communication. There is the client-server
+    interaction and the forwarding of messages over Relay Agents. The following sections
+    describe these processes in more detail. Many processes are similar to DHCPv4,
+    differing only in IPv6-related adaptation. Other processes are new—for instance,
+    the way messages are forwarded over Relay Agents.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Client and server communication
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: A client uses multicast Solicit messages to find a DHCP server. If a client
+    wishes to contact a specific DHCP server, it uses the server DUID in a Server
+    Identifier Option (option type 2). All DHCP servers will receive this message,
+    but only the server specified by the DUID will reply. In some cases, a client
+    can use a unicast address to reach a specific server. This is possible only if
+    the server is configured to send a Server Unicast Option (option type 12) indicating
+    that unicast communication is possible and stating the IP address to be used.
+    In this case, it has to be considered that these unicast messages will not be
+    forwarded over Relay Agents, so any additional configuration done on the Relay
+    Agent will not be inserted into the unicast DHCP messages. If a DHCP server receives
+    a unicast message from a client to which it has not sent the Unicast option, it
+    replies with a Reply message containing the Status Code “use multicast” (option
+    13, code 5).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The client receives one or more Advertise messages in answer to its Solicit
+    message. If it receives more than one, it applies the following criteria to choose
+    a DHCP server:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The message with the highest Server Preference value is preferred.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If there are several messages with an equal Server Preference value, it chooses
+    the one with the preferred configuration.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The client may also choose a message with a lower Server Preference value if
+    it contains more appropriate configuration parameters.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The list of servers and their corresponding Preference values are stored at
+    the client. Should it not receive replies from its preferred DHCP server, it will
+    choose the next one in the list. If a client does not receive an answer from a
+    DHCP server within a certain amount of time, it either initiates a new Discovery
+    process by sending out another Solicit message or ends the configuration and creates
+    an error message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In reply to the Advertise message, the client sends a Request message to one
+    of the DHCP servers including its IA Option, its client DUID, and an Option Request
+    option, which contains the desired DHCP options. The server replies with a Reply
+    message containing the requested options. If the server received the Request forwarded
+    by a Relay Agent in a Relay Forward message, it will reply with a Relay Reply
+    message forwarded over the same Relay Agents like the incoming Request message.
+    The server flags the addresses given out in the Reply message as allocated. If
+    the client receives multiple Replies, it chooses the most appropriate one and
+    uses these addresses. The addresses allocated by other servers through their Advertise
+    messages remain allocated but are not used. They will be reused by the DHCP server
+    when their lifetimes have expired.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The client has to perform Duplicate Address Detection (DAD) for each address
+    allocated by the DHCP server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For an explanation of DAD, refer to the section [Neighbor Discovery](ch04.html#neighbor_discovery
+    "Neighbor Discovery") in [Chapter 4](ch04.html "Chapter 4. ICMPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A typical DHCP communication performed by a client that does Stateful Address
+    Autoconfiguration looks as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Client sends Solicit message.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Server(s) reply with Advertise message.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Client sends Request message to one server.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Server replies with Reply message.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This communication can be shortened to only two messages with the *Rapid Commit
+    option*. In this case, the client sends a Solicit message with the Rapid Commit
+    option included. The server replies with a Reply message that also contains the
+    Rapid Commit option. If the client sent out a Solicit message with a Rapid Commit
+    option, it will ignore any Replies that do not contain a Rapid Commit option.
+    If the client does not receive any Reply including a Rapid Commit option, it may
+    accept an incoming Advertise message and continue the regular configuration process.
+    If a server receives a Solicit message with a Rapid Commit option and is not configured
+    to use it, it replies with a regular Advertise message. While it is true that
+    Rapid Commit offers a more efficient approach to address assignment by using only
+    two messages, depending on the configuration and the number of DHCP servers, it
+    could result in wasted address space or a situation where multiple DHCPv6 servers
+    believe that they each assigned addresses to requesting clients. Once a DHCP server
+    has allocated an address in a Reply message with a Rapid Commit option, it has
+    to commit the IP address to the client. Obviously with the vast address space
+    in a /64, this may not be a big concern.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A client uses Request, Renew, Rebind, Release, and Decline messages as necessary
+    for the lifetime of its server-assigned addresses. If the client switches link
+    or subnet (for instance, in a wireless network or after waking up from sleep mode),
+    it has to initiate a Confirm/Reply exchange. It does this by sending its IAs and
+    the corresponding addresses and options. If the client does not receive an answer
+    to its Confirm message, it should continue to use the previously allocated addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To release one or more of its addresses, a client sends a Release message, which
+    contains the IA and the corresponding addresses and options. The server answers
+    with a Reply. If the client does not receive a Reply, it sends another Release
+    message. This is not possible in all cases—for instance, if the client is shutting
+    down. If a DHCP server did not receive a Release message, it will reuse the addresses
+    when their lifetimes have expired.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If a client notices that an allocated address is already in use (for instance,
+    through DAD), it sends a Decline message to the server. This message contains
+    a Transaction ID, the client identifier, the server identifier, and the address(es).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Renew/Rebind
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: If a client wants to refresh the lifetime of its valid and preferred addresses,
+    it sends a Renew (type 5) message containing the IA Address option and the addresses
+    corresponding to this IA. The server identifies the corresponding lifetimes and
+    sends a Reply message to the client. Doing this may also add new addresses or
+    remove old addresses by setting their lifetime to 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If a server receives a Renew message for an IA for which it has no entry, it
+    replies with a Reply message setting the Status code to “no binding” (option 13,
+    code 3). If the client wants to renew an address that is not valid for its link,
+    the server sends a Reply message setting the lifetimes for the addresses to 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The server controls the intervals in which a client has to renew its addresses
+    through the Timers T1 and T2 preconfigured and associated to each IA. When the
+    client reaches the time indicated by T1, it has to start the Renew process. When
+    a client reaches the time indicated by T2, this indicates that its Renew messages
+    have not been answered. In this case, it sends a Rebind message to all DHCP servers.
+    The Rebind message contains an IA option with the currently allocated addresses
+    and an Option Request option with all desired DHCP options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When a server receives a Rebind message and finds the corresponding IA, it
+    answers with a Reply message. If the addresses are not valid for the link anymore,
+    it sets the lifetimes to 0\. If the client does not receive an answer to a Rebind
+    message, it cannot make further use of the address(es). In this case, it has two
+    options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Restart the address configuration by sending out a Solicit message to find a
+    DHCP server.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If the client has other valid IAs, it can ignore the expired IA and use other
+    addresses.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Information Request
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: If the client already has IP addresses but wants to get other DHCP information,
+    it sends an Information Request message. This message contains an Option Request
+    option to indicate the desired DHCP options. If, for instance, the client is configured
+    by Stateless Address Autoconfiguration and the router is configured to set the(((“O-Flag”)))
+    O-Flag (other Stateful configuration) in the Router Advertisement, this causes
+    the client to send an Information Request message to get additional information
+    such as DNS, NTP, or SIP server configuration. The Information Request message
+    is also sent by the client in answer to a Reconfigure message from the server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reconfigure process
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: The server sends a Reconfigure message to trigger the client to send a Renew
+    or an Information Request message. This is useful when the server has been updated
+    with new or modified information, to make sure the new information is propagated
+    as quickly as possible. In the Reconfigure message, the Transaction ID is set
+    to 0 and contains a Server Identifier option including the server DUID and a Client
+    Identifier option containing the client DUID. Additionally, an Option Request
+    option can be sent along to indicate to the client which options have been changed
+    or added. The Option Request option contains an IA Address option (type 5) if
+    the client needs to reconfigure its IP address. With the Reconfigure message option
+    (type 19), the server indicates whether the client has to send a Renew or an Information
+    Request message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because of the danger of DoS attacks, the use of security mechanisms is mandatory
+    in Reconfigure messages, which means that the server has to use DHCP authentication.
+    The server sends a Reconfigure message to a unicast IPv6 address of each client.
+    If it doesn’t know the unicast address of the client, it sends the message as
+    a Relay Reply message to a Relay Agent. While a client is in a Reconfigure process,
+    it does not accept further Reconfigure messages. A new process can be started
+    only once the initial process has been completed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Relay Agent communication
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: The way a Relay Agent forwards DHCP messages with DHCPv6 is quite different
+    from the way it is done with DHCPv4\. The following section describes the Relay
+    Agent communication in detail.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Relay Agent uses the All_DHCP_Servers multicast address (`ff05::1:3`) to forward
+    messages to DHCP servers. It can be configured to use a unicast address. The Relay
+    Agent takes the message coming from the client and builds a Relay Forward message.
+    [Figure 5-10](ch05.html#header_fields_in_relay_agent_and_server "Figure 5-10. Header
+    fields in Relay Agent and server messages") shows the header of this message.
+    In the Link Address field, it sets its global IPv6 address with the prefix for
+    the link on which the client resides. From this address, the DHCP server determines
+    for which prefix it has to allocate addresses. The Hop Count is set to 1\. The
+    Source address from the original address (i.e., the client IP address) is copied
+    into the Peer Address field of the Relay Forward message. The original DHCP message
+    is copied into the Relay Message Option field. The Relay Agent can now add other
+    information that has been preconfigured by the administrator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When a Relay Agent receives a Relay Forward message from another Relay Agent
+    and the value of the Hop Count field reaches the preconfigured value for the Hop
+    Count Limit, it ignores the message. With the Hop Count Limit, the number of Relay
+    Agents that forward a DHCP message can be limited. If the Hop Count is smaller
+    than the Hop Count Limit, the message is forwarded. It encapsulates the packet
+    into another Relay Forward header, increases the Hop Count by one, and copies
+    the Source address of the previous Relay Agent into the Peer Address field. The
+    Link Address field is set to 0\. The message received is copied into the Relay
+    Message Option.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As already mentioned, the Relay Reply message has to be forwarded over the same
+    Relay Agents as the Relay Forward message. With the process just described, each
+    Relay Agent encapsulates the received message into a new Relay Forward header,
+    which makes it possible for the DHCP server to track the way back. In the last
+    Relay Message Option, the server finds the original request from the client. It
+    replies to it and copies the answer into the Relay Message Option of a Relay Reply
+    message. It encapsulates this reply into as many Relay Reply headers as the Relay
+    Forward message has received. So the Relay Reply travels the same way back through
+    the same Relay Agents. Each Relay Agent on the path decapsulates the exterior
+    header and forwards the message to the next Relay Agent. The last Relay Agent
+    on the path receives a Relay Reply message, which contains the server reply in
+    the Relay Message Option field. It removes the Relay Reply header and forwards
+    the server reply to the client.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Table 5-5](ch05.html#the_headers_in_relay_forward_and_relay "Table 5-5. The
+    headers in Relay Forward and Relay Reply messages") shows the entries in the header
+    fields for a packet that has been forwarded over two Relays, Relay A and Relay
+    B.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 5-5. The headers in Relay Forward and Relay Reply messages
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Header field | Packet 2 | Packet 3 | Packet 4 | Packet 5 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '|   | Relay A to Relay B | Relay B to Server | Server to Relay B | Relay B
+    to Relay A |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Message Type | Relay Forward(type 12) | Relay Forward(type 12) | Relay Reply(type
+    13) | Relay Reply(type 13) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Hop Count | 1 | 2 | 2 | 1 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Link Address | Relay A | 0 | 0 | Relay A |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Peer Address | Client C | Relay A | Relay A | Client C |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Relay Message Option | Client Request | Packet 2 | Packet 5 | DHCP Reply
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: 'The communication looks as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Client C sends a DHCP Request (packet 1, not shown in [Table 5-5](ch05.html#the_headers_in_relay_forward_and_relay
+    "Table 5-5. The headers in Relay Forward and Relay Reply messages")).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Relay Agent A forwards the client request in a Relay Forward message (type 12)
+    to Relay Agent B (packet 2). It copies its address into the Link Address field.
+    The client request is copied into the Relay Message Option.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Relay Agent B forwards the message to the DHCP server (packet 3). It sets the
+    Link Address field to 0 and copies the address of Relay Agent A into the Peer
+    Address field. Packet 2 received from Relay Agent A is copied into the Relay Message
+    Option.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The DHCP server sends a Relay Reply (type 13) to Relay Agent B (packet 4). The
+    Hop Count, Link Address, and Peer Address fields are copied from the Relay Forward
+    message. The Relay Message Option contains the packet, which has to be sent from
+    Relay Agent B to Relay Agent A (packet 5).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Relay Agent B decapsulates packet 5 and forwards it to Relay Agent A.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Relay Agent A takes the server reply from the Relay Message Option and forwards
+    it to Client C.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: As mentioned before, the Relay Agent may have information for the client. But
+    it has no way to send that information to the client. RFC 6422 specifies a *Relay-Supplied
+    Options option* (*RSOO*, option code 66). The Relay encapsulates these additional
+    options in an RSOO. The DHCP server can then add those options to the DHCP reply
+    that is sent to the client. These options must be specifically defined as an RSOO-enabled
+    option with reference to RFC 6422\. Options that have been defined before publication
+    of RFC 6422 are not RSOO-enabled.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A list of RSOO-enabled options can be found at [http://bit.ly/1na9bZQ](http://bit.ly/1na9bZQ)
+    (scroll way down).
+  prefs: []
+  type: TYPE_NORMAL
+- en: DHCPv6 communication in the trace file
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: In this section I would like to show you a DHCPv6 trace file, captured in a
+    classroom.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As described in [Chapter 4](ch04.html "Chapter 4. ICMPv6"), the client learns
+    through a Router Advertisement (RA) that it needs to use DHCPv6 in order to get
+    an IPv6 address. [Figure 5-11](ch05.html#dhcpv6_flags_in_the_router_advertisement
+    "Figure 5-11. DHCPv6 flags in the Router Advertisement") shows what the Router
+    Advertisement looks like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![DHCPv6 flags in the Router Advertisement](images/ipv6_0511.png.jpg)Figure 5-11. DHCPv6
+    flags in the Router Advertisement'
+  prefs: []
+  type: TYPE_NORMAL
+- en: During the boot process, the client sends out a Router Solicitation. If there
+    is an IPv6 router and it has been accordingly configured,(((“O-Flag”))) the client
+    will get a Router Advertisement with one or both DHCPv6 flags set to 1, the *Managed
+    Configuration flag* (*M-Flag*) and the *Other Stateful Configuration flag* (*O-Flag*).
+    When the client gets this it will initiate a DHCP request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 5-12](ch05.html#dhcpv6_communication_in_the_trace_fi "Figure 5-12. DHCPv6
+    communication in the trace file") shows the communication.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![DHCPv6 communication in the trace file](images/ipv6_0512.png.jpg)Figure 5-12. DHCPv6
+    communication in the trace file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you can see in the uppermost part of the figure, I set a filter in Wireshark
+    to only display DHCPv6 communication. The summary line therefore shows the four
+    DHCPv6 packets described before, Solicit, Advertise, Request, and Reply. Packet
+    number 47 is marked and the details of this reply packet are displayed in the
+    lower part of the figure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let me shortly describe the three packets of which you cannot see the details
+    in the screenshot:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In packet number 40 we see the Solicit message. The source address is the link-local
+    address of the client and it goes to the well-known multicast address for All_DHCP_Relay_Agents_and_Servers
+    (`ff02::1:2`). UDP source port is 546 and UDP destination port is 547.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Packet number 44 is the Advertise message of the DHCP server. The source address
+    is the DHCP server’s address and the packet is sent to the link-local address
+    of the client.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In packet 46, the client sends its DHCPv6 request to the multicast address `ff02::1:2`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Packet number 47 is the Reply message of the DHCP server and this is the packet
+    of which you can see the details in the screenshot. It is sent from the DHCP server’s
+    address to the link-local address of the client. The UDP source port is 547 (server
+    port) and the UDP destination port is 546 (client port). The first field in the
+    DHCPv6 header shows the message type (7 for Reply, refer to [Table 5-4](ch05.html#dhcp_options
+    "Table 5-4. DHCP options") for all option type numbers). The next field contains
+    the transaction ID. For a given DHCP communication, the transaction ID must be
+    the same (important to watch when troubleshooting). The Reply message contains
+    the Server Identifier (option 2), Client Identifier (option type 1), Identity
+    Association (option type 3) including the two timers T1 and T2, the IA address
+    option (option type 5) including the IPv6 address and the lifetime parameters,
+    the Domain Search List (option type 24), DNS recursive name server (option type
+    23), and the fully qualified domain name (FQDN, option type 39).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stateless DHCP
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: In environments where Stateless Address Autoconfiguration is used for IP address
+    information, there was no way to configure additional information on the client,
+    such as DNS information or other options. Several solutions were discussed, one
+    being to add such options to the Router Advertisement. Finally, RFC 3736 specified
+    a new service called Stateless DHCP Service for IPv6\. A Stateless DHCP server
+    has an implementation of only a subset of the DHCPv6 specification. Its use requires
+    that hosts are already configured for an IPv6 address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Stateless DHCP server replies to Information Request messages (message type
+    11) that contain an Option Request option (option type 6) with a Reply message
+    (message type 7). The Stateless DHCP server can also act as a Relay Agent. This
+    allows configuration of a part of the clients on a link using SLAAC while getting
+    additional information from the Stateless DHCP server. Meanwhile, other clients
+    use Stateful Address Autoconfiguration, and their DHCP messages are forwarded
+    by the Stateless DHCP server acting as a Relay Agent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally both options were realized. Stateless DHCPv6 was developed and RFC 6106
+    defines “Router Advertisement Options for Recursive DNS Server and DNS Search
+    List.” It must be implemented on routers as well as on the client side in order
+    to work. Currently, Microsoft is not supporting it on Windows. For scenarios such
+    as ad hoc networks, this can be a good option to configure clients without a stateful
+    or stateless DHCPv6 server. In a corporate environment, a DHCPv6 server may be
+    chosen in most cases, because of the need for traceability and also in order to
+    configure other additional options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prefix Delegation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: RFC 3633, “IPv6 Prefix Options,” defines options that can be used to send prefix
+    information from a delegating router or a DHCPv6 server to a requesting router
+    that has DHCPv6 client functionality. It is useful in environments where the delegating
+    router has no information about the topology of a network connected to the requesting
+    router. A delegating router or a DHCPv6 server in an ISP network uses this option
+    to configure a router in a customer network for its prefix. The delegating router
+    can, for example, assign a /48 prefix to the border router in the customer network.
+    The border router can subdivide the /48 prefix to /64 subnets and advertise these
+    prefixes with Router Advertisements. DHCP Prefix Delegation (DHCP-PD) is independent
+    from DHCP address assignment, but the two can be combined.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 6603, “Prefix Exclude Option for DHCPv6-based Prefix Delegation,” updates
+    RFC 3633\. The prefix exclusion mechanism is defined for deployments where DHCPv6-based
+    prefix delegation is used, where a single aggregated route/prefix has to represent
+    one customer, instead of using one prefix for the link between the delegating
+    router and the requesting router and another prefix for the customer network.
+    This mechanism allows a delegating router to use a prefix out of the delegated
+    prefix set on the link through which it exchanges DHCPv6 messages with the requesting
+    router. It is intended for use in networks where each requesting router is on
+    its own Layer 2 domain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Security considerations
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Attacks based on DHCP functionality are possible in the IPv4 world as well
+    as in the IPv6 world. The points of attack to be watched are the same:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: External, unknown DHCP servers allocating false addresses to DHCP clients
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Faulty or malicious DHCP servers in the intranet that assign false addresses
+    or other false configuration information to DHCP clients
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Unknown external clients that attach to the corporate network and receive internal
+    addresses
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Intentional exhaustion of IP addresses by malicious clients, resulting in valid
+    clients being unable to obtain a valid IP address and/or configuration options
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Malicious client(s) transmitting such high volumes of requests that a DHCP server
+    is unable to respond to valid requests
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To protect your network from external DHCP servers from outside the corporate
+    network, a firewall closing the ports for DHCP is a good protection. It is important
+    to protect your network from internal DHCP servers. It doesn’t even need to be
+    a malicious attack. Very often the problems come from improperly configured test
+    servers. A client can be attacked by a malicious DHCP server configuring it with
+    false information. For instance, a bad DNS or NTP server can be configured, or
+    it can be configured in a way that it cannot communicate in the local network
+    anymore. To protect from such attacks, Authentication should be used (see below).
+    Another protection is to use DHCP Guard, which is described in the section [First-hop
+    security](ch06.html#first-hop_security "First-hop security") in [Chapter 6](ch06.html
+    "Chapter 6. Security with IPv6").
+  prefs: []
+  type: TYPE_NORMAL
+- en: With DHCPv4, the ways to protect from such attacks are limited. Firewalls only
+    protect from outside attacks. The possibility to use Authentication for DHCP communication
+    exists only in the form of vendor solutions in addition to DHCPv4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The specification for DHCPv6 includes an Authentication mechanism, which is
+    based on Authentication for DHCPv4 (RFC 3118). New hosts must be authorized and
+    authenticated before they receive configuration information from a DHCP server,
+    the sender of a message must be authenticated, and the content of the message
+    must be protected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following section gives an overview of the Authentication mechanisms specified
+    in RFC 3315\. If you are not familiar with security concepts and terms, please
+    refer to [Chapter 6](ch06.html "Chapter 6. Security with IPv6") first.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Security for messages between Relay Agents and DHCP servers
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: For a secure exchange of messages between Relay Agents and DHCP servers, IPsec
+    (in transport mode with ESP) is used. Between each Relay Agent and its communication
+    peers, an independent two-way trust relationship has to be established. If the
+    content of the message is not considered confidential, encryption is not required
+    (null encryption). As the Relay Agents and the DHCP servers are within the corporate
+    network, private keys can be used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In addition to this, DHCP servers and Relay Agents are configured with the addresses
+    of trusted communication peers. It is therefore not possible for an unknown DHCP
+    server or Relay Agent to intrude into the communication.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DHCP Authentication
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: The authentication of DHCP messages can be accomplished through the use of the
+    Authentication option (option 11). The authentication information carried in the
+    Authentication option can be used to reliably identify the source of a DHCP message
+    and to confirm that the contents of the DHCP message have not been changed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 5-13](ch05.html#the_format_of_the_authentication_option "Figure 5-13. The
+    format of the Authentication option") shows the format of the Authentication option.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The format of the Authentication option](images/ipv6_0513.png)Figure 5-13. The
+    format of the Authentication option'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Multiple authentication protocols can be used with the Authentication option.
+    Two such protocols are specified in RFC 3315: the Delayed Authentication Protocol
+    and the Reconfigure Key Authentication Protocol (section 21 in RFC 3315). If the
+    Delayed Authentication Protocol is chosen, Protocol number 2 is used. If the Reconfigure
+    Key Authentication Protocol is chosen, Protocol number 3 is used. Additional protocols
+    may be specified in the future with separate RFCs.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unfortunately, there is limited support for DHCPv6 authentication. Specifically,
+    Microsoft does not support it on Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further development
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: IP address management is an important aspect of efficient network management.
+    There is intense work going on in the IETF DHCP working group to optimize DHCP.
+    The DHCP working group is the best place to find updated information not only
+    on the current status of DHCP (for IPv4 and IPv6) but also on possible future
+    developments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The DHCP working group can be found at [http://datatracker.ietf.org/wg/dhc](http://datatracker.ietf.org/wg/dhc).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A special focus is on how dual-stack networks or IPv6-only networks can best
+    be managed. Currently, there is DHCPv4 for the configuration of IPv4 interfaces
+    and DHCPv6 for the configuration for IPv6 interfaces. So in a dual-stack network
+    we would need both, a DHCPv4 and a DHCPv6 server. Special care has to be taken
+    that there is not overlapping and contradicting configuration coming from each
+    DHCP server. RFC 4477, “Dynamic Host Configuration Protocol (DHCP): IPv4 and IPv6
+    Dual-Stack Issues,” discusses these challenges. Another scenario that is becoming
+    more and more important is IPv6-only networks. Even in those cases, where IPv4
+    might be treated as a service in an IPv6-only network, hosts may need some IPv4
+    configuration information.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Currently the working group is working on drafts that would provide DHCPv4 information
+    over IPv6 transport or encapsulated in DHCPv6 messages. One draft describes the
+    definition of IPv4 options for DHCPv6 servers. The draft called “Provisioning
+    IPv4 Configuration Over IPv6 Only Networks” provides an overview of the use cases
+    and a summary and discussion of the possible solutions. See the draft reference
+    list at the end of this chapter for a list of the current drafts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dynamic updates to DNS
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: With the widespread use of DHCP and autoconfiguration for dynamic IP address
+    configuration, the need for a dynamic update of DNS for addition and deletion
+    of records arose. RFC 2136 introduced the mechanism called Dynamic DNS (DDNS).
+    It is supported since BIND versions 8 and 9 and many popular DNS implementations.
+    The update functionality is usually used by applications such as DHCP, but it
+    can be implemented on hosts as well. With IPv6, dynamic addresses are often assigned
+    using Stateless Address Autoconfiguration, which means there may not be a DHCP
+    server in the network. A DNS update mechanism is necessary on each host to update
+    its DNS records. There are important security aspects to consider when DDNS updates
+    are made. It is important that you can control which nodes are authorized to make
+    changes to your DNS records. Update policies must be implemented and Transaction
+    Signatures (TSIG; see RFC 2845) or Domain Name System Security Extensions (DNSSEC;
+    see RFCs 3007, 4033, 4034, and 4035) mechanisms should be used. RFC 4339, “IPv6
+    Host Configuration of DNS Server Information Approaches,” discusses some of these
+    general DNS aspects for IPv6 hosts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For hosts that are configured through DHCPv6, RFC 4704 defines an client FQDN
+    (Fully Qualified Domain Name) option that can be added to the Solicit, Request,
+    Renew or Rebind messages. This allows the DHCPv6 client or server to update the
+    DNS accordingly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For hosts that are configured with SLAAC, a similar mechanism is about to be
+    defined. A draft is under way called “Registering self-generated IPv6 Addresses
+    in DNS using DHCPv6.” It defines a new DHCPv6 message type that can be used by
+    clients to request a DHCPv6 server to add FQDN options to DNS dynamically.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DNS
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: DNS is used in the IPv4 world to do name-to-address mappings and vice versa.
+    This is not changing in the IPv6 world. The need for DNS is actually much greater
+    because of the length of IPv6 addresses. Mixed IPv4/IPv6 environments need multiple
+    host entries in DNS. A host communicating with both versions of TCP/IP needs at
+    least two entries in DNS—one with its IPv4 address and the other with its IPv6
+    address. A new DNS record type has been defined for IPv6 hosts. RFC 3596 defines
+    the AAAA type record (called *Quad-A*). RFC 2874 defines the A6 type record, which
+    was designed to make renumbering of networks and prefix changes easier to administer.
+    A6 has been moved to experimental status and is not used. The other DNS record
+    types (NS and PTR records) remain unchanged, adjusting only to support the IPv6
+    address format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: AAAA records and IP6.ARPA
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: RFC 3596 describes DNS extensions for IPv6 implementations based on AAAA records.
+    This record type can store an 128-bit IPv6 address, and the DNS value for this
+    type of record is 28 (decimal notation). A host that has more than one IPv6 address
+    has a AAAA record for each address. The corresponding reverse lookup domain is
+    `IP6.ARPA`. The reverse lookup records are PTR records of type 12.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A AAAA type record can look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For reverse lookups, each subdomain level under `IP6.ARPA` represents 4 bits
+    of the 128-bit address. The least significant bit appears at the far left of the
+    domain name. Omitting leading zeros is not allowed in this case, so the PTR record
+    for the previous example looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that there are several ways to represent reverse IPv6 addresses in DNS.
+    It depends on the implementation, so refer to your vendor’s documentation to find
+    out which format is expected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Originally, the reverse domain was called IP6.INT. It has been deprecated (RFC
+    4159) and replaced by IP6.ARPA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DNS servers
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: BIND implements IPv6 DNS in versions of BIND 8.4 and higher and in BIND version
+    9.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DNS implementations based on these versions of BIND support IPv6\. A good reference
+    site for BIND is the [Internet Systems Consortium home page](http://www.isc.org/products/BIND).
+    The same site has a list of vendor implementations based on BIND. There are also
+    links to versions of BIND that run on different versions of the Microsoft operating
+    system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The most important file for configuring a name server on Unix is */etc/named.conf*.
+    The file itself contains detailed information on how to configure it. To make
+    name resolution work over IPv6, you need to add one important entry: `listen-on-v6
+    { any }`. This entry tells the name server to listen for IPv6 queries. Then update
+    */var/named* with the entries for all IPv6 hosts.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The entries in our zone record file are shown in [Figure 5-14](ch05.html#the_zone_record_file
+    "Figure 5-14. The zone record file").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The zone record file](images/ipv6_0514.png)Figure 5-14. The zone record file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For a detailed explanation of BIND and DNS configuration, refer to *DNS and
+    BIND on IPv6*, by Cricket Liu (O’Reilly).
+  prefs: []
+  type: TYPE_NORMAL
+- en: DNS resolvers and DNS design
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Resolvers are the client part in DNS communication. The resolver sends out DNS
+    requests for IP addresses to DNS servers. It can be part of an operating system
+    or an application. DNS servers also have a resolver implemented to send out DNS
+    requests to other DNS servers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When a dual-stacked host queries a DNS server for a service name, for instance
+    by entering an URL in the browser, the client will send out two DNS requests,
+    one for an A record and another for a AAAA record. The DNS server may respond
+    with either an A record, or a AAAA record or with both, depending on how it is
+    configured. In case the client receives two addresses, it will, based on the default
+    address selection rules (RFC 6724), prefer native IPv6 over IPv4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Default Address Selection is discussed in [Chapter 2](ch02.html "Chapter 2. IPv6
+    Addressing").
+  prefs: []
+  type: TYPE_NORMAL
+- en: Which transport is used for resolving a name with DNS is independent of the
+    connection that is used. So for instance, Windows XP was not able to resolve DNS
+    names over IPv6\. A Windows XP client always needed a DNS server that it could
+    reach over IPv4\. But when the client is dual-stacked and the DNS server responds
+    with a AAAA record, the Windows XP client could initiate a session over IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is a problem if a client gets a AAAA record but does not have IPv6 connectivity
+    or only a very poor one. IPv6 stacks are generally configured to prefer IPv6 over
+    IPv4 by default, so the client will try to connect over IPv6\. But because it
+    does not have connectivity, there is a long waiting time until the client eventually
+    reverts to using IPv4 (in case it got an A record for the same service). The user
+    will in most cases not understand why it takes so long to access that website
+    and will probably blame the website owner for it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is the reason why earlier (before IPv6 World Launch Day on June 6, 2012)
+    large dual-stacked websites such as Google and Facebook did not give out AAAA
+    records for their main domain. If you wanted to access Google or Facebook over
+    IPv6 in those days, you had to use a v6-specific domain name such as [http://ipv6.google.com](http://ipv6.google.com).
+    These large sites did not want to accept performance hits due to users connecting
+    from networks with bad IPv6 Internet connectivity. If such a user experiences
+    long timeouts while accessing Google, the user will think that Google has a bad
+    performance, while the timeout comes from not being able to connect over IPv6
+    and waiting to connect over IPv4\. These sites often used DNS whitelisting for
+    ISPs with good IPv6 performance, where they could be sure that users coming from
+    that ISP have no problems accessing the website over IPv6\. So only if you were
+    connected from such a provider would you get a AAAA record for [http://www.google.com](http://www.google.com).
+    World IPv6 Launch Day on June 6, 2012, showed that only a tiny fraction of users
+    experienced problems. Since then many of these sites have enabled AAAA records
+    for the main domain permanently. To find more information on World IPv6 Launch
+    day, go to [http://www.worldipv6launch.org](http://www.worldipv6launch.org). It
+    shows the participants and information about measurements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you like to get an updated picture of the current status of deployment of
+    IPv6 in the world, there are two sites you can refer to: [Google Statistics](http://www.google.com/ipv6/statistics.html)
+    and [Cisco Statistics](http://6lab.cisco.com/stats).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Happy Eyeballs
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: In order to improve user experience in a dual-stack Internet, a specification
+    has been defined, which is called Happy Eyeballs. It is defined in RFC 6555.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When a client gets two addresses for a given service, an IPv4 and a native IPv6
+    address, it will by default connect to the IPv6 address by initiating a TCP handshake.
+    If there is no reply to the request, the client will, after a long timeout, revert
+    to using IPv4\. This can happen if the IPv6 path from the client to the service
+    is broken or very slow. With a Happy Eyeball implementation, the client will try
+    both protocols and then use the faster one for the connection. There are several
+    ways to do it. [Figure 5-15](ch05.html#happy_eyeballs_with_ipv6_connection_brok
+    "Figure 5-15. Happy Eyeballs with IPv6 connection broken") shows such an algorithm.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Happy Eyeballs with IPv6 connection broken](images/ipv6_0515.png)Figure 5-15. Happy
+    Eyeballs with IPv6 connection broken'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this case, the client sends two requests to the DNS server for *http://www.example.com*,
+    an A request and a AAAA request. The service is dual-stack so DNS returns two
+    addresses, an IPv4 and an IPv6 address. Next we see the client issue two TCP Syn
+    requests (the first packet in a TCP handshake), one over IPv6 and one over IPv4\.
+    In this case the IPv6 connection was broken, so the client only gets a reply (SYN+ACK)
+    over IPv4\. In the next packet the client confirms the TCP handshake with a TCP
+    Ack and now the communication with the service will run over IPv4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Different operating systems and browsers have different types of implementations
+    of Happy Eyeballs. RFC 6555 describes the implementation in Google Chrome and
+    Firefox as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Call `getaddrinfo()`, which returns a list of IP addresses sorted by the host’s
+    address preference policy.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Initiate a connection attempt with the first address in that list (e.g., IPv6).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If that connection does not complete within a short period of time (Firefox
+    and Chrome use 300 ms), initiate a connection attempt with the first address belonging
+    to the other address family (e.g., IPv4).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The first connection that is established is used. The other connection is discarded.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Microsoft has not implemented Happy Eyeballs in Internet Explorer but it has
+    a similar mechanism to optimize connection setup depending on protocol performance.
+    Apple also has an OS-specific implementation similar to Happy Eyeballs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Name space fragmentation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: 'With regard to DNS design, there is an important point to be aware of: *name
+    space fragmentation*. When a resolver tries to resolve a name it will start at
+    the root and follow referrals until it reaches an authoritative name server for
+    the name. If the resolver happens to reach a name server that is only reachable
+    over a protocol that the resolver can’t use, the name cannot be resolved, and
+    so the DNS query is unsuccessful.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: So when IPv6 starts to get deployed more and more in the Internet, the name
+    space may get fragmented because there may be name servers that can only be reached
+    over IPv4 and more and more name servers that may only be reached over IPv6\.
+    So we have to find mechanisms to avoid the situation where the resolver chain
+    breaks due to two name servers in the resolution process that do not speak the
+    same language (IP version).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are the DNS recommended guidelines to avoid this (quote from RFC 3901).
+    In order to preserve name space continuity, the following administrative policies
+    are recommended:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every recursive name server SHOULD be either IPv4-only or dual stack.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This rules out IPv6-only recursive servers. However, one might design configurations
+    where a chain of IPv6-only name server forward queries to a set of dual-stack
+    recursive name servers actually performing those recursive queries.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Every DNS zone SHOULD be served by at least one IPv4-reachable authoritative
+    name server.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This rules out DNS zones served only by IPv6-only authoritative name servers.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Note: zone validation processes SHOULD ensure that there is at least one IPv4
+    address record available for the name servers of any child delegations within
+    the zone.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For your integration of IPv6 it is probably a good idea to plan for dual-stacked
+    DNS services, as this is the best and most flexible protection of fragmentation.
+    With BIND9 you can also configure a dual-stack server. When a recursive name server
+    needs to look up data in a zone served only by a name server that doesn’t speak
+    the same protocol, it can forward a recursive query to the dual-stack server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make sure that you configure AAAA records only when the services are fully reachable
+    over IPv6, otherwise your clients may experience long timeouts or not reach the
+    service at all. We also have to move away from entering host names only in DNS.
+    A host may be dual-stacked (and have two DNS entries), while some services running
+    on that host may be either IPv4 or IPv6 services. In a large enterprise it could
+    be recommendable for administrative reasons to not mix IPv4 services and IPv6
+    services on dual-stacked hosts, but place IPv4 services on IPv4 hosts and IPv6
+    services on IPv6 hosts. At the same time you have to make sure that all clients
+    that get AAAA records for IPv6-only services can connect over IPv6 to that network
+    where the service is. If a service is available on both protocols, make sure the
+    IPv6 service gets precedence over the IPv4 service, so your traffic can slowly
+    shift to using IPv6 more and more whenever it is available.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DNS communication in the trace file
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[Figure 5-16](ch05.html#dns_communication_in_the_trace_file-id1 "Figure 5-16. DNS
+    communication in the trace file") shows DNS queries and replies in the trace file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![DNS communication in the trace file](images/ipv6_0516.png)Figure 5-16. DNS
+    communication in the trace file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A client issues DNS requests for [http://nsv6.ipv6class.com](http://nsv6.ipv6class.com)
+    to a DNS server. In packet 5, the client asks for an A record and receives a reply
+    in packet 6 with no Answer Record. The requested service is an IPv6-only service
+    and therefore has no A record. In packet 7, the client asks for a AAAA record
+    and gets the Answer record in packet 8\. The details of packet 8 are displayed
+    in the lower part of the figure. The DNS transaction ID is `099c2` (both in Request
+    and Reply). The flags are set for Response, Authoritative Server, Recursion desired,
+    and Recursion available. Below that you can see the Query and the corresponding
+    Answer Record with Time to Live and the IPv6 address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The whole DNS communication goes over IPv6 in this case. As mentioned before,
+    it would also be possible that the DNS resolution goes over IPv4 and then the
+    connection to the IPv6-only service over IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next chapter discusses Security with IPv6.
+  prefs: []
+  type: TYPE_NORMAL
+- en: References
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Here’s a list of the most important RFCs and drafts mentioned in this chapter.
+    Sometimes I list additional subject-related RFCs for your personal further study.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFCs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: RFC 1195, “Use of OSI IS-IS for Routing in TCP/IP and Dual Environments,” 1990
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 1321, “The MD5 Message Digest Algorithm,” 1992
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2080, “RIPng” for IPv6,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 2104, “HMAC: Keyed-Hashing for Message Authentication,” 1997'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2136, “Dynamic Updates in the Domain Name System,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2149, “Multicast Server Architectures for MARS-based ATM multicasting,”
+    1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2205, “Resource ReSerVation Protocol (RSVP)—Version 1 Functional Specification,”
+    1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2210, “The Use of RSVP with IETF Integrated Services,” 1997
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2324, “Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0),” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2328, “OSPF Version 2,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 2362, “Protocol Independent Multicast-Sparse Mode (PIM-SM): Protocol Specification,”
+    1998'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2365, “Administratively Scoped IP Multicast,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2430, “A Provider Architecture for Differentiated Services and Traffic Engineering
+    (PASTE),” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2453, “RIP Version 2,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2464, “Transmission of IPv6 Packets over Ethernet Networks,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2467, “Transmission of IPv6 Packets over FDDI Networks,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2474, “Definition of the Differentiated Services Field (DS Field) in the
+    IPv4 and IPv6 Headers,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2475, “An Architecture for Differentiated Services,” 1998
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2491, “IPv6 over Non-Broadcast Multiple Access (NBMA) networks,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2492, “IPv6 over ATM Networks,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2597, “Assured Forwarding PHB Group,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2590, “Transmission of IPv6 Packets over Frame Relay Networks Specification,”
+    1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2710, “Multicast Listener Discovery (MLD)” for IPv6,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2715, “Interoperability Rules for Multicast Routing Protocols,” 1999
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2845, “Secret Key Transaction Authentication for DNS (TSIG),” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2884, “Performance Evaluation of Explicit Congestion Notification (ECN)
+    in IP Networks,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2894, “Router Renumbering for IPv6,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2914, “Congestion Control Principles,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2963, “A Rate Adaptive Shaper for Differentiated Services,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2983, “Differentiated Services and Tunnels,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 2998, “A Framework for Integrated Services Operation over Diffserv Networks,”
+    2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3006, “Integrated Services in the Presence of Compressible Flows,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3007, “Secure Domain Name System (DNS) Dynamic Update,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3008, “Domain Name System Security (DNSSEC) Signing Authority,” 2000
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3086, “Definition of Differentiated Services Per Domain Behaviors and Rules
+    for their Specification,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3118, “Authentication for DHCP Messages,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3124, “The Congestion Manager,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3140, “Per Hop Behavior Identification Codes,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3162, “Radius and IPv6,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3168, “The Addition of Explicit Congestion Notification (ECN) to IP,” 2001
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3246, “An Expedited Forwarding PHB,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3247, “Supplemental Information for the New Definition of the EF PHB (Expedited
+    Forwarding Per-Hop Behavior),” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3260, “New Terminology and Clarifications for Diffserv,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3289, “Management Information Base for the Differentiated Services Architecture,”
+    2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3290, “An Informal Management Model for DiffServ Routers,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3306, “Unicast-Prefix-based IPv6 Multicast Addresses,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3307, “Allocation Guidelines for IPv6 Multicast Addresses,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3315, “Dynamic Host Configuration Protocol for IPv6 (DHCPv6),” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3317, “Differentiated Services Quality of Service Policy Information Base,”
+    2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3353, “Overview of IP Multicast in a Multi-Protocol Label Switching (MPLS)
+    Environment,” 2002
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3569, “An Overview of Source-Specific Multicast (SSM),” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3590, “Source Address Selection for the Multicast Listener Discovery (MLD)
+    Protocol,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3596, “DNS Extensions to Support IP Version 6,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3633, “IPv6 Prefix Options for Dynamic Host Configuration Protocol (DHCP)
+    version 6,” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3646, “DNS Configuration options for Dynamic Host Configuration Protocol
+    for IPv6 (DHCPv6),” 2003
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 3717, “IP over Optical Networks: A Framework,” 2004'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3736, “Stateless Dynamic Host Configuration Protocol (DHCP) Service for
+    IPv6,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3810, “Multicast Listener Discovery Version 2 (MLDv2) for IPv6,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3901, “DNS IPv6 Transport Operational Guidelines,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3956, “Embedding the Rendezvous Point (RP) Address in an IPv6 Multicast
+    Address,” 2004
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3971, “SEcure Neighbor Discovery (SEND),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 3972, “Cryptographically Generated Addresses (CGA),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 3973, “Protocol Independent Multicast—Dense Mode (PIM-DM): Protocol Specification
+    (Revised ),” 2005'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4033, “DNS Security Introduction and Requirements,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4034, “Resource Records for the DNS Security Extensions,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4035, “Protocol Modifications for the DNS Security Extensions,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4074, “Common Misbehavior Against DNS Queries for IPv6 Addresses,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4076, “Renumbering Requirements for Stateless Dynamic Host Configuration
+    Protocol for IPv6 (DHCPv6),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4094, “Analysis of Existing Quality-of-Service Signaling Protocols,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4135, “Goals of Detecting Network Attachment in IPv6,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4159, “Deprecation of “ip6.int,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4192, “Procedures for Renumbering an IPv6 Network without a Flag Day,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4243, “Vendor-Specific Information Suboption for the Dynamic Host Configuration
+    Protocol (DHCP) Relay Agent Option,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4271, “A Border Gateway Protocol 4 (BGP-4),” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4282, “The Network Access Identifier,” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4286, “Multicast Router Discovery (MRD),” 2005
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4338, “Transmission of IPv6, IPv4, and Address Resolution Protocol (ARP)
+    Packets over Fibre Channel,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4339, “IPv6 Host Configuration of DNS Server Information Approaches,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4361, “Node-specific Client Identifiers for DHCPv4,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4472, “Operational Considerations and Issues with IPv6 DNS,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4477, “Dynamic Host Configuration Protocol (DHCP): IPv4 and IPv6 Dual-Stack
+    Issues,” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4489, “A Method for Generating Link-Scoped IPv6 Multicast Addresses,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 4601, “Protocol Independent Multicast—Sparse Mode (PIM-SM): Protocol Specification
+    (Revised),” 2006'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4604, “Using MLDv2 for Source Specific Multicast,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4703, “Resolution of Fully Qualified Domain Name (FQDN) Conflicts among
+    Dynamic Host Configuration Protocol (DHCP) Clients,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4704, “The Dynamic Host Configuration Protocol for IPv6 (DHCPv6) Client
+    Fully Qualified Domain Name (FQDN) Option,” 2006
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4760, “Multiprotocol Extensions for BGP-4,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4944, “Transmission of IPv6 Packets over IEEE 802.15.4 Networks,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 4957, “Link-Layer Event Notifications for Detecting Network Attachments,”
+    2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5015, “Bidirectional Protocol Independent Multicast (BIDIR-PIM),” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5072, “IP Version 6 over PPP,” 2007
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5172, “Negotiation for IPv6 Datagram Compression using IPv6 Control Protocol,”
+    2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5308, “Routing IPv6 with IS-IS,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5340, “OSPF for IPv6,” 2008
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5796, “Authentication and Confidentiality in PIM-SM Link-local Messages,”
+    2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5838, “Support of Address Families in OSPFv3,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 5887, “Renumbering Still Needs Work,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 5942, “IPv6 Subnet Model: the Relationship between Links and Subnet Prefixes,”
+    2012'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6085, “Address Mapping of IPv6 Multicast Packets on Ethernet,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6104, “Rogue IPv6 Router Advertisement Problem Statement,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6105, “IPv6 Router Advertisement Guard,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6106, “IPv6 Router Advertisement Options for DNS Configuration,” 2010
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6119, “IPv6 Traffic Engineering in IS-IS,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6221, “Lightweight DHCPv6 Relay Agent,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6226, “PIM Group-to-Rendezvous-Point Mapping,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6282, “Compression Format for IPv6 Datagrams over IEEE 802.15.4-Based Networks,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6294, “Survey of Proposed Use Cases for the IPv6 Flow Label,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6308, “The Internet Multicast Address Allocation Architecture,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6326, “Transparent Interconnection of Lots of Links (TRILL) Use of IS-IS,”
+    2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6334, “Dynamic Host Configuration Protocol for IPv6 (DHCPv6) Option for
+    Dual-Stack Lite,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6398, “IP Router Alert Considerations and Usage,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6422, “Relay Supplied DHCP Options,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6434, “IPv6 Node Requirements,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6436, “Rationale for Update to the IPv6 Flow Label Specification,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6437, “IPv6 Flow Label Specification,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6438, “Using the IPv6 Flow Label for Equal Cost Multipath Routing and Link
+    Aggregation in Tunnels,” 2011
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6553, “The Routing Protocol for Low-Power and Lossy Networks (RPL) Option
+    for Carrying RPL Information in Data-Plane Datagrams,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6554, “An IPv6 Routing Header for Source Routes with the Routing Protocol
+    for Low-Power and Lossy Networks (RPL),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'RFC 6555, “Happy Eyeballs: Success with Dual-Stack Hosts,” 2012'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6556, “Testing Eyeball Happiness,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6603, “Prefix Exclude Option for DHCPv6-based Prefix Delegation,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6724, “Default Address Selection for Internet Protocol Version 6 (IPv6),”
+    2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6775, “Neighbor Discovery Optimization for IPv6 over Low-Power Wireless
+    Personal Area Networks (6LoWPANs),” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6822, “IS-IS Multi-Instance,” 2012
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6845, “OSPF Hybrid Broadcast and Point-to-Multipoint Interface Type,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6853, “DHCPv6 Redundancy Deployment Considerations,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6895, “Domain Name System (DNS) IANA Considerations,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6939, “Client Link-Layer Address Option in DHCPv6,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6977, “Triggering DHCPv6 Reconfiguration from Relay Agents,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 6992, “Routing for IPv4-Embedded IPv6 Packets,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7031, “DHCPv6 Failover Requirements,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7037, “Radius Option for the DHCPv6 Relay Agent,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7078, “Distributing Address Selection Policy Using DHCPv6,” 2014
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7084, “Basic Requirements for IPv6 Customer Edge Routers,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: RFC 7098, “Using the IPv6 Flow Label for Load Balancing in Server Farms,” 2013
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Drafts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Drafts can be found at [http://www.ietf.org/ID.html](http://www.ietf.org/ID.html).
+    To locate the latest version of a draft, refer to [https://datatracker.ietf.org/public/pidtracker.cgi](https://datatracker.ietf.org/public/pidtracker.cgi).
+    You can enter the draft name without a version number and the most current version
+    will come up. If a draft does not show up, it was possibly deleted. If it was
+    published as an RFC, the RFC number will be displayed. [http://tools.ietf.org/wg](http://tools.ietf.org/wg)
+    is also a very useful site. More information on the process of standardization,
+    RFCs, and drafts can be found in [Appendix A](apa.html "Appendix A. RFCs").
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s a list of drafts I refer to in this chapter, as well as interesting
+    drafts that relate to the topics in this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Transmission of IPv6 Packets over BLUETOOTH Low Energy”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-6lo-btle-01*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Transmission of IPv6 Packets over IEEE 802.11p Networks”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-petrescu-ipv6-over-80211p-01*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Registering self-generated IPv6 Addresses in DNS using DHCPv6”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-dhc-addr-registration-04*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Provisioning IPv4 Configuration Over IPv6 Only Networks”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-dhc-v4configuration-05*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “DHCPv4 over DHCPv6 Transport”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-dhc-dhcpv4-over-dhcpv6-08*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “DHCPv4 over IPv6 Transport”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-dhc-dhcpv4-over-ipv6-09*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “DHCPv6 Failover Design”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-dhc-dhcpv6-failover-design-04*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “DHC Load Balancing Algorithm for DHCPv6”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-dhc-dhcpv6-load-balancing-01*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Populating the DNS Reverse Tree for DHCP Delegated Prefixes”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-dhc-dns-pd-01*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “DHCPv6/SLAAC Address Configuration Interaction Problem Statement”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-ietf-v6ops-dhcpv6-slaac-problem-00*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “DHCPv6/SLAAC Interaction Operational Guidance”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-liu-v6ops-dhcpv6-slaac-guidance-01*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Reducing Multicast in IPv6 Neighbor Discovery”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-yourtchenko-colitti-nd-reduce-multicast-00*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: “A comparison between the DHCPv6 and RA based host configuration”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*draft-yourtchenko-ra-dhcpv6-comparison-00*'
+  prefs: []
+  type: TYPE_NORMAL
